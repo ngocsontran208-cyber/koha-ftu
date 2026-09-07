@@ -1,0 +1,136 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE AuthorisedValues %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Transfers to receive") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="circ_transferstoreceive" class="circ">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Nhận tài liệu chuyển về thư viện</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% SET aside = Koha.Preference('CircSidebar') ? 'circ-nav' : '' %]
+[% WRAPPER 'main-container.inc' aside=aside %]
+ <h1>Tài liệu chuyển về thư viện ngày [% show_date | $KohaDates %]</h1>
+ [% IF ( branchesloop ) %]
+ <p>Danh sách các tài liệu chuyển tới thư viện</p>
+ [% IF ( latetransfers ) %]<p>Tài liệu chuyển đến thư viện <span class="error">bị xem là chậm nếu chuyển về thư viện</span> sau [% TransfersMaxDaysWarning | html %] ngày.</p>[% END %]
+ <div id="resultlist">
+ [% FOREACH branchesloo IN branchesloop %]
+ [% IF ( branchesloo.branchcode ) %]
+ <div class="page-section">
+ <table style="width: 100%" id="transferst[% branchesloo.branchcode | html %]">
+ <caption>Tài liệu chuyển từ thư viện [% branchesloo.branchname | html %]</caption>
+ <thead
+                                ><tr>
+ <th>Ngày chuyển</th>
+ <th class="anti-the">Nhan đề</th>
+ <th>Bạn đọc đặt mượn</th>
+ <th>Thư viện chủ quản</th>
+ <th>Số phân loại</th>
+ <th class="no-sort">&nbsp;</th>
+ </tr></thead
+                            >
+ <tbody
+                                >[% FOREACH reser IN branchesloo.reserve %]
+ <tr>
+ <td data-order="[% reser.datetransfer | html %]">
+ [% reser.datetransfer | $KohaDates %]
+ [% IF ( reser.messcompa ) %]
+ <span class="badge bg-warning text-dark">[% tnx('{count} day late', '{count} days late', reser.diff, { count = reser.diff }) %]</span>
+ [% END %]
+ </td>
+ <td>
+ [% INCLUDE 'biblio-title.inc' biblio=reser link = 1 %] [% IF ( reser.author ) %]by [% reser.author | html %][% END %]
+ [% IF ( reser.itemtype ) %](<strong>[% reser.itemtype | html %]</strong>)[% END %]
+ [% IF ( reser.ccode ) -%]
+ <span class="collection_code">Collection: [% AuthorisedValues.GetDescriptionByKohaField(kohafield => 'items.ccode', authorised_value => reser.ccode) | html %]</span>
+ [%- END %]
+ <br />Đăng ký cá biệt: [% reser.barcode | html %] </td>
+ <td
+                                            >[% IF ( reser.patron ) %]
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% reser.patron.borrowernumber | uri %]">
+ [% reser.patron.surname | html %][% IF ( reser.patron.firstname ) %], [% reser.patron.firstname | html %][% END %]
+ </a>
+ [% IF ( reser.patron.phone ) %]<br />[% reser.patron.phone | html %][% END %]
+ [% IF ( reser.patron.notice_email_address ) %]
+ <br />
+ [% BLOCK subject %] Đặt mượn:[% END %] <a href="mailto:[% reser.patron.notice_email_address | uri %]?subject=[% INCLUDE subject %] [% reser.title | uri %]"> [% reser.patron.notice_email_address | html %] </a>
+ [% END %]
+ [% IF reser.patron.cardnumber %]
+ <div class="cardnumber">Card number: [% reser.patron.cardnumber | html %]</div>
+ [% END %]
+ [% ELSIF ( reser.recall ) %]
+ Recall requested by
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% reser.recall.patron_id | uri %]"
+                                                    >[% reser.recall.patron.surname | html %][% IF reser.recall.patron.firstname %], [% reser.recall.patron.firstname | html %][% END %] ([% reser.recall.patron.cardnumber | html %])</a
+                                                >
+ [% ELSE %]
+ <p>Không có</p>
+ [% END %]
+ </td>
+ <td>[% IF reser.homebranch %][% Branches.GetName( reser.homebranch ) | html %][% END %]</td>
+ <td>[% reser.itemcallnumber | html %]</td>
+ <td class="actions"
+                                            ><a href="/cgi-bin/koha/circ/returns.pl?itemnumber=[% reser.itemnumber | uri %]&amp;canceltransfer=1&amp;dest=ttr" class="btn btn-default btn-xs"
+                                                ><i class="fa fa-times"></i> Hủy vận chuyển</a
+                                            ></td
+                                        >
+ </tr>
+ [% END %]</tbody
+                            >
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% END %]
+ [% END %]
+ </div>
+ [% ELSE %]
+ <p>Không có tài liệu được chuyển tới thư viện của bạn!</p>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        let library_ids = [];
+        [% FOR library IN branchesloop %]
+            library_ids.push("[% library.branchcode | html %]");
+        [% END %]
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            library_ids.forEach(library_id => {
+                $(`#transferst${library_id}`).kohaTable({
+                    dom: "t",
+                    paging: false,
+                });
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

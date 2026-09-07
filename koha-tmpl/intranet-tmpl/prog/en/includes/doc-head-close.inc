@@ -59,6 +59,9 @@
     <!-- prettier-ignore-end -->
 [% END %]
 
+<!-- FTU Global Branding CSS -->
+[% Asset.css("css/ftu-global.css") | $raw %]
+
 [% KohaPlugins.get_plugins_intranet_head | $raw %]
 
 [% UNLESS ( footerjs ) %]

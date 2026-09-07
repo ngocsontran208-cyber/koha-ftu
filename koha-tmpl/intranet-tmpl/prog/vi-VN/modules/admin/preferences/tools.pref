@@ -1,0 +1,97 @@
+Công cụ:
+    Mã vạch:
+        -
+            - Split barcodes on the following separator chars
+            - pref: BarcodeSeparators
+              default: '\s\r\n'
+            - "in batch item modification and inventory.<br/>Note: Type \\r for carriage return, \\n for newline and \\s for whitespace. Possible candidates to include also are pipe char |, hyphen (precede with backslash), comma, semicolon, dot, etc."
+    Chỉnh sửa tài liệu theo lô:
+        -
+            - Process up to
+            - pref: MaxItemsToProcessForBatchMod
+              class: integer
+            - items in a single item modification batch.
+        -
+            - Display up to
+            - pref: MaxItemsToDisplayForBatchDel
+              class: integer
+            - items in a single item deletion batch.
+        -
+            - Display up to
+            - pref: MaxItemsToDisplayForBatchMod
+              class: integer
+            - items in a single item modification batch.
+    Thẻ bạn đọc:
+        -
+            - Limit the number of creator images stored in the database to
+            - pref: ImageLimit
+              class: Integer
+            - images.
+    Thông báo và phiếu:
+        -
+            - Include the stylesheet at
+            - pref: AllNoticeStylesheet
+              class: url
+            - on notices regardless of message transport type. (This should be a complete URL, starting with <code>http://</code>.)
+        -
+            - "Include the following CSS on all notices regardless of message transport:"
+            - pref: AllNoticeCSS
+              type: textarea
+              syntax: css
+              class: code
+        -
+            - Include the stylesheet at
+            - pref: EmailNoticeStylesheet
+              class: url
+            - on email notices. (This should be a complete URL, starting with <code>http://</code>.)
+        -
+            - "Include the following CSS on all email notices:"
+            - pref: EmailNoticeCSS
+              type: textarea
+              syntax: css
+              class: code
+        -
+            - "Include the following CSS on all print notices:"
+            - pref: PrintNoticeCSS
+              type: textarea
+              syntax: css
+              class: code
+        -
+            - Include the stylesheet at
+            - pref: PrintNoticeStylesheet
+              class: url
+            - on print notices. (This should be a complete URL, starting with <code>http://</code>.)
+        -
+            - Include the stylesheet at
+            - pref: PrintSlipStylesheet
+              class: url
+            - on print slips. (This should be a complete URL, starting with <code>http://</code>.)
+        -
+            - "Include the following CSS on all print slips:"
+            - pref: PrintSlipCSS
+              type: textarea
+              syntax: css
+              class: code
+    Tin tức:
+        -
+            - "Show the author for news items:"
+            - pref: NewsAuthorDisplay
+              choices:
+                  none: "not at all"
+                  opac: "OPAC only"
+                  staff: "staff interface only"
+                  both: "both OPAC and staff interface"
+            - .
+        -
+            - By default edit additional contents and news items with
+            - pref: AdditionalContentsEditor
+              choices:
+                  tinymce: "a WYSIWYG editor (TinyMCE)"
+                  codemirror: "a text editor (CodeMirror)"
+            - .
+    Tải lên:
+        -
+            - Automatically delete temporary uploads older than
+            - pref: UploadPurgeTemporaryFilesDays
+              class: integer
+            - "days in cleanup_database cron job. NOTE: If you leave this field empty, the cron job will not delete any files. On the other hand a value of 0 means: delete all temporary files."

@@ -7,11 +7,7 @@
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title
-    >[% FILTER collapse %]
-        [% t("Koha staff interface") | html %]
-    [% END %]</title
->
+<title>Thư viện – Phân hiệu Trường Đại học Ngoại thương</title>
 [% IF ( bidi ) %]
     [% Asset.css("css/mainpage-rtl.css") | $raw %]
 [% ELSE %]
@@ -21,323 +17,268 @@
 </head>
 
 <body id="main_intranet-main" class="intranet-main">
-[% WRAPPER 'header.inc' %]
-    [% INCLUDE 'home-search.inc' %]
-[% END %]
-
-[% WRAPPER 'sub-header.inc' %]
-    [% WRAPPER breadcrumbs %]
-    [% END #/ WRAPPER breadcrumbs %]
-[% END %]
+[% WRAPPER 'header.inc' %][% END %]
 
 <div id="container-main" class="container-fluid">
-    <div class="row">
-        <h1 class="visually-hidden">Koha home</h1>
-        <div class="col-md-3 order-sm-2">
+
+    <!-- ── KPI Stats Row ── -->
+    <div id="ftu-kpi-row">
+        <div class="ftu-kpi-card kpi-blue">
+            <div class="kpi-icon"><i class="fa fa-users"></i></div>
+            <div class="kpi-body">
+                <div class="kpi-value">[% kpi_total_patrons | html %]</div>
+                <div class="kpi-label">Bạn đọc</div>
+            </div>
+            <a class="kpi-link" href="/cgi-bin/koha/members/members-home.pl"></a>
+        </div>
+        <div class="ftu-kpi-card kpi-red">
+            <div class="kpi-icon"><i class="fa fa-book"></i></div>
+            <div class="kpi-body">
+                <div class="kpi-value">[% kpi_total_biblios | html %]</div>
+                <div class="kpi-label">Tài liệu</div>
+            </div>
+            <a class="kpi-link" href="/cgi-bin/koha/catalogue/search.pl"></a>
+        </div>
+        <div class="ftu-kpi-card kpi-green">
+            <div class="kpi-icon"><i class="fa fa-exchange"></i></div>
+            <div class="kpi-body">
+                <div class="kpi-value">[% kpi_checkouts_today | html %]</div>
+                <div class="kpi-label">Mượn hôm nay</div>
+            </div>
+            <a class="kpi-link" href="/cgi-bin/koha/circ/circulation-home.pl"></a>
+        </div>
+        <div class="ftu-kpi-card kpi-amber">
+            <div class="kpi-icon"><i class="fa fa-clock-o"></i></div>
+            <div class="kpi-body">
+                <div class="kpi-value">[% kpi_pending_total | html %]</div>
+                <div class="kpi-label">Chờ xử lý</div>
+            </div>
+            <a class="kpi-link" href="#area-pending"></a>
+        </div>
+    </div>
+
+    <!-- ── Main Layout: Sidebar + Content ── -->
+    <div id="ftu-main-layout">
+
+        <!-- Sidebar -->
+        <aside id="ftu-sidebar">
             [% IF ( koha_news.count ) %]
-                <div id="area-news" class="page-section">
-                    <h3><span class="news_title">News</span></h3>
+                <div class="ftu-sidebar-card">
+                    <div class="sidebar-card-header">
+                        <i class="fa fa-newspaper-o"></i> Tin tức thư viện
+                    </div>
                     [% SET show_author = Koha.Preference('NewsAuthorDisplay') == 'staff' || Koha.Preference('NewsAuthorDisplay') == 'both' %]
                     [% FOREACH koha_new IN koha_news %]
-                        <div class="newsitem" id="news[% koha_new.additional_content_id | html %]"
-                            ><h4>[% koha_new.title | html %]</h4>
-                            <div class="newsbody">[% koha_new.content | $raw %]</div>
-                            <p class="newsfooter">
-                                Posted on [% koha_new.published_on | $KohaDates %][% IF( show_author && koha_new.author ) %]by <span class="newsauthor">[% INCLUDE 'patron-title.inc' patron=koha_new.author %]<br /></span>[% END %]
+                        <div class="ftu-newsitem" id="news[% koha_new.additional_content_id | html %]">
+                            <div class="news-title">[% koha_new.title | html %]</div>
+                            <div class="news-body">[% koha_new.content | $raw %]</div>
+                            <div class="news-footer">
+                                [% koha_new.published_on | $KohaDates %]
                                 [% IF ( CAN_user_tools_edit_additional_contents ) %]
-                                    <a href="/cgi-bin/koha/tools/additional-contents.pl?op=add_form&amp;id=[% koha_new.additional_content_id | uri %]">Edit</a>
-                                    | <a href="/cgi-bin/koha/tools/additional-contents.pl?op=add_form">New</a>
+                                    &middot; <a href="/cgi-bin/koha/tools/additional-contents.pl?op=add_form&id=[% koha_new.additional_content_id | uri %]">Sửa</a>
+                                    | <a href="/cgi-bin/koha/tools/additional-contents.pl?op=add_form">Thêm</a>
                                 [% END %]
-                            </p>
-                        </div>
-                    [% END %] </div
-                ><!-- /additional-contents -->
-            [% END %]
-            [% IF ( daily_quote ) %]
-                <div id="area-quote" class="page-section">
-                    <h3>Quote of the day</h3>
-                    <div class="newsitem"> <span id="daily-quote-text">[% daily_quote.text | html %]</span><span id="daily-quote-sep"> ~ </span><span id="daily-quote-source">[% daily_quote.source | html %]</span> </div>
-                </div>
-            [% END %]
-        </div>
-        <!-- /.col-sm-2 -->
-        <div class="col-md-9 order-md-2">
-            <div class="row">
-                <div class="col-sm-6">
-                    <ul class="biglinks-list">
-                        [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]
-                            <li>
-                                <a class="icon_general icon_circulation" href="/cgi-bin/koha/circ/circulation-home.pl"><i class="fa fa-fw fa-exchange"></i>Circulation</a>
-                            </li>
-                        [% END %]
-
-                        [% IF (CAN_user_borrowers_edit_borrowers) || (CAN_user_borrowers_list_borrowers) %]
-                            <li>
-                                <a class="icon_general icon_patrons" href="/cgi-bin/koha/members/members-home.pl"><i class="fa fa-fw fa-id-card"></i>Patrons</a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_catalogue ) %]
-                            <li>
-                                <a class="icon_general icon_search" href="/cgi-bin/koha/catalogue/search.pl">
-                                    <span class="fa-stack">
-                                        <i class="fa fa-fw fa-book fa-stack-1x"></i>
-                                        <i class="fa fa-fw fa-search fa-stack-2x"></i>
-                                    </span>
-                                    Advanced search
-                                </a>
-                            </li>
-                            <li>
-                                <a class="icon_general icon_search" href="/cgi-bin/koha/catalogue/itemsearch.pl">
-                                    <span class="fa-stack">
-                                        <i class="fa fa-fw fa-list fa-stack-1x"></i>
-                                        <i class="fa fa-fw fa-search fa-stack-2x"></i>
-                                    </span>
-                                    Item search
-                                </a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_lists ) %]
-                            <li>
-                                <a class="icon_general icon_lists" href="/cgi-bin/koha/virtualshelves/shelves.pl"><i class="fa fa-fw fa-list-alt"></i>Lists</a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( UseCourseReserves ) %]
-                            <li>
-                                <a class="icon_general icon_course_reserves" href="/cgi-bin/koha/course_reserves/course-reserves.pl"><i class="fa fa-fw fa-book"></i>Course reserves</a>
-                            </li>
-                        [% END %]
-
-                        <li>
-                            <a class="icon_general icon_authorities" href="/cgi-bin/koha/authorities/authorities-home.pl"><i class="fa fa-fw fa-link"></i>Authorities</a>
-                        </li>
-                        [% IF Koha.Preference('ILLModule') && CAN_user_ill %]
-                            <li>
-                                <a class="icon_general icon_ill" href="/cgi-bin/koha/ill/ill.pl"><i class="fa fa-fw fa-retweet"></i>Interlibrary loans</a>
-                            </li>
-                        [% END %]
-
-                        [% IF Koha.Preference('ERMModule') && CAN_user_erm %]
-                            <li>
-                                <a class="icon_general icon_erm" href="/cgi-bin/koha/erm/erm.pl"><i class="fa fa-fw fa-external-link-square"></i>E-resource management</a>
-                            </li>
-                        [% END %]
-                    </ul>
-                </div>
-                <!-- /.col-sm-6 -->
-                <div class="col-sm-6">
-                    <ul class="biglinks-list">
-                        [% IF ( Koha.Preference('EnablePointOfSale') && Koha.Preference('UseCashRegisters') && CAN_user_cash_management_takepayment ) %]
-                            <li>
-                                <a class="icon_general icon_pos" href="/cgi-bin/koha/pos/pay.pl"><i class="fa fa-fw fa-shopping-cart"></i>Point of sale</a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || ( fast_cataloging && CAN_user_editcatalogue_fast_cataloging || can_see_cataloguing_module ) ) %]
-                            <li>
-                                <a class="icon_general icon_cataloging" href="/cgi-bin/koha/cataloguing/cataloging-home.pl"><i class="fa fa-fw fa-tag"></i>Cataloging</a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_serials ) %]
-                            <li>
-                                <a class="icon_general icon_serials" href="/cgi-bin/koha/serials/serials-home.pl"><i class="fa fa-fw fa-newspaper"></i>Serials</a>
-                                <span class="biglink"></span>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_acquisition ) %]
-                            <li>
-                                <a class="icon_general icon_acquisitions" href="/cgi-bin/koha/acqui/acqui-home.pl"><i class="fa fa-fw fa-gift"></i>Acquisitions</a>
-                                <span class="biglink"></span>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_reports ) %]
-                            <li>
-                                <a class="icon_general icon_reports" href="/cgi-bin/koha/reports/reports-home.pl"><i class="fa fa-fw fa-pie-chart"></i>Reports</a>
-                            </li>
-                        [% END %]
-
-                        [% IF Koha.Preference('PreservationModule') && CAN_user_preservation %]
-                            <li>
-                                <a class="icon_general icon_preservation" href="/cgi-bin/koha/preservation/home.pl"><i class="fa fa-fw fa-book"></i>Preservation</a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_tools || CAN_user_clubs ) %]
-                            <li>
-                                <a class="icon_general icon_tools" href="/cgi-bin/koha/tools/tools-home.pl"><i class="fa fa-fw fa-wrench"></i>Tools</a>
-                            </li>
-                        [% END %]
-
-                        [% IF ( CAN_user_parameters || CAN_user_plugins_admin ) %]
-                            <li>
-                                <a class="icon_general icon_administration" href="/cgi-bin/koha/admin/admin-home.pl"><i class="fa fa-fw fa-gears"></i>Administration</a>
-                            </li>
-                        [% END %]
-                    </ul>
-                </div>
-                <!-- /.col-sm-6 -->
-            </div>
-            <!-- /.row -->
-            <div class="row">
-                <div class="col-sm-12">
-                    [%# Following statement must be in one line for translatability %]
-                    [% IF ( CAN_user_tools_moderate_comments  && pendingcomments ) || ( CAN_user_tools_moderate_tags && pendingtags ) || ( CAN_user_borrowers_edit_borrowers && pending_borrower_modifications ) || ( CAN_user_suggestions_suggestions_manage && ( pendingsuggestions || all_pendingsuggestions )) || ( CAN_user_borrowers_edit_borrowers && pending_discharge_requests ) || pending_article_requests || ( Koha.Preference('AllowCheckoutNotes') && CAN_user_circulate_manage_checkout_notes && pending_checkout_notes.count ) || ( ( Koha.Preference('OpacCatalogConcerns') || Koha.Preference('CatalogConcerns') ) && pending_biblio_tickets && CAN_user_editcatalogue_edit_catalogue ) || ( Koha.Preference('OPACReportProblem') && CAN_user_problem_reports && pending_problem_reports.count ) || already_ran_jobs || new_curbside_pickups.count || ( holds_with_cancellation_requests && CAN_user_circulate_circulate_remaining_permissions ) || ( CAN_user_borrowers_edit_borrowers && self_registered_count ) || ( CAN_user_borrowers_list_borrowers && self_registered_count ) %]
-                        <div id="area-pending" class="page-section">
-                            [% IF pending_article_requests %]
-                                <div class="pending-info" id="article_requests_pending">
-                                    <a href="/cgi-bin/koha/circ/article-requests.pl">Article requests</a>:
-                                    <span class="pending-number-link">[% pending_article_requests | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF CAN_user_suggestions_suggestions_manage && ( pendingsuggestions || all_pendingsuggestions ) %]
-                                <div class="pending-info" id="suggestions_pending">
-                                    Suggestions pending approval:
-                                    <a href="/cgi-bin/koha/suggestion/suggestion.pl?branchcode=[% Branches.GetLoggedInBranchcode | url %]#ASKED">
-                                        <span id="pendingsuggestions" class="pending-number-link">[% Branches.GetLoggedInBranchname | html %]: [% pendingsuggestions | html %]</span>
-                                    </a>
-                                    [% IF (all_pendingsuggestions > 0) %]
-                                        /
-                                        <a href="/cgi-bin/koha/suggestion/suggestion.pl?branchcode=__ANY__#ASKED">
-                                            <span id="all_pendingsuggestions" class="pending-number-link">All libraries: [% all_pendingsuggestions | html %]</span>
-                                        </a>
-                                    [% END %]
-                                </div>
-                            [% END %]
-
-                            [% IF ( CAN_user_tools_moderate_comments  && pendingcomments ) %]
-                                <div class="pending-info" id="comments_pending">
-                                    <a href="/cgi-bin/koha/reviews/reviewswaiting.pl">Comments pending approval</a>:
-                                    <span class="pending-number-link">[% pendingcomments | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF ( CAN_user_tools_moderate_tags && pendingtags ) %]
-                                <div class="pending-info" id="tags_pending">
-                                    <a href="/cgi-bin/koha/tags/review.pl">Tags pending approval</a>:
-                                    <span class="pending-number-link">[% pendingtags | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF ( CAN_user_borrowers_edit_borrowers && pending_borrower_modifications ) %]
-                                <div class="pending-info" id="patron_updates_pending">
-                                    <a href="/cgi-bin/koha/members/members-update.pl">Patrons requesting modifications</a>:
-                                    <span class="pending-number-link">[% pending_borrower_modifications | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF CAN_user_borrowers_edit_borrowers && pending_discharge_requests %]
-                                <div class="pending-info" id="patron_discharges_pending">
-                                    <a href="/cgi-bin/koha/members/discharges.pl">Discharge requests pending</a>:
-                                    <span class="pending-number-link">[% pending_discharge_requests | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF ( ( Koha.Preference('OpacCatalogConcerns') || Koha.Preference('CatalogConcerns') ) && pending_biblio_tickets && CAN_user_editcatalogue_edit_catalogue ) %]
-                                <div class="pending-info" id="catalog_concerns_pending">
-                                    <a href="/cgi-bin/koha/cataloguing/concerns.pl">Catalog concerns pending</a>:
-                                    <span class="pending-number-link">[% pending_biblio_tickets | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF Koha.Preference('AllowCheckoutNotes') && CAN_user_circulate_manage_checkout_notes && pending_checkout_notes.count %]
-                                <div class="pending-info" id="checkout_notes_pending">
-                                    <a href="/cgi-bin/koha/circ/checkout-notes.pl">Checkout notes pending</a>:
-                                    <span class="pending-number-link">[% pending_checkout_notes.count | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF ( Koha.Preference('OPACReportProblem') && CAN_user_problem_reports && pending_problem_reports.count ) %]
-                                <div class="pending-info" id="problem_reports_pending">
-                                    <a href="/cgi-bin/koha/tools/problem-reports.pl">OPAC problem reports pending</a>:
-                                    <span class="pending-number-link">[% pending_problem_reports.count | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF already_ran_jobs %]
-                                <div class="pending-info" id="background_jobs">
-                                    <a href="/cgi-bin/koha/admin/background_jobs.pl">Access your background jobs</a>
-                                </div>
-                            [% END %]
-
-                            [% IF new_curbside_pickups.count %]
-                                <div class="pending-info" id="new_curbside_pickups">
-                                    <a href="/cgi-bin/koha/circ/curbside_pickups.pl">New curbside pickups</a>:
-                                    <span class="pending-number-link">[% new_curbside_pickups.count | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF holds_with_cancellation_requests  && CAN_user_circulate_circulate_remaining_permissions %]
-                                <div class="pending-info" id="holds_with_cancellation_requests">
-                                    <a href="/cgi-bin/koha/circ/waitingreserves.pl?allbranches=1#holdscancelled-tab">Holds with cancellation requests</a>:
-                                    <span class="pending-number-link">[% holds_with_cancellation_requests | html %]</span>
-                                </div>
-                            [% END %]
-
-                            [% IF (CAN_user_borrowers_edit_borrowers) || (CAN_user_borrowers_list_borrowers) %]
-                                [% IF self_registered_count %]
-                                    <div class="pending-info" id="self_registered_patrons_info">
-                                        Self-registrations from:
-                                        <a
-                                            class="self-registration-link pending-number-link self-registration-link-all"
-                                            href="/cgi-bin/koha/members/member.pl?categorycode_filter=[% Koha.Preference('PatronSelfRegistrationDefaultCategory') | html %]"
-                                            >All libraries: [% self_registered_count | html %]</a
-                                        >
-
-                                        [% IF self_registered_mybranch_count %]
-                                            <span>/</span>
-                                            <a
-                                                class="self-registration-link pending-number-link self-registration-link-branch"
-                                                href="/cgi-bin/koha/members/member.pl?categorycode_filter=[% Koha.Preference('PatronSelfRegistrationDefaultCategory') | html %]&branchcode_filter=[% Branches.GetLoggedInBranchcode | html %]"
-                                                >[% Branches.GetLoggedInBranchname | html %]: [% self_registered_mybranch_count | html %]</a
-                                            >
-                                        [% END %]
-                                    </div>
-                                [% END %]
-                            [% END %]
+                            </div>
                         </div>
                     [% END %]
                 </div>
-                <!-- /.col-sm-12 -->
-            </div>
-            <!-- /.row -->
+            [% END %]
+
+            [% IF ( daily_quote ) %]
+                <div class="ftu-sidebar-card">
+                    <div class="sidebar-card-header">
+                        <i class="fa fa-quote-left"></i> Trích dẫn hôm nay
+                    </div>
+                    <div class="ftu-quote">
+                        <span class="quote-text">&ldquo;[% daily_quote.text | html %]&rdquo;</span>
+                        <span class="quote-source">&mdash; [% daily_quote.source | html %]</span>
+                    </div>
+                </div>
+            [% END %]
+
+            [% IF ( CAN_user_tools_moderate_comments && pendingcomments ) || ( CAN_user_tools_moderate_tags && pendingtags ) || ( CAN_user_borrowers_edit_borrowers && pending_borrower_modifications ) || ( CAN_user_suggestions_suggestions_manage && ( pendingsuggestions || all_pendingsuggestions )) || pending_article_requests %]
+                <div class="ftu-sidebar-card pending-card">
+                    <div class="sidebar-card-header">
+                        <i class="fa fa-bell"></i> Cần xử lý
+                    </div>
+                    [% IF pending_article_requests %]
+                        <div class="pending-row">
+                            <span class="pending-badge">[% pending_article_requests | html %]</span>
+                            <a href="/cgi-bin/koha/circ/article-requests.pl">Yêu cầu bài báo</a>
+                        </div>
+                    [% END %]
+                    [% IF CAN_user_suggestions_suggestions_manage && pendingsuggestions %]
+                        <div class="pending-row">
+                            <span class="pending-badge">[% pendingsuggestions | html %]</span>
+                            <a href="/cgi-bin/koha/suggestion/suggestion.pl#ASKED">Đề xuất mua sách</a>
+                        </div>
+                    [% END %]
+                    [% IF CAN_user_tools_moderate_comments && pendingcomments %]
+                        <div class="pending-row">
+                            <span class="pending-badge">[% pendingcomments | html %]</span>
+                            <a href="/cgi-bin/koha/reviews/reviewswaiting.pl">Bình luận chờ duyệt</a>
+                        </div>
+                    [% END %]
+                    [% IF CAN_user_borrowers_edit_borrowers && pending_borrower_modifications %]
+                        <div class="pending-row">
+                            <span class="pending-badge">[% pending_borrower_modifications | html %]</span>
+                            <a href="/cgi-bin/koha/members/members-update.pl">Cập nhật bạn đọc</a>
+                        </div>
+                    [% END %]
+                </div>
+            [% END %]
 
             [% SET IntranetmainUserblock = AdditionalContents.get( location => "IntranetmainUserblock", lang => lang, library => Branches.GetLoggedInBranchcode || default_branch ) %]
-
             [% IF ( IntranetmainUserblock.content && IntranetmainUserblock.content.count > 0 ) %]
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div id="[% IntranetmainUserblock.location | html %]" class="page-section">
-                            [% FOREACH n IN IntranetmainUserblock.content %]
-                                <div class="[% n.lang | html %]_item">
-                                    <div class="[% n.lang | html %]_body">[% n.content | $raw %]</div>
-                                </div>
-                            [% END %]
-                        </div>
-                        <!-- /#IntranetmainUserblock -->
-                    </div>
-                    <!-- /.col-sm-12 -->
+                <div class="ftu-sidebar-card">
+                    [% FOREACH n IN IntranetmainUserblock.content %]
+                        <div class="[% n.lang | html %]_body">[% n.content | $raw %]</div>
+                    [% END %]
                 </div>
-                <!-- /.row -->
-            [% END # /IF IntranetmainUserblock %]
+            [% END %]
+        </aside>
 
-            <div class="row">
-                <div class="col-sm-12">
-                    <div id="koha_version"><a href="/cgi-bin/koha/about.pl">Koha [% Koha.Version.maintenance | html %]</a></div>
-                </div>
+        <!-- Main module grid -->
+        <main id="ftu-modules">
+            <div id="ftu-modules-grid">
+
+                [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/circ/circulation-home.pl">
+                    <div class="module-icon mod-circulation"><i class="fa fa-exchange"></i></div>
+                    <div class="module-name">Lưu thông</div>
+                    <div class="module-desc">Mượn &bull; Trả &bull; Gia hạn</div>
+                </a>
+                [% END %]
+
+                [% IF CAN_user_borrowers_edit_borrowers || CAN_user_borrowers_list_borrowers %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/members/members-home.pl">
+                    <div class="module-icon mod-patrons"><i class="fa fa-id-card"></i></div>
+                    <div class="module-name">Bạn đọc</div>
+                    <div class="module-desc">Quản lý thành viên</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || can_see_cataloguing_module ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/cataloguing/cataloging-home.pl">
+                    <div class="module-icon mod-cataloging"><i class="fa fa-tag"></i></div>
+                    <div class="module-name">Biên mục</div>
+                    <div class="module-desc">Nhập &bull; Chỉnh sửa biểu ghi</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_catalogue ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/catalogue/search.pl">
+                    <div class="module-icon mod-search"><i class="fa fa-search"></i></div>
+                    <div class="module-name">Tìm kiếm nâng cao</div>
+                    <div class="module-desc">Tìm tài liệu &bull; Vật phẩm</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_reports ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/reports/reports-home.pl">
+                    <div class="module-icon mod-reports"><i class="fa fa-pie-chart"></i></div>
+                    <div class="module-name">Báo cáo</div>
+                    <div class="module-desc">Thống kê &bull; Xuất dữ liệu</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_acquisition ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/acqui/acqui-home.pl">
+                    <div class="module-icon mod-acquisitions"><i class="fa fa-shopping-cart"></i></div>
+                    <div class="module-name">Bổ sung</div>
+                    <div class="module-desc">Đặt mua &bull; Ngân sách</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_serials ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/serials/serials-home.pl">
+                    <div class="module-icon mod-serials"><i class="fa fa-newspaper-o"></i></div>
+                    <div class="module-name">Báo – Tạp chí</div>
+                    <div class="module-desc">Quản lý ấn phẩm định kỳ</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_lists ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/virtualshelves/shelves.pl">
+                    <div class="module-icon mod-lists"><i class="fa fa-list-alt"></i></div>
+                    <div class="module-name">Danh sách</div>
+                    <div class="module-desc">Giá sách ảo</div>
+                </a>
+                [% END %]
+
+                <a class="ftu-module-card" href="/cgi-bin/koha/authorities/authorities-home.pl">
+                    <div class="module-icon mod-authorities"><i class="fa fa-link"></i></div>
+                    <div class="module-name">Từ điển</div>
+                    <div class="module-desc">Kiểm soát từ chuẩn</div>
+                </a>
+
+                [% IF ( CAN_user_tools || CAN_user_clubs ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/tools/tools-home.pl">
+                    <div class="module-icon mod-tools"><i class="fa fa-wrench"></i></div>
+                    <div class="module-name">Công cụ</div>
+                    <div class="module-desc">Tiện ích &bull; Nhập/Xuất</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_parameters || CAN_user_plugins_admin ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/admin/admin-home.pl">
+                    <div class="module-icon mod-admin"><i class="fa fa-gears"></i></div>
+                    <div class="module-name">Quản trị</div>
+                    <div class="module-desc">Cấu hình hệ thống</div>
+                </a>
+                [% END %]
+
+                [% IF UseCourseReserves %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/course_reserves/course-reserves.pl">
+                    <div class="module-icon mod-course"><i class="fa fa-graduation-cap"></i></div>
+                    <div class="module-name">Tài liệu học phần</div>
+                    <div class="module-desc">Course reserves</div>
+                </a>
+                [% END %]
+
             </div>
-        </div>
-        <!-- /.col-sm-9 -->
+        </main>
+
     </div>
-    <!-- /.row -->
+    <!-- /.ftu-main-layout -->
+
+    <!-- Footer -->
+    <div id="ftu-dash-footer">
+        <span>&copy; Thư viện Phân hiệu Trường Đại học Ngoại thương &mdash; <a href="https://www.ftu.edu.vn" target="_blank">ftu.edu.vn</a></span>
+        <span><a href="/cgi-bin/koha/about.pl">Koha [% Koha.Version.maintenance | html %]</a></span>
+    </div>
+
 </div>
-<!-- /#container-main.container-fluid -->
+<!-- /#container-main -->
+
 [% MACRO jsinclude BLOCK %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+$(document).ready(function() {
+    // Live clock
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        const dateStr = now.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'long', year:'numeric'});
+        $('#ftu-hd-date').text(timeStr + ' \u2013 ' + dateStr);
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    // Dropdown toggles
+    function closeAll() { $('.ftu-dropdown-menu').removeClass('open'); }
+    $('#ftu-more-btn').on('click', function(e) {
+        e.stopPropagation();
+        var m = $('#ftu-more-menu'), open = m.hasClass('open');
+        closeAll(); if (!open) m.addClass('open');
+    });
+    $('#ftu-user-btn').on('click', function(e) {
+        e.stopPropagation();
+        var m = $('#ftu-user-menu'), open = m.hasClass('open');
+        closeAll(); if (!open) m.addClass('open');
+    });
+    $(document).on('click', closeAll);
+});
+</script>
 [% END %]
 <!-- the main div is closed in intranet-bottom.inc -->
 [% INCLUDE 'intranet-bottom.inc' %]

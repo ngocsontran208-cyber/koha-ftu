@@ -1,0 +1,58 @@
+[% USE raw %]
+[% USE Koha %]
+[% SET admin = Koha.Preference('ReplytoDefault') || Koha.Preference('KohaAdminEmailAddress') %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% tx("Error {error_number}", {error_number = errno }) | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="err_[% errno | html %]" class="err">
+
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active = 1 %]
+ [% tx("Error {error_number}", {error_number = errno }) | html %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+<div class="main container-fluid">
+ <div class="row">
+ <div class="col-md-8 offset-md-2">
+ [% INCLUDE 'messages.inc' %]
+
+ <h1>Phát hiện lỗi hệ thống:</h1>
+ <h2><em>[% tx("Error {error_number}", {error_number = errno }) | html %]</em></h2>
+ [% IF ( csrf_error ) %]
+ [% INCLUDE 'blocking_errors.inc' blocking_error => csrf_error %]
+ [% ELSE %]
+ <h3>This message may have been caused by any of the following reasons:</h3>
+ <ul style="padding-bottom: 0.5em;">
+ <li>You made use of an external link to an item that is no longer available</li>
+ <li>You followed an outdated link e.g. from a search engine or a bookmark</li>
+ <li>You tried to access a page that needs authentication</li>
+ <li>An internal link in the client is broken and the page does not exist</li>
+ </ul>
+ [% END %]
+ <h3>Tiếp theo là gì?</h3>
+ <ul style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #CCC;">
+ <li>Sử dụng thanh menu phía trên để chuyển sang phần khác của Koha.</li>
+ <li>To report a broken link or any other issue, please contact the Koha administrator. <a href="mailto:[% admin | uri %]">Gửi email</a></li>
+ </ul>
+ </div>
+ <!-- /.col-md-8 -->
+ </div>
+ <!-- /.row -->
+</div>
+<!-- /.main.container-fluid -->
+
+[% INCLUDE 'intranet-bottom.inc' %]

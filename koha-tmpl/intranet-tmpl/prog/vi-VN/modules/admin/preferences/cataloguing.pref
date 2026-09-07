@@ -1,0 +1,406 @@
+Biên mục:
+# broken, omitted: marc
+    Giao diện:
+        -
+            - Sử dụng
+            - pref: DefaultClassificationSource
+              choices: class-sources
+            - as the default classification source.
+        -
+            - pref: advancedMARCeditor
+              choices:
+                  1: "Không hiển thị"
+                  0: Hiển thị
+            - descriptions of fields and subfields in the MARC editor.
+        -
+            - pref: EasyAnalyticalRecords
+              choices:
+                  1: Hiển thị
+                  0: "Không hiển thị"
+            - "easy ways to create analytical record relationships."
+        -
+            - pref: Kích hoạtAdvancedCatalogingEditor
+              default: 0
+              choices:
+                  1: Kích hoạt
+                  0: "Cón't enable"
+            - the advanced cataloging editor.
+            - "<br/> <strong>NOTE:</strong>"
+            - Currently does not include support for UNIMARC fixed fields.
+        -
+            - "When saving in a MARC/MARCXML file in the advanced cataloging editor or exporting from the detail page in the staff interface, use the"
+            - pref: DefaultSaveRecordFileID
+              default: biblionumber
+              choices:
+                  controlnumber: "control number"
+                  biblionumber: "bibliographic record number"
+            - "in the file name."
+        -
+            - pref: CreateAVFromCataloguing
+              default: 1
+              choices:
+                  1: "Cho phép"
+                  0: "Không cho phép"
+            - authorized values to be created within the cataloguing module. Librarian will need the manage_auth_values subpermission.
+        -
+            - pref: CatalogConcerns
+              default: 0
+              choices:
+                  0: "Không cho phép"
+                  1: Cho phép
+            - "staff to report concerns about bibliographic records."
+            - '<p><strong>NOTE:</strong> You can also enable `<a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=OpacCatalogConcerns">OpacCatalogConcerns</a>` to allow OPAC users the same option.</p>'
+        -
+            - "Sử dụng "
+            - pref: CatalogerEmails
+              default: ''
+              class: email
+            - " as the notification address for catalog concerns."
+
+    Nhãn gáy sách:
+        -
+            - When using the quick spine label printer,
+            - pref: SpineLabelAutoPrint
+              choices:
+                  1: do
+                  0: "don't"
+            - automatically pop up a print dialog.
+        -
+            - "Include the following fields on a quick-printed spine label:"
+            - (Enter in columns from the <code>biblio</code>, <code>biblioitems</code> or <code>items</code> tables, surrounded by &lt; and &gt;.)
+            - pref: SpineLabelFormat
+              type: textarea
+
+    Cấu trúc biểu ghi:
+        -
+            - "Fill in the default language for field 008 Range 35-37 of MARC21 records (e.g. eng, nor, ger, see <a href='http://www.loc.gov/marc/languages/language_code.html'>MARC Code List for Languages</a>):"
+            - pref: DefaultLanguageField008
+            - " Empty defaults to eng."
+        -
+            - "Fill in the default country code for field 008 Range 15-17 of MARC21 - Place of publication, production, or execution. (See <a href='http://www.loc.gov/marc/countries/countries_code.html'>MARC Code List for Countries</a>):"
+            - pref: DefaultCountryField008
+            - " Empty defaults to ||| - No attempt to code."
+        -
+            - Interpret and store MARC records in the
+            - pref: marcflavour
+              choices:
+                  MARC21: MARC21
+                  UNIMARC: UNIMARC
+            - format.
+        -
+            - pref: Kích hoạtItemGroups
+              choices:
+                   1: Kích hoạt
+                   0: "Cón't enable"
+            - the item groups feature to allow collecting groups of items on a record together.
+        -
+            - Sử dụng the item type of the
+            - pref: item-level_itypes
+              choices:
+                  1: specific item
+                  0: bibliographic record
+            - as the authoritative item type (for determining circulation and fine rules, for displaying an item type icon on either OPAC detail or results page, etc).
+        -
+            - Map the MARC subfields
+            - pref: itemcallnumber
+            - "to an item's callnumber. List multiple comma-separated fields to check them sequentially. Each field can include multiple subfields. The order of the subfields in the record will be preserved. For example: '082ab,092ab' will look in the 082$a and 082$b, then the 092$a and 092$b."
+            - "Examples for MARC21: Dewey: 082ab,092ab; LOC: 050ab,090ab; from the Koha record: 942hi. Examples for UNIMARC: Dewey: 676a; LOC: 680ab."
+        -
+            - Hiển thị MARC subfield
+            - pref: AlternateHoldingsField
+            - "as holdings information for records that do not have items (this can contain multiple subfields to look in, for example <code>852abhi</code> would look in 852 subfields a, b, h, and i), with the subfields separated by"
+            - pref: AlternateHoldingsSeparator
+            - .
+        -
+            - Fill in the <a href="http://www.loc.gov/marc/organizations/orgshome.html">MARC organization code</a>
+            - pref: MARCOrgCode
+            - by default in new MARC21 records (leave blank to disable). This can be also set on libraries level.
+        -
+            - When items are created, give them the temporary location of
+            - pref: NewItemsDefaultLocation
+              class: short
+            - (should be a <a href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=LOC">location code</a>, or blank to disable).
+        -
+            - pref: z3950NormalizeAuthor
+              choices:
+                  1: Sao chép
+                  0: "Cón't copy"
+            - authors from the UNIMARC
+            - pref: z3950AuthorAuthFields
+              class: multi
+            - tags (separated by commas) to the correct author tags when importing a record using Z39.50.
+        -
+            - Barcodes are
+            - pref: autoBarcode
+              choices:
+                  incremental: generated in the form 1, 2, 3.
+                  annual: generated in the form <year>-0001, <year>-0002.
+                  hbyymmincr: generated in the form <branchcode>yymm0001.
+                  EAN13: incremental EAN-13 barcodes.
+                  "OFF": not generated automatically.
+        -
+            - When a new item is added,
+            - pref: PrefillItem
+              choices:
+                  1: the new item is prefilled with last created item values.
+                  0: the new item is not prefilled with last created item values.
+        -
+            - "Define a list of subfields to use when prefilling items (separated by space):"
+            - pref: SubfieldsToSử dụngWhenPrefill
+            - "If left empty, all subfields will be prefilled."
+        -
+            - Sử dụng the languague (ISO 690-2)
+            - pref: UNIMARCField100Language
+              class: short
+            - as default language in the UNIMARC field 100 when creating a new record or in the field plugin.
+        -
+            - "List of subfields for which editing is authorized when the edit_items_restricted permission is enabled, separated by spaces:"
+            - pref: SubfieldsToCho phépForRestrictedEditing
+            - 'Examples:'
+            - 'UNIMARC: "995$f 995$h 995$j"'
+            - 'MARC21: "952$a 952$b 952$c"'
+            - Note that the FA framework is excluded from the permission.
+            - If the system preference is empty, no fields are restricted.
+        -
+            - "List of subfields for which editing is authorized when the items_batchmod_restricted permission is enabled, separated by spaces:"
+            - pref: SubfieldsToCho phépForRestrictedBatchmod
+            - 'Examples:'
+            - 'UNIMARC: "995$f 995$h 995$j"'
+            - 'MARC21: "952$a 952$b 952$c"'
+            - Note that the FA framework is excluded from the permission.
+            - If the system preference is empty, no fields are restricted.
+        -
+            - Store record's creator borrowernumber in MARC subfield
+            - pref: MarcFieldForCreatorId
+            - and record's creator name in MARC subfield
+            - pref: MarcFieldForCreatorName
+            - .
+            - Store record's last modifier borrowernumber in MARC subfield
+            - pref: MarcFieldForModifierId
+            - and record's last modifier name in MARC subfield
+            - pref: MarcFieldForModifierName
+            - ". <br/><strong>NOTE:</strong> Sử dụng a dollar sign between field and subfield like 123$a."
+        -
+            - Control Number (001) is
+            - pref: autoControlNumber
+              choices:
+                  biblionumber: generated as biblionumber.
+                  "OFF": not generated automatically.
+        -
+            - pref: Sử dụngOCLCEncodingLevels
+              choices:
+                  1: Hiển thị
+                  0: "Cón't display"
+            - OCLC defined values for MARC encoding level in leader value builder for position 17.
+        -
+            - Apply framework default values
+            - pref: ApplyFrameworkDefaults
+              multiple:
+                new: "when cataloguing new records"
+                duplicate: "when editing records as new (duplicating)"
+                changed: "when changing the framework while editing the existing record"
+                imported: "when importing a record via z39.50"
+        -
+            - Sử dụng MARC field
+            - pref: ContentWarningField
+            - for storing content warnings.
+            - "<br/><strong>NOTE:</strong> The field needs to appear in the MARC frameworks to be accessible."
+        -
+            - pref: Loại bỏWhitespaceChars
+              choices:
+                  1: Loại bỏ
+                  0: "Cón't strip"
+            - leading and trailing whitespace characters (including spaces, tabs, line breaks and carriage returns) and inner newlines from data fields when cataloguing bibliographic and authority records. The leader and control fields will not be affected.
+    Hiển thị:
+        -
+            - 'Phân tách mục từ chính và các mục con bằng '
+            - pref: AuthoritySeparator
+              class: short
+            - '(non-XSLT view only).'
+        -
+            - Hiển thị
+            - pref: URLLinkText
+            - as the text of links embedded in MARC records and items.
+        -
+            - pref: Sử dụngControlNumber
+              choices:
+                  1: Sử dụng
+                  0: "Không sử dụng"
+            - record control number ($w subfields) and control number (001) for linking of bibliographic records.
+        -
+            - Sử dụng
+            - pref: MarcFieldCócURL
+              class: url
+            - as the URL for MARC field documentation.
+            - "<br><br>"
+            - "If left empty, the default URLs are:"
+            - "<ul><li>MARC21: field-level pages at https://www.loc.gov/marc/bibliographic/</li>"
+            - "<li>UNIMARC: https://www.ifla.org/g/unimarc-rg/unimarc-updates/</a></li></ul>"
+            - "Placeholders available for use in the URL:"
+            - "<ul><li><code>{MARC}</code>: MARC flavor, \"MARC21\" or \"UNIMARC\"</li>"
+            - "<li><code>{FIELD}</code>: field number, for example, \"000\" or \"048\"</li>"
+            - "<li><code>{LANG}</code>: language, for example, \"en\" or \"fi-FI\"</li></ul>"
+            - "Examples:<ul><li>https://www.example.com/marcdocs?marc={MARC}&field={FIELD}&language={LANG}</li>"
+            - "<li>https://www.marc21.ca/MaJ/BIB/B{FIELD}.pdf</li></ul>"
+        -
+            - pref: hide_marc
+              choices:
+                  1: "Không hiển thị"
+                  0: Hiển thị
+            - số trường MARC, mã trường con và chỉ thị trong chế độ xem MARC.
+        -
+            - pref: LabelMARCView
+              choices:
+                  standard: "Cón't"
+                  economical: Có
+            - thu gọn các trường lặp lại cùng loại thành một mục duy nhất trên màn hình hiển thị.
+        -
+            - Mặc định hiển thị biểu ghi thư mục ở
+            - pref: IntranetBiblioDefaultView
+              choices:
+                  normal: normal form.
+                  marc: MARC form.
+                  labeled_marc: labelled MARC form.
+                  isbd: ISBD form (see below).
+        -
+            - "Sử dụng mẫu dưới đây làm mẫu ISBD trên giao diện nhân viên:"
+            - pref: ISBD
+              type: textarea
+              syntax: text/html
+              class: code
+        -
+            - pref: OpacSuppression
+              choices:
+                  1: Ẩn
+                  0: "Không ẩn"
+            - bibliographic records marked as suppressed from OPAC search results.
+            - <br />Restrict the suppression to IP addresses outside of the IP range
+            - pref: OpacSuppressionByIPRange
+              class: short
+            - (Leave blank if not used. Define a range like <code>192.168.</code>.)
+            - <br />Redirect the OPAC detail page for suppressed records to
+            - pref: OpacSuppressionRedirect
+              choices:
+                  1: "an explanatory page ('This record is blocked')."
+                  0: "the 404 error page ('Not found')."
+            - "<br /> A custom message can be shown on the redirect page for suppressed bibliographic records by creating an <a href='/cgi-bin/koha/tools/additional-contents.pl?category=html_customizations'>HTML customization</a> in the OpacSuppressionMessage region."
+        -
+            - pref: Phân táchHoldings
+              choices:
+                  1: Phân tách
+                  0: "Cón't separate"
+            - "items display into two tabs, where the first tab contains items whose"
+            - pref: Phân táchHoldingsBranch
+              choices:
+                homebranch: 'home library'
+                holdingbranch: 'holding library'
+            - "is the logged in user's library. The second tab will contain all other items."
+        -
+            - pref: AlwaysHiển thịHoldingsTableFilters
+              choices:
+                  1: "Có"
+                  0: "Cón't"
+            - luôn hiển thị bộ lọc mặc định trên bảng bản sao ở trang chi tiết trên giao diện nhân viên.
+        -
+            - "Không hiển thị"
+            - pref: NotesToẨn
+              class: multi
+            - "note fields in the 'Title notes' tab and in the 'Description' tab on the OPAC and staff interface detail pages. Sử dụng a comma to separate multiple fields. Examples: 500,502 (MARC21); 300,328 (UNIMARC)."
+            - <br />
+            - For hiding fields from other pages like the normal view, use the visibility settings for subfields in the MARC bibliographic frameworks section of the administration module.
+        -
+            - pref: AcquisitionDetails
+              choices:
+                  1: Hiển thị
+                  0: "Không hiển thị"
+            - chi tiết bổ sung trên trang chi tiết biểu ghi thư mục.
+        -
+            - "Hiển thị các trường sau cho biểu ghi bị xóa sau khi trộn:"
+            - pref: MergeReportFields
+            - ".<br />For example: '001,245ab,600'"
+            - "displays:"
+            - "<ul>"
+            - "<li>value of 001</li>"
+            - "<li>subfields a and b of fields 245</li>"
+            - "<li>all subfields of fields 600</li>"
+        -
+            - "Hiển thị danh sách các biểu ghi thành phần, as linked via field 773, in"
+            - pref: Hiển thịComponentRecords
+              choices:
+                  nowhere: "no"
+                  staff: "staff interface"
+                  opac: "OPAC"
+                  both: "both staff interface and OPAC"
+            - "record detail pages."
+            - "A maximum of"
+            - pref: MaxComponentRecords
+            - "records will be displayed."
+            - "<br/> UNIMARC is not supported."
+            - By default, sort component results by
+            - pref: ComponentSortField
+              default: title
+              choices:
+                  call_number: call number
+                  pubdate: date of publication
+                  acqdate: date added
+                  title: title
+                  author: author
+                  biblionumber: biblionumber
+            - ','
+            - pref: ComponentSortOrder
+              choices:
+                  asc: ascending.
+                  dsc: descending.
+                  az: from A to Z.
+                  za: from Z to A.
+    Nhập dữ liệu:
+        -
+            - When matching on ISBN with the record import tool,
+            - pref: AggressiveMatchOnISBN
+              choices:
+                  1: "do"
+                  0: "don't"
+            - cố gắng so khớp mạnh mẽ bằng cách thử mọi biến thể của ISBN in the imported record as a phrase in the ISBN fields of already cataloged records.
+        -
+            - Hiển thị the MARC field/subfields
+            - pref: AdditionalFieldsInZ3950ResultSearch
+            - " in the 'Additional fields' column of Z39.50 search results (use comma as delimiter e.g.: \"<code>001, 082$ab, 090$ab</code>\")."
+        -
+            - When matching on ISSN with the record import tool,
+            - pref: AggressiveMatchOnISSN
+              choices:
+                  1: "do"
+                  0: "don't"
+            - cố gắng so khớp mạnh mẽ bằng cách thử mọi biến thể của ISSN in the imported record as a phrase in the ISSN fields of already cataloged records.
+        -
+            - pref: MARCOverlayRules
+              choices:
+                  1: "Sử dụng"
+                  0: "Không sử dụng"
+            - MARC overlay rules for incoming records, to decide which action to take for each field.
+    Xuất dữ liệu:
+        -
+            - "Bao gồm các trường sau khi xuất BibTeX:"
+            - pref: BibtexExportAdditionalFields
+              type: textarea
+              syntax: text/x-yaml
+            - "Sử dụng one line per tag in the format BT_TAG: TAG$SUBFIELD ( e.g. lccn: 010$a )."
+            - "<br/>"
+            - "To specify multiple marc tags/subfields as targets for a repeating BibTex tag, use the following format: BT_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. notes: [501$a, 505$g] )."
+            - "<br/>"
+            - "All values of repeating tags and subfields will be printed with the given BibTeX tag."
+            - "<br/>"
+            - "Sử dụng '@' ( with quotes ) as the BT_TAG to replace the bibtex record type with a field value of your choosing."
+        -
+            - "Bao gồm các trường sau khi xuất RIS:"
+            - pref: RisExportAdditionalFields
+              type: textarea
+              syntax: text/x-yaml
+            - "Sử dụng one line per tag in the format RIS_TAG: TAG$SUBFIELD ( e.g. LC: 010$a )."
+            - "<br/>"
+            - "To specify multiple MARC tags/subfields as targets for a repeating RIS tag, use the following format: RIS_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. NT: [501$a, 505$g] )."
+            - "<br/>"
+            - "All values of repeating tags and subfields will be printed with the given RIS tag."
+            - "<br/>"
+            - "Sử dụng of TY ( record type ) as a key will <em>replace</em> the default TY with the field value of your choosing."
+

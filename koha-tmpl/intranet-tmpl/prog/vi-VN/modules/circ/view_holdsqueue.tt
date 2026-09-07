@@ -1,0 +1,430 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE ItemTypes %]
+[% USE Branches %]
+[% USE AuthorisedValues %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Holds queue") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    p {
+        margin-top: 0;
+    }
+    #locationslimit + .select2-container,
+    #itemtypeslimit + .select2-container {
+        max-width: 300px !important;
+    }
+    .main .col-md-10 #branchlimit,
+    .main .col-md-10 #itemtypeslimit {
+        width: 300px;
+    }
+</style>
+</head>
+
+<body id="circ_view_holdsqueue" class="circ">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% IF ( run_report ) %]
+ [% WRAPPER breadcrumb_item %]
+ [% IF Koha.Preference('UseHoldsQueueFilterOptions') %]
+ <a href="/cgi-bin/koha/circ/view_holdsqueue.pl?branchlimit=[% Branches.GetLoggedInBranchcode | uri %]">Danh sách bạn đọc đặt mượn đầu tiên trên tài liệu</a>
+ [% ELSE %]
+ <a href="/cgi-bin/koha/circ/view_holdsqueue.pl?branchlimit=[% Branches.GetLoggedInBranchcode | uri %]&run_report=1">Danh sách bạn đọc đặt mượn đầu tiên trên tài liệu</a>
+ [% END %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Kết quả</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Danh sách bạn đọc đặt mượn đầu tiên trên tài liệu</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+<div class="main container-fluid">
+ <div class="row">
+ <div class="col-sm-12">
+ <main>
+ <div class="row">
+ [% IF ( total || Koha.Preference('CircSidebar') ) %]
+ [% SET div_class='col-md-10 order-md-2 order-sm-1' %]
+ [% ELSE %]
+ [% SET div_class='col-md-10 offset-md-1 col-lg-8 offset-lg-2' %]
+ [% END %]
+ <div class="[% div_class | html %]">
+ [% INCLUDE 'messages.inc' %]
+
+ <h1>Danh sách bạn đọc đặt mượn đầu tiên trên tài liệu</h1>
+
+ [% IF ( run_report ) %]
+ [% IF ( total ) %]
+ <div class="results"
+                                    >[% total | html %] <span>items found for</span>
+ [% IF ( branchlimit ) %][% Branches.GetName( branchlimit ) | html %][% ELSE %]<span>Tất cả thư viện</span>[% END %]
+ [% IF ( itemtypeslimit ) %]<span>and item type: [% ItemTypes.GetDescription( itemtypeslimit ) | html %]</span>[% END %]
+ [% IF ( ccodeslimit ) %]
+ <span
+                                            >and collection:
+ [% FOREACH ccode IN ccodeslimit %]
+ [% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode' authorised_value = ccode ) | html %]
+ [% UNLESS loop.last %],[% END %]
+ [% END %]
+ </span>
+ [% END %]
+
+ [% IF ( locationslimit ) %]
+ <span
+                                            >and shelving location:
+ [% FOREACH loc IN locationslimit %]
+ [% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location' authorised_value = loc ) | html %]
+ [% UNLESS loop.last %],[% END %]
+ [% END %]
+ </span>
+ [% END %]
+ </div>
+ [% ELSE %]
+ <div class="alert alert-info">Không tìm thấy tài liệu</div>
+ [% END %]
+ [% IF ( itemsloop ) %]
+ <div class="page-section">
+ <table id="holdst">
+ <thead>
+ <tr>
+ <th class="hq-title anti-the">Nhan đề</th>
+ <th class="hq-author">Tác giả</th>
+ <th class="hq-pubdetails">Publication details</th>
+ <th class="hq-holdingbranch">Thư viện hiện tại</th>
+ <th class="hq-homebranch">Thư viện chủ quản</th>
+ <th class="hq-collection">Bộ sưu tập</th>
+ <th class="hq-location">Kho tài liệu</th>
+ <th class="hq-itemtype">Kiểu tài liệu</th>
+ <th class="hq-callnumber">Số phân loại</th>
+ <th class="hq-copynumber">Số bản sao</th>
+ <th class="hq-enumchron">Số định danh ấn phẩm</th>
+ <th class="hq-barcode">Mã vạch</th>
+ <th class="hq-patron">Bạn đọc</th>
+ <th class="hq-patroncategory">Kiểu bạn đọc</th>
+ <th class="hq-sendto">Gửi tới</th>
+ <th class="hq-date">Ngày</th>
+ <th class="hq-notes">Ghi chú</th>
+ </tr>
+ <tr>
+ <td class="hq-title">
+ <span class="filter_column filter_text">
+ <input class="text_filter" placeholder="Nhan đề" type="text" />
+ </span>
+ </td>
+ <td class="hq-author">
+ <span class="filter_column filter_text">
+ <input class="text_filter" placeholder="Tác giả" type="text" />
+ </span>
+ </td>
+ <td class="hq-pubdetails">
+ <span class="filter_column filter_text">
+ <input class="text_filter" type="text" placeholder="Publication details" />
+ </span>
+ </td>
+ <td class="hq-holdingbranch">
+ <span class="filter_column filter_text">
+ <input class="text_filter" placeholder="Thư viện hiện tại" type="text" />
+ </span>
+ </td>
+ <td class="hq-homebranch">
+ <span class="filter_column filter_text">
+ <input class="text_filter" placeholder="Thư viện chủ quản" type="text" />
+ </span>
+ </td>
+ <td class="hq-collection">
+ <span class="filter_column filter_text">
+ <input placeholder="Bộ sưu tập" type="text" />
+ </span>
+ </td>
+ <td class="hq-location">
+ <span class="filter_column filter_text">
+ <input placeholder="Vị trí" type="text" />
+ </span>
+ </td>
+ <td class="hq-itemtype">
+ <span class="filter_column filter_text">
+ <input placeholder="Kiểu tài liệu" type="text" />
+ </span>
+ </td>
+ <td class="hq-callnumber">
+ <span class="filter_column filter_text">
+ <input placeholder="Số phân loại" type="text" />
+ </span>
+ </td>
+ <td class="hq-copynumber">
+ <span class="filter_column filter_text">
+ <input placeholder="Số bản sao" type="text" />
+ </span>
+ </td>
+ <td class="hq-enumchron">
+ <span class="filter_column filter_text">
+ <input placeholder="Số định danh ấn phẩm" type="text" />
+ </span>
+ </td>
+ <td class="hq-barcode">
+ <span class="filter_column filter_text">
+ <input placeholder="Mã vạch" type="text" />
+ </span>
+ </td>
+ <td class="hq-patron">
+ <span class="filter_column filter_text">
+ <input placeholder="Bạn đọc" type="text" />
+ </span>
+ </td>
+ <td class="hq-patroncategory">
+ <span class="filter_column filter_text">
+ <input placeholder="Kiểu bạn đọc" type="text" />
+ </span>
+ </td>
+ <td class="hq-sendto">
+ <span class="filter_column filter_text">
+ <input placeholder="Gửi tới" type="text" />
+ </span>
+ </td>
+ <td class="hq-date">
+ <span class="filter_column filter_text">
+ <input placeholder="Ngày" type="text" />
+ </span>
+ </td>
+ <td class="hq-notes">
+ <span class="filter_column filter_text">
+ <input placeholder="Ghi chú" type="text" />
+ </span>
+ </td>
+ </tr>
+ </thead>
+ <tbody
+                                            >[% FOREACH itemsloo IN itemsloop %]
+ <tr>
+ <td class="hq-title">
+ <p> [% INCLUDE 'biblio-title.inc' biblio=itemsloo.biblio link = 1 %] </p>
+ <div class="hq-biblionumber content_hidden">[% itemsloo.biblionumber | html %]</div>
+ [% IF ( itemsloo.hold_group_id ) %]
+ <p>(<a class="hold-group" href="/cgi-bin/koha/reserve/hold-group.pl?hold_group_id=[% itemsloo.hold_group_id | html %]">Hold group [% itemsloo.hold_group_id | html %]</a>)</p>
+ [% END %]
+ </td>
+ <td class="hq-author">[% itemsloo.biblio.author | html %]</td>
+ <td class="hq-pubdetails">
+ <div class="hq-pubdata">
+ [% IF ( itemsloo.biblio.biblioitem.editionstatement ) %]<div class="hq-editionstatement">[% itemsloo.biblio.biblioitem.editionstatement | html %]</div>[% END %]
+ [% IF ( itemsloo.biblio.biblioitem.publishercode ) %][% itemsloo.biblio.biblioitem.publishercode | html %][% END %]
+
+ [% IF ( itemsloo.biblio.biblioitem.publicationyear ) %]
+ , [% itemsloo.biblio.biblioitem.publicationyear | html %]
+ [% ELSIF ( itemsloo.biblio.copyrightdate ) %]
+ , [% itemsloo.biblio.copyrightdate | html %]
+ [% END %]
+
+ [% IF ( itemsloo.biblio.biblioitem.pages ) %]: [% itemsloo.biblio.biblioitem.pages | html %][% END %]
+
+ [% IF ( itemsloo.biblio.biblioitem.size ) %][% itemsloo.biblio.biblioitem.size | html %][% END %]
+
+ [% IF ( itemsloo.biblio.biblioitem.isbn ) %]<span>ISBN: [% itemsloo.biblio.biblioitem.isbn | html %]</span>[% END %]
+ </div>
+ </td>
+ <td class="hq-holdingbranch">[% Branches.GetName( itemsloo.holdingbranch ) | html %]</td>
+ <td class="hq-homebranch">[% Branches.GetName( itemsloo.item.homebranch ) | html %]</td>
+ <td class="hq-collection">[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode', authorised_value => itemsloo.item.ccode ) | html %]</td>
+ <td class="hq-location">[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => itemsloo.item.location ) | html %]</td>
+ <td class="hq-itemtype">[% ItemTypes.GetDescription( itemsloo.item.effective_itemtype ) | html %]</td>
+ <td class="hq-callnumber"><span class="itemcallnumber">[% itemsloo.item.itemcallnumber | html %]</span></td>
+ <td class="hq-copynumber">[% itemsloo.item.copynumber | html %]</td>
+ <td class="hq-enumchron">[% itemsloo.item.enumchron | html %]</td>
+ <td class="hq-barcode">
+ [% IF ( itemsloo.item_level_request ) %]
+ <em>Only item:</em>
+ <strong
+                                                                ><a href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% itemsloo.itemnumber | uri %]&biblionumber=[% itemsloo.biblionumber | uri %]#item[% itemsloo.itemnumber | uri %]"
+                                                                    >[% itemsloo.barcode | html %]</a
+                                                                ></strong
+                                                            >
+ [% ELSIF itemsloo.item.item_group %]
+ <strong
+                                                                ><a href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% itemsloo.itemnumber | uri %]&biblionumber=[% itemsloo.biblionumber | uri %]#item[% itemsloo.itemnumber | uri %]"
+                                                                    >[% itemsloo.barcode | html %]</a
+                                                                ></strong
+                                                            >
+ <em>or any item from item group <strong>[% itemsloo.item.item_group.description | html %]</strong></em>
+ [% ELSE %]
+ <strong
+                                                                ><a href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% itemsloo.itemnumber | uri %]&biblionumber=[% itemsloo.biblionumber | uri %]#item[% itemsloo.itemnumber | uri %]"
+                                                                    >[% itemsloo.barcode | html %]</a
+                                                                ></strong
+                                                            >
+ <em>hoặc bất kỳ</em>
+ [% END %]
+ </td>
+ <td class="hq-patron">
+ <p> [% INCLUDE 'patron-title.inc' invert_name=1 patron=itemsloo.patron hide_patron_infos_if_needed=1 link_to="circulation_reserves" %] </p>
+ [% UNLESS Koha.Preference('HidePatronName') %]
+ <p>[% itemsloo.patron.phone | html %]</p>
+ [% IF itemsloo.patron.notice_email_address %]
+ <p class="patron-email">
+ <a href="mailto:[% itemsloo.patron.notice_email_address | uri %]?subject=[% itemsloo.title | uri %]"> [% itemsloo.patron.notice_email_address | html %]</a>
+ </p>
+ [% END %]
+ [% END %]
+ </td>
+ <td class="hq-patroncategory">[% itemsloo.patron.category.description | html %] ([% itemsloo.patron.categorycode | html %])</td>
+ <td class="hq-sendto">[% Branches.GetName( itemsloo.pickbranch ) | html %]</td>
+ <td class="hq-date" data-order="[% itemsloo.reservedate | html %]">[% itemsloo.reservedate | $KohaDates %]</td>
+ <td class="hq-notes">[% itemsloo.notes | html %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% END %]
+ [% END %]
+
+ [% UNLESS ( total ) %]
+ [% branchlimit = Branches.GetLoggedInBranchcode %]
+ [% PROCESS filter_form %]
+ [% END %]
+ </div>
+ <!-- /.col-md-10.order-md-2 -->
+ [% IF ( total || Koha.Preference('CircSidebar') ) %]
+ <div class="col-md-2 order-sm-2 order-md-1">
+ <aside>
+ [% IF ( total ) %]
+ [% PROCESS filter_form %]
+ [% END %]
+ [% IF Koha.Preference('CircSidebar') %]
+ [% INCLUDE 'circ-nav.inc' %]
+ [% END %]
+ </aside>
+ </div>
+ <!-- /.col-md-2.order-md-1 -->
+ [% END %]
+ </div>
+ <!-- /.row -->
+ </main>
+ </div>
+ <!-- /.col-sm-12 -->
+ </div>
+ <!-- /.row -->
+</div>
+<!-- /.main.container-fluid -->
+
+[% BLOCK filter_form %]
+ <form method="get" name="f" action="/cgi-bin/koha/circ/view_holdsqueue.pl">
+ [% IF ( total ) %]
+ [% SET fieldset_class='brief' %]
+ [% ELSE -%]
+ [% SET fieldset_class='rows' %]
+ [% END %]
+ <fieldset class="[% fieldset_class | html %]">
+ <ol>
+ <li>
+ <label for="branchlimit">Thư viện: </label>
+ <select name="branchlimit" id="branchlimit">
+ [% IF CAN_user_superlibrarian || !Koha.Preference('IndependentBranches') %]
+ <option value="">Tất cả</option>
+ [% END %]
+ [% PROCESS options_for_libraries libraries => Branches.all( selected => branchlimit, only_from_group => 1 ) %]
+ </select>
+ </li>
+ <li>
+ <label for="itemtypeslimit">Kiểu tài liệu: </label>
+ <select name="itemtypeslimit" id="itemtypeslimit">
+ <option value="">Tất cả</option>
+ [% PROCESS options_for_item_types itemtypes => ItemTypes.Get(), selected_itemtype => itemtypeslimit %]
+ </select>
+ </li>
+ <li>
+ <label for="ccodeslimit">Bộ sưu tập: </label>
+ <select name="ccodeslimit" id="ccodeslimit" multiple="multiple">
+ <option value="">Tất cả</option>
+ [% PROCESS options_for_authorised_values_multiselect authorised_values => AuthorisedValues.GetAuthValueDropbox( 'CCODE' ), selected_av => ccodeslimit %]
+ </select>
+ </li>
+ <li>
+ <label for="locationslimit">Shelving location: </label>
+ <select name="locationslimit" id="locationslimit" multiple="multiple">
+ <option value="">Tất cả</option>
+ [% PROCESS options_for_authorised_values_multiselect authorised_values => AuthorisedValues.GetAuthValueDropbox( 'LOC' ), selected_av => locationslimit %]
+ </select>
+ </li>
+ </ol>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ <input type="hidden" name="run_report" value="1" />
+ </fieldset>
+ </fieldset>
+ </form>
+[% END %]
+
+[% INCLUDE 'hold-group-modal.inc' %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'select2.inc' %]
+ [% INCLUDE 'datatables.inc' %]
+ [% Asset.js("js/hold-group.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var table_settings = [% TablesSettings.GetTableSettings('circ', 'view_holdsqueue', 'holds-table', 'json') | $raw %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            // Apply select2 to all select fields having a "multiple" attribute
+            let selectFields = document.querySelectorAll("select[multiple]");
+            selectFields.forEach(selectField => {
+                $(selectField).select2({
+                    width: "100%",
+                    allowClear: true,
+                });
+            });
+            var holdst;
+
+            // Setup filters before DataTables initialisation, in case some columns are
+            // hidden by default
+            var filterColumnTimeoutId;
+            var filterColumn = function (e) {
+                clearTimeout(filterColumnTimeoutId);
+                filterColumnTimeoutId = setTimeout(function () {
+                    var input = $(e.target);
+                    var idx = input.parents("td").index();
+                    holdst
+                        .api()
+                        .column(idx + ":visible")
+                        .search(input.val())
+                        .draw();
+                }, 200);
+            };
+            $("#holdst thead input").on("change keyup keydown", filterColumn);
+
+            var holdst = $("#holdst").kohaTable(
+                {
+                    dom: 'B<"clearfix">t',
+                    orderCellsTop: true,
+                    paging: false,
+                },
+                table_settings
+            );
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

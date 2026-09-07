@@ -1,0 +1,471 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE Branches %]
+[% USE Categories %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Merge patron records") | html %]
+ &rsaquo; [% t("Patrons") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        ins {
+            background-color: #e6ffe6;
+        }
+        del {
+            background-color: #ffe6e6;
+        }
+        .col0,
+        .col1 {
+            display: none;
+        }
+        .col3 ins,
+        .col2 del {
+            display: none;
+        }
+        #col-label,
+        .col2,
+        .col3 {
+            border-right: 1px solid #eee;
+            flex-grow: 1;
+            margin-right: 1em;
+        }
+        #col-label {
+            font-family: monospace;
+        }
+        #col-label div {
+            white-space: none;
+        }
+        .compare {
+            display: flex;
+        }
+        .modal-lg {
+            width: 90%;
+        }
+    </style>
+[% END %]
+</head>
+<body id="pat_merge" class="pat">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'patron-search-header.inc' %]
+[% END %]
+
+[% BLOCK display_names %]
+ [% SWITCH rs %]
+ [% CASE 'Accountline' %]
+ <span>account lines</span>
+ [% CASE 'ArticleRequest' %]
+ <span>article requests</span>
+ [% CASE 'BorrowerAttribute' %]
+ <span>extended patron attributes</span>
+ [% CASE 'BorrowerDebarment' %]
+ <span>patron restrictions</span>
+ [% CASE 'BorrowerFile' %]
+ <span>patrons files</span>
+ [% CASE 'BorrowerModification' %]
+ <span>patron modification requests</span>
+ [% CASE 'ClubEnrollment' %]
+ <span>club enrollments</span>
+ [% CASE 'Issue' %]
+ <span>checkouts</span>
+ [% CASE 'ItemsLastBorrower' %]
+ <span>marks as last borrower of item</span>
+ [% CASE 'Linktracker' %]
+ <span>tracked link clicks</span>
+ [% CASE 'Message' %]
+ <span>patron messages</span>
+ [% CASE 'MessageQueue' %]
+ <span>patron notices</span>
+ [% CASE 'OldIssue' %]
+ <span>previous checkouts</span>
+ [% CASE 'OldReserve' %]
+ <span>filled holds</span>
+ [% CASE 'Rating' %]
+ <span>ratings</span>
+ [% CASE 'Reserve' %]
+ <span>current holds</span>
+ [% CASE 'Review' %]
+ <span>Bài phê bình</span>
+ [% CASE 'Statistic' %]
+ <span>Thống kê</span>
+ [% CASE 'SearchHistory' %]
+ <span>historical searches</span>
+ [% CASE 'Suggestion' %]
+ <span>purchase suggestions</span>
+ [% CASE 'TagAll' %]
+ <span>tags</span>
+ [% CASE 'Virtualshelfcontent' %]
+ <span>list items</span>
+ [% CASE 'Virtualshelfshare' %]
+ <span>list shares</span>
+ [% CASE 'Virtualshelve' %]
+ <span>lists</span>
+ [% CASE %]
+ [% rs | html %]
+ [% END %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/members-home.pl">Bạn đọc</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Merge patron records</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+ <h1>Merge patron records</h1>
+
+ [% IF op == 'show' %]
+ [% IF patrons.count > 1 %]
+ [% IF ( patrons.count == 2 ) %]
+ <div id="toolbar" class="btn-toolbar">
+ <div class="btn-group">
+ <button class="btn btn-default" id="compare_patrons"> <i class="fa fa-arrows-h"></i> Compare patrons </button>
+ </div>
+ </div>
+ [% END %]
+
+ <p>Select patron to keep. Data from the other patrons will be transferred to this patron record and the remaining patron records will be deleted.</p>
+
+ <form method="post" action="merge-patrons.pl" id="patron-merge-form">
+ [% INCLUDE 'csrf-token.inc' %]
+ <table id="patron-merge-table" class="datatable container">
+ <thead>
+ <tr>
+ <th>&nbsp;</th>
+ <th>Tóm tắt</th>
+ <th>Tên</th>
+ <th>Ngày sinh</th>
+ <th>Kiểu bạn đọc</th>
+ <th>Thư viện</th>
+ <th>Ngày hết hạn</th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH p IN patrons %]
+ <tr>
+ <td><input class="keeper" type="radio" name="keeper" value="[% p.id | html %]" data-borrowernumber="[% p.id | html %]" id="keeper_[% p.id | html %]" /></td>
+ <td>
+ <label for="keeper_[% p.id | html %]">
+ <strong>[% p.cardnumber | html %]</strong>
+ </label>
+ </td>
+ <td>
+ <a target="_blank" href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% p.borrowernumber | uri %]">
+ [% INCLUDE 'patron-title.inc' patron = p %]
+ <i class="fa-solid fa-window-restore"></i>
+ </a>
+ </td>
+ <td>[% p.dateofbirth | $KohaDates %]</td>
+ <td>[% Categories.GetName( p.categorycode ) | html %] ([% p.categorycode | html %])</td>
+ <td>[% Branches.GetName( p.branchcode ) | html %]</td>
+ <td>[% p.dateexpiry | $KohaDates %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% IF ( patrons.count == 2 ) %]
+ <br />
+ <fieldset id="copy-ui" class="datatable container" disabled>
+ <div class="form-check">
+ <input type="checkbox" id="copy-checkbox" name="copy" value="1" />
+ <label for="copy-checkbox">Copy values from record to be deleted</label>
+ </div>
+ <div id="copy-fields" hidden></div>
+ </fieldset>
+ [% END %]
+
+ <fieldset class="action">
+ [% FOREACH p IN patrons %]
+ <input type="hidden" name="id" value="[% p.id | html %]" />
+ [% END %]
+ <input type="hidden" name="op" value="cud-merge" />
+ <input type="submit" id="merge-patrons" class="btn btn-primary" value="Merge patrons" />
+ [% PROCESS 'members-patron-selections.inc' id="patron-merge-form" %]
+ </fieldset>
+ </form>
+ [% ELSE %]
+ <div class="alert alert-warning">Error: Two or more patrons need to be selected for merging</div>
+ [% END %]
+ [% ELSIF op == 'cud-merge' %]
+ <h4>Kết quả</h4>
+ [% IF error %]
+ [% IF error == 'INVALID_KEEPER' %]
+ <div class="alert alert-warning">Merge failed! The patron to keep was invalid.</div>
+ [% ELSE %]
+ <div class="alert alert-warning">Merge failed! The following error was reported: [% error | html %].</div>
+ [% END %]
+ [% ELSIF !results.merged.keys.size %]
+ <div class="alert alert-warning">No valid patrons to merge were found.</div>
+ [% ELSE %]
+ <p> Patron records merged into <a href="moremember.pl?borrowernumber=[% keeper.id | uri %]">[% INCLUDE 'patron-title.inc' patron = keeper %]</a> </p>
+
+ [% FOREACH pair IN results.merged.pairs %]
+ [% SET patron = pair.value.patron %]
+
+ <h5>[% INCLUDE 'patron-title.inc' %]</h5>
+
+ [% FOREACH r IN pair.value.updated.pairs %]
+ [% SET name = r.key %]
+ [% SET count = r.value %]
+ [% IF count %]
+ <p>
+ <span>[% count | html %] [% PROCESS display_names rs = name %] được chuyển.</span>
+ [% IF name == 'Reserve' %]
+ <strong>It is advisable to check for and resolve duplicate holds due to merging.</strong>
+ [% END %]
+ </p>
+ [% END %]
+ [% END %]
+ [% END %]
+ [% END %]
+
+ [% UNLESS error %]
+ <a class="btn btn-default" href="moremember.pl?borrowernumber=[% keeper.id | html %]">View patron record</a>
+ [% END %]
+ [% END %]
+[% END %]
+
+<!-- Modal -->
+<div class="modal" id="compareModal" tabindex="-1" role="dialog" aria-labelledby="compareModalLabel">
+ <div class="modal-dialog modal-lg">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="compareModalLabel">Compare patrons for merging</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div class="compare">
+ <div id="col-label">
+ <div><strong data-field="surname">Họ:</strong></div>
+ <div><strong data-field="firstname">Tên:</strong></div>
+ <div><strong data-field="preferred_name">Tên gọi ưa thích:</strong></div>
+ <div><strong data-field="initials">Tên viết tắt:</strong></div>
+ <div><strong data-field="othernames">Other name:</strong></div>
+ <div><strong data-field="branchcode">Thư viện:</strong></div>
+ <div><strong data-field="cardnumber">Số thẻ:</strong></div>
+ <div><strong data-field="categorycode">Danh mục:</strong></div>
+ <br />
+ <div><strong data-field="address">Address line 1:</strong></div>
+ <div><strong data-field="address2">Address line 2:</strong></div>
+ <div><strong data-field="city">Thành phố / Tỉnh:</strong></div>
+ <div><strong data-field="state">Bang / Tỉnh:</strong></div>
+ <div><strong data-field="zipcode">Mã bưu chính:</strong></div>
+ <div><strong data-field="country">Quốc gia:</strong></div>
+ <br />
+ <div><strong data-field="dateenrolled">Registration date:</strong></div>
+ <div><strong data-field="date_renewed">Renewal date:</strong></div>
+ <div><strong data-field="dateexpiry">Ngày hết hạn:</strong></div>
+ <div><strong data-field="dateofbirth">Ngày sinh:</strong></div>
+ <div><strong data-field="debarred">Hạn chế:</strong></div>
+ <div><strong data-field="email">Email chính:</strong></div>
+ <div><strong data-field="emailpro">Email phụ:</strong></div>
+ <div><strong data-field="phone">Số điện thoại chính:</strong></div>
+ <div><strong data-field="phonepro">Số điện thoại phụ:</strong></div>
+ <div><strong data-field="mobile">Số điện thoại khác:</strong></div>
+ <div><strong data-field="sex">Giới tính:</strong></div>
+ <div><strong data-field="updated_on">Updated on:</strong></div>
+ <div><strong data-field="userid">Tên đăng nhập:</strong></div>
+ </div>
+
+ [% FOREACH p IN patrons %]
+ <div id="col-[% p.borrowernumber | html %]-orig" class="col[% loop.index | html %]">
+ <!-- prettier-ignore-start -->
+<!-- <pre> block is unindented to avoid unwanted whitespace -->
+<pre>
+[% IF ( p.surname ) %][% p.surname | html %][% ELSE %]-[% END %]
+[% IF ( p.firstname ) %][% p.firstname | html %][% ELSE %]-[% END %]
+[% IF ( p.preferred_name ) %][% p.preferred_name | html %][% ELSE %]-[% END %]
+[% IF ( p.initials ) %][% p.initials | html %][% ELSE %]-[% END %]
+[% IF ( p.othernames ) %][% p.othernames | html %][% ELSE %]-[% END %]
+[% IF ( p.branchcode ) %][% p.branchcode | html %][% ELSE %]-[% END %]
+[% IF ( p.cardnumber ) %][% p.cardnumber | html %][% ELSE %]-[% END %]
+[% IF ( p.categorycode ) %][% p.categorycode | html %][% ELSE %]-[% END %]
+
+[% IF ( p.address ) %][% p.address | html %][% ELSE %]-[% END %]
+[% IF ( p.address2 ) %][% p.address2 | html %][% ELSE %]-[% END %]
+[% IF ( p.city ) %][% p.city | html %][% ELSE %]-[% END %]
+[% IF ( p.state ) %][% p.state | html %][% ELSE %]-[% END %]
+[% IF ( p.zipcode ) %][% p.zipcode | html %][% ELSE %]-[% END %]
+[% IF ( p.country ) %][% p.country | html %][% ELSE %]-[% END %]
+
+[% IF ( p.dateenrolled ) %][% p.dateenrolled | html %][% ELSE %]-[% END %]
+[% IF ( p.date_renewed ) %][% p.date_renewed | html %][% ELSE %]-[% END %]
+[% IF ( p.dateexpiry ) %][% p.dateexpiry | html %][% ELSE %]-[% END %]
+[% IF ( p.dateofbirth ) %][% p.dateofbirth | html %][% ELSE %]-[% END %]
+[% IF ( p.debarred ) %][% p.debarred | html %][% ELSE %]-[% END %]
+[% IF ( p.email ) %][% p.email | html %][% ELSE %]-[% END %]
+[% IF ( p.emailpro ) %][% p.emailpro | html %][% ELSE %]-[% END %]
+[% IF ( p.phone ) %][% p.phone | html %][% ELSE %]-[% END %]
+[% IF ( p.phonepro ) %][% p.phonepro | html %][% ELSE %]-[% END %]
+[% IF ( p.mobile ) %][% p.mobile | html %][% ELSE %]-[% END %]
+[% IF ( p.sex ) %][% p.sex | html %][% ELSE %]-[% END %]
+[% IF ( p.updated_on ) %][% p.updated_on | html %][% ELSE %]-[% END %]
+[% IF ( p.userid ) %][% p.userid | html %][% ELSE %]-[% END %]
+</pre>
+<!-- prettier-ignore-end -->
+ </div>
+ [% END %]
+ [% FOREACH p IN patrons %]
+ <div id="col-[% p.borrowernumber | html %]-diff" class="col[% ( loop.index + 2 ) | html %]"><pre></pre></div>
+ [% END %]
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-default" id="submit-merge-form"><i class="fa fa-compress" aria-hidden="true"></i> Merge patrons</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> Thoát</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#compareModal -->
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'str/members-menu.inc' %]
+ [% Asset.js("js/members-menu.js") | $raw %]
+ [% Asset.js("js/members-patron-selections.js") | $raw %]
+ [% Asset.js("lib/jsdiff/jsdiff.min.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            var controls = $("#merge-patrons, #compare_patrons");
+            controls.prop("disabled", true);
+            $("#patron-merge-table").on("change", "input", function () {
+                if ($(".keeper:checked").length > 0) {
+                    controls.prop("disabled", false);
+                    $("#copy-ui").prop("disabled", false);
+                } else {
+                    controls.prop("disabled", true);
+                }
+                if ($("#copy-checkbox").is(":checked")) {
+                    loadCopyUI();
+                }
+            });
+
+            $("#compare_patrons").on("click", function (e) {
+                e.preventDefault();
+                $("#compareModal").modal("show");
+            });
+
+            $("#compareModal").on("shown.bs.modal", function () {
+                /* Find which column is the basis for merging */
+                var col0 = $(".keeper:checked").data("borrowernumber");
+                var col1 = $(".keeper:not(:checked)").data("borrowernumber");
+                /* Get the original patron data for comparison */
+                var diff1 = $("#col-" + col0 + "-orig pre").text();
+                var diff2 = $("#col-" + col1 + "-orig pre").text();
+
+                var diffs = diffString(diff2, diff1);
+                /* Load the diff HTML in the empty columns */
+                $("#compareModal .col2 pre, #compareModal .col3 pre").html(diffs);
+            });
+
+            $("#submit-merge-form").on("click", function () {
+                $("#patron-merge-form").submit();
+            });
+
+            $("#copy-checkbox").on("change", function () {
+                $("#copy-fields").prop("hidden", !this.checked);
+                $("#compare_patrons").prop("disabled", this.checked);
+                if (this.checked) {
+                    loadCopyUI();
+                }
+            });
+        });
+
+        function loadCopyUI() {
+            $("#copy-fields").empty();
+            /* Find which column is the basis for merging */
+            let col0 = $(".keeper:checked").data("borrowernumber");
+            let col1 = $(".keeper:not(:checked)").data("borrowernumber");
+            /* Get the original patron data for comparison */
+            let diff1 = $("#col-" + col0 + "-orig pre")
+                .text()
+                .split("\n")
+                .filter(e => e !== "");
+            let diff2 = $("#col-" + col1 + "-orig pre")
+                .text()
+                .split("\n")
+                .filter(e => e !== "");
+            let labels = $("#col-label strong")
+                .text()
+                .split(":")
+                .filter(e => e !== "");
+            let fields = $("#col-label strong")
+                .map((_, e) => e.dataset.field)
+                .get();
+
+            const container = $("#copy-fields");
+            container.append(
+                `<div class="row mb-2">
+                    <div class="col fw-bold">` +
+                    _("Trường") +
+                    `</div>
+                    <div class="col fw-bold">` +
+                    _("Destination record") +
+                    `</div>
+                    <div class="col fw-bold">` +
+                    _("Source record") +
+                    `</div>
+                    <div class="col fw-bold">` +
+                    _("Copy value") +
+                    `</div>
+                </div>`
+            );
+
+            labels.forEach((label, i) => {
+                if (diff1[i] !== diff2[i]) {
+                    container.append(
+                        `<div class="row">
+                            <div class="col">
+                                <label for="copy${fields[i]}">
+                                <strong>` +
+                            _(label) +
+                            `:</strong>
+                            </div>
+                            <div class="col col2"><pre data-og="${diff1[i]}"></pre></div>
+                            <div class="col col3"><pre data-og="${diff2[i]}"></pre></div>
+                            <div class="col form-check">
+                                <input type="checkbox" name="${fields[i]}" value="${diff2[i]}" id="copy${fields[i]}">
+                            </div>
+                        </div>`
+                    );
+
+                    let diffs = diffString(diff2[i], diff1[i]);
+                    container.find(".row:last-child pre").html(diffs);
+                }
+            });
+
+            $("#copy-fields .row input[type=checkbox]").on("click", function () {
+                let ins = $(this).closest(".row").find(".col2 pre").data("og").toString();
+                let del = $(this).closest(".row").find(".col3 pre").data("og").toString();
+                let diffs = diffString(ins, del);
+
+                $(this).closest(".row").find(".col3 pre, .col2 pre").html(diffs);
+
+                $(this)
+                    .closest(".row")
+                    .find(".col2, .col3")
+                    .each(function () {
+                        $(this).toggleClass("col2", "col3");
+                        $(this).toggleClass("col3", "col2");
+                    });
+            });
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

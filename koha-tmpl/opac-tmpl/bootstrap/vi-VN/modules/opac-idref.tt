@@ -1,0 +1,76 @@
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% tx("Your search IDREF for ppn {ppn}", { ppn = unimarc3 }) | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        #idref h2.role {
+            background-color: #dddeee;
+            cursor: pointer;
+        }
+        #idref table {
+            margin: 0;
+        }
+    </style>
+[% END %]
+
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='idref' bodyclass='scrollto' %]
+<main class="main">
+ [% IF error %] Ppn này không được tìm thấy trên dịch vụ idref. [% ELSE %] [% FOREACH role IN content %] <div>
+ <h1 class="role" title="Nhấp để mở rộng phần này">[% role.role_name | html %] ([% role.count | html %])</h1>
+ <div class="docs">
+ <table>
+ <caption class="visually-hidden">[% role.role_name | html %]</caption>
+ <thead>
+ <tr>
+ <th>Trích dẫn</th>
+ <th class="no-sort">Koha</th>
+ <th class="no-sort">Sudoc</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH doc IN role.docs %]
+ <tr>
+ <td>[% doc.citation | html %]</td>
+ <td><a href="/cgi-bin/koha/opac-search.pl?q=ident:[% doc.ppn | uri %]" target="_blank">Koha</a></td>
+ <td><a href="http://www.sudoc.fr/[% doc.ppn | uri %]" target="_blank" rel="noreferrer">Sudoc</a></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ </div>
+ [% END %]
+ [% END %]
+</main>
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("table").kohaTable({
+                filter: false,
+            });
+
+            $(".role").click(function () {
+                var docs_node = $(this).parent().find("div.docs");
+                if ($(docs_node).is(":visible")) {
+                    $(".docs").hide();
+                } else {
+                    $(".docs").hide();
+                    docs_node.show();
+                }
+            });
+            $(".docs").hide();
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'opac-bottom.inc' is_popup=1 %]

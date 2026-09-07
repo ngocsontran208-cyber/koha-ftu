@@ -1,0 +1,76 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Subject cloud") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-tags-subject' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Đám mây chủ đề</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ [% column_class = "col-10 order-first order-md-first order-lg-2" %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ [% END %]
+
+ <div class="[% column_class | html %]">
+ <div id="subjectcloud" class="maincontent">
+ <h1>Đám mây chủ đề</h1>
+ [% IF Koha.Preference( 'OpacCloud' ) == 1 %]
+ [% IF ( LOOP ) %]
+ <p>&quot;Mây chủ đề&quot; hiển thị các chủ đề được sử dụng nhiều nhất trong phần biên mục của chúng tôi. Nhấp vào bất kỳ chủ đề nào dưới đây để xem các tài liệu trong bộ sưu tập của chúng tôi.</p>
+ <fieldset>
+ <legend>Hiển thị</legend>
+ <form class="form-inline" action="/cgi-bin/koha/opac-tags_subject.pl" method="get">
+ <label>lên đến <input type="text" name="number" value="[% number | html %]" size="4" maxlength="4" /> </label> <label>chủ đề <input type="submit" class="btn btn-primary" value="OK" /></label>
+ </form>
+ </fieldset>
+
+ [% FOREACH LOO IN LOOP %]
+ <a href='/cgi-bin/koha/opac-search.pl?idx=su&amp;q="[% LOO.entry | uri %]"' style="font-size:[% LOO.weight | html %]px;">[% LOO.entry | html %]</a>
+ [% END %]
+ [% ELSE %]
+ <p>Ghi chú: Chức năng này chỉ dành cho công tác biên mục của Pháp, các chủ đề ISBD tại đây được sử dụng phổ biến và được xây dựng cách đánh chỉ mục riêng.</p>
+ [% END # / IF LOOP %]
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>Tính năng mây ISBD không được kích hoạt.</p>
+ </div>
+ [% END # / IF OpacCloud %]
+ </div>
+ <!-- / #subjectcloud -->
+ </div>
+ <!-- / .col-10/12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

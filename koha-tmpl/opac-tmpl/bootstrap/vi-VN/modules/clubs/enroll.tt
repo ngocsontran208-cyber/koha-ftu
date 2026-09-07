@@ -1,0 +1,78 @@
+[% USE Koha %]
+[% USE raw %]
+[% USE AuthorisedValues %]
+
+<h2> Đăng ký vào <em>[% club.name | html %]</em> </h2>
+
+<div class="container-fluid">
+ <form method="get" id="patron-enrollment-form">
+ <legend class="visually-hidden">Đăng ký</legend>
+ <input type="hidden" name="id" value="[% club.id | html %]" />
+ <input type="hidden" name="borrowernumber" value="[% borrowernumber | html %]" />
+ <fieldset class="rows">
+ <ol>
+ [% FOREACH f IN club.club_template.club_template_enrollment_fields %]
+ <li>
+ <label>[% f.name | html %]</label>
+ [% IF f.authorised_value_category %]
+ <select name="[% f.id | html %]">
+ [% FOREACH a IN AuthorisedValues.Get( f.authorised_value_category ) %]
+ <option value="[% a.authorised_value | html %]">[% a.lib | html %]</option>
+ [% END %]
+ </select>
+ [% ELSE %]
+ <input type="text" name="[% f.id | html %]" />
+ [% END %]
+ <span class="hint">[% f.description | html %]</span>
+ </li>
+ [% END %]
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <button class="btn btn-primary add_enrollment">Hoàn thành đăng ký</button>
+ <a href="#" class="cancel show_clubs">Hủy bỏ</a>
+ </fieldset>
+ </form>
+</div>
+<script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+    function addEnrollment() {
+        $("body").css("cursor", "progress");
+        let data = $( "#patron-enrollment-form" ).serialize();
+        data += '&csrf_token='+$('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            type: "POST",
+            url: '/cgi-bin/koha/svc/club/enroll',
+            data,
+            success: function( data ) {
+                if ( data.success ) {
+                    $('#opac-user-clubs_panel').load('/cgi-bin/koha/clubs/clubs-tab.pl?borrowernumber=[% borrowernumber | html %]&id=[% club.id | html %]', function() {
+                        $("body").css("cursor", "default");
+                    });
+                } else {
+                    alert(_("Không thể tạo đăng ký!"));
+                }
+            },
+            dataType: 'json'
+        });
+        return false;
+    }
+
+    function showClubs() {
+        $("body").css("cursor", "progress");
+        $('#opac-user-clubs_panel').load('/cgi-bin/koha/clubs/clubs-tab.pl?borrowernumber=[% borrowernumber | html %]&id=[% club.id | html %]', function() {
+            $("body").css("cursor", "default");
+        });
+    }
+
+        $(document).ready(function(){
+            $(".add_enrollment").on("click", function(e){
+                e.preventDefault();
+                addEnrollment();
+            });
+
+            $(".show_clubs").on("click", function(e){
+                e.preventDefault();
+                showClubs();
+            });
+        });
+</script>

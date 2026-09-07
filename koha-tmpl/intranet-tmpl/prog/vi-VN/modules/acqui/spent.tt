@@ -1,0 +1,139 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE ItemTypes %]
+[% USE Price %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Spent") | html %]
+ &rsaquo; [% t("Acquisitions") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="acq_spent" class="acq">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'acquisitions-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/acqui/acqui-home.pl">Phân hệ bổ sung</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Spent - [% fund_code | html %]</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='acquisitions-menu' %]
+ <h1>Spent - Fund: [% fund_code | html %]</h1>
+
+ <div class="page-section">
+ <table id="spent">
+ <thead>
+ <tr>
+ <th class="anti-the">Nhan đề</th>
+ <th>[% tp('noun', 'Order') | html %]</th>
+ <th>Nhà cung cấp</th>
+ <th>Invoice</th>
+ <th>Loại tài liệu</th>
+ <th>Nhận</th>
+ <th>Unit price</th>
+ <th>Date ordered</th>
+ <th>Ngày nhận</th>
+ <th>Subtotal</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH order IN spent %]
+ <tr>
+ <td class="cell">
+ <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% order.biblionumber | uri %]"> [% order.title | html %] </a>
+ </td>
+ <td class="cell"> [% order.ordernumber | html %] </td>
+ <td class="cell">
+ <a href="/cgi-bin/koha/acquisition/vendors/[% order.booksellerid | uri %]">[% order.vendorname | html %]</a>
+ </td>
+ <td class="cell">
+ <a href="/cgi-bin/koha/acqui/invoice.pl?invoiceid=[% order.invoiceid | uri %]">[% order.invoicenumber | html %]</a>
+ </td>
+ <td class="cell">
+ [% FOREACH itemtype IN order.itemtypes %]
+ [% ItemTypes.GetDescription( itemtype ) | html %]
+ [% IF !loop.last() %]|[% END %]
+ [% END %]
+ </td>
+ <td class="cell"> [% order.quantityreceived | html %] </td>
+ <td class="cell">
+ [% IF Koha.Preference('CalculateFundValuesIncludingTax') %]
+ [% order.unitprice_tax_included | $Price %]
+ [% ELSE %]
+ [% order.unitprice_tax_excluded | $Price %]
+ [% END %]
+ </td>
+ <td class="cell" data-order="[% order.entrydate | html %]"> [% order.entrydate | $KohaDates %] </td>
+ <td class="cell" data-order="[% order.datereceived | html %]"> [% order.datereceived | $KohaDates %] </td>
+ <td class="data cell"> [% order.rowtotal | $Price %] </td>
+ </tr>
+ [% END %]
+ </tbody>
+ <tfoot>
+ [% IF shipmentcosts.size || ( adjustments && adjustments.count > 0 ) %]
+ <tr>
+ <td colspan="9"> Tổng đơn hàng </td>
+ <td class="data"> [% subtotal | $Price %] </td>
+ </tr>
+ [% END %]
+ [% IF shipmentcosts.size %]
+ [% FOREACH shipmentcost IN shipmentcosts %]
+ <tr>
+ <td></td>
+ <td colspan="8"
+                                >Shipping cost for invoice
+ <a href="/cgi-bin/koha/acqui/invoice.pl?invoiceid=[% shipmentcost.invoiceid | uri %]"> [% shipmentcost.invoicenumber | html %] </a>
+ </td>
+ <td class="data total">[% shipmentcost.shipmentcost | $Price %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+ [% IF ( adjustments && adjustments.count > 0 ) %]
+ [% FOREACH adjustment IN adjustments %]
+ <tr>
+ <td></td>
+ <td colspan="8"
+                                >Chỉnh lại chi phí cho báo giá<a href="/cgi-bin/koha/acqui/invoice.pl?invoiceid=[% adjustment.invoiceid | uri %]"> [% adjustment.invoice.invoicenumber | html %] </a>
+ </td>
+ <td class="data total">[% adjustment.adjustment | $Price %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+ <tr>
+ <td colspan="9">Tổng số</td>
+ <td class="data total">[% total | $Price %]</td>
+ </tr>
+ </tfoot>
+ </table>
+ </div>
+ <!-- /.page-section -->
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/acquisitions-menu.js") | $raw %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#spent").kohaTable({
+                pagingType: "full",
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

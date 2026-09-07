@@ -1,0 +1,108 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Authority search") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+<meta name="robots" content="noindex" />
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-authorities' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tìm kiếm dữ liệu kiểm soát</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ [% column_class = "col-10 order-first order-md-first order-lg-2" %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+ </div>
+ [% END %]
+ <div class="[% column_class | html %]">
+ <div id="userauthhome" class="maincontent">
+ <form name="f" action="/cgi-bin/koha/opac-authorities-home.pl" method="get">
+ <input type="hidden" name="op" value="do_search" />
+ <input type="hidden" name="type" value="opac" />
+ <fieldset class="rows">
+ <legend><h1>Tìm kiếm dữ liệu kiểm soát</h1></legend>
+ <ol>
+ <li>
+ <label for="authtypecode">Loại dữ liệu kiểm soát định danh: </label>
+ <select name="authtypecode" id="authtypecode">
+ [% FOREACH authority_type IN authority_types %]
+ [% IF authority_type.authtypecode == authtypecode %]
+ <option value="[% authority_type.authtypecode | html %]" selected="selected">[% authority_type.authtypetext | html %]</option>
+ [% ELSE %]
+ <option value="[% authority_type.authtypecode | html %]">[% authority_type.authtypetext | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li>
+ <label for="anywhere">Tùy chọn tìm kiếm:</label>
+ <select name="operator" id="anywhere">
+ <option value="contains">có chứa</option>
+ <option value="start">bắt đầu với</option>
+ <option value="exact">chính xác là</option>
+ </select>
+ </li>
+ <li>
+ <label for="value">Thuật ngữ:</label>
+ <input type="text" name="value" id="value" value="[% value | html %]" />
+ </li>
+ <li>
+ <label for="marclist">Vị trí:</label>
+ <select name="marclist" id="marclist">
+ <option value="all" selected="selected">trong toàn bộ biểu ghi</option>
+ <option value="match">trong bất kỳ tiêu đề nào</option>
+ <option value="mainentry">trong điểm truy cập chính</option>
+ </select>
+ </li>
+ <li>
+ <input type="hidden" name="and_or" value="and" />
+ <input type="hidden" name="excluding" value="" />
+ <label for="orderby">Sắp xếp theo: </label>
+ <select name="orderby" id="orderby">
+ <option value="">Không có</option>
+ <option value="HeadingAsc" selected="selected">Tiêu đề tăng dần</option>
+ <option value="HeadingDsc">Tiêu đề giảm dần</option>
+ </select>
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ </fieldset>
+ </form>
+ </div>
+ <!-- / #userauthhome -->
+ </div>
+ <!-- / .col-lg-10/12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

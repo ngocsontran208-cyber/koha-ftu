@@ -1,0 +1,30 @@
+[% USE raw %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Cataloging authority plugin") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="auth_auth_finder" class="auth">
+<div class="container-fluid">
+ <h1>Tìm kiếm dữ liệu kiểm soát</h1>
+ [% INCLUDE 'auth-finder-search.inc' %]
+</div>
+<!-- /.main.container-fluid -->
+
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var index = "[% index | html %]";
+        var authtypecode = "[% authtypecode | html %]";
+    </script>
+ [% Asset.js("js/auth-finder-search.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' popup_window = 1 %]

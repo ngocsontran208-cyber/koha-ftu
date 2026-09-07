@@ -1,0 +1,2895 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE AuthorisedValues %]
+[% USE KohaDates %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE TablesSettings %]
+[% USE HtmlScrubber %]
+[% USE JSON.Escape %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% USE To %]
+
+[%- BLOCK area_name -%]
+ [%- SWITCH area -%]
+
+ [%- CASE 'CIRC' -%]
+ <span>Phân hệ lưu thông</span>
+ [%- CASE 'CAT' -%]
+ <span>Mục tra cứu</span>
+ [%- CASE 'PAT' -%]
+ <span>Bạn đọc</span>
+ [%- CASE 'ACQ' -%]
+ <span>Phân hệ bổ sung</span>
+ [%- CASE 'ACC' -%]
+ <span>Accounts</span>
+ [%- CASE 'SER' -%]
+ <span>Ấn phẩm định kỳ</span>
+ [%- END -%]
+[%- END -%]
+
+[% INCLUDE 'doc-head-open.inc' %]
+
+<title
+    >[% FILTER collapse %]
+ [% IF ( saved1 ) %]
+ [% t("Saved reports") | html %]
+ &rsaquo;
+ [% ELSIF ( create ) %]
+ [% t("Create from SQL") | html %]
+ &rsaquo;
+ [% ELSIF ( showsql ) %]
+ [% tx("Show report {reportname} ({id})", { reportname = reportname, id = id }) | html %]
+ &rsaquo; [% t("SQL view") | html %] &rsaquo; [% t("Saved reports") | html %] &rsaquo;
+ [% ELSIF ( execute ) %]
+ [% tx("Report {reportname} ({id})", { reportname = name, id = id }) | html %]
+ &rsaquo; [% t("Saved reports") | html %] &rsaquo;
+ [% ELSIF ( editsql ) %]
+ [% tx("Edit report {reportname} ({id})", { reportname = reportname, id = id }) | html %]
+ &rsaquo; [% t("Saved reports") | html %] &rsaquo;
+ [% END %]
+
+ [% IF ( build1 ) %]
+ [% t("Build a report, step 1 of 7: Choose a module") | html %]
+ &rsaquo;
+ [% ELSIF ( build2 ) %]
+ [% t("Build a report, step 2 of 7: Pick a report type") | html %]
+ &rsaquo;
+ [% ELSIF ( build3 ) %]
+ [% t("Build a report, step 3 of 7: Select columns for display") | html %]
+ &rsaquo;
+ [% ELSIF ( build4 ) %]
+ [% t("Build a report, step 4 of 7: Select criteria to limit on") | html %]
+ &rsaquo;
+ [% ELSIF ( build5 ) %]
+ [% t("Build a report, step 5 of 7: Pick which columns to total") | html %]
+ &rsaquo;
+ [% ELSIF ( build6 ) %]
+ [% t("Build a report, step 6 of 7: Select how you want the report ordered") | html %]
+ &rsaquo;
+ [% ELSIF ( showreport ) %]
+ [% t("Build a report, step 7 of 7: Confirm custom report") | html %]
+ &rsaquo;
+ [% END %]
+ [% t("Guided reports wizard") | html %]
+ &rsaquo; [% t("Reports") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+
+[% INCLUDE 'doc-head-close.inc' %]
+[% Asset.css("lib/codemirror/codemirror.min.css") | $raw %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        .CodeMirror {
+            resize: vertical;
+        }
+        .cm-sqlParams {
+            color: #11917b;
+        }
+        .cm-columnPlaceholder {
+            color: #bf2d5d;
+        }
+        #mana_search_errortext {
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .data-plain {
+            display: none;
+        }
+        div.radio label {
+            font-weight: bold;
+            margin: 0;
+        }
+        #tabs .tab-pane {
+            display: block;
+        }
+
+        #column_selection {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+        }
+
+        #column_options {
+            flex-shrink: 1;
+        }
+
+        #column_controls {
+            flex-shrink: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #selected_columns {
+            flex-grow: 1;
+        }
+    </style>
+[% END %]
+[% Asset.css("css/reports.css") | $raw %]
+[% Asset.css("lib/d3c3/c3.min.css") | $raw %]
+</head>
+
+<body id="rep_guided_reports_start" class="rep">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/reports-home.pl">Báo cáo</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl">Hướng dẫn tạo báo cáo</a>
+ [% END %]
+ [% IF ( showsql || editsql || execute ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=list">Báo cáo được lưu lại</a>
+ [% END %]
+ [% END %]
+ [% IF ( saved1 ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Báo cáo được lưu lại</span>
+ [% END %]
+ [% ELSIF ( create ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tạo báo cáo từ SQL</span>
+ [% END %]
+ [% ELSIF ( showsql ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% reportname | html %]
+ ([% id | html %])
+ [% END %]
+ [% ELSIF ( editsql ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?id=[% id | uri %]&amp;op=show">[% reportname | html %] ([% id | html %])</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Sửa</span>
+ [% END %]
+ [% ELSIF ( execute ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?id=[% id | uri %]&amp;op=show">[% name | html %] ([% id | html %])</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Chạy báo cáo</span>
+ [% END %]
+ [% ELSIF ( build1 || build2 || build3 || build4 || build5 || build6 || showreport ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form">Tạo báo cáo mới</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% IF ( build1 ) %]
+ <span>Step 1 of 7: Choose a module</span>
+ [% ELSIF ( build2 ) %]
+ <span>Step 2 of 7: Pick a report type</span>
+ [% ELSIF ( build3 ) %]
+ <span>Step 3 of 7: Select columns for display</span>
+ [% ELSIF ( build4 ) %]
+ <span>Step 4 of 7: Select criteria to limit on</span>
+ [% ELSIF ( build5 ) %]
+ <span>Step 5 of 7: Pick which columns to total</span>
+ [% ELSIF ( build6 ) %]
+ <span>Step 6 of 7: Select how you want the report ordered</span>
+ [% ELSIF ( showreport ) %]
+ <span>Step 7 of 7: Confirm custom report</span>
+ [% END # /IF ( build1 ) %]
+ [% END # /WRAPPER breadcrumb_item %]
+ [% END # /IF ( saved1 ) %]
+ [% END # /WRAPPER breadcrumbs %]
+[% END # /WRAPPER 'sub-header.inc' %]
+
+<div id="update_sql" class="modal" tabindex="-1" role="dialog" aria-labelledby="update_sql_label" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="update_sql_label">Cập nhật SQL</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
+ </div>
+ <div class="modal-footer">
+ <a href="#" class="btn btn-default" id="update_sql_button" role="button">Cập nhật</a>
+ <button class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- #update_sql -->
+
+[% aside = BLOCK %]
+ [% IF ( saved1 ) %]
+ <div id="saved-reports-filter">
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="get">
+ <input type="hidden" name="op" value="list" />
+ <input type="hidden" name="filter_set" value="1" />
+ <fieldset class="brief">
+ <h3>Bộ lọc dữ liệu</h3>
+ <ol>
+ <li>
+ <label for="filter_date">Ngày:</label>
+ <input type="text" id="filter_date" name="filter_date" size="10" value="[% filters.date | html %]" class="flatpickr" />
+ <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
+ </li>
+ <li>
+ <label for="filter_author">Tác giả:</label>
+ <input type="text" id="filter_author" name="filter_author" value="[% filters.author | html %]" size="16" />
+ </li>
+ <li>
+ <label for="filter_keyword">Từ khóa:</label>
+ <input type="text" id="filter_keyword" name="filter_keyword" value="[% filters.keyword | html %]" size="16" />
+ </li>
+ </ol>
+ </fieldset>
+ <!-- /.brief -->
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Tìm kiếm" />
+ <a class="btn btn-default clear_search" id="resetReportsFilter" href="/cgi-bin/koha/reports/guided_reports.pl?op=list&clear_filters=1">Xóa</a>
+ </fieldset>
+ </form>
+ </div>
+ <!-- /#saved-reports-filter -->
+ [% END %]
+ [% INCLUDE 'guided-reports-view.inc' %]
+[% END %]
+
+[% WRAPPER 'main-container.inc' aside_block=aside %]
+ [% INCLUDE "reports-toolbar.inc" %]
+
+ [% IF access_denied %]
+ <div>
+ <h1>Access denied</h1>
+ <p>This report is restricted and cannot be accessed by the current user.</p>
+ [% IF id %]<p>Report ID: [% id | html %]</p>[% END %]
+ <p><a class="btn btn-secondary" href="/cgi-bin/koha/reports/guided_reports.pl?op=list">Return to saved reports</a></p>
+ </div>
+ [% END %]
+
+ [% IF ( start ) %]
+ <h1>Hướng dẫn tạo báo cáo</h1>
+ <p>Sử dụng tính năng này để tạo các báo báo khác với các báo cáo sẵn có trong hệ thống. Tính năng ngày cho phép thử thư hoặc người sử dụng thành thạo các câu lệnh MYSQL thì có thể viết trực tiếp lệnh MYSQL để tạo các báo cáo theo yêu cầu.</p>
+
+ <h2>Lập và chạy báo cáo</h2>
+
+ [% IF ( CAN_user_reports_create_reports ) %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form" class="btn btn-primary">Tạo báo cáo mới</a>
+ [% END %]
+
+ [% IF ( CAN_user_reports_execute_reports ) %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=list" class="btn btn-primary">View saved</a>
+ [% END %]
+
+ [% IF ( CAN_user_reports_create_reports ) %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form_sql" class="btn btn-primary">Tạo báo cáo từ SQL</a>
+ [% END %]
+
+ <h2>Từ điển báo cáo</h2>
+ <p>Sử dụng từ điển báo cáo để thiết lập tiêu chí tùy chỉnh được sử dụng cho báo cáo của bạn</p>
+ <a href="/cgi-bin/koha/reports/dictionary.pl?op=list" class="btn btn-primary">Xem từ điển</a>
+ [% END # /IF (start) %]
+
+ [% IF report_converted %]
+ <div class="alert alert-info"> The report "[% report_converted | html %]" has been converted. </div>
+ [% END %]
+
+ [% IF ( saved1 ) %]
+ <h1>Báo cáo được lưu lại</h1>
+ [% IF ( savedreports ) %]
+
+ [% IF ( filters.date || filters.author || filters.keyword || library_limit_active ) %]
+ <p
+                    >Filtered by:
+ <span class="filter">
+ [% IF ( filters.date ) %]
+ <span class="filter_date"><strong>Ngày:</strong> [% filters.date | html %]</span>
+ [% END %]
+ [% IF ( filters.author ) %]
+ <span class="filter_author"><strong>Tác giả:</strong> [% filters.author | html %]</span>
+ [% END %]
+ [% IF ( filters.keyword ) %]
+ <span class="filter_keyword"><strong>Từ khóa:</strong> [% filters.keyword | html %]</span>
+ [% END %]
+ [% IF library_limit_active %]
+ <span class="filter_show_all"><strong>Show reports:</strong> My library reports</span>
+ [% END %]
+ <a class="clear_filter" href="/cgi-bin/koha/reports/guided_reports.pl?op=list&clear_filters=1"><i class="fa fa-times" aria-hidden="true"></i> Xóa</a>
+ </span>
+ </p>
+ [% END %]
+
+ [% WRAPPER tabs id= "tabs" %]
+ [% WRAPPER tabs_nav %]
+ [% WRAPPER tab_item tabname= "reports" bt_active= 1 %]<span>Tất cả</span>[% END %]
+ [% FOREACH group IN groups_with_subgroups %]
+ [% WRAPPER tab_item tabname= group.id %]<span>[% group.name | html %]</span>[% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+
+ [% WRAPPER tab_panels %]
+ [% WRAPPER tab_panel tabname="reports" bt_active= 1 %]
+ <div id="subgroup_filter_block">
+ <label for="subgroup_filter">Nhóm phụ:</label>
+ <select id="subgroup_filter">
+ <option value="">Tất cả</option>
+ </select>
+ </div>
+
+ [% IF (Koha.Preference('Mana') == 1) %]
+ [% IF manamsg %]
+ <div id="mana_search_message" class="alert alert-info">
+ <p> [% manamsg | html %] </p>
+ </div>
+ [% END %]
+ [% END %]
+
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" id="reports_form" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete" />
+ <table id="table_reports">
+ <thead>
+ <tr>
+ <th data-colname="selection" class="report_checkbox no-sort">&nbsp;</th>
+ <th data-colname="report_id" class="report_id">Mã</th>
+ <th data-colname="report_name" class="report_name">Tên báo cáo</th>
+ <th data-colname="type" class="report_type">Loại</th>
+ <th data-colname="group" class="report_group">Nhóm</th>
+ <th data-colname="subgroup" class="report_subgroup">Nhóm phụ</th>
+ <th data-colname="notes" class="report_notes">Ghi chú</th>
+ <th data-colname="author" class="report_author">Tác giả</th>
+ <th data-colname="creation_date" class="report_creation_date">Ngày tạo</th>
+ <th data-colname="last_edit" class="report_last_edit">Last edit</th>
+ <th data-colname="last_run" class="report_last_run">Last run</th>
+ <th data-colname="public" class="report_public">Công cộng</th>
+ <th data-colname="json_url" class="report_json_url">JSON URL</th>
+ [% IF (usecache) %]
+ <th data-colname="cache_expiry" class="report_cache_expiry">Bộ nhớ đệm hết hạn (giây)</th>
+ [% ELSE %]
+ <th data-colname="cache_expiry" class="report_cache_expiry NoVisible">Bộ nhớ đệm hết hạn (giây)</th>
+ [% END %]
+ <th data-colname="saved_results" class="report_saved_results">Kết quả được lưu</th>
+ [% IF has_obsolete_reports %]
+ <th data-colname="update" class="report_update">Cập nhật</th>
+ [% ELSE %]
+ <th data-colname="update" class="report_update NoVisible">Cập nhật</th>
+ [% END %]
+ <th data-colname="library_limits" class="report_library_limits">Library limits</th>
+ <th data-colname="actions" class="no-sort no-export">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH savedreport IN savedreports %]
+ <tr>
+ <td class="report_checkbox">
+ [% IF ( CAN_user_reports_delete_all_reports || (CAN_user_reports_delete_own_reports && savedreport.borrowernumber == loggedinusernumber) ) %]
+ <!-- not break CSS -->
+ <input type="checkbox" name="id" id="id_[% savedreport.id | html %]" value="[% savedreport.id | html %]" />
+ [% END %]
+ <input type="hidden" class="report_sql" value="[% savedreport.savedsql |html %]" />
+ </td>
+ <td class="report_id">
+ <label for="id_[% savedreport.id | html %]">[% savedreport.id | html %]</label>
+ </td>
+ <td class="report_name">
+ [% IF ( savedreport.report_name ) %]
+ [% savedreport.report_name | html %]
+ [% ELSE %]
+ [ no name ]
+ [% END %]
+ </td>
+ <td class="report_type"> [% savedreport.type | html %] </td>
+ <td data-search="[% savedreport.report_group | html %]" class="report_group"> [% savedreport.groupname | html %] </td>
+ <td data-search="[% savedreport.report_subgroup | html %]"> [% savedreport.subgroupname | html %] </td>
+ <td class="report_notes"> [% savedreport.notes | html %] </td>
+ <td> [%- savedreport.borrowersurname | html -%][%- IF ( savedreport.borrowerfirstname ) -%], [%- savedreport.borrowerfirstname | html -%][%- END -%] ([% savedreport.borrowernumber | html %]) </td>
+ <td data-order="[% savedreport.date_created | html %]"> [% savedreport.date_created | $KohaDates %] </td>
+ <td data-order="[% savedreport.last_modified | html %]"> [% savedreport.last_modified | $KohaDates  with_hours => 1 %] </td>
+ <td data-order="[% savedreport.last_run | html %]"> [% savedreport.last_run | $KohaDates  with_hours => 1 %] </td>
+ <td class="report_public">
+ [% IF (savedreport.public) %] Có [% ELSE %] Không [% END %]</td>
+ <td class="report_json_url">
+ [% IF (savedreport.public) %]
+ <a href="[% OPACBaseURL | url %]/cgi-bin/koha/svc/report?id=[% savedreport.id | uri %]">[% OPACBaseURL | html %]/cgi-bin/koha/svc/report?id=[% savedreport.id | html %]</a>
+ [% ELSE %]
+ <a href="/cgi-bin/koha/svc/report?id=[% savedreport.id | uri %]">[% Koha.Preference('staffClientBaseURL') | html %]/cgi-bin/koha/svc/report?id=[% savedreport.id | html %]</a>
+ [% END %]
+ </td>
+ <td> [% savedreport.cache_expiry | html %] </td>
+ <td>
+ [% FOR result IN savedreport.results %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=retrieve_results&amp;id=[% result.id | uri %]">[% result.date_run | html %]</a>
+ <br />
+ [% END %]
+ </td>
+ <td>
+ [% IF savedreport.seems_obsolete %]
+ This report seems obsolete, it uses biblioitems.marcxml field.
+ <a class="update_sql btn btn-default btn-xs" data-report_id="[% savedreport.id | html %]" href="/cgi-bin/koha/svc/convert_report?id=[% savedreport.id | uri %]" title="Cập nhật SQL"><i class="fa-solid fa-eye" aria-hidden="true"></i> Cập nhật SQL</a
+                                                    >
+ [% END %]
+ </td>
+ <td>
+ [% IF ( Koha.Preference('LimitReportsByLibrary') && ( CAN_user_superlibrarian || CAN_user_reports_manage_report_limits ) ) %]
+ [% IF savedreport.library_limits && savedreport.library_limits.size > 0 %]
+ [% library_str = "" %]
+ [% FOREACH library IN savedreport.library_limits %]
+ [%- IF loop.first -%]
+ [% library_str = library.branchname _ " (" _ library.branchcode _ ")" %]
+ [% ELSE %]
+ [% library_str = library_str _ "\n" _ library.branchname _ " (" _ library.branchcode _ ")" %]
+ [% END %]
+ [% END %]
+ <span class="library_limitation" data-bs-toggle="tooltip" title="[% library_str | html %]">
+ [% IF savedreport.library_limits.size > 1 %]
+ <span>[% savedreport.library_limits.size | html %] library limitations</span>
+ [% ELSE %]
+ <span>[% savedreport.library_limits.size | html %] library limitation</span>
+ [% END %]
+ </span>
+ [% ELSE %]
+ <span>No limitation</span>
+ [% END %]
+ [% END %]
+ </td>
+ <td>
+ <div class="btn-group dropup">
+ [%# There should be no space between these two buttons, it would render badly %]
+ [%- IF ( CAN_user_reports_execute_reports ) -%]
+ [% INCLUDE 'throttled-button.inc' element_type='link' href='/cgi-bin/koha/reports/guided_reports.pl?id=' _ savedreport.id _ '&op=run' classes='btn btn-default btn-xs' label=t('Run') attrs={ role => 'button' } %]
+ [%- ELSE -%]
+ <a class="btn btn-default btn-xs" href="/cgi-bin/koha/reports/guided_reports.pl?id=[% savedreport.id | uri %]&amp;op=show"> <i class="fa fa-search" aria-hidden="true"></i> view </a>
+ [% END -%]
+ [%- "" |$raw %]<a class="btn btn-default btn-xs dropdown-toggle" id="reportactions[% savedreport.id | html %]" role="button" data-bs-toggle="dropdown" href="#"></a>
+ <ul class="dropdown-menu" role="menu" aria-labelledby="reportactions[% savedreport.id | html %]">
+ <li
+                                                            ><a class="dropdown-item" href="/cgi-bin/koha/reports/guided_reports.pl?id=[% savedreport.id | uri %]&amp;op=show"><i class="fa fa-search" aria-hidden="true"></i> Xem</a></li
+                                                        >
+ <li>
+ [% SET can_delete_this_report = 0 %]
+ [% IF ( CAN_user_reports_delete_all_reports || (CAN_user_reports_delete_own_reports && savedreport.borrowernumber == loggedinusernumber) ) %]
+ [% can_delete_this_report = 1 %]
+ [% END %]
+ <a
+                                                                [% # tags below to remove extra whitespace added for readability %]
+                                                                [%- " "|$raw -%]href="/cgi-bin/koha/reports/guided_reports.pl?id=[% savedreport.id | uri %]&op=show"
+                                                                [%- " "|$raw -%]class="dropdown-item preview_sql"
+                                                                [%- " "|$raw -%]data-reportid="[% savedreport.id | html %]"
+                                                                [%- " "|$raw -%]data-create="[% CAN_user_reports_create_reports || 0 | html %]"
+                                                                [%- " "|$raw -%]data-delete="[% can_delete_this_report | html %]"
+                                                                [%- " "|$raw -%]data-run="[% CAN_user_reports_execute_reports || 0 | html %]"
+                                                                [%- ""|$raw -%]
+                                                            >
+ <i class="fa-solid fa-eye" aria-hidden="true"></i> Preview SQL
+ </a>
+ </li>
+ [% IF ( CAN_user_reports_create_reports ) %]
+ <li
+                                                                ><a class="dropdown-item" href="/cgi-bin/koha/reports/guided_reports.pl?id=[% savedreport.id | uri %]&amp;op=edit_form"
+                                                                    ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a
+                                                                ></li
+                                                            >
+ <li
+                                                                ><a class="dropdown-item" href="/cgi-bin/koha/reports/guided_reports.pl?op=duplicate&id=[% savedreport.id | uri %]" title="Sao chép báo cáo này"><i class="fa fa-copy" aria-hidden="true"></i> Sao chép</a
+                                                                ></li
+                                                            >
+ [% END %]
+ [% IF (Koha.Preference('Mana') == 1) %]
+ <li
+                                                                ><a class="dropdown-item ShareButton" data-bs-toggle="modal" href="#mana_share_report" title="Share your report with Mana Knowledge Base"
+                                                                    ><i class="fa fa-share-alt" aria-hidden="true"></i> Chia sẻ</a
+                                                                ></li
+                                                            >
+ [% END %]
+ <li
+                                                            ><a class="dropdown-item" href="/cgi-bin/koha/tools/scheduler.pl?id=[% savedreport.id | uri %]"><i class="fa-solid fa-clock" aria-hidden="true"></i> Lịch hẹn</a></li
+                                                        >
+ [% IF ( CAN_user_reports_delete_all_reports || (CAN_user_reports_delete_own_reports && savedreport.borrowernumber == loggedinusernumber) ) %]
+ <li>
+ <a
+                                                                    class="dropdown-item submit-form-link"
+                                                                    href="#"
+                                                                    data-id="[% savedreport.id | html %]"
+                                                                    data-action="guided_reports.pl"
+                                                                    data-method="post"
+                                                                    data-op="cud-delete"
+                                                                    data-confirmation-msg="[% t('Are you sure you want to delete this report?') | html %]"
+                                                                    ><i class="fa fa-trash-can" aria-hidden="true"></i> Xóa</a
+                                                                >
+ </li>
+ [% END %]
+ </ul>
+ </div>
+ <input type="hidden" id="previewSql[% savedreport.id | html %]" value="[% savedreport.savedsql | html %]" data-title="[% savedreport.report_name | html %]" />
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+
+ [% IF ( CAN_user_reports_delete_all_reports || CAN_user_reports_delete_own_reports ) %]
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Xóa đề xuất mua" />
+ </fieldset>
+ [% END %]
+ </form>
+ [% END # /tab_panel# %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs %]
+ [% ELSE # IF ( savedreports ) %]
+ <div class="alert alert-info">
+ [% IF (filter_set || filters.date || filters.author || filters.keyword) %]
+ <h4>Không có báo cáo nào được lưu phù hợp với tiêu chí của bạn. </h4>
+ [% IF ( CAN_user_reports_create_reports ) %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form" class="new btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Theo hướng dẫn</a>
+
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form_sql" class="new btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Tạo báo cáo SQL</a>
+
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=list&filter_set=1&clear_filters=1" class="deny btn btn-default"><i class="fa fa-fw fa-times" aria-hidden="true"></i> Hủy bộ lọc</a>
+ [% END %]
+ [% ELSE %]
+ <h4>Không có các báo cáo được lưu lại. </h4>
+ [% IF ( CAN_user_reports_create_reports ) %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form">Tạo báo cáo mới?</a>
+ [% END %]
+ [% END # IF (filter_set || filters.date || filters.author || filters.keyword) %]
+ </div>
+ <!-- /.dialog.message -->
+ [% END # /IF ( savedreports ) %]
+ [% END # /IF ( saved1 ) %]
+
+ [% INCLUDE 'mana/mana-share-report.inc' %]
+
+ [% IF ( build1 ) %]
+ [% IF ( cache_error) %]
+ <div class="alert alert-warning">
+ <strong> Vui lòng chọn bộ nhớ đệm hết hạn không quá 30 ngày </strong>
+ </div>
+ [% END %]
+
+ <h1>Tạo báo cáo mới</h1>
+ <form method="post" action="/cgi-bin/koha/reports/guided_reports.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ <legend>Step 1 of 7: Choose a module to report on,[% IF (usecache) %]Set cache expiry,[% END %] and choose report visibility </legend>
+ <ol>
+ <li>
+ <label for="area">Chọn: </label>
+ <select name="area" id="area">
+ [%- FOREACH area IN areas -%]
+ <option value="[% area | html %]">[%- PROCESS area_name area=area -%]</option>
+ [%- END -%]
+ </select>
+ </li>
+ [% IF (public) %]
+ <li>
+ <label for="public">Báo cáo công khai:</label>
+ <select id="public" name="public">
+ <option value="0">Không (mặc định)</option>
+ <option value="1" selected="selected">Có</option>
+ </select>
+ </li>
+ [% ELSE %]
+ <li>
+ <label for="public">Báo cáo công khai:</label>
+ <select id="public" name="public">
+ <option value="0" selected="selected">Không (mặc định)</option>
+ <option value="1">Có</option>
+ </select>
+ </li>
+ [% END %]
+
+ [% IF (usecache) %]
+ <li>
+ <label for="cache_expiry">Bộ nhớ đệm hết hạn:</label>
+ <input type="text" id="cache_expiry" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <select id="cache_expiry_units" name="cache_expiry_units">
+ <option value="seconds">Giây (mặc định)</option>
+ <option value="minutes">Phút</option>
+ <option value="hours">Giờ</option>
+ <option value="days">Ngày</option>
+ </select>
+ </li>
+ [% END %]
+ </ol>
+ </fieldset>
+ <!-- /.rows -->
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-report" />
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ [% END # /build1 %]
+
+ [% IF ( build2 ) %]
+ <h1>Tạo báo cáo mới</h1>
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset class="rows">
+ <legend>Step 2 of 7: Pick a report type</legend>
+ <ol>
+ <li>
+ <label for="types">Chọn: </label>
+ <select id="types" name="types">
+ <option value="1">Kiểu bảng</option>
+ <option value="2" disabled="disabled">Tóm tắt</option>
+ <option value="3" disabled="disabled">Ma trận</option>
+ </select>
+ </li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-choose_type" />
+ <button type="submit" class="btn btn-default goback" name="back"><i class="fa fa-left-long" aria-hidden="true"></i> Quay lại</button>
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ [% END # /IF (build2 ) %]
+
+ [% IF ( build3 ) %]
+ <h1>Tạo báo cáo mới</h1>
+
+ <form id="column_submit" action="/cgi-bin/koha/reports/guided_reports.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="type" value="[% type | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset>
+ <legend>Step 3 of 7: Select columns for display</legend>
+ <p>Ghi chú: Thận trọng khi chọn cột. Nếu bạn chọn quá nhiều dữ liệu hiển thị ra sẽ dẫn tới kết quả lớn, báo cáo sẽ chạy chậm, thậm chí không hoàn thành.</p>
+
+ <div id="column_selection">
+ <div id="column_options">
+ <select id="availableColumns" name="oldcolumns2" multiple="multiple" size="25" style="min-width: 200px;height:300px;">
+ [% FOREACH table IN columns.keys.sort %]
+ <optgroup label="[% table | html %]">
+ [% FOREACH column IN columns.item(table) %]
+ <option value="[% column.name | html %]">
+ [% IF ( column.description ) %]
+ [% column.description | html %]
+ &nbsp; / &nbsp; [% column.name | html %]
+ [% ELSE %]
+ [% column.name | html %]
+ [% END %]
+ </option>
+ [% END %]
+ </optgroup>
+ [% END %]
+ </select>
+ </div>
+ <div id="column_controls">
+ <button type="button" class="btn btn-default m-3" id="addColumn">Tạo <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ <button type="button" class="btn btn-default m-3" id="delColumn"><i class="fa fa-left-long" aria-hidden="true"></i> Xóa</button>
+ </div>
+ <div id="selected_columns">
+ <select id="selectedColumns" name="columns" multiple="multiple" size="25" style="min-width:200px; height:300px;"> </select>
+ </div>
+ </div>
+ </fieldset>
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-choose_columns" />
+ <button type="submit" class="btn btn-default goback" name="back"> <i class="fa fa-left-long" aria-hidden="true"></i> Quay lại</button>
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ <!-- /#column_submit -->
+ [% END # /IF ( build3 ) %]
+
+ [% IF ( build4 ) %]
+ <h1>Tạo báo cáo mới</h1>
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="type" value="[% type | html %]" />
+ <input type="hidden" name="column" value="[% column | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset>
+ <legend>Step 4 of 7: Select criteria to limit on</legend>
+ <table>
+ [% FOREACH criteri IN criteria %]
+ <tr>
+ <td>
+ <input type="checkbox" name="criteria_column" id="[% criteri.name | html %]" value="[% criteri.name | html %]" />
+ <label for="[% criteri.name | html %]">[% criteri.description | html %] </label>
+ </td>
+ [% IF ( criteri.date ) %]
+ <td>
+ <input type="text" size="10" id="[% criteri.name | html %]_value" name="[% criteri.name | html %]_value" value="" class="flatpickr" />
+ <span class="hint">[% INCLUDE 'date-format.inc' %]</span>
+ </td>
+ [% ELSE %]
+ [% IF ( criteri.textrange ) %]
+ <td>
+ Từ <input type="text" size="10" id="[% criteri.from | html %]_value" name="[% criteri.from | html %]_value" value="" /> đến <input type="text" size="10" id="[% criteri.to | html %]_value" name="[% criteri.to | html %]_value" value="" />
+ </td>
+ [% ELSE %]
+ [% IF ( criteri.daterange ) %]
+ <td>
+ Từ <input
+                                                type="text"
+                                                size="10"
+                                                id="from_[% criteri.name.remove('\.') | html %]_value"
+                                                name="from_[% criteri.name | html %]_value"
+                                                value=""
+                                                data-date_to="to_[% criteri.name.remove('\.') | html %]_value"
+                                                class="flatpickr"
+                                            />
+ đến <input type="text" size="10" id="to_[% criteri.name.remove('\.') | html %]_value" name="to_[% criteri.name | html %]_value" value="" class="flatpickr" />
+ <span class="hint">[% INCLUDE 'date-format.inc' %]</span>
+ </td>
+ [% ELSE %]
+ <td>
+ <select name="[% criteri.name | html %]_value">
+ [% FOREACH value IN criteri.values %]
+ <option value="[% value.availablevalues | html %]">
+ [% IF ( value.default ) %]
+ Default
+ [% ELSE %]
+ [% value.display_value | html %]
+ [% END %]
+ </option>
+ [% END %]
+ </select>
+ </td>
+ [% END %]
+ [% END %]
+ [% END %]
+ </tr>
+ [% END %]
+ </table>
+ </fieldset>
+
+ [% IF ( definitions ) %]
+ <fieldset>
+ <legend>Định nghĩa từ điển</legend>
+ <table>
+ [% FOREACH definition IN definitions %]
+ <tr>
+ <td>
+ <input type="checkbox" name="definition" value="[% definition.id | html %]" />
+ [% definition.name | html %]
+ </td>
+ </tr>
+ [% END %]
+ </table>
+ </fieldset>
+ [% END %]
+
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-choose_criteria" />
+ <button type="submit" class="btn btn-default goback" name="back"> <i class="fa fa-left-long" aria-hidden="true"></i> Quay lại</button>
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ [% END # /IF ( build4 ) %]
+
+ [% IF ( build5 ) %]
+ <h1>Tạo báo cáo mới</h1>
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="type" value="[% type | html %]" />
+ <input type="hidden" name="column" value="[% column | html %]" />
+ <input type="hidden" name="definition" value="[% definition | html %]" />
+ <input type="hidden" name="criteria" value="[% criteriastring | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset>
+ <legend>Step 5 of 7: Pick which columns to total</legend>
+ <table>
+ [% FOREACH total_b IN total_by %]
+ <tr>
+ <td>
+ <input type="checkbox" name="total_by" id="[% total_b.name | html %]" value="[% total_b.name | html %]" />
+ <label for="[% total_b.name | html %]">[% total_b.name | html %]</label>
+ </td>
+ <td>
+ <select name="[% total_b.name | html %]_tvalue">
+ [% FOREACH selec IN total_b.select %]
+ <option value="[% selec.value | html %]">[% selec.value | html %]</option>
+ [% END %]
+ </select>
+ </td>
+ </tr>
+ [% END %]
+ </table>
+ </fieldset>
+
+ <fieldset class="action"
+                ><input type="hidden" name="op" value="cud-choose_operations" />
+ <button type="submit" class="btn btn-default goback" name="back"> <i class="fa fa-left-long" aria-hidden="true"></i> Quay lại</button>
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ [% END # /IF ( build5 ) %]
+
+ [% IF ( build6 ) %]
+ <h1>Tạo báo cáo mới</h1>
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="type" value="[% type | html %]" />
+ <input type="hidden" name="column" value="[% column | html %]" />
+ <input type="hidden" name="criteria" value="[% criteriastring | html %]" />
+ <input type="hidden" name="definition" value="[% definition | html %]" />
+ <input type="hidden" name="totals" value="[% totals | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset>
+ <legend>Step 6 of 7: Choose how you want the report ordered</legend>
+ <table>
+ [% FOREACH order_b IN order_by %]
+ <tr>
+ <td>
+ <input type="checkbox" id="[% order_b.name | html %]" name="order_by" value="[% order_b.name | html %]" />
+ <label for="[% order_b.name | html %]">[% order_b.name | html %]</label>
+ </td>
+ <td>
+ <select name="[% order_b.name | html %]_ovalue">
+ [% FOREACH selec IN order_b.select %]
+ <option value="[% selec.value | html %]">[% selec.value | html %]</option>
+ [% END %]
+ </select>
+ </td>
+ </tr>
+ [% END %]
+ </table>
+ </fieldset>
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-build_report" />
+ <button type="submit" class="btn btn-default goback" name="back"> <i class="fa fa-left-long" aria-hidden="true"></i> Quay lại</button>
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ [% END #/ IF ( build6 ) %]
+
+ [% IF ( showreport ) %]
+ <h1>Tạo báo cáo mới</h1>
+ <div class="page-section">
+ <h2>Step 7 of 7: Confirm custom report</h2>
+ <p>Báo cáo của bạn sẽ được tạo ra với các câu lệnh SQL sau đây.</p>
+ <textarea id="sql" readonly="readonly">[% sql | html %]</textarea>
+ <div class="alert alert-info">You may add a title to your report in the next step.</div>
+ </div>
+
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="sql" value="[% sql | html %]" />
+ <input type="hidden" name="type" value="[% type | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset class="action"
+                ><input type="hidden" name="op" value="cud-save" />
+ <button type="submit" class="btn btn-default goback" name="back"> <i class="fa fa-left-long" aria-hidden="true"></i> Quay lại</button>
+ <button type="submit" class="btn btn-primary">Tiếp <i class="fa fa-right-long" aria-hidden="true"></i></button>
+ </fieldset>
+ </form>
+ [% END #/ IF ( showreport ) %]
+
+ [% IF ( save ) %]
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post" id="sql_report_form">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="sql" value="[% sql | html %]" />
+ <input type="hidden" name="type" value="[% type | html %]" />
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <fieldset class="rows">
+ <legend><h1>Lưu tùy chỉnh báo cáo của bạn</h1></legend>
+ <ol>
+ <li>
+ <label for="reportname" class="required">Tên báo cáo: </label>
+ <input type="text" id="reportname" name="reportname" class="required" required="required" />
+ <span class="required">Bắt buộc</span>
+ </li>
+ [% PROCESS group_and_subgroup_selection %]
+ <li>
+ <label for="notes">Ghi chú:</label>
+ <textarea name="notes" id="notes"></textarea>
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action"
+                ><input type="hidden" name="op" value="cud-save" />
+ <input type="submit" name="submit" class="btn btn-primary" value="Save report" />
+ </fieldset>
+ </form>
+ [% END # /IF( save ) %]
+
+ [% IF ( warn_authval_problem ) %]
+ <div class="alert alert-warning">
+ <h3>Phát hiện lỗi khi xử lý các thông số của báo cáo: [% name | html %]</h3>
+ [% FOREACH problematic_authval IN problematic_authvals %]
+ <p> <strong>[% problematic_authval.name | html %]:</strong> Kiểu giá trị định trước (<strong>[% problematic_authval.authval | html %]</strong>) bạn chọn không tồn tại. </p>
+ [% END %]
+ <!-- Save Anyway Form -->
+ <form method="post" action="/cgi-bin/koha/reports/guided_reports.pl">
+ <!--Every parameter the user issued is provided as a hidden field for recovery-->
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="id" value="[% id | html %]" />
+ <input type="hidden" name="sql" value="[% sql | html %]" />
+ <input type="hidden" name="reportname" value="[% reportname | html %]" />
+ <input type="hidden" name="group" value="[% group | html %]" />
+ <input type="hidden" name="subgroup" value="[% subgroup | html %]" />
+ <input type="hidden" name="branches" value="[% branches | html %]" />
+ <input type="hidden" name="notes" value="[% notes | scrub_html type => 'note' | $raw %]" />
+ <input type="hidden" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <input type="hidden" name="cache_expiry_units" value="[% cache_expiry_units | html %]" />
+ <input type="hidden" name="public" value="[% public | html %]" />
+ [% IF ( op == 'update') %]
+ <input type="hidden" name="op" value="cud-update" />
+ <button type="submit" name="save_anyway" value="Save anyway" class="approve"><i class="fa fa-fw fa-check" aria-hidden="true"></i> Đồng ý lưu</button>
+ [% ELSIF ( op == 'save') %]
+ <input type="hidden" name="area" value="[% area | html %]" />
+ <input type="hidden" name="op" value="cud-save" />
+ <button type="submit" name="save_anyway" value="Save anyway" class="approve"><i class="fa fa-fw fa-check" aria-hidden="true"></i> Đồng ý lưu</button>
+ [% END %]
+ </form>
+ <!-- Go back to editing -->
+ <a href="/cgi-bin/koha/reports/guided_reports.pl" class="btn btn-default new goback"><i class="fa-fw fa-solid fa-pencil" aria-hidden="true"></i> Sửa SQL</a>
+ </div>
+ [% END # /IF ( warn_authval_problem ) %]
+
+ [% IF ( enter_params ) %]
+ [% IF ( auth_val_error ) %]
+ <div class="alert alert-warning">
+ <h3>Phát hiện lỗi khi xử lý các thông số của báo cáo: [% name | html %]</h3>
+ [% FOREACH auth_val_error IN auth_val_errors %]
+ <p> <strong>[% auth_val_error.entry | html %]:</strong> Kiểu giá trị định trước (<strong>[% auth_val_error.auth_val | html %]</strong>) bạn chọn không tồn tại. </p>
+ [% END %]
+ </div>
+ <fieldset class="action">
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=edit_form&id=[% id | uri %]" class="btn btn-primary">Sửa SQL</a>
+ </fieldset>
+ [% ELSE #  IF ( auth_val_error ) %]
+ <form method="get" action="/cgi-bin/koha/reports/guided_reports.pl" id="report_param_form">
+ <input type="hidden" name="id" value="[% id | html %]" />
+ <h1>Nhập thông số cho báo cáo [% name | html %]:</h1>
+ [% IF ( notes ) %]
+ <p>[% notes | scrub_html type => 'note' | $raw %]</p>
+ [% END %]
+ <fieldset class="rows">
+ <ol>
+ [% FOREACH sql_param IN sql_params %]
+ <input name="param_name" value="[% sql_param.name | html %]" type="hidden" />
+ [% IF sql_param.input == 'date' %]
+ <li>
+ <label for="date_[% sql_param_entry | html %][% loop.count | html %]">[% sql_param.entry | html %]:</label>
+ <input id="date_[% sql_param_entry | html %][% loop.count | html %]" type="text" value="" size="10" name="sql_params" class="flatpickr" />
+ </li>
+ [% ELSIF ( sql_param.input == 'text' ) %]
+ <li>
+ <label for="sql_params[% loop.count | html %]">[% sql_param.entry | html %]: </label>
+ <input id="sql_params[% loop.count | html %]" type="text" name="sql_params" />
+ </li>
+ [% ELSIF ( sql_param.input == 'textarea' ) %]
+ <li>
+ <label for="sql_params[% loop.count | html %]">[% sql_param.entry | html %]: </label>
+ <textarea id="sql_params[% loop.count | html %]" name="sql_params" rows="5"></textarea>
+ </li>
+ [% ELSE %]
+ <li>
+ <label for="sql_params_[% sql_param.labelid | html %]">[% sql_param.entry | html %]:</label>
+ <select name="[%- sql_param.input.name | html -%]" tabindex="1" id="[%- sql_param.input.id | html -%]" [% IF (sql_param.select_multiple) %]multiple[% END %]>
+ [% IF (sql_param.select_multiple) %]
+ <option value="[% sql_param.input.values.join("\n") | html %]" disabled="disabled"></option>
+ [% END %]
+ [% IF (sql_param.include_all) %]
+ <option value="%">Tất cả</option>
+ [% END %]
+ [% FOREACH value IN sql_param.input.values %]
+ <option value="[%- value | html -%]">[%- sql_param.input.labels.$value | html -%]</option>
+ [% END %]
+ </select>
+ </li>
+ [% END # /IF sql_param.input == 'date' %]
+ [% END # /FOREACH sql_param %]
+ </ol>
+ </fieldset>
+ <!-- /.rows -->
+ <fieldset class="action">
+ <input type="hidden" name="op" value="run" />
+ [% IF ( template_code ) %]
+ <input type="hidden" name="template_code" value="[% template_code | html %]" />
+ [% END %]
+ [% INCLUDE 'throttled-button.inc' element_type='button' classes='btn btn-primary' label=t('Run the report') %]
+ </fieldset>
+ </form>
+ [% END # / IF ( auth_val_error ) %]
+ [% END # /IF ( enter_params ) %]
+
+ [% IF processed_notice %]
+ [% processed_notice | $raw %]
+ [% ELSIF ( execute ) %]
+ <h1
+            >[% name | html %] <span class="report_heading_id"><span class="report_label">Report ID:</span> <span class="report_number">[% id | html %]</span></span></h1
+        >
+ <div class="page-section">
+ [% IF ( notes ) %]
+ <p><span class="label">Ghi chú:</span> [% notes | scrub_html type => 'note' | $raw %]</p>
+ [% END %]
+ [% IF ( unlimited_total ) %]
+ <p>
+ <span class="label">Total number of results:</span>
+ [% unlimited_total | html %]
+ [% IF unlimited_total >= limit %]
+ ([% results.size | html %] shown)
+ [% END %]
+ </p>
+ [% END %]
+
+ <div id="sql_output" style="display:none;">
+ <span class="label">Report SQL:</span>
+ <textarea id="sql" readonly="readonly">[% sql | html %]</textarea>
+ </div>
+
+ <div>
+ <a href="#" id="toggle_chart_settings_hid" class="toggle_chart_settings" style="display:none"><i class="fa-solid fa-eye-slash" aria-hidden="true"></i> Hide chart</a>
+ <a href="#" id="toggle_chart_settings_vis" class="toggle_chart_settings" style="display:none"><i class="fa-solid fa-eye" aria-hidden="true"></i> Show chart</a>
+ </div>
+ <div id="chart" class="clearfix"></div>
+
+ [% IF ( execute ) %]
+ [% UNLESS ( errors ) %]
+ <form method="post" enctype="multipart/form-data" action="/cgi-bin/koha/tools/batch_record_modification.pl" id="batch_record_modification" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="recordtype" value="biblio" />
+ <input type="hidden" name="op" value="cud-list" />
+ [%# Preserve the whitespace of the following textarea in order to format the values correctly %]
+ <textarea style="display:none" name="recordnumber_list" id="recordnumber_list">
+ [%- recordnumbers = PROCESS batch_list results=results batch_type='biblionumber' | trim | html %][% IF recordnumbers %][% SET batch_biblionumbers = 1 %][% recordnumbers | html %][% END -%]
+ </textarea
+                        >
+ </form>
+
+ <form method="POST" action="/cgi-bin/koha/tools/batch_delete_records.pl" id="batch_record_deletion" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="recordtype" value="biblio" />
+ <input type="hidden" name="op" value="cud-list" />
+ [%# Preserve the whitespace of the following textarea in order to format the values correctly %]
+ <textarea style="display:none" name="recordnumber_list" id="recordnumber_list">
+ [%- recordnumbers = PROCESS batch_list results=results batch_type='biblionumber' | trim | html %][% IF recordnumbers %][% SET batch_biblionumbers = 1 %][% recordnumbers | html %][% END -%]
+ </textarea
+                        >
+ </form>
+
+ <form method="POST" action="/cgi-bin/koha/tools/batchMod.pl" id="batch_item_modification" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-show" />
+ [% FOREACH result IN results %]
+ [% FOREACH cells IN result.cells %]
+ [% place = loop.index %]
+ [% NEXT UNLESS cells.cell.match('^(\d+)$') %]
+ [% IF header_row.$place.cell == 'itemnumber' || header_types.item(header_row.$place.cell) == 'itemnumber' %]
+ [% SET batch_itemnumbers = 1 %]
+ [% SET header_row.$place.has_itemnumbers = 1 %]
+ <input type="hidden" name="itemnumber" value="[% cells.cell | html %]" />
+ [% END %]
+ [% END %]
+ [% END %]
+ </form>
+
+ <form method="POST" action="/cgi-bin/koha/tools/batchMod.pl" id="batch_item_deletion" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-show" />
+ <input type="hidden" name="del" value="1" />
+ [% FOREACH result IN results %]
+ [% FOREACH cells IN result.cells %]
+ [% place = loop.index %]
+ [% NEXT UNLESS cells.cell.match('^(\d+)$') %]
+ [% IF header_row.$place.cell == 'itemnumber' || header_types.item(header_row.$place.cell) == 'itemnumber' %]
+ [% SET batch_itemnumbers = 1 %]
+ [% SET header_row.$place.has_itemnumbers = 1 %]
+ <input type="hidden" name="itemnumber" value="[% cells.cell | html %]" />
+ [% END %]
+ [% END %]
+ [% END %]
+ </form>
+
+ <form method="get" action="/cgi-bin/koha/virtualshelves/addbybiblionumber.pl" id="batch_add_to_list" target="_blank">
+ [% FOREACH result IN results %]
+ [% FOREACH cells IN result.cells %]
+ [% place = loop.index %]
+ [% NEXT UNLESS cells.cell.match('^(\d+)$') %]
+ [% IF header_row.$place.cell == 'biblionumber' || header_types.item(header_row.$place.cell) == 'biblionumber' %]
+ [% SET batch_biblionumbers = 1 %]
+ [% SET header_row.$place.has_biblionumbers = 1 %]
+ <input type="hidden" class="bib_to_list" name="biblionumber" value="[% cells.cell | html %]" />
+ [% END %]
+ [% END %]
+ [% END %]
+ </form>
+
+ <form method="POST" action="/cgi-bin/koha/tools/modborrowers.pl" id="batch_patron_modification" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-show" />
+ [%# Preserve the whitespace of the following textarea in order to format the values correctly %]
+ [%- borrowernumbers = PROCESS batch_list results=results batch_type='borrowernumber' | trim | html -%]
+ [%- IF borrowernumbers -%]
+ [%- SET batch_borrowernumbers = 1 -%]
+ <textarea style="display:none;" name="borrowernumberlist" id="borrowernumberlist">
+ [%- borrowernumbers | html -%]
+ </textarea
+                            >
+ [%- END -%]
+ [%- cardnumbers = PROCESS batch_list results=results batch_type='cardnumber' | trim | html %]
+ [% IF !batch_borrowernumbers && cardnumbers %]
+ [% SET batch_cardnumbers = 1 %]
+ <textarea style="display:none;" name="cardnumberlist" id="cardnumberlist">
+ [%- cardnumbers | html -%]
+ </textarea
+                            >
+ [% END %]
+ </form>
+
+ <form action="/cgi-bin/koha/patroncards/edit-batch.pl" id="patron_card_creator" method="post" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-add" />
+ <input type="hidden" name="batch_id" value="0" />
+ [%# Preserve the whitespace of the following textarea in order to format the values correctly %]
+ <textarea style="display:none;" name="bor_num_list" id="bor_num_list">
+ [%- borrowernumbers = PROCESS batch_list results=results batch_type='borrowernumber' | trim | html %][% IF borrowernumbers %][% SET batch_borrowernumbers = 1 %][% borrowernumbers | html %][% END -%]
+ </textarea
+                        >
+ </form>
+
+ <form method="post" action="/cgi-bin/koha/tools/batch_modify_holds.pl" id="batch_modify_holds" target="_blank">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-form" />
+ <textarea style="display:none" name="reserve_ids_list" id="reserve_ids_list">
+ [%# Preserve the whitespace of the following textarea in order to format the values correctly %]
+ [%- reserve_ids = PROCESS batch_list results=results batch_type='reserve_id' | trim | html %][% IF reserve_ids %][% SET batch_reserve_ids = 1 %][% reserve_ids | html %][% END -%]
+ </textarea
+                        >
+ </form>
+
+ [% BLOCK batch_list %]
+ [%- FOREACH result IN results %]
+ [%- FOREACH cells IN result.cells %]
+ [%- place = loop.index %]
+ [%- IF header_row.$place.cell == batch_type || header_types.item(header_row.$place.cell) == batch_type -%]
+ [%- cells.cell | html -%][% "\n" | $raw %][%# We want 1 item per line, without whitespace %]
+ [%- END -%]
+ [%- END %]
+ [%- END -%]
+ [% END %]
+
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="get" id="limitselect">
+ <input type="hidden" name="op" value="run" />
+ <input type="hidden" name="id" value="[% id | html %]" />
+ [% FOREACH p IN sql_params %]
+ <input type="hidden" name="sql_params" value="[% p | html %]" />
+ [% END %]
+ [% FOREACH n IN param_names %]
+ <input type="hidden" name="param_name" value="[% n | html %]" />
+ [% END %]
+ <input type="hidden" name="limit" id="limit" value="20" />
+ </form>
+ <!-- /#limitselect -->
+
+ [% IF ( batch_biblionumbers || batch_itemnumbers || batch_cardnumbers || batch_borrowernumbers || batch_reserve_ids ) || ( unlimited_total > 10 && limit <= 1000 ) %]
+ <div id="toolbar" class="btn-toolbar">
+ [% IF ( batch_biblionumbers || batch_itemnumbers || batch_cardnumbers || batch_borrowernumbers || batch_reserve_ids ) %]
+ <div class="btn-group">
+ <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="batch_mod_menu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+ Batch operations with [% IF unlimited_total >= limit %][% results.size | html %][% ELSE %][% unlimited_total | html %][% END %] visible records
+ <span class="caret"></span>
+ </button>
+ <ul class="dropdown-menu" aria-labelledby="batch_mod_menu">
+ [% FOREACH header_ro IN header_row %]
+ [% IF header_ro.cell == 'cardnumber' || header_types.item( header_ro.cell ) == 'cardnumber' || header_ro.cell == 'borrowernumber' || header_types.item( header_ro.cell ) == 'borrowernumber' %]
+ [% IF header_ro.cell == 'cardnumber' || header_types.item( header_ro.cell ) == 'cardnumber' %]
+ [% SET show_cardnumber_ops = 1 %]
+ [% END %]
+ [% IF header_ro.cell == 'borrowernumber' || header_types.item( header_ro.cell ) == 'borrowernumber' %]
+ [% SET show_borrowernumber_ops = 1 %]
+ [% END %]
+ [% END %]
+ [% END %]
+ [% IF show_cardnumber_ops || show_borrowernumber_ops %]
+ <li><h6 class="dropdown-header">Patron records</h6></li>
+ [% IF show_cardnumber_ops || show_borrowernumber_ops %]
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="batch_patron_modification"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="right"
+                                                        title="Send visible results to batch patron modification"
+                                                        class="dropdown-item batch_op send_to_patron_mod"
+                                                        >Thay đổi nhóm bạn đọc theo lô</a
+                                                    >
+ </li>
+ [% END %]
+ [% IF show_borrowernumber_ops %]
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="patron_card_creator"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="right"
+                                                        title="Send visible results to a new patron card batch"
+                                                        class="dropdown-item batch_op send_to_patron_card_batch"
+                                                        >Tạo thẻ bạn đọc</a
+                                                    >
+ </li>
+ [% END %]
+ [% END %]
+ [% FOREACH header_ro IN header_row %]
+ [% IF header_ro.has_biblionumbers && ( header_ro.cell == 'biblionumber' || header_types.item( header_ro.cell ) == 'biblionumber' ) %]
+ <li><h6 class="dropdown-header">Bibliographic records</h6></li>
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="batch_record_modification"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="right"
+                                                        title="Send visible records to batch record modification"
+                                                        class="dropdown-item batch_op send_to_record_mod"
+                                                        >Batch record modification</a
+                                                    >
+ </li>
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="batch_record_deletion"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="right"
+                                                        title="Send visible records to batch record deletion"
+                                                        class="dropdown-item batch_op send_to_record_del"
+                                                        >Batch record deletion</a
+                                                    >
+ </li>
+ <li>
+ <a href="#" data-submit="batch_add_to_list" data-bs-toggle="tooltip" data-bs-placement="right" title="Send visible records to a list" class="dropdown-item batch_op send_to_list"
+                                                        >Thêm vào giá sách ảo</a
+                                                    >
+ </li>
+ [% END %]
+ [% IF header_ro.has_itemnumbers && ( header_ro.cell == 'itemnumber' || header_types.item( header_ro.cell ) == 'itemnumber' ) %]
+ <li><h6 class="dropdown-header">Item records</h6></li>
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="batch_item_modification"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="right"
+                                                        title="Send visible items to batch item modification"
+                                                        class="dropdown-item batch_op send_to_item_mod"
+                                                        >Chỉnh sửa bản tài liệu theo lô</a
+                                                    >
+ </li>
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="batch_item_deletion"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="right"
+                                                        title="Send visible items to batch item deletion"
+                                                        class="dropdown-item batch_op send_to_item_del"
+                                                        >Xóa bản tài liệu theo lô</a
+                                                    >
+ </li>
+ [% END %]
+ [% IF header_ro.cell == 'reserve_id' || header_types.item( header_ro.cell ) == 'reserve_id' %]
+ <li class="dropdown-header">Hold records</li>
+ <li>
+ <a
+                                                        href="#"
+                                                        data-submit="batch_modify_holds"
+                                                        data-bs-toggle="tooltip"
+                                                        data-placement="right"
+                                                        title="Send visible results to batch hold modification"
+                                                        class="batch_op send_to_hold_mod dropdown-item"
+                                                        >Batch hold modification</a
+                                                    >
+ </li>
+ [% END %]
+ [% END # /FOREACH header_ro %]
+ </ul>
+ <!-- /.dropdown-menu -->
+ </div>
+ <!-- /.dropdown -->
+ [% END # /IF ( batch_biblionumbers || batch_itemnumbers || batch_cardnumbers || batch_reserve_ids ) %]
+
+ [% IF ( unlimited_total > 10 && limit <= 1000 ) %]
+ <div class="btn-group">
+ <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+ [% IF ( limit ) %]
+ Rows per page: <strong>[% limit | html %]</strong>
+ [% ELSE %]
+ Rows per page
+ [% END %]
+ </button>
+ <ul class="dropdown-menu">
+ [% limits = [ 10, 20, 50, 100, 200, 300, 400, 500, 1000 ] %]
+ [% FOREACH l IN limits %]
+ [% IF l == limit %]
+ <li>
+ <a class="dropdown-item limitselect" data-limit="[% l | html %]" href="#"><i class="fa fa-fw fa-check" aria-hidden="true"></i> [% l | html %]</a>
+ </li>
+ [% ELSE %]
+ <li>
+ <a class="dropdown-item limitselect" data-limit="[% l | html %]" href="#"><i class="fa fa-fw" aria-hidden="true"></i> [% l | html %]</a>
+ </li>
+ [% END %]
+ [% END %]
+ </ul>
+ </div>
+ [% END # /IF ( unlimited_total > 10 && limit <= 1000 ) %]
+
+ [% IF ( batch_biblionumbers || batch_itemnumbers || batch_cardnumbers || batch_reserve_ids || batch_borrowernumbers ) %]
+ <a href="#" class="btn btn-link" id="toggle_auto_links">
+ <i class="fa-solid fa-eye autolink" aria-hidden="true" style="display:none"></i>
+ <i class="fa-solid fa-eye-slash autolink" aria-hidden="true"></i>
+ <span class="autolink" style="display:none">Show data menus</span>
+ <span class="autolink">Hide data menus</span>
+ </a>
+ [% END %]
+ </div>
+ <!-- /#toolbar.btn-toolbar -->
+ [% END # /IF batch operations || ( unlimited_total > 10 && limit <= 1000 ) %]
+
+ <nav id="pagination_top" class="pages"> [% pagination_bar | $raw %] </nav>
+ [% END # UNLESS ( errors ) %]
+ [% END # IF ( execute ) %]
+
+ [% UNLESS ( errors ) %]
+ <table id="report_results">
+ <thead>
+ <tr>
+ [% FOREACH header_ro IN header_row %]
+ [% IF header_ro.has_itemnumbers && ( header_ro.cell == 'itemnumber' || header_types.item( header_ro.cell ) == 'itemnumber' ) %]
+ <th class="itemnumber num-html">[% header_ro.cell | html %]</th>
+ [% ELSIF header_ro.has_biblionumbers && ( header_ro.cell == 'biblionumber' || header_types.item( header_ro.cell ) == 'biblionumber' ) %]
+ <th class="biblionumber num-html">[% header_ro.cell | html %]</th>
+ [% ELSIF header_ro.cell == 'cardnumber' || header_types.item( header_ro.cell ) == 'cardnumber' %]
+ <th class="cardnumber num-html">[% header_ro.cell | html %]</th>
+ [% ELSIF header_ro.cell == 'borrowernumber' || header_types.item( header_ro.cell ) == 'borrowernumber' %]
+ <th class="borrowernumber num-html">[% header_ro.cell | html %]</th>
+ [% ELSE %]
+ <th>[% header_ro.cell | html %]</th>
+ [% END %]
+ [% END %]
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH result IN results %]
+ <tr>
+ [% FOREACH cells IN result.cells %]
+ [% place = loop.index %]
+ [%- IF header_row.$place.cell == 'itemnumber' || header_types.item(header_row.$place.cell) == 'itemnumber' %]
+ <td class="batch-op itemnumber" data-number="itemnumber">
+ <span class="data-plain">[% cells.cell | $raw %]</span>
+ <div id="itemnumber_autolink" class="btn-group dropup autolink no-export"
+                                                ><a class="btn btn-link dropdown-toggle" role="button" data-bs-toggle="dropdown" href="#">[% cells.cell | $raw %] </a>
+ <ul class="dropdown-menu" role="menu">
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&itemnumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa-fw fa-solid fa-pencil" aria-hidden="true"></i> Edit item</a
+                                                        ></li
+                                                    >
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa fa-fw fa-eye" aria-hidden="true"></i> View item</a
+                                                        ></li
+                                                    >
+ </ul>
+ </div>
+ </td>
+ [% ELSIF header_row.$place.cell == 'biblionumber' || header_types.item(header_row.$place.cell) == 'biblionumber' %]
+ <td class="batch-op biblionumber" data-number="biblionumber">
+ <span class="data-plain">[% cells.cell | $raw %]</span>
+ <div id="biblionumber_autolink" class="btn-group dropup autolink no-export"
+                                                ><a class="btn btn-link dropdown-toggle" role="button" data-bs-toggle="dropdown" href="#">[% cells.cell | $raw %] </a>
+ <ul class="dropdown-menu" role="menu">
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa biểu ghi</a
+                                                        ></li
+                                                    >
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa-solid fa-eye" aria-hidden="true"></i> Hiển thị biểu ghi</a
+                                                        ></li
+                                                    >
+ </ul>
+ </div>
+ </td>
+ [% ELSIF header_row.$place.cell == 'borrowernumber' || header_types.item(header_row.$place.cell) == 'borrowernumber' %]
+ <td class="batch-op borrowernumber" data-number="borrowernumber">
+ <span class="data-plain">[% cells.cell | $raw %]</span>
+ <div id="borrowernumber_autolink" class="btn-group dropup autolink no-export"
+                                                ><a class="btn btn-link dropdown-toggle" role="button" data-bs-toggle="dropdown" href="#">[% cells.cell | $raw %] </a>
+ <ul class="dropdown-menu" role="menu">
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa-solid fa-eye" aria-hidden="true"></i> View patron</a
+                                                        ></li
+                                                    >
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/members/memberentry.pl?op=edit_form&amp;borrowernumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Edit patron</a
+                                                        ></li
+                                                    >
+ <li
+                                                        ><a class="dropdown-item" target="_blank" href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% cells.cell | $raw %]"
+                                                            ><i class="fa fa-barcode" aria-hidden="true"></i> Ghi mượn</a
+                                                        ></li
+                                                    >
+ </ul>
+ </div>
+ </td>
+ [% ELSIF header_row.$place.cell == 'cardnumber' || header_types.item(header_row.$place.cell) == 'cardnumber' %]
+ <td class="batch-op cardnumber" data-number="cardnumber">
+ <span class="data-plain">[% cells.cell | $raw %]</span>
+ <div id="cardnumber_autolink" class="btn-group dropup autolink no-export"
+                                                ><a class="btn btn-link dropdown-toggle" role="button" data-bs-toggle="dropdown" href="#">[% cells.cell | $raw %] </a>
+ <ul class="dropdown-menu" role="menu">
+ <li>
+ <a class="dropdown-item" target="_blank" href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% cells.cell | $raw %]"><i class="fa fa-barcode" aria-hidden="true"></i> Ghi mượn</a>
+ </li>
+ </ul>
+ </div>
+ </td>
+ [% ELSE %]
+ <td> [% cells.cell | $raw %] </td>
+ [% END %]
+ [% END %]
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% END %]
+ <nav class="pages" id="pagination_bottom"> [% pagination_bar | $raw %] </nav>
+ </div>
+ [% INCLUDE 'chart.inc' %]
+ [% END #/IF ( execute ) %]
+
+ [% IF ( create ) %]
+ <h1>Tạo báo cáo từ SQL</h1>
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post" id="sql_report_form">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ <legend>Tạo báo cáo từ SQL</legend>
+ <ol>
+ <li>
+ <label for="reportname" class="required">Tên báo cáo:</label>
+ [% IF ( reportname ) %]
+ <input type="text" class="required" required="required" id="reportname" name="reportname" value="[% reportname | html %]" size="50" />
+ [% ELSE %]
+ <input type="text" class="required focus" required="required" id="reportname" name="reportname" size="50" />
+ [% END %]
+ <span class="required">Bắt buộc</span>
+ </li>
+ [% PROCESS group_and_subgroup_selection %]
+
+ [% IF (public) %]
+ <li>
+ <label for="public">Báo cáo công khai:</label>
+ <select id="public" name="public">
+ <option value="0">Không (mặc định)</option>
+ <option value="1" selected="selected">Có</option>
+ </select>
+ </li>
+ [% ELSE %]
+ <li>
+ <label for="public">Báo cáo công khai:</label>
+ <select id="public" name="public">
+ <option value="0" selected="selected">Không (mặc định)</option>
+ <option value="1">Có</option>
+ </select>
+ </li>
+ [% END # /IF (public) %]
+
+ [% IF (usecache) %]
+ <li>
+ <label for="cache_expiry">Bộ nhớ đệm hết hạn:</label>
+ <input type="text" id="cache_expiry" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <select id="cache_expiry_units" name="cache_expiry_units">
+ <option value="seconds" selected="selected">Giây (mặc định)</option>
+ <option value="minutes">Phút</option>
+ <option value="hours">Giờ</option>
+ <option value="days">Ngày</option>
+ </select>
+ </li>
+ [% END # /IF (usecache) %]
+ <li>
+ <label for="notes">Ghi chú:</label>
+ <textarea id="notes" name="notes" cols="50" rows="2">[% notes | scrub_html type => 'note' | $raw %]</textarea>
+ </li>
+ </ol>
+ </fieldset>
+ <!-- /.rows -->
+
+ [% IF ( Koha.Preference('LimitReportsByLibrary') && ( CAN_user_superlibrarian || CAN_user_reports_manage_report_limits ) ) %]
+ <fieldset class="rows">
+ <legend>Library limitation:</legend>
+ <div>
+ <label for="library_limitation">Library limitation: </label>
+ <select id="library_limitation" name="branches" multiple size="10">
+ [% PROCESS options_for_libraries libraries => Branches.all( selected => report.get_library_limits, unfiltered => 1, do_not_select_my_library => 1 ) %]
+ </select>
+ <div class="hint">Limits the use of this report to the selected libraries.</div>
+ </div>
+ </fieldset>
+ [% END %]
+
+ <fieldset class="rows">
+ <legend>SQL:</legend>
+ <div style="margin:1em;">
+ [% PROCESS insert_runtime_parameter %]
+ <textarea id="sql" name="sql" class="required" required="required" cols="50" rows="10">[% sql | html %]</textarea>
+ <span style="color:#383838; font-style:italic">* In order to achieve auto-complete for columns, please prepend the column name with the table name, followed by a period. For example: 'borrowers.surname'</span>
+ <br />
+ <span class="required">Bắt buộc</span>
+ </div>
+ </fieldset>
+
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-save" />
+ <input type="submit" name="submit" class="btn btn-primary" value="Save report" />
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=list" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ [% END #/IF ( create ) %]
+
+ [% IF saved_results %]
+ <h1>Danh sách các báo cáo được lưu lại</h1>
+ <h2>[% name | html %]</h2>
+ <p>[% notes | scrub_html type => 'note' | $raw %]</p>
+ <table>
+ [% FOREACH rows IN saved_results %]
+ <tr>
+ [% FOREACH col IN rows %]
+ <td>[% col | html %]</td>
+ [% END %]
+ </tr>
+ [% END %]
+ </table>
+ [% END # /IF saved_results %]
+
+ [% IF ( showsql ) %]
+ <h1>Saved reports - SQL</h1>
+ <fieldset class="rows">
+ <legend>[% reportname | html %]</legend>
+ <ol>
+ [% IF ( notes ) %]
+ <li>
+ <span class="label">Ghi chú:</span>
+ [% notes | scrub_html type => 'note' | $raw %]
+ </li>
+ [% ELSE %]
+
+ [% END %]
+ <li>
+ <textarea id="sql">[% sql | html %]</textarea>
+ </li>
+ </ol>
+ </fieldset>
+ [% END # /IF ( showsql ) %]
+
+ [% IF ( save_successful ) %]
+ [% UNLESS ( errors ) %]
+ <br />
+ <div id="report_updated">
+ [% IF ( reportname ) %]
+ <div class="alert alert-info"> Your report "[% reportname | html %]" has been saved </div>
+ [% ELSE %]
+ <div class="alert alert-warning"> Your report has been saved without a title </div>
+ [% END %]
+ </div>
+ [% END %]
+ [% END %]
+
+ [% IF ( editsql ) %]
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="post" id="sql_report_form">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="id" value="[% id | html %]" />
+ <fieldset class="rows">
+ <legend><h1>Chỉnh sửa báo cáo SQL</h1></legend>
+ <ol>
+ <li>
+ <label for="reportname" class="required">Tên báo cáo: </label>
+ <input type="text" id="reportname" name="reportname" value="[% reportname | html %]" size="50" class="required" required="required" />
+ <span class="required">Bắt buộc</span>
+ </li>
+ [% PROCESS group_and_subgroup_selection %]
+ [% IF (public) %]
+ <li>
+ <label for="public">Báo cáo công khai:</label>
+ <select id="public" name="public">
+ <option value="0">Không (mặc định)</option>
+ <option value="1" selected="selected">Có</option>
+ </select>
+ </li>
+ [% ELSE %]
+ <li>
+ <label for="public">Báo cáo công khai:</label>
+ <select id="public" name="public">
+ <option value="0" selected="selected">Không (mặc định)</option>
+ <option value="1">Có</option>
+ </select>
+ </li>
+ [% END # /IF (public) %]
+
+ [% IF (usecache) %]
+ <li>
+ <label for="cache_expiry">Bộ nhớ đệm hết hạn:</label>
+ <input type="text" id="cache_expiry" name="cache_expiry" value="[% cache_expiry | html %]" />
+ <select id="cache_expiry_units" name="cache_expiry_units">
+ <option value="seconds">Giây (mặc định)</option>
+ <option value="minutes">Phút</option>
+ <option value="hours">Giờ</option>
+ <option value="days">Ngày</option>
+ </select>
+ </li>
+ [% END %]
+ <li>
+ <label for="notes">Ghi chú:</label>
+ <textarea id="notes" name="notes" cols="50" rows="2">[% notes | scrub_html type => 'note' | $raw %]</textarea>
+ </li>
+ </ol>
+ </fieldset>
+ <!-- /.rows -->
+
+ [% IF ( Koha.Preference('LimitReportsByLibrary') && ( CAN_user_superlibrarian || CAN_user_reports_manage_report_limits ) ) %]
+ <fieldset class="rows">
+ <legend>Library limitation:</legend>
+ <div
+                        ><label for="library_limitation">Library limitation: </label>
+ <select id="library_limitation" name="branches" multiple size="10">
+ [% PROCESS options_for_libraries libraries => Branches.all( selected => report.get_library_limits, unfiltered => 1, do_not_select_my_library => 1 ) %]
+ </select>
+ <div class="hint">Limits the use of this report to the selected libraries.</div>
+ </div>
+ </fieldset>
+ [% END %]
+
+ <fieldset class="rows">
+ <legend>SQL:</legend>
+ [% PROCESS insert_runtime_parameter %]
+ <textarea id="sql" name="sql" class="required" required="required" cols="50" rows="10">[% sql | html %]</textarea>
+ <span style="color:#383838; font-style:italic">* In order to achieve auto-complete for columns, please prepend the column name with the table name, followed by a period. For example: 'borrowers.surname'</span>
+ <br />
+ <span class="required" style="margin-left:30px;">Bắt buộc</span>
+ </fieldset>
+
+ <fieldset class="action">
+ <button class="btn btn-primary" type="submit" name="op" value="cud-update_sql">Cập nhật SQL</button>
+ [% IF ( CAN_user_reports_create_reports && CAN_user_reports_execute_reports ) %]
+ [% INCLUDE 'throttled-button.inc' element_type='button' classes='btn btn-default' label=t('Update and run SQL') attrs={ name => 'op', value => 'cud-update_and_run_sql' } %]
+ [% END %]
+ <a href="/cgi-bin/koha/reports/guided_reports.pl?op=list" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ [% END # /IF ( editsql ) %]
+
+ [% IF ( errors ) %]
+ <form action="/cgi-bin/koha/reports/guided_reports.pl" method="get">
+ <div class="alert alert-warning">
+ <h1>Bạn gặp phải các lỗi sau đây:</h1>
+ [% FOREACH error IN errors %]
+ [% IF ( error.duplicate_running_report ) %]
+ <p>This report is already running. Please wait for it to finish before running it again.</p>
+ [% ELSIF ( error.total_running_reports_limit_exceeded ) %]
+ <p>You have too many reports running at the moment. Please wait for some of them to finish before running this report again.</p>
+ [% ELSIF ( error.sqlerr ) %]
+ <p>This report contains an SQL keyword: <strong>[% error.sqlerr | html %]</strong>. </p>
+ <p>Use of this keyword is not allowed in Koha reports due to security and data integrity risks. Only SELECT queries are allowed.</p>
+ <p>Please delete this report or retry creating a new one.</p>
+ [% ELSIF ( error.queryerr ) %]
+ <h2>SQL error:</h2>
+ <p>[% error.queryerr | html %]</p>
+ <p>Please check the log for further details.</p>
+ [% ELSIF ( error.cache_expiry ) %]
+ <p>Please select a cache expiry less than 30 days.</p>
+ [% ELSIF ( error.passworderr ) %]
+ <p>The column selection in this report includes a password field.</p>
+ <p>The report cannot be executed due to security risks. Please edit this report and ensure no password columns have been selected.</p>
+ [% ELSE %]
+
+ [% END %]
+ <div id="onerror_actions">
+ <a href="#" class="button goback">Return to previous page</a>
+ </div>
+ [% END %]
+ </div>
+ <fieldset class="action">
+ <input type="hidden" name="op" value="list" />
+ <input class="btn btn-primary" name="submit" type="submit" value="Báo cáo được lưu lại" />
+ </fieldset>
+ </form>
+ [% END # /IF ( errors ) %]
+[% END %]
+
+<!-- Runtime Parameters Modal -->
+<div class="modal" id="runtime_parameters" tabindex="-1" role="dialog" aria-labelledby="runtime_parametersLabel">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="runtime_parametersLabel">Runtime parameter options</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="get" id="send_runtime_parameter">
+ <input type="hidden" name="param_category" id="param_category" />
+ <div class="modal-body">
+ <div class="form-group">
+ <label for="paramLabel" class="required">Parameter label: </label>
+ <input class="form-control required" type="text" name="paramLabel" id="paramLabel" required="required" />
+ <div class="hint">The label for the field shown when the report is run, e.g. "Select a library."</div>
+ </div>
+ <div id="authorised_value_category" class="form-group" style="display:none">
+ <label for="authorised_value">Authorized value category:</label>
+ <select class="form-select" name="authorised_value" id="authorised_value">
+ <option value=""></option>
+ [% PROCESS options_for_authorised_value_categories authorised_value_categories => AuthorisedValues.GetCategories() %]
+ </select>
+ <div class="hint">Select which authorized value category the user will choose from.</div>
+ </div>
+ <div id="runtime_param_options" style="display:none">
+ <h5>Parameter options:</h5>
+ <div class="radio">
+ <input type="radio" id="single_param_check" name="param_option" value="" checked="checked" />
+ <label for="single_param_check">Single parameter only</label>
+ <span class="hint">- Query expression should use =</span>
+ </div>
+
+ <div class="radio">
+ <input type="radio" id="include_all_check" name="param_option" value=":all" />
+ <label for="include_all_check">Include option for all</label>
+ <span class="hint">- Query expression must use LIKE</span>
+ </div>
+
+ <div class="radio">
+ <input type="radio" id="multi_select_check" name="param_option" value=":in" />
+ <label for="multi_select_check">Allow multiple selections</label>
+ <span class="hint">- Query expression must use IN</span>
+ </div>
+ </div>
+ </div>
+ <!-- /.modal-body -->
+ <div class="modal-footer">
+ <button type="submit" id="sendParam" class="btn btn-default approve">Insert parameter</button>
+ <button type="button" class="btn btn-default deny" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ <!-- /.modal-footer -->
+ </form>
+ <!-- /#send_runtime_parameter -->
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#runtime_parameters -->
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/charts.js") | $raw %]
+ [% Asset.js("lib/d3c3/d3.min.js") | $raw %]
+ [% Asset.js("lib/d3c3/c3.min.js") | $raw %]
+ [% INCLUDE 'calendar.inc' %]
+ [% INCLUDE 'datatables.inc' %]
+ [% IF ( saved1 ) %]
+ [% Asset.js( "lib/jsdiff/jsdiff.min.js" ) | $raw %]
+ [% END %]
+ [% Asset.js( "lib/codemirror/codemirror.min.js" ) | $raw %]
+ [% Asset.js( "lib/codemirror/overlay.min.js" ) | $raw %]
+ [% Asset.js( "lib/codemirror/sql.js" ) | $raw %]
+ [% Asset.js( "lib/codemirror/show-hint.js" ) | $raw %]
+ [% Asset.css("lib/codemirror/show-hint.css") | $raw %]
+ [% Asset.js( "lib/codemirror/sql-hint.js" ) | $raw %]
+ [% Asset.js( "lib/codemirror/highlight.js" ) | $raw %]
+ [% Asset.css("lib/codemirror/highlight.css") | $raw %]
+ [% Asset.js( "js/mana.js" ) | $raw %]
+ [% Asset.js( "js/throttledButton.js" ) | $raw %]
+ [% INCLUDE 'select2.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        let op = "";
+        [% IF create %]
+            op = "create";
+        [% ELSIF editsql %]
+            op = "editsql";
+        [% ELSIF save %]
+            op = "save";
+        [% ELSIF showsql %]
+            op = "showsql";
+        [% ELSIF showreport %]
+            op = "showreport";
+        [% END %]
+
+        let saved1 = [% saved1 ? 1 : 0 | html %];
+        const interface = "[% interface | html %]";
+        const theme = "[% theme | html %]";
+        const has_errors = [% errors ? 1 : 0 | html %];
+        const original_results = [% results.json || '[]'| $raw %];
+        const all_results = [% allresults.json || '[]' | $raw %];
+        const header_row = [% header_row.json || '[]' | $raw %];
+        const unlimited_total = [% unlimited_total || 0 | $raw %];
+
+        var group_subgroups = {};
+        [% FOREACH group IN groups_with_subgroups %]
+            var gid = "[% group.id | html %]"
+            group_subgroups[gid] = new Array();
+            [% FOREACH subgroup IN group.subgroups %]
+                var sgid = "[% subgroup.id | html %]";
+                var sgname = "[% subgroup.name | html %]";
+                group_subgroups[gid].push([sgid, sgname]);
+            [% END %]
+        [% END %]
+
+        const can_limit_reports_by_library = [% (Koha.Preference('LimitReportsByLibrary') && (CAN_user_superlibrarian || CAN_user_reports_manage_report_limits)) ? 1 : 0 | html %];
+
+        var table_settings = [% TablesSettings.GetTableSettings( 'reports', 'saved-sql', 'table_reports', 'json' ) | $raw %];
+        if (table_settings && table_settings.columns) {
+            let library_limits_column = table_settings.columns.find(function (c) {
+                return c.columnname === "library_limits";
+            });
+            if (library_limits_column) {
+                library_limits_column.is_hidden = !can_limit_reports_by_library;
+                library_limits_column.cannot_be_toggled = !can_limit_reports_by_library;
+                library_limits_column.visibility_condition = !!can_limit_reports_by_library;
+            }
+        }
+
+        const tables = [% To.json(tables || []) | $raw %];
+
+        const open_in_dt = [% open_in_dt ? 1 : 0 | html %];
+        const execute = [% execute ? 1 : 0 | html %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        //  if the report param form has multiselects override default form submission
+        if ($("#report_param_form").find("select[multiple]").length) {
+            $("#report_param_form").on("submit", function (e) {
+                $("#report_param_form")
+                    .find("select[multiple]")
+                    .each(function (i) {
+                        $(this).find("option:first").prop("disabled", false);
+                        var selection;
+                        if ($(this).find("option:selected").length === 0) {
+                            selection = $(this).find("option:first").val();
+                            $(this).val(selection);
+                        } else if ($(this).find("option:selected").length > 1) {
+                            selection = $(this).val().join("\n");
+                            $(this).find("option:selected").prop("selected", false);
+                            $(this).find("option:first").val(selection);
+                            $(this).find("option:first").prop("selected", "selected");
+                        }
+                    });
+            });
+        }
+
+        function hide_bar_element() {
+            $("#chart-column-horizontal").hide();
+            $(".chart-column-group").each(function (index) {
+                $(this).hide();
+            });
+            $(".chart-column-line").each(function (index) {
+                $(this).hide();
+            });
+        }
+
+        function show_bar_element() {
+            $("#chart-column-horizontal").show();
+            $(".chart-column-group").each(function (index) {
+                $(this).show();
+            });
+            $(".chart-column-line").each(function (index) {
+                $(this).show();
+            });
+        }
+
+        function removeColumn(id) {
+            $("#" + id).remove();
+
+            if ($(".chart-column-conf").length == 1) {
+                $(".chart-column-delete").remove();
+            }
+        }
+
+        var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this report? This cannot be undone.");
+
+        if (op == "create" || op == "editsql" || op == "save") {
+            var editor = CodeMirror.fromTextArea(sql, {
+                lineNumbers: true,
+                mode: "text/x-sql",
+                lineWrapping: true,
+                smartIndent: false,
+                keyword: {
+                    // Custom highlighting for items bounded in [[ ]] or << >>.
+                    "\\[\\[(.*?)\\]\\]": "style1",
+                    "<<(.*?)>>": "style1",
+                },
+                hint: CodeMirror.hint.sql,
+                hintOptions: {
+                    tables,
+                },
+            });
+            var ExcludedTriggerKeys = {
+                //key-code combinations of keys that will not fire the auto-complete script
+                8: "backspace",
+                9: "tab",
+                13: "enter",
+                16: "shift",
+                17: "ctrl",
+                18: "alt",
+                19: "pause",
+                20: "capslock",
+                27: "escape",
+                33: "pageup",
+                32: "spacebar",
+                34: "pagedown",
+                35: "end",
+                36: "home",
+                37: "left",
+                38: "up",
+                39: "right",
+                40: "down",
+                45: "insert",
+                46: "delete",
+                56: "asterisk",
+                59: "semicolon",
+                91: "left window key",
+                92: "right window key",
+                93: "select",
+                106: "asterisk",
+                107: "add",
+                109: "subtract",
+                110: "decimal point",
+                111: "divide",
+                112: "f1",
+                113: "f2",
+                114: "f3",
+                115: "f4",
+                116: "f5",
+                117: "f6",
+                118: "f7",
+                119: "f8",
+                120: "f9",
+                121: "f10",
+                122: "f11",
+                123: "f12",
+                144: "numlock",
+                145: "scrolllock",
+                186: "semicolon",
+                187: "equalsign",
+                188: "comma",
+                189: "dash",
+                191: "slash",
+                192: "graveaccent",
+                220: "backslash",
+                222: "quote",
+            };
+            //Trigger auto-complete on all keys not in dictionary of exclusions above.
+            editor.on("keyup", function (cm, e) {
+                if (ExcludedTriggerKeys[e.keyCode] == undefined) {
+                    CodeMirror.commands.autocomplete(editor, null, { completeSingle: false });
+                }
+            });
+
+            // https://stackoverflow.com/questions/2086287/how-to-clear-jquery-validation-error-messages#answer-16025232
+            function clearValidation(formElement) {
+                // formElement should be a jQuery object
+                var validator = formElement.validate();
+                // Iterate through named elements inside of the form, and mark them as error free
+                $("[name]", formElement).each(function () {
+                    validator.successList.push(this); //mark as error free
+                    validator.showErrors(); //remove error messages if present
+                });
+                validator.resetForm(); //remove error class on name elements and clear history
+                validator.reset(); //remove all error and success data
+            }
+        }
+
+        if (op == "showsql" || op == "showreport") {
+            var editor = CodeMirror.fromTextArea(sql, {
+                lineNumbers: false,
+                mode: "text/x-sql",
+                lineWrapping: true,
+                readOnly: true,
+                keyword: {
+                    // Custom highlighting for items bounded in [[ ]] or << >>.
+                    "\\[\\[(.*?)\\]\\]": "style2",
+                    "<<(.*?)>>": "style1",
+                },
+            });
+        }
+
+        function showParamModal(category) {
+            var modal = $("#runtime_parameters");
+            var modalTitle = $("#runtime_parametersLabel");
+            switch (category) {
+                case "insertAuthVal":
+                    modalTitle.text(_("Insert authorized value parameter"));
+                    $("#paramLabel").val(_("Giá trị định trước"));
+                    $("#authorised_value_category").show();
+                    $("label[for='authorised_value']").addClass("required");
+                    $("#authorised_value").prop("required", true).attr("required", "required").addClass("required");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertCnSource":
+                    modalTitle.text(_("Insert classification source parameter"));
+                    $("#paramLabel").val(_("Source of classification or shelving scheme"));
+                    $("#param_category").val("cn_source");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertFramework":
+                    modalTitle.text(_("Insert bibliographic framework parameter"));
+                    $("#paramLabel").val(_("Framework"));
+                    $("#param_category").val("biblio_framework");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertDate":
+                    modalTitle.text(_("Insert date parameter"));
+                    $("#paramLabel").val(_("Ngày"));
+                    $("#param_category").val("date");
+                    break;
+                case "insertItemtypes":
+                    modalTitle.text(_("Insert item types parameter"));
+                    $("#paramLabel").val(_("Kiểu tài liệu"));
+                    $("#param_category").val("itemtypes");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertBranches":
+                    modalTitle.text(_("Insert libraries parameter"));
+                    $("#paramLabel").val(_("Thư viện"));
+                    $("#param_category").val("branches");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertCategorycode":
+                    modalTitle.text(_("Insert patron category parameter"));
+                    $("#paramLabel").val(_("Kiểu bạn đọc"));
+                    $("#param_category").val("categorycode");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertCashregister":
+                    modalTitle.text(_("Insert cash register parameter"));
+                    $("#paramLabel").val(_("Cash register"));
+                    $("#param_category").val("cash_registers");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertDebittypes":
+                    modalTitle.text(_("Insert debit type parameter"));
+                    $("#paramLabel").val(_("Debit type"));
+                    $("#param_category").val("debit_types");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertCredittypes":
+                    modalTitle.text(_("Insert credit type parameter"));
+                    $("#paramLabel").val(_("Credit type"));
+                    $("#param_category").val("credit_types");
+                    $("#runtime_param_options").show();
+                    break;
+                case "insertList":
+                    modalTitle.text(_("Insert list parameter"));
+                    $("#paramLabel").val(_("List of values"));
+                    $("#param_category").val("list");
+                    break;
+                case "insertText":
+                    modalTitle.text(_("Insert text parameter"));
+                    $("#paramLabel").val(_("Văn bản"));
+                    $("#param_category").val("");
+                    break;
+            }
+            $("#paramLabel").select();
+            modal.modal("show");
+        }
+
+        function load_group_subgroups() {
+            var group = $("#group_select").val();
+            var subgroup = $("#subgroup_select").val();
+            var sg = $("#subgroup");
+            $(sg)
+                .find('option[value!=""]')
+                .each(function () {
+                    $(this).remove();
+                });
+            $(sg).hide();
+            if (group) {
+                var select = $(sg).find("select")[0];
+                $.each(group_subgroups[group], function (index, value) {
+                    if (value[0] == subgroup) {
+                        $('<option selected="selected" value="' + value[0] + '">' + value[1] + "</option>").appendTo(select);
+                    } else {
+                        $('<option value="' + value[0] + '">' + value[1] + "</option>").appendTo(select);
+                    }
+                });
+                $("#subgroup, #subgroup *").show();
+            }
+        }
+
+        $(document).ready(function () {
+            var activeTab = localStorage.getItem("sql_reports_activetab");
+            if (activeTab == 0) {
+                $("#subgroup_filter_block").hide();
+            }
+
+            $("body").on("click", ".fetch_chart_data", function () {
+                if (unlimited_total > 1000) {
+                    if (confirm(_("Fetching full chart data for reports with many rows can cause performance issues. Are you sure you want to chart this report?"))) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+
+            var showsql;
+            hide_bar_element();
+
+            if ($(".chart-column-conf").length == 1) {
+                $(".chart-column-delete").remove();
+            }
+
+            $(".chart-column-delete").on("click", function (e) {
+                e.preventDefault();
+                removeColumn("column_" + $(this).data("column"));
+            });
+
+            $("#download-chart").click(function () {
+                var svg = "<svg>" + $("#chart svg").html() + "</svg>";
+                this.href = "data:application/octet-stream;base64," + btoa(svg);
+                this.setAttribute("download", "chart.svg");
+            });
+
+            $("#chart-type").change(function () {
+                if ($(this).val() == "bar") {
+                    show_bar_element();
+                } else {
+                    hide_bar_element();
+                }
+            });
+
+            $("#download-chart").hide();
+            var chart;
+
+            if (original_results.length && !has_errors) {
+                $("#draw-chart").click(function () {
+                    var x_elements = $('select[name="x"]').val();
+                    var y_elements = [];
+                    var groups = [];
+                    var lines = [];
+                    var options = {};
+
+                    headers = header_row;
+
+                    var results;
+                    if (all_results.length) {
+                        if ($('input[name="chart-include-all"]').prop("checked")) {
+                            results = all_results;
+                        } else {
+                            results = original_results;
+                        }
+                    } else {
+                        results = original_results;
+                    }
+
+                    if ($('input[name="chart-exclude-last"]').prop("checked")) {
+                        results.splice(-1, 1);
+                    }
+
+                    $('select[name="y"]').each(function (index) {
+                        y_elements.push($(this).val());
+                    });
+                    $('select[name="group"]').each(function (index) {
+                        groups.push($(this).val());
+                    });
+                    $(".column-line").each(function (index) {
+                        if ($(this).prop("checked")) {
+                            lines.push($(this).attr("name"));
+                        }
+                    });
+
+                    // Remove deleted columns from headers and results.
+                    var deleted_indexes = [];
+                    var kept_headers = [];
+                    $.each(headers, function (index, value) {
+                        if (value.cell != x_elements && $.inArray(value.cell, y_elements) === -1) {
+                            // This header is neither a x element nor in y elements. Don't need it.
+                            deleted_indexes.push(index);
+                        } else {
+                            kept_headers.push({ cell: value.cell });
+                        }
+                    });
+
+                    // Remove corresponding cells.
+                    var kept_results = [];
+                    $.each(results, function (index, value) {
+                        var line = {};
+                        line["cells"] = [];
+                        $.each(value.cells, function (i, val) {
+                            if ($.inArray(i, deleted_indexes) === -1) {
+                                line["cells"].push({ cell: val.cell });
+                            }
+                        });
+                        kept_results.push(line);
+                    });
+
+                    options.type = $('select[name="chart-type"]').val();
+                    options.horizontal = $('input[name="column-horizontal"]').prop("checked");
+                    options.lines = lines;
+
+                    chart = create_chart(kept_headers, kept_results, x_elements, y_elements, groups, options);
+                    $("#download-chart,#toggle_chart_settings_hid,#chart").show();
+                    $("#toggle_chart_settings_vis").hide();
+                    $("#chartModal").modal("hide");
+                });
+            }
+            if (op == "create") {
+                load_group_subgroups();
+            }
+
+            $("#limit").change(function () {
+                $("#limitselect").submit();
+            });
+
+            $(document).click(function () {
+                $("#report_updated").hide();
+            });
+
+            $(".goback").on("click", function (e) {
+                e.preventDefault();
+                window.history.back();
+            });
+
+            $("body").on("click", ".mana_search_button", function () {
+                $("#mana-loading").show();
+                mana_search($("#mana_search_field").val());
+            });
+
+            $(".ShareButton").on("click", function () {
+                $("#note-error").hide();
+                if ($(this).closest("tr").find(".report_notes").text().length < 20 || $(this).closest("tr").find(".report_name").text().length < 20) {
+                    $(".shared_infos").hide();
+                    $("#note-error").show();
+                } else {
+                    $("#reportid").val($(this).closest("tr").find(".report_id").text());
+                    $("#shared_id").html($(this).closest("tr").find(".report_id").text());
+                    $("#shared_name").html($(this).closest("tr").find(".report_name").text());
+                    $("#shared_sql").html($(this).closest("tr").find(".report_sql").val());
+                    $("#shared_type").html($(this).closest("tr").find(".report_type").text());
+                    $("#shared_group").html($(this).closest("tr").find(".report_group").text());
+                    $("#shared_notes").html($(this).closest("tr").find(".report_notes").text());
+                }
+            });
+
+            $("#mana_share_report").on("hidden.bs.modal", function () {
+                $(".shared_infos").show();
+            });
+
+            $("#addColumn").on("click", function () {
+                addColumn();
+            });
+
+            $("#delColumn").on("click", function () {
+                delColumn();
+            });
+
+            if (open_in_dt && execute && !has_errors) {
+                let columns = [];
+                $.each(header_row, function (index, value) {
+                    columns.push({
+                        cannot_be_modified: 0,
+                        cannot_be_toggled: 0,
+                        is_hidden: 0,
+                    });
+                });
+                let report_table_settings = { columns };
+                $("#report_results").kohaTable({}, report_table_settings);
+            }
+            if (saved1) {
+                var rtable = $("#table_reports").kohaTable(
+                    {
+                        autoWidth: false,
+                        pagingType: "full",
+                        order: [[1, "asc"]],
+                        language: {
+                            zeroRecords: _("Không tìm thấy báo cáo phù hợp"),
+                        },
+                        bKohaColumnsUseNames: true,
+                    },
+                    table_settings
+                );
+                let table_dt = rtable?.DataTable();
+
+                $("#tabs a[data-bs-toggle='tab']").on("shown.bs.tab", function (e) {
+                    tabsInit($(e.target).parent(), rtable);
+                });
+
+                if (activeTab) {
+                    $("#tabs li:eq(" + activeTab + ") a").tab("show");
+                }
+
+                $("#subgroup_filter").change(function () {
+                    var selected = $(this).find("option:selected");
+                    var sg_id = $(selected).val();
+                    let col = table_dt.columns(5);
+                    if (sg_id.length > 0) {
+                        col.search(sg_id, { exact: true }).visible(false).draw();
+                    } else {
+                        col.search("").visible(true).draw();
+                    }
+                });
+
+                $("#reports_form").submit(function () {
+                    var checkedItems = $("input[name=id]:checked");
+                    if ($(checkedItems).size() == 0) {
+                        alert(_("Bạn phải lựa chọn các báo cáo để xóa bỏ"));
+                        return false;
+                    }
+                    $(checkedItems).parents("tr").addClass("warn");
+                    if (confirm(_("Bạn chắc chắn muốn xóa các báo cáo được lựa chọn?"))) {
+                        return true;
+                    } else {
+                        $(checkedItems).parents("tr").removeClass("warn");
+                        return false;
+                    }
+                });
+
+                $("body").on("click", ".update_sql", function (e) {
+                    e.preventDefault();
+                    var ltitle = $(this).text();
+                    var report_id = $(this).data("report_id");
+                    var page = $(this).attr("href");
+                    $("#update_sql .modal-body").load(page + " div", function () {
+                        var diff1 = $("#col1 .show_sql").text();
+                        var diff2 = $("#col2 .show_sql").text();
+                        var diffs = diffString(escape(diff1), escape(diff2));
+                        $("#col1 .show_sql,#col2 .show_sql").html(diffs);
+                    });
+                    $("#update_sql").modal("show");
+                    $("#update_sql_button").attr("href", "/cgi-bin/koha/reports/guided_reports.pl?op=convert&id=" + report_id);
+                });
+
+                $("#update_sql").on("hidden.bs.modal", function () {
+                    $("#update_sql_label").html("");
+                    $("#update_sql .modal-body").html('<div id="loading"><img src="' + interface + "/" + theme + '/img/spinner-small.gif" alt="" /> ' + _("Đang tải") + "</div>");
+                });
+            }
+
+            if (op == "showsql") {
+                $("#sql").focus(function () {
+                    $(this).select();
+                });
+            }
+
+            $("#toggle_sql").click(function () {
+                var sql_output = $("#sql_output");
+                sql_output.toggle();
+                if (sql_output.is(":visible")) {
+                    $(this).button("complete");
+                } else {
+                    $(this).button("reset");
+                }
+                if (!showsql) {
+                    showsql = CodeMirror.fromTextArea(sql, {
+                        lineNumbers: false,
+                        mode: "text/x-sql",
+                        lineWrapping: true,
+                        readOnly: true,
+                    });
+                }
+            });
+
+            $(".toggle_chart_settings").click(function () {
+                $("#chart, #toggle_chart_settings_hid, #toggle_chart_settings_vis").toggle();
+            });
+
+            if (op == "create" || op == "editsql" || op == "save") {
+                var validated_form = $("#sql_report_form").validate({
+                    reportname: "required",
+                    group_input: {
+                        required: {
+                            depends: function (element) {
+                                return $("#create_group").prop("checked") && $("#groupdesc_input").val() != "";
+                            },
+                        },
+                    },
+                    groupdesc_input: {
+                        required: {
+                            depends: function (element) {
+                                return $("#create_group").prop("checked") && $("#group_input").val() != "";
+                            },
+                        },
+                    },
+                });
+
+                $("#select_group").change(function () {
+                    if ($(this).prop("checked")) {
+                        $("#group_input").attr("class", "").prop("disabled", true).prop("required", false);
+                        $("#groupdesc_input").attr("class", "").prop("disabled", true).prop("required", false);
+                        $("#group_select").prop("disabled", false);
+                        clearValidation($("#sql_report_form"));
+                        if ($("#group_select").val().length > 0) {
+                            $("#select_subgroup").prop("checked", true);
+                            $("#select_subgroup").change();
+                            $("#subgroup, #subgroup *").show();
+                        } else {
+                            $("#subgroup").hide();
+                        }
+                    }
+                });
+                $("#create_group").change(function () {
+                    if ($(this).prop("checked")) {
+                        $("#group_input").prop("disabled", false).prop("required", true);
+                        $("#groupdesc_input").prop("disabled", false).prop("required", true);
+                        $("#group_select").prop("disabled", true);
+                        // $("#create_subgroup").prop('checked', true).change();
+                        $("#subgroup_select").hide();
+                        $("#subgroup input[type='radio']").hide();
+                        $("#subgroup label[for]").hide();
+                        $("#subgroup_input").prop("required", false).prop("disabled", false).show();
+                        $("#subgroupdesc_input").prop("required", false).prop("disabled", false).show();
+                        $("#subgroup").show();
+                        // Add validation rules for fields which were previously hidden
+                        $("#subgroup_input").rules("add", {
+                            required: {
+                                depends: function (element) {
+                                    return $("#create_group").prop("checked") && $("#subgroupdesc_input").val() != "";
+                                },
+                            },
+                        });
+                        $("#subgroupdesc_input").rules("add", {
+                            required: {
+                                depends: function (element) {
+                                    return $("#create_group").prop("checked") && $("#subgroup_input").val() != "";
+                                },
+                            },
+                        });
+                    }
+                });
+                $("#select_subgroup").change(function () {
+                    if ($(this).prop("checked")) {
+                        $("#subgroup_select").prop("disabled", false);
+                        $("#subgroup_input").prop("disabled", true).prop("required", false);
+                        $("#subgroupdesc_input").prop("disabled", true).prop("required", false);
+                        clearValidation($("#sql_report_form"));
+                    }
+                });
+                $("#create_subgroup").change(function () {
+                    if ($(this).prop("checked")) {
+                        $("#subgroup_input").prop("disabled", false).prop("required", true);
+                        $("#subgroupdesc_input").prop("disabled", false).prop("required", true);
+                        $("#subgroup_select").val("").prop("disabled", true);
+                    }
+                });
+                $("#select_group").change();
+                $("#select_subgroup").change();
+                $("#group_select").on("change", function () {
+                    load_group_subgroups();
+                });
+
+                $(".insertParam").on("click", function (e) {
+                    e.preventDefault();
+                    var category = this.id;
+                    showParamModal(category);
+                });
+
+                $("#runtime_parameters").on("shown.bs.modal", function () {
+                    $("#paramLabel").focus();
+                });
+
+                $("#runtime_parameters").on("hide.bs.modal", function () {
+                    $("#send_runtime_parameter")[0].reset();
+                    $("#authorised_value_category").val("").hide();
+                    $("#runtime_param_options").val("").hide();
+                    $("label[for='authorised_value']").removeClass("required");
+                    $("#authorised_value").prop("required", false).removeAttr("required").removeClass("required");
+                });
+
+                $("#send_runtime_parameter").on("submit", function (e) {
+                    e.preventDefault();
+                    /* Get form values */
+                    var paramLabel = $("#paramLabel").val();
+                    var param_category = $("#param_category").val();
+                    var categoryLabel = $("#authorised_value").val();
+                    var param_option = $('#runtime_param_options input[name="param_option"]:checked').val();
+                    // Get CodeMirror environment variables
+                    var selection = editor.getSelection();
+                    var doc = editor.getDoc();
+                    var cursor = doc.getCursor();
+                    var pos = {
+                        line: cursor.line,
+                        ch: cursor.ch,
+                    };
+                    /* Build runtime parameter text string */
+                    var text = "";
+                    if (paramLabel && param_category) {
+                        text += paramLabel + "|" + param_category;
+                    } else if (paramLabel) {
+                        text += paramLabel;
+                    } else if (param_category) {
+                        text += param_category;
+                    }
+                    if (param_option) {
+                        text += param_option;
+                    }
+                    if (text != "") {
+                        text = " <<" + text + ">> ";
+                        if (selection.length > 0) {
+                            editor.replaceSelection(text);
+                        } else {
+                            doc.replaceRange(text, pos);
+                        }
+                    }
+                    $("#runtime_parameters").modal("hide");
+                });
+
+                $("#authorised_value").on("change", function () {
+                    $("#param_category").val($(this).val());
+                });
+            }
+
+            $("#mana_search_form").submit(function (e) {
+                e.preventDefault();
+            });
+
+            $("#column_submit").submit(function () {
+                if ($("#selectedColumns option").size() < 1) {
+                    alert(_("Bạn chưa chọn cột dữ liệu trong báo cáo!"));
+                    return false;
+                }
+                $("#selectedColumns option").attr("selected", "selected"); // Select everything still in #selectedColumns
+                return true;
+            });
+
+            // Mana KB
+            $("body").on("click", ".mana-use", function (e) {
+                e.preventDefault();
+                $(this).find("i").attr("class", "fa-solid fa-rotate fa-spin");
+                mana_use($(this).data("report_id"));
+            });
+
+            $("#mana_search_result").on("shown.bs.modal", function () {
+                $("#mana_search_field").focus();
+            });
+
+            $("#mana_search_result").on("hide.bs.modal", function () {
+                $("#mana_result_content").html("");
+                $("#mana_search_field").val("");
+            });
+
+            $(".batch_op").on("click", function (e) {
+                e.preventDefault();
+                var target_form = $(this).data("submit");
+                $("#" + target_form).submit();
+            });
+
+            $("#batch_add_to_list").on("submit", function (e) {
+                e.preventDefault();
+                addToList();
+            });
+
+            $("body").on("click", ".preview_sql", function (e) {
+                e.preventDefault();
+                var report_data = $(this).data();
+                previewSql(report_data);
+            });
+            $(".limitselect").on("click", function () {
+                var limit = $(this).data("limit");
+                $("#limit").val(limit);
+                $("#limitselect").submit();
+            });
+
+            // Apply select2 to all select fields having a "multiple" attribute
+            let selectFields = document.querySelectorAll("#report_param_form select[multiple]");
+            selectFields.forEach(selectField => {
+                selectField.style.minWidth = "320px";
+                $(selectField).select2();
+            });
+
+            const libraryLimitSelectFields = document.querySelectorAll("#library_limitation");
+            libraryLimitSelectFields.forEach(selectField => {
+                selectField.style.minWidth = "450px";
+                $(selectField).select2();
+            });
+        });
+
+        $("#toggle_auto_links").on("click", function (e) {
+            e.preventDefault();
+            if ($(".data-plain").is(":visible")) {
+                /* if a data-plain element is visible, this click hides it and shows auto-links */
+                localStorage.removeItem("reports_auto_link_off");
+            } else {
+                /* if a data-plain element is hidden, this click shows it  and hides auto-links */
+                localStorage.setItem("reports_auto_link_off", 1);
+            }
+            $(".data-plain,.autolink").toggle();
+        });
+        if (localStorage.getItem("reports_auto_link_off") == 1) {
+            $("#toggle_auto_links").click();
+        }
+
+        function tabsInit(tab, rtable) {
+            var activeTab = tab.index();
+            localStorage.setItem("sql_reports_activetab", activeTab);
+
+            $("#subgroup_filter option").each(function () {
+                if ($(this).val().length > 0) {
+                    $(this).remove();
+                }
+            });
+            let table_dt = rtable.DataTable();
+            let col4 = table_dt.columns(4);
+            col4.search("").visible(true);
+            let col5 = table_dt.columns(5);
+            col5.search("").visible(true);
+
+            var g_id = tab.find("a").data("tabname");
+            if (g_id === "reports") {
+                g_id = "";
+            }
+
+            if (g_id !== null && g_id !== undefined && g_id.toString().length > 0) {
+                col4.search(g_id, { exact: true }).visible(false);
+                if (group_subgroups[g_id] && group_subgroups[g_id].length > 0) {
+                    for (var i in group_subgroups[g_id]) {
+                        $("#subgroup_filter").append('<option value="' + group_subgroups[g_id][i][0] + '">' + group_subgroups[g_id][i][1] + "</option>");
+                    }
+                    $("#subgroup_filter_block").show();
+                } else {
+                    $("#subgroup_filter_block").hide();
+                }
+            } else {
+                $("#subgroup_filter_block").hide();
+            }
+            table_dt.draw();
+        }
+
+        function addColumn() {
+            $("#availableColumns option:selected").clone().appendTo("#selectedColumns").attr("selected", "selected");
+        }
+        function delColumn() {
+            $("#selectedColumns option:selected").remove();
+        }
+
+        // Mana KB
+        function mana_use(mana_id) {
+            $.ajax({
+                type: "POST",
+                url: "/cgi-bin/koha/svc/mana/use",
+                data: { id: mana_id, resource: "report", saveinbase: 1, csrf_token: $('meta[name="csrf-token"]').attr("content") },
+                dataType: "json",
+            })
+                .done(function (result) {
+                    if (result.errmsg) {
+                        alert(result.errmsg);
+                    } else {
+                        window.location = "/cgi-bin/koha/reports/guided_reports.pl?id=".concat(result.id).concat("&op=show&mana_success=1");
+                    }
+                })
+                .fail(function (error) {
+                    $(".mana_use_status").hide();
+                    $("#mana_use_errortext").html(error.status + " " + error.statusText);
+                    $("#mana_use_failed").show();
+                    $(".mana-use i").attr("class", "fa fa-download");
+                });
+        }
+
+        function mana_search(textquery) {
+            $(".mana_search_status").hide();
+            $("#mana_result_content").load("/cgi-bin/koha/svc/mana/search #mana_results", "resource=report&usecomments=1&id=" + textquery, function (response, status, xhr) {
+                if (status == "error") {
+                    $("#mana_search_errortext").html(xhr.status + " " + xhr.statusText);
+                    $("#mana_search_failed").show();
+                    $("#mana-loading").hide();
+                } else {
+                    $(".mana_search_status").hide();
+                    $("#mana_search_result_label").text(_("Results from Mana Knowledge Base"));
+                    $("#mana-loading").hide();
+                    $("#mana_results_datatable").kohaTable({
+                        pagingType: "full",
+                        autoWidth: false,
+                        columnDefs: [{ width: "35%", targets: 1 }],
+                    });
+
+                    $(".showbutton").on("click", function (e) {
+                        e.preventDefault();
+                        $(this).parent().hide();
+                        $(this).parent().next().show();
+                    });
+
+                    $(".hidebutton").on("click", function (e) {
+                        e.preventDefault();
+                        $(this).parent().hide();
+                        $(this).parent().prev().show();
+                    });
+
+                    if ($("td.dataTables_empty").length == 0) {
+                        $("#mana_search_message").show();
+                    }
+                }
+            });
+        }
+
+        function addToList() {
+            var biblionumbers = [];
+            $(".bib_to_list").each(function () {
+                var biblionumber = Number($(this).val());
+                if (biblionumbers.indexOf(biblionumber) < 0) {
+                    biblionumbers.push(biblionumber);
+                }
+            });
+            bibs = biblionumbers.join("/");
+            var url = "/cgi-bin/koha/virtualshelves/addbybiblionumber.pl?biblionumbers=" + bibs;
+            window.open(url, "Add_to_virtualshelf", "width=500, height=400, toolbar=false, scrollbars=yes");
+            return false;
+        }
+
+        // Adapted from https://gist.github.com/jnormore/7418776
+        function previewSql(report_data) {
+            var reportid = report_data.reportid;
+            var can_create = report_data.create;
+            var can_delete = report_data.delete;
+            var can_run = report_data.run;
+            var message = $("#previewSql" + reportid).val();
+            var title = $("#previewSql" + reportid).data("title");
+            if ($("#preview-sql-modal").length > 0) {
+                $("#preview-sql-modal").remove();
+            }
+
+            // Clone the template content
+            var template = document.getElementById("preview-sql-modal-template");
+            var clone = document.importNode(template.content, true);
+
+            // Fill in the placeholders
+            clone.querySelector('[data-placeholder="title"]').textContent = title;
+
+            Object.assign(clone.querySelector('[data-placeholder="code"]'), {
+                id: "code" + reportid,
+                textContent: message,
+            });
+
+            if (can_run) {
+                clone.querySelector('[data-placeholder="run-href"]').href = "/cgi-bin/koha/reports/guided_reports.pl?id=" + encodeURIComponent(reportid) + "&op=run";
+                clone.querySelector('[data-placeholder="schedule-href"]').href = "/cgi-bin/koha/tools/scheduler.pl?id=" + encodeURIComponent(reportid);
+            } else {
+                clone.querySelector("#preview-modal-runreport").remove();
+                clone.querySelector("#preview-modal-schedule").remove();
+            }
+
+            if (can_create) {
+                clone.querySelector('[data-placeholder="edit-href"]').href = "/cgi-bin/koha/reports/guided_reports.pl?id=" + encodeURIComponent(reportid) + "&op=edit_form";
+                clone.querySelector('[data-placeholder="duplicate-href"]').href = "/cgi-bin/koha/reports/guided_reports.pl?op=duplicate&id=" + encodeURIComponent(reportid);
+            } else {
+                clone.querySelector("#preview-modal-editreport").remove();
+                clone.querySelector("#preview-modal-duplicate").remove();
+            }
+
+            if (can_delete) {
+                Object.assign(clone.querySelector('[data-placeholder="delete-attrs"]').dataset, {
+                    id: reportid,
+                    action: "guided_reports.pl",
+                    method: "post",
+                    op: "cud-delete",
+                });
+            } else {
+                clone.querySelector("#preview-modal-delete").remove();
+            }
+
+            document.body.appendChild(clone);
+
+            $("#preview-sql-modal")
+                .on("shown.bs.modal", function () {
+                    CodeMirror.fromTextArea(document.getElementById("code" + reportid), {
+                        lineNumbers: false,
+                        mode: "text/x-sql",
+                        lineWrapping: true,
+                        readOnly: true,
+                    });
+                })
+                .modal("show");
+        }
+    </script>
+[% END %]
+
+<template id="preview-sql-modal-template">
+ <div id="preview-sql-modal" tabindex="-1" role="dialog" aria-hidden="true" class="modal">
+ <div class="modal-dialog modal-xl">
+ <div class="modal-content">
+ <div class="modal-header" style="min-height:40px;">
+ <h1 class="modal-title" data-placeholder="title"></h1>
+ <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="[% t('Close') | html %]"></button>
+ </div>
+ <div class="modal-body"><textarea data-placeholder="code"></textarea></div>
+ <div class="modal-footer">
+ <a id="preview-modal-editreport" class="btn btn-default" data-placeholder="edit-href"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a>
+ <a id="preview-modal-duplicate" class="btn btn-default" data-placeholder="duplicate-href"><i class="fa fa-copy" aria-hidden="true"></i> Sao chép</a>
+ <a id="preview-modal-schedule" class="btn btn-default" data-placeholder="schedule-href"><i class="fa-solid fa-clock" aria-hidden="true"></i> Lịch hẹn</a>
+ <a id="preview-modal-delete" class="btn btn-default submit-form-link" href="#" data-placeholder="delete-attrs" data-confirmation-msg="[% t('Are you sure you want to delete this report?') | html %]"
+                        ><i class="fa fa-trash-can" aria-hidden="true"></i> Xóa</a
+                    >
+ [% INCLUDE 'throttled-button.inc' element_type='link' id='preview-modal-runreport' classes='btn btn-default' label=t('Run report') attrs={ 'data-placeholder' => 'run-href' } %]
+ <a href="#" id="preview-sql-modal-cancel" data-bs-dismiss="modal" class="btn btn-default"><i class="fa fa-times" aria-hidden="true"></i> Thoát</a>
+ </div>
+ </div>
+ </div>
+ </div>
+</template>
+
+[% INCLUDE 'intranet-bottom.inc' %]
+
+[% BLOCK group_and_subgroup_selection %]
+ <li id="group">
+ <label>Nhóm báo cáo:</label>
+ <input type="radio" name="select_or_create_group" id="select_group" checked="checked" />
+ <label for="select_group" class="radio">Chọn</label>
+ <select name="group" id="group_select">
+ <option value="">(Không chọn)</option>
+ [% FOREACH group IN groups_with_subgroups %]
+ <option value="[% group.id | html %]" [% IF group.selected %]selected="selected"[% END %]> [% group.name | html %] </option>
+ [% END %]
+ </select>
+ <input type="radio" name="select_or_create_group" id="create_group" />
+ <label for="create_group" class="radio">or create:</label>
+ <input id="group_input" name="group" placeholder="Mã" title="Mã nhóm" type="text" />
+ <input id="groupdesc_input" name="groupdesc" placeholder="Tên" title="Tên nhóm" type="text" />
+ </li>
+ <li id="subgroup">
+ <label>Nhóm báo cáo phụ:</label>
+ <input type="radio" name="select_or_create_subgroup" id="select_subgroup" checked="checked" />
+ <label for="select_subgroup" style="float:none">Chọn</label>
+ <select name="subgroup" id="subgroup_select">
+ <option value="">(Không chọn)</option>
+ [% FOREACH group IN groups_with_subgroups %]
+ [% IF (group.selected) %]
+ [% FOREACH subgroup IN group.subgroups %]
+ <option value="[% subgroup.id | html %]" [% IF subgroup.selected %]selected="selected"[% END %]> [% subgroup.name | html %] </option>
+ [% END %]
+ [% END %]
+ [% END %]
+ </select>
+ <input type="radio" name="select_or_create_subgroup" id="create_subgroup" />
+ <label for="create_subgroup" style="float:none">Tạo mới</label>
+ <input id="subgroup_input" name="subgroup" placeholder="Mã" title="Mã nhóm phụ" type="text" />
+ <input id="subgroupdesc_input" name="subgroupdesc" placeholder="Tên" title="Tên nhóm phụ" type="text" />
+ </li>
+[% END %]
+
+[% BLOCK insert_runtime_parameter %]
+ <div class="btn-group" style="margin-left:30px;">
+ <button type="button" class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Insert runtime parameter </button>
+ <ul class="dropdown-menu">
+ <li><a class="dropdown-item insertParam" href="#" id="insertAuthVal">Giá trị định trước</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertFramework">Bibliographic framework</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertCnSource">Khung phân loại</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertDate">Ngày</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertItemtypes">Loại tài liệu</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertBranches">Thư viện</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertList">Giá sách ảo</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertCategorycode">để kiểm tra lại.</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertCashregister">Cash registers</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertDebittypes">Debit types</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertCredittypes">Credit types</a></li>
+ <li><a class="dropdown-item insertParam" href="#" id="insertText">Text field</a></li>
+ </ul>
+ </div>
+[% END %]

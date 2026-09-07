@@ -1,0 +1,38 @@
+[% USE raw %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Search for vendor") | html %]
+ &rsaquo; [% t("Serials") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="ser_acqui-search" class="ser">
+
+<div class="container-fluid">
+ <h1>Ấn phẩm định kỳ: Tìm kiếm nhà cung cấp </h1>
+ <form action="/cgi-bin/koha/serials/acqui-search-result.pl" method="get">
+ <fieldset class="rows">
+ <ol>
+ <li>
+ <label for="text">Vendor name or ID: </label>
+ <input id="text" type="text" size="25" name="supplier" autofocus="autofocus" />
+ </li>
+ </ol>
+ </fieldset>
+ <nav class="navbar navbar-default fixed-bottom">
+ <div class="container-fluid">
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Tìm kiếm" />
+ <button type="button" class="btn btn-default close_window">Đóng</button>
+ </fieldset>
+ </div>
+ </nav>
+ </form>
+</div>
+<!-- /.main.container-fluid -->
+
+[% INCLUDE 'intranet-bottom.inc' popup_window=1 %]

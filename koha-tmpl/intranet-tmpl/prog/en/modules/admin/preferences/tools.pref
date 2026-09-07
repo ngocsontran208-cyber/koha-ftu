@@ -21,13 +21,13 @@ Tools:
             - pref: MaxItemsToDisplayForBatchMod
               class: integer
             - items in a single item modification batch.
-    Patron cards:
+    Thẻ bạn đọc:
         -
             - Limit the number of creator images stored in the database to
             - pref: ImageLimit
               class: Integer
             - images.
-    Notices and slips:
+    Thông báo và phiếu:
         -
             - Include the stylesheet at
             - pref: AllNoticeStylesheet
@@ -89,7 +89,7 @@ Tools:
                   tinymce: "a WYSIWYG editor (TinyMCE)"
                   codemirror: "a text editor (CodeMirror)"
             - .
-    Upload:
+    Tải lên:
         -
             - Automatically delete temporary uploads older than
             - pref: UploadPurgeTemporaryFilesDays

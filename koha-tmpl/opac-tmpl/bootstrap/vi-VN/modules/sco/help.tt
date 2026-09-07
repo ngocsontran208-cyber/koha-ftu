@@ -1,0 +1,104 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+[% SET SelfCheckHelpMessage = AdditionalContents.get( location => "SelfCheckHelpMessage", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+<title
+    >[% FILTER collapse %]
+ [% t("Self checkout help") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Koha" />
+<!-- leave this for stats -->
+<link rel="shortcut icon" href="[% IF ( Koha.Preference('OpacFavicon')  ) %][% Koha.Preference('OpacFavicon') | url %][% ELSE %][% interface | html %]/[% theme | html %]/images/favicon.ico[% END %]" type="image/x-icon" />
+[% Asset.css("css/sco.css") | $raw %]
+[% IF ( Koha.Preference('OPACUserCSS') ) %]
+ <!-- prettier-ignore-start -->
+ <style nonce="[% Koha.CSPNonce | $raw %]">[% Koha.Preference('OPACUserCSS') | $raw %]</style>
+ <!-- prettier-ignore-end -->
+[% END %]
+[% IF Branches.GetBranchSpecificCSS( Branches.GetLoggedInBranchcode() || default_branch) %]
+ <!-- prettier-ignore-start -->
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        [% Branches.GetBranchSpecificCSS( Branches.GetLoggedInBranchcode() || default_branch) | $raw %]
+    </style>
+ <!-- prettier-ignore-end -->
+[% END %]
+[% IF ( SCOUserCSS ) %]
+ <!-- prettier-ignore-start -->
+ <style nonce="[% Koha.CSPNonce | $raw %]">[% SCOUserCSS | $raw %]</style>
+ <!-- prettier-ignore-end -->
+[% END %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    var Koha = {};
+    function _(s) {
+        return s;
+    } // dummy function for gettext
+</script>
+[% IF lang && lang != 'en' %]
+ [% Asset.js(lang _ '/js/locale_data.js') | $raw %]
+[% END %]
+[% Asset.js('js/Gettext.js') | $raw %]
+[% Asset.js('js/i18n.js') | $raw %]
+[% Asset.js('js/stores.js') | $raw %]
+</head>
+<body id="sco_help" class="sco">
+<div id="wrapper">
+ [% INCLUDE 'masthead-sco.inc' %]
+
+ <main class="main">
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <h1>Self-checkout help</h1>
+
+ [% IF ( SelfCheckHelpMessage ) %]
+ <div id="selfcheckhelpmessage"> [% PROCESS koha_news_block news => SelfCheckHelpMessage %] </div>
+ [% END %]
+
+ <div id="selfcheckdefaulthelpmessage">
+ <p>If this is your first time using the self-checkout system, or if the system is not behaving as expected, you may want to refer to this guide to get yourself started.</p>
+
+ <h2>Step one: Enter your user ID[% IF ( SelfCheckoutByLogin ) %]and password[% END %]</h2>
+
+ <p>Enter your user ID[% IF ( SelfCheckoutByLogin ) %]and password[% END %], and click the submit button (or press the enter key).</p>
+
+ <h2>Bước 2: Quét ĐKCB cho từng tài liệu, bạn có thể quét nhiều ĐKCB cùng một lúc</h2>
+
+ <p
+                            >Scan each item and wait for the page to reload before scanning the next item. The checked-out item should appear in your checkouts list. The submit button only needs to be clicked if you enter the barcode
+ manually.</p
+                        >
+
+ <h2>Bước 3: Nhấn nút 'Hoàn thành'.</h2>
+
+ <p>Nếu bạn không nhấn nút  'Hoàn thành', phiên làm việc của bạn sẽ tự động đóng lại trong [% SelfCheckTimeout | html %] giây.</p>
+ </div>
+
+ <div class="button">
+ <a href="javascript:history.go(-1)">Quay lại hệ thống mượn trả tự động</a>
+ </div>
+ </div>
+ <!-- / .col -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+ </main>
+ <!-- / .main -->
+</div>
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% IF ( SCOUserJS ) %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+            [% SCOUserJS | $raw %]
+        </script>
+ [% END %]
+[% END %]

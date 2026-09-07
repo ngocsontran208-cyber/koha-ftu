@@ -1,0 +1,1071 @@
+[% USE raw %]
+[% USE AdditionalContents %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE To %]
+[% USE KohaDates %]
+[% USE AuthorisedValues %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF op == 'view' %]
+ [% tx("Contents of {list_name}", { list_name = shelf.shelfname }) | html %]
+ &rsaquo;
+ [% END %]
+ [% IF op == 'add_form' %]
+ [% t("Create new list") | html %]
+ &rsaquo;
+ [% END %]
+ [% IF op == 'edit_form' %]
+ [% tx("Edit list {list_name}", { list_name = shelf.shelfname }) | html %]
+ &rsaquo;
+ [% END %]
+ [% t("Lists") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        textarea {
+            width: 100%;
+        }
+    </style>
+[% END %]
+
+[% BLOCK list_permissions %]
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="allow_changes_from">Allow changes to contents from: </label>
+ </div>
+ <div class="fg-input">
+ <select name="allow_changes_from" id="allow_changes_from" class="adjust_remark">
+ [% IF shelf.allow_change_from_owner %]
+ <option value="0">Nobody</option>
+ [% ELSE %]
+ <option value="0" selected="selected">Nobody</option>
+ [% END %]
+
+ [% IF shelf.allow_change_from_owner && (( !shelf.is_public && !shelf.is_shared ) || !shelf.allow_change_from_others ) %]
+ <option value="1" selected="selected">Owner only</option>
+ [% ELSE %]
+ <option value="1">Owner only</option>
+ [% END %]
+
+ [% IF shelf.allow_change_from_permitted_staff %]
+ <option value="4" selected="selected">Permitted staff only</option>
+ [% ELSE %]
+ <option value="4">Permitted staff only</option>
+ [% END %]
+ [% IF shelf.allow_change_from_staff %]
+ <option value="3" selected="selected">Staff only</option>
+ [% ELSE %]
+ <option value="3">Staff only</option>
+ [% END %]
+
+ [% IF shelf.allow_change_from_others %]
+ <option value="2" selected="selected">Anyone seeing this list</option>
+ [% ELSE %]
+ <option value="2">Anyone seeing this list</option>
+ [% END %]
+ </select>
+ </div>
+ &emsp; <div class="hint" id="permitted_staff_remark" style="display:none;color:red;">The Permitted staff only permission has no effect while this list is private.</div> &emsp;
+ <div class="hint" id="staff_remark" style="display:none;color:red;">The Staff only permission has no effect while this list is private.</div> &emsp;
+ <div class="hint" id="anyone_remark" style="display:none;color:red;">The Anyone permission has no effect while this list is private.</div>
+ </div>
+[% END %]
+</head>
+
+<body id="lists_shelves" class="lists">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% IF op != 'list' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl">Danh sách</a>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Danh sách</span>
+ [% END %]
+ [% END %]
+
+ [% IF shelf AND shelf.is_private %]
+ [% IF op == 'view' OR op == 'edit_form' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=list&amp;public=0">Danh sách của bạn</a>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Danh sách của bạn</span>
+ [% END %]
+ [% END %]
+ [% ELSIF shelf AND shelf.is_public %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=list&amp;public=1">Giá sách ảo cộng đồng</a>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'view' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Giá sách ảo <em>[% shelf.shelfname | html %]</em></span>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'add_form' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Create new list</span>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'edit_form' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Chỉnh sửa giá sách ảo <em>[% shelf.shelfname | html %]</em></span>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'transfer' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Transfer list <em>[% shelf.shelfname | html %]</em></span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' wide_centered=1 %]
+
+ [% IF op != 'transfer' %][% INCLUDE 'virtualshelves-toolbar.inc' %][% END %]
+
+ [% FOR m IN messages %]
+ <div class="alert alert-[% m.type | html %]">
+ [% SWITCH m.code %]
+ [% CASE 'error_on_update' %]
+ <span>An error occurred when updating this list.</span>
+ [% CASE 'error_on_insert' %]
+ <span>An error occurred when creating this list.</span>
+ [% CASE 'error_on_delete' %]
+ <span>An error occurred when deleting this list.</span>
+ [% CASE 'error_on_add_biblio' %]
+ [% IF m.item_barcode %]
+ <span>The record for this item ([% m.item_barcode | html %]) has not been added to the list. Please verify it is not already in the list.</span>
+ [% ELSE %]
+ <span>The record ([% m.bibnum | html %]) has not been added to the list. Please verify it is not already in the list.</span>
+ [% END %]
+ [% CASE 'success_on_update' %]
+ <span>List updated.</span>
+ [% CASE 'success_on_insert' %]
+ <span>List created.</span>
+ [% CASE 'success_on_delete' %]
+ <span>List deleted.</span>
+ [% CASE 'success_on_add_biblio' %]
+ [% IF m.item_barcode %]
+ <span>The record for this item ([% m.item_barcode | html %]) has been added to the list.</span>
+ [% ELSE %]
+ <span>The record ([% m.bibnum | html %]) has been added to the list.</span>
+ [% END %]
+ [% CASE 'success_on_remove_biblios' %]
+ <span>The record has been removed from the list.</span>
+ [% CASE 'does_not_exist' %]
+ <span>This list does not exist.</span>
+ [% CASE 'item_does_not_exist' %]
+ [% IF m.item_barcode %]
+ <span>The item ([% m.item_barcode | html %]) does not exist.</span>
+ [% ELSE %]
+ <span>The record ([% m.bibnum | html %]) does not exist.</span>
+ [% END %]
+ [% CASE 'unauthorized_on_view' %]
+ <span>You do not have permission to view this list.</span>
+ [% CASE 'unauthorized_on_update' %]
+ <span>You do not have permission to update this list.</span>
+ [% CASE 'unauthorized_on_delete' %]
+ <span>You do not have permission to delete this list.</span>
+ [% CASE 'unauthorized_on_add_biblio' %]
+ <span>You do not have permission to add a record to this list.</span>
+ [% CASE 'unauthorized_transfer' %]
+ <span>Transfer not allowed: You or the selected user do not have the required permissions.</span>
+ [% CASE 'new_owner_not_found' %]
+ <span>The new owner could not be found anymore.</span>
+ [% CASE 'no_biblio_removed' %]
+ <span>No record was removed.</span>
+ [% CASE 'Koha::Exceptions::Virtualshelf::DuplicateObject' %]
+ <span>Đã có lỗi khi tạo ra giá sách ảo này. Tên [% shelfname | html %] đã có rồi.</span>
+ [% CASE 'Koha::Exceptions::Virtualshelf::UseDbAdminAccount' %]
+ <span>List could not be created. (Do not use the database administrator account.)</span>
+ [% CASE 'Koha::Exceptions::Object::FKConstraint' %]
+ <span>Database constraint error: [% m.msg | html %]</span>
+ [% CASE 'Koha::Exceptions::Object::DuplicateID' %]
+ <span>Duplicate entry error: [% m.msg | html %]</span>
+ [% CASE 'Koha::Exceptions::Object::BadValue' %]
+ <span>Invalid data error: [% m.msg | html %]</span>
+ [% CASE %]
+ [% m.code | html %]
+ [% m.msg | html %]
+ [% END # /SWITCH %]
+ </div>
+ [% END # /FOR m IN messages %]
+
+ [% IF op == 'transfer' %]
+ <h1>Transfer ownership of public list [% shelf.shelfname | html %]</h1>
+
+ <form action="/cgi-bin/koha/virtualshelves/shelves.pl" id="transferform" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ <legend class="visually-hidden">Transfer ownership</legend>
+ <input type="hidden" name="op" value="cud-transfer" />
+ <input type="hidden" name="public" value="1" />
+ <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
+ <ol>
+ <li>
+ <label for="find_patron">Search for new owner: </label>
+ <input autocomplete="off" id="find_patron" type="text" size="40" class="patron_autocomplete noEnterSubmit" placeholder="Enter patron card number or partial name" />
+ </li>
+ <li style="display:none">
+ <label for="find_patron">New owner: </label>
+ <span id="new_owner_name"></span>
+ <input type="hidden" id="new_owner" name="new_owner" value="" />
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Chuyển tài liệu" />
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=list&amp;public=1" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ [% END # /IF op == transfer %]
+
+ [% IF op == 'view' %]
+ <h1>Giá sách ảo <em>[% shelf.shelfname | html %]</em></h1>
+ [% IF itemsloop %]
+ [% SET contents = shelf.get_contents %]
+ [% IF ( contents.count ) %]<p>This list contains [% contents.count | html %] titles</p>[% END %]
+
+ <nav class="pages" id="pagination_top"> [% pagination_bar | $raw %] </nav>
+
+ <form action="/cgi-bin/koha/virtualshelves/shelves.pl" id="listform" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-remove_biblios" />
+ <input type="hidden" name="referer" value="view" />
+ <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
+
+ [% IF direction == 'asc' %]
+ [% SET new_direction = 'desc' %]
+ [% ELSE %]
+ [% SET direction = 'desc' %]
+ [% SET new_direction = 'asc' %]
+ [% END %]
+
+ [% IF itemsloop %]
+ <div id="searchheader" class="searchheader noprint sticky">
+ <div id="selection_ops">
+ <span class="checkall"></span> |
+ <span class="clearall"></span>
+
+ <span class="addto">| </span>
+ &nbsp;
+ [% IF CAN_user_reserveforothers && Koha.Preference('DisplayMultiPlaceHold') %]
+ <div class="btn-group"
+                                    ><button class="btn btn-default btn-xs placehold"><i class="fa-solid fa-bookmark"></i> Đặt mượn</button></div
+                                >
+ [% END %]
+ [% IF can_remove_biblios %]
+ <div class="btn-group"
+                                    ><button type="submit" class="btn btn-default btn-xs list-remove"><i class="fa fa-trash-can"></i> Loại bỏ</button></div
+                                >
+ [% END %]
+ [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
+ <div class="btn-group"
+                                    ><button type="submit" class="btn btn-default btn-xs merge-items"><i class="fa fa-compress"></i> Sát nhập</button></div
+                                >
+ [% END %]
+ </div>
+ </div>
+ [% END %]
+
+ <div class="page-section">
+ <table id="searchresults" class="dataTable">
+ <thead>
+ <tr>
+ [% IF ( itemsloop ) %]
+ <th class="checkall">&nbsp;</th>
+ [% END %]
+ [% UNLESS ( item_level_itypes ) %]
+ <th>Kiểu tài liệu</th>
+ [% END %]
+ [% SET sort_class = 'dt-orderable-asc dt-orderable-desc' %]
+ [% IF sortfield == 'title' %]
+ [% sort_class = sort_class _ " dt-ordering-" _ direction %]
+ [% END %]
+ <th class="[% sort_class | html %]">
+ <a
+                                        href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% shelf.shelfnumber | uri %]&amp;sortfield=title&amp;direction=[% IF sortfield != 'title' %]asc[% ELSE %][% new_direction | uri %][% END %]"
+                                        >Nhan đề</a
+                                    >
+ <span class="dt-column-order"></span>
+ </th>
+ [% SET sort_class = 'dt-orderable-asc dt-orderable-desc' %]
+ [% IF sortfield == 'author' %]
+ [% sort_class = sort_class _ " dt-ordering-" _ direction %]
+ [% END %]
+ <th class="[% sort_class | html %]">
+ <a
+                                        href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% shelf.shelfnumber | uri %]&amp;sortfield=author&amp;direction=[% IF sortfield != 'author' %]asc[% ELSE %][% new_direction | uri %][% END %]"
+                                        >Tác giả</a
+                                    >
+ <span class="dt-column-order"></span>
+ </th>
+ [% SET sort_class = 'dt-orderable-asc dt-orderable-desc' %]
+ [% IF sortfield == 'dateadded' %]
+ [% sort_class = sort_class _ " dt-ordering-" _ direction %]
+ [% END %]
+ <th class="[% sort_class | html %]">
+ <a
+                                        href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% shelf.shelfnumber | uri %]&amp;sortfield=dateadded&amp;direction=[% IF sortfield != 'dateadded' %]asc[% ELSE %][% new_direction | uri %][% END %]"
+                                        >Ngày bổ sung</a
+                                    >
+ <span class="dt-column-order"></span>
+ </th>
+ [% SET sort_class = 'dt-orderable-asc dt-orderable-desc' %]
+ [% IF sortfield == 'itemcallnumber' %]
+ [% sort_class = sort_class _ " dt-ordering-" _ direction %]
+ [% END %]
+ <th class="[% sort_class | html %]">
+ <a
+                                        href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% shelf.shelfnumber | uri %]&amp;sortfield=itemcallnumber&amp;direction=[% IF sortfield != 'itemcallnumber' %]asc[% ELSE %][% new_direction | uri %][% END %]"
+                                        >Số phân loại</a
+                                    >
+ <span class="dt-column-order"></span>
+ </th>
+ </tr>
+ </thead>
+ [% FOREACH itemsloo IN itemsloop %]
+ <tr>
+ [% IF itemsloop %]
+ <td>
+ <input type="checkbox" class="selection" value="[% itemsloo.biblionumber | html %]" name="biblionumber" />
+ </td>
+ [% END %]
+ [% UNLESS ( item_level_itypes ) %]
+ <td>
+ [% UNLESS ( noItemTypeImages || !itemsloo.imageurl ) %]
+ <img class="itemtype-image" src="[% itemsloo.imageurl | html %]" alt="" />
+ [% END %]
+ <span class="itypetext">[% itemsloo.description | html %]</span>
+ </td>
+ [% END %]
+ <td>
+ [% IF ( itemsloo.XSLTBloc ) %]
+ [% itemsloo.XSLTBloc | $raw %]
+ [% ELSE %]
+ [% INCLUDE 'biblio-title.inc' biblio=itemsloo link = 1 %]
+ [% END %]
+ <p class="hold">
+ [% IF ( itemsloo.notforloan ) %]
+ <span class="noholdstext">Không có đặt mượn</span>
+ [% ELSE %]
+ [% IF ( itemsloo.ITEM_RESULTS.count ) %]
+ <a id="reserve_[% itemsloo.biblionumber | html %]" href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% itemsloo.biblionumber | html %]">Đặt mượn</a>
+ [% IF ( holdfor ) %]
+ <span class="holdforlink"
+                                                        >|
+ <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% itemsloo.biblionumber | uri %]&amp;findborrower=[% holdfor_patron.cardnumber | uri %]"
+                                                            >Place hold for [% INCLUDE 'patron-title.inc' patron => holdfor_patron no_title => 1 no_html => 1 %]</a
+                                                        ></span
+                                                    >
+ [% END %]
+ [% ELSE %]
+ <span class="noholdstext">Không có đặt mượn</span>
+ [% END %]
+ [% END %]
+ [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
+ | <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% itemsloo.biblionumber | uri %]">Sửa biểu ghi</a>
+ [% END %]
+ [% IF ( CAN_user_editcatalogue_edit_items ) %]
+ | <a href="/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% itemsloo.biblionumber | uri %]">Bản tài liệu</a>
+ [% END %]
+ </p>
+ </td>
+ <td> [% itemsloo.author | html %] </td>
+ <td> [% itemsloo.dateadded | $KohaDates %] </td>
+ <td>
+ <ul>
+ [% FOREACH item IN itemsloo.ITEM_RESULTS %]
+ <li>
+ [% Branches.GetName(item.holdingbranch) | html %]
+ [% IF ( item.location ) %]
+ <span class="shelvingloc"> [% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => item.location ) | html %] </span>
+ [% END %]
+ [% IF ( item.itemcallnumber ) %]
+ [<a href="/cgi-bin/koha/catalogue/search.pl?idx=callnum&amp;q=%22[% item.itemcallnumber | uri %]%22">[% item.itemcallnumber | html %]</a>]
+ [% END %]
+ </li>
+ [% END # /FOREACH item %]
+ </ul>
+ </td>
+ </tr>
+ [% END #/FOREACH itemsloo %]
+ </table>
+ <!-- /#searchresults -->
+ </div>
+ <!-- /.page-section -->
+
+ <nav class="pages" id="pagination_bottom"> [% pagination_bar | $raw %] </nav>
+ </form>
+ [% END # /IF itemsloop %]
+ [% END # /IF op == 'view' %]
+
+ [% IF op == 'add_form' OR op == 'edit_form' %]
+ <form method="post" action="/cgi-bin/koha/virtualshelves/shelves.pl" class="validated">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="fg">
+ [% IF op == 'add_form' %]
+ <legend><h1>Tạo giá sách ảo</h1></legend>
+ <input type="hidden" name="op" value="cud-add" />
+ [% ELSE %]
+ <legend
+                        ><h1>Chỉnh sửa giá sách ảo <em>[% shelf.shelfname | html %]</em></h1></legend
+                    >
+ <input type="hidden" name="op" value="cud-edit" />
+ [% END %]
+ <input type="hidden" name="referer" value="[% referer | html %]" />
+ <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
+
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="shelfname" class="required">Name: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" id="shelfname" name="shelfname" size="25" value="[% shelf.shelfname | html %]" required="required" class="focus required" />
+ </div>
+ <div class="required">Bắt buộc</div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <span class="label">Chủ sở hữu: </span>
+ </div>
+ <div class="fg-text">
+ [% IF op == 'add_form' %]
+ <input type="hidden" name="owner" id="owner" value="[% loggedinusernumber | html %]" />[% logged_in_user.userid | html %]
+ [% ELSE %]
+ [% IF owner %]
+ <input type="hidden" id="owner" name="owner" value="[% owner.borrowernumber | html %]" />[% owner.firstname _ ' ' _ owner.surname | html %]
+ [% ELSE %]
+ <input type="hidden" id="owner" name="owner" value="[% loggedinusernumber | html %]" />[% logged_in_user.userid | html %]
+ [% END %]
+ [% END %]
+ </div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="sortfield">Sắp xếp theo: </label>
+ </div>
+ <div class="fg-input">
+ <select id="sortfield" name="sortfield">
+ [% IF shelf.sortfield == "title" %]
+ <option value="title" selected="selected">Nhan đề</option>
+ [% ELSE %]
+ <option value="title">Nhan đề</option>
+ [% END %]
+ [% IF shelf.sortfield == "author" %]
+ <option value="author" selected="selected">Tác giả</option>
+ [% ELSE %]
+ <option value="author">Tác giả</option>
+ [% END %]
+ [% IF shelf.sortfield == "copyrightdate" %]
+ <option value="copyrightdate" selected="selected">Ngày suất bản</option>
+ [% ELSIF shelf.sortfield == "publicationyear" %]
+ <option value="publicationyear" selected="selected">Năm xuất bản</option>
+ [% ELSE %]
+ <option value="copyrightdate">Ngày suất bản</option>
+ [% END %]
+ [% IF shelf.sortfield == "itemcallnumber" %]
+ <option value="itemcallnumber" selected="selected">Số phân loại</option>
+ [% ELSE %]
+ <option value="itemcallnumber">Số phân loại</option>
+ [% END %]
+ [% IF shelf.sortfield == "dateadded" %]
+ <option value="dateadded" selected="selected">Ngày bổ sung</option>
+ [% ELSE %]
+ <option value="dateadded">Ngày bổ sung</option>
+ [% END %]
+ </select>
+ </div>
+ </div>
+ [% IF ( CAN_user_lists_create_public_lists ) %]
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="public">Public: </label>
+ </div>
+ <div class="fg-input">
+ <select id="public" name="public" class="adjust_remark">
+ [% IF shelf.is_private %]
+ <option value="0" selected="selected">Cá nhân</option>
+ [% ELSE %]
+ <option value="0">Cá nhân</option>
+ [% END %]
+ [% IF shelf.is_public %]
+ <option value="1" selected="selected">Công cộng</option>
+ [% ELSE %]
+ <option value="1">Công cộng</option>
+ [% END %]
+ </select>
+ </div>
+ </div>
+ [% ELSE %]
+ <div class="fg-row">
+ <div class="fg-label">
+ <span class="label">Public: </span>
+ </div>
+ <div class="fg-text">
+ <span>Cá nhân</span>
+ <input id="public" name="public" value="0" type="hidden" />
+ </div>
+ </div>
+ [% END %]
+ [% INCLUDE list_permissions %]
+ </fieldset>
+
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Lưu" />
+ [% IF referer == 'view' %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% shelf.shelfnumber | uri %]" class="cancel">Hủy bỏ</a>
+ [% ELSE %]
+ [% IF public %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=list&amp;public=1" class="cancel">Hủy bỏ</a>
+ [% ELSE %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=list&amp;public=0" class="cancel">Hủy bỏ</a>
+ [% END %]
+ [% END %]
+ </fieldset>
+ </form>
+ [% END # /IF op == 'add_form'... %]
+
+ [% IF op == 'list' %]
+ <h1>Danh sách</h1>
+
+ [% WRAPPER tabs id= "tabs" %]
+ [% WRAPPER tabs_nav %]
+ [% WRAPPER tab_item tabname= "privateshelves_tab" bt_active= 1 %]<span>Danh sách của bạn</span>[% END %]
+ [% IF ( CAN_user_lists_use_public_lists ) %]
+ [% WRAPPER tab_item tabname= "publicshelves_tab" %]<span>Giá sách ảo cộng đồng</span>[% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+
+ [% WRAPPER tab_panels %]
+ [% WRAPPER tab_panel tabname="shelves_tab" bt_active= 1 %]
+ <table id="listresultst">
+ <thead>
+ <tr>
+ <th class="NoVisible">Loại</th>
+ <th>Tên giá sách ảo:</th>
+ <th>Nội dung</th>
+ <th>Loại</th>
+ <th>Người quản lý</th>
+ <th>Sắp xếp theo</th>
+ <th>Ngày tạo</th>
+ <th>Modification date</th>
+ <th class="no-export">Thao tác</th>
+ </tr>
+ <tr class="filters_row">
+ <th></th>
+ <th><input class="filter text_filter" id="searchshelfname_filter" placeholder="Tên giá sách ảo:" /></th>
+ <th></th>
+ <th></th>
+ <th><input class="filter text_filter" id="searchowner_filter" placeholder="Người quản lý" /></th>
+ <th>
+ <select class="filter text_filter" id="searchsortby_filter">
+ <option value=""></option>
+ <option value="title">Nhan đề</option>
+ <option value="author">Tác giả</option>
+ <option value="copyrightdate">Ngày suất bản</option>
+ <option value="itemcallnumber">Số phân loại</option>
+ <option value="dateadded">Ngày bổ sung</option>
+ </select>
+ </th>
+ <th></th>
+ <th></th>
+ <th></th>
+ </tr>
+ </thead>
+ <tbody></tbody>
+ </table>
+ <!-- /#listresultst -->
+ [% END %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs %]
+
+ [%- SET StaffListsHome = AdditionalContents.get( location => "StaffListsHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]
+ [%- FOREACH block IN StaffListsHome.content -%]
+ <div class="page-section"> [%- block.content | $raw -%] </div>
+ [%- END -%]
+ [% END # /IF op == 'list' %]
+
+ <form id="hold_form" method="get" action="/cgi-bin/koha/reserve/request.pl">
+ <!-- Values will be set here by placeHold() -->
+ </form>
+[% END %]
+
+[% IF ( can_add_biblios ) %]
+ <!-- Modal -->
+ <div class="modal" id="addToList" tabindex="-1" role="dialog" aria-labelledby="addToListLabel">
+ <div class="modal-dialog">
+ <form action="/cgi-bin/koha/virtualshelves/shelves.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="addToListLabel">Add records</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <fieldset class="fg">
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="barcodes">Barcodes:</label>
+ </div>
+ <div class="fg-input">
+ <textarea name="barcodes" id="barcodes" rows="5"></textarea>
+ <input type="hidden" name="op" value="cud-add_biblio" />
+ <input type="hidden" name="referer" value="view" />
+ <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
+ </div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="biblionumbers">Biblio numbers:</label>
+ </div>
+ <div class="fg-input">
+ <textarea name="biblionumbers" id="biblionumbers" rows="5"></textarea>
+ <input type="hidden" name="op" value="cud-add_biblio" />
+ <input type="hidden" name="referer" value="view" />
+ <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
+ </div>
+ </div>
+ </fieldset>
+ </div>
+ <!-- /.modal-body -->
+ <div class="modal-footer">
+ <button type="submit" class="btn btn-primary">Lưu</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ </form>
+ </div>
+ <!-- /.modal-dialog -->
+ </div>
+ <!-- /#addToList -->
+[% END # IF /( can_add_biblios ) %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        [% IF op == 'list' %]
+            var public = [% public | html %];
+            const allow_transfer = [% allow_transfer ? 1 : 0 | html %];
+        [% END %]
+
+        const is_shelf_shared = [% shelf.is_shared ? 1 : 0 | html %];
+
+        [% IF shelf AND op == 'view' %]
+            Koha.addPrefs({
+                intranetbookbag: [% Koha.Preference("intranetbookbag") ? 1 : 0 | html %],
+                virtualshelves: [% Koha.Preference("virtualshelves") ? 1 : 0 | html %],
+            });
+        [% END %]
+
+        [% IF op == 'view' %]
+            var shelfnumber = "[% shelf.shelfnumber | html %]";
+        [% END %]
+
+        [% IF shelf AND op == 'view' %]
+            let add_to_some_private_shelves = [];
+            [% FOR private_shelf IN add_to_some_private_shelves %]
+                add_to_some_private_shelves.push(
+                    {
+                        id: "[% private_shelf.shelfnumber | html %]",
+                        name: "[% private_shelf.shelfname | html %]",
+                    }
+                );
+            [% END %]
+            let add_to_some_public_shelves = [];
+            [% FOR public_shelf IN add_to_some_public_shelves %]
+                add_to_some_public_shelves.push(
+                    {
+                        id: "[% public_shelf.shelfnumber | html %]",
+                        name: "[% public_shelf.shelfname | html %]",
+                    }
+                );
+            [% END %]
+        [% END %]
+    </script>
+ [% IF print %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                window.print();
+                window.onafterprint = function () {
+                    window.close();
+                };
+                setTimeout(() => {
+                    window.close();
+                }, 1000); // Hack for Chrome < 63
+            });
+        </script>
+ [% END #/print %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        var MSG_NO_ITEM_SELECTED = _("Bạn chưa lựa chọn tài liệu.");
+        var MSG_REMOVE_FROM_LIST = _("Are you sure you want to remove these records from the list?");
+        var MSG_CONFIRM_DELETE_LIST = _("Bạn có chắc chắn muốn loại bỏ giá sách ảo này?");
+    </script>
+ [% IF op == 'list' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                let sorton = ["vs.shelfname", "count", "vs.public", "vs.owner", "vs.sortfield", "vs.created_on", "vs.lastmodified"];
+
+                var dtListResults = $("#listresultst").kohaTable({
+                    order: [[5, "asc"]],
+                    serverSide: true,
+                    ajax: {
+                        url: "/cgi-bin/koha/svc/virtualshelves/search",
+                        data: function (d) {
+                            let order_by = [];
+                            d.order.forEach((o, i) => order_by.push(sorton[o.column - 1] + " " + o.dir));
+                            return $.extend({}, d, {
+                                public,
+                                order_by: order_by.join(","),
+                                shelfname: $("#searchshelfname_filter").val(),
+                                owner: $("#searchowner_filter").val(),
+                                sortby: $("#searchsortby_filter").val(),
+                                template_path: "virtualshelves/tables/shelves_results.tt",
+                                allow_transfer,
+                            });
+                        },
+                    },
+                    bKohaAjaxSVC: true,
+                    columns: [
+                        { data: "dt_public" },
+                        { data: "dt_shelfname" },
+                        { data: "dt_count" },
+                        { data: "dt_is_shared" },
+                        { data: "dt_owner" },
+                        { data: "dt_sortby" },
+                        { data: "dt_created_on" },
+                        { data: "dt_modification_time" },
+                        { data: "dt_action", orderable: false, className: "actions" },
+                    ],
+                    columnDefs: [{ visible: false, targets: ["NoVisible"] }],
+                    autoWidth: false,
+                    pagingType: "full_numbers",
+                    searching: false,
+                    processing: true,
+                    orderCellsTop: true,
+                });
+                _dt_add_delay_filters(dtListResults.api(), $("#listresultst"));
+
+                /* Select correct tab based on URL parameter */
+                if (public == 0) {
+                    $('a[href="#privateshelves_tab_panel"]').tab("show");
+                } else {
+                    $('a[href="#publicshelves_tab_panel"]').tab("show");
+                }
+
+                $('#tabs a[data-bs-toggle="tab"]').on("shown.bs.tab", function (e) {
+                    let target = $(this).attr("href");
+                    if (target == "#publicshelves_tab_panel") {
+                        public = 1;
+                    } else {
+                        public = 0;
+                    }
+                    dtListResults.DataTable().draw();
+                });
+
+                $("body").on("click", ".deleteshelf", function () {
+                    return confirmDelete(MSG_CONFIRM_DELETE_LIST);
+                });
+            });
+        </script>
+ [% END # /IF op == 'list' %]
+
+ [% IF shelf AND op == 'view' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                $("span.clearall").html('<a id="CheckNone" href="/cgi-bin/koha/shelves.pl"><i class="fa fa-times"></i>' + _(" Bỏ tất cả") + "<\/a>");
+                $("span.checkall").html('<a id="CheckAll" href="/cgi-bin/koha/shelves.pl"><i class="fa fa-check"></i>' + _(" Chọn tất cả") + "<\/a>");
+                $("#CheckAll").click(function (e) {
+                    e.preventDefault();
+                    $(".selection").each(function () {
+                        $(this).prop("checked", true);
+                    });
+                });
+
+                $("#CheckNone").click(function (e) {
+                    e.preventDefault();
+                    $(".selection").each(function () {
+                        $(this).prop("checked", false);
+                    });
+                });
+                $(".placehold").on("click", function (e) {
+                    placeHold();
+                    e.preventDefault();
+                });
+                $(".addtocart").show();
+                let dropdown = build_dropdown();
+                $("span.addto").html(dropdown);
+                $("#cartsubmit").on("click", function (e) {
+                    cartList();
+                    e.preventDefault();
+                });
+                $("#addto").change(function () {
+                    cartList();
+                });
+                $(".addto")
+                    .find("input:submit")
+                    .click(function (e) {
+                        e.preventDefault();
+                        cartList();
+                    });
+                $("#selection_ops").show();
+                $(".merge-items").on("click", function (e) {
+                    e.preventDefault();
+                    MergeItems();
+                });
+                $("#listform").on("submit", function (e) {});
+                $(".list-remove").on("click", function (e) {
+                    if ($(".selection").filter(":checked").length > 0) {
+                        return confirm(MSG_REMOVE_FROM_LIST);
+                    } else {
+                        alert(MSG_NO_ITEM_SELECTED);
+                        e.preventDefault();
+                    }
+                });
+                $("#addToList").on("shown.bs.modal", function (e) {
+                    $("#barcodes").focus();
+                });
+            });
+
+            function build_dropdown() {
+                var param1 = '| <label for="addto">' + _("Thêm vào:") + '<\/label> <select name="addto" id="addto"><option value=""><\/option>';
+                if (Koha.prefs.intranetbookbag) {
+                    param1 += '<option value="addtocart">' + _("Giỏ tài liệu") + "<\/option>";
+                }
+                if (Koha.prefs.virtualshelves) {
+                    if (add_to_some_private_shelves.length) {
+                        param1 += '<optgroup label="' + _("Giá sách ảo của bạn:") + '">';
+                        let number_of_private_shelves = 0;
+                        for (let s of add_to_some_private_shelves) {
+                            if (shelfnumber != s.id) {
+                                param1 += `<option id=\"s${s.id}\" value=\"addtolist\">${s.name}<\/option>`;
+                                number_of_private_shelves++;
+                                if (number_of_private_shelves == 10) break;
+                            }
+                        }
+                        param1 += "<\/optgroup>";
+                    }
+
+                    if (add_to_some_public_shelves.length) {
+                        param1 += '<optgroup label="' + _("Giá sách ảo cộng đồng:") + '">';
+                        let number_of_public_shelves = 0;
+                        for (let s of add_to_some_public_shelves) {
+                            if (shelfnumber != s.id) {
+                                param1 += `<option id=\"s${s.id}\" value=\"addtolist\">${s.name}<\/option>`;
+                                number_of_public_shelves++;
+                                if (number_of_public_shelves == 10) break;
+                            }
+                        }
+                        param1 += "<\/optgroup>";
+                    }
+                    if (add_to_some_private_shelves.length > 10 || add_to_some_public_shelves.length > 10) {
+                        param1 += '<option value="morelists">[ ' + _("Thêm danh sách") + " ]<\/option>";
+                    }
+                    param1 += '<option value="newlist">' + _("[ Tạo giá sách ảo ]") + "<\/option>";
+                }
+                param1 += '<\/select> <button id="cartsubmit" type="submit" class="btn btn-default btn-xs">' + _("Lưu") + "</button>";
+                return param1;
+            }
+        </script>
+ [% END # /IF shelf AND op == 'view' %]
+
+ [% IF shelf AND op == 'edit_form' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                AdjustRemark();
+            });
+        </script>
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        /**
+         * This function checks if the adequate number of records are checked for merging
+         */
+        function MergeItems() {
+            var checkboxes = $("input:checkbox:checked");
+            if (checkboxes.length < 2) {
+                alert(_("At least two records must be selected for merging."));
+            } else {
+                var params = [];
+                $(checkboxes).each(function () {
+                    params.push("biblionumber=" + $(this).val());
+                });
+                var url = "/cgi-bin/koha/cataloguing/merge.pl?" + params.join("&");
+                location.href = url;
+            }
+            return false;
+        }
+
+        /**
+         * This function checks all checkboxes if all are empty,
+         * or unchecks all if any already checked.
+         */
+        function CheckAll() {
+            var checkboxes = document.getElementsByTagName("input");
+            var nbCheckbox = checkboxes.length;
+            var check = areAllChecked();
+            for (var i = 0; i < nbCheckbox; i++) {
+                if (checkboxes[i].getAttribute("type") == "checkbox") {
+                    checkboxes[i].checked = check ? 0 : 1;
+                }
+            }
+        }
+        /**
+         * This function returns true if ALL checkboxes are checked
+         */
+        function areAllChecked() {
+            var checkboxes = document.getElementsByTagName("input");
+            var nbCheckbox = checkboxes.length;
+            for (var i = 0; i < nbCheckbox; i++) {
+                if (checkboxes[i].getAttribute("type") == "checkbox") {
+                    if (checkboxes[i].checked == 0) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function placeHold() {
+            var checkedItems = $(".selection:checked");
+            if ($(checkedItems).size() == 0) {
+                alert(MSG_NO_ITEM_SELECTED);
+                return false;
+            }
+            $(checkedItems).each(function () {
+                var bib_param = $("<input>").attr("type", "hidden").attr("name", "biblionumber").val($(this).val());
+                $("#hold_form").append(bib_param);
+            });
+            $("#hold_form").submit();
+            return false;
+        }
+
+        function cartList() {
+            var checkboxes = $("#searchresults").find(":checkbox");
+            var vshelf = vShelfAdd(checkboxes);
+            if ($("#addto").find("option:selected").val() == "addtolist") {
+                var shelfnumber = $("#addto").find("option:selected").attr("id").replace("s", "");
+                if (vshelf) {
+                    openWindow("/cgi-bin/koha/virtualshelves/addbybiblionumber.pl?shelfnumber=" + shelfnumber + "&confirm=1&" + vshelf, "popup", 500, 500);
+                }
+                return false;
+            } else if ($("#addto").find("option:selected").val() == "newlist") {
+                if (vshelf) {
+                    openWindow("/cgi-bin/koha/virtualshelves/addbybiblionumber.pl?newshelf=1&" + vshelf, "popup", 500, 500);
+                }
+                return false;
+            } else if ($("#addto").find("option:selected").val() == "morelists") {
+                if (vshelf) {
+                    openWindow("/cgi-bin/koha/virtualshelves/addbybiblionumber.pl?" + vshelf, "popup", 500, 500);
+                }
+                return false;
+            }
+            if ($("#addto").find("option:selected").val() == "addtocart") {
+                addMultiple(checkboxes);
+                return false;
+            }
+        }
+
+        function AdjustRemark() {
+            var public = $("#public").val();
+            var perms = $("#allow_changes_from").val();
+
+            if (perms < 2) {
+                $("#anyone_remark").hide();
+                $("#staff_remark").hide();
+                $("#permitted_staff_remark").hide();
+            } else if (public == 0) {
+                // If we move to Private (without shares), show Anyone remark
+                // Note: the number of shares is not tested real-time
+                if (!is_shelf_shared) {
+                    if (perms == 2) {
+                        $("#anyone_remark").show();
+                        $("#staff_remark").hide();
+                        $("#permitted_staff_remark").hide();
+                    } else if (perms == 3) {
+                        $("#anyone_remark").hide();
+                        $("#staff_remark").show();
+                        $("#permitted_staff_remark").hide();
+                    } else if (perms == 4) {
+                        $("#anyone_remark").hide();
+                        $("#staff_remark").hide();
+                        $("#permitted_staff_remark").show();
+                    }
+                } else {
+                    $("#anyone_remark").hide();
+                    $("#staff_remark").hide();
+                    $("#permitted_staff_remark").hide();
+                }
+            } else {
+                // public==1
+                $("#anyone_remark").hide();
+                $("#staff_remark").hide();
+                $("#permitted_staff_remark").hide();
+            }
+        }
+        $(document).ready(function () {
+            $(".adjust_remark").on("change", function () {
+                AdjustRemark();
+            });
+        });
+    </script>
+ [% IF op == 'view' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            function sendList() {
+                openWindow(CGIBIN + `virtualshelves/sendshelf.pl?shelfid=${shelfnumber}`);
+            }
+
+            $(document).ready(function () {
+                $("#sendlist").click(function () {
+                    sendList();
+                    return false;
+                });
+            });
+        </script>
+ [% END %]
+
+ [% IF op == 'transfer' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                patron_autocomplete($("#find_patron"), {
+                    "on-select-add-to": {
+                        container: $("#new_owner_name"),
+                        input_name: "new_owner",
+                    },
+                    "on-select-callback": function (event, ui) {
+                        $("#find_patron").val("").focus();
+                        return false;
+                    },
+                });
+
+                $("#transferform").submit(function () {
+                    if (!$('input[name="new_owner"]').val()) {
+                        alert(_("Please select a new owner first"));
+                        return false;
+                    }
+                    return true;
+                });
+            });
+        </script>
+ [% END %]
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

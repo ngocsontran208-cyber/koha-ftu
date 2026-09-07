@@ -1,0 +1,37 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Patron card creator") | html %]
+ &rsaquo; [% t("Tools") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="pcard_home" class="tools pcard">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/tools/tools-home.pl">Công cụ bổ trợ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tạo thẻ bạn đọc</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='tools-menu' %]
+ [% INCLUDE 'messages.inc' %]
+
+ [% INCLUDE 'patroncards-toolbar.inc' %]
+
+ <h1>Tạo thẻ bạn đọc</h1>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

@@ -1,5 +1,5 @@
 Searching:
-    Features:
+    Tính năng:
         -
             - Perform wildcard searching (where, for example, <cite>Har</cite> would match <cite>Harry</cite> and <cite>harp</cite>)
             - pref: QueryAutoTruncate

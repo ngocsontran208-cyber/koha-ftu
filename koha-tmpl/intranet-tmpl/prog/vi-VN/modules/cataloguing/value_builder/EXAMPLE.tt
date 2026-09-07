@@ -1,0 +1,48 @@
+[% USE raw %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Framework plugin example") | html %]
+ &rsaquo; [% t("Cataloguing") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="EXAMPLE" class="cat value_builder">
+<form method="get" name="f_pop" onsubmit="report()" action="">
+ <h1>EXAMPLE plugin</h1>
+ <p>Hi, you are looking at the result of launching the EXAMPLE plugin.</p>
+ <p>I received this from you:</p>
+ <input type="text" id="received" value="[% result | html %]" disabled />
+
+ <p>I will pass back what you type here, if you press OK.</p>
+
+ <input type="text" id="return" value="[% result | html %]" />
+
+ <nav class="navbar navbar-default fixed-bottom">
+ <div class="container-fluid">
+ <fieldset class="action">
+ <input type="button" class="btn btn-primary" value="OK" onclick="submitMyForm();" />
+ <button class="btn btn-default close_window">Hủy bỏ</button>
+ </fieldset>
+ </div>
+ </nav>
+</form>
+<script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+    var index = "[% index | html %]";
+</script>
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    $(document).ready(function () {
+        $("#return").focus();
+    });
+
+    // The following function just puts back the value of the input #return
+    // into the caller's field, referenced by index. And closes the popup.
+    function submitMyForm() {
+        $(window.opener.document).find(`#${index}`).val($("#return").val());
+        window.close();
+    }
+</script>
+[% INCLUDE 'popup-bottom.inc' %]

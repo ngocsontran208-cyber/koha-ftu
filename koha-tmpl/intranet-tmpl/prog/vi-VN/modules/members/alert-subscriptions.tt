@@ -1,0 +1,106 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE AuthorisedValues %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Alert subscriptions for [% INCLUDE 'patron-title.inc' no_html = 1 %] &rsaquo; Patrons &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="pat_alert_subscriptions" class="pat">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'patron-search-header.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/members-home.pl">Bạn đọc</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% patron.borrowernumber | uri %]">[% INCLUDE 'patron-title.inc' %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Đăng ký nhận thông báo</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='circ-menu' %]
+
+ [% INCLUDE 'members-toolbar.inc' %]
+ <h1>Đăng ký nhận thông báo</h1>
+
+ [% IF patron.alert_subscriptions.count %]
+ <div class="page-section">
+ <table id="subscriptions">
+ <thead>
+ <tr>
+ <th>Số ISSN</th>
+ <th>Nhan đề</th>
+ <th>Thư viện</th>
+ <th>Vị trí</th>
+ <th>Số phân loại</th>
+ <th>Thao tác</th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH sub IN patron.alert_subscriptions %]
+ <tr>
+ <td> [% IF sub.biblio.biblioitem.issn %][% sub.biblio.biblioitem.issn | html %][% END %] </td>
+ <td>
+ <a class="button" href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% sub.subscriptionid | uri %]" title="Thông tin chi tiết ấn phẩm định kỳ">[% sub.biblio.title | html %] [% sub.biblio.subtitle | html %]</a
+                                >
+ </td>
+ <td> [% IF ( sub.branchcode ) %][% Branches.GetName( sub.branchcode ) | html %][% END %] </td>
+ <td> [% IF ( sub.location ) %][% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => sub.location ) | html %][% END %] </td>
+ <td> [% IF ( sub.callnumber ) %][% sub.callnumber | html %][% END %] </td>
+ <td class="actions">
+ <form
+                                    action="/cgi-bin/koha/members/alert-subscriptions.pl"
+                                    method="post"
+                                    class="unsubscribe"
+                                    data-title="[% sub.biblio.title | html %] [% sub.biblio.subtitle | html %]"
+                                    data-patron="[% INCLUDE 'patron-title.inc' no_html = 1 %]"
+                                >
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-unsubscribe" />
+ <input type="hidden" name="subscription_id" value="[% sub.subscriptionid | html %]" />
+ <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
+ <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-times"></i> Hủy đăng ký nhận thông báo qua email</button>
+ </form>
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>This patron has not subscribed to email alerts for any subscriptions.</p>
+ </div>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'str/members-menu.inc' %]
+ [% Asset.js("js/members-menu.js") | $raw %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#subscriptions").kohaTable();
+            $(".unsubscribe").submit(function () {
+                var patron = $(this).data("patron");
+                var title = $(this).data("title");
+                return confirmDelete(_("Bạn có chắc chắn muốn hủy đăng ký nhận thông báo qua email cho %s đối với %s không?").format(patron, title));
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

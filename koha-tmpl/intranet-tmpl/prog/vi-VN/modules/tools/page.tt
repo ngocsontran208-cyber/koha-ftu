@@ -1,0 +1,54 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( page ) %]
+ [% page.title | html %]
+ [% ELSE %]
+ [% t("Page error") | html %]
+ [% END %]
+ &rsaquo; [% t("Tools") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="tools_page_[% page.additional_content_id | html %]" class="tools">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/tools/tools-home.pl">Công cụ bổ trợ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% IF page %]
+ [% page.title | html %]
+ [% ELSE %]
+ <span>Lỗi trang</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='tools-menu' %]
+ [% IF page %]
+ <h1>[% page.title | html %]</h1>
+
+ <div class="page"> [% page.content | $raw %] </div>
+ [% ELSE %]
+ <div class="alert alert-warning"> Trang này không tồn tại. </div>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/tools-menu.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

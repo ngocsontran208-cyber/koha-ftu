@@ -1,0 +1,624 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE AuthorisedValues %]
+[% SET footerjs = 1 %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Search engine configuration (Elasticsearch)") | html %]
+ &rsaquo; [% t("Administration") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    a.add,
+    a.delete {
+        cursor: pointer;
+    }
+</style>
+<!--</head>-->
+
+<!--<body id="admin_searchengine_mappings" class="admin">-->
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'prefs-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Search engine configuration (Elasticsearch)</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+
+ [% FOR m IN messages %]
+ <div class="alert alert-[% m.type | html %]">
+ [% SWITCH m.code %]
+ [% CASE 'error_on_update' %]
+ [% tx("An error occurred when updating mappings: {message}.", { message = m.message }) | html %]
+ [% CASE 'error_on_delete' %]
+ [% t("An error occurred when deleting the existing mappings. Nothing has been changed!") | $raw %]
+ [% tx("(search field {field_name} with mapping {marc_field}.)", { field_name = m.values.field_name, marc_field = m.values.marc_field }) | html %]
+ [% CASE 'invalid_field_weight' %]
+ [% tx("Invalid field weight '{weight}', must be a positive decimal number.", { weight = m.weight }) | html %]
+ [% CASE 'missing_mandatory_fields' %]
+ [% t("You attempted to delete all mappings for a required index, you must leave at least one mapping") | $raw %]
+ [% CASE 'error_on_update_es_mappings' %]
+ [% tx("An error occurred when updating Elasticsearch index mappings: {message}.", { message = m.message }) | html %]
+ [% CASE 'reindex_required' %]
+ [% tx("Index '{index}' needs to be reindexed.", { index = m.index }) | html %]
+ [% CASE 'recreate_required' %]
+ [% tx("Index '{index}' needs to be recreated.", { index = m.index }) | html %]
+ [% CASE 'success_on_update' %]
+ [% t("Mappings updated successfully.") | $raw %]
+ [% CASE 'success_on_reset' %]
+ [% t("Mappings have been reset successfully.") | $raw %]
+ [% CASE 'elasticsearch_disabled' %]
+ [% t("Elasticsearch is currently disabled.") | $raw %]
+ [% CASE %]
+ [% m.code | html %]
+ [% END %]
+ </div>
+ [% END %]
+
+ <h1>Search engine configuration (Elasticsearch)</h1>
+
+ [% IF errors %]
+ <div class="alert alert-warning">
+ Changes have not been applied. Please check the following values:
+ <ul>
+ [% FOREACH e IN errors %]
+ <li>
+ [% IF ( e.type == "malformed_mapping" ) %]
+ <span>The value "[% e.value | html %]" is not supported for mappings</span>
+ [% ELSIF ( e.type == "no_mapping" ) %]
+ <span>There is no mapping for the index [% e.value | html %]</span>
+ [% END %]
+ </li>
+ [% END %]
+ </ul>
+ </div>
+ [% END %]
+
+ [% IF reset_confirm %]
+ <div class="alert alert-warning">
+ <h3>The current mappings you see on the screen will be erased and replaced by the mappings in the mappings.yaml file.</h3>
+ <form method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-reset_confirmed" />
+ <button type="submit" class="btn btn-default approve"><i class="fa fa-fw fa-check"></i> Yes, reset mappings</button>
+ </form>
+
+ <form method="get">
+ <button type="submit" class="btn btn-default deny"><i class="fa fa-fw fa-times"></i> No, do not reset mappings</button>
+ </form>
+ </div>
+ [% END %]
+
+ <div class="alert alert-info">
+ <i class="fa fa-exclamation"></i>
+ <strong>Cảnh báo:</strong> Any changes to the configuration will only take effect after a full reindex. Until then searching may not work correctly.
+
+ <p><strong>Weight:</strong> define weight as a positive number. Higher numbers indicate increased relevancy. <strong>Note that fields weighting works only for simple search.</strong></p>
+ <ol>
+ <li>Only search fields mapped with biblios can be weighted</li>
+ <li>Search will boost/increase weighted field(s) relevancy</li>
+ </ol>
+ </div>
+
+ <form id="es_mappings" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+
+ [% WRAPPER tabs id= "tabs" %]
+
+ [% WRAPPER tabs_nav %]
+ [% WRAPPER tab_item tabname= "search_fields" bt_active= 1 %]Search fields[% END %]
+ [% FOREACH index IN indexes %]
+ [% SWITCH index.index_name %]
+ [% CASE 'biblios' %]
+ [% WRAPPER tab_item tabname= "mapping_biblios" %]<span>Bibliographic records</span>[% END %]
+ [% CASE 'authorities' %]
+ [% WRAPPER tab_item tabname= "mapping_authorities" %]<span>Dữ liệu kiểm soát</span>[% END %]
+ [% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+
+ [% WRAPPER tab_panels %]
+ [% WRAPPER tab_panel tabname="search_fields" bt_active= 1 %]
+ <table class="search_fields" id="search_fields_table" data-index_name="search_fields">
+ <thead>
+ <tr>
+ <th>Tên</th>
+ <th>Aliases</th>
+ <th>Nhãn</th>
+ <th>Loại</th>
+ <th>Số lần dùng</th>
+ <th colspan="2">Searchable</th>
+ <th>&nbsp;</th>
+ </tr>
+ <tr>
+ <th colspan="5" class="no-sort">&nbsp;</th>
+ <th class="no-sort">Staff interface</th>
+ <th class="no-sort">Giao diện OPAC</th>
+ <th>&nbsp;</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH search_field IN all_search_fields %]
+ <tr>
+ <td data-order="[% search_field.name | html %]">
+ [% IF search_field.mandatory %]
+ <input type="text" name="search_field_name" value="[% search_field.name | html %]" readonly />
+ [% ELSE %]
+ <input type="text" name="search_field_name" value="[% search_field.name | html %]" />
+ [% END %]
+ </td>
+ <td> [% search_field.aliases.join(', ') | html %] </td>
+ <td data-order="[% search_field.label | html %]">
+ [% IF search_field.mandatory %]
+ <input type="text" name="search_field_label" value="[% search_field.label | html %]" readonly />
+ [% ELSE %]
+ <input type="text" name="search_field_label" value="[% search_field.label | html %]" />
+ [% END %]
+ </td>
+ <td data-order="[% search_field.type | html %]">
+ [% IF search_field.mandatory %]
+ <input type="hidden" name="search_field_type" value="[% search_field.type | html %]" />
+ [% END %]
+ <select name="search_field_type" [% IF search_field.mandatory %]disabled[% END %]>
+ <option value="">Mặc định</option>
+ [% IF search_field.type == "string" %]
+ <option value="string" selected="selected">String</option>
+ [% ELSE %]
+ <option value="string">String</option>
+ [% END %]
+ [% IF search_field.type == "date" %]
+ <option value="date" selected="selected">Ngày</option>
+ [% ELSE %]
+ <option value="date">Ngày</option>
+ [% END %]
+ [% IF search_field.type == "year" %]
+ <option value="year" selected="selected">Năm</option>
+ [% ELSE %]
+ <option value="year">Năm</option>
+ [% END %]
+ [% IF search_field.type == "number" %]
+ <option value="number" selected="selected">Số phát hành</option>
+ [% ELSE %]
+ <option value="number">Số phát hành</option>
+ [% END %]
+ [% IF search_field.type == "boolean" %]
+ <option value="boolean" selected="selected">Boolean</option>
+ [% ELSE %]
+ <option value="boolean">Boolean</option>
+ [% END %]
+ [% IF search_field.type == "sum" %]
+ <option value="sum" selected="selected">Sum</option>
+ [% ELSE %]
+ <option value="sum">Sum</option>
+ [% END %]
+ [% IF search_field.type == "isbn" %]
+ <option value="isbn" selected="selected">Số ISBN</option>
+ [% ELSE %]
+ <option value="isbn">Số ISBN</option>
+ [% END %]
+ [% IF search_field.type == "stdno" %]
+ <option value="stdno" selected="selected">Identifier</option>
+ [% ELSE %]
+ <option value="stdno">Identifier</option>
+ [% END %]
+ [% IF search_field.type == "callnumber" %]
+ <option value="callnumber" selected="selected">Số phân loại</option>
+ [% ELSE %]
+ <option value="callnumber">Số phân loại</option>
+ [% END %]
+ [% IF search_field.type == "geo_point" %]
+ <option value="geo_point" selected="selected">Geo point</option>
+ [% ELSE %]
+ <option value="geo_point">Geo point</option>
+ [% END %]
+ </select>
+ </td>
+ <td data-order="[% search_field.weight | html %]">
+ [% IF search_field.mapped_biblios %]
+ <input type="text" inputmode="decimal" pattern="[0-9\.]*" name="search_field_weight" value="[% search_field.weight | html %]" />
+ [% ELSE %]
+ <input type="text" name="search_field_weight" value="" />
+ [% END %]
+ </td>
+ <td>
+ <select name="search_field_staff_client">
+ [% IF search_field.staff_client %]
+ <option value="1" selected="selected">Có</option>
+ <option value="0">Không</option>
+ [% ELSE %]
+ <option value="1">Có</option>
+ <option value="0" selected="selected">Không</option>
+ [% END %]
+ </select>
+ </td>
+ <td>
+ <select name="search_field_opac">
+ [% IF search_field.opac %]
+ <option value="1" selected="selected">Có</option>
+ <option value="0">Không</option>
+ [% ELSE %]
+ <option value="1">Có</option>
+ <option value="0" selected="selected">Không</option>
+ [% END %]
+ </select>
+ </td>
+ <td>
+ [% IF search_field.is_mapped %]
+ <a class="btn btn-default btn-xs disabled delete-search-field" style="cursor: pointer;"><i class="fa fa-trash"></i> Xóa</a>
+ [% ELSE %]
+ <a class="btn btn-default btn-xs delete-search-field" style="cursor: pointer;"><i class="fa fa-trash"></i> Xóa</a>
+ [% END %]
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ <tfoot>
+ <tr data-type="search-field">
+ <td>
+ <input type="text" data-id="search_field_name" />
+ </td>
+ <td></td>
+ <td>
+ <input type="text" data-id="search_field_label" />
+ </td>
+ <td>
+ <select data-id="search_field_type">
+ <option value="">Mặc định</option>
+ <option value="string">String</option>
+ <option value="date">Ngày</option>
+ <option value="year">Năm</option>
+ <option value="number">Số phát hành</option>
+ <option value="boolean">Boolean</option>
+ <option value="sum">Sum</option>
+ <option value="isbn">Số ISBN</option>
+ <option value="stdno">Identifier</option>
+ <option value="callnumber">Số phân loại</option>
+ <option value="geo_point">Geo point</option>
+ </select>
+ </td>
+ <td>
+ <input type="text" data-id="search_field_weight" value="" />
+ </td>
+ <td>
+ <select data-id="search_field_staff_client">
+ <option value="1">Có</option>
+ <option value="0">Không</option>
+ </select>
+ </td>
+ <td>
+ <select data-id="search_field_opac">
+ <option value="1">Có</option>
+ <option value="0">Không</option>
+ </select>
+ </td>
+ <td
+                                    ><a class="btn btn-default btn-xs add-search-field"><i class="fa fa-plus"></i> Thêm</a></td
+                                >
+ </tr>
+ </tfoot>
+ </table>
+ [% END %]
+ [% FOREACH index IN indexes %]
+ [% WRAPPER tab_panel tabname="mapping_${ index.index_name }" %]
+ <table class="mappings" data-index_name="[% index.index_name | html %]" data-ordering="false" id="mapping_[% index.index_name | html %]_table">
+ <thead>
+ <tr>
+ <th>Search field</th>
+ <th>Sortable</th>
+ <th>Facetable</th>
+ <th>Suggestible</th>
+ <th>Searchable</th>
+ <th>Bộ lọc dữ liệu</th>
+ <th>Mapping</th>
+ <th>&nbsp;</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH mapping IN index.mappings %]
+ [% IF mapping.search_field_mandatory && mapping.search_field_label != loop.next.search_field_label && mapping.search_field_label != loop.prev.search_field_label %]
+ <tr>
+ <td>
+ <input type="hidden" name="mapping_index_name" value="[% index.index_name | html %]" />
+ <input type="hidden" name="mapping_search_field_name" value="[% mapping.search_field_name | html %]" />
+ [% mapping.search_field_name | html %]
+ [% IF mapping.search_field_label != mapping.search_field_name %]([% mapping.search_field_label | html %])[% END %]
+ </td>
+ <td>
+ [% IF mapping.sort == 0 %]
+ <input type="hidden" name="mapping_sort" value="0" readonly />Không [% ELSE %] <input type="hidden" name="mapping_sort" value="1" readonly />Yes
+ [% END %]
+ </td>
+ <td> <input type="hidden" name="mapping_facet" value="[% mapping.facet | html %]" readonly />[% IF mapping.facet == 1 %]Yes[% ELSE %]No[% END %] </td>
+ <td> <input type="hidden" name="mapping_suggestible" value="[% mapping.suggestible | html %]" readonly />[% IF mapping.suggestible == 1 %]Yes[% ELSE %]No[% END %] </td>
+ <td> <input type="hidden" name="mapping_search" value="[% mapping.search | html %]" readonly />[% IF mapping.search == 1 %]Yes[% ELSE %]No[% END %] </td>
+ <td> <input type="hidden" name="mapping_filter" value="[% mapping.filter | html %]" readonly />[% IF mapping.filter == 'punctuation' %]Punctuation[% END %] </td>
+ <td data-search="[% mapping.marc_field | html %]">
+ <input name="mapping_marc_field" type="text" value="[% mapping.marc_field | html %]" />
+ </td>
+ <td>&nbsp;</td>
+ </tr>
+ [% ELSE %]
+ <tr>
+ <td>
+ <input type="hidden" name="mapping_index_name" value="[% index.index_name | html %]" />
+ <input type="hidden" name="mapping_search_field_name" value="[% mapping.search_field_name | html %]" />
+ [% mapping.search_field_name | html %]
+ [% IF mapping.search_field_label != mapping.search_field_name %]([% mapping.search_field_label | html %])[% END %]
+ </td>
+ <td>
+ <select name="mapping_sort">
+ [% IF mapping.sort == 0 %]
+ <option value="0" selected="selected">Không</option>
+ <option value="1">Có</option>
+ [% ELSE %]
+ <option value="0">Không</option>
+ <option value="1" selected="selected">Có</option>
+ [% END %]
+ </select>
+ </td>
+ <td>
+ [% IF mapping.is_facetable %]
+ <select name="mapping_facet">
+ [% IF mapping.facet %]
+ <option value="0">Không</option>
+ <option value="1" selected="selected">Có</option>
+ [% ELSE %]
+ <option value="0" selected="selected">Không</option>
+ <option value="1">Có</option>
+ [% END %]
+ </select>
+ [% ELSE %]
+ <input type="hidden" name="mapping_facet" value="0" />
+ Không [% END %] </td>
+ <td>
+ <select name="mapping_suggestible">
+ [% IF mapping.suggestible %]
+ <option value="0">Không</option>
+ <option value="1" selected="selected">Có</option>
+ [% ELSE %]
+ <option value="0" selected="selected">Không</option>
+ <option value="1">Có</option>
+ [% END %]
+ </select>
+ </td>
+ <td>
+ <select name="mapping_search">
+ [% IF mapping.search %]
+ <option value="0">Không</option>
+ <option value="1" selected="selected">Có</option>
+ [% ELSE %]
+ <option value="0" selected="selected">Không</option>
+ <option value="1">Có</option>
+ [% END %]
+ </select>
+ </td>
+ <td>
+ <select name="mapping_filter">
+ [% IF mapping.filter == 'punctuation' %]
+ <option value="">Không có</option>
+ <option value="punctuation" selected="selected">Punctuation</option>
+ [% ELSE %]
+ <option value="" selected="selected">Không có</option>
+ <option value="punctuation">Punctuation</option>
+ [% END %]
+ </select>
+ </td>
+ <td data-search="[% mapping.marc_field | html %]">
+ <input name="mapping_marc_field" type="text" value="[% mapping.marc_field | html %]" />
+ </td>
+ [% IF mapping.search_field_mandatory %]
+ <td
+                                                    ><a class="btn btn-default btn-xs delete-mapping mandatory" data-field_name="[% mapping.search_field_name | html %]" style="cursor: pointer;"><i class="fa fa-trash"></i> Xóa</a></td
+                                                >
+ [% ELSE %]
+ <td
+                                                    ><a class="btn btn-default btn-xs delete-mapping" style="cursor: pointer;"><i class="fa fa-trash"></i> Xóa</a></td
+                                                >
+ [% END %]
+ </tr>
+ [% END %]
+ [% END %]
+ </tbody>
+ <tfoot>
+ <tr data-type="mapping">
+ <td>
+ <input data-id="mapping_index_name" type="hidden" value="[% index.index_name | html %]" />
+ <select data-id="mapping_search_field_name">
+ [% FOREACH f IN all_search_fields %]
+ <option value="[% f.name | html %]">[% f.name | html %][% IF f.label != f.name %]([% f.label | html %])[% END %]</option>
+ [% END %]
+ </select>
+ </td>
+ <td>
+ <select data-id="mapping_sort">
+ <option value="0">Không</option>
+ <option value="1">Có</option>
+ </select>
+ </td>
+ <td>
+ <select data-id="mapping_facet">
+ <option value="0">Không</option>
+ <option value="1">Có</option>
+ </select>
+ </td>
+ <td>
+ <select data-id="mapping_suggestible">
+ <option value="0">Không</option>
+ <option value="1">Có</option>
+ </select>
+ </td>
+ <td>
+ <select data-id="mapping_search">
+ <option value="0">Không</option>
+ <option value="1">Có</option>
+ </select>
+ </td>
+ <td>
+ <select data-id="mapping_filter">
+ <option value="">Không có</option>
+ <option value="punctuation">Punctuation</option>
+ </select>
+ </td>
+ <td><input data-id="mapping_marc_field" type="text" /></td>
+ <td
+                                        ><a class="btn btn-default btn-xs add"><i class="fa fa-plus"></i> Thêm</a></td
+                                    >
+ </tr>
+ </tfoot>
+ </table>
+
+ [% IF index.index_name == 'biblios' %]
+ <h3>Facet order</h3>
+ <div class="hint">Drag and drop rows to change the order</div>
+ <div id="facet_[% index.index_name | html %]">
+ <table id="facet_[% index.index_name | html %]_table" style="max-width: 50%; margin: 0;">
+ <thead>
+ <tr>
+ <th>Đơn hàng</th>
+ <th class="no-sort">Search field</th>
+ <th class="no-sort">Nhãn</th>
+ <th class="no-sort">Authorized value category</th>
+ <th class="no-sort">&nbsp;</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH f IN facetable_fields %]
+ <tr>
+ <td>[% loop.count | html %]</td>
+ <td class="drag_handle"> [% f.name | html %] </td>
+ <td>
+ [% SWITCH f.label %]
+ [% CASE 'Authors' %]
+ <span>Tác giả</span>
+ [% CASE 'Item types' %]
+ <span>Loại tài liệu</span>
+ [% CASE 'Locations' %]
+ <span>Vị trí</span>
+ [% CASE 'Places' %]
+ <span>Địa điểm</span>
+ [% CASE 'Series' %]
+ <span>Tuyển tập</span>
+ [% CASE 'Topics' %]
+ <span>Chủ đề</span>
+ [% CASE 'Collections' %]
+ <span>Bộ sưu tập</span>
+ [% CASE 'Holding libraries' %]
+ <span>Thư viện lưu trữ</span>
+ [% CASE 'Home libraries' %]
+ <span>Thư viện chính</span>
+ [% CASE 'Languages' %]
+ <span>Ngôn ngữ</span>
+ [% CASE %]
+ <span>[% f.label | html %]</span>
+ [% END %]
+ <input type="hidden" name="facet_name" value="[% f.name | html %]" />
+ </td>
+ <td>
+ [% IF f.name != 'itype' && f.name != 'location' && f.name != 'holdingbranch' && f.name != 'homebranch' && f.name != 'ln' && f.name != 'ccode' %]
+ <select name="facet_av_cat_[% f.name | html %]">
+ <option value=""></option>
+ [% FOR av_cat IN authorised_value_categories %]
+ [% IF f.authorised_value_category == av_cat %]
+ <option value="[% av_cat | html %]" selected="selected">[% av_cat | html %]</option>
+ [% ELSE %]
+ <option value="[% av_cat | html %]">[% av_cat | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ [% END %]
+ </td>
+ <td>
+ <a class="btn btn-default btn-xs delete-facet" style="cursor: pointer;"><i class="fa fa-trash"></i> Xóa</a>
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ <tfoot>
+ <tr data-type="facet">
+ <td></td>
+ <td>
+ <select data-id="facet-search-field">
+ [% FOREACH search_field IN all_search_fields %]
+ <option value="[% search_field.name | html %]" data-label="[% search_field.label | html %]">[% search_field.name | html %]</option>
+ [% END %]
+ </select>
+ </td>
+ <td></td>
+ <td>
+ <select data-id="facet-av-cat">
+ <option value=""></option>
+ [% FOR av_cat IN authorised_value_categories %]
+ <option value="[% av_cat | html %]">[% av_cat | html %]</option>
+ [% END %]
+ </select>
+ </td>
+ <td
+                                                ><a class="btn btn-default btn-xs add-facet"><i class="fa fa-plus"></i> Thêm</a></td
+                                            >
+ </tr>
+ </tfoot>
+ </table>
+ </div>
+ [% END %]
+ [% END # /WRAPPER tab_panel#mapping_{ index.index_name} %]
+ [% END # /FOREACH index %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs %]
+
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-edit" />
+ <button class="btn btn-primary" type="submit"><i class="fa-solid fa-hard-drive" aria-hidden="true"></i> Lưu</button>
+ </fieldset>
+ </form>
+ <form method="get">
+ <fieldset class="action">
+ <button class="btn btn-default" type="submit" name="op" value="reset_confirm"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Reset mappings</button>
+ <a id="export_mappings" class="btn btn-default"><i class="fa-solid fa-download" aria-hidden="true"></i> Export mappings</a>
+ </fieldset>
+ </form>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ [% Asset.js("js/elasticsearch-mappings.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $("#export_mappings").on("click", function (e) {
+            e.preventDefault();
+            fetch("/api/v1/config/search_mappings", {
+                headers: { Accept: "application/yaml" },
+            })
+                .then(function (response) {
+                    if (!response.ok) throw new Error("Export failed");
+                    return response.blob();
+                })
+                .then(function (blob) {
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement("a");
+                    a.href = url;
+                    a.download = "search_mappings.yaml";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                })
+                .catch(function () {
+                    alert(_("Failed to export mappings."));
+                });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

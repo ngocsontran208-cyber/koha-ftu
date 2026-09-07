@@ -87,3 +87,6 @@
 
 [% PROCESS 'html_helpers.inc' %]
 [% KohaPlugins.get_plugins_opac_head | $raw %]
+
+<!-- FTU Global Branding CSS -->
+<link rel="stylesheet" type="text/css" href="/opac-tmpl/bootstrap/css/ftu-opac.css" />

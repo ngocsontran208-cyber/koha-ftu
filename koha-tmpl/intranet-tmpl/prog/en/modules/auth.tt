@@ -44,10 +44,10 @@
             &rsaquo;
         [% END %]
         [% IF ( loginprompt ) %]
-            [% t("Log in to Koha") | html %]
+            [% t("Đăng nhập") | html %]
             &rsaquo;
         [% END %]
-        [% t("Koha") | html %]
+        [% t("Thư viện – Phân hiệu Trường Đại học Ngoại thương") | html %]
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -57,8 +57,14 @@
 
 <div class="main container-fluid">
     [% INCLUDE 'messages.inc' %]
-
     <div id="login">
+        <!-- FTU Branding Header -->
+        <div id="ftu-header">
+            <img id="ftu-logo-img" src="/intranet-tmpl/prog/img/ftu-logo.png" alt="Logo FTU" />
+            <div id="ftu-name-line1">Thư viện</div>
+            <div id="ftu-name-line2">Phân hiệu Trường Đại học Ngoại thương</div>
+        </div>
+        <div id="ftu-divider"></div>
         <h1><a href="https://koha-community.org">Koha</a></h1>
 
         [% SET StaffLoginInstructions = AdditionalContents.get( location => "StaffLoginInstructions", lang => lang ) %]
@@ -284,7 +290,12 @@
         [% IF ( nopermission ) %]
             <p><a id="previous_page" href="javascript:window.history.back()">[Previous page]</a> <a id="mainpage" href="/">[Main page]</a></p>
         [% END %]
+        <!-- FTU Footer inside panel -->
+        <div id="ftu-footer">
+            <p>Hệ thống Quản lý Thư viện &bull; <a href="https://www.ftu.edu.vn" target="_blank">ftu.edu.vn</a></p>
+        </div>
     </div>
+    <!-- /.login -->
 </div>
 <!-- /.main.container-fluid -->
 

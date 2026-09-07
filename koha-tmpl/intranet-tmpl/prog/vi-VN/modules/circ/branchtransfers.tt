@@ -1,0 +1,345 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE ItemTypes %]
+[% USE AuthorisedValues %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% PROCESS 'member-display-address-style.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Transfers") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        #tobranchcd-error {
+            display: block;
+        }
+        #transfer_confirm {
+            font-size: 110%;
+            line-height: 130%;
+        }
+        #transfer_confirm .modal-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+    </style>
+[% END %]
+</head>
+
+[% BLOCK display_holdpatron_address %]
+ [% PROCESS 'display-address-style' %]
+[% END %]
+
+<body id="circ_branchtransfers" class="circ">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Chuyển tài liệu</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% SET aside = Koha.Preference('CircSidebar') ? 'circ-nav' : '' %]
+[% WRAPPER 'main-container.inc' aside=aside %]
+
+ [% IF ( found ) %]
+ [% BLOCK transfer_hidden_fields %]
+ [% FOREACH trsfitemloo IN trsfitemloop %]
+ <input type="hidden" name="bc-[% trsfitemloo.counter | html %]" value="[% trsfitemloo.item.barcode | html %]" />
+ <input type="hidden" name="fb-[% trsfitemloo.counter | html %]" value="[% trsfitemloo.frombrcd | html %]" />
+ <input type="hidden" name="tb-[% trsfitemloo.counter | html %]" value="[% trsfitemloo.tobrcd | html %]" />
+ [% END %]
+ [% END %]
+
+ <h1>Chuyển tài liệu</h1>
+
+ <!-- Modal -->
+ <div class="modal block in" id="transfer_confirm" tabindex="-1" role="dialog" aria-labelledby="transfer_confirmLabel" data-backdrop="static" data-show="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="transfer_confirmLabel">
+ [% IF ( reserved ) %]
+ <span>Hold found:</span>
+ [% ELSIF ( waiting ) %]
+ <span>Hold found (item is already waiting):</span>
+ [% ELSIF ( transferred) %]
+ <span>Hold found (item is waiting and in transit):</span>
+ [% END %]
+ <br />
+ [% INCLUDE 'biblio-title.inc' biblio=found_biblio link=1 %]
+ [% IF ( barcode ) %]
+ (<a href="/cgi-bin/koha/catalogue/moredetail.pl?biblionumber=[% biblionumber | uri %]&amp;itemnumber=[% itemnumber | uri %]#item[% itemnumber | uri %]">[% barcode | html %]</a>)
+ [% END %]
+ </h1>
+ </div>
+ <div class="modal-body">
+ [% IF ( reserved || waiting || transferred ) %]
+ <h5>Bạn đọc đặt mượn:</h5>
+ <ul>
+ <li>
+ [% INCLUDE 'patron-title.inc' patron=hold.patron hide_patron_infos_if_needed=1 invert_name=1 link_to="circulation_reserves" %]
+ <span class="patron-category"> - [% patron.category.description | html %]</span>
+ </li>
+ [% INCLUDE display_holdpatron_address %]
+ [% IF ( patron.phone ) %]
+ <li class="patron-phone"> [% patron.phone | html %]</li>
+ [% END %]
+
+ [% IF ( patron.email ) %]
+ <li class="patron-email"><a href="mailto:[% patron.email | uri %]">[% patron.email | html %]</a></li>
+ [% END %]
+
+ [% IF ( patron.is_debarred ) %]
+ <li class="error">Bạn đọc bị KHÓA THẺ</li>
+ [% END %]
+
+ [% IF ( patron.gonenoaddress ) %]
+ <li class="error">Địa chỉ bạn đọc chưa chính xác</li>
+ [% END %]
+ </ul>
+ <h4>Transfer to: [% Branches.GetName( hold.branchcode ) | html %]</h4>
+ [% END %]
+ </div>
+
+ <div class="modal-footer">
+ <div>
+ <form method="post" action="branchtransfers.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ [% PROCESS transfer_hidden_fields %]
+ <input type="hidden" name="reserve_id" value="[% hold.reserve_id | html %]" />
+ <input type="hidden" name="itemnumber" value="[% itemnumber | html %]" />
+ <input type="hidden" name="borrowernumber" value="[% borrowernumber | html %]" />
+ <input type="hidden" name="tobranchcd" value="[% tobranchcd | html %]" />
+ <input type="hidden" name="barcode" value="[% barcode | html %]" />
+ [% IF ( waiting or transferred or processing ) %]
+ <input type="hidden" name="op" value="cud-KillWaiting" />
+ <button type="submit" class="btn btn-default"><i class="fa fa-trash"></i> Cancel hold and attempt transfer</button>
+ [% END %]
+ [% IF ( reserved ) %]
+ <input type="hidden" name="op" value="cud-SetTransit" />
+ <button type="submit" class="btn btn-default approve"><i class="fa fa-check"></i> Transfer to [% Branches.GetName( hold.branchcode ) | html %]</button>
+ [% END %]
+ </form>
+ </div>
+
+ [% IF ( reserved && hold.branchcode != tobranchcd ) %]
+ <div>
+ <form method="post" action="branchtransfers.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ [% PROCESS transfer_hidden_fields %]
+ <input type="hidden" name="tobranchcd" value="[% tobranchcd | html %]" />
+ <input type="hidden" name="barcode" value="[% barcode | html %]" />
+ <input type="hidden" name="op" value="cud-IgnoreHold" />
+ <button type="submit" class="btn btn-default"><i class="fa fa-ban"></i> Ignore hold and transfer to [% Branches.GetName( tobranchcd ) | html %]</button>
+ </form>
+ </div>
+ [% END %]
+
+ [% IF ( reserved ) %]
+ <div>
+ <form method="post" action="branchtransfers.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ [% PROCESS transfer_hidden_fields %]
+ <input type="hidden" name="reserve_id" value="[% hold.reserve_id | html %]" />
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ <input type="hidden" name="borrowernumber" value="[% borrowernumber | html %]" />
+ <input type="hidden" name="tobranchcd" value="[% tobranchcd | html %]" />
+ <input type="hidden" name="barcode" value="[% barcode | html %]" />
+ <input type="hidden" name="op" value="cud-KillReserved" />
+ <button type="submit" class="btn btn-default"><i class="fa fa-trash"></i> Cancel hold and attempt transfer</button>
+ </form>
+ </div>
+ [% END # /IF reserved %]
+
+ <div>
+ <form method="get" action="branchtransfers.pl">
+ <input type="hidden" name="tobranchcd" value="[% tobranchcd | html %]" />
+ <input type="hidden" name="barcode" />
+ [% PROCESS transfer_hidden_fields %]
+ <button type="submit" class="btn btn-default deny"><i class="fa fa-times"></i> Ignore and return to transfers</button>
+ </form>
+ </div>
+ </div>
+ <!-- /.modal-footer -->
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+ </div>
+ <!-- /.modal -->
+ [% ELSE # /IF found %]
+ [% IF ( reqmessage ) %]
+ <div class="alert alert-info">
+ [% IF ( cancelled ) %]
+ <p>Hold cancelled</p>
+ [% END %]
+ [% IF ( settransit ) %]
+ <p>Item is now in transit to [% Branches.GetName(tobranchcd) | html %]</p>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF ( errmsgloop ) %]
+ [% FOREACH errmsgloo IN errmsgloop %]
+ [% IF ( errmsgloo.errbadcode ) %]
+ <div class="alert alert-info">
+ <p>Không có tài liệu với đăng ký cá biệt là: [% errmsgloo.msg | html %]</p>
+ </div>
+ [% END %]
+ [% IF ( errmsgloo.errnotallowed ) %]
+ <div class="alert alert-info">
+ <p>Transfer is not allowed for:</p>
+ <ol>
+ [% IF ( Koha.Preference('BranchTransferLimitsType') == 'itemtype' ) %]
+ <li>Kiểu tài liệu: <strong>[% ItemTypes.GetDescription( errmsgloo.code ) | html %]</strong></li>
+ [% ELSE %]
+ <li>Bộ sưu tập: <strong>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode', authorised_value => errmsgloo.code ) | html %]</strong></li>
+ [% END %]
+ <li>Originating library: <strong>[% Branches.GetName( errmsgloo.fbr ) | html %]</strong></li>
+ <li>Thư viện đích: <strong>[% Branches.GetName( errmsgloo.tbr ) | html %]</strong></li>
+ </ol>
+ </div>
+ [% END %]
+ [% IF ( errmsgloo.errdesteqholding ) %]
+ <div class="alert alert-info">
+ <p>Hiện tại tài liệu bạn cần chuyển đã ở thư viện đích.</p>
+ </div>
+ [% END %]
+ [% IF ( errmsgloo.errwasreturned ) %]
+ <div class="alert alert-info">
+ <p
+                            >Tài liệu được ghi mượn tới bạn đọc <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% errmsgloo.patron.borrowernumber | uri %]"
+                                >[% errmsgloo.patron.firstname | html %] [% errmsgloo.patron.surname | html %] ([% errmsgloo.patron.cardnumber | html %])</a
+                            >
+ và đã được trả lại.</p
+                        >
+ </div>
+ [% END %]
+ [% END # /FOREACH errmsgloo %]
+ [% END # /errmsgloop %]
+
+ <div id="branchtransfers">
+ <form method="post" action="/cgi-bin/koha/circ/branchtransfers.pl" class="validated">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="barcode_input">
+ <h1>Chuyển tài liệu</h1>
+ <div class="form-control-group">
+ <label for="tobranchcd" class="hint">Thư viện đích: </label>
+ <select name="tobranchcd" id="tobranchcd" class="required select2" required="required">
+ [% PROCESS options_for_libraries libraries => Branches.all( selected => tobranchcd, unfiltered => 1) %]
+ </select>
+ <span class="required">Bắt buộc</span>
+ </div>
+ <div class="form-control-group">
+ <label class="hint" for="barcode">Nhập mã vạch tài liệu: </label>
+ <input name="barcode" id="barcode" size="15" class="barcode focus" placeholder="Enter item barcode" type="text" />
+ <input class="btn btn-primary" type="submit" value="Chuyển tài liệu" />
+ </div>
+ </fieldset>
+ [% FOREACH trsfitemloo IN trsfitemloop %]
+ <input type="hidden" name="bc-[% trsfitemloo.counter | html %]" value="[% trsfitemloo.item.barcode | html %]" />
+ <input type="hidden" name="fb-[% trsfitemloo.counter | html %]" value="[% trsfitemloo.frombrcd | html %]" />
+ <input type="hidden" name="tb-[% trsfitemloo.counter | html %]" value="[% trsfitemloo.tobrcd | html %]" />
+ [% END %]
+ <input type="hidden" name="op" value="cud-transfer" />
+ </form>
+ </div>
+ <!-- /#branchtransfers -->
+
+ [% IF ( trsfitemloop ) %]
+ <div class="page-section">
+ <table id="transferstable">
+ <caption>Tài liệu đã được chuyển</caption>
+ <thead>
+ <tr>
+ <th class="tf-title">Nhan đề</th>
+ <th class="tf-author">Tác giả</th>
+ <th class="tf-barcode">Mã vạch</th>
+ <th class="tf-location">Kho tài liệu</th>
+ <th class="tf-itemcallnumber">Số phân loại</th>
+ <th class="tf-itemtype">Kiểu tài liệu</th>
+ <th class="tf-ccode">Bộ sưu tập</th>
+ <th class="tf-origin">Origin</th>
+ <th class="tf-destination">Destination</th>
+ <th class="tf-printslip">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH trsfitemloo IN trsfitemloop %]
+ <tr>
+ <td class="tf-title"> [% INCLUDE 'biblio-title.inc' biblio=trsfitemloo.item.biblio link=1 %] </td>
+ <td class="tf-author">[% trsfitemloo.item.biblio.author | html %]</td>
+ <td class="tf-barcode"
+                                    ><a href="/cgi-bin/koha/catalogue/moredetail.pl?biblionumber=[% trsfitemloo.item.biblionumber | uri %]&amp;itemnumber=[% trsfitemloo.item.itemnumber | uri %]#item[% trsfitemloo.item.itemnumber | uri %]"
+                                        >[% trsfitemloo.item.barcode | html %]</a
+                                    ></td
+                                >
+ <td class="tf-location"><span class="shelvingloc">[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => trsfitemloo.item.location ) | html %]</span></td>
+ <td class="tf-itemcallnumber">[% trsfitemloo.item.itemcallnumber | html %]</td>
+ <td class="tf-itemtype">[% ItemTypes.GetDescription( trsfitemloo.item.effective_itemtype ) | html %]</td>
+ <td class="tf-ccode">[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode', authorised_value => trsfitemloo.item.ccode ) | html %]</td>
+ <td class="tf-origin">[% Branches.GetName( trsfitemloo.frombrcd ) | html %]</td>
+ <td class="tf-destination">[% Branches.GetName( trsfitemloo.tobrcd ) | html %]</td>
+ <td class="tf-printslip">
+ <button type="button" class="btn btn-default btn-sm printtransferslip" data-itemnumber="[% trsfitemloo.item.itemnumber | html %]" data-tobranch="[% trsfitemloo.tobrcd | html %]"
+                                        ><i class="fa fa-print"></i> Thông tin ghi mượn</button
+                                    >
+ </td>
+ </tr>
+ [% END # /FOREACH trsfitemloo %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% END # /IF trsfitemloop %]
+ [% END # /IF found %]
+[% END %]
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'select2.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var table_settings = [% TablesSettings.GetTableSettings( 'circ', 'transfers', 'transferstable', 'json' ) | $raw %]
+        var found = [% found ? 1 : 0 | html %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $(".printtransferslip").on("click", function (e) {
+                e.preventDefault();
+                var itemnumber = $(this).attr("data-itemnumber");
+                var to_branch = $(this).attr("data-tobranch");
+                window.open("/cgi-bin/koha/circ/transfer-slip.pl?transferitem=" + itemnumber + "&branchcode=" + to_branch);
+            });
+            if (found) {
+                $("#transfer_confirm").modal("show");
+            }
+            var transfers_table = $("#transferstable").kohaTable(
+                {
+                    searching: false,
+                    paging: false,
+                    info: false,
+                    ordering: false,
+                    dom: '<"table_controls"B>rt',
+                },
+                table_settings
+            );
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

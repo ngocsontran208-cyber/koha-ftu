@@ -1,0 +1,214 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE ItemTypes %]
+[% USE AuthorisedValues %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Recall") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+<body id="opac-recall" class="scrollto">
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Chi tiết cho: [% biblio.title | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Yêu cầu hoàn trả</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1 order-lg-2">
+ <div id="recall" class="maincontent">
+ <h1>Xác nhận thu hồi cho: [% INCLUDE 'patron-title.inc' patron = logged_in_user %] ([% logged_in_user.cardnumber | html %])</h1>
+ [% IF nosyspref %]
+ <span>Tính năng thu hồi chưa được kích hoạt. Vui lòng liên hệ với thư viện của bạn.</span>
+ [% ELSIF error == 'unavailable' %]
+ <span>Không có tài liệu nào khả dụng để thu hồi.</span>
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Quay lại [% biblio.title | html %]</a>
+ [% ELSE %]
+ [% IF error %]
+ <div class="alert alert-warning">
+ [% IF error == 'duplicate' %]
+ <span>Bạn đã đạt số lượng thu hồi tối đa cho bản ghi này.</span>
+ [% ELSIF error == 'unavailable' %]
+ <span>Không có tài liệu nào khả dụng để thu hồi.</span>
+ [% ELSIF error == 'cannot' %]
+ <span>Bạn không thể yêu cầu thu hồi tài liệu này.</span>
+ [% ELSE %]
+ <span>Đã xảy ra lỗi khi cố gắng thực hiện yêu cầu thu hồi. Vui lòng liên hệ với thư viện của bạn.</span>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF success %]
+ <p>Yêu cầu thu hồi của bạn đã được ghi nhận. Bạn đọc đang mượn tài liệu này đã được yêu cầu trả lại trong vòng [% due_interval | html %] ngày, trước [% due_date | $KohaDates %].</p>
+ <p>Bạn sẽ nhận được thông báo khi tài liệu của bạn sẵn sàng để đến lấy tại thư viện.</p>
+ [% ELSIF not error %]
+ <p>Tất cả tài liệu có thể mượn đều có thể bị thu hồi nếu đã được mượn và có người khác cần. Chúng tôi sẽ yêu cầu người đang mượn tài liệu này trả lại để bạn có thể sử dụng.</p>
+ [% IF logged_in_user %]
+ <div class="dialog">
+ <form id="recallform" action="/cgi-bin/koha/opac-recall.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows" id="options">
+ <legend>Yêu cầu thu hồi đối với <b>[% biblio.title | html %]</b> ([% biblio.author | html %])?</legend>
+ <ul>
+ [% UNLESS ( single_branch_mode ) %]
+ <li>
+ <label for="pickup">Địa điểm nhận tài liệu:</label>
+ <select name="pickup" id="pickup">
+ [% FOREACH branch IN branches %]
+ [% IF branch.branchcode == logged_in_user.branchcode %]
+ <option value="[% branch.branchcode | html %]" selected>[% Branches.GetName( branch.branchcode ) | html %]</option>
+ [% ELSE %]
+ <option value="[% branch.branchcode | html %]">[% Branches.GetName( branch.branchcode ) | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ [% END %]
+
+ <li>
+ <label for="expirationdate">Không cần thu hồi sau ngày:</label>
+ <input type="text" name="expirationdate" id="expirationdate" size="20" class="flatpickr futuredate" />
+ <span id="expiration-hint">[% INCLUDE 'date-format.inc' %]</span>
+ </li>
+ <li class="level-option" style="display:none;"><label for="bibliolevel">Thu hồi tài liệu khả dụng tiếp theo</label> <input type="radio" name="type" id="bibliolevel" value="bibliolevel" checked /></li>
+ <li class="level-option" style="display:none;"><label for="itemlevel">Thu hồi một tài liệu cụ thể</label> <input type="radio" name="type" id="itemlevel" value="itemlevel" /></li>
+ </ul>
+
+ <table class="table table-bordered table-striped" id="items">
+ <caption>Chọn một tài liệu cụ thể:</caption>
+ <tr>
+ <th>&nbsp;</th>
+ <th>Kiểu tài liệu</th>
+ <th>Mã vạch</th>
+ [% UNLESS ( single_branch_mode ) %]
+ <th>Thư viện chủ quản</th>
+ <th>Vị trí cuối cùng</th>
+ [% END %]
+ <th>Bộ sưu tập</th>
+ <th>Số phân loại</th>
+ <th>Số bản sao</th>
+ <th>Thông tin tập</th>
+ <th>Thông tin</th>
+ </tr>
+ [% FOREACH item IN items %]
+ <tr>
+ <td>
+ [% IF item.can_be_recalled( patron => logged_in_user ) %]
+ <input type="radio" class="itemnumber" name="itemnumber" value="[% item.itemnumber | html %]" />
+ [% ELSE %]
+ <input disabled="disabled" type="radio" class="itemnumber" name="itemnumber" value="[% item.itemnumber | html %]" style="display:none;" />
+ <img alt="Không thể thu hồi" src="[% interface | html %]/lib/famfamfam/cross.png" title="Không thể thu hồi" />
+ [% END %]
+ </td>
+ <td>[% ItemTypes.GetDescription( item.effective_itemtype ) | html %]</td>
+ <td>[% item.barcode | html %]</td>
+ [% UNLESS ( single_branch_mode ) %]
+ <td>[% Branches.GetName( item.homebranch ) | html %]</td>
+ <td>[% Branches.GetName( item.holdingbranch) | html %]</td>
+ [% END %]
+ <td>[% AuthorisedValues.GetByCode( 'CCODE', item.ccode, 1 ) | html %]</td>
+ <td>[% item.itemcallnumber | html %]</td>
+ <td>[% item.copynumber | html %]</td>
+ <td>[% item.enumchron | html %]</td>
+ <td>
+ [% IF ( item.checkout ) %]
+ <span class="checkedout">Hạn trả [% item.checkout.date_due | $KohaDates as_due_date => 1 %]</span>
+ [% ELSIF ( item.get_transfer ) %]
+ <span class="intransit"
+                                                                    >Đang chuyển từ [% Branches.GetName( item.get_transfer.frombranch ) | html %] sang [% Branches.GetName( item.get_transfer.tobranch ) | html %] từ ngày [% item.get_transfer.datesent | $KohaDates %]</span
+                                                                >
+ [% END %]
+ [% IF ( item.itemlost || item.withdrawn ) %]
+ <span class="lost">Không khả dụng (mất hoặc thất lạc)</span>
+ [% END %]
+ [% IF ( item.notforloan ) %]
+ <span class="notforloan">Không cho mượn ([% item.notforloan | html %])</span>
+ [% END %]
+ [% hold = item.current_holds.next %]
+ [% IF ( item.recall ) %]
+ <span class="waiting">
+ [% IF ( item.recall.waiting_date ) %]
+ <span>Đang chờ bạn đọc đến nhận tại [% Branches.GetName( item.recall.pickup_library_id ) | html %]</span> <span>từ ngày</span> [% item.recall.waiting_date | $KohaDates %].
+ [% ELSE %]
+ <span>Đã được bạn đọc yêu cầu thu hồi, dự kiến đến vào [% Branches.GetName( item.recall.pickup_library_id ) | html %]</span>
+ <span>từ ngày</span> [% item.recall.created_date | $KohaDates %].
+ [% END %]
+ </span>
+ [% ELSIF ( hold.waitingdate ) %]
+ <span class="waiting"> Đang chờ bạn đọc đến nhận tại [% Branches.GetName( hold.branchcode ) | html %] từ ngày [% hold.waitingdate | $KohaDates %]. </span>
+ [% ELSIF ( hold.borrowernumber == logged_in_user.borrowernumber ) %]
+ <span class="waiting"> Bạn đã đặt một <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-holds">yêu cầu đặt mượn</a> cho tài liệu này. </span>
+ [% END # / IF ( item.recall or hold ) %]
+ </td>
+ </tr>
+ [% END %]
+ </table>
+ </fieldset>
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-request" />
+ <input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />
+ <input class="btn btn-primary" type="submit" value="Xác nhận" />
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ </div>
+ [% ELSE %]
+ <div class="alert alert-warning">Bạn phải đăng nhập để gửi yêu cầu thu hồi.</div>
+ [% END %]
+ [% END %]
+ [% END %]
+ <!-- norecalls -->
+ </div>
+ <!-- / #recall -->
+ </div>
+ <!-- / .col-md-12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'calendar.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $(".level-option").show();
+            $("#items").hide();
+            $("#expiration-hint").hide();
+            $("#itemlevel").click(function () {
+                if ($("#itemlevel").is(":checked")) {
+                    $("#items").show();
+                    $("input:radio[name='itemnumber']:not(:disabled)").first().attr("checked", "checked"); // selects first item in table
+                }
+            });
+            $("#bibliolevel").click(function () {
+                if ($("#bibliolevel").is(":checked")) {
+                    $("#items").hide();
+                }
+            });
+        });
+    </script>
+[% END %]

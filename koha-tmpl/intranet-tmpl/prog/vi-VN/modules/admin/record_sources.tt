@@ -1,0 +1,41 @@
+[% USE raw %]
+[% USE To %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE TablesSettings %]
+[% USE AuthorisedValues %]
+[% SET footerjs = 1 %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Record sources") | html %]
+ &rsaquo; [% t("Administration") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="record_sources" class="record_sources">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'prefs-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ <div id="vue-breadcrumbs-container"></div>
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+ <div id="record-source"></div>
+[% END #/ WRAPPER main-container.inc %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'calendar.inc' %]
+ <!-- FIXME: this shouldn't be needed -->
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'js-date-format.inc' %]
+ [% Asset.js("js/admin-menu.js") | $raw %]
+ [% Asset.js("js/vue/dist/admin/record_sources.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

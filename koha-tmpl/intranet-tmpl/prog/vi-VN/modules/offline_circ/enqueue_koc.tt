@@ -1,0 +1,48 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Add offline circulations to queue") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="ocirc_enqueue_koc" class="circ ocirc">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Thêm dữ liệu lưu thông ngoại tuyến</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+ <h1>Lưu thông ngoại tuyến Koha</h1>
+ <div class="page-section">
+ <p>Your file was uploaded. Once all files are uploaded, please process them in pending offline circulation actions.</p>
+
+ [% FOREACH message IN messages %]
+ [% IF ( message.message ) %]
+ [% IF ( message.ERROR_file_version ) %]
+ <div class="alert alert-warning"><p>Cảnh báo: Phiên bản của tệp tin này là [% message.upload_version | html %], phiên bản được hỗ trợ tốt nhất là phiên bản [% message.current_version | html %]. Do đó kết quả có thể không theo ý bạn.</p></div>
+ [% END %]
+ [% END %]
+ [% END %]
+
+ <p><a href="process_koc.pl">Tải lên tệp tin .koc khác</a></p>
+
+ <p><a href="list.pl">Xem thao tác lưu thông ngoại tuyến chờ xử lý</a></p>
+ </div>
+ <!-- /.page-section -->
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

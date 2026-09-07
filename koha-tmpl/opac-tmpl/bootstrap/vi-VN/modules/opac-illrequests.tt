@@ -1,0 +1,535 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE AuthorisedValues %]
+[% USE Branches %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET ILLModuleCopyrightClearance = AdditionalContents.get( location => "ILLModuleCopyrightClearance", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your interlibrary loan requests") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-illrequests' bodyclass='scrollto' %]
+[% BLOCK messages %]
+ [% IF message == "1" %]
+ <div class="alert alert-success" role="alert">Yêu cầu đã cập nhật</div>
+ [% ELSIF message == "2" %]
+ <div class="alert alert-success" role="alert">Đã gửi yêu cầu</div>
+ [% END %]
+[% END %]
+[% INCLUDE 'masthead.inc' %]
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% IF ( logged_in_user ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ [% END %]
+ [% END %]
+
+ [% IF op != 'list' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-illrequests.pl">Yêu cầu mượn từ thư viện khác</a>
+ [% END %]
+ [% IF op == 'cud-create' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Yêu cầu mượn liên thư viện mới</span>
+ [% END %]
+ [% ELSIF op == 'view' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Xem yêu cầu mượn liên thư viện</span>
+ [% END %]
+ [% ELSIF op == 'typedisclaimer' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tuyên bố miễn trừ trách nhiệm yêu cầu mượn liên thư viện</span>
+ [% END %]
+ [% ELSIF op == 'confirmautoill' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Confirm request</span>
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Yêu cầu mượn từ thư viện khác</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav||loggedinusername ) && !print %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ [% ELSIF ( unauthenticated_ill ) %]
+ <div class="col-lg-2"></div>
+ [% END %]
+
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav||loggedinusername ) %]
+ [% column_class = "col-lg-10 order-first order-md-first order-lg-2" %]
+ [% END %]
+ <div class="[% column_class | html %]">
+ [% IF !backends_available %]
+ <div class="alert alert-warning">Lỗi cấu hình phân hệ ILL. Liên hệ với quản trị viên của bạn.</div>
+ [% ELSE %]
+ <div id="illrequests" class="maincontent">
+ [% IF op == 'cud-create' %]
+ <h1>Yêu cầu mượn liên thư viện mới</h1>
+ [% IF stage == 'copyrightclearance' %]
+ [% INCLUDE messages %]
+ <div>
+ <p>
+ [% IF ( ILLModuleCopyrightClearance ) %]
+ <div id="ILLModuleCopyrightClearance"> [% PROCESS koha_news_block news => ILLModuleCopyrightClearance %] </div>
+ [% END %]
+ </p>
+ [% USE link_url = url('/cgi-bin/koha/opac-illrequests.pl', whole.value.other) %]
+ <a href="[% link_url _ '&amp;stage=copyrightclearance' | $raw %]" class="btn btn-sm btn-primary"><i class="fa fa-fw fa-check" aria-hidden="true"></i> Có</a>
+ <a href="/cgi-bin/koha/opac-illrequests.pl" class="btn btn-sm btn-danger"><i class="fa fa-fw fa-times" aria-hidden="true"></i> Không</a>
+ </div>
+ [% ELSE %]
+ [% INCLUDE messages %]
+ [% IF backends %]
+ <form method="get" id="illrequestcreate-form" novalidate="novalidate">
+ <legend class="visually-hidden">Hệ thống hậu trường</legend>
+ <fieldset class="rows">
+ <label for="backend">Nhà cung cấp:</label>
+ <select name="backend">
+ [% FOREACH backend IN backends %]
+ <option value="[% backend | html %]">[% backend | html %]</option>
+ [% END %]
+ </select>
+ </fieldset>
+ <fieldset class="action">
+ <input type="hidden" name="op" value="add_form" />
+ <input class="btn btn-sm btn-primary" type="submit" value="Tiếp theo" />
+ </fieldset>
+ </form>
+ [% ELSE %]
+ [% PROCESS $whole.opac_template %]
+ [% END %]
+ [% END # /IF stage == 'copyrightclearance' %]
+ [% ELSIF op == 'list' %]
+ <h1>Yêu cầu mượn từ thư viện khác</h1>
+ [% INCLUDE messages %]
+
+ [% IF can_patron_place_ill_in_opac %]
+ <div id="illrequests-create-button" class="dropdown btn-group">
+ [% IF Koha.Preference('AutoILLBackendPriority') %]
+ <a id="ill-new" class="btn btn-primary" href="/cgi-bin/koha/opac-illrequests.pl?method=create&amp;backend=Standard"> <i class="fa fa-plus" aria-hidden="true"></i> Tạo yêu cầu mới </a>
+ [% ELSIF backends.size > 1 %]
+ <button class="btn btn-primary dropdown-toggle" type="button" id="ill-backend-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+ <i class="fa fa-plus" aria-hidden="true"></i> Tạo yêu cầu mới <span class="caret"></span>
+ </button>
+ <div id="backend-dropdown-options" class="dropdown-menu nojs" aria-labelledby="ill-backend-dropdown">
+ [% FOREACH backend IN backends %]
+ <a class="dropdown-item" href="/cgi-bin/koha/opac-illrequests.pl?op=add_form&amp;backend=[% backend | uri %]">[% backend | html %]</a>
+ [% END %]
+ </div>
+ [% ELSE %]
+ <a id="ill-new" class="btn btn-primary" href="/cgi-bin/koha/opac-illrequests.pl?op=add_form&amp;backend=[% backends.0 | html %]">
+ <i class="fa fa-plus" aria-hidden="true"></i> Tạo yêu cầu mới </a>
+ [% END %]
+ </div>
+ [% END %]
+
+ <table id="illrequestlist" class="table table-bordered table-striped">
+ <caption class="visually-hidden">Các yêu cầu</caption>
+ <thead>
+ <tr>
+ <th>Mã yêu cầu</th>
+ <th>Tác giả</th>
+ <th>Nhan đề</th>
+ <th>Yêu cầu từ</th>
+ <th>Loại yêu cầu</th>
+ <th>Trạng thái</th>
+ <th>Đã gửi yêu cầu</th>
+ <th>Lần cập nhật cuối</th>
+ <th class="no-sort"></th>
+ </tr>
+ </thead>
+ <tbody> </tbody>
+ </table>
+ [% ELSIF op == 'view' %]
+ <h1>Xem yêu cầu mượn liên thư viện</h1>
+ [% INCLUDE messages %]
+ [% status = request.status %]
+ <form method="post" id="illrequestupdate-form" novalidate="novalidate">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ <legend id="library_legend">Chi tiết từ thư viện</legend>
+ <ol>
+ [% type = request.get_type %]
+ <li>
+ <label for="request_id">Mã yêu cầu:</label>
+ [% request.id | html %]
+ </li>
+ <li>
+ <label for="backend">Yêu cầu từ:</label>
+ [% request.backend | html %]
+ </li>
+ [% IF request.biblio_id %]
+ <li>
+ <label for="biblio">Tài liệu yêu cầu:</label>
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% request.biblio_id | uri %]">Xem tài liệu yêu cầu</a>
+ </li>
+ [% END %]
+ <li>
+ <label for="branchcode">Thư viện bộ sưu tập:</label>
+ [% Branches.GetName(request.branchcode) | html %]
+ </li>
+ <li>
+ <label for="status">Trạng thái:</label>
+ [% request.capabilities.$status.name | html %]
+ [% IF request.status_alias && request.statusalias.lib_opac %]
+ <i><strong>[% request.statusalias.lib_opac | html %]</strong></i>
+ [% ELSE %]
+ <i><strong>[% request.statusalias.authorised_value | html %]</strong></i>
+ [% END %]
+ </li>
+ <li>
+ <label for="medium">Loại yêu cầu:</label>
+ [% IF type %][% type | html %][% ELSE %]<span>Không áp dụng</span>[% END %]
+ </li>
+ <li>
+ <label for="placed">Ngày gửi yêu cầu:</label>
+ [% request.placed | $KohaDates %]
+ </li>
+ <li>
+ <label for="updated">Lần cập nhật cuối:</label>
+ [% request.updated | $KohaDates %]
+ </li>
+ <li>
+ <label for="notesopac">Ghi chú:</label>
+ [% IF !request.completed %]
+ <textarea id="notesopac" name="notesopac" rows="5" cols="50">[% request.notesopac | html %]</textarea>
+ [% ELSE %]
+ [% request.notesopac | html %]
+ [% END %]
+ </li>
+ </ol>
+ </fieldset>
+ <div id="ill-supplier-metadata" class="rows">
+ <legend id="backend_legend">Chi tiết từ [% request.backend | html %]</legend>
+ [% FOREACH meta IN request.metadata %]
+ <div class="requestattr-[% meta.key | replace(' ', '_') | html %]">
+ <span class="label">[% meta.key | html %]:</span>
+ <span class="value">[% IF meta.value %][% meta.value | html %][% ELSE %]Không áp dụng[% END %]</span>
+ </div>
+ [% END %]
+ </div>
+ [% IF can_patron_place_ill_in_opac %]
+ <fieldset class="action illrequest-actions">
+ <input type="hidden" name="illrequest_id" value="[% request.illrequest_id | html %]" />
+ <input type="hidden" name="op" value="cud-update" />
+ [% IF !request.completed %]
+ [% IF request.status == "NEW" %]
+ <a class="cancel-illrequest btn btn-danger" href="/cgi-bin/koha/opac-illrequests.pl?op=cancreq&amp;illrequest_id=[% request.illrequest_id | html %]">Yêu cầu hủy</a>
+ [% END %]
+ <input class="update-illrequest btn btn-primary" type="submit" value="Gửi các thay đổi" />
+ [% END %]
+ <span class="cancel"><a href="/cgi-bin/koha/opac-illrequests.pl">Hủy bỏ</a></span>
+ </fieldset>
+ [% END %]
+ </form>
+ [% ELSIF op == 'availability' %]
+ <h1>Khả năng đáp ứng tài liệu mượn liên thư viện</h1>
+ <div id="results">
+ <form method="POST" action="/cgi-bin/koha/opac-illrequests.pl">
+ [%# This will get its name="op" value="cud-" from the loop over whole.keys below %]
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend><h2>Đang hiển thị kết quả khả năng đáp ứng</h2></legend>
+ [% FOREACH key IN whole.keys %]
+ [% value = whole.$key %]
+ [% IF key != 'custom_key' && key != 'custom_value' && key != 'csrf_token' %]
+ <input type="hidden" name="[% key | html %]" value="[% value | html %]" />
+ [% END %]
+ [% END %]
+ [% custom_keys = whole.custom_key.split('\0') %]
+ [% custom_values = whole.custom_value.split('\0') %]
+ [% i = 0 %]
+ [% FOREACH custom_key IN custom_keys %]
+ <input type="hidden" name="custom_key" value="[% custom_key | html %]" />
+ <input type="hidden" name="custom_value" value="[% custom_values.$i | html %]" />
+ [% i = i + 1 %]
+ [% END %]
+ <input type="hidden" name="checked_availability" value="1" />
+ <div id="continue-request-row" class="alert">
+ Nếu bạn không tìm thấy tài liệu cần tìm, bạn có thể <button class="button btn btn-primary" type="submit">tiếp tục tạo yêu cầu của bạn</button> hoặc <a href="/cgi-bin/koha/opac-illrequests.pl">hủy yêu cầu của bạn</a>
+ </div>
+ </form>
+ [% FOR service IN services %]
+ <h3 class="ill_availability_sourcename">[% service.name | html %]</h3>
+ [% INCLUDE 'ill-availability-table.inc' service=service %]
+ [% END %]
+ </div>
+ <!-- /#illrequestupdate-form -->
+ [% ELSIF op == 'typedisclaimer' %]
+ <h1>Tuyên bố miễn trừ trách nhiệm về yêu cầu mượn liên thư viện</h1>
+ <div id="results" class="page-section">
+ [% INCLUDE messages %]
+ <form method="post" id="typedisclaimer-form">
+ [%# This will get its name="op" value="cud-" from the loop over whole.keys below %]
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ [% disclaimer.text | $raw %]
+ [% SET disc_av_category_code = AuthorisedValues.GetAuthValueDropbox(disclaimer.av_cat) %]
+ [% IF disc_av_category_code.count %]
+ <br />
+ <select name="type_disclaimer_value">
+ [% FOR av_option IN disc_av_category_code %]
+ <option value="[% av_option.lib_opac | html %]">[% av_option.lib_opac | html %]</option>
+ [% END %]
+ </select>
+ [% END %]
+ </fieldset>
+ <fieldset class="action">
+ [% FOREACH key IN whole.keys %]
+ [% value = whole.$key %]
+ [% IF key != 'custom_key' && key != 'custom_value' && key != 'csrf_token' %]
+ <input type="hidden" name="[% key | html %]" value="[% value | html %]" />
+ [% END %]
+ [% END %]
+ [% custom_keys = whole.custom_key.split('\0') %]
+ [% custom_values = whole.custom_value.split('\0') %]
+ [% i = 0 %]
+ [% FOREACH custom_key IN custom_keys %]
+ <input type="hidden" name="custom_key" value="[% custom_key | html %]" />
+ <input type="hidden" name="custom_value" value="[% custom_values.$i | html %]" />
+ [% i = i + 1 %]
+ [% END %]
+ <input type="hidden" name="type_disclaimer_submitted" value="1" />
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ <a class="action" href="/cgi-bin/koha/opac-illrequests.pl">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ </div>
+ [% ELSIF op == 'historycheck' %]
+ <h1>Request history check</h1>
+ <div id="results" class="page-section">
+ [% INCLUDE messages %]
+ <form method="post" id="historycheck-form">
+ [%# This will get its name="op" value="cud-" from the loop over whole.keys below %]
+ [% INCLUDE 'csrf-token.inc' %]
+ <p>You have requested this interlibrary loan before:</p>
+ [% IF matching_requests_for_patron.size %]
+ <ul class="list-unstyled">
+ [% FOREACH matching_request_for_patron IN matching_requests_for_patron %]
+ [% SET matching_req_status = matching_request_for_patron.status %]
+ <li>
+ <a target="_blank" href="/cgi-bin/koha/opac-illrequests.pl?op=view&amp;illrequest_id=[% matching_request_for_patron.illrequest_id | uri %]"
+                                                        ><i aria-hidden="true" class="fa fa-fw fa-external-link-square"></i>Request [% matching_request_for_patron.id_prefix | html %][% matching_request_for_patron.illrequest_id | html %]
+ ([% matching_request_for_patron.capabilities.$matching_req_status.name | html %]) on [% matching_request_for_patron.placed | $KohaDates %]</a
+                                                    >
+ </li>
+ [% END %]
+ </ul>
+ [% END %]
+ <fieldset class="action">
+ [% FOREACH key IN whole.keys %]
+ [% value = whole.$key %]
+ [% IF key != 'custom_key' && key != 'custom_value' && key != 'csrf_token' %]
+ <input type="hidden" name="[% key | html %]" value="[% value | html %]" />
+ [% END %]
+ [% END %]
+ [% custom_keys = whole.custom_key.split('\0') %]
+ [% custom_values = whole.custom_value.split('\0') %]
+ [% i = 0 %]
+ [% FOREACH custom_key IN custom_keys %]
+ <input type="hidden" name="custom_key" value="[% custom_key | html %]" />
+ <input type="hidden" name="custom_value" value="[% custom_values.$i | html %]" />
+ [% i = i + 1 %]
+ [% END %]
+ <input type="hidden" name="history_check_submitted" value="1" />
+ <input type="submit" class="btn btn-primary" value="Submit anyway" />
+ <a class="action" href="/cgi-bin/koha/opac-illrequests.pl">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ </div>
+ [% ELSIF op == 'confirmautoill' %]
+ <h1>Confirming request</h1>
+ <div id="results" class="page-section">
+ <form method="post" id="confirmautoill-form">
+ [%# This will get its name="op" value="cud-" from the loop over whole.keys below %]
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ <p id="autoillbackends"></p>
+ <p id="autoillbackend-message" class="text-info"></p>
+ </fieldset>
+ <fieldset class="action">
+ [% FOREACH key IN whole.keys %]
+ [% value = whole.$key %]
+ [% IF key != 'custom_key' && key != 'custom_value' && key != 'csrf_token' %]
+ <input type="hidden" name="[% key | html %]" value="[% value | html %]" />
+ [% END %]
+ [% END %]
+ [% custom_keys = whole.custom_key.split('\0') %]
+ [% custom_values = whole.custom_value.split('\0') %]
+ [% i = 0 %]
+ [% FOREACH custom_key IN custom_keys %]
+ <input type="hidden" name="custom_key" value="[% custom_key | html %]" />
+ <input type="hidden" name="custom_value" value="[% custom_values.$i | html %]" />
+ [% i = i + 1 %]
+ [% END %]
+ <input type="hidden" name="confirm_auto_submitted" value="1" />
+ </fieldset>
+ </form>
+ </div>
+ [% END # / IF op == 'cud-create' %]
+ </div>
+ <!-- / #illrequests -->
+ [% END # /IF !backends_available %]
+ </div>
+ <!-- / .col-lg-10/12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        const logged_in_user_borrowernumber = "[% logged_in_user.borrowernumber | html %]";
+        [% IF services_json.length > 0 %]
+            var services = [% services_json | $raw %];
+        [% ELSE %]
+            var services = [];
+        [% END %]
+        [% IF auto_backends_json.length > 0 %]
+            var auto_backends = [% auto_backends_json | $raw %];
+        [% ELSE %]
+            var auto_backends = [];
+        [% END %]
+        [% IF metadata.length > 0 %]
+            var metadata = "[% metadata | $raw %]";
+        [% END %]
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function display_extended_attribute(row, type) {
+            var arr = $.grep(row.extended_attributes, x => x.type === type);
+            if (arr.length > 0) {
+                return escape_str(arr[0].value);
+            }
+
+            return "";
+        }
+
+        function display_request_status(row) {
+            let status = row._strings.status.str;
+            let status_alias = row._strings.status_av ? (row._strings.status_av.str ? row._strings.status_av.str : row._strings.status_av.code) : null;
+
+            let status_label = status + (status_alias ? " <i><strong>" + status_alias + "</strong></i>" : "");
+
+            return status_label;
+        }
+        $("#illrequestlist").kohaTable({
+            order: [[0, "desc"]],
+            dom: '<"dt-info"i><"top pager"<"table_entries"lp>t<"bottom pager"pi>',
+            paging: true,
+            embed: ["+strings", "extended_attributes"],
+            ajax: { url: `/api/v1/public/patrons/${logged_in_user_borrowernumber}/ill/requests` },
+            columnDefs: [
+                {
+                    render: function (data, type, row, meta) {
+                        if (data && type == "display") {
+                            return data.escapeHtml();
+                        }
+                        return data;
+                    },
+                },
+            ],
+            columns: [
+                {
+                    data: "ill_request_id",
+                    sortable: true,
+                },
+                {
+                    data: "author",
+                    sortable: false,
+                    render: (data, type, row, meta) => {
+                        return display_extended_attribute(row, "author");
+                    },
+                },
+                {
+                    data: "title",
+                    sortable: false,
+                    render: (data, type, row, meta) => {
+                        return display_extended_attribute(row, "title");
+                    },
+                },
+                {
+                    data: "ill_backend_id",
+                    sortable: true,
+                },
+                {
+                    data: "type",
+                    sortable: false,
+                    render: (data, type, row, meta) => {
+                        return display_extended_attribute(row, "type");
+                    },
+                },
+                {
+                    data: "status",
+                    sortable: true,
+                    render: (data, type, row, meta) => {
+                        return display_request_status(row);
+                    },
+                },
+                {
+                    data: "requested_date",
+                    sortable: true,
+                    render: (data, type, row, meta) => {
+                        return $date(data);
+                    },
+                },
+                {
+                    data: "timestamp",
+                    sortable: true,
+                    render: (data, type, row, meta) => {
+                        return $date(data);
+                    },
+                },
+                {
+                    data: "",
+                    sortable: false,
+                    render: (data, type, row, meta) => {
+                        return `<a href="/cgi-bin/koha/opac-illrequests.pl?op=view&amp;illrequest_id=${row.ill_request_id}" class="btn btn-primary btn-sm">View</a>`;
+                    },
+                },
+            ],
+        });
+        $("#backend-dropdown-options").removeClass("nojs");
+    </script>
+ [% IF op == 'availability' %]
+ [% Asset.js("js/ill-availability.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                window.doSearch();
+            });
+        </script>
+ [% END %]
+ [% IF op == 'confirmautoill' %]
+ [% Asset.js("js/ill-autobackend.js") | $raw %]
+ [% END %]
+ <!-- prettier-ignore-start -->
+ [% TRY %]
+ [% PROCESS backend_jsinclude %]
+ [% CATCH %]
+ [% END %]
+ <!-- prettier-ignore-end -->
+[% END %]

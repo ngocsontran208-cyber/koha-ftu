@@ -1,0 +1,284 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE KohaDates %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Thư viện – Phân hiệu Trường Đại học Ngoại thương</title>
+[% IF ( bidi ) %]
+ [% Asset.css("css/mainpage-rtl.css") | $raw %]
+[% ELSE %]
+ [% Asset.css("css/mainpage.css") | $raw %]
+[% END %]
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="main_intranet-main" class="intranet-main">
+[% WRAPPER 'header.inc' %][% END %]
+
+<div id="container-main" class="container-fluid">
+
+ <!-- ── KPI Stats Row ── -->
+ <div id="ftu-kpi-row">
+ <div class="ftu-kpi-card kpi-blue">
+ <div class="kpi-icon"><i class="fa fa-users"></i></div>
+ <div class="kpi-body">
+ <div class="kpi-value">[% kpi_total_patrons | html %]</div>
+ <div class="kpi-label">Bạn đọc</div>
+ </div>
+ <a class="kpi-link" href="/cgi-bin/koha/members/members-home.pl"></a>
+ </div>
+ <div class="ftu-kpi-card kpi-red">
+ <div class="kpi-icon"><i class="fa fa-book"></i></div>
+ <div class="kpi-body">
+ <div class="kpi-value">[% kpi_total_biblios | html %]</div>
+ <div class="kpi-label">Tài liệu</div>
+ </div>
+ <a class="kpi-link" href="/cgi-bin/koha/catalogue/search.pl"></a>
+ </div>
+ <div class="ftu-kpi-card kpi-green">
+ <div class="kpi-icon"><i class="fa fa-exchange"></i></div>
+ <div class="kpi-body">
+ <div class="kpi-value">[% kpi_checkouts_today | html %]</div>
+ <div class="kpi-label">Mượn hôm nay</div>
+ </div>
+ <a class="kpi-link" href="/cgi-bin/koha/circ/circulation-home.pl"></a>
+ </div>
+ <div class="ftu-kpi-card kpi-amber">
+ <div class="kpi-icon"><i class="fa fa-clock-o"></i></div>
+ <div class="kpi-body">
+ <div class="kpi-value">[% kpi_pending_total | html %]</div>
+ <div class="kpi-label">Chờ xử lý</div>
+ </div>
+ <a class="kpi-link" href="#area-pending"></a>
+ </div>
+ </div>
+
+ <!-- ── Main Layout: Sidebar + Content ── -->
+ <div id="ftu-main-layout">
+
+ <!-- Sidebar -->
+ <aside id="ftu-sidebar">
+ [% IF ( koha_news.count ) %]
+ <div class="ftu-sidebar-card">
+ <div class="sidebar-card-header">
+ <i class="fa fa-newspaper-o"></i> Tin tức thư viện
+ </div>
+ [% SET show_author = Koha.Preference('NewsAuthorDisplay') == 'staff' || Koha.Preference('NewsAuthorDisplay') == 'both' %]
+ [% FOREACH koha_new IN koha_news %]
+ <div class="ftu-newsitem" id="news[% koha_new.additional_content_id | html %]">
+ <div class="news-title">[% koha_new.title | html %]</div>
+ <div class="news-body">[% koha_new.content | $raw %]</div>
+ <div class="news-footer">
+ [% koha_new.published_on | $KohaDates %]
+ [% IF ( CAN_user_tools_edit_additional_contents ) %]
+ &middot; <a href="/cgi-bin/koha/tools/additional-contents.pl?op=add_form&id=[% koha_new.additional_content_id | uri %]">Sửa</a>
+ | <a href="/cgi-bin/koha/tools/additional-contents.pl?op=add_form">Thêm</a>
+ [% END %]
+ </div>
+ </div>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF ( daily_quote ) %]
+ <div class="ftu-sidebar-card">
+ <div class="sidebar-card-header">
+ <i class="fa fa-quote-left"></i> Trích dẫn hôm nay
+ </div>
+ <div class="ftu-quote">
+ <span class="quote-text">&ldquo;[% daily_quote.text | html %]&rdquo;</span>
+ <span class="quote-source">&mdash; [% daily_quote.source | html %]</span>
+ </div>
+ </div>
+ [% END %]
+
+ [% IF ( CAN_user_tools_moderate_comments && pendingcomments ) || ( CAN_user_tools_moderate_tags && pendingtags ) || ( CAN_user_borrowers_edit_borrowers && pending_borrower_modifications ) || ( CAN_user_suggestions_suggestions_manage && ( pendingsuggestions || all_pendingsuggestions )) || pending_article_requests %]
+ <div class="ftu-sidebar-card pending-card">
+ <div class="sidebar-card-header">
+ <i class="fa fa-bell"></i> Cần xử lý
+ </div>
+ [% IF pending_article_requests %]
+ <div class="pending-row">
+ <span class="pending-badge">[% pending_article_requests | html %]</span>
+ <a href="/cgi-bin/koha/circ/article-requests.pl">Yêu cầu bài báo</a>
+ </div>
+ [% END %]
+ [% IF CAN_user_suggestions_suggestions_manage && pendingsuggestions %]
+ <div class="pending-row">
+ <span class="pending-badge">[% pendingsuggestions | html %]</span>
+ <a href="/cgi-bin/koha/suggestion/suggestion.pl#ASKED">Đề xuất mua sách</a>
+ </div>
+ [% END %]
+ [% IF CAN_user_tools_moderate_comments && pendingcomments %]
+ <div class="pending-row">
+ <span class="pending-badge">[% pendingcomments | html %]</span>
+ <a href="/cgi-bin/koha/reviews/reviewswaiting.pl">Bình luận chờ duyệt</a>
+ </div>
+ [% END %]
+ [% IF CAN_user_borrowers_edit_borrowers && pending_borrower_modifications %]
+ <div class="pending-row">
+ <span class="pending-badge">[% pending_borrower_modifications | html %]</span>
+ <a href="/cgi-bin/koha/members/members-update.pl">Cập nhật bạn đọc</a>
+ </div>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% SET IntranetmainUserblock = AdditionalContents.get( location => "IntranetmainUserblock", lang => lang, library => Branches.GetLoggedInBranchcode || default_branch ) %]
+ [% IF ( IntranetmainUserblock.content && IntranetmainUserblock.content.count > 0 ) %]
+ <div class="ftu-sidebar-card">
+ [% FOREACH n IN IntranetmainUserblock.content %]
+ <div class="[% n.lang | html %]_body">[% n.content | $raw %]</div>
+ [% END %]
+ </div>
+ [% END %]
+ </aside>
+
+ <!-- Main module grid -->
+ <main id="ftu-modules">
+ <div id="ftu-modules-grid">
+
+ [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/circ/circulation-home.pl">
+ <div class="module-icon mod-circulation"><i class="fa fa-exchange"></i></div>
+ <div class="module-name">Lưu thông</div>
+ <div class="module-desc">Mượn &bull; Trả &bull; Gia hạn</div>
+ </a>
+ [% END %]
+
+ [% IF CAN_user_borrowers_edit_borrowers || CAN_user_borrowers_list_borrowers %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/members/members-home.pl">
+ <div class="module-icon mod-patrons"><i class="fa fa-id-card"></i></div>
+ <div class="module-name">Bạn đọc</div>
+ <div class="module-desc">Quản lý thành viên</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || can_see_cataloguing_module ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/cataloguing/cataloging-home.pl">
+ <div class="module-icon mod-cataloging"><i class="fa fa-tag"></i></div>
+ <div class="module-name">Biên mục</div>
+ <div class="module-desc">Nhập &bull; Chỉnh sửa biểu ghi</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_catalogue ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/catalogue/search.pl">
+ <div class="module-icon mod-search"><i class="fa fa-search"></i></div>
+ <div class="module-name">Tìm kiếm nâng cao</div>
+ <div class="module-desc">Tìm tài liệu &bull; Vật phẩm</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_reports ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/reports/reports-home.pl">
+ <div class="module-icon mod-reports"><i class="fa fa-pie-chart"></i></div>
+ <div class="module-name">Báo cáo</div>
+ <div class="module-desc">Thống kê &bull; Xuất dữ liệu</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_acquisition ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/acqui/acqui-home.pl">
+ <div class="module-icon mod-acquisitions"><i class="fa fa-shopping-cart"></i></div>
+ <div class="module-name">Bổ sung</div>
+ <div class="module-desc">Đặt mua &bull; Ngân sách</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_serials ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/serials/serials-home.pl">
+ <div class="module-icon mod-serials"><i class="fa fa-newspaper-o"></i></div>
+ <div class="module-name">Báo – Tạp chí</div>
+ <div class="module-desc">Quản lý ấn phẩm định kỳ</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_lists ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/virtualshelves/shelves.pl">
+ <div class="module-icon mod-lists"><i class="fa fa-list-alt"></i></div>
+ <div class="module-name">Danh sách</div>
+ <div class="module-desc">Giá sách ảo</div>
+ </a>
+ [% END %]
+
+ <a class="ftu-module-card" href="/cgi-bin/koha/authorities/authorities-home.pl">
+ <div class="module-icon mod-authorities"><i class="fa fa-link"></i></div>
+ <div class="module-name">Từ điển</div>
+ <div class="module-desc">Kiểm soát từ chuẩn</div>
+ </a>
+
+ [% IF ( CAN_user_tools || CAN_user_clubs ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/tools/tools-home.pl">
+ <div class="module-icon mod-tools"><i class="fa fa-wrench"></i></div>
+ <div class="module-name">Công cụ</div>
+ <div class="module-desc">Tiện ích &bull; Nhập/Xuất</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_parameters || CAN_user_plugins_admin ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/admin/admin-home.pl">
+ <div class="module-icon mod-admin"><i class="fa fa-gears"></i></div>
+ <div class="module-name">Quản trị</div>
+ <div class="module-desc">Cấu hình hệ thống</div>
+ </a>
+ [% END %]
+
+ [% IF UseCourseReserves %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/course_reserves/course-reserves.pl">
+ <div class="module-icon mod-course"><i class="fa fa-graduation-cap"></i></div>
+ <div class="module-name">Tài liệu học phần</div>
+ <div class="module-desc">Tài liệu học phần</div>
+ </a>
+ [% END %]
+
+ </div>
+ </main>
+
+ </div>
+ <!-- /.ftu-main-layout -->
+
+ <!-- Footer -->
+ <div id="ftu-dash-footer">
+ <span>&copy; Thư viện Phân hiệu Trường Đại học Ngoại thương &mdash; <a href="https://www.ftu.edu.vn" target="_blank">ftu.edu.vn</a></span>
+ <span><a href="/cgi-bin/koha/about.pl">Koha [% Koha.Version.maintenance | html %]</a></span>
+ </div>
+
+</div>
+<!-- /#container-main -->
+
+[% MACRO jsinclude BLOCK %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+$(document).ready(function() {
+    // Live clock
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        const dateStr = now.toLocaleDateString('vi-VN', {weekday:'short', day:'numeric', month:'long', year:'numeric'});
+        $('#ftu-hd-date').text(timeStr + ' \u2013 ' + dateStr);
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    // Dropdown toggles
+    function closeAll() { $('.ftu-dropdown-menu').removeClass('open'); }
+    $('#ftu-more-btn').on('click', function(e) {
+        e.stopPropagation();
+        var m = $('#ftu-more-menu'), open = m.hasClass('open');
+        closeAll(); if (!open) m.addClass('open');
+    });
+    $('#ftu-user-btn').on('click', function(e) {
+        e.stopPropagation();
+        var m = $('#ftu-user-menu'), open = m.hasClass('open');
+        closeAll(); if (!open) m.addClass('open');
+    });
+    $(document).on('click', closeAll);
+});
+</script>
+[% END %]
+<!-- the main div is closed in intranet-bottom.inc -->
+[% INCLUDE 'intranet-bottom.inc' %]

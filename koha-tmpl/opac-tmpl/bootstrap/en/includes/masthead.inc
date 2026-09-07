@@ -27,11 +27,11 @@
     <nav class="navbar navbar-expand">
         <div id="logo">
             <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl">
-                [% IF ( LibraryNameTitle ) %]
-                    [% LibraryNameTitle | html %]
-                [% ELSE %]
-                    Koha online
-                [% END %]
+                <img class="ftu-logo-img" src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" />
+                <span class="ftu-brand-title-wrap">
+                    <span class="ftu-brand-main-title">TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</span>
+                    <span class="ftu-brand-sub-title">PHÂN HIỆU TẠI THÀNH PHỐ HỒ CHÍ MINH</span>
+                </span>
             </a>
         </div>
         [% IF ( OpacPublic ) %]

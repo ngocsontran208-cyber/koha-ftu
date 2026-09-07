@@ -1,5 +1,5 @@
 OPAC:
-    Appearance:
+    Giao diện:
         -
             - pref: OPACUserSummary
               choices:
@@ -361,7 +361,7 @@ OPAC:
                   branchonly: "library only"
             - "(NOTE: For large consortia we recommend to group unavailable items by 'substatus only', listing item counts per substatus. Similarly the option 'library only' results in unavailable item counts per library.)"
 
-    Features:
+    Tính năng:
         -
             - pref: OpacCatalogConcerns
               default: 0
@@ -634,7 +634,7 @@ OPAC:
             - 'List of item type codes (separated by spaces) for those you want to show the OpenURL link:'
             - pref: OPACOpenURLItemTypes
             - '<br />'
-    Policy:
+    Chính sách:
         -
             - pref: SearchMyLibraryFirst
               choices:
@@ -723,7 +723,7 @@ OPAC:
                   0: "Don't allow"
                   1: Allow
             - "OPAC users to checkout to themselves."
-    Privacy:
+    Riêng tư:
         -
             - pref: opacreadinghistory
               choices:

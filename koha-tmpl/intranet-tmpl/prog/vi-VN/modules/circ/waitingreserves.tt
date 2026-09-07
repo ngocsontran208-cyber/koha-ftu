@@ -1,0 +1,340 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE TablesSettings %]
+[% USE AuthorisedValues %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Holds awaiting pickup") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        .tab-toolbar {
+            padding: 0.5rem 0;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+[% END %]
+</head>
+
+<body id="circ_waitingreserves" class="circ">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Đặt mượn chờ bạn đọc nhận tài liệu</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% SET aside = Koha.Preference('CircSidebar') ? 'circ-nav' : '' %]
+[% WRAPPER 'main-container.inc' aside=aside %]
+ <h1>Holds awaiting pickup for your library on: [% show_date | $KohaDates %]</h1>
+ <h2>
+ [% IF ( all_branches_link ) %]
+ <span><a href="[% all_branches_link | url %]"> Thống kê tất cả thư viện</a></span>
+ [% END %]
+ </h2>
+ [% IF reject_result_error %]
+ <div class="error message">
+ [% IF reject_result_error.invalid_status %]
+ <p>There was a problem rejecting the cancellation request. Cannot reject an already completed cancellation request.</p>
+ [% ELSE %]
+ <p>Some error occurred while rejecting the cancellation request. Please check the logs</p>
+ [% END %]
+ </div>
+ [% END %]
+ [% IF ( cancel_result ) %]
+ [% FOREACH cancel_result %]
+ [% IF ( messagetransfert ) %]
+ <div class="alert alert-info">
+ <h2>Tài liệu chờ bạn đọc nhận tại thư viện [% Branches.GetName( branchcode ) | html %]</h2>
+ <p><strong>[% nextreservtitle | html %]</strong> is on hold for <strong> [% nextreservsurname | html %], [% nextreservfirstname | html %]</strong>đặt mượn. Vui lòng lưu lại các tài liệu này và kiểm tra chúng để xử lý đặt mượn.</p>
+ <form name="cancelReservewithtransfert" action="waitingreserves.pl" method="get">
+ <input type="hidden" name="tab" value="[% tab | html %]" />
+ <button type="submit" class="btn btn-default approve"><i class="fa fa-fw fa-check"></i> OK</button>
+ </form>
+ </div>
+ [% END # /IF messagetransfert %]
+ [% IF ( waiting ) %]
+ <div class="alert alert-info">
+ <h2>Tài liệu chờ bạn đọc nhận tại thư viện của bạn</h2>
+ <p><strong>[% nextreservtitle | html %]</strong> is on hold for <strong>[% nextreservsurname | html %], [% nextreservfirstname | html %]</strong>đặt mượn. Vui lòng lưu lại các tài liệu này và kiểm tra chúng để xử lý đặt mượn.</p>
+ <form name="cancelReservewithwaiting" action="waitingreserves.pl" method="get">
+ <input type="hidden" name="tab" value="[% tab | html %]" />
+ <button type="submit" class="btn btn-default approve"><i class="fa fa-fw fa-check"></i> OK</button>
+ </form>
+ </div>
+ [% END # /IF waiting %]
+ [% END # /FOREACH cancel_result %]
+ [% ELSE %]
+ [% IF enqueued %]
+ <div class="alert alert-info">
+ <p>The job has been enqueued! It will be processed as soon as possible.</p>
+ <p><a href="/cgi-bin/koha/admin/background_jobs.pl?op=view&id=[% job_id | uri %]" title="View detail of the enqueued job">View detail of the enqueued job</a></p>
+ </div>
+ [% END %]
+
+ [% WRAPPER tabs id= "resultlist" %]
+ [% WRAPPER tabs_nav %]
+ [% WRAPPER tab_item tabname= "holdswaiting" bt_active= 1 %]
+ <span>Holds waiting:</span> [% reservecount | html %]
+ [% END %]
+ [% WRAPPER tab_item tabname= "holdsover" %]
+ <span>Holds waiting past their expiration date:</span> [% overcount | html %]
+ [% END %]
+ [% WRAPPER tab_item tabname= "holdscancelled" %]
+ <span>Holds with cancellation requests:</span> [% cancel_reqs_count | html %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+
+ [% WRAPPER tab_panels %]
+ [% WRAPPER tab_panel tabname="holdswaiting" bt_active= 1 %]
+ [% IF ( reserveloop ) %]
+ <div class="tab-toolbar">
+ <button class="btn btn-default cancel_selected_holds" data-bulk="true"></button>
+ </div>
+ [% INCLUDE waiting_holds.inc table_name='holdst' reserveloop=reserveloop tab='holdwaiting' %]
+ [% ELSE %]
+ <div class="alert alert-info">Không tìm thấy đặt mượn phù hợp.</div>
+ [% END %]
+ [% END # /tab_panel#holdswaiting %]
+
+ [% WRAPPER tab_panel tabname="holdsover" %]
+ [% IF ( overloop ) %]
+ <div class="tab-toolbar">
+ <button class="btn btn-default cancel_selected_holds" data-bulk="true"></button>
+ <div class="btn-group">
+ <form name="cancelAllReserve" action="waitingreserves.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-cancelall" />
+ <input type="hidden" name="allbranches" value="[% allbranches | html %]" />
+ <input type="hidden" name="tab" value="holdsover" />
+ [% IF TransferWhenCancelAllWaitingHolds %]
+ <button type="submit" class="btn btn-primary">Cancel and transfer all</button>
+ [% ELSE %]
+ <button type="submit" class="btn btn-primary">Cancel all</button>
+ [% END %]
+ </form>
+ </div>
+ </div>
+ [% UNLESS TransferWhenCancelAllWaitingHolds %]
+ <div class="hint"
+                                >Only items that need not be transferred will be cancelled
+ [% IF ( CAN_user_parameters_manage_sysprefs ) %]
+ (<a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=TransferWhenCancelAllWaitingHolds">TransferWhenCancelAllWaitingHolds</a> system preference)
+ [% ELSE %]
+ (TransferWhenCancelAllWaitingHolds system preference)
+ [% END %]
+ </div>
+ [% END %]
+ [% INCLUDE waiting_holds.inc table_name='holdso' reserveloop=overloop tab='holdsover' %]
+ [% ELSE %]
+ <div class="alert alert-info">Không tìm thấy đặt mượn phù hợp.</div>
+ [% END # /IF( overloop ) %]
+ [% END # /tab_panel#holdsover %]
+
+ [% WRAPPER tab_panel tabname="holdscancelled" %]
+ [% IF cancel_reqs_count %]
+ <div class="tab-toolbar">
+ <button class="btn btn-default cancel_selected_holds" data-bulk="true"></button>
+ </div>
+ [% INCLUDE waiting_holds.inc select_column='1' table_name='holdscr' reserveloop=cancel_reqs tab='holdscr' %]
+ [% ELSE %]
+ <div class="alert alert-info">Không tìm thấy đặt mượn phù hợp.</div>
+ [% END %]
+ [% END # /tab_panel#holdscancelled %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs %]
+ [% END # /IF ( cancel_result ) %]
+[% END %]
+<div id="cancelModal" class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title">Confirm cancellation</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+
+ <div class="modal-body">
+ <p>Bạn chắc chắn muốn hủy bỏ đặt mượn này?</p>
+
+ <fieldset class="action">
+ [% SET hold_cancellation = AuthorisedValues.GetAuthValueDropbox('HOLD_CANCELLATION') %]
+ [% IF hold_cancellation.count %]
+ <label for="modal-cancellation-reason">Cancellation reason: </label>
+ <select class="cancellation-reason" name="modal-cancellation-reason" id="modal-cancellation-reason">
+ <option value="">No reason given</option>
+ [% FOREACH reason IN hold_cancellation %]
+ <option value="[% reason.authorised_value | html %]">[% reason.lib | html %]</option>
+ [% END %]
+ </select>
+ [% END %]
+ </fieldset>
+ <!-- /.action -->
+ </div>
+ <!-- /.modal-body -->
+
+ <div class="modal-footer">
+ <button id="cancelModalConfirmBtn" type="button" class="btn btn-danger">Confirm cancellation</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ <!-- /.modal-footer -->
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#cancelModal -->
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var holdst_table_settings  = [% TablesSettings.GetTableSettings( 'circ', 'holds_awaiting_pickup', 'holdst',  'json' ) | $raw %];
+        var holdso_table_settings  = [% TablesSettings.GetTableSettings( 'circ', 'holds_awaiting_pickup', 'holdso',  'json' ) | $raw %];
+        var holdscr_table_settings = [% TablesSettings.GetTableSettings( 'circ', 'holds_awaiting_pickup', 'holdscr', 'json' ) | $raw %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        var MSG_CANCEL_SELECTED = _("Cancel selected (%s)");
+        $(document).ready(function () {
+            $("#holdst").kohaTable(
+                {
+                    pagingType: "full",
+                    order: [[1, "asc"]],
+                },
+                holdst_table_settings
+            );
+
+            $("#holdso").kohaTable(
+                {
+                    pagingType: "full",
+                    order: [[1, "asc"]],
+                },
+                holdso_table_settings
+            );
+
+            $("#holdscr").kohaTable(
+                {
+                    pagingType: "full",
+                    order: [[1, "asc"]],
+                },
+                holdscr_table_settings
+            );
+
+            let cancel_link;
+
+            $("#cancelModalConfirmBtn").on("click", function (e) {
+                var ids = cancel_link.data("ids");
+                localStorage.selectedWaitingHolds = JSON.stringify(JSON.parse(localStorage.selectedWaitingHolds).filter(id => !ids.includes(id)));
+                let link = `waitingreserves.pl?cancelBulk=1&amp;ids=${ids.join(",")}`;
+                let reason = $("#modal-cancellation-reason").val();
+                if (reason) {
+                    link += "&amp;cancellation-reason=" + reason;
+                }
+                window.location.href = link;
+                return false;
+            });
+
+            if (!localStorage.selectedWaitingHolds || document.referrer.replace(/\?.*/, "") !== document.location.origin + document.location.pathname) {
+                localStorage.selectedWaitingHolds = "[]";
+            }
+
+            try {
+                JSON.parse(localStorage.selectedWaitingHolds);
+            } catch (e) {
+                localStorage.selectedWaitingHolds = "[]";
+            }
+
+            $(".holds_table .select_hold").each(function () {
+                if (JSON.parse(localStorage.selectedWaitingHolds).includes($(this).data("id"))) {
+                    $(this).prop("checked", true);
+                }
+            });
+
+            function get_selected_ids(dt) {
+                let selected_ids = [];
+                dt.cells(null, 0).every(function () {
+                    let checkbox = $(this.node()).find('input[type="checkbox"]');
+                    if (checkbox.is(":checked")) {
+                        selected_ids.push(checkbox.data("id"));
+                    }
+                });
+                return selected_ids;
+            }
+
+            $(".holds_table").each(function () {
+                var parent = $(this).parents(".tab-pane");
+                var this_dt = $(this).DataTable();
+                let selected_ids = get_selected_ids(this_dt);
+                parent.find(".cancel_selected_holds").html(MSG_CANCEL_SELECTED.format(selected_ids.length));
+                parent.find(".cancel_selected_holds").click(function (e) {
+                    e.preventDefault();
+                    if (get_selected_ids(this_dt).length) {
+                        cancel_link = $(this);
+                        $("#cancelModal").modal("show");
+                    }
+                    return false;
+                });
+            });
+
+            $(".holds_table").on("click", ".select_hold_all", function () {
+                var parent = $(this).parents(".tab-pane");
+                var this_dt = $(this).closest(".holds_table").DataTable();
+
+                var all_checked = $(this).closest(".select_hold_all").prop("checked");
+
+                this_dt.cells(null, 0).every(function () {
+                    $(this.node()).find('input[type="checkbox"]').prop("checked", all_checked);
+                });
+
+                let selected_ids = get_selected_ids(this_dt);
+                var count = selected_ids.length;
+                parent.find(".cancel_selected_holds").data("ids", selected_ids).html(MSG_CANCEL_SELECTED.format(count));
+                localStorage.selectedWaitingHolds = JSON.stringify(selected_ids);
+            });
+
+            $(".holds_table").on("click", ".select_hold", function () {
+                var parent = $(this).parents(".tab-pane");
+                var this_dt = $(this).closest(".holds_table").DataTable();
+                let selected_ids = get_selected_ids(this_dt);
+                var count = selected_ids.length;
+                parent.find(".cancel_selected_holds").data("ids", selected_ids).html(MSG_CANCEL_SELECTED.format(count));
+                localStorage.selectedWaitingHolds = JSON.stringify(selected_ids);
+            });
+
+            var hash = document.location.hash;
+            if (hash !== "") {
+                /* The existence of location.hash means someone clicked a link which targets a specific tab */
+                $(hash).tab("show");
+            } else {
+                /* If no specific tab was linked to, use the last active tab */
+                var activeTab = localStorage.getItem("waitingreserves_activetab");
+                if (activeTab) {
+                    $("div#resultlist li:eq(" + activeTab + ") a").tab("show");
+                }
+            }
+            $("div#resultlist a[data-bs-toggle='tab']").on("shown.bs.tab", function (e) {
+                var thisTab = $(e.target).parent();
+                var activeTab = thisTab.index();
+                localStorage.setItem("waitingreserves_activetab", activeTab);
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

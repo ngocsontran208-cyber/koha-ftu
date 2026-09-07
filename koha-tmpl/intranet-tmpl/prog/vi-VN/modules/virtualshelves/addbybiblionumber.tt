@@ -1,0 +1,147 @@
+[% USE raw %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Add to list") | html %]
+ &rsaquo; [% t("Lists") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    fieldset.rows {
+        float: none;
+    }
+</style>
+</head>
+
+<body id="lists_addbybiblionumber" class="lists">
+<div class="container-fluid">
+ [% UNLESS (authorized) %]
+ <h1>Error adding to list</h1>
+ <div class="alert alert-warning">
+ [% IF (errcode==1) %]<p>Could not create a new list. Please check the name.</p>[% END %]
+ [% IF (errcode==2) %]<p>Sorry, you do not have permission to add items to this list.</p>[% END %]
+ [% IF (errcode==3) %]<p>The titles selected were not found</p>[% END %]
+ <button class="btn btn-default close_window focus">Đóng</button>
+ </div>
+ [% ELSE %]
+
+ [% IF ( multiple ) %]
+ <h1>Thêm [% total | html %] tài liệu vào [% IF ( singleshelf ) %]<em>[% shelfname | html %]</em>:[% ELSE %]a list:[% END %]</h1>
+ [% ELSE %]
+ <h1>Thêm vào [% IF ( singleshelf ) %]<em>[% shelfname | html %]</em>[% ELSE %]giá sách ảo:[% END %]</h1>
+ [% END %]
+ <ul>
+ [% FOREACH biblio IN biblios %]
+ <li>
+ <span class="title">[% biblio.title | html %]</span>
+ [% IF ( biblio.author ) %]<span class="author"> [% biblio.author | html %] </span>[% END %]
+ </li>
+ [% END %]
+ </ul>
+
+ <form name="f1" action="/cgi-bin/koha/virtualshelves/addbybiblionumber.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ [% FOREACH biblio IN biblios %]<input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />[% END %]
+ <input type="hidden" name="confirmed" value="1" />
+ [% IF ( shelfnumber ) %]<input type="hidden" name="shelfnumber" value="[% shelfnumber | html %]" />[% END %]
+
+ [% UNLESS ( shelfnumber ) %]
+
+ [% UNLESS ( newshelf ) %]
+ [% IF private_shelves.count OR public_shelves.count OR private_shelves_shared_with_me.count %]
+ <fieldset class="fg">
+ <legend>Chọn giá sách ảo hiện tại</legend>
+
+ <div class="fg-row">
+ <div class="fg-label">
+ <label>Chọn giá sách ảo</label>
+ </div>
+ <div class="fg-input">
+ <select name="shelfnumber" id="shelfnumber">
+ [% IF private_shelves.count %]
+ <optgroup label="Danh sách cá nhân">
+ [% FOREACH private_shelf IN private_shelves %]
+ <option value="[% private_shelf.shelfnumber | html %]">[% private_shelf.shelfname | html %]</option>
+ [% END %]
+ </optgroup>
+ [% END %]
+ [% IF private_shelves_shared_with_me.count %]
+ <optgroup label="Danh sách cá nhân được chia sẻ với tôi">
+ [% FOREACH private_shelf IN private_shelves_shared_with_me %]
+ <option value="[% private_shelf.shelfnumber | html %]">[% private_shelf.shelfname | html %]</option>
+ [% END %]
+ </optgroup>
+ [% END %]
+ [% IF public_shelves.count %]
+ <optgroup label="Giá sách ảo cộng đồng">
+ [% FOREACH public_shelf IN public_shelves %]
+ <option value="[% public_shelf.shelfnumber | html %]">[% public_shelf.shelfname | html %]</option>
+ [% END %]
+ </optgroup>
+ [% END %]
+ </select>
+ </div>
+ </div>
+
+ [% FOREACH biblio IN biblios %]<input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />[% END %]
+ [% UNLESS ( biblionumbers ) %]
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ [% ELSE %]
+ <input type="hidden" name="biblionumbers" value="[% biblionumbers | html %]" />
+ [% END %]
+ </fieldset>
+
+ <p>... Hoặc...</p>
+ [% END %]
+ [% END %]
+
+ <fieldset class="fg">
+ <legend>Thêm vào danh sách mới:</legend>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="newvirtualshelf"> Tên giá sách ảo: </label>
+ </div>
+ <div class="fg-input">
+ [% FOREACH biblio IN biblios %]<input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />[% END %]
+ [% UNLESS ( biblionumbers ) %]
+ <input type="hidden" name="biblionumber" id="biblionumber" value="[% biblionumber | html %]" />
+ [% ELSE %]
+ <input type="hidden" name="biblionumbers" id="biblionumbers" value="[% biblionumbers | html %]" />
+ [% END %]
+ <input type="text" name="newvirtualshelf" id="newvirtualshelf" size="40" />
+ <input type="hidden" name="confirmed" value="1" />
+ </div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="public">Danh mục:</label>
+ </div>
+ <div class="fg-input">
+ <select name="public" id="public">
+ <option value="0">Cá nhân</option>
+ <option value="1">Công cộng</option>
+ </select>
+ </div>
+ </div>
+ </fieldset>
+ [% END %]
+
+ <input type="hidden" name="sortfield" value="title" />
+ <nav class="navbar navbar-default fixed-bottom">
+ <div class="container-fluid">
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-add" />
+ <input class="btn btn-primary" type="submit" value="Lưu" />
+ <button class="btn btn-default close_window">Hủy bỏ</button>
+ </fieldset>
+ </div>
+ </nav>
+ </form>
+ [% END %]
+</div>
+<!-- /.container-fluid -->
+
+[% SET popup_window = 1 %]
+[% INCLUDE 'intranet-bottom.inc' %]

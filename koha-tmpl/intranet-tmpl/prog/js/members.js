@@ -249,9 +249,8 @@ $(document).ready(function () {
             $("#debarreduntil").hide();
         }
     });
-    var mandatory_fields = $("input[name='BorrowerMandatoryField']")
-        .val()
-        .split("|");
+    var bmf_input = $("input[name='BorrowerMandatoryField']");
+    var mandatory_fields = (bmf_input.length && bmf_input.val()) ? bmf_input.val().split("|") : [];
     $(mandatory_fields).each(function () {
         let input = $("[name='" + this + "']");
         if (input.hasClass("flatpickr")) {

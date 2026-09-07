@@ -1,0 +1,346 @@
+[% USE raw %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>
+ [% FILTER collapse %]
+ [% SWITCH source %]
+ [% CASE "Itemtype" %]
+ [% tx("Add translations for item type '{code}'", { code = object_id }) | html %]
+ &rsaquo; [% t("Item types") | html %] &rsaquo; [% t("Administration") | html %]
+ [% CASE %]
+ [% tx("Add translations for '{code}'", { code = object_id }) | html %]
+ [% END %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    #localization {
+        margin-top: 1em;
+    }
+</style>
+</head>
+
+<body id="admin_localization" class="admin">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% SWITCH source %]
+ [% CASE "Itemtype" %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/itemtypes.pl">Loại tài liệu</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/itemtypes.pl?op=add_form&itemtype=[% object_id | uri %]"> [% tx("Modify item type '{code}'", { code = object_id }) | html %] </a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Add translations</span>
+ [% END %]
+ [% CASE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% tx("Add translations for '{code}'", { code = object_id }) | html %]
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+ [% SWITCH source %]
+ [% CASE "Itemtype" %]
+ <h1>[% tx("Add translations for item type '{code}'", { code = object_id }) | html %]</h1>
+ [% CASE %]
+ <h1>[% tx("Add translations for '{code}'", { code = code }) | html %]</h1>
+ [% END %]
+
+ <form id="add_translation" method="get">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="source" value="[% source | html %]" />
+ <input type="hidden" name="object_id" value="[% object_id | html %]" />
+ <input type="hidden" name="property" value="[% property | html %]" />
+ <fieldset class="rows clearfix">
+ <ol>
+ <li>
+ <span class="label">Mã thông báo:</span>
+ [% object_id | html %]
+ </li>
+ <li>
+ <label for="lang">Language:</label>
+ <select name="lang" id="lang">
+ [% FOR language IN languages %]
+ [% FOR sublanguage IN language.sublanguages_loop %]
+ [% IF language.plural %]
+ <option value="[% sublanguage.rfc4646_subtag | html %]">[% sublanguage.native_description | html %] [% sublanguage.region_description | html %] ([% sublanguage.rfc4646_subtag | html %])</option>
+ [% ELSE %]
+ <option value="[% sublanguage.rfc4646_subtag | html %]">[% sublanguage.native_description | html %] ([% sublanguage.rfc4646_subtag | html %])</option>
+ [% END %]
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li>
+ <label for="translation">Translation:</label>
+ <input type="text" size="40" name="translation" id="translation" />
+ </li>
+ <li>
+ <span class="label">&nbsp;</span>
+ <input class="btn btn-primary" type="submit" value="Thêm" />
+ </li>
+ </ol>
+ </fieldset>
+ </form>
+ <div id="messages"></div>
+ <div class="page-section">
+ <table id="localization">
+ <thead>
+ <tr>
+ <th class="lang">Ngôn ngữ</th>
+ <th class="translation">translation</th>
+ <th class="no-sort">&nbsp;</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOR t IN translations %]
+ <tr id="row_id_[% t.localization_id | html %]" data-id="[% t.localization_id | html %]">
+ <td class="lang">[% t.lang | html %]</td>
+ <td class="translation" contenteditable="true">[% t.translation | html %]</td>
+ <td class="actions"
+                            ><a href="#" class="btn btn-xs btn-default delete"><i class="fa fa-trash-can"></i> Xóa</a></td
+                        >
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ [% SWITCH entity %]
+ [% CASE "itemtypes" %]
+ <fieldset class="action">
+ <a class="btn btn-default" href="/cgi-bin/koha/admin/itemtypes.pl?op=add_form&itemtype=[% code | uri %]"> [% tx("Return to item type '{code}'", { code = code }) | html %] </a>
+ </fieldset>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function show_message(params) {
+            var type = params.type;
+            var data = params.data;
+            var messages = $("#messages");
+            var message;
+            if (type == "success_on_update") {
+                message = $('<div class="alert alert-info"></div>');
+                message.text(_("Translation for lang %s has correctly been updated with '%s'").format(data.lang, data.translation));
+            } else if (type == "error_on_update") {
+                message = $('<div class="alert alert-warning"></div>');
+                if (data.error_code == "already_exists") {
+                    message.text(_("A translation already exists for this language."));
+                } else {
+                    message.text(_("An error occurred when updating this translation."));
+                }
+            } else if (type == "success_on_delete") {
+                message = $('<div class="alert alert-info"></div>');
+                message.text(_("The translation has been removed successfully"));
+            } else if (type == "error_on_delete") {
+                message = $('<div class="alert alert-warning"></div>');
+                message.text(_("An error occurred when deleting this translation"));
+            } else if (type == "success_on_insert") {
+                message = $('<div class="alert alert-info"></div>');
+                message.text(_("Translation has been added successfully"));
+            } else if (type == "error_on_insert") {
+                message = $('<div class="alert alert-warning"></div>');
+                if (data.error_code == "already_exists") {
+                    message.text(_("A translation already exists for this language."));
+                } else {
+                    message.text(_("An error occurred when adding this translation"));
+                }
+            }
+
+            $(messages).append(message);
+
+            setTimeout(function () {
+                message.hide();
+            }, 3000);
+        }
+
+        function send_update_request(_data, cell) {
+            const form = document.forms.add_translation;
+            const source = form.elements.source.value;
+            const object_id = form.elements.object_id.value;
+            const data = Object.assign({}, _data, { source, object_id });
+            const client = APIClient.localization;
+            client.localizations.update(data).then(
+                success => {
+                    if (success.error) {
+                        $(cell).css("background-color", "#FF0000");
+                        show_message({ type: "error_on_update", data: success });
+                    } else {
+                        $(cell).css("background-color", "#00FF00");
+                        show_message({ type: "success_on_update", data: success });
+                    }
+
+                    if ($(cell).hasClass("lang")) {
+                        $(cell).text(success.lang);
+                    } else if ($(cell).hasClass("translation")) {
+                        $(cell).text(success.translation);
+                    }
+                },
+                error => {
+                    $(cell).css("background-color", "#FF9090");
+                    if ($(cell).hasClass("lang")) {
+                        $(cell).text(error.lang);
+                    } else if ($(cell).hasClass("translation")) {
+                        $(cell).text(error.translation);
+                    }
+                    show_message({ type: "error_on_update", data: error });
+                    console.warn("Something wrong happened: %s".format(error));
+                }
+            );
+        }
+
+        function send_delete_request(localization_id, cell) {
+            const form = document.forms.add_translation;
+            const source = form.elements.source.value;
+            const object_id = form.elements.object_id.value;
+            const property = form.elements.property.value;
+            const data = { source, object_id, property, localization_id };
+
+            const client = APIClient.localization;
+            client.localizations.delete(data).then(
+                success => {
+                    $("#localization")
+                        .DataTable()
+                        .row("#row_id_" + localization_id)
+                        .remove()
+                        .draw();
+                    show_message({ type: "success_on_delete", data: { localization_id } });
+                },
+                error => {
+                    $(cell).css("background-color", "#FF9090");
+                    show_message({ type: "error_on_delete", data: error });
+                    console.warn("Something wrong happened: %s".format(error));
+                }
+            );
+        }
+
+        $(document).ready(function () {
+            $(".dialog").hide();
+
+            let table = $("#localization").kohaTable({
+                dom: "t",
+                paging: false,
+                autoWidth: false,
+            });
+            let table_dt = table.DataTable();
+
+            $("body").on("focus", "td.translation", function () {
+                $(this).css("background-color", "");
+            });
+            $("body").on("click", "td.lang", function () {
+                var td = $(this);
+                if (td[0].childElementCount > 0) {
+                    // do nothing if there is already something there (like a select for instance)
+                    return;
+                }
+                var tr = td.parent();
+                var id = tr.data("id");
+                var lang = td.text();
+                td.css("background-color", "");
+                var my_select = languages_select.clone();
+                my_select.find('option[value="' + lang + '"]').attr("selected", "selected");
+                my_select.on("click", function (e) {
+                    e.stopPropagation();
+                });
+                var lang;
+                my_select.on("change", function () {
+                    var localization_id = $(tr).data("id");
+                    lang = td.find("option:selected").val();
+                    send_update_request({ localization_id, lang }, td[0]);
+                });
+                my_select.on("blur", function () {
+                    td.html(lang);
+                });
+                td.html(my_select);
+            });
+
+            $("body").on("blur", "td.translation", function () {
+                var tr = $(this).parent();
+                var localization_id = $(tr).data("id");
+                var translation = $(this).text();
+                send_update_request({ localization_id, translation }, this);
+            });
+
+            $("body").on("click", "a.delete", function (e) {
+                e.preventDefault();
+                if (confirm(_("Are you sure you want to delete this translation?"))) {
+                    var td = $(this).parent();
+                    var tr = $(td).parent();
+                    var id = $(tr).data("id");
+                    send_delete_request(id, td);
+                }
+            });
+
+            const th_lang_index = document.querySelector("th.lang").cellIndex;
+            const th_translation_index = document.querySelector("th.translation").cellIndex;
+
+            $("#add_translation").on("submit", function (e) {
+                e.preventDefault();
+
+                const form = this;
+                const source = form.elements.source.value;
+                const object_id = form.elements.object_id.value;
+                const property = form.elements.property.value;
+                const lang = form.elements.lang.value;
+                const translation = form.elements.translation.value;
+
+                let localization = { source, object_id, property, lang, translation };
+                const client = APIClient.localization;
+                client.localizations.create(localization).then(
+                    success => {
+                        if (success.error) {
+                            show_message({ type: "error_on_insert", data: success });
+                        } else {
+                            var new_row = table
+                                .api()
+                                .row.add([success.lang, success.translation, '<a href="#" class="btn btn-xs btn-default delete"><i class="fa fa-trash-can"></i> %s</a>'.format(escape_str(_("Xóa")))])
+                                .draw()
+                                .node();
+                            $(new_row)
+                                .attr("id", "row_id_" + success.localization_id)
+                                .data("id", success.localization_id);
+                            $(new_row.children[th_lang_index]).prop("contenteditable", true).addClass("lang");
+                            $(new_row.children[th_translation_index]).prop("contenteditable", true).addClass("translation");
+                            show_message({ type: "success_on_insert", data: success });
+                        }
+                    },
+                    error => {
+                        show_message({ type: "error_on_insert", data: error });
+                        console.warn("Something wrong happened: %s".format(error));
+                    }
+                );
+            });
+        });
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var languages_select = $('<select name="lang" id="lang"></select>');
+        [% FOR language IN languages %]
+            [% FOR sublanguage IN language.sublanguages_loop %]
+                var option;
+                [% IF language.plural %]
+                    option = $('<option value="[% sublanguage.rfc4646_subtag | html %]">[% sublanguage.native_description | html %] [% sublanguage.region_description | html %] ([% sublanguage.rfc4646_subtag | html %])</option>');
+                    $(languages_select).append(option);
+                [% ELSE %]
+                    option = $('<option value="[% sublanguage.rfc4646_subtag | html %]">[% sublanguage.native_description | html %] ([% sublanguage.rfc4646_subtag | html %])</option>');
+                [% END %]
+                $(languages_select).append(option);
+            [% END %]
+        [% END %]
+    </script>
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

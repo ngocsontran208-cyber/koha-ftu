@@ -1,0 +1,384 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE AuthorisedValues %]
+[% USE Branches %]
+[% USE CGI %]
+[% USE KohaDates %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Search results") | html %]
+ &rsaquo; [% t("Serials") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    input.dt-filter {
+        width: 100%;
+        font-size: 85%;
+    }
+</style>
+</head>
+
+<body id="ser_serials-search" class="ser">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'serials-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% IF ( done_searched ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/serials/serials-home.pl">Ấn phẩm định kỳ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Kết quả tìm kiếm</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Ấn phẩm định kỳ</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% url_params = [] %]
+[% FOREACH param IN CGI.params.pairs %]
+ [% escaped_value = BLOCK %][% param.value | uri %][% END %]
+ [% url_params.push(param.key _ '=' _ escaped_value) %]
+[% END %]
+
+[% SET referrer = '/cgi-bin/koha/serials/serials-search.pl?' %]
+[% referrer = BLOCK %][% referrer | url %][% url_params.join("&amp;") |uri %][% END %]
+[% SET edit_action_link = '/cgi-bin/koha/serials/subscription-batchedit.pl?referrer=' _ referrer %]
+
+[% BLOCK subscriptions_table %]
+ <div>
+ [% INCLUDE 'csrf-token.inc' %]
+ [% IF closed %]
+ [% SET tab = 'closed' %]
+ [% ELSE %]
+ [% SET tab = 'opened' %]
+ [% END %]
+ [% IF CAN_user_serials_edit_subscription %]
+ <div class="actions">
+ <a class="select-all" href="#" data-tab="[% tab | html %]"><i class="fa fa-check"></i> Chọn tất cả</a>
+ |
+ <a class="clear-all" href="#" data-tab="[% tab | html %]"><i class="fa fa-times"></i> Bỏ tất cả</a>
+ <span class="itemselection_actions [% tab | html %]">
+ | Actions:
+ <a href="#" data-tab="[% tab | html %]" class="itemselection_action_modify"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Edit selected serials</a>
+ </span>
+ </div>
+ [% END %]
+ <table>
+ <thead>
+ <tr>
+ <th class="no-sort no-export"></th>
+ <th>Số ISSN</th>
+ <th class="anti-the">Nhan đề</th>
+ <th>Ghi chú</th>
+ <th>Thư viện</th>
+ <th>Vị trí</th>
+ <th>Số phân loại</th>
+ [% UNLESS closed %]
+ <th>Ngày hết hạn</th>
+ [% END %]
+ [% FOR field IN additional_fields_for_subscription %]
+ <th>[% field.name | html %]</th>
+ [% END %]
+ <th class="no-sort no-export">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH subscription IN subscriptions %]
+ [% UNLESS subscription.cannotdisplay %]
+ <tr>
+ <td>
+ [% UNLESS subscription.cannotedit %]
+ <input type="checkbox" name="subscriptionid" value="[% subscription.subscriptionid | html %]" class="[% tab | html %]" />
+ [% ELSE %]
+ <input type="checkbox" name="subscriptionid" value="[% subscription.subscriptionid | html %]" disabled="disabled" title="You cannot edit this subscription" />
+ [% END %]
+ </td>
+ <td>
+ [% IF ( subscription.issn ) %]
+ [% subscription.issn | html %]
+ [% END %]
+ </td>
+ <td>
+ <a class="button" href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% subscription.subscriptionid | uri %]" title="Thông tin chi tiết ấn phẩm định kỳ">[% subscription.title | html %] [% subscription.subtitle | html %] [% subscription.part_number | html %] [% subscription.part_name | html %]</a
+                                >
+ </td>
+ <td>
+ [% IF ( subscription.publicnotes ) %][% subscription.publicnotes | html %][% END %]
+ [% IF ( subscription.internalnotes ) %]([% subscription.internalnotes | html %])[% END %]
+ </td>
+ <td> [% IF ( subscription.branchcode ) %][% Branches.GetName( subscription.branchcode ) | html %][% END %] </td>
+ <td>
+ [% IF ( subscription.location ) %]
+ [% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => subscription.location ) | html %]
+ [% END %]
+ </td>
+ <td> [% IF ( subscription.callnumber ) %][% subscription.callnumber | html %][% END %] </td>
+ [% UNLESS closed %]
+ <td data-order="[% subscription.enddate | html %]"> [% subscription.enddate | $KohaDates %] </td>
+ [% END %]
+
+ [% INCLUDE 'additional-fields-display.inc' available=additional_fields_for_subscription values=subscription.additional_field_values value_only=1 is_table_cell=1 %]
+
+ <td>
+ <div class="btn-group dropup">
+ [% IF closed %]
+ <a class="btn btn-default btn-xs dropdown-toggle" id="closedsubactions[% subscription.subscriptionid | html %]" role="button" data-bs-toggle="dropdown" href="#"> Thao tác </a>
+ <ul class="dropdown-menu" role="menu" aria-labelledby="closedsubactions[% subscription.subscriptionid | html %]">
+ [% UNLESS ( subscription.cannotedit ) %]
+ <li>
+ <a
+                                                        class="dropdown-item"
+                                                        href="/cgi-bin/koha/serials/serials-search.pl?subscriptionid=[% subscription.subscriptionid | uri %]&amp;op=reopen&amp;[% IF ( routing && CAN_user_serials_routing ) %]routing=[% subscription.routing | uri %]&amp;[% END %]searched=1&amp;title_filter=[% title_filter | uri %]&amp;ISSN_filter=[% ISSN_filter | uri %]&amp;EAN_filter=[% EAN_filter | uri %]&amp;published_filter=[% publisher_filter | uri %]&amp;bookseller_filter=[% bookseller_filter | uri %]&amp;branch_filter=[% branch_filter | uri %]"
+                                                        id="reopensub"
+                                                    >
+ <i class="fa-solid fa-arrow-rotate-right"></i> Mở lại</a
+                                                    >
+ </li>
+ [% END %]
+
+ <li>
+ <a class="dropdown-item" href="/cgi-bin/koha/serials/serials-collection.pl?subscriptionid=[% subscription.subscriptionid | uri %]"><i class="fa-solid fa-rectangle-list"></i> Lịch sử phát hành</a>
+ </li>
+ </ul>
+ [% ELSE %]
+ <div class="btn-group dropup">
+ [% IF ( CAN_user_serials_receive_serials ) %]
+ [%# There should be no space between these two buttons, it would render badly %]
+ <a class="btn btn-default btn-xs" role="button" href="/cgi-bin/koha/serials/serials-edit.pl?subscriptionid=[% subscription.subscriptionid | html %]&amp;serstatus=1,3,7"
+                                                    ><i class="fa fa-inbox"></i> Nhận ÂPĐK</a
+                                                ><a class="btn btn-default btn-xs dropdown-toggle" id="subactions[% subscription.subscriptionid | html %]" role="button" data-bs-toggle="dropdown" href="#"></a>
+ [% ELSE %]
+ <a class="btn btn-default btn-xs dropdown-toggle" id="subactions[% subscription.subscriptionid | html %]" role="button" data-bs-toggle="dropdown" href="#">Thao tác </a>
+ [% END %]
+ <ul class="dropdown-menu" role="menu" aria-labelledby="subactions[% subscription.subscriptionid | html %]">
+ [% IF ( routing && CAN_user_serials_routing ) %]
+ [% IF ( subscription.cannotedit ) %]
+
+ [% ELSE %]
+ [% IF ( subscription.routingedit ) %]
+ <li>
+ <a class="dropdown-item" href="/cgi-bin/koha/serials/routing.pl?subscriptionid=[% subscription.subscriptionid | uri %]"
+                                                                    ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Edit routing list ([% subscription.routingedit | html %])</a
+                                                                >
+ </li>
+ [% ELSE %]
+ <li>
+ <a class="dropdown-item" href="/cgi-bin/koha/serials/routing.pl?subscriptionid=[% subscription.subscriptionid | uri %]&amp;op=new">
+ <i class="fa fa-plus"></i> New routing list</a
+                                                                >
+ </li>
+ [% END %]
+ [% END %]
+ [% END # IF ( routing && CAN_user_serials_routing ) %]
+
+ <li>
+ <a class="dropdown-item" href="/cgi-bin/koha/serials/serials-collection.pl?subscriptionid=[% subscription.subscriptionid | uri %]"
+                                                        ><i class="fa-solid fa-rectangle-list"></i> Lịch sử phát hành</a
+                                                    >
+ </li>
+ </ul>
+ </div>
+ [% END # IF closed %]
+ </div>
+ <!-- /.btn-group -->
+ </td>
+ </tr>
+ [% END # /UNLESS subscription.cannotdisplay %]
+ [% END  # /FOREACH subscription %]
+ </tbody>
+ </table>
+ </div>
+[% END # /BLOCK subscriptions_table %]
+
+[% SET asides = ['serials-menu'] %]
+[% IF done_searched && !mana %][% asides.unshift('serials-advsearch_brief') %][% END %]
+[% WRAPPER 'main-container.inc' asides=asides %]
+
+ [% INCLUDE 'serials-toolbar.inc' %]
+
+ [% IF ( mana ) %]
+ [% IF ( done_searched ) %]
+ <h1>Mana subscriptions ([% total | html %] found)</h1>
+ [% ELSE %]
+ <h1>Mana subscriptions search</h1>
+ [% END %]
+ [% ELSE %]
+ [% IF ( done_searched ) %]
+ [% IF orig_total > total %]
+ <div class="alert alert-warning">
+ <p>The search originally produced [% orig_total | html %] results and was limited to [% total | html %].</p>
+ </div>
+ [% END %]
+ <h1>Ấn phẩm định kỳ (Tìm thấy [% total | html %] kết quả)</h1>
+ [% ELSE %]
+ <h1>Serials subscriptions search</h1>
+ [% END %]
+ [% END %]
+
+ [% UNLESS ( done_searched ) %]
+ [% INCLUDE 'serials-advsearch.inc' %]
+ [% END # /UNLESS ( done_searched ) %]
+
+ [% IF ( done_searched ) %]
+ [% IF ( total ) %]
+
+ [% WRAPPER tabs id= "serialstabs" %]
+ [% WRAPPER tabs_nav %]
+ [% IF mana %]
+ [% WRAPPER tab_item tabname= "mana" bt_active= 1 %]<span>Mana</span> ([% total || 0 | html %])[% END %]
+ [% ELSE %]
+ [% WRAPPER tab_item tabname= "opened" bt_active= 1 %]<span>Mở</span> ([% openedsubscriptions.size || 0 | html %])[% END %]
+ [% WRAPPER tab_item tabname= "closed" %]<span>Đóng</span> ([% closedsubscriptions.size || 0 | html %])[% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+ [% WRAPPER tab_panels %]
+ [% IF mana %]
+ [% WRAPPER tab_panel tabname="mana" bt_active= 1 %]
+ [% INCLUDE 'mana/mana-subscription-search-result.inc' %]
+ [% END # /WRAPPER tab_panel#mana %]
+ [% ELSE %]
+ [% WRAPPER tab_panel tabname="opened" bt_active= 1 %]
+ [% IF openedsubscriptions %]
+ [% INCLUDE subscriptions_table subscriptions = openedsubscriptions %]
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>Không có ấn phẩm định kỳ đang sử dụng.</p>
+ </div>
+ [% END %]
+ [% END # /WRAPPER tab_panel#opened %]
+ [% WRAPPER tab_panel tabname="closed" %]
+ [% IF closedsubscriptions %]
+ [% INCLUDE subscriptions_table subscriptions = closedsubscriptions closed = 1 %]
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>Your search returned no closed subscriptions.</p>
+ </div>
+ [% END %]
+ [% END # /WRAPPER tab_panel#closed %]
+ [% END # /IF mana %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs#serialstabs %]
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>Không tìm thấy kết quả.</p>
+ </div>
+ [% END # IF ( total ) %]
+ [% END # /IF done_searched %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'calendar.inc' %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var subscriptionid = "[% subscriptionid | html %]";
+        const edit_action_link = "[% edit_action_link | html %]";
+
+        [% IF mana %]
+            var additional_fields_for_subscription_ids = [];
+            [% FOR field IN additional_fields_for_subscription %]
+                additional_fields_for_subscription_ids.push([% field.id | $raw %]);
+            [% END %]
+        [% END %]
+    </script>
+ [% Asset.js("js/serials-toolbar.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function itemSelectionBuildEditLink(tab) {
+            var subscription_ids = new Array();
+            $("input:checkbox." + tab + ":checked").each(function () {
+                subscription_ids.push($(this).val());
+            });
+
+            if (subscription_ids.length > 0) {
+                var url = edit_action_link;
+                url += "&subscriptionid=" + subscription_ids.join("&subscriptionid=");
+                location.href = url;
+            } else {
+                return false;
+            }
+        }
+
+        function enableCheckboxActions(tab) {
+            // Enable/disable controls if checkboxes are checked
+            var checked_count = $("input:checkbox." + tab + ":checked").length;
+            if (checked_count > 0) {
+                $(".itemselection_actions." + tab).show();
+            } else {
+                $(".itemselection_actions." + tab).hide();
+            }
+        }
+
+        $(document).ready(function () {
+            var osrlt = $("#opened_panel table").kohaTable(
+                {
+                    pagingType: "full",
+                    order: [[2, "asc"]],
+                },
+                null,
+                true
+            );
+
+            var csrlt = $("#closed_panel table").kohaTable(
+                {
+                    // FIXME sort function of additional_fields!
+                    order: [[2, "asc"]],
+                    pagingType: "full",
+                },
+                null,
+                true
+            );
+
+            var manarlt = $("#mana_results_datatable").kohaTable({
+                pagingType: "full",
+            });
+
+            $("#reopensub").click(function () {
+                return confirm(_("Bạn chắc chắn muốn mở lại ấn phẩm định kỳ này?"));
+            });
+
+            $(".select-all, .clear-all").on("click", function (e) {
+                e.preventDefault();
+                var tab = $(this).data("tab");
+                var checkboxes = $("input:checkbox." + tab);
+                checkboxes.prop("checked", $(this).hasClass("select-all")).change();
+                enableCheckboxActions(tab);
+            });
+
+            enableCheckboxActions("opened");
+            enableCheckboxActions("closed");
+
+            $("input[name='subscriptionid'][type='checkbox']").change(function () {
+                var tab = $(this).attr("class");
+                enableCheckboxActions(tab);
+            });
+
+            $(".itemselection_action_modify").on("click", function (e) {
+                e.preventDefault();
+                var tab = $(this).data("tab");
+                itemSelectionBuildEditLink(tab);
+            });
+        });
+    </script>
+ [% IF ( mana ) %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                $(".local").hide();
+                additional_fields_for_subscription_ids.forEach(id => {
+                    $(`label[for=additional_field_${id}], input#additional_field_${id}`).hide();
+                });
+            });
+        </script>
+ [% END %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

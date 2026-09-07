@@ -1,0 +1,164 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your recalls history") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-recalls' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Lịch sử thu hồi của bạn</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1 order-lg-2">
+ <div id="recalls" class="maincontent">
+ <h1>Lịch sử yêu cầu thu hồi</h1>
+ [% IF Koha.Preference('UseRecalls') %]
+ [% IF RECALLS.count %]
+ <div id="opac-user-recalls">
+ <table id="recalls-table" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th class="anti-the">Nhan đề</th>
+ <th class="psort">Ngày đặt hàng</th>
+ <th>Ngày hết hạn</th>
+ <th>Địa điểm nhận sách</th>
+ <th>Trạng thái</th>
+ <th>Hạn trả</th>
+ <th class="no-sort">Chỉnh sửa</th>
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH RECALL IN RECALLS %]
+ <tr>
+ <td class="title">
+ <a class="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% RECALL.biblio_id | html %]">
+ [% RECALL.biblio.title | html %]
+ [% FOREACH s IN RECALL.biblio.subtitle %]
+ [% s | html %]
+ [% END %]
+ </a>
+ [% RECALL.biblio.author | html %]
+ </td>
+ <td class="recalldate" data-order="[% RECALL.created_date | html %]"> [% RECALL.created_date | $KohaDates %] </td>
+ <td class="expirationdate" data-order="[% RECALL.expiration_date | html %]">
+ [% IF ( RECALL.expiration_date ) %]
+ [% RECALL.expiration_date | $KohaDates %]
+ [% ELSIF ( !RECALL.completed ) %]
+ <span>Không bao giờ hết hạn</span>
+ [% ELSE %]
+ -
+ [% END %]
+ </td>
+ <td class="branch"> [% RECALL.library.branchname | html %] </td>
+ <td class="status">
+ [% IF ( RECALL.in_transit ) %]
+ <span>Đang chuyển đến [% RECALL.library.branchname | html %]</span>
+ [% ELSIF ( RECALL.waiting ) %]
+ <span>Sẵn sàng để nhận</span>
+ [% ELSIF ( RECALL.overdue ) %]
+ <span>Đã quá hạn trả</span>
+ [% ELSIF ( RECALL.expired ) %]
+ <span>Đã hết hạn vào [% RECALL.expiration_date | $KohaDates %]</span>
+ [% ELSIF ( RECALL.cancelled ) %]
+ <span>Đã hủy vào [% RECALL.completed_date | $KohaDates %]</span>
+ [% ELSIF ( RECALL.fulfilled ) %]
+ <span>Đã hoàn thành</span>
+ [% ELSE %]
+ <span>Đã yêu cầu</span>
+ [% END %]
+ </td>
+ <td class="due_date">
+ [% IF ( RECALL.requested ) %]
+ <span>Hạn phải trả vào ngày [% RECALL.checkout.date_due | $KohaDates as_due_date => 1 %]</span>
+ [% ELSIF ( RECALL.waiting and RECALL.expiration_date ) %]
+ <span>Đến lấy trước ngày [% RECALL.expiration_date | $KohaDates %]</span>
+ [% ELSE %]
+ -
+ [% END %]
+ </td>
+
+ <td class="cancelrecall">
+ [% IF ( RECALL.requested or RECALL.overdue ) %]
+ <form action="/cgi-bin/koha/opac-recall.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-cancel" />
+ <input type="hidden" name="recall_id" value="[% RECALL.id | html %]" />
+ <input type="hidden" name="biblionumber" value="[% RECALL.biblio_id | html %]" />
+ <input class="btn btn-danger cancel_recall" name="submit" type="submit" value="Hủy bỏ" />
+ </form>
+ [% END %]
+ </td>
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ [% ELSE %]
+ <span>Chưa có yêu cầu thu hồi nào được thực hiện.</span>
+ [% END # / # RECALLS.count %]
+ [% ELSE %]
+ <span>Tính năng thu hồi chưa được kích hoạt. Vui lòng liên hệ với thư viện của bạn.</span>
+ [% END %]
+ </div>
+ <!-- /#recalls -->
+ </div>
+ <!-- /.col-md-12 -->
+ </div>
+ <!-- /.row -->
+ </div>
+ <!-- /.container-fluid -->
+</main>
+<!-- /#main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        Koha.addPrefs({
+            OPACTableColExpandedByDefault: [% Koha.Preference('OPACTableColExpandedByDefault') ? 1 : 0 | html %],
+        });
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $(".cancel_recall").click(function () {
+                return confirmDelete(_("Bạn có chắc chắn muốn xóa yêu cầu thu hồi này không?"));
+            });
+
+            var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
+            $("#recalls-table").kohaTable({
+                responsive: {
+                    details: {
+                        display: responsive_display,
+                        type: "column",
+                        target: -1,
+                    },
+                },
+                columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+            });
+        });
+    </script>
+[% END %]

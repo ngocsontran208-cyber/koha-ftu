@@ -1,0 +1,52 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% tx("Serials {biblionumber}", { biblionumber = biblionumber }) | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="ser_serials-home" class="ser">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'serials-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Ấn phẩm định kỳ</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='serials-menu' %]
+
+ [% INCLUDE 'serials-toolbar.inc' %]
+
+ <h1>Ấn phẩm định kỳ</h1>
+
+ [% INCLUDE 'serials-advsearch.inc' %]
+
+ [%- SET StaffSerialsHome = AdditionalContents.get( location => "StaffSerialsHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]
+ [%- FOREACH block IN StaffSerialsHome.content -%]
+ <div class="page-section"> [%- block.content | $raw -%] </div>
+ [%- END -%]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'calendar.inc' %]
+ [% Asset.js("js/serials-toolbar.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var subscriptionid = "[% subscriptionid | html %]";
+    </script>
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

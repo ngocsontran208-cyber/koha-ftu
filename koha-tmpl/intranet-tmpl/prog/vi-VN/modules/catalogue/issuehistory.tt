@@ -1,0 +1,148 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% title_in_title = INCLUDE 'biblio-title-head.inc' %]
+ [% tx("Checkout history for {title}", { title = title_in_title }) | html %]
+ &rsaquo; [% t("Catalog") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="catalog_issuehistory" class="catalog">
+
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/catalogue/search.pl">Mục tra cứu</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ [% INCLUDE 'biblio-title.inc' link = 1 %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Lịch sử mượn tài liệu</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='biblio-view-menu' %]
+ <h1>Lịch sử ghi mượn của [% INCLUDE 'biblio-title.inc' %]</h1>
+ [% IF biblio.author %]<h3>, Tác giả: [% biblio.author | html %]</h3>[% END %]
+
+ [% SET show_patron_column = (CAN_user_borrowers_view_checkout_history && Koha.Preference('intranetreadinghistory')) AND CAN_user_circulate_circulate_remaining_permissions %]
+
+ <div class="searchresults page-section">
+ [% IF checkouts %]
+ <h2>Hiện tại tài liệu được ghi mượn [% checkouts.size | html %] lần</h2>
+ <table id="table_issues">
+ <thead
+                    ><tr>
+ [% IF show_patron_column %]
+ <th>Bạn đọc</th>
+ [% END %]
+ <th>Mã vạch</th>
+ <th>Nơi ghi mượn</th>
+ [% IF Koha.Preference('RecordStaffUserOnCheckout') %]
+ <th>Checked out by</th>
+ [% ELSE %]
+ <th class="NoVisible">Checked out by</th>
+ [% END %]
+ <th>Gia hạn</th>
+ <th>Ngày ghi mượn</th>
+ <th>Hạn trả</th>
+ <th>Ngày ghi trả</th>
+ </tr></thead
+                >
+ <tbody>
+ [% SET anonymous_patron_id = Koha.Preference('AnonymousPatron') || 0 %]
+ [% FOREACH checkout IN checkouts %]
+ <tr>
+ [% IF show_patron_column %]
+ <td>
+ [% IF checkout.patron %]
+ [%# Not set for deleted patron records %]
+ [% IF checkout.patron.id == anonymous_patron_id %]
+ <em>Anonymized</em>
+ [% ELSE %]
+ [% INCLUDE 'patron-title.inc' patron => checkout.patron hide_patron_infos_if_needed=1 %]
+ [% END %]
+ [% END %]
+ </td>
+ [% END %]
+ <td>
+ [% IF checkout.item.barcode %]
+ [%# FIXME This test is not mandatory I think %]
+ <a href="/cgi-bin/koha/catalogue/moredetail.pl?biblionumber=[% checkout.item.biblionumber | uri %]&amp;itemnumber=[% checkout.item.itemnumber | uri %]">[% checkout.item.barcode | html %]</a>
+ [% ELSE %]
+ &nbsp;
+ [% END %]</td
+                            >
+ <td
+                                >[% IF checkout.branchcode %]
+ [% Branches.GetName( checkout.branchcode ) | html %]
+ [% ELSE %]
+ &nbsp;
+ [% END %]</td
+                            >
+ <td
+                                >[% IF checkout.issuer_id %]
+ <a href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% checkout.issuer_id | uri %]"> [% INCLUDE 'patron-title.inc' patron=checkout.issuer %] </a>
+ [% END %]</td
+                            >
+ <td
+                                >[% IF checkout.renewals_count %]
+ Yes[% IF checkout.lastreneweddate %]
+ , <small>lần cuối vào ngày: [% checkout.lastreneweddate |$KohaDates  with_hours => 1 %]</small>
+ [% END %] [% ELSE %] Không [% END %]</td
+                            >
+ <td data-order="[% checkout.issuedate | html %]"> [% checkout.issuedate |$KohaDates  with_hours => 1 %] </td>
+ <td data-order="[% checkout.date_due | html %]"> [% checkout.date_due | $KohaDates as_due_date => 1 %] </td>
+ <td data-order="[% checkout.returndate | html %]"> [% checkout.returndate |$KohaDates  with_hours => 1 %] </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% ELSE %]
+ <div class="alert alert-info"
+                ><p> <strong>[% biblio.title | html %][% IF biblio.author %], Tác giả: [% biblio.author | html %][% END %]</strong> chưa được ghi mượn.</p></div
+            >
+ [% END %]
+ </div>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var table_settings = [% TablesSettings.GetTableSettings('catalogue', 'detail', 'checkoutshistory-table', 'json') | $raw %];
+        [% UNLESS show_patron_column %]
+            // Remove the patron column definition
+            table_settings['columns'].splice(0,1);
+        [% END %]
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            var table = $("#table_issues").kohaTable(
+                {
+                    dom: 'C<"top pager"ilpfB><"#filter_c">tr<"bottom pager"ip>',
+                    order: [[5, "desc"]],
+                    pagingType: "full_numbers",
+                },
+                table_settings
+            );
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

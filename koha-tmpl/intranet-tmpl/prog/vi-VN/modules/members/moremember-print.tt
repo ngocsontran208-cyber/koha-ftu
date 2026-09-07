@@ -1,0 +1,220 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE KohaDates %]
+[% USE Price %]
+[% USE ItemTypes %]
+[% USE TablesSettings %]
+[% PROCESS 'member-display-address-style.inc' %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% PROCESS 'accounts.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Summary for") | html %]
+ [% INCLUDE 'patron-title.inc' no_html = 1 %]
+ &rsaquo; [% t("Patrons") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    .pager div.dt-buttons {
+        justify-content: flex-start;
+    }
+</style>
+</head>
+
+<body id="pat_moremember-print" class="pat">
+<div id="main">
+ <h3><a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]">Account summary: [% INCLUDE 'patron-title.inc' no_html = 1 %] &rsaquo;</a></h3>
+ <div class="page-section">
+ <ul>
+ [% PROCESS 'display-address-style' %]
+ <li>[% IF ( patron.phone ) %][% patron.phone | html %][% ELSE %](Không có số điện thoại)[% END %]</li>
+ <li>[% IF ( patron.email ) %][% patron.email | html %][% ELSE %](Không có địa chỉ thư điện tử)[% END %]</li>
+ [% IF ( patron.emailpro ) %]
+ <li>[% patron.emailpro | html %]</li>
+ [% END %]
+ <li>Ngày đăng ký: [% patron.dateenrolled | $KohaDates %]</li>
+ <li>Ngày hết hạn: [% patron.dateexpiry | $KohaDates %]</li>
+ <li>Thư viện: [% Branches.GetName( patron.branchcode ) | html %]</li>
+ <li>Kiểu bạn đọc: [% patron.category.description | html %]</li>
+ </ul>
+ </div>
+
+ [% IF ( issues ) %]
+ <h2>Tài liệu được ghi mượn</h2>
+ <table id="print-summary-checkouts">
+ <thead>
+ <tr>
+ <th class="anti-the">Nhan đề</th>
+ <th>Tác giả</th>
+ <th>Số phân loại</th>
+ <th>Kiểu tài liệu</th>
+ <th>Ngày hết hạn</th>
+ <th>Mã vạch</th>
+ <th>Số kiểm kê</th>
+ <th>Phí</th>
+ <th>Giá tiền</th>
+ <th>Trạng thái</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH issue IN issues %]
+ <tr>
+ <td> [% INCLUDE 'biblio-title.inc' biblio=issue link = 0 %] </td>
+ <td>[% issue.author | html %]</td>
+ <td>[% issue.itemcallnumber | html %]</td>
+ <td>[% ItemTypes.GetDescription( issue.itype ) | html %]</td>
+ <td data-order="[% issue.date_due | html %]">[% issue.date_due | $KohaDates as_due_date => 1 %]</td>
+ <td>[% issue.barcode | html %]</td>
+ <td>[% issue.stocknumber | html %]</td>
+ <td class="[% issue.charge <= 0 ? 'credit' : 'debit' | html %]"> [% issue.charge | $Price %] </td>
+ <td class="[% issue.replacementprice <= 0 ? 'credit' : 'debit' | html %]"> [% issue.replacementprice | $Price %] </td>
+ <td>[% IF ( issue.overdue ) %]Quá hạn![% ELSE %]&nbsp;[% END %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ <tfoot>
+ <tr>
+ <td></td>
+ <td></td>
+ <td></td>
+ <td></td>
+ <td></td>
+ <td></td>
+ <td style="text-align: right; font-weight:bold;">Tổng số:</td>
+ <td class="[% totaldue <= 0 ? 'credit' : 'debit' | html %]"> [% totaldue | $Price %] </td>
+ <td class="[% totalprice <= 0 ? 'credit' : 'debit' | html %]"> [% totalprice | $Price %] </td>
+ <td></td>
+ </tr>
+ </tfoot>
+ </table>
+ [% END %]
+
+ [% IF ( reserves ) %]
+ <h2>Pending holds</h2>
+ <table id="print-summary-holds">
+ <thead>
+ <tr>
+ <th class="anti-the">Nhan đề</th>
+ <th>Tác giả</th>
+ <th>Ngày đặt hàng</th>
+ <th>Ngày hết hạn</th>
+ <th>Thư viện nhận</th>
+ <th>Hold priority</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH reserve IN reserves %]
+ <tr>
+ <td>[% reserve.title | html %]</td>
+ <td>[% reserve.author | html %]</td>
+ <td data-sort="[% reserve.reservedate | html %]">[% reserve.reservedate | $KohaDates %]</td>
+ <td data-sort="[% reserve.expirationdate | html %]">[% reserve.expirationdate | $KohaDates %]</td>
+ <td>[% reserve.waiting_at | html %]</td>
+ <td>[% reserve.priority | html %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% END %]
+ [% IF accounts && totaldue != 0 %]
+ <h2>Thông tin tài khoản</h2>
+ <table id="print-summary-fines">
+ <thead>
+ <tr>
+ <th>Ngày</th>
+ <th>Thông tin khoản tiền phạt.</th>
+ <th>Ghi chú</th>
+ <th>Số lượng</th>
+ <th>Còn nợ</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH account IN accounts %]
+ <tr>
+ <td data-sort="[% account.date| html %]">[% account.date | $KohaDates %]</td>
+ <td>
+ [% PROCESS account_type_description account=account %]
+ [%- IF account.payment_type %]
+ , [% AuthorisedValues.GetByCode('PAYMENT_TYPE', account.payment_type) | html %]
+ [% END %]
+ [%- IF account.description %]
+ , [% account.description | html %]
+ [% END %]
+ &nbsp;
+ [% IF ( account.itemnumber AND account.debit_type_code != 'OVERDUE' ) %]
+ <a href="/cgi-bin/koha/catalogue/moredetail.pl?biblionumber=[% account.item.biblionumber | uri %]&amp;itemnumber=[% account.itemnumber | uri %]">[% account.item.biblio.title | html %]</a>
+ [% END %]
+ </td>
+ <td> [% account.note | html_line_break %] </td>
+ <td class="[% account.amount <= 0 ? 'credit' : 'debit' | html %]"> [% account.amount | $Price %] </td>
+ <td class="[% account.amountoutstanding <= 0 ? 'credit' : 'debit' | html %]"> [% account.amountoutstanding | $Price %] </td>
+ </tr>
+ [% END %]
+ </tbody>
+ <tfoot>
+ <tr>
+ <td></td>
+ <td></td>
+ <td></td>
+ <td class="[% totaldue < 0 ? 'credit' : 'debit' | html %]"> Total due: </td>
+ <td class="[% totaldue < 0 ? 'credit' : 'debit' | html %]"> [% totaldue | $Price %] </td>
+ </tr>
+ </tfoot>
+ </table>
+ [% END %]
+</div>
+<!-- /#main-->
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'slip-print.inc' #printThenClose %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var checkouts_columns = [% TablesSettings.GetTableSettings( 'circ', 'print_summary', 'print-summary-checkouts', 'json' ) | $raw %];
+        var holds_columns = [% TablesSettings.GetTableSettings( 'circ', 'print_summary', 'print-summary-holds', 'json' ) | $raw %];
+        var fines_columns = [% TablesSettings.GetTableSettings( 'circ', 'print_summary', 'print-summary-fines', 'json' ) | $raw %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function initTables() {
+            $("#print-summary-checkouts").kohaTable(
+                {
+                    dom: '<"dt-info"><"top pager"<"table_controls"B>>t',
+                    paging: false,
+                    autoWidth: false,
+                },
+                checkouts_columns
+            );
+
+            $("#print-summary-holds").kohaTable(
+                {
+                    dom: '<"dt-info"><"top pager"<"table_controls"B>>t',
+                    paging: false,
+                    autoWidth: false,
+                },
+                holds_columns
+            );
+
+            $("#print-summary-fines").kohaTable(
+                {
+                    dom: '<"dt-info"><"top pager"<"table_controls"B>>t',
+                    paging: false,
+                    autoWidth: false,
+                },
+                fines_columns
+            );
+        }
+
+        if (autoprint) {
+            window.onbeforeprint = initTables();
+        } else {
+            $(document).ready(function () {
+                initTables();
+            });
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

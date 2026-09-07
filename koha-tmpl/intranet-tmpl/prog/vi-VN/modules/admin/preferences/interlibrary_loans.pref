@@ -1,0 +1,117 @@
+Mượn liên thư viện:
+    Tính năng:
+        -
+            - pref: ILLModule
+              default: 0
+              choices:
+                  1: Enable
+                  0: Disable
+            - the interlibrary loans module (master switch).
+        -
+            - pref: ILLModuleUnmediated
+              default: 0
+              choices:
+                  1: Enable
+                  0: Disable
+            - unmediated interlibrary loan requests. If enabled and the ILL backend supports it, the newly created requests are immediately requested by backend.
+        -
+            - pref: CirculateILL
+              default: 0
+              choices:
+                  1: Enable
+                  0: Disable
+            - the circulation of ILL requested items.
+        -
+            - "ILL statuses that are considered finished and should not be displayed in the ILL module: "
+            - pref: ILLHiddenRequestStatuses
+              class: multi
+            - (separated with |). If left empty, all ILL requests will be displayed. The request codes are defined in the backends and additional aliases can be configured via the <a href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=ILL_STATUS_ALIAS">ILL_STATUS_ALIAS</a> authorized value category.
+        -
+            - "Use patrons from category"
+            - pref: ILLPartnerCode
+              choices: patron-categories
+            - "as partners to place ILL requests with."
+        -
+            - "Add customizable tabs to interlibrary loan requests list:"
+            - pref: ILLRequestsTabs
+              syntax: text/x-yaml
+              class: code
+              type: textarea
+            - "This is a list that defines tab names and statuses that will be sorted under that tab.<br/><br/>"
+            - "Examples:<br/>"
+            - "<pre>- name: Closed</pre>"
+            - "<pre>  status:</pre>"
+            - "<pre>    - COMP</pre>"
+            - "<pre>- name: Ordered</pre>"
+            - "<pre>  status:</pre>"
+            - "<pre>    - REQ</pre>"
+            - "<pre>    - ANOTHER_ORDER_STATUS</pre>"
+            - "<pre>- name: On loan</pre>"
+            - "<pre>  status:</pre>"
+            - "<pre>    - CHK</pre>"
+    Thông báo:
+        -
+            - "Send these ILL notices to staff when appropriate:"
+            - pref: ILLSendStaffNotices
+              class: multi
+            - "(separated with |). e.g. ILL_REQUEST_CANCEL|ILL_REQUEST_MODIFIED If left empty, no staff ILL notices will be sent."
+        -
+            - "Fallback email address for staff ILL notices to be sent to in the absence of a library address:"
+            - pref: ILLDefaultStaffEmail
+              class: email
+            - .
+    OPAC:
+        -
+            - "Enabled ILL backends for OPAC initiated requests:"
+            - pref: ILLOpacbackends
+              class: multi
+            - (separated with |). If left empty, all installed backends will be enabled.
+        -
+            - pref: ILLOpacUnauthenticatedRequest
+              default: 0
+              choices:
+                  0: "Don't allow"
+                  1: Allow
+            - OPAC users to place ILL requests without having to be logged in.
+    Quy trình làm việc:
+        -
+            - pref: ILLCheckAvailability
+              default: 0
+              choices:
+                  1: Check
+                  0: "Don't check"
+            - external sources for availability during the request process.
+        -
+            - pref: ILLHistoryCheck
+              default: 0
+              choices:
+                  1: Check
+                  0: "Don't check"
+            - "if an ILL request has previously been placed by the same patron. Verification is done using one of the following identifier fields: DOI, Pubmed ID or ISBN."
+        -
+            - "If the ILL backend supports it, adding YAML will enable the request type disclaimer stage in request creation, prompting the user with a request type specific disclaimer as defined (staff interface and OPAC)."
+            - "For each request type, you can have 3 configuration options: <code>text</code>, <code>av_category_code</code> and <code>bypass</code><ul>"
+            - "<li><code>text</code> is the HTML that will be visible for the specified request type.</li>"
+            - "<li><code>av_category_code</code> is the authorised values category that will be used for the options being presented at the disclaimer stage.</li>"
+            - "<li><code>bypass</code> allows for a specific request type to skip the disclaimer stage.</li></ul>"
+            - "Example (paste the code in the input box): <br>"
+            - "<code>all:<br>"
+            - "&nbsp;text: |<br>"
+            - "&nbsp;&nbsp;&lt;h2&gt;HTML title&lt;/h2&gt;<br>"
+            - "&nbsp;&nbsp;&lt;p&gt;This is an HTML paragraph&lt;/p&gt;<br>"
+            - "&nbsp;&nbsp;&lt;p&gt;This is another HTML paragraph&lt;/p&gt;<br>"
+            - "&nbsp;av_category_code: YES_NO<br>"
+            - "article:<br>"
+            - "&nbsp;text: copyright text for all article type requests<br>"
+            - "&nbsp;av_category_code: YES_NO<br>"
+            - "&nbsp;bypass: 1<br>"
+            - "</code>"
+            - pref: ILLModuleDisclaimerByType
+              type: textarea
+              syntax: text/x-yaml
+              class: code
+        -
+            - "Select which backends will be queried for availability and in what order of priority. The first available backend will be suggested to place the request with.<br>"
+            - "If no backend is selected, automatic backend selection will not take place."
+            - pref: AutoILLBackendPriority
+              type: ill-backends

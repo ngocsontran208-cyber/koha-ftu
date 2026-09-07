@@ -1,0 +1,117 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE ItemTypes %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% PROCESS 'transfer_reasons.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Transfers to send") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="circ_transferstosend" class="circ">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Transfers to send</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% SET aside = Koha.Preference('CircSidebar') ? 'circ-nav' : '' %]
+[% WRAPPER 'main-container.inc' aside=aside %]
+ <h1>Transfers requested of your library as of [% show_date | $KohaDates %]</h1>
+
+ [% IF libraries.count %]
+ <p>Your library is the origin for the following transfer(s)</p>
+ <div id="resultlist">
+ [% FOREACH library IN libraries %]
+ [% IF ( library.branchcode ) %]
+ <div class="page-section">
+ <table style="width: 100%" id="transferst[% library.branchcode | html %]">
+ <caption>Sending to [% library.branchname | html %]</caption>
+ <thead>
+ <tr>
+ <th>Date of request</th>
+ <th class="anti-the">Nhan đề</th>
+ <th>Lý do</th>
+ <th>Ngày hết hạn</th>
+ <th>Thư viện chủ quản</th>
+ <th>Số phân loại</th>
+ <th class="no-sort">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH transfer IN library.inbound_transfers %]
+ [% UNLESS transfer.datesent %]
+ <tr>
+ <td data-order="[% transfer.daterequested | html %]"> [% transfer.daterequested | $KohaDates %] </td>
+ <td>
+ [% INCLUDE 'biblio-title.inc' biblio = transfer.item.biblio link = 1 %][% IF ( transfer.item.biblio.author ) %]by [% transfer.item.biblio.author | html %][% END %]
+ [% IF ( transfer.item.effective_itemtype ) %](<b>[% ItemTypes.GetDescription( transfer.item.effective_itemtype ) | html %]</b>)[% END %]
+ <br />Đăng ký cá biệt: [% transfer.item.barcode | html %] </td>
+ <td><p>[% PROCESS transfer_reason transfer=transfer %]</p></td>
+ <td>[% IF transfer.item.onloan %]Due [% transfer.item.onloan | $KohaDates %][% ELSE %]Not checked out[% END %]</td>
+ <td>[% Branches.GetName( transfer.item.homebranch ) | html %]</td>
+ <td>[% transfer.item.itemcallnumber | html %]</td>
+ <td class="actions">
+ [% IF transfer.reason == 'StockrotationAdvance' %]
+ <a
+                                                        href="/cgi-bin/koha/catalogue/stockrotation.pl?op=toggle_in_demand&stage_id=4&item_id=[% transfer.itemnumber | uri %]&biblionumber=[% transfer.item.biblionumber | uri %]"
+                                                        class="btn btn-default btn-xs"
+                                                        ><i class="fa fa-fire"></i> Mark "In demand"</a
+                                                    >
+ [% END %]
+ </td>
+ </tr>
+ [% END %]
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% END %]
+ [% END %]
+ </div>
+ [% ELSE %]
+ <p>No transfers to send</p>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        const library_ids = [
+            [% FOREACH library IN libraries %]
+                "[% library.branchcode | html %]"[% UNLESS loop.last %],[% END %]
+            [% END %]
+        ];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            library_ids.forEach(library_id => {
+                $(`#transferst${library_id}`).kohaTable({
+                    dom: "t",
+                    paging: false,
+                });
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

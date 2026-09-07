@@ -1,5 +1,5 @@
 Web services:
-    General:
+    Chung:
         -
             - "Set the Access-Control-Allow-Origin header to"
             - pref: 'AccessControlAllowOrigin'
@@ -127,7 +127,7 @@ Web services:
             - pref: AutoShareWithMana
               multiple:
                 subscription: subscriptions
-    Reporting:
+    Báo cáo:
         -
             - Only return
             - pref: SvcMaxReportRows

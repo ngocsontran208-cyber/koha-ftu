@@ -1,0 +1,140 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% PROCESS 'display-library-address.inc' %]
+[% IF library %][% SET OpacLibraryInfo = library.opac_info( lang => lang ) %][% END %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( library ) %]
+ [% library.branchname | html %]
+ &rsaquo;
+ [% END %]
+ [% t("Libraries") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        .section_library {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border: 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
+[% END %]
+</head>
+
+[% INCLUDE 'bodytag.inc' bodyid='opac-library' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+[% BLOCK library_description %]
+ <div property="description">
+ [% FOREACH info IN OpacLibraryInfo %]
+ <div id="library_description_[% info.additional_content_id | $raw %]" class="library-description">[% info.content | $raw %]</div>
+ [% END %]
+ </div>
+[% END %]
+
+[% BLOCK library_info %]
+ <div class="branchaddress" property="address" typeof="PostalAddress"> [% PROCESS 'display-library-address' %] </div>
+ <!-- /div property=address -->
+ [% IF ( library.branchphone ) %]
+ <p class="branchphone">Điện thoại: <a href="tel:[% library.branchphone | url %]" property="telephone">[% library.branchphone | html %]</a></p>
+ [% END %]
+ [% IF ( library.branchfax ) %]
+ <p class="branchfax">Số Fax: <span property="faxNumber">[% library.branchfax | html %]</span></p>
+ [% END %]
+ [% IF ( library.branchurl ) %]
+ [% IF ( Koha.Preference('OPACURLOpenInNewWindow') ) %]
+ <p class="branchurl"><a href="[% library.branchurl | url %]" target="_blank" rel="noreferrer" property="url">[% library.branchurl | html %]</a></p>
+ [% ELSE %]
+ <p class="branchurl"><a href="[% library.branchurl | url %]" property="url">[% library.branchurl | html %]</a></p>
+ [% END %]
+ [% END %]
+[% END %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% IF ( library ) %]
+ [% WRAPPER breadcrumb_item %]
+ [% IF public_count > 1 %]
+ <a href="/cgi-bin/koha/opac-library.pl">Thư viện</a>
+ [% ELSE %]
+ <a href="/cgi-bin/koha/opac-library.pl">Contact</a>
+ [% END %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% library.branchname | html %]
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Thư viện</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav ||  OpacNavBottom ) %]
+ [% column_class = "col-10 order-first order-md-first order-lg-2" %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+ </div>
+ [% END %]
+
+ <div class="[% column_class | html %]">
+ [% IF ( library ) %]
+ <div id="library_info" class="maincontent" vocab="http://schema.org/" typeof="Library">
+ <h1 property="name">[% library.branchname | html %]</h1>
+ <div class="row">
+ <div class="col-lg-8">
+ [% PROCESS library_info %]
+ [% IF ( OpacLibraryInfo ) %]
+ <div class="library_description">
+ <hr />
+ [% PROCESS library_description %]
+ </div>
+ [% END %]
+ </div>
+ </div>
+ </div>
+ <!-- /#library_info -->
+ [% ELSE %]
+ <div id="library_info" class="maincontent">
+ <h1>Thư viện</h1>
+ [% SET div_class = "section_library" %]
+ [% FOREACH library IN libraries %]
+ [% IF ( branchcode == library.branchcode ) %]
+ [% div_class = "section_library current" %]
+ [% END %]
+ <div class="[% div_class | html %]" id="section_[% library.branchcode | html %]">
+ <h2 property="name">
+ <a href="/cgi-bin/koha/opac-library.pl?branchcode=[% library.branchcode | url %]"> [% library.branchname | html %] </a>
+ </h2>
+ [% PROCESS library_info %]
+ </div>
+ [% END %]
+ </div>
+ <!-- /#library_info -->
+ [% END # /IF library %]
+ </div>
+ <!-- /.col -->
+ </div>
+ <!-- /.row -->
+ </div>
+ <!-- /.container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

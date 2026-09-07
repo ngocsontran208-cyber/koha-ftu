@@ -1,0 +1,34 @@
+[% SET table_id = 'ill-requests' %]
+[% IF patron.borrowernumber %]
+ [% table_id = 'ill-requests-patron-' _ patron.borrowernumber %]
+[% ELSIF batch.id %]
+ [% table_id = 'ill-requests-batch-' _ batch.id %]
+[% END %]
+<table id="[% table_id | html %]">
+ <thead>
+ <tr id="ill_requests_header">
+ <th scope="col">Mã yêu cầu</th>
+ <th scope="col">Batch</th>
+ <th scope="col">Request details</th>
+ <th scope="col" data-datatype="related-object" data-related="extended_attributes" data-related-key="type" data-related-value="type" data-related-search-on="value">Loại yêu cầu</th>
+ <th scope="col">Order ID</th>
+ <th scope="col">Bạn đọc</th>
+ <th scope="col">Người quản lý</th>
+ <th scope="col">Thư viện</th>
+ <th scope="col">Trạng thái</th>
+ <th scope="col" class="placed_formatted">Ngày đặt hàng</th>
+ <th scope="col" class="updated_formatted">Updated on</th>
+ <th scope="col">Replied</th>
+ <th scope="col" class="completed_formatted">Completed on</th>
+ <th scope="col">Access URL</th>
+ <th scope="col">Cost</th>
+ <th scope="col">Price paid</th>
+ <th scope="col">Bình luận</th>
+ <th scope="col">OPAC notes</th>
+ <th scope="col">Staff notes</th>
+ <th scope="col">Backend</th>
+ <th scope="col" class="actions"></th>
+ </tr>
+ </thead>
+ <tbody id="illview-body"> </tbody>
+</table>

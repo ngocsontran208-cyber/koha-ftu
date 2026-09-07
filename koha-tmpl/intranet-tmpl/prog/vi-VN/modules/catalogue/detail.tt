@@ -1,0 +1,2483 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE To %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE KohaPlugins %]
+[% USE AuthorisedValues %]
+[% USE Branches %]
+[% USE Biblio %]
+[% USE Frameworks %]
+[% USE Price %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers/tables/items/catalogue_detail.inc' %]
+[% SET CoverImagePlugins = KohaPlugins.get_plugins_intranet_cover_images %]
+
+[% IF Koha.Preference('AmazonAssocTag') %]
+ [% AmazonAssocTag = '?tag=' _ Koha.Preference('AmazonAssocTag') %]
+[% ELSE %]
+ [% AmazonAssocTag = '' %]
+[% END %]
+
+[% SET plugins_intranet_catalog_biblio_tabs = KohaPlugins.get_plugins_intranet_catalog_biblio_tab({ biblio => biblio, biblio_id => biblionumber }) %]
+
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( unknownbiblionumber ) %]
+ [% t("Unknown record") | html %]
+ [% ELSE %]
+ [% title_in_title = INCLUDE 'biblio-title-head.inc' %]
+ [% tx("Details for {title}", { title = title_in_title }) | html %]
+ [% END %]
+ &rsaquo; [% t("Catalog") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+
+[% Asset.css("lib/Chocolat/css/chocolat.css") | $raw %]
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+[% BLOCK acq_status %]
+ <span
+        title="The status 'Unlinked' means: no linked orders. Cancelled means that all orders are cancelled. Processing implies any active or new order lines. Status 'acquired' implies any completely received lines (with remaining lines cancelled)."
+    >
+ [% SWITCH myvar %]
+ [% CASE 'unlinked' %]
+ <b>Unlinked</b>
+ [% CASE 'acquired' %]
+ <b>Acquired</b>
+ [% CASE 'processing' %]
+ <b>Processing</b>
+ [% CASE 'cancelled' %]
+ <b>Đã hủy</b>
+ [% END %]
+ </span>
+[% END %]
+
+<body id="catalog_detail" class="catalog">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/catalogue/search.pl">Mục tra cứu</a>
+ [% END %]
+
+ [% IF ( unknownbiblionumber ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Unknown record</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item %]
+ [% INCLUDE 'biblio-title.inc' link = 1 %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Chi tiết</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='biblio-view-menu' %]
+ <div class="row">
+ <div class="col">
+ [% IntranetCoce    = Koha.Preference('IntranetCoce') %]
+ [% CoceProviders   = Koha.Preference('CoceProviders') %]
+ [% CoceHost        = Koha.Preference('CoceHost') %]
+ [% SyndeticsCovers = Koha.Preference('SyndeticsEnabled') && Koha.Preference('SyndeticsCoverImages') %]
+
+ [% INCLUDE 'cat-toolbar.inc' %]
+ [% IF ( ocoins ) %]
+ <!-- COinS / OpenURL -->
+ <span class="Z3988" title="[% ocoins | html %]"></span>
+ [% END %]
+ </div>
+ <!-- /.col -->
+ </div>
+ <!-- /.row -->
+ <div class="row">
+ <div id="catalogue_detail_biblio" class="col">
+ [% IF decoding_error || analytics_error %]
+ <div class="alert alert-warning">
+ <h1>Errors found</h1>
+ [% IF decoding_error %]
+ <h2>Encoding errors</h2>
+ <p class="biberror">There is at least one encoding error with this bibliographic record, the view may be degraded.</p>
+ <pre class="error">[% decoding_error | html %]</pre>
+ [% END %]
+ [% IF analytics_error %]
+ <h2>Analytics errors</h2>
+ <p class="analytics_error">There was an error searching for analytic records, please see the logs for details.</p>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF auditing %]
+ [% IF audit_errors %]
+ <div class="alert alert-warning">
+ <h1>Errors found</h1>
+ [% FOR error IN audit_errors %]
+ <div class="alert alert-warning">[% error | html %]</div>
+ [% END %]
+ </div>
+ [% ELSE %]
+ <div class="alert alert-info">No data inconsistency found.</div>
+ [% END %]
+ [% END %]
+
+ <div class="page-section">
+ [% XSLTBloc | $raw %]
+
+ [% IF shelves.count %]
+ <span class="results_summary"
+                        ><span class="label">Giá sách ảo chứa nhan đề này: </span>
+ [% FOREACH s IN shelves %]
+ <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber | uri %]">[% s.shelfname | html %]</a>
+ [% IF ( loop.last ) %][% ELSE %]|[% END %]
+ [% END %]
+ </span>
+ [% END %]
+
+ [% IF ( TagsEnabled &&  TagsShowOnDetail &&  TagLoop ) %]
+ <span class="results_summary"
+                        ><span class="label">Thẻ:</span>
+ [% FOREACH TagLoo IN TagLoop %]
+ [% IF ( CAN_user_tools_moderate_tags ) %]
+ <a href="/cgi-bin/koha/tags/list.pl?tag=[% TagLoo.term |uri %]">[% TagLoo.term | html %]</a>
+ [% ELSE %]
+ [% TagLoo.term | html %]
+ [% END %]
+ <span class="weight">([% TagLoo.weight_total | html %])</span>[% IF ( loop.last ) %][% ELSE %],[% END %]
+ [% END %]
+ </span>
+ [% END %]
+
+ <span id="catalogue_detail_marc_preview" class="results_summary">
+ <span class="label">MARC preview:</span>
+ <a href="/cgi-bin/koha/catalogue/showmarc.pl?id=[% biblionumber | uri %]&amp;viewas=html" title="MARC" class="previewMARC">Hiển thị</a>
+ </span>
+ <span id="catalogue_detail_framework" class="results_summary">
+ <span class="label">MARC framework:</span>
+ <span class="frameworkcode">[% Frameworks.GetName(biblio.frameworkcode) | html %]</span>
+ [% IF is_fast_add %]
+ <span class="badge rounded-pill bg-secondary">Fast add</span>
+ [% END %]
+ </span>
+ [% IF !item_level_itypes || Koha.Preference("BiblioItemtypeInfo") %]
+ <span class="results_summary itemtype">
+ <span class="label">Itemtype:</span>
+ [% IF ( !noItemTypeImages && imageurl ) %]
+ <img class="itemtype-image" src="[% imageurl | html %]" alt="" />
+ [% END %]
+ [% IF ( description ) %]
+ <span class="itypetext">[% description | html %]</span>
+ [% ELSE %]
+ <span class="itypetext">[% itemtype | html %]</span>
+ [% END %]
+ </span>
+ [% END %]
+
+ [% IF ( Koha.Preference('SearchEngine') == 'Elasticsearch' ) %]
+ <span id="catalogue_detail_elastic_record" class="results_summary">
+ <span class="label">Elasticsearch record:</span>
+ <a href="/cgi-bin/koha/catalogue/showelastic.pl?id=[% biblionumber | uri %]" title="Elasticsearch record" class="previewElastic">Hiển thị</a>
+ </span>
+ [% END %]
+
+ [% SET record_source = biblio.metadata.record_source %]
+ [% IF ( record_source ) %]
+ <span id="catalogue_detail_record_source" class="results_summary">
+ <span class="label">Record source:</span>
+ [% IF record_source.can_be_edited %]
+ [% record_source.name | html %]
+ [% ELSE %]
+ [% record_source.name | html %] <i class="fa fa-lock"></i>
+ [% END %]
+ </span>
+ [% END %]
+
+ [% IF ( holdcount ) %]
+ <span class="results_summary">
+ <span class="label">Đặt mượn:</span>
+ <span class="badge bg-info-subtle">
+ [% IF CAN_user_reserveforothers_place_holds %]
+ <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblionumber | uri %]">[% holdcount | html %]</a>
+ [% ELSE %]
+ <span>[% holdcount | html %]</span>
+ [% END %]
+ </span>
+ </span>
+ [% END %]
+
+ [% IF illrequests.count %]
+ <span class="results_summary">
+ <span class="label">ILL requests:</span>
+ [% IF CAN_user_ill %]
+ [% FOREACH ill IN illrequests %]
+ <a href="/cgi-bin/koha/ill/ill-requests.pl?method=illview&illrequest_id=[% ill.illrequest_id | uri %]">Request [% ill.illrequest_id | html %]</a>[% IF ! loop.last %],[% END %]
+ [% END %]
+ [% ELSE %]
+ [% FOREACH ill IN illrequests %]
+ <span>Request [% ill.illrequest_id | html %]</span>[% IF ! loop.last %],[% END %]
+ [% END %]
+ [% END %]
+ </span>
+ [% END %]
+
+ [% IF ( article_requests_count = biblio.article_requests.filter_by_current.count ) %]
+ <span class="results_summary">
+ <span class="label">Article requests:</span>
+ <span class="badge bg-info-subtle">
+ <a href="/cgi-bin/koha/circ/request-article.pl?biblionumber=[% biblionumber | uri %]">[% article_requests_count | html %]</a>
+ </span>
+ </span>
+ [% END %]
+
+ [% IF course_reserves %]
+ <span class="results_summary"
+                        ><span class="label">Courses that have reserved this title: </span>
+ [% FOREACH c IN course_reserves %]
+ <a href="/cgi-bin/koha/course_reserves/course-details.pl?course_id=[% c.course_id | uri %]">[% c.course.course_name | html %]</a>
+ [% IF ( loop.last ) %][% ELSE %]|[% END %]
+ [% END %]
+ </span>
+ [% END %]
+ </div>
+ [%# .page-section %]
+ </div>
+ <!-- /.col-xs-* -->
+
+ [% IF ( CoverImagePlugins || AmazonCoverImages  || LocalCoverImages || IntranetCoce || ( SyndeticsCovers ) || (Koha.Preference('CustomCoverImages') && Koha.Preference('CustomCoverImagesURL')) ) %]
+ <div class="col-sm-3 bookcoverimg">
+ <div id="biblio-cover-slider" class="cover-slider" data-isbn="[% normalized_isbn | html %]">
+ [% IF ( LocalCoverImages ) %]
+ [% IF localimages.count %]
+ [% FOREACH image IN localimages %]
+ <div class="cover-image local-coverimg">
+ <a href="/cgi-bin/koha/catalogue/image.pl?imagenumber=[% image.imagenumber | uri %]" title="Ảnh bìa cục bộ">
+ <img alt="Ảnh bìa cục bộ" data-link="/cgi-bin/koha/catalogue/imageviewer.pl?biblionumber=[% biblionumber | uri %]&imagenumber=[% image.imagenumber | uri %]" src="/cgi-bin/koha/catalogue/image.pl?thumbnail=1&imagenumber=[% image.imagenumber | uri %]" />
+ </a>
+ <div class="hint">Ảnh bìa cục bộ</div>
+ </div>
+ [% END %]
+ [% END %]
+ [% END %]
+
+ [% IF ( AmazonCoverImages && normalized_isbn) %]
+ <div class="cover-image" id="amazon-bookcoverimg">
+ <a href="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn | uri %].01.LZZZZZZZ.jpg" title="Ảnh bìa lấy từ Amazon">
+ <img alt="Ảnh bìa lấy từ Amazon" data-link="http://www.amazon[% AmazonTld | uri %]/gp/reader/[% normalized_isbn | uri %][% AmazonAssocTag | uri %]#reader-link" src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn | uri %].01.MZZZZZZZ.jpg" />
+ </a>
+ <div class="hint">Ảnh từ Amazon.com</div>
+ </div>
+ [% END %]
+
+ [% IF ( IntranetCoce && CoceProviders && normalized_isbn ) %]
+ [% coce_id = normalized_ean || normalized_isbn %]
+ <div class="cover-image coce-coverimg">
+ [% IF ( coce_id ) %]
+ <a class="[% coce_id | html %]" id="coce-thumbnail-preview" title="Ảnh từ Coce"></a>
+ [% ELSE %]
+ <span class="no-image">Không có ảnh bìa</span>
+ [% END %]
+ <div class="hint">Ảnh từ Coce</div>
+ </div>
+ [% END %]
+
+ [% IF ( SyndeticsCovers ) %]
+ [% IF ( content_identifier_exists ) %]
+ <div class="cover-image" id="syndetics-bookcoverimg">
+ <a href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | url %]/LC.GIF&client=[% Koha.Preference('SyndeticsClientCode') | url %]&type=xw10&upc=[% normalized_upc | url %]&oclc=[% normalized_oclc | url %]" title="Ảnh bìa lấy từ Syndetics">
+ <img
+                                        src="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | url %]/[% Koha.Preference('SyndeticsCoverImageSize') | url %].GIF&amp;client=[% Koha.Preference('SyndeticsClientCode') | url %]&amp;type=xw10&amp;upc=[% normalized_upc | url %]&amp;oclc=[% normalized_oclc | url %]"
+                                        alt=""
+                                        class="thumbnail"
+                                    />
+ </a>
+ <div class="hint">Ảnh từ Syndetics</div>
+ </div>
+ [% ELSE %]
+ <span class="no-image">Không có ảnh bìa</span>
+ [% END %]
+ [% END %]
+
+ [% IF Koha.Preference('CustomCoverImages') && Koha.Preference('CustomCoverImagesURL') %]
+ [% SET custom_cover_image_url = biblio.custom_cover_image_url %]
+ [% IF custom_cover_image_url %]
+ <div class="cover-image" id="custom-coverimg">
+ <a class="custom_cover_image" href="[% custom_cover_image_url | url %]" title="Ảnh bìa tùy chỉnh">
+ <img alt="Ảnh bìa tùy chỉnh" id="custom-img" src="[% custom_cover_image_url | url %]" />
+ </a>
+ <div class="hint">Ảnh bìa tùy chỉnh</div>
+ </div>
+ [% END %]
+ [% END %]
+ </div>
+ <!-- /.cover-slider -->
+ </div>
+ <!-- /.bookcoverimg.col-xs-3 -->
+ [% END # /IF ( AmazonCoverImages, etc ) %]
+ </div>
+
+ [% WRAPPER tabs id= "bibliodetails" %]
+ [% WRAPPER tabs_nav %]
+ [% IF Koha.Preference('SeparateHoldings') %]
+ [% IF items_to_display_count - ( other_holdings_count || 0 ) %]
+ [% WRAPPER tab_item tabname= "holdings" %]
+ <span>[% Branches.GetLoggedInBranchname | html %] đặt mượn ([% items_to_display_count - ( other_holdings_count || 0 ) - ( hidden_count || 0 ) || 0 | html %])</span>
+ [% END %]
+ [% END %]
+ [% IF other_holdings_count %]
+ [% WRAPPER tab_item tabname= "otherholdings" %]
+ <span>Other holdings ([% other_holdings_count || 0 | html %])</span>
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER tab_item tabname= "holdings" %]
+ <span>Holdings ([% items_to_display_count || 0 | html %])</span>
+ [% END %]
+ [% END %]
+ [% IF Koha.Preference('EnableItemGroups') %]
+ [% WRAPPER tab_item tabname= "item_groups" %]
+ <span>Item groups</span>
+ [% END %]
+ [% END %]
+
+ [% IF ( MARCNOTES || notes ) %]
+ [% WRAPPER tab_item tabname= "description" %]
+ <span>Descriptions ([% ( MARCNOTES.size || 1 ) | html %])</span>
+ [% END %]
+ [% END %]
+ [% IF ComponentParts && ComponentParts.size %]
+ [% WRAPPER tab_item tabname= "components" %]
+ <span>Bộ phận cấu thành ([% ComponentParts.size | html %])</span>
+ [% END %]
+ [% END %]
+
+ [% IF ( subscriptionsnumber ) %]
+ [% WRAPPER tab_item tabname= "subscriptions" %]
+ <span>Các đợt đăng ký mua</span>
+ [% END %]
+ [% END %]
+
+ [% IF Koha.Preference('AcquisitionDetails') %]
+ [% WRAPPER tab_item tabname= "acq_details" %]
+ <span>Thông tin bổ sung</span>
+ [% END %]
+ [% END %]
+
+ [% IF suggestions.count %]
+ [% WRAPPER tab_item tabname= "suggestion_details" %]
+ <span>Suggestion details</span>
+ [% END %]
+ [% END %]
+
+ [% IF ( FRBRizeEditions ) %]
+ [% IF ( XISBNS ) %]
+ [% WRAPPER tab_item tabname= "editions" %]
+ <span>Các phiên bản xuất bản</span>
+ [% END %]
+ [% END %]
+ [% END %]
+
+ [% IF ( ( Koha.Preference('CatalogConcerns') || Koha.Preference('OpacCatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
+ [% WRAPPER tab_item tabname= "concerns" %]
+ <span>Concerns ([% biblio.tickets.count | html %])</span>
+ [% END %]
+ [% END %]
+
+ [% IF ( LocalCoverImages ) %]
+ [% WRAPPER tab_item tabname= "images" %]
+ <span>Images ([% localimages.count || 0 | html %])</span>
+ [% END %]
+ [% END %]
+
+ [% IF HTML5MediaEnabled && HTML5MediaSets.size %]
+ [% WRAPPER tab_item tabname= "html5media" %]
+ <span>Phát tập tin phương tiện</span>
+ [% END %]
+ [% END %]
+
+ [% IF ( reviews ) %]
+ [% WRAPPER tab_item tabname= "comments" %]
+ <span>Comments [% ' ( ' _ ( reviews.size ) _ ' )' | html %]</span>
+ [% END %]
+ [% END %]
+
+ [% IF ( Koha.Preference('NovelistSelectStaffEnabled') && Koha.Preference('NovelistSelectStaffProfile') && Koha.Preference('NovelistSelectStaffView') == 'tab' ) %]
+ [% WRAPPER tab_item tabname= "NovelistSelect" %]
+ <span>NoveList Select</span>
+ [% END %]
+ [% END %]
+
+ [% FOREACH plugins_intranet_catalog_biblio_tab IN plugins_intranet_catalog_biblio_tabs %]
+ [% WRAPPER tab_item tabname= "${ plugins_intranet_catalog_biblio_tab.id }" %]
+ <span>[% plugins_intranet_catalog_biblio_tab.title | html %]</span>
+ [% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+
+ [% WRAPPER tab_panels %]
+ [% WRAPPER tab_panel tabname="item_groups" %]
+ [% IF Koha.Preference('EnableItemGroups') %]
+ [% IF CAN_user_editcatalogue_manage_item_groups %]
+ <div class="item_groups_table_table_controls">
+ <a href="#" class="item-group-create btn btn-default btn-xs"><i class="fa fa-plus"></i> New item group</a>
+ </div>
+ [% END %]
+ <table class="items-group-table" id="items-group-table">
+ <thead>
+ <tr>
+ <th>Hiển thị đơn hàng</th>
+ <th>Thông tin mô tả</th>
+ <th class="no-sort">&nbsp;</th>
+ </tr>
+ </thead>
+ </table>
+ [% END # /IF EnableItemGroups %]
+ [% END # /tab_panel %]
+
+ [% WRAPPER tab_panel tabname="holdings" %]
+ [% IF ( Koha.Preference('NovelistSelectStaffEnabled') && Koha.Preference('NovelistSelectStaffProfile') && Koha.Preference('NovelistSelectStaffView') == 'above' ) %]
+ <span class="results_summary NovelistSelect" style="display:none;">
+ <span class="label">Dịch vụ gợi ý NoveList Select: </span>
+ <div data-novelist-novelistselect="[% normalized_isbn | html %]"></div>
+ </span>
+ [% END %]
+
+ [% SET hidden_count = all_items_count - items_to_display_count %]
+ [% IF all_items_count %]
+ [% PROCESS items_table tab="holdings" %]
+
+ [% IF hidden_count %]
+ [%# FIXME We could deal with that in JS and prevent a full refresh %]
+ <p><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]&amp;showallitems=1">Hiển thị tất cả tài liệu ([% hidden_count | html %] tài liệu ẩn)</a></p>
+ [% END %]
+ [% ELSE %]
+ [% IF ( ALTERNATEHOLDINGS ) %]
+ [% FOREACH ALTERNATEHOLDING IN ALTERNATEHOLDINGS %]
+ <div id="alternateholdings"><span class="holdings_label">Bản tài liệu hiện có:</span> [% ALTERNATEHOLDING.holding | html %]</div>
+ [% END %]
+ [% ELSE %]
+ <div id="noitems">Không có bản tài liệu vật lý nào cho biểu ghi này</div>
+ [% END %]
+ [% END # /IF all_items_count %]
+
+ [% IF ( Koha.Preference('NovelistSelectStaffEnabled') && Koha.Preference('NovelistSelectStaffProfile') && Koha.Preference('NovelistSelectStaffView') == 'below' ) %]
+ <span class="results_summary NovelistSelect" style="display:none;">
+ <span class="label">Dịch vụ gợi ý NoveList Select: </span>
+ <div data-novelist-novelistselect="[% normalized_isbn | html %]"></div>
+ </span>
+ [% END %]
+ [% END # /tab_panel %]
+
+ [% IF Koha.Preference('SeparateHoldings') %]
+ [% WRAPPER tab_panel tabname="otherholdings" %]
+ [% PROCESS items_table tab="otherholdings" %]
+ [% END # /tab_panel %]
+ [% END %]
+
+ [% IF ( MARCNOTES ) %]
+ [% WRAPPER tab_panel tabname="description" %]
+ <div class="content_set">
+ [% FOREACH MARCNOTE IN MARCNOTES %]
+ <p class="marcnote marcnote-[% MARCNOTE.tag | html %]" id="marcnote-[% MARCNOTE.tag | html %]-[% loop.count | html %]">
+ [% IF MARCNOTE.marcnote.match('^https?://\S+$') %]
+ <a href="[% MARCNOTE.marcnote | url %]">[% MARCNOTE.marcnote | html %]</a>
+ [% ELSE %]
+ [% MARCNOTE.marcnote | html | html_line_break %]
+ [% END %]
+ </p>
+ [% END %]
+ </div>
+ [% END # /tab_panel %]
+ [% END %]
+
+ [% IF ComponentParts && ComponentParts.size %]
+ [% WRAPPER tab_panel tabname="components" %]
+ <div class="content_set">
+ <table>
+ [% FOR PART IN ComponentParts %]
+ <tr>
+ <td> [% PART | $raw %] </td>
+ </tr>
+ [% END %]
+ </table>
+ [% IF ComponentParts.size == Koha.Preference('MaxComponentRecords') %]
+ <p>Chỉ hiển thị [% ComponentParts.size | html %] kết quả: <a href="/cgi-bin/koha/catalogue/search.pl?q=[% ComponentPartsQuery | url %]">hiển thị tất cả các bộ phận cấu thành</a></p>
+ [% END %]
+ </div>
+ <!-- /.content_set -->
+ [% END # /tab_panel %]
+ [% END %]
+
+ [% IF ( subscriptionsnumber ) %]
+ [% WRAPPER tab_panel tabname="subscriptions" %]
+ <div id="catalogue_detail_subscriptions">
+ <h2>Thông tin ấn phẩm định kỳ</h2>
+ <p> (Hiện tại có [% subscriptionsnumber | html %]  kỳ ÂPĐK liên quan đến nhan đề này).</p>
+ [% FOREACH subscription IN subscriptions %]
+ [% IF subscription.branchcode %]
+ <h3>Tại thư viện: [% Branches.GetName(subscription.branchcode) || subscription.branchcode | html %]</h3>
+ [% END %]
+ [% IF ( subscription.closed ) %]
+ <p>Đợt đăng ký mua này đã đóng.</p>
+ [% END %]
+ [% IF ( subscription.location ) %]
+ <p class="subscription_location">Location: [% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => subscription.location ) | html %]</p>
+ [% END %]
+ [% IF ( subscription.callnumber ) %]
+ <p>Ký hiệu phân loại: [% subscription.callnumber | html %] </p>
+ [% END %]
+ [% IF ( subscription.subscriptionnotes ) %]
+ <p>[% subscription.subscriptionnotes | html | html_line_break %] </p>
+ [% END %]
+ [% IF ( subscription.missinglist ) %]
+ <p>Các số thiếu: [% subscription.missinglist | html %] </p>
+ [% END %]
+ [% IF ( subscription.librariannote ) %]
+ <p>([% subscription.librariannote | html %])</p>
+ [% END %]
+ [% IF ( subscription.latestserials ) %]
+ <p> Hiện tại có [% subscription.staffdisplaycount | html %] kỳ phát hành mới nhất liên quan đến ÂPĐK này:</p>
+ <table>
+ <tr>
+ <th>Số phát hành #</th>
+ <th>Ngày nhận</th>
+ <th>Ngày phát hành</th>
+ <th>Date published (text)</th>
+ <th>Trạng thái</th>
+ <th>Ghi chú</th>
+ </tr>
+ [% FOREACH latestserial IN subscription.latestserials %]
+ <tr>
+ <td>[% latestserial.serialseq | html %]</td>
+ <td data-order="[% latestserial.planneddate | html %]">[% latestserial.planneddate | $KohaDates %]</td>
+ <td data-order="[% latestserial.publisheddate | html %]">[% latestserial.publisheddate | $KohaDates %]</td>
+ <td>[% latestserial.publisheddatetext | html %]</td>
+ <td> [% INCLUDE 'serial-status.inc' serial = latestserial %] </td>
+ <td>[% latestserial.notes | html %]</td>
+ </tr>
+ [% END %]
+ </table>
+ [% END # /IF subscription.latestserials %]
+ [% IF ( CAN_user_serials ) %]
+ <p>
+ <a class="btn btn-link" href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% subscription.subscriptionid | uri %]"><i class="fa fa-list" aria-hidden="true"></i> Chi tiết ÂPĐK</a>
+ </p>
+ [% END %]
+ [% END # /FOREACH subscription %]
+ </div>
+ <!-- /#catalogue_detail_subscriptions -->
+ [% END # /tab_panel %]
+ [% END # IF subscriptionsnumber %]
+
+ [% IF Koha.Preference('AcquisitionDetails') %]
+ [% WRAPPER tab_panel tabname="acq_details" %]
+ <p class="acqstatus_[% acq_status | html %]">This bibliographic record has acquisition status: [% PROCESS acq_status myvar=acq_status %] </p>
+ [% IF orders.count %]
+ <table id="orders">
+ <thead>
+ <tr>
+ <th>Nhà cung cấp</th>
+ <th>Invoice</th>
+ <th>Nhóm giỏ đặt hàng</th>
+ <th>Giỏ đặt hàng</th>
+ <th>Số đơn hàng</th>
+ <th>Ngày tạo</th>
+ <th>Ngày nhận</th>
+ <th>Trạng thái</th>
+ <th>Số lượng</th>
+ <th title="Estimated cost tax incl. while pending, actual cost tax incl. once received">Giá tiền</th>
+ <th>Internal note</th>
+ <th>Đợt đăng ký mua</th>
+ <th>Subscription call number</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOR order IN orders %]
+ [% SET basket = order.basket %]
+ [% SET vendor = basket.bookseller %]
+ <tr>
+ <td>
+ <a href="/cgi-bin/koha/acquisition/vendors/[% vendor.id | uri %]" title="Vendor detail page">[% vendor.name | html %]</a>
+ </td>
+ <td>
+ [% IF order.invoiceid %]
+ [% IF CAN_user_acquisition %]
+ <div><a href="/cgi-bin/koha/acqui/invoice.pl?invoiceid=[% order.invoiceid | uri %]" title="Invoice detail page"> [% order.invoice.invoicenumber | html %]</a></div>
+ [% ELSE %]
+ <div>[% order.invoice.invoicenumber | html %]</div>
+ [% END %]
+
+ [% IF ( Koha.Preference('EDIFACT') && CAN_user_acquisition_edi_manage && order.invoice.message_id ) %]
+ <div><a href="/cgi-bin/koha/acqui/edimsg.pl?id=[% order.invoice.message_id | uri %]" title="EDI INVOICE message">EDI message</a></div>
+ [% END %]
+ [% END %]
+ </td>
+ <td>
+ [% IF basket.basketgroupid %]
+ [% SET basket_group = basket.basket_group %]
+ [% IF CAN_user_acquisition_group_manage %]
+ <a href="/cgi-bin/koha/acqui/basketgroup.pl?op=add&booksellerid=[% vendor.id | uri %]&basketgroupid=[% basket_group.id | uri %]"
+                                                        >[% basket_group.name | html %] ([% basket_group.id | html %])</a
+                                                    >
+ [% ELSE %]
+ [% basket_group.name | html %]
+ ([% basket_group.id | html %])
+ [% END %]
+ [% END %]
+ </td>
+ <td>
+ [% IF CAN_user_acquisition_order_manage %]
+ <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% basket.basketno | uri %]">[% basket.basketname | html %] ([% basket.basketno | html %])</a>
+ [% ELSE %]
+ [% basket.basketname | html %]
+ ([% basket.basketno | html %])
+ [% END %]
+ </td>
+ <td>[% order.ordernumber | html %]</td>
+ <td data-order="[% basket.creationdate | uri %]">[% basket.creationdate | $KohaDates %]</td>
+ <td data-order="[% order.datereceived | uri %]">[% order.datereceived | $KohaDates %]</td>
+ <td>
+ [% SWITCH order.orderstatus %]
+ [% CASE 'new' %]
+ <span>Mới</span>
+ [% CASE 'ordered' %]
+ <span>Đặt hàng</span>
+ [% CASE 'partial' %]
+ <span>Partial</span>
+ [% CASE 'complete' %]
+ <span>Complete</span>
+ [% CASE 'cancelled' %]
+ <span>Đã hủy</span>
+ [% END %]
+ </td>
+ <td>[% order.quantity | html %]</td>
+ <td>
+ [% IF ( order.orderstatus == "complete" ) %]
+ [% order.unitprice_tax_included | $Price %]
+ [% ELSE %]
+ [% order.ecost_tax_included | $Price %]
+ [% END %] </td
+                                        ><td>[% order.order_internalnote | html %]</td>
+ <td>
+ [% IF order.subscriptionid %]
+ <a href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% order.subscriptionid | uri %]">[% order.subscriptionid | html %]</a>
+ [% END %]
+ </td>
+ <td>
+ [% IF order.subscriptionid %]
+ [% order.subscription.callnumber | html %]
+ [% END %]
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ <!-- /#orders -->
+ [% ELSE %]
+ <span class="noorder">There is no order for this bibliographic record.</span>
+ [% END # /IF orders.count %]
+ [% END # /tab_panel %]
+ [% END # /IF AcquisitionDetails %]
+
+ [% IF suggestions.count %]
+ [% WRAPPER tab_panel tabname="suggestion_details" %]
+ [% IF nb_archived_suggestions > 0 %]
+ <p>[% tnpx('pluralization', 'There is one archived suggestion.', 'There are {count} archived suggestions.', nb_archived_suggestions, { count = nb_archived_suggestions }) | $raw %] </p>
+ [% END %]
+ <table id="suggestions" class="sorted">
+ <thead>
+ <tr>
+ <th class="no-sort">&nbsp;</th>
+ <th class="anti-the">Đề xuất mua</th>
+ <th>Người đề xuất</th>
+ <th>Người quản lý</th>
+ <th>Last modification by - on</th>
+ <th>Thư viện</th>
+ <th>Quỹ</th>
+ <th>Trạng thái</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH suggestion IN suggestions %]
+ <tr>
+ <td>[% suggestion.suggestionid | html %]</td>
+ <td>
+ <a href="/cgi-bin/koha/suggestion/suggestion.pl?suggestionid=[% suggestion.suggestionid | uri %]&op=show" title="Đề xuất mua">
+ [% suggestion.title | html %][% IF ( suggestion.author ) %], Tác giả: [% suggestion.author | html %][% END %]</a
+                                        >
+ <br />
+ [% IF ( suggestion.copyrightdate ) %]&copy; [% suggestion.copyrightdate | html %][% END %]
+ [% IF ( suggestion.volumedesc ) %]; Volume:<em>[% suggestion.volumedesc | html %]</em>[% END %] [% IF ( suggestion.isbn ) %]; Số ISBN:<em>[% suggestion.isbn | html %]</em>[% END %]
+ [% IF ( suggestion.publishercode ) %]; Published by [% suggestion.publishercode | html %][% END %]
+ [% IF ( suggestion.publicationyear ) %]in <em>[% suggestion.publicationyear | html %]</em>[% END %]
+ [% IF ( suggestion.place ) %]in <em>[% suggestion.place | html %]</em>[% END %]
+ [% IF ( suggestion.collectiontitle ) %]; [% suggestion.collectiontitle | html %][% END %]
+ [% IF ( suggestion.itemtype ) %]; [% AuthorisedValues.GetByCode( 'SUGGEST_FORMAT', suggestion.itemtype, 0 ) | html %][% END %]<br />
+ [% IF ( suggestion.note ) %]<div class="suggestion_note"><i class="fa fa-comment"></i> [% suggestion.note | html %]</div>[% END %]
+ </td>
+ <td>
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% suggestion.suggestedby | uri %]">[% INCLUDE 'patron-title.inc' patron => suggestion.suggester %]</a>
+ [% IF suggestion.suggesteddate %]- [% suggestion.suggesteddate | $KohaDates %][% END %]
+ </td>
+ <td>
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% suggestion.managedby | uri %]">[% INCLUDE 'patron-title.inc' patron => suggestion.manager %]</a>
+ [% IF suggestion.manageddate %]- [% suggestion.manageddate | $KohaDates %][% END %]
+ </td>
+ <td>
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% suggestion.lastmodificationby | uri %]">[% INCLUDE 'patron-title.inc' patron => suggestion.last_modifier %]</a>
+ [% IF suggestion.lastmodificationdate %]- [% suggestion.lastmodificationdate | $KohaDates %][% END %]
+ </td>
+ <td> [% Branches.GetName( suggestion.branchcode ) | html %] </td>
+ <td> [% suggestion.fund.budget_name | html %] </td>
+ <td>
+ [% IF    suggestion.STATUS == 'ASKED' %]
+ <span>Đang xử lý</span>
+ [% ELSIF suggestion.STATUS == 'ACCEPTED' %]
+ <span>Được chấp nhận</span>
+ [% ELSIF suggestion.STATUS == 'ORDERED' %]
+ <span>Đặt hàng</span>
+ [% ELSIF suggestion.STATUS == 'REJECTED' %]
+ <span>Bị từ chối</span>
+ [% ELSIF suggestion.STATUS == 'CHECKED' %]
+ <span>Đã kiểm tra</span>
+ [% ELSIF suggestion.STATUS == 'AVAILABLE' %]
+ <span>Available</span>
+ [% ELSIF AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS ) %]
+ [% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS ) | html %]
+ [% ELSE %]
+ <span>Status unknown</span>
+ [% END %]
+ [% IF suggestion.reason %]
+ <br />([% suggestion.reason | html %])
+ [% END %]
+ </td>
+ </tr>
+ [% END # /FOREACH suggestion %]
+ </tbody>
+ </table>
+ <!-- /#suggestions -->
+ [% END # /tab_panel %]
+ [% END # /IF suggestions.count %]
+
+ [% IF ( FRBRizeEditions ) %]
+ [% IF ( XISBNS ) %]
+ [% WRAPPER tab_panel tabname="editions" %]
+ <h4>Các phiên bản xuất bản</h4>
+ <table>
+ [% FOREACH XISBN IN XISBNS %]
+ <tr>
+ [% IF ( AmazonCoverImages ) %]
+ <td>
+ <a href="http://www.amazon.com/gp/reader/[% XISBN.normalized_isbn | uri %][% AmazonAssocTag | uri %]#reader-link"
+                                                ><img src="https://images-na.ssl-images-amazon.com/images/P/[% XISBN.normalized_isbn | html %].01._AA75_PU_PU-5_.jpg"
+                                            /></a>
+ </td>
+ [% END %]
+ [% IF ( !item_level_itypes || Koha.Preference('BiblioItemtypeInfo') ) %]
+ <td>
+ [% IF ( noItemTypeImages ) %]
+ <span class="itypetext">[% XISBN.description | html %]</span>
+ [% ELSE %]
+ <img src="[% XISBN.imageurl | html %]" alt="[% XISBN.description | html %]" title="[% XISBN.description | html %]" />
+ [% END %]
+ </td>
+ [% END %]
+ <td>
+ <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% XISBN.biblionumber | uri %]">[% XISBN.title | html %]</a> <span>bởi</span> [% XISBN.author | html %] &copy;[% XISBN.copyrightdate | html %]
+ [% IF ( XISBN.publishercode ) %]
+ [% XISBN.publishercode | html %]
+ [% IF ( XISBN.place ) %]([% XISBN.place | html %])[% END %]
+ [% IF ( XISBN.publicationyear ) %], [% XISBN.publicationyear | html %][% END %]
+ [% IF ( XISBN.editionstatement ) %][% XISBN.editionstatement | html %][% END %]
+ [% IF ( XISBN.editionresponsibility ) %][% XISBN.editionresponsibility | html %][% END %]
+ [% END %]
+ [% IF ( XISBN.pages ) %]
+ [% END %][% XISBN.pages | html %]
+ [% IF ( XISBN.illus ) %][% XISBN.illus | html %][% END %]
+ [% IF ( XISBN.size ) %],[% END %][% XISBN.size | html %]
+ </td>
+ </tr>
+ [% END # /FOREACH XISBN %]
+ </table>
+ [% END # /tab_panel %]
+ [% END # /IF XISBNS %]
+ [% END # /IF FRBRizeEditions %]
+
+ [% IF ( ( Koha.Preference('CatalogConcerns') || Koha.Preference('OpacCatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
+ [% WRAPPER tab_panel tabname="concerns" %]
+ <fieldset class="action" style="cursor:pointer;">
+ <a id="hideResolved"><i class="fa fa-minus-square"></i> Hide resolved</a>
+ | <a id="showAll"><i class="fa fa-bars"></i> Hiển thị tất cả</a>
+ <input type="checkbox" id="hide_resolved_concerns" name="hide_resolved_concerns" style="display:none;" />
+ </fieldset>
+
+ <table id="table_concerns" width="100%">
+ <thead>
+ <tr>
+ <th>Reported</th>
+ <th>Chi tiết</th>
+ <th>Nhan đề</th>
+ <th>Trạng thái</th>
+ <th data-class-name="actions no-export">Thao tác</th>
+ </tr>
+ </thead>
+ </table>
+ [% END # /tab_panel %]
+ [% END # /IF CatalogConcerns %]
+
+ [% IF ( LocalCoverImages ) %]
+ [% WRAPPER tab_panel tabname="images" %]
+ [% IF localimages.count %]
+ <p>Nhấp vào ảnh để xem trong trình xem ảnh</p>
+ <ul class="thumbnails">
+ [% FOREACH image IN localimages %]
+ [% IF image %]
+ <li id="imagenumber-[% image.imagenumber | html %]" class="thumbnail">
+ <a href="/cgi-bin/koha/catalogue/imageviewer.pl?biblionumber=[% biblionumber | uri %]&amp;imagenumber=[% image.imagenumber | uri %]">
+ <img src="/cgi-bin/koha/catalogue/image.pl?thumbnail=1&amp;imagenumber=[% image.imagenumber | uri %]" />
+ </a>
+ [% IF CAN_user_tools_upload_local_cover_images %]
+ <a href="#" class="remove"><i class="fa fa-trash-can"></i> Xóa hình ảnh</a>
+ [% END %]
+ </li>
+ [% END # /IF image %]
+ [% END # /FOREACH image %]
+ </ul>
+ <!-- /.thumbnails -->
+ [% ELSE # - No image passed JavaScript takes care %]
+ <span class="noimagesuploaded">No images have been uploaded for this bibliographic record yet.</span>
+ [% END %]
+ [% IF ( CAN_user_tools_upload_local_cover_images ) %]
+ <p
+                            >Upload an image file:
+ <a class="btn btn-default btn-xs" href="/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber | uri %]&amp;filetype=image"><i class="fa fa-upload" aria-hidden="true"></i> Tải lên</a>
+ </p>
+ [% END %]
+ [% END # /tab_panel %]
+ [% END # /IF LocalCoverImages %]
+
+ [% IF ( HTML5MediaEnabled ) %]
+ [% WRAPPER tab_panel tabname="html5media" %]
+ [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
+ <p>
+ [% IF HTML5MediaSet.is_youtube %]
+ <iframe id="player" width="640" height="360" src="[% HTML5MediaSet.srcblock | url %]"></iframe>
+ [% ELSE %]
+ <!-- prettier-ignore-start -->
+ <[% HTML5MediaParent | html %] controls preload=none>
+ <[% HTML5MediaSet.child | html %] src="[% HTML5MediaSet.srcblock | url %]"[% HTML5MediaSet.typeblock | html %] />
+ [[% HTML5MediaParent | html %] tag not supported by your browser.]
+ </[% HTML5MediaParent | html %]>
+ <!-- prettier-ignore-end -->
+ [% END %]
+ </p>
+ [% END %]
+ [% END # /tab_panel %]
+ [% END # /IF HTML5MediaEnabled %]
+
+ [% IF ( reviews ) %]
+ [% WRAPPER tab_panel tabname="comments" %]
+ [% SET ShowReviewerPhoto = Koha.Preference( "ShowReviewerPhoto" ) %]
+ <table id="comments_table">
+ <thead>
+ <tr>
+ <th>Commenter</th>
+ <th>Ngày</th>
+ <th>Trạng thái</th>
+ <th>Bình luận</th>
+ [% IF ( CAN_user_tools_moderate_comments ) %]
+ <th class="no-sort">Thao tác</th>
+ [% END %]
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH review IN reviews %]
+ <tr id="comment[% review.reviewid | html %]">
+ <td>
+ [% IF ( review.patron ) %]
+ [% IF ( review.avatarurl ) %]
+ <img class="avatar" src="[% review.avatarurl | html %]" height="80" width="80" alt="" />
+ [% END %]
+ [% INCLUDE 'patron-title.inc' patron=review.patron hide_patron_infos_if_needed=1 %]
+ [% ELSE %]
+ <em>Patron deleted<em> </em></em>
+ [% END %]
+ </td>
+ <td data-order="[% review.datereviewed | html %]"> [% review.datereviewed | $KohaDates %] </td>
+ <td>
+ [% IF ( review.approved ) %]
+ <em>Chấp nhận</em>
+ [% ELSE %]
+ <em>Unapproved</em>
+ [% END %]
+ </td>
+ <td>
+ [% FILTER html_break %]
+ [% review.review | html %]
+ [% END %]
+ </td>
+ [% IF ( CAN_user_tools_moderate_comments ) %]
+ <td class="actions">
+ [% IF ( review.approved ) %]
+ <form action="/cgi-bin/koha/reviews/reviewswaiting.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-unapprove" />
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ <input type="hidden" name="reviewid" value="[% review.reviewid | html %]" />
+ <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-times" aria-hidden="true"></i> Không chấp nhận</button>
+ </form>
+ [% ELSE %]
+ <form action="/cgi-bin/koha/reviews/reviewswaiting.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-approve" />
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ <input type="hidden" name="reviewid" value="[% review.reviewid | html %]" />
+ <button type="submit" class="btn btn-default btn-xs"><i class="fa fa-check" aria-hidden="true"></i> Chấp nhận</button>
+ </form>
+ [% END %]
+ <form action="/cgi-bin/koha/reviews/reviewswaiting.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete" />
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ <input type="hidden" name="reviewid" value="[% review.reviewid | html %]" />
+ <button type="submit" class="btn btn-default btn-xs delete-comment"><i class="fa fa-trash-can" aria-hidden="true"></i> Xóa</button>
+ </form>
+ </td>
+ [% END # /IF CAN_user_tools_moderate_comments %]
+ </tr>
+ [% END # / FOREACH reviews %]
+ </tbody>
+ </table>
+ [% END %]
+ [% END # /IF reviews %]
+
+ [% IF ( Koha.Preference('NovelistSelectStaffEnabled') && Koha.Preference('NovelistSelectStaffProfile') && Koha.Preference('NovelistSelectStaffView') == 'tab' ) %]
+ [% WRAPPER tab_panel tabname="NovelistSelect" %]
+ <div data-novelist-novelistselect="[% normalized_isbn | html %]"></div>
+ [% END # /tab_panel %]
+ [% END %]
+
+ [% FOREACH plugins_intranet_catalog_biblio_tab IN plugins_intranet_catalog_biblio_tabs %]
+ [% WRAPPER tab_panel tabname="${ plugins_intranet_catalog_biblio_tab.id }" %]
+ [% plugins_intranet_catalog_biblio_tab.content | $raw %]
+ [% END # /tab_panel %]
+ [% END # /WRAPPER comments %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs %]
+
+ <div id="export" style="margin-top: 1em;">
+ <form method="get" action="/cgi-bin/koha/catalogue/export.pl">
+ <table>
+ <tr>
+ <th>Save record</th>
+ </tr>
+ <tr>
+ <td>
+ Chọn định dạng tải về: <select name="format">
+ <option value="mods">MODS (XML)</option>
+ <option data-bs-toggle="modal" data-bs-target="#exportModal_">Dublin Core</option>
+ <option value="marcxml">MARCXML</option>
+ <option value="marc8">MARC (không Unicode/MARC-8)</option>
+ <option value="utf8">MARC (Unicode/UTF-8)</option>
+ </select>
+ <input type="submit" name="save" class="btn btn-primary" value="Download record" />
+ </td>
+ </tr>
+ <tr>
+ <td> <input type="hidden" name="op" value="export" /><input type="hidden" name="bib" value="[% biblionumber | html %]" /> </td>
+ </tr>
+ </table>
+ </form>
+ </div>
+ <!-- /#export -->
+
+ <div id="marcPreview" class="modal" tabindex="-1" role="dialog" aria-labelledby="marcPreviewLabel" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="marcPreviewLabel">MARC preview</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ <!-- /#marcPreview.modal -->
+
+ <div id="elasticPreview" class="modal" tabindex="-1" role="dialog" aria-labelledby="elasticPreviewLabel" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="elasticPreviewLabel">Elasticsearch record</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ <!-- /#elasticPreview.modal -->
+[% END %]
+
+<div class="modal" id="modal-item-group-create" tabindex="-1" role="dialog" aria-labelledby="modal-item-group-create-label">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="modal-item-group-create-label">Create a new item group</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="get" id="modal-item-group-create-form" class="validated">
+ <div class="modal-body">
+ <fieldset>
+ <p>
+ <label for="modal-item-group-create-form-description" class="required">Name: </label>
+ <input name="description" id="modal-item-group-create-form-description" type="text" size="30" required="required" class="required" />
+ <span class="required">Bắt buộc</span>
+ </p>
+ <p>
+ <label for="modal-item-group-create-form-display_order" class="required">Display order: </label>
+ <input name="display_order" id="modal-item-group-create-form-display_order" value="0" size="5" required="required" class="required" />
+ <span class="required">Bắt buộc</span>
+ <br />
+ <span class="hint">Numbers only, item groups will be displayed in counting order</span>
+ </p>
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button id="modal-item-group-create-submit" class="btn btn-primary">Gửi</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ </form>
+ <!-- /#modal-item-group-create-form -->
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#modal-item-group-create.modal -->
+
+<div class="modal" id="modal-item-group-edit" tabindex="-1" role="dialog" aria-labelledby="modal-item-group-edit-label">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="modal-item-group-edit-label">Edit item group</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="get" id="modal-item-group-edit-form" class="validated">
+ <div class="modal-body">
+ <fieldset>
+ <p>
+ <label for="modal-item-group-edit-form-description" class="required">Name: </label>
+ <input name="description" id="modal-item-group-edit-form-description" type="text" size="30" required="required" class="required" />
+ <span class="required">Bắt buộc</span>
+ </p>
+ <p>
+ <label for="modal-item-group-edit-form-display_order" class="required">Sort order: </label>
+ <input name="display_order" id="modal-item-group-edit-form-display_order" size="5" />
+ <span class="hint">Numbers only, item groups will be displayed in counting order</span>
+ </p>
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button id="modal-item-group-edit-submit" class="btn btn-primary">Gửi</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ </form>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#modal-item-group-edit.modal -->
+
+<div class="modal" id="modal-item-group-delete" tabindex="-1" role="dialog" aria-labelledby="modal-item-group-delete-label">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="modal-item-group-delete-label">Delete item group</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body"> Are you sure you want to delete this item group? </div>
+ <div class="modal-footer">
+ <button id="modal-item-group-delete-submit" class="btn btn-danger">Xóa</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#modal-item-group-delete.modal -->
+
+<div class="modal" id="modal-item-group-set" tabindex="-1" role="dialog" aria-labelledby="modal-item-group-set-label">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="modal-item-group-set-label">Set item group for items</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="get" id="modal-item-group-set-form" class="validated">
+ <div class="modal-body">
+ <fieldset>
+ <p>
+ <label for="item-group-add-form-select" class="required">Item group: </label>
+ <select name="item_group" id="item-group-add-form-select">
+ [% FOREACH ig IN biblio.item_groups.search({}, {order_by => 'display_order'}) %]
+ <option value="[% ig.id | html %]">[% ig.description | html %]</option>
+ [% END %]
+ </select>
+ <span class="required">Bắt buộc</span>
+ </p>
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button id="modal-item-group-set-submit" class="btn btn-primary">Set item group</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ </form>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#modal-item-group-set.modal -->
+
+<div class="modal" id="modal-item-group-unset" tabindex="-1" role="dialog" aria-labelledby="modal-item-group-unset-label">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="modal-item-group-unset-label">Remove item from item group</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body"> Are you sure you want to remove these item(s) from their item group(s)? </div>
+ <div class="modal-footer">
+ <button id="modal-item-group-unset-submit" class="btn btn-danger">Loại bỏ</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+</div>
+<!-- /#.modal -->
+
+[% IF bundlesEnabled %]
+ <div class="modal" id="addToBundleModal" tabindex="-1" role="dialog" aria-labelledby="addToBundleLabel">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <form method="get" id="addToBundleForm" action="">
+ <div class="modal-header">
+ <h1 class="modal-title" id="addToBundleLabel">Add to bundle</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="addResult"></div>
+ <fieldset class="rows">
+ <ol>
+ <li>
+ <label class="required" for="external_id">Item barcode: </label>
+ <input type="text" id="external_id" name="external_id" required="required" />
+ <span class="required">Bắt buộc</span>
+ </li>
+ <li id="add_marc_link">
+ <label for="bundle_link">Add MARC link: </label>
+ <input type="checkbox" name="bundle_link" />
+ </li>
+ </ol>
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button type="submit" class="btn btn-primary">Gửi</button>
+ <button class="btn btn-default" type="button" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </form>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+ </div>
+ <!-- /#addToBundleModal.modal -->
+
+ <div class="modal" id="removeFromBundleModal" tabindex="-1" role="dialog" aria-labelledby="removeFromBundleLabel">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <form method="get" id="removeFromBundleForm" action="">
+ <div class="modal-header">
+ <h1 class="modal-title" id="removeFromBundleLabel">Remove from bundle</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="removeResult"></div>
+ <fieldset class="rows">
+ <ol>
+ <li>
+ <label class="required" for="external_id">Item barcode: </label>
+ <input type="text" id="rm_external_id" name="external_id" required="required" />
+ <span class="required">Bắt buộc</span>
+ </li>
+ </ol>
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button type="submit" class="btn btn-primary">Gửi</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </form>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+ </div>
+ <!-- /#removeFromBundleModal.modal -->
+[% END %]
+
+[% IF ( Koha.Preference('CatalogConcerns') ) %]
+ [% INCLUDE 'modals/add_catalog_concern.inc' %]
+[% END %]
+
+[% IF ( ( Koha.Preference('CatalogConcerns') || Koha.Preference('OpacCatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
+ [% INCLUDE 'modals/display_ticket.inc' %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'catalog-strings.inc' %]
+ [% IF Koha.Preference('EnableBooking') %]
+ [% INCLUDE 'calendar.inc' %]
+ [% INCLUDE 'select2.inc' %]
+ [% INCLUDE 'js-date-format.inc' %]
+ [% END %]
+ [% Asset.js("js/catalog.js") | $raw %]
+ [% Asset.js("js/recalls.js") | $raw %]
+ [% Asset.js("js/coce.js") | $raw %]
+ [% Asset.js("lib/Chocolat/js/chocolat.js") | $raw %]
+
+ [%# The following PROCESS needs: %]
+ [%# can_edit_items_from item_type_image_locations %]
+ [% PROCESS build_items_table_js biblio => biblio %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        /* Set a variable needed by add_catalog_concern.js */
+        var logged_in_user_borrowernumber = "[% logged_in_user.borrowernumber | html %]";
+
+        var searchid = "[% searchid | html %]";
+        var biblio_id = parseInt('[% biblionumber | html %]', 10);
+
+        var interface = "[% interface | html %]";
+        var theme = "[% theme | html %]";
+        var all_items_count = [% count || 0 | html %];
+
+        const activetab = "[% activetab | html %]";
+        const has_component_parts = [% ComponentParts && ComponentParts.size ? 1 : 0 | html %];
+        const show_holdings_panel = [% items_to_display_count - ( other_holdings_count || 0 ) ? 1 : 0 | html %];
+        const HTML5MediaSetsSize = [% HTML5MediaEnabled && HTML5MediaSets.size ? HTML5MediaSets.size : 0 | html %];
+
+        const normalized_isbn = "[% normalized_isbn | html %]";
+        const normalized_upc = "[% normalized_upc | html %]";
+
+        [% IF ( ( Koha.Preference('CatalogConcerns') || Koha.Preference('OpacCatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
+            var concerns_table_settings = [% TablesSettings.GetTableSettings( 'catalogue', 'concerns', 'table_concerns', 'json' ) | $raw %];
+        [% END %]
+
+        [% IF Koha.Preference('AcquisitionDetails') %]
+            var acquisitiondetails_table_settings = [% TablesSettings.GetTableSettings('catalogue', 'detail', 'acquisitiondetails-table', 'json') | $raw %];
+        [% END %]
+
+        [% IF reviews %]
+            var comment_table_settings = [% TablesSettings.GetTableSettings('catalogue', 'detail', 'comments-table', 'json') | $raw %];
+        [% END %]
+
+        [% IF bundlesEnabled %]
+            var bundle_settings = [% TablesSettings.GetTableSettings('catalogue', 'detail','bundle_tables','json') | $raw %];
+        [% END %]
+
+        Koha.addPrefs({
+            AlwaysShowHoldingsTableFilters: [% Koha.Preference('AlwaysShowHoldingsTableFilters') ? 1 : 0 | html %],
+            BundleLostValue: "[% Koha.Preference('BundleLostValue') | html %]",
+            CoceHost: "[% Koha.Preference('CoceHost') | html %]",
+            CoceProviders: "[% Koha.Preference('CoceProviders') | html %]",
+            HTML5MediaEnabled: "[% Koha.Preference('HTML5MediaEnabled') | html %]",
+            KohaAdminEmailAddress: "[% Koha.Preference('KohaAdminEmailAddress') | uri %]",
+            IntranetCoce: [% Koha.Preference('IntranetCoce') ? 1 : 0 | html %],
+            NovelistSelectStaffEnabled: [% Koha.Preference('NovelistSelectStaffEnabled') ? 1 : 0 | html %],
+            NovelistSelectStaffProfile: "[% Koha.Preference('NovelistSelectStaffProfile') | html %]",
+            NovelistSelectPassword: "[% Koha.Preference('NovelistSelectPassword') | html %]",
+            SearchEngine: "[% Koha.Preference('SearchEngine') | html %]",
+        });
+
+        Koha.addPermissions({
+            CAN_user_editcatalogue_manage_item_groups: [% CAN_user_editcatalogue_manage_item_groups ? 1 : 0 | html %],
+            CAN_user_tools_upload_local_cover_images: [% CAN_user_tools_upload_local_cover_images ? 1 : 0 | html %],
+        });
+    </script>
+ [% IF ( Koha.Preference('CatalogConcerns') ) %]
+ [% Asset.js("js/modals/add_catalog_concern.js") | $raw %]
+ [% END %]
+ [% IF ( ( Koha.Preference('CatalogConcerns') || Koha.Preference('OpacCatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                $("#bibliodetails a:first").tab("show");
+
+                let additional_filters = {
+                    resolved_date: function () {
+                        if ($("#hide_resolved_concerns").is(":checked")) {
+                            return { "=": null };
+                        } else {
+                            return;
+                        }
+                    },
+                    source: "catalog",
+                    biblio_id,
+                };
+                let external_filter_nodes = {
+                    hide_resolved_concerns: "#hide_resolved_concerns",
+                };
+
+                var tickets_url = "/api/v1/tickets";
+                var tickets = $("#table_concerns").kohaTable(
+                    {
+                        ajax: {
+                            url: tickets_url,
+                        },
+                        embed: ["assignee", "reporter", "resolver", "biblio", "updates+count", "+strings"],
+                        emptyTable: '<div class="alert alert-info">' + _("Congratulations, there are no catalog concerns.") + "</div>",
+                        columnDefs: [
+                            {
+                                targets: [0, 1, 2, 3],
+                                render: function (data, type, row, meta) {
+                                    if (type == "display") {
+                                        if (data != null) {
+                                            return data.escapeHtml();
+                                        } else {
+                                            return "";
+                                        }
+                                    }
+                                    return data;
+                                },
+                            },
+                        ],
+                        columns: [
+                            {
+                                data: "reported_date:reporter.firstname",
+                                render: function (data, type, row, meta) {
+                                    let reported = '<div class="d-flex justify-content-between align-items-start">';
+                                    reported +=
+                                        '<span class="reporter">' +
+                                        $patron_to_html(row.reporter, {
+                                            display_cardnumber: false,
+                                            url: true,
+                                        }) +
+                                        "</span>";
+                                    reported += '<span class="date text-muted">' + $datetime(row.reported_date) + "</span>";
+                                    reported += "</div>";
+                                    return reported;
+                                },
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "title:body",
+                                render: function (data, type, row, meta) {
+                                    let result = '<div class="d-flex justify-content-between align-items-start">';
+
+                                    // Title link on the left
+                                    result += '<a id="title_' + row.ticket_id + '" role="button" href="#" class="detail-trigger">' + row.title + "</a>";
+
+                                    // Updates count on the right, if it exists
+                                    if (row.updates_count) {
+                                        result += '<span><a role="button" href="#" class="detail-trigger"><i class="fa fa-comment" aria-hidden="true"></i> ' + row.updates_count + "</a></span>";
+                                    }
+
+                                    // Hidden detail content
+                                    result += "</div>";
+                                    result += '<div id="detail_' + row.ticket_id + '" style="display:none">' + row.body + "</div>";
+
+                                    return result;
+                                },
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "biblio.title",
+                                render: function (data, type, row, meta) {
+                                    return $biblio_to_html(row.biblio, {
+                                        link: 1,
+                                    });
+                                },
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "assignee.firstname:assignee.surname:resolver.firstname:resolver.surname:resolved_date:status",
+                                render: function (data, type, row, meta) {
+                                    let result = "";
+                                    if (row.resolved_date) {
+                                        result += "<div>";
+                                        result +=
+                                            _("Resolved by") +
+                                            " <span>" +
+                                            $patron_to_html(row.resolver, {
+                                                display_cardnumber: false,
+                                                url: true,
+                                            }) +
+                                            "</span>";
+                                        result += "</div>";
+                                        if (row.status) {
+                                            result += "<div>";
+                                            result += " " + _("as") + " ";
+                                            result += row._strings.status ? escape_str(row._strings.status.str) : "";
+                                            result += "</div>";
+                                        }
+                                        result += "<div>" + $datetime(row.resolved_date) + "</div>";
+                                    } else {
+                                        result += "<div>";
+                                        if (row.status) {
+                                            result += row._strings.status ? escape_str(row._strings.status.str) : "";
+                                        } else {
+                                            result += _("Mở");
+                                        }
+                                        result += "</div>";
+                                        if (row.assignee) {
+                                            result += "<div>";
+                                            result +=
+                                                _("Assigned to: ") +
+                                                " <span>" +
+                                                $patron_to_html(row.assignee, {
+                                                    display_cardnumber: false,
+                                                    url: true,
+                                                }) +
+                                                "</span>";
+                                            result += "</div>";
+                                        }
+                                    }
+                                    return result;
+                                },
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: function (row, type, val, meta) {
+                                    let resolved = row.resolved_date ? true : false;
+                                    let result =
+                                        '<a class="btn btn-default btn-xs main-trigger" role="button" href="#" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" data-concern="' +
+                                        encodeURIComponent(row.ticket_id) +
+                                        '" data-resolved="' +
+                                        resolved +
+                                        '" data-assignee="' +
+                                        $patron_to_html(row.assignee, { display_cardnumber: false, url: false }) +
+                                        '"><i class="fa-solid fa-eye" aria-hidden="true"></i> ' +
+                                        _("Chi tiết") +
+                                        "</a>";
+                                    return result;
+                                },
+                                searchable: false,
+                                orderable: false,
+                            },
+                        ],
+                    },
+                    concerns_table_settings,
+                    0,
+                    additional_filters,
+                    undefined,
+                    external_filter_nodes
+                );
+
+                $("#hideResolved").on("click", function () {
+                    $("#hide_resolved_concerns").prop("checked", true);
+                    tickets.DataTable().draw();
+                });
+
+                $("#showAll").on("click", function () {
+                    $("#hide_resolved_concerns").prop("checked", false);
+                    tickets.DataTable().draw();
+                });
+            });
+        </script>
+ [% Asset.js("js/modals/display_ticket.js") | $raw %]
+ [% END # /IF CatalogConcerns %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        // http://www.oreillynet.com/pub/a/javascript/2003/10/21/amazonhacks.html
+        function verify_cover_images(container) {
+            // Loop over each container in the template which contains covers
+            let cover_sliders = container ? container.find(".cover-slider") : $(".cover-slider");
+            cover_sliders.each(function () {
+                var lightbox_descriptions = [];
+                var first_shown = 0;
+                $(this)
+                    .find(".cover-image")
+                    .each(function (index) {
+                        var div = $(this);
+                        // Find the image in the container
+                        var img = div.find("img")[0];
+                        if ($(img).length > 0) {
+                            var description = "";
+                            // All slides start hidden. If this is the first one, show it.
+                            if (first_shown == 0) {
+                                div.show();
+                                first_shown = 1;
+                            }
+                            // Check if Amazon image is present
+                            if (div.attr("id") == "amazon-bookcoverimg") {
+                                w = img.width;
+                                h = img.height;
+                                if (w == 1 || h == 1) {
+                                    // Amazon returned single-pixel placeholder
+                                    // Remove the container
+                                    div.remove();
+                                } else {
+                                    lightbox_descriptions.push(_("Ảnh bìa Amazon (<a href='%s'>xem ảnh gốc</a>)").format($(img).data("link")));
+                                }
+                            } else if (div.attr("id") == "custom-coverimg") {
+                                if ((img.complete != null && !img.complete) || img.naturalHeight == 0) {
+                                    // No image was loaded via the CustomCoverImages system preference
+                                    // Remove the container
+                                    div.remove();
+                                } else {
+                                    lightbox_descriptions.push(_("Ảnh bìa tùy chỉnh"));
+                                }
+                            } else if (div.attr("id") == "syndetics-bookcoverimg") {
+                                lightbox_descriptions.push(_("Syndetics cover image (<a href='%s'>see the original image</a>)").format($(img).data("link")));
+                            } else if (div.hasClass("coce-coverimg")) {
+                                // Identify which service's image is being loaded by Coce
+                                var coce_description;
+                                if ($(img).attr("src").indexOf("amazon.com") >= 0) {
+                                    coce_description = _("Ảnh Coce từ Amazon.com");
+                                } else if ($(img).attr("src").indexOf("google.com") >= 0) {
+                                    coce_description = _("Ảnh Coce từ Google Books");
+                                } else if ($(img).attr("src").indexOf("openlibrary.org") >= 0) {
+                                    coce_description = _("Ảnh Coce từ Open Library");
+                                }
+                                div.find(".hint").html(coce_description);
+                                lightbox_descriptions.push(coce_description);
+                            } else if (div.attr("class") == "cover-image local-coverimg") {
+                                lightbox_descriptions.push(_("Local cover image (<a href='%s'>edit</a>)").format($(img).data("link")));
+                            } else {
+                                lightbox_descriptions.push(_("Không rõ nguồn ảnh bìa"));
+                            }
+                        }
+                    });
+
+                // Lightbox for cover images
+                Chocolat(this.querySelectorAll(".cover-image a"), {
+                    description: function () {
+                        return lightbox_descriptions[this.settings.currentImageIndex];
+                    },
+                });
+            });
+
+            cover_sliders.each(function () {
+                var coverSlide = this;
+                var coverImages = $(this).find(".cover-image");
+                if (coverImages.length > 1) {
+                    coverImages.each(function (index) {
+                        // If more that one image is present, add a navigation link
+                        // for activating the slide
+                        var covernav = $('<a href="#" data-num="' + index + '" class="cover-nav"></a>');
+                        if (index == 0) {
+                            // Set the first navigation link as active
+                            $(covernav).addClass("nav-active");
+                        }
+                        $(covernav).html('<i class="fa fa-circle"></i>');
+                        $(coverSlide).append(covernav);
+                    });
+                }
+
+                if (
+                    $(coverSlide).attr("id") == "biblio-cover-slider" && // Hide if not visible, but only for the biblio images. Images for items are only local cover images
+                    $(coverSlide).find(".cover-image:visible").length < 1
+                ) {
+                    $(coverSlide).remove();
+                } else {
+                    $(coverSlide).addClass("cover-slides");
+                    var img = $(coverSlide).find(".cover-image:visible").find("img")[0];
+                    if ($(img).length > 0 && img.complete && img.naturalHeight > 0) {
+                        $(".cover-slides").css({ "background-image": "none" });
+                    }
+                }
+            });
+
+            $("#editions img").each(function (i) {
+                if (this.src.indexOf("amazon.com") >= 0) {
+                    w = this.width;
+                    h = this.height;
+                    if (w == 1 || h == 1) {
+                        this.src = "https://images-na.ssl-images-amazon.com/images/G/01/x-site/icons/no-img-sm.gif";
+                    } else if ((this.complete != null && !this.complete) || this.naturalHeight == 0) {
+                        this.src = "https://images-na.ssl-images-amazon.com/images/G/01/x-site/icons/no-img-sm.gif";
+                    }
+                }
+            });
+        }
+
+        let build_items_table_drawncallback = function (table) {
+            verify_cover_images(table);
+        };
+
+        function removeLocalImage(imagenumber) {
+            var thumbnail = $("#imagenumber-" + imagenumber);
+            var copy = thumbnail.html();
+            thumbnail.find("img").css("opacity", ".2");
+            thumbnail.find("a.remove").html("<img style='display:inline-block' src='" + interface + "/" + theme + "/img/spinner-small.gif' alt='' />");
+            const client = APIClient.cover_image;
+            client.cover_images.delete(imagenumber).then(
+                success => {
+                    if (success.deleted == 1) {
+                        thumbnail.remove();
+                    } else {
+                        thumbnail.html(copy);
+                        alert(_("Xảy ra lỗi khi bạn xóa hình ảnh này"));
+                    }
+                    if ($("ul.thumbnails > li").length == 0) {
+                        showNoImageMessage();
+                    }
+                },
+                error => {
+                    thumbnail.html(copy);
+                    alert(_("Xảy ra lỗi khi bạn xóa hình ảnh này"));
+                    console.warn("Something wrong happened: %s".format(error));
+                }
+            );
+        }
+
+        function showNoImageMessage() {
+            var no_images_msg = _("No images have been uploaded for this bibliographic record yet.");
+            no_images_msg = "<p>" + no_images_msg + "</p>";
+            if (Koha.permissions.CAN_user_tools_upload_local_cover_images) {
+                var please_upload = _("Upload an image file: %sUpload%s").format(
+                    "<a class='btn btn-default btn-xs' href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=" + biblio_id + "&amp;filetype=image'><i class='fa fa-upload' aria-hidden='true'></i> ",
+                    "</a>"
+                );
+                no_images_msg += "<p id='upload_image'>" + please_upload + "</p>";
+            }
+            $("#images").html(no_images_msg);
+        }
+
+        $(document).ready(function () {
+            // Pick details tab to display by default
+            if (activetab == "comments") {
+                $("#bibliodetails a[href='#comments_panel']").tab("show");
+            } else if (all_items_count == 0) {
+                if ((Koha.prefs.HTML5MediaEnabled == "staff" || Koha.prefs.HTML5MediaEnabled == "both") && HTML5MediaSetsSize) {
+                    $("#bibliodetails a[href='#html5media_panel']").tab("show");
+                } else if (has_component_parts) {
+                    $("#bibliodetails a[href='#components_panel']").tab("show");
+                } else {
+                    $("#bibliodetails a[href='#holdings_panel']").tab("show");
+                }
+            } else {
+                if (show_holdings_panel) {
+                    $("#bibliodetails a[href='#holdings_panel']").tab("show");
+                } else {
+                    $("#bibliodetails a[href='#otherholdings_panel']").tab("show");
+                }
+            }
+            $("#search-form").focus();
+            $(".thumbnails > li > .remove").click(function () {
+                var result = confirm(_("Bạn chắc chắn muốn xóa ảnh bìa này?"));
+
+                if (result == true) {
+                    var imagenumber = $(this).parent().attr("id").split("-")[1];
+                    removeLocalImage(imagenumber);
+                }
+
+                return false;
+            });
+            if (Koha.prefs.IntranetCoce && Koha.prefs.CoceProviders) {
+                KOHA.coce.getURL(Koha.prefs.CoceHost, Koha.prefs.CoceProviders);
+            }
+
+            $("body").on("click", ".previewMARC", function (e) {
+                e.preventDefault();
+                var page = $(this).attr("href");
+                $("#marcPreview .modal-body").load(page + " table");
+                $("#marcPreview").modal("show");
+            });
+
+            if (Koha.prefs.SearchEngine == "Elasticsearch") {
+                $("body").on("click", ".previewElastic", function (e) {
+                    e.preventDefault();
+                    var pageElastic = $(this).attr("href");
+                    $("#elasticPreview .modal-body").load(pageElastic, function (response, status, xhr) {
+                        if (status == "error") {
+                            $("#elasticPreview .modal-body").html(
+                                "<h1>" +
+                                    _("Phát hiện lỗi hệ thống:") +
+                                    "</h1><h2><em>" +
+                                    _("Error 404") +
+                                    "</em></h2><ul><li>" +
+                                    _("An internal link in the staff interface is broken and the page does not exist") +
+                                    "</li></ul><h3>" +
+                                    _("Tiếp theo là gì?") +
+                                    "</h3><ul style='margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #CCC;'><li>" +
+                                    _("Sử dụng thanh menu phía trên để chuyển sang phần khác của Koha.") +
+                                    "</li><li>" +
+                                    _("To report a broken link or any other issue, please contact the Koha administrator.") +
+                                    " <a href='mailto:" +
+                                    Koha.prefs.KohaAdminEmailAddress +
+                                    "'>" +
+                                    _("Gửi email") +
+                                    "</a></li></ul>"
+                            );
+                        }
+                    });
+                    $("#elasticPreview").modal("show");
+                });
+            }
+
+            if (Koha.prefs.NovelistSelectStaffEnabled && Koha.prefs.NovelistSelectStaffProfile && (normalized_isbn || normalized_upc)) {
+                novSelect.loadContentForQuery(
+                    {
+                        ClientIdentifier: normalized_isbn || normalized_upc,
+                        ISBN: normalized_isbn || normalized_upc,
+                        version: "2.1",
+                    },
+                    Koha.prefs.NovelistSelectStaffProfile,
+                    Koha.prefs.NovelistSelectPassword,
+                    function (d) {
+                        if (d.length > 0) {
+                            //If no content
+                            $(".NovelistSelect").show();
+                        }
+                    }
+                );
+            }
+            $(".cover-slider").on("click", ".cover-nav", function (e) {
+                e.preventDefault();
+                var cover_slider = $(this).parent();
+                // Adding click handler for cover image navigation links
+                var num = $(this).data("num");
+                $(cover_slider).find(".cover-nav").removeClass("nav-active");
+                $(this).addClass("nav-active");
+                $(cover_slider).find(".cover-image").hide();
+                $(cover_slider).find(".cover-image").eq(num).show();
+            });
+        });
+
+        if (Koha.prefs.IntranetCoce && Koha.prefs.CoceProviders) {
+            let counter_wait = 0;
+            function wait_for_images(cb) {
+                var loaded = 1;
+                counter_wait++;
+
+                if (loaded) {
+                    loaded = KOHA.coce.done;
+                }
+
+                if (!loaded && counter_wait < 50) {
+                    // Do not wait more than 5 seconds
+                    window.setTimeout(function () {
+                        wait_for_images(cb);
+                    }, 100);
+                } else {
+                    if (counter_wait >= 50) {
+                        console.warn("Could not retrieve the images");
+                    }
+                    cb();
+                }
+            }
+
+            $(window).load(function () {
+                wait_for_images(verify_cover_images);
+            });
+        } else {
+            $(window).load(function () {
+                verify_cover_images();
+            });
+        }
+    </script>
+ [% IF ( Koha.Preference('NovelistSelectStaffEnabled') && Koha.Preference('NovelistSelectStaffProfile') && ( normalized_isbn || normalized_upc ) ) %]
+ <script src="https://imageserver.ebscohost.com/novelistselect/ns2init.js">
+</script>
+ [% END %]
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'js-date-format.inc' %]
+ [% Asset.js("lib/dayjs/plugin/isSameOrAfter.js") | $raw %]
+ [% Asset.js("lib/dayjs/plugin/isSameOrBefore.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        dayjs.extend(window.dayjs_plugin_isSameOrAfter);
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        dayjs.extend(window.dayjs_plugin_isSameOrBefore);
+    </script>
+ [% INCLUDE 'js-biblio-format.inc' %]
+ [% Asset.js("js/browser.js") | $raw %]
+
+ [% IF Koha.Preference('EnableBooking') %]
+ [% Asset.js("js/modals/place_booking.js") | $raw %]
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        var browser = KOHA.browser(searchid, biblio_id);
+        browser.show();
+
+        let items_tab_ids = ["holdings", "otherholdings"];
+        items_tab_ids.forEach(function (tab_id, index) {
+            // Early return if the tab is not shown (ie. no table)
+            if (!$("#%s_table".format(tab_id)).length) return;
+            if (Koha.prefs.AlwaysShowHoldingsTableFilters) {
+                build_items_table(tab_id, true, {}, build_items_table_drawncallback);
+            } else {
+                build_items_table(tab_id, false, {}, build_items_table_drawncallback);
+            }
+
+            // bundlesEnabled is defined in catalogue_detail.inc
+            if (bundlesEnabled) {
+                // Add event listener for opening and closing bundle details
+                $(document).on("click", `#${tab_id}_table tbody button.details-control`, function () {
+                    var button = $(this);
+                    var tr = button.closest("tr");
+                    var dTable = button.closest("table").DataTable({ retrieve: true });
+
+                    let row = dTable.row(tr);
+                    let data = row.data();
+                    let itemnumber = data.item_id;
+                    let duedate = (data.checkout && data.checkout.due_date) || null;
+
+                    if (row.child.isShown()) {
+                        // This row is already open - close it
+                        row.child.hide();
+                        tr.removeClass("shown");
+                        button.removeClass("active");
+                    } else {
+                        // Open this row
+                        createChild(row, itemnumber, duedate);
+                        tr.addClass("shown");
+                        button.addClass("active");
+                    }
+                });
+            }
+        });
+
+        if (bundlesEnabled) {
+            // Bundle handling
+            function createChild(row, itemnumber, duedate) {
+                // Toolbar
+                var bundle_toolbar = $('<div id="toolbar" class="btn-toolbar"></div>');
+                bundle_toolbar.append('<a class="btn btn-default" data-bs-toggle="modal" data-bs-target="#addToBundleModal" data-item="' + itemnumber + '"><i class="fa fa-plus"></i> ' + _("Add to bundle") + "</a>");
+                bundle_toolbar.append('<a class="btn btn-default" data-bs-toggle="modal" data-bs-target="#removeFromBundleModal" data-item="' + itemnumber + '"><i class="fa fa-minus"></i> ' + _("Remove from bundle") + "</a>");
+
+                // Toolbar
+                var bundle_toolbar = $('<div id="toolbar" class="btn-toolbar"></div>');
+                bundle_toolbar.append('<a class="btn btn-default" data-bs-toggle="modal" data-bs-target="#addToBundleModal" data-item="' + itemnumber + '"><i class="fa fa-plus"></i> ' + _("Add to bundle") + "</a>");
+                bundle_toolbar.append('<a class="btn btn-default" data-bs-toggle="modal" data-bs-target="#removeFromBundleModal" data-item="' + itemnumber + '"><i class="fa fa-minus"></i> ' + _("Remove from bundle") + "</a>");
+
+                // This is the table we'll convert into a DataTable
+                var bundles_table = $('<table class="display tbundle" data-itemnumber="' + itemnumber + '" id="bundle_table_' + itemnumber + '" width="100%"/>');
+
+                // Display it the child row
+                row.child(bundle_toolbar.add(bundles_table), "bundle").show();
+
+                // Initialise as a DataTable
+                var bundle_table_url = "/api/v1/items/" + itemnumber + "/bundled_items?";
+                var bundle_table = bundles_table.kohaTable(
+                    {
+                        ajax: {
+                            url: bundle_table_url,
+                        },
+                        embed: ["biblio", "return_claim.patron"],
+                        order: [[1, "asc"]],
+                        columnDefs: [
+                            {
+                                targets: [0, 1, 2, 3],
+                                render: function (data, type, row, meta) {
+                                    if (data && type == "display") {
+                                        return data.escapeHtml();
+                                    }
+                                    return data;
+                                },
+                            },
+                        ],
+                        columns: [
+                            {
+                                data: "biblio.title:biblio.subtitle:biblio.medium",
+                                title: _("Nhan đề"),
+                                searchable: true,
+                                orderable: true,
+                                render: function (data, type, row, meta) {
+                                    return $biblio_to_html(row.biblio, { link: 1 });
+                                },
+                            },
+                            {
+                                data: "biblio.author",
+                                title: _("Tác giả"),
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "copy_number",
+                                title: _("Số bản sao"),
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "callnumber",
+                                title: _("Callnumber"),
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "external_id",
+                                title: _("Mã vạch"),
+                                searchable: true,
+                                orderable: true,
+                            },
+                            {
+                                data: "lost_status:last_seen_date:return_claim.patron",
+                                title: _("Trạng thái"),
+                                searchable: false,
+                                orderable: false,
+                                render: function (data, type, row, meta) {
+                                    if (row.lost_status == Koha.prefs.BundleLostValue) {
+                                        let out = '<span class="lost">' + _("Cập nhật lần cuối") + ": " + $date(row.last_seen_date) + "</span>";
+                                        if (row.return_claim) {
+                                            out = out + '<span class="claims_return">' + _("Claims returned by") + ": " + $patron_to_html(row.return_claim.patron, { display_cardnumber: false, url: true }) + "</span>";
+                                        }
+                                        return out;
+                                    } else if (row.lost_status !== 0) {
+                                        return '<span class="lost">' + _("Bị mất thẻ") + ": " + row.lost_status + "</span>";
+                                    }
+                                    return '<span class="available">' + _("Present") + "</span>";
+                                },
+                            },
+                            {
+                                data: function (row, type, val, meta) {
+                                    var result;
+                                    if (duedate) {
+                                        result =
+                                            '<button class="btn btn-default btn-xs remove disabled" role="button" data-itemnumber="' +
+                                            row.item_id +
+                                            '" title="%s"><i class="fa fa-minus" aria-hidden="true"></i> %s</button>\n'.format(_("This bundle is checked out, it cannot be modified"), _("Loại bỏ"));
+                                    } else {
+                                        result = '<button class="btn btn-default btn-xs remove" role="button" data-itemnumber="' + row.item_id + '"><i class="fa fa-minus" aria-hidden="true"></i> ' + _("Loại bỏ") + "</button>\n";
+                                    }
+                                    return result;
+                                },
+                                title: _("Thao tác"),
+                                searchable: false,
+                                orderable: false,
+                                class: "no-export",
+                            },
+                        ],
+                    },
+                    bundle_settings,
+                    1
+                );
+                $(".tbundle").on("click", ".remove:not(.disabled)", function () {
+                    var bundle_table = $(this).closest("table");
+                    var host_itemnumber = bundle_table.data("itemnumber");
+                    var component_itemnumber = $(this).data("itemnumber");
+                    var unlink_item_url = "/api/v1/items/" + host_itemnumber + "/bundled_items/" + component_itemnumber;
+                    $.ajax({
+                        type: "DELETE",
+                        url: unlink_item_url,
+                        success: function () {
+                            bundle_table.DataTable({ retrieve: true }).draw(false);
+                        },
+                    });
+                });
+
+                return;
+            }
+
+            var bundle_changed;
+            var bundle_form_active;
+            $("#addToBundleModal").on("shown.bs.modal", function (e) {
+                var button = $(e.relatedTarget);
+                var item_id = button.data("item");
+                $("#addResult").replaceWith('<div id="addResult"></div>');
+                $("#addToBundleForm").attr("action", "/api/v1/items/" + item_id + "/bundled_items");
+                $("#external_id").focus();
+                bundle_changed = 0;
+                bundle_form_active = item_id;
+            });
+
+            function addToBundle(item_id, data) {
+                /* Send the data using post with external_id */
+                const client = APIClient.item;
+                const posting = client.bundled_items.add(item_id, data, { return_response: true });
+
+                const barcode = data.external_id;
+                const marc_link = data.marc_link;
+
+                /* Report the results */
+                posting.then(function (response) {
+                    if (response.ok) {
+                        response.json().then(function () {
+                            $("#addResult").replaceWith('<div id="addResult" class="alert alert-success">' + _("Success: Added '%s'").format(barcode) + "</div>");
+                            $("#external_id").val("").focus();
+                            bundle_changed = 1;
+                        });
+                    } else {
+                        response.json().then(function (responseJSON) {
+                            if (response.status === 409) {
+                                if (responseJSON.error_code === "already_bundled") {
+                                    $("#addResult").replaceWith('<div id="addResult" class="alert alert-warning">' + _("Warning: Item '%s' already attached").format(barcode) + "</div>");
+                                } else if (responseJSON.error_code === "bundle_checked_out") {
+                                    $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Bundle is currently checked out") + "</div>");
+                                } else if (responseJSON.error_code === "checked_out") {
+                                    const button = $('<button type="button">')
+                                        .addClass("btn btn-xs")
+                                        .text(_("Check in and add to bundle"))
+                                        .on("click", function () {
+                                            addToBundle(item_id, { external_id: barcode, force_checkin: true, marc_link: marc_link });
+                                        });
+                                    $("#addResult").empty().attr("class", "alert alert-warning").append(__x("Warning: Item {barcode} is checked out", { barcode })).append(" ", button);
+                                } else if (responseJSON.error_code === "failed_checkin") {
+                                    $("#addResult").empty().attr("class", "alert alert-danger").append(__x("Failure: Item {barcode} cannot be checked in", { barcode }));
+                                } else if (responseJSON.error_code === "reserved") {
+                                    const button = $('<button type="button">')
+                                        .addClass("btn btn-xs")
+                                        .text(_("Ignore holds and add to bundle"))
+                                        .on("click", function () {
+                                            addToBundle(item_id, { external_id: barcode, ignore_holds: true, marc_link: marc_link });
+                                        });
+                                    $("#addResult").empty().attr("class", "alert alert-warning").append(__x("Warning: Item {barcode} is on hold", { barcode })).append(" ", button);
+                                } else {
+                                    $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Item '%s' belongs to another bundle").format(barcode) + "</div>");
+                                }
+                            } else if (response.status === 404) {
+                                $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Item '%s' not found").format(barcode) + "</div>");
+                            } else if (response.status === 400) {
+                                if (responseJSON.error_code === "failed_nesting") {
+                                    $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Item '%s' is a bundle and bundles cannot be nested").format(barcode) + "</div>");
+                                } else {
+                                    $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Check the logs for details.") + "</div>");
+                                }
+                            } else {
+                                $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Check the logs for details.") + "</div>");
+                            }
+                            $("#external_id").val("").focus();
+                        });
+                    }
+                });
+            }
+
+            $("#addToBundleForm").submit(function (event) {
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                const data = { external_id: this.elements.external_id.value, marc_link: this.elements.bundle_link.checked };
+
+                addToBundle(bundle_form_active, data);
+            });
+
+            $("#addToBundleModal").on("hidden.bs.modal", function (e) {
+                if (bundle_changed) {
+                    $("#bundle_table_" + bundle_form_active)
+                        .DataTable({ retrieve: true })
+                        .ajax.reload();
+                }
+                bundle_form_active = 0;
+                bundle_changed = 0;
+            });
+
+            $("#removeFromBundleModal").on("shown.bs.modal", function (e) {
+                var button = $(e.relatedTarget);
+                var item_id = button.data("item");
+                $("#removeResult").replaceWith('<div id="removeResult"></div>');
+                $("#removeFromBundleForm").attr("action", "/api/v1/items/" + item_id + "/bundled_items/");
+                $("#rm_external_id").focus();
+                bundle_changed = 0;
+                bundle_form_active = item_id;
+            });
+
+            $("#removeFromBundleForm").submit(function (event) {
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                /* get the action attribute from the <form action=""> element */
+                var $form = $(this),
+                    url = $form.attr("action");
+
+                var barcode = $("#rm_external_id").val();
+
+                /* Fetch itemnumber using rm_external_id */
+                var itemReq = $.get(
+                    "/api/v1/items",
+                    {
+                        q: JSON.stringify({
+                            external_id: barcode,
+                        }),
+                    },
+                    null,
+                    "json"
+                );
+
+                var itemnumber;
+                itemReq.done(function (data) {
+                    if (data.length === 1) {
+                        itemnumber = data[0].item_id;
+
+                        /* Remove link using fetch itemnumber */
+                        var deleteReq = $.ajax(url + itemnumber, {
+                            type: "DELETE",
+                        });
+
+                        /* Report the results */
+                        deleteReq.done(function (data) {
+                            var barcode = $("#rm_external_id").val();
+                            $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-success">' + _("Success: Removed '%s'").format(barcode) + "</div>");
+                            $("#rm_external_id").val("").focus();
+                            bundle_changed = 1;
+                        });
+                        deleteReq.fail(function (data) {
+                            var barcode = $("#rm_external_id").val();
+                            if (data.status === 409) {
+                                var response = data.responseJSON;
+                                if (response.error_code === "bundle_checked_out") {
+                                    $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-danger">' + _("Failure: Bundle is currently checked out") + "</div>");
+                                } else if (response.key === "PRIMARY") {
+                                    $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-warning">' + _("Warning: Item '%s' already attached").format(barcode) + "</div>");
+                                } else {
+                                    $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-danger">' + _("Failure: Item '%s' belongs to another bundle").format(barcode) + "</div>");
+                                }
+                            } else if (data.status === 404) {
+                                $("#addResult").replaceWith('<div id="addResult" class="alert alert-danger">' + _("Failure: Item '%s' not found").format(barcode) + "</div>");
+                            } else {
+                                $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-danger">' + _("Failure: Check the logs for details") + "</div>");
+                            }
+                            $("#rm_external_id").val("").focus();
+                        });
+                    } else {
+                        $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-danger">' + _("Failed: Barcode matched more than one item '%s'").format(barcode) + "</div>");
+                    }
+                });
+                itemReq.fail(function (data) {
+                    $("#removeResult").replaceWith('<div id="removeResult" class="alert alert-danger">' + _("Failed: Item not found '%s'").format(barcode) + "</div>");
+                    $("#rm_external_id").val("").focus();
+                });
+            });
+
+            $("#removeFromBundleModal").on("hidden.bs.modal", function (e) {
+                if (bundle_changed) {
+                    $("#bundle_table_" + bundle_form_active)
+                        .DataTable({ retrieve: true })
+                        .ajax.reload();
+                }
+                bundle_form_active = 0;
+                bundle_changed = 0;
+            });
+            // End bundle handling
+        }
+    </script>
+ [% IF Koha.Preference('AcquisitionDetails') %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                var acquisitiondetails_table = $("#orders").kohaTable(
+                    {
+                        dom: 'C<"top pager"ilpfB><"#filter_c">tr<"bottom pager"ip>',
+                        paging: false,
+                        autoWidth: false,
+                        order: [[4, "desc"]],
+                    },
+                    acquisitiondetails_table_settings
+                );
+            });
+        </script>
+ [% END %]
+
+ [% IF suggestions.count %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                $("#suggestions").kohaTable({
+                    pagingType: "full",
+                });
+            });
+        </script>
+ [% END %]
+
+ [% IF ( reviews ) %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                var comments_table = $("#comments_table").kohaTable(
+                    {
+                        paging: false,
+                        autoWidth: false,
+                        order: [[2, "desc"]],
+                    },
+                    comment_table_settings
+                );
+            });
+        </script>
+ [% END %]
+
+ [% IF found1 && Koha.Preference('RetainCatalogSearchTerms') %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                var search_index = localStorage.getItem("cat_search_pulldown_selection");
+                var search_value = localStorage.getItem("searchbox_value");
+                if (search_index) {
+                    $("#cat-search-block select.advsearch").val(search_index);
+                }
+                if (search_value) {
+                    $("#cat-search-block #search-form").val(search_value);
+                }
+            });
+        </script>
+ [% END %]
+
+ [% IF Koha.Preference('EnableItemGroups') %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            // Load item groups table
+            var itemGroupsTable = $("#items-group-table").kohaTable({
+                autoWidth: false,
+                dom: '<"top pager"ilp>t<"bottom pager"ip>r',
+                columns: [
+                    {
+                        data: "display_order",
+                        title: _("Hiển thị đơn hàng"),
+                        searchable: true,
+                        orderable: true,
+                    },
+                    {
+                        data: "description",
+                        title: _("Thông tin mô tả"),
+                        searchable: true,
+                        orderable: true,
+                    },
+                    {
+                        data: function (oObj) {
+                            if (Koha.permissions.CAN_user_editcatalogue_manage_item_groups) {
+                                return (
+                                    `<button class='item-group-edit btn btn-default btn-xs' data-item-group-id='${oObj.item_group_id}'>
+                                    <i class="fa-solid fa-pencil" aria-hidden="true"></i> ${_("Sửa")}
+                                </button>` +
+                                    "&nbsp" +
+                                    `<button class='item-group-delete btn btn-default btn-xs' data-item-group-id='${oObj.item_group_id}'>
+                                    <i class='fa fa-trash-can'></i> ${"Delete"}
+                                </button>`
+                                );
+                            } else {
+                                return "";
+                            }
+                        },
+                        searchable: false,
+                        orderable: false,
+                    },
+                ],
+                paging: false,
+                ajax: { url: `/api/v1/biblios/${biblionumber}/item_groups?_per_page=-1` },
+            });
+
+            // Create new item groups
+            $(".item-group-create").on("click", function () {
+                $("#modal-item-group-create-form-description").val("");
+                $("#modal-item-group-create-submit").removeAttr("disabled");
+                $("#modal-item-group-create").modal("show");
+            });
+
+            $("#modal-item-group-create-form").validate({
+                submitHandler: function (form) {
+                    $.ajax({
+                        url: `/api/v1/biblios/${biblionumber}/item_groups`,
+                        headers: { "x-koha-embed": "items" },
+                        success: function (item_groups) {
+                            $("#modal-item-group-create-submit").attr("disabled", "disabled");
+
+                            var settings = {
+                                url: `/api/v1/biblios/${biblionumber}/item_groups`,
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                data: JSON.stringify({
+                                    description: $("#modal-item-group-create-form-description").val(),
+                                    display_order: $("#modal-item-group-create-form-display_order").val(),
+                                }),
+                            };
+
+                            $.ajax(settings)
+                                .done(function (response) {
+                                    $("#item-group-add-form-select").append(
+                                        $("<option>", {
+                                            value: response.item_group_id,
+                                            text: response.description,
+                                        })
+                                    );
+
+                                    $("#modal-item-group-create").modal("hide");
+                                    if (item_groups.length == 0) {
+                                        // This bib has no previous item groups, reload the page
+                                        window.location.replace(`/cgi-bin/koha/catalogue/detail.pl?biblionumber=${biblionumber}`);
+                                    } else {
+                                        // Has other item groups, just reload the table
+                                        itemGroupsTable.api().ajax.reload();
+                                    }
+                                })
+                                .fail(function (err) {
+                                    var message = err.responseJSON.error;
+                                    alert(message);
+                                });
+                        },
+                    });
+                },
+            });
+
+            $("#modal-item-group-create").on("shown.bs.modal", function () {
+                $("#modal-item-group-create-form-description").focus();
+            });
+
+            // Edit existing item groups
+            $("body").on("click", ".item-group-edit", function () {
+                const item_group_id = $(this).data("item-group-id");
+                const url = `/api/v1/biblios/${biblionumber}/item_groups/${item_group_id}`;
+                $.get(url, function (data) {
+                    $("#modal-item-group-edit-form-description").val(data.description);
+                    $("#modal-item-group-edit-form-display_order").val(data.display_order);
+                    $("#modal-item-group-edit-submit").data("item-group-id", item_group_id);
+                    $("#modal-item-group-edit-submit").removeAttr("disabled");
+                    $("#modal-item-group-edit").modal("show");
+                });
+            });
+
+            $("#modal-item-group-edit-form").validate({
+                submitHandler: function (form) {
+                    $("#modal-item-group-edit-submit").attr("disabled", "disabled");
+
+                    const item_group_id = $("#modal-item-group-edit-submit").data("item-group-id");
+                    const url = `/api/v1/biblios/${biblionumber}/item_groups/${item_group_id}`;
+
+                    var settings = {
+                        url: url,
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        data: JSON.stringify({
+                            description: $("#modal-item-group-edit-form-description").val(),
+                            display_order: $("#modal-item-group-edit-form-display_order").val(),
+                        }),
+                    };
+
+                    $.ajax(settings)
+                        .done(function (response) {
+                            $("#modal-item-group-edit").modal("hide");
+                            itemGroupsTable.api().ajax.reload();
+                        })
+                        .fail(function (err) {
+                            var message = err.responseJSON.error;
+                            alert(message);
+                        });
+                },
+            });
+
+            $("#modal-item-group-edit").on("shown.bs.modal", function () {
+                $("#modal-item-group-edit-form-description").focus();
+            });
+
+            // Delete existing item groups
+            $("body").on("click", ".item-group-delete", function () {
+                const item_group_id = $(this).data("item-group-id");
+                $("#modal-item-group-delete-submit").data("item-group-id", item_group_id);
+                $("#modal-item-group-delete-submit").removeAttr("disabled");
+                $("#modal-item-group-delete").modal("show");
+            });
+            $("#modal-item-group-delete-submit").on("click", function () {
+                $("#modal-item-group-delete-submit").attr("disabled", "disabled");
+                const item_group_id = $("#modal-item-group-delete-submit").data("item-group-id");
+
+                $.ajax({
+                    url: `/api/v1/biblios/${biblionumber}/item_groups/${item_group_id}`,
+                    headers: { "x-koha-embed": "items" },
+                    success: function (item_group_data) {
+                        $.ajax({
+                            url: `/api/v1/biblios/${biblionumber}/item_groups/${item_group_id}`,
+                            method: "DELETE",
+                        })
+                            .done(function (response) {
+                                $("#modal-item-group-delete").modal("hide");
+                                $(`#item-group-add-form-select option[value='${item_group_id}']`).remove();
+                                if (item_group_data.items === null) {
+                                    // No items for this item group, we can just refresh the table
+                                    itemGroupsTable.api().ajax.reload();
+                                } else {
+                                    // This item group had items attached to it, we need to reload the page
+                                    window.location.replace(`/cgi-bin/koha/catalogue/detail.pl?biblionumber=${biblionumber}`);
+                                }
+                            })
+                            .fail(function (err) {
+                                var message = err.responseJSON.error;
+                                alert(message);
+                            });
+                    },
+                });
+            });
+
+            // Add item(s) to a item group
+            $(".itemselection_action_item_group_set").on("click", function () {
+                $("#modal-item-group-set").modal("show");
+            });
+
+            $("#modal-item-group-set-form").validate({
+                submitHandler: function (form) {
+                    $("#modal-item-group-set-submit").attr("disabled", "disabled");
+
+                    const item_group_id = $("#item-group-add-form-select").val();
+
+                    let itemnumbers = new Array();
+                    $("input[name='itemnumber'][type='checkbox']:checked").each(function () {
+                        const itemnumber = $(this).val();
+                        itemnumbers.push(itemnumber);
+                    });
+                    if (itemnumbers.length > 0) {
+                        let url = "/cgi-bin/koha/catalogue/detail.pl?op=set_item_group";
+                        url += "&itemnumber=" + itemnumbers.join("&itemnumber=");
+                        url += "&biblionumber=" + biblionumber;
+                        url += `&item_group_id=${item_group_id}`;
+
+                        window.location.replace(url);
+                    }
+
+                    $("#modal-item-group-set").modal("hide");
+                },
+            });
+
+            // Remove item(s) from an item group
+            $(".itemselection_action_item_group_unset").on("click", function () {
+                $("#modal-item-group-unset").modal("show");
+            });
+
+            $("#modal-item-group-unset-submit").on("click", function () {
+                $("#modal-item-group-unset-submit").attr("disabled", "disabled");
+
+                let itemnumbers = new Array();
+                $("input[name='itemnumber'][type='checkbox']:checked").each(function () {
+                    const itemnumber = $(this).val();
+                    itemnumbers.push(itemnumber);
+                });
+                if (itemnumbers.length > 0) {
+                    let url = "/cgi-bin/koha/catalogue/detail.pl?op=unset_item_group";
+                    url += "&itemnumber=" + itemnumbers.join("&itemnumber=");
+                    url += "&biblionumber=" + biblionumber;
+
+                    window.location.replace(url);
+                }
+
+                $("#modal-item-group-unset").modal("hide");
+            });
+        </script>
+ [% END # /IF EnableItemGroups %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(".delete-comment").on("click", function () {
+            return confirm(_("Are you sure you want to delete this comment?"));
+        });
+
+        specific_dt_errors = _("Have a look at the 'Audit' button in the toolbar");
+    </script>
+ [% CoverImagePlugins | $raw %]
+[% END # /jsinclude %]
+[% INCLUDE 'intranet-bottom.inc' %]

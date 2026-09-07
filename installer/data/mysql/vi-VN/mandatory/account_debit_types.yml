@@ -1,0 +1,112 @@
+---
+description:
+- Debit types used in Koha
+tables:
+- account_debit_types:
+    multiline: []
+    rows:
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: ACCOUNT
+      default_amount: ~
+      description: Phí tạo tài khoản
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: ACCOUNT_RENEW
+      default_amount: ~
+      description: Phí gia hạn tài khoản
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: ARTICLE_REQUEST
+      default_amount: ~
+      description: Phí yêu cầu đặt bài báo
+      is_system: '1'
+    - can_be_invoiced: '1'
+      can_be_sold: '0'
+      code: LOST
+      default_amount: ~
+      description: Lost item
+      is_system: '1'
+    - can_be_invoiced: '1'
+      can_be_sold: '0'
+      code: MANUAL
+      default_amount: ~
+      description: Phí thủ công
+      is_system: '0'
+    - can_be_invoiced: '1'
+      can_be_sold: '0'
+      code: NEW_CARD
+      default_amount: ~
+      description: New card fee
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: OVERDUE
+      default_amount: ~
+      description: Overdue fine
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: PROCESSING
+      default_amount: ~
+      description: Phí xử lý vật phẩm bị mất
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: PAYOUT
+      default_amount: ~
+      description: Khoản thanh toán từ thư viện cho người dùng
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: RENT
+      default_amount: ~
+      description: Phí mượn tài liệu
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: RENT_DAILY
+      default_amount: ~
+      description: Phí thuê theo ngày
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: RENT_DAILY_RENEW
+      default_amount: ~
+      description: Gia hạn tài liệu thuê theo ngày
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: RENT_RENEW
+      default_amount: ~
+      description: Gia hạn mục thuê
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: RESERVE
+      default_amount: ~
+      description: Hold fee
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: RESERVE_EXPIRED
+      default_amount: ~
+      description: Yêu cầu đặt đã chờ quá hạn
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: VOID
+      default_amount: ~
+      description: Khoản tín dụng đã bị hủy
+      is_system: '1'
+    - can_be_invoiced: '0'
+      can_be_sold: '0'
+      code: CASHUP_DEFICIT
+      default_amount: ~
+      description: Cash register deficit found during cashup
+      is_system: '1'
+      restricts_checkouts: '0'
+    translatable:
+    - description

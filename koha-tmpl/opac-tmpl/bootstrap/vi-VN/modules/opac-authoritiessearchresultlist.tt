@@ -1,0 +1,138 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% PROCESS 'opac-authorities.inc' %]
+[% PROCESS 'authorities-search-results.inc' %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Results") | html %]
+ &rsaquo; [% t("Authority search") | html %] &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-authoritiesresultlist' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-authorities-home.pl">Tìm kiếm dữ liệu kiểm soát</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Kết quả</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ [% column_class = "col-10 order-first order-md-first order-lg-2" %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+ </div>
+ [% END %]
+ <div class="[% column_class | html %]">
+ <div id="userauthsearchresults" class="maincontent">
+ <h1>Kết quả tìm kiếm dữ liệu kiểm soát định danh</h1>
+
+ [% IF total %]
+ <div class="pages" id="pagination_top"> [% pagination_bar | $raw %] </div>
+ [% END %]
+ <div id="results">
+ [% IF ( total ) %]
+ [% IF ( countfuzzy ) %]
+ <p><strong>Hiển thị [% resultcount | html %] trong tổng số khoảng [% total | html %] kết quả</strong></p>
+ [% ELSE %]
+ <p><strong>Kết quả từ [% from | html %] đến [% to | html %] trong tổng số [% total | html %]</strong></p>
+ [% END %] [% ELSE %] Không tìm thấy kết quả nào. [% END %] </div>
+
+ [% IF ( total ) %]
+ <div class="searchresults">
+ <table class="table table-bordered table-striped">
+ <caption class="visually-hidden">Kết quả tìm kiếm dữ liệu kiểm soát định danh</caption>
+ <thead>
+ <tr>
+ <th>Các tiêu đề kiểm soát định danh</th>
+ <th></th>
+ <th>Loại tiêu đề</th>
+ [% UNLESS ( isEDITORS ) %]
+ <th>Biểu ghi</th>
+ [% END %]
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH line IN result %]
+ <tr>
+ <td>
+ [% IF line.html %]
+ [% line.html | $raw %]
+ [% ELSE %]
+ [% PROCESS authresult summary=line.summary authid=line.authid %]
+ [% END %]
+ </td>
+ <td><a href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% line.authid | uri %]">Chi tiết</a> </td><td>[% line.authtype | html %]</td>
+ [% UNLESS ( line.isEDITORS ) %]
+ <td>
+ [% IF line.used > 0 %]
+ <a href="/cgi-bin/koha/opac-search.pl?type=opac&amp;op=do_search&amp;q=an,phr:[% line.authid | uri %]">[% line.used | html %] [% tn('record', 'records', line.used ) | html %]</a>
+ [% ELSE %] 0 biểu ghi [% END %] </td>
+ [% END %]
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- / .searchresults -->
+
+ <div class="pages" id="pagination_bottom"> [% pagination_bar | $raw %] </div>
+ [% END # / IF total %]
+ </div>
+ <!-- / #userauthsearchresults -->
+ </div>
+ <!-- / .col-lg-10/12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        Koha.addPrefs({
+            OPACTableColExpandedByDefault: [% Koha.Preference('OPACTableColExpandedByDefault') ? 1 : 0 | html %],
+        });
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
+            $(".table").kohaTable({
+                searching: false,
+                paging: false,
+                info: false,
+                responsive: {
+                    details: {
+                        display: responsive_display,
+                        type: "column",
+                        target: -1,
+                    },
+                },
+                columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+            });
+        });
+    </script>
+[% END %]

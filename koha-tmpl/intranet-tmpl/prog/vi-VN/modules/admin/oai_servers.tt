@@ -1,0 +1,269 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE I18N %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+[% PROCESS 'i18n.inc' %]
+
+<title>
+ [% IF op == 'edit_form' %]
+ Modify OAI repository [% server.servername | html %] &rsaquo;
+ [% END %]
+
+ [% IF op ==  'add_form' %]
+ New OAI repository &rsaquo;
+ [% END %]
+ OAI repositories &rsaquo; Administration &rsaquo; Koha
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="admin_oai_servers" class="admin">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'oai-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+ [% END %]
+
+ [% IF op == 'edit_form' || op == 'add_form' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/oai_servers.pl">OAI repositories</a>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'edit_form' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Modify OAI repository [% server.servername | html %]</span>
+ [% END %]
+ [% ELSIF op == 'add_form' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>New OAI repository</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>OAI repositories</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+
+ [% IF msg_deleted %]
+ <div class="alert alert-warning">OAI repository deleted ([% msg_add | html %])</div>
+ [% ELSIF msg_updated %]
+ <div class="alert alert-info">OAI repository updated ([% msg_add | html %])</div>
+ [% ELSIF msg_added %]
+ <div class="alert alert-info">OAI repository added ([% msg_add | html %])</div>
+ [% ELSIF msg_notfound %]
+ <div class="alert alert-warning">Error: Server with ID [% msg_add | html %] not found</div>
+ [% END %]
+
+ [% IF op == 'edit_form' || op == 'add_form' %]
+ <form action="/cgi-bin/koha/admin/oai_servers.pl" name="Aform" method="post" id="serverentry">
+ [% INCLUDE 'csrf-token.inc' %]
+ [% IF op == 'edit_form' %]
+ <h1>Modify OAI repository</h1>
+ <input type="hidden" name="id" value="[% server.oai_server_id | html %]" />
+ [% ELSE %]
+ <h1>New OAI repository</h1>
+ [% END %]
+
+ <input type="hidden" name="op" value="cud-add_validated" />
+ <fieldset class="fg">
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="servername" class="required">Repository name: </label>
+ </div>
+ <div class="fg-input">
+ [% IF server.servername %]
+ <input type="text" name="servername" id="servername" size="65" maxlength="100" value="[% server.servername | html %]" required="required" />
+ [% ELSE %]
+ <input type="text" name="servername" id="servername" class="focus" size="65" maxlength="100" value="[% server.servername | html %]" required="required" />
+ [% END %]
+ </div>
+ <div class="required">Bắt buộc</div>
+ </div>
+
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="endpoint" class="required">Endpoint: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="endpoint" id="endpoint" size="30" value="[% server.endpoint | html %]" required="required" />
+ </div>
+ <div class="required">Bắt buộc</div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="oai_set">[% I18N.tp('OAI', 'Set:') | html %] </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="oai_set" id="oai_set" value="[% server.oai_set | html %]" />
+ </div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="dataformat">Data format: </label>
+ </div>
+ <div class="fg-input">
+ <select name="dataformat" id="dataformat">
+ <option value="oai_dc">Dublin Core (oai_dc)</option>
+ <option value="marc-xml">Marcxml (marc-xml)</option>
+ <option value="marcxml">Marcxml (marcxml)</option>
+ </select>
+ </div>
+ <div class="hint">OAI can send records in various formats. Choose one.</div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="recordtype">Kiểu biểu ghi: </label>
+ </div>
+ <div class="fg-input">
+ <select name="recordtype" id="recordtype">
+ <option value="biblio">Biểu ghi thư mục</option>
+ <option value="authority">Biểu ghi chuẩn</option>
+ </select>
+ </div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="add_xslt">XSLT file for transforming results: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="add_xslt" id="add_xslt" size="100" placeholder="[% xslt_path | html %]" value="[% server.add_xslt | html %]" />
+ </div>
+ </div>
+ </fieldset>
+
+ <fieldset class="action"> <input class="btn btn-primary" type="submit" value="Lưu" /> <a class="cancel" href="/cgi-bin/koha/admin/oai_servers.pl">Hủy bỏ</a> </fieldset>
+ </form>
+ [% END %]
+
+ [% IF op == 'list' %]
+ <div id="toolbar" class="btn-toolbar">
+ <a id="newserver" class="btn btn-default" href="/cgi-bin/koha/admin/oai_servers.pl?op=add_form"><i class="fa fa-plus"></i> New OAI repository</a>
+ </div>
+ <h1>OAI repositories</h1>
+ [% IF id %]
+ <span>You searched for record [% id | html %]</span>
+ [% ELSIF searchfield %]
+ <span>You searched for [% searchfield | html %]</span>
+ [% END %]
+
+ <div class="page-section">
+ <table id="serverst">
+ <thead
+                    ><tr><th>Mã</th><th>Repository name</th><th>Endpoint</th><th>[% tp('OAI', 'Set') | html %]</th><th>Data format</th><th>Kiểu biểu ghi</th><th class="no-export no-sort">Thao tác</th> </tr></thead
+                >
+ <tbody>
+ [% FOREACH loo IN loop %]
+ <tr>
+ <td>[% loo.oai_server_id | html %]</td>
+ <td><a href="/cgi-bin/koha/admin/oai_servers.pl?op=edit_form&amp;id=[% loo.oai_server_id | uri %]">[% loo.servername | html %]</a></td
+                            ><td>[% loo.endpoint | html %]</td><td>[% loo.oai_set | html %]</td>
+ <td>[% loo.dataformat | html %]</td>
+ <td
+                                >[% IF ( loo.recordtype == 'biblio' ) %]
+ <span>Biểu ghi thư mục</span>
+ [% ELSIF ( loo.recordtype == 'authority' ) %]
+ <span>Biểu ghi chuẩn</span>
+ [% END %]
+ </td>
+ <td>
+ <div class="btn-group dropup">
+ <a class="btn btn-default btn-xs dropdown-toggle" id="reportactions[% savedreport.id | html %]" role="button" data-bs-toggle="dropdown" href="#"> Thao tác </a>
+ <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="reportactions[% savedreport.id | html %]">
+ <li
+                                            ><a class="dropdown-item" href="/cgi-bin/koha/admin/oai_servers.pl?op=edit_form&amp;id=[% loo.oai_server_id | uri %]"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a></li
+                                        >
+ <li
+                                            ><a class="dropdown-item" href="/cgi-bin/koha/admin/oai_servers.pl?op=add_form&amp;id=[% loo.oai_server_id | uri %]"><i class="fa fa-copy"></i> Sao chép</a></li
+                                        >
+ <li>
+ <a href="#" class="dropdown-item delete" data-formid="server_row_[% loo.oai_server_id | uri %]" data-servername="[% loo.servername | html %]"><i class="fa fa-trash-can"></i> Xóa</a>
+ <form id="server_row_[% loo.oai_server_id | uri %]" action="/cgi-bin/koha/admin/oai_servers.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete_confirmed" />
+ <input type="hidden" name="id" value="[% loo.oai_server_id | uri %]" />
+ </form>
+ </li>
+ </ul>
+ </div>
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/admin-menu.js") | $raw %]
+ [% IF op == 'list' %]
+ [% INCLUDE 'datatables.inc' %]
+ [% END %]
+ [% IF server %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+            const server = {
+                dataformat: "[% server.dataformat | html %]",
+                recordtype: "[% server.recordtype | html %]",
+            };
+        </script>
+ [% END %]
+ [% IF op == 'edit_form' || op == 'add_form' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                // Update selects for dataformat and recordtype
+                // FIXME Do not do this in JS!
+                if (typeof server !== "undefined") {
+                    $("#dataformat").val(server.dataformat);
+                    $("#recordtype").val(server.recordtype);
+                }
+                $("#serverentry").validate({
+                    rules: {
+                        servername: { required: true },
+                        host: { required: true },
+                        port: {
+                            number: true,
+                        },
+                        rank: { number: true },
+                    },
+                });
+                $("#serverentry").submit(function (event) {
+                    // enable recordtype to include field in post
+                    $("#recordtype").prop("disabled", false);
+                });
+                $("#servername").on("blur", function () {
+                    toUC(this);
+                });
+            });
+        </script>
+ [% ELSE %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+            $(document).ready(function () {
+                $("#serverst").kohaTable({
+                    pagingType: "full",
+                });
+                $(".delete").on("click", function (e) {
+                    var servername = $(this).data("servername");
+                    let formid = $(this).data("formid");
+                    if (confirm(_("Are you sure you want to delete repository %s?").format(servername))) {
+                        $("#" + formid).submit();
+                        return true;
+                    } else {
+                        e.preventDefault();
+                    }
+                });
+            });
+        </script>
+ [% END %]
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

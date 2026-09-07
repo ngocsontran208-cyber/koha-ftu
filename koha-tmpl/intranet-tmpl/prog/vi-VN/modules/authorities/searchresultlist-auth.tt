@@ -1,0 +1,170 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% PROCESS 'authorities-search-results.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Cataloging authority plugin") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% Asset.css("css/addbiblio.css") | $raw %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    .usefor {
+        padding: 0;
+        margin: 0;
+    }
+    .usefor li {
+        list-style-type: none;
+    }
+</style>
+</head>
+
+[% BLOCK result_page_numbers %]
+ <div class="resultnumber clearfix">
+ <nav>
+ <ul class="pagination">
+ [% IF ( displayprev ) %]
+ <li class="page-item">
+ <a
+                            class="page-link"
+                            href="auth_finder.pl?startfrom=[% startfromprev | uri %]&amp;authtypecode=[% authtypecode | uri %][% FOREACH searchdat IN searchdata %]&amp;[% searchdat.term | uri %]=[% searchdat.val | uri %][% END %]&amp;op=do_search&amp;type=intranetamp;&amp;index=[% index | uri %]&amp;tagid=[% tagid | uri %]&amp;orderby=[% orderby | uri %]&amp;source=[% source | uri %]"
+                        >
+ <i class="fa fa-fw fa-angle-left"></i> Previous
+ </a>
+ </li>
+ [% END %]
+ [% FOREACH number IN numbers %]
+ [% IF ( number.highlight ) %]
+ <li class="page-item active"> <a class="page-link" href="#">[% number.number | html %]</a> </li>
+ [% ELSE %]
+ <li class="page-item">
+ <a
+                                class="page-link"
+                                href="auth_finder.pl?startfrom=[% number.startfrom | uri %]&amp;authtypecode=[% authtypecode | uri %][% FOREACH searchdat IN number.searchdata %]&amp;[% searchdat.term | uri %]=[% searchdat.val | uri %][% END %]&amp;op=do_search&amp;type=intranet&amp;index=[% index | uri %]&amp;tagid=[% tagid | uri %]&amp;orderby=[% orderby | uri %]&amp;source=[% source | uri %]"
+                            >
+ [% number.number | html %]</a
+                            >
+ </li>
+ [% END %]
+ [% END %]
+ [% IF ( displaynext ) %]
+ <li class="page-item">
+ <a
+                            class="page-link"
+                            href="auth_finder.pl?startfrom=[% startfromnext | uri %]&amp;authtypecode=[% authtypecode | uri %][% FOREACH searchdat IN searchdata %]&amp;[% searchdat.term | uri %]=[% searchdat.val | uri %][% END %]&amp;op=do_search&amp;type=intranet&amp;index=[% index | uri %]&amp;tagid=[% tagid | uri %]&amp;orderby=[% orderby | uri %]&amp;source=[% source | uri %]"
+                        >
+ Tiếp <i class="fa fa-fw fa-angle-right"></i>
+ </a>
+ </li>
+ [% END %]
+ </ul>
+ </nav>
+ </div>
+[% END %]
+
+<body id="auth_searchresultlist_auth" class="auth">
+[% WRAPPER 'main-container.inc' %]
+ <h1>Kết quả tìm kiếm dữ liệu kiểm soát định danh</h1>
+ [% INCLUDE 'auth-finder-search.inc' %]
+ [% IF ( result ) %]
+ <p><strong>Kết quả từ [% from | html %] đến [% to | html %] trong tổng số [% total | html %]</strong></p>
+ [% PROCESS 'result_page_numbers' %]
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>Không tìm thấy kết quả phù hợp</p>
+ </div>
+ [% END %]
+
+ [% IF ( result ) %]
+ <div id="resultlist" class="page-section">
+ <table>
+ <tr>
+ <th>Tóm tắt</th>
+ <th>Heading type</th>
+ <th>Được sử dụng</th>
+ [% IF Koha.Preference('ShowHeadingUse') %]
+ <th class="heading_use">Heading use</th>
+ [% END %]
+ <th>Nhận!</th>
+ <th>Thao tác khác</th>
+ </tr>
+ [% FOREACH line IN result %]
+ <tr>
+ <td>
+ [% IF line.html %]
+ [% line.html | $raw %]
+ [% ELSE %]
+ [% PROCESS authresult summary=line.summary authid=line.authid auth_preview=1 %]
+ [% END %]
+ </td>
+ <td>[% line.summary.label | html %]</td>
+ <td>
+ [% IF line.used > 0 %]
+ <a href="/cgi-bin/koha/catalogue/search.pl?type=intranet&amp;op=do_search&amp;idx=an,phr&amp;q=[% line.authid | uri %]" class="button">Được sử dụng [% line.used | html %] lần</a>
+ [% ELSE %]
+ 0 times
+ [% END %]
+ </td>
+ [% IF Koha.Preference('ShowHeadingUse') %]
+ <td class="heading_use"
+                                ><ul class="usefor">
+ <li>[% IF line.main %]<i class="fa fa-check"></i>[% ELSE %]<i class="fa fa-times"></i>[% END %] Main/Added Entry</li>
+ <li>[% IF line.subject %]<i class="fa fa-check"></i>[% ELSE %]<i class="fa fa-times"></i>[% END %] Subject</li>
+ <li>[% IF line.series %]<i class="fa fa-check"></i>[% ELSE %]<i class="fa fa-times"></i>[% END %] Series Title</li>
+ </ul></td
+                            >
+ [% END %]
+ <td>
+ [% IF line.summary && line.summary.authorized && line.summary.authorized.size > 1 %]
+ [% FOREACH authorized IN line.summary.authorized %]
+ <a href="javascript:doauth('[% line.authid | uri %]', '[% index | uri %]', '[% loop.count | uri %]')" title="[% authorized.heading | html %]">[% loop.count | html %]</a>
+ [% END %]
+ [% ELSE %]
+ <a class="btn btn-xs btn-default" href="javascript:doauth('[% line.authid | html %]', '[% index | html %]', '')"><i class="fa fa-plus"></i> Chọn</a>
+ [% END %]
+ </td>
+ <td
+                            ><a class="btn btn-xs btn-default" href="authorities.pl?authid=[% line.authid | html %]"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa biểu ghi nhất quán</a></td
+                        >
+ </tr>
+ [% END %]
+ </table>
+ </div>
+ [% PROCESS 'result_page_numbers' %]
+ [% END %]
+[% END %]
+
+[% INCLUDE 'authority-detail-modal.inc' %]
+
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var index = "[% index | html %]";
+        var authtypecode = "[% authtypecode | html %]";
+        const searchType = "[% marclist | html %]";
+        const template_path = "[% interface | html %]/[% theme | html %]";
+        const source = "[% source | uri %]";
+    </script>
+ [% Asset.js("js/auth-finder-search.js") | $raw %]
+ [% Asset.js("js/authorities-detail-modal.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function jumpfull(page) {
+            window.open(page, "", "width=100,height=100,resizable=yes,toolbar=false,scrollbars=yes,top");
+        }
+        function doauth(authid, index, repet) {
+            if (source == "auth") {
+                var elem = document.getElementById("special_relationship");
+                var relationship = elem.options[elem.selectedIndex].value;
+                jumpfull("blinddetail-biblio-search.pl?authid=" + authid + "&index=" + index + "&repet=" + repet + "&source=" + source + "&relationship=" + relationship);
+            } else {
+                jumpfull("blinddetail-biblio-search.pl?authid=" + authid + "&index=" + index + "&repet=" + repet + "&source=" + source);
+            }
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' popup_window = 1 %]

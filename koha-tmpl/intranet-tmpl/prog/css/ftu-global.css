@@ -1,0 +1,1067 @@
+/* ================================================================
+   FTU GLOBAL CSS – Đồng bộ toàn hệ thống Koha Staff Interface
+   Thư viện Phân hiệu Trường Đại học Ngoại thương
+   Áp dụng: doc-head-close.inc → tất cả trang
+   ================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+
+/* ── CSS Variables ── */
+:root {
+    --ftu-red:         #b91c1c;
+    --ftu-red-dark:    #7f1d1d;
+    --ftu-red-mid:     #991b1b;
+    --ftu-red-light:   #fef2f2;
+    --ftu-red-border:  #fecaca;
+    --ftu-white-85:    rgba(255,255,255,0.85);
+    --ftu-white-12:    rgba(255,255,255,0.12);
+}
+
+/* ── Global font – tăng cỡ chữ cơ sở ── */
+html { font-size: 15.5px !important; }
+body {
+    font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif !important;
+    font-size: 0.95rem !important;
+    background-color: #f3f4f6;
+    line-height: 1.55;
+}
+
+/* ================================================================
+   ẨN HOÀN TOÀN: Koha nav + Quick Actions Bar (global)
+   ================================================================ */
+nav.navbar,
+#header_search,
+.sub-header-search { display: none !important; }
+
+/* ================================================================
+   FTU UNIFIED HEADER – Toàn cục (từ header.inc)
+   ================================================================ */
+#ftu-header-unified {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, var(--ftu-red-dark) 0%, var(--ftu-red-mid) 45%, var(--ftu-red) 100%);
+    height: 56px;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+    width: 100%;
+}
+
+/* Brand block */
+#ftu-hd-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0 1.1rem 0 0.85rem;
+    border-right: 1px solid rgba(255,255,255,0.14);
+    height: 100%;
+    min-width: 255px;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+#ftu-hd-logo-link { display: flex; align-items: center; flex-shrink: 0; }
+#ftu-hd-logo {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    filter: none !important;
+}
+#ftu-hd-titles { display: flex; flex-direction: column; line-height: 1; gap: 0.2rem; }
+#ftu-hd-title { font-size: 0.92rem; font-weight: 800; color: #fff; white-space: nowrap; letter-spacing: 0.01em; }
+#ftu-hd-sub   { font-size: 0.7rem; color: rgba(255,255,255,0.65); white-space: nowrap; }
+
+/* Nav links */
+#ftu-hd-nav {
+    display: flex; align-items: center; flex: 1;
+    height: 100%; padding: 0 0.25rem; gap: 0; overflow: visible;
+}
+.ftu-nav-link {
+    display: inline-flex; align-items: center; gap: 0.42rem;
+    color: rgba(255,255,255,0.88); text-decoration: none;
+    font-family: 'Be Vietnam Pro', sans-serif; font-size: 0.88rem; font-weight: 500;
+    padding: 0 0.9rem; height: 100%; white-space: nowrap;
+    transition: background 0.14s, color 0.14s;
+    background: none; border: none; cursor: pointer; line-height: 1;
+}
+.ftu-nav-link:hover, .ftu-nav-link:focus { background: rgba(255,255,255,0.11); color: #fff; }
+.ftu-nav-link i { font-size: 0.82rem; }
+
+/* Dropdown */
+.ftu-nav-dropdown { position: relative; height: 100%; display: flex; align-items: center; }
+.ftu-nav-more { border-left: 1px solid rgba(255,255,255,0.12); }
+.ftu-dropdown-menu {
+    display: none;
+    position: absolute; top: 100%; left: 0;
+    background: #161616;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.38);
+    min-width: 185px; z-index: 2100; overflow: hidden;
+}
+.ftu-dropdown-menu.ftu-dropdown-right { left: auto; right: 0; min-width: 210px; }
+.ftu-dropdown-menu.open { display: block; animation: ftuDropIn 0.14s ease; }
+@keyframes ftuDropIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+.ftu-dropdown-menu a {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.65rem 1.1rem; font-size: 0.88rem;
+    color: rgba(255,255,255,0.85); text-decoration: none;
+    transition: background 0.1s;
+}
+.ftu-dropdown-menu a:hover { background: rgba(255,255,255,0.09); color: #fff; }
+.ftu-dropdown-menu a i { width: 16px; text-align: center; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+.ftu-dropdown-menu .ftu-logout { color: #fca5a5; }
+.ftu-dropdown-menu .ftu-logout:hover { background: rgba(239,68,68,0.14); color: #f87171; }
+.ftu-menu-divider { border: none; border-top: 1px solid rgba(255,255,255,0.09); margin: 0.3rem 0; }
+.ftu-user-info { padding: 0.7rem 1.1rem 0.5rem; display: flex; flex-direction: column; gap: 0.14rem; }
+.ftu-user-info strong { font-size: 0.9rem; color: #fff; }
+.ftu-user-info small  { font-size: 0.76rem; color: rgba(255,255,255,0.5); }
+
+/* Right section */
+#ftu-hd-right {
+    display: flex; align-items: center; gap: 0.5rem;
+    height: 100%; border-left: 1px solid rgba(255,255,255,0.14);
+    padding: 0 0.8rem; flex-shrink: 0;
+}
+#ftu-hd-clock { display: flex; flex-direction: column; align-items: flex-end; gap: 0.14rem; margin-right: 0.3rem; }
+#ftu-hd-date  { font-size: 0.82rem; color: rgba(255,255,255,0.9); font-weight: 500; white-space: nowrap; }
+#ftu-hd-status {
+    display: flex; align-items: center; gap: 0.3rem;
+    font-size: 0.68rem; color: rgba(255,255,255,0.55);
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+.ftu-live-dot {
+    width: 6px; height: 6px; background: #4ade80; border-radius: 50%; flex-shrink: 0;
+    animation: ftuPulse 2s ease-in-out infinite;
+}
+@keyframes ftuPulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.72);} }
+.ftu-user-btn {
+    display: flex; align-items: center; gap: 0.48rem;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.17);
+    border-radius: 7px; padding: 0.38rem 0.8rem; cursor: pointer;
+    color: rgba(255,255,255,0.92); font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 0.86rem; font-weight: 500; transition: background 0.14s; white-space: nowrap;
+}
+.ftu-user-btn:hover { background: rgba(255,255,255,0.17); color: #fff; }
+.ftu-user-avatar {
+    width: 22px; height: 22px; background: rgba(255,255,255,0.18);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.64rem; flex-shrink: 0;
+}
+.ftu-caret { font-size: 0.6rem; opacity: 0.7; }
+
+/* ================================================================
+   SUB-HEADER – Breadcrumb
+   ================================================================ */
+#sub-header { background: #fff; border-bottom: 1px solid #e5e7eb; }
+#breadcrumbs {
+    background: #f9fafb; border-bottom: 1px solid #e5e7eb;
+    font-size: 0.88rem; padding: 0.45rem 1rem;
+}
+#breadcrumbs a { color: var(--ftu-red); text-decoration: none; }
+#breadcrumbs a:hover { text-decoration: underline; }
+
+/* ================================================================
+   BUTTONS-LIST – module link lists (circ-home, tools, members…)
+   ================================================================ */
+.buttons-list { padding:0; margin:0; display:flex; flex-direction:column; gap:0.4rem; }
+.buttons-list li { list-style:none; margin:0; }
+.buttons-list li a {
+    display:flex; align-items:center; gap:0.65rem;
+    background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:8px;
+    color:#111827; font-family:'Be Vietnam Pro',sans-serif; font-size:0.92rem; font-weight:600;
+    padding:0.65rem 1rem; text-decoration:none; transition:all 0.15s ease;
+}
+.buttons-list li a i { font-size:0.9rem; width:18px; text-align:center; color:#9ca3af; flex-shrink:0; }
+.buttons-list li a:hover { background:var(--ftu-red-light); border-color:var(--ftu-red); color:var(--ftu-red); text-decoration:none; transform:translateX(2px); }
+.buttons-list li a:hover i { color:var(--ftu-red); }
+
+/* ================================================================
+   GLOBAL UI TWEAKS
+   ================================================================ */
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: var(--ftu-red) !important; }
+.page-item.active .page-link { background-color:var(--ftu-red) !important; border-color:var(--ftu-red) !important; }
+.page-link { color:var(--ftu-red) !important; }
+.page-link:hover { color:var(--ftu-red-dark) !important; }
+.table-hover tbody tr:hover { background-color: var(--ftu-red-light); }
+*:focus-visible { outline-color: var(--ftu-red); }
+.btn-success { background-color:var(--ftu-red) !important; border-color:var(--ftu-red-dark) !important; color:#fff !important; }
+.btn-success:hover, .btn-success:focus { background-color:var(--ftu-red-dark) !important; }
+
+/* ================================================================
+   CIRCULATION HOME – body#circ_circulation-home
+   ================================================================ */
+body#circ_circulation-home { background: #f3f4f6; }
+body#circ_circulation-home h1 {
+    font-size:1rem; font-weight:700; color:var(--ftu-red);
+    border-left:3px solid var(--ftu-red); padding:0.4rem 0 0.4rem 0.85rem;
+    margin:1.2rem 0 1rem; background:none;
+}
+body#circ_circulation-home h3 {
+    font-size:0.65rem; font-weight:700; color:#6b7280;
+    text-transform:uppercase; letter-spacing:0.09em; margin:0 0 0.65rem; border:none; background:none; padding:0;
+}
+body#circ_circulation-home h4 { font-size:0.72rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.06em; margin:1.4rem 0 0.6rem; }
+body#circ_circulation-home .circulation-actions,
+body#circ_circulation-home .holds-bookings,
+body#circ_circulation-home .transfers,
+body#circ_circulation-home .overdues,
+body#circ_circulation-home .recalls,
+body#circ_circulation-home .patron-request {
+    background:#fff; border-radius:12px; padding:1.1rem 1.1rem 0.8rem;
+    box-shadow:0 1px 3px rgba(0,0,0,.05); margin-bottom:1rem; border-top:3px solid var(--ftu-red);
+}
+body#circ_circulation-home .transfers    { border-top-color:#1d4ed8; }
+body#circ_circulation-home .overdues     { border-top-color:#b45309; }
+body#circ_circulation-home .recalls      { border-top-color:#7c3aed; }
+body#circ_circulation-home .patron-request { border-top-color:#059669; }
+body#circ_circulation-home .transfers .buttons-list li a:hover { background:#eff6ff; border-color:#1d4ed8; color:#1d4ed8; }
+body#circ_circulation-home .transfers .buttons-list li a:hover i { color:#1d4ed8; }
+body#circ_circulation-home .overdues .buttons-list li a:hover { background:#fffbeb; border-color:#b45309; color:#b45309; }
+body#circ_circulation-home .overdues .buttons-list li a:hover i { color:#b45309; }
+body#circ_circulation-home #offline-circulation {
+    background:#fff; border-radius:12px; padding:0.9rem 1.1rem;
+    box-shadow:0 1px 3px rgba(0,0,0,.05); border-top:3px solid #475569; margin-top:0.5rem;
+}
+body#circ_circulation-home #offline-circulation p { margin:0.15rem 0; }
+body#circ_circulation-home #offline-circulation a { font-size:0.8rem; color:#374151; text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; }
+body#circ_circulation-home #offline-circulation a:hover { color:var(--ftu-red); }
+
+/* ================================================================
+   KHỐI 1 – THANH ĐIỀU HƯỚNG (header.inc)
+   nav.navbar | #toplevelmenu | #user-menu | dropdown-menu-dark
+   ================================================================ */
+
+/* Main nav bar – gradient FTU đỏ */
+nav.navbar.bg-dark,
+nav.navbar[class*="bg-dark"] {
+    background: linear-gradient(90deg,
+        var(--ftu-red-dark) 0%,
+        var(--ftu-red-mid)  45%,
+        var(--ftu-red)      100%) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Nav links */
+nav.navbar .nav-link,
+nav.navbar .navbar-brand,
+nav.navbar .dropdown-toggle,
+nav.navbar #user-menu .nav-link {
+    color: var(--ftu-white-85) !important;
+    transition: background 0.15s, color 0.15s;
+}
+
+nav.navbar .nav-link:hover,
+nav.navbar .nav-link:focus,
+nav.navbar .dropdown-toggle:hover {
+    background: var(--ftu-white-12) !important;
+    color: #fff !important;
+    border-radius: 6px;
+}
+
+/* Koha logo → white */
+#logo img {
+    filter: brightness(0) invert(1);
+    height: 28px;
+}
+
+/* Dark dropdowns stay dark (already styled by Bootstrap) */
+.dropdown-menu.dropdown-menu-dark {
+    background-color: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.dropdown-menu.dropdown-menu-dark .dropdown-item {
+    color: rgba(255,255,255,0.82);
+    font-size: 0.82rem;
+}
+.dropdown-menu.dropdown-menu-dark .dropdown-item:hover {
+    background-color: rgba(255,255,255,0.08);
+    color: #fff;
+}
+.dropdown-menu.dropdown-menu-dark .dropdown-divider {
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* Logged-in label inside user menu */
+.loggedin-menu-label {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+    color: rgba(255,255,255,0.5) !important;
+}
+.loggedin-menu-label span { color: rgba(255,255,255,0.9) !important; }
+
+/* Highlight current section in nav (active link) */
+nav.navbar .nav-link.active,
+nav.navbar .nav-item.active > .nav-link {
+    background: rgba(255,255,255,0.18) !important;
+    color: #fff !important;
+    border-radius: 6px;
+}
+
+/* ================================================================
+   KHỐI 2 – QUICK ACTIONS BAR (home-search.inc / circ-search.inc)
+   #header_search | .form-title | .nav-tabs | submit button
+   ================================================================ */
+
+/* Container bar */
+#header_search {
+    background-color: var(--ftu-red) !important;
+    border-color: var(--ftu-red-dark) !important;
+    border-top: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Tab nav row (Check out | Check in | Renew | Search catalog) */
+#header_search ul,
+#header_search .nav-tabs {
+    background-color: var(--ftu-red) !important;
+}
+
+#header_search ul li { background: transparent; }
+
+/* Tab links */
+#header_search .nav-tabs > li > a,
+#header_search ul li a {
+    color: rgba(255,255,255,0.8) !important;
+    background-color: var(--ftu-red) !important;
+    border: 2px solid transparent !important;
+    border-radius: 4px 4px 0 0 !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    padding: 0 0.5em !important;
+    transition: background 0.15s, color 0.15s;
+}
+
+#header_search .nav-tabs > li > a.active,
+#header_search ul li a.active {
+    color: #fff !important;
+    border-bottom: 2px solid rgba(255,255,255,0.7) !important;
+    background-color: var(--ftu-red) !important;
+}
+
+#header_search .nav-tabs > li > a:hover,
+#header_search .nav-tabs > li > a:focus,
+#header_search ul li a:hover {
+    background-color: rgba(0,0,0,0.15) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    text-decoration: none;
+}
+
+/* Form title pill (ô nhãn "Check out") */
+#header_search .form-title {
+    background-color: var(--ftu-red-dark) !important;
+    border-radius: 0 !important;
+}
+#header_search .form-title label {
+    color: rgba(255,255,255,0.9) !important;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+/* Input field area */
+#header_search .form-content {
+    background-color: #fff;
+    border-radius: 0 4px 4px 0;
+}
+#header_search .form-content input[type=text],
+#header_search .form-content input[type=search],
+#header_search .form-content select {
+    font-size: 0.9rem;
+    color: #111827;
+}
+#header_search .form-content input[type=text]:not(:first-child),
+#header_search .form-content select:not(:first-child) {
+    border-left: 1px solid #e5e7eb;
+}
+
+/* Submit / Go button */
+#header_search input[type=submit],
+#header_search button[type=submit] {
+    background-color: var(--ftu-red-dark) !important;
+    color: #fff !important;
+    border: 0 !important;
+    font-weight: 700;
+    transition: background 0.15s;
+}
+#header_search input[type=submit]:hover,
+#header_search button[type=submit]:hover {
+    background-color: #6b1a1a !important;
+}
+
+/* Extra content toggle */
+#header_search .form-extra-content-toggle.extra-content-open {
+    color: #fca5a5 !important;
+}
+#header_search .form-extra-content {
+    border-color: var(--ftu-red) !important;
+}
+#header_search .form-extra-content a {
+    color: var(--ftu-red) !important;
+}
+
+/* ── Catalog-search dropdown border (was green) ── */
+#catalog-search-dropdown > a {
+    border-left: 1px solid rgba(0,0,0,0.3) !important;
+}
+#catalog-search-dropdown > a:hover,
+#catalog-search-dropdown > a.catalog-search-dropdown-hover {
+    background-color: rgba(0,0,0,0.2) !important;
+    border-left-color: rgba(0,0,0,0.3) !important;
+}
+
+/* ================================================================
+   SUB-HEADER – Breadcrumb & Toolbar
+   #sub-header | #breadcrumbs | #toolbar
+   ================================================================ */
+
+#sub-header {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+#breadcrumbs {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.8rem;
+}
+
+#breadcrumbs a {
+    color: var(--ftu-red);
+    text-decoration: none;
+}
+#breadcrumbs a:hover { text-decoration: underline; }
+#breadcrumbs .breadcrumb-item.active a { color: #6b7280; }
+
+/* Toolbar */
+#toolbar, .toolbar, #toolbar-main {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* ================================================================
+   BUTTONS-LIST – dùng trên circ-home, members-home, tools-home…
+   ================================================================ */
+.buttons-list {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.buttons-list li { list-style: none; margin: 0; }
+.buttons-list li a {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    color: #111827;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 0.81rem;
+    font-weight: 600;
+    padding: 0.58rem 0.85rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.buttons-list li a i {
+    font-size: 0.82rem;
+    width: 16px;
+    text-align: center;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+.buttons-list li a:hover {
+    background: var(--ftu-red-light);
+    border-color: var(--ftu-red);
+    color: var(--ftu-red);
+    text-decoration: none;
+    transform: translateX(2px);
+}
+.buttons-list li a:hover i { color: var(--ftu-red); }
+
+/* ================================================================
+   CIRCULATION HOME – body#circ_circulation-home
+   ================================================================ */
+body#circ_circulation-home { background: #f3f4f6; }
+
+body#circ_circulation-home h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ftu-red);
+    border-left: 3px solid var(--ftu-red);
+    padding: 0.4rem 0 0.4rem 0.85rem;
+    margin: 1.2rem 0 1rem;
+    background: none;
+}
+body#circ_circulation-home h3 {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    margin: 0 0 0.65rem;
+    border: none;
+    background: none;
+    padding: 0;
+}
+body#circ_circulation-home h4 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 1.4rem 0 0.6rem;
+}
+
+/* Section cards */
+body#circ_circulation-home .circulation-actions,
+body#circ_circulation-home .holds-bookings,
+body#circ_circulation-home .transfers,
+body#circ_circulation-home .overdues,
+body#circ_circulation-home .recalls,
+body#circ_circulation-home .patron-request {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.1rem 1.1rem 0.8rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+    border-top: 3px solid var(--ftu-red);
+}
+body#circ_circulation-home .transfers    { border-top-color: #1d4ed8; }
+body#circ_circulation-home .overdues     { border-top-color: #b45309; }
+body#circ_circulation-home .recalls      { border-top-color: #7c3aed; }
+body#circ_circulation-home .patron-request { border-top-color: #059669; }
+
+body#circ_circulation-home .transfers .buttons-list li a:hover
+ { background:#eff6ff; border-color:#1d4ed8; color:#1d4ed8; }
+body#circ_circulation-home .transfers .buttons-list li a:hover i { color:#1d4ed8; }
+body#circ_circulation-home .overdues .buttons-list li a:hover
+ { background:#fffbeb; border-color:#b45309; color:#b45309; }
+body#circ_circulation-home .overdues .buttons-list li a:hover i { color:#b45309; }
+
+body#circ_circulation-home #offline-circulation {
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-top: 3px solid #475569;
+    margin-top: 0.5rem;
+}
+body#circ_circulation-home #offline-circulation p { margin: 0.15rem 0; }
+body#circ_circulation-home #offline-circulation a {
+    font-size: 0.8rem; color: #374151; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+}
+body#circ_circulation-home #offline-circulation a:hover { color: var(--ftu-red); }
+
+/* ================================================================
+   MISC GLOBAL OVERRIDES – success badge, links, tables
+   ================================================================ */
+
+/* Green → Red for active nav pills / badges */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: var(--ftu-red) !important;
+}
+
+/* Pagination active */
+.page-item.active .page-link {
+    background-color: var(--ftu-red) !important;
+    border-color: var(--ftu-red) !important;
+}
+.page-link { color: var(--ftu-red) !important; }
+.page-link:hover { color: var(--ftu-red-dark) !important; }
+
+/* Links in content area */
+#main_circ_circulation-home a,
+.main-container a,
+#main-container a {
+    color: var(--ftu-red);
+}
+#main_circ_circulation-home a:hover,
+.main-container a:hover {
+    color: var(--ftu-red-dark);
+}
+
+/* Table hover */
+.table-hover tbody tr:hover { background-color: var(--ftu-red-light); }
+
+/* Focus rings */
+*:focus-visible { outline-color: var(--ftu-red); }
+
+/* btn-success → FTU red */
+.btn-success {
+    background-color: var(--ftu-red) !important;
+    border-color: var(--ftu-red-dark) !important;
+    color: #fff !important;
+}
+.btn-success:hover, .btn-success:focus {
+    background-color: var(--ftu-red-dark) !important;
+    border-color: #6b1a1a !important;
+}
+
+/* ================================================================
+   CIRCULATION SIDEBAR – circ-nav.inc
+   ================================================================ */
+.circ-nav-menu.sidebar_menu {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem 0.75rem 1.2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb;
+    font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.circ-nav-menu.sidebar_menu h5 {
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    color: #9ca3af !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    margin: 1rem 0 0.4rem 0.5rem !important;
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+}
+.circ-nav-menu.sidebar_menu h5:first-child { margin-top: 0.25rem !important; }
+
+.circ-nav-menu.sidebar_menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.circ-nav-menu.sidebar_menu ul li a {
+    display: block;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 7px;
+    transition: background 0.13s, color 0.13s;
+}
+.circ-nav-menu.sidebar_menu ul li a:hover {
+    background: var(--ftu-red-light);
+    color: var(--ftu-red);
+}
+.circ-nav-menu.sidebar_menu ul li a.current,
+.circ-nav-menu.sidebar_menu ul li.current a {
+    background: var(--ftu-red-light);
+    color: var(--ftu-red);
+    font-weight: 700;
+}
+
+/* Sidebar toggle button */
+.sidebar_menu_toggler {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #6b7280;
+}
+.sidebar_menu_toggler:hover { background: var(--ftu-red-light); color: var(--ftu-red); }
+
+/* CIRCULATION CHECKOUT page */
+body#circ_circulation {
+    background: #f3f4f6;
+}
+
+body#circ_circulation h1 {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--ftu-red) !important;
+    border-left: 3px solid var(--ftu-red);
+    padding: 0.4rem 0 0.4rem 0.85rem !important;
+    margin: 1rem 0 1.2rem !important;
+    background: none !important;
+}
+
+/* Search form */
+body#circ_circulation #patron_checkout_search {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.2rem;
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+}
+body#circ_circulation #patron_checkout_search input[type=text],
+body#circ_circulation #patron_checkout_search input[type=search] {
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.9rem;
+    flex: 1;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    transition: border-color 0.15s;
+}
+body#circ_circulation #patron_checkout_search input:focus {
+    border-color: var(--ftu-red);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(185,28,28,0.1);
+}
+body#circ_circulation #patron_checkout_search input[type=submit],
+body#circ_circulation #patron_checkout_search button[type=submit] {
+    background: var(--ftu-red) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 0.55rem 1.2rem !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+body#circ_circulation #patron_checkout_search input[type=submit]:hover,
+body#circ_circulation #patron_checkout_search button[type=submit]:hover {
+    background: var(--ftu-red-dark) !important;
+}
+
+/* Checkout table */
+body#circ_circulation .checkouts-table-container,
+body#circ_circulation #issues-table_wrapper {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+}
+body#circ_circulation .checkouts-table-controls {
+    margin-bottom: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+body#circ_circulation table.dataTable thead th {
+    background: #f9fafb;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e5e7eb;
+    padding: 0.6rem 0.75rem;
+}
+body#circ_circulation table.dataTable tbody td {
+    font-size: 0.88rem;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #111827;
+}
+body#circ_circulation table.dataTable tbody tr:hover td {
+    background: var(--ftu-red-light);
+}
+body#circ_circulation .overdue { color: #b45309; font-weight: 700; }
+
+/* Alert messages */
+body#circ_circulation .alert { border-radius: 10px; font-size: 0.88rem; }
+body#circ_circulation .alert-info { border-left: 4px solid #1d4ed8; }
+body#circ_circulation .alert-warning { border-left: 4px solid #b45309; }
+body#circ_circulation .alert-danger { border-left: 4px solid var(--ftu-red); }
+
+/* Patron info card (when patron loaded) */
+body#circ_circulation #borrower_details,
+body#circ_circulation .patron-info {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+    border-top: 3px solid var(--ftu-red);
+}
+
+/* Needs confirm panel */
+body#circ_circulation #circ_needsconfirm {
+    background: #fffbeb;
+    border: 1.5px solid #f59e0b;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1rem;
+}
+body#circ_circulation #circ_needsconfirm h3 {
+    color: #92400e;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+/* ================================================================
+   FTU MAINPAGE INTRANET - RECOVERY (ftu-kpi-row, ftu-main-layout)
+   ================================================================ */
+
+/* KPI Row */
+#ftu-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+}
+
+.ftu-kpi-card {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    position: relative;
+    border-left: 4px solid #ccc;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ftu-kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.ftu-kpi-card .kpi-icon {
+    font-size: 2.5rem;
+    margin-right: 1.2rem;
+    opacity: 0.8;
+}
+
+.ftu-kpi-card .kpi-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.ftu-kpi-card .kpi-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #1f2937;
+}
+
+.ftu-kpi-card .kpi-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+}
+
+.ftu-kpi-card a.kpi-link {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10;
+}
+
+.kpi-blue { border-left-color: #3b82f6; }
+.kpi-blue .kpi-icon { color: #3b82f6; }
+.kpi-red { border-left-color: #ef4444; }
+.kpi-red .kpi-icon { color: #ef4444; }
+.kpi-green { border-left-color: #10b981; }
+.kpi-green .kpi-icon { color: #10b981; }
+.kpi-amber { border-left-color: #f59e0b; }
+.kpi-amber .kpi-icon { color: #f59e0b; }
+
+/* Main Layout */
+#ftu-main-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+}
+
+#ftu-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.ftu-sidebar-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.sidebar-card-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.sidebar-card-header i { color: var(--ftu-red); }
+
+.ftu-newsitem {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+.ftu-newsitem:last-child {
+    margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+}
+
+.ftu-newsitem .news-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ftu-red);
+    margin-bottom: 0.5rem;
+}
+
+.ftu-newsitem .news-body {
+    font-size: 0.95rem;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.ftu-newsitem .news-footer {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-top: 0.8rem;
+}
+.ftu-newsitem .news-footer a { color: var(--ftu-red); text-decoration: none; font-weight: 600;}
+
+.ftu-quote {
+    font-style: italic;
+    color: #4b5563;
+    font-size: 1rem;
+}
+.quote-source { display: block; margin-top: 0.5rem; font-weight: 600; font-style: normal; color: #1f2937; text-align: right;}
+
+.pending-card {
+    border: 1.5px solid #f59e0b;
+    background: #fffbeb;
+}
+
+/* Modules Grid */
+#ftu-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.ftu-module-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.8rem 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid #f3f4f6;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.ftu-module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border-color: var(--ftu-red-border);
+    text-decoration: none;
+}
+
+.module-icon {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #fff;
+}
+
+.mod-circulation { background: #3b82f6; }
+.mod-patrons     { background: #10b981; }
+.mod-cataloging  { background: #8b5cf6; }
+.mod-search      { background: #06b6d4; }
+.mod-reports     { background: #f59e0b; }
+.mod-acquisitions{ background: #ef4444; }
+.mod-serials     { background: #ec4899; }
+.mod-lists       { background: #14b8a6; }
+.mod-tools       { background: #64748b; }
+.mod-authorities { background: #6366f1; }
+.mod-plugins     { background: #0ea5e9; }
+.mod-admin       { background: #475569; }
+.mod-about       { background: #9ca3af; }
+.mod-course      { background: #f43f5e; }
+
+/* Font Awesome Fixes for missing FA4 outlines */
+.module-icon i { font-weight: 900 !important; }
+i.fa-newspaper-o:before { content: "\f1ea" !important; font-weight: 900 !important; font-family: "Font Awesome 6 Free", "FontAwesome" !important; }
+
+.module-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.4rem;
+}
+
+.module-desc {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* Dash Footer */
+#ftu-dash-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+#ftu-dash-footer a {
+    color: var(--ftu-red);
+    text-decoration: none;
+}
+#ftu-dash-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Integration: DSpace 856 URL Styling (Intranet) */
+.online_resources a,
+.results_summary.online_resources a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff !important;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-decoration: none !important;
+    margin-top: 5px;
+    transition: all 0.2s ease-in-out;
+    border: none;
+}
+
+.online_resources a::before,
+.results_summary.online_resources a::before {
+    content: "\f08e"; /* FontAwesome external-link icon */
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    margin-right: 6px;
+}
+
+.online_resources a:hover,
+.results_summary.online_resources a:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}

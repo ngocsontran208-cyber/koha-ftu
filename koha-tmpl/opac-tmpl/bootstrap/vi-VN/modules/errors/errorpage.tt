@@ -1,0 +1,107 @@
+[% USE raw %]
+[% USE AdditionalContents %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET admin = Koha.Preference('ReplytoDefault') || Koha.Preference('KohaAdminEmailAddress') %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("An error has occurred") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+<body id="error[% errno | html %]" class="error">
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active = 1 %]
+ <span>Đã xảy ra lỗi</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav || OpacNavBottom ) %]
+ [% column_class = "col-10 order-first order-md-first order-lg-2" %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+ </div>
+ [% END %]
+
+ <div class="[% column_class | html %]">
+ <div id="errormsg[% errno | html %]">
+ <h1>Rất tiếc, trang yêu cầu không khả dụng</h1>
+ <h2>Lỗi [% errno | html %]</h2>
+ <p><strong>Thông báo này có thể do những lý do sau:</strong></p>
+ <ul>
+ [% IF ( errno == 400 ) %]
+ <li>Liên kết bị hỏng và trang không tồn tại.</li>
+ [% END %]
+
+ [% IF ( errno == 401 ) %]
+ <li>Bạn không được cấp quyền để xem trang này.</li>
+ [% END %]
+
+ [% IF ( errno == 402 ) %]
+ <li>Liên kết không hợp lệ.</li>
+ [% END %]
+
+ [% IF ( errno == 403 ) %]
+ [% IF ( csrf_error ) %]
+ [% IF csrf_error == 'wrong_csrf_token' %]
+ <li>Gửi biểu mẫu không thành công (Sai mã CSRF). Vui lòng quay lại, tải lại trang rồi thử lại.</li>
+ [% ELSE %]
+ [%# Programming errors, we do not want to display them at the OPAC %]
+ <li>Đã xảy ra lỗi không mong đợi khi xử lý yêu cầu của bạn.</li>
+ [% END %]
+ [% ELSE %]
+ <li>Bạn bị cấm xem trang này.</li>
+ [% END %]
+ [% END %]
+
+ [% IF ( errno == 404 ) %]
+ <li>Bạn đã sử dụng liên kết bên ngoài đến một tài liệu trong mục lục nhưng hiện không còn khả dụng.</li>
+ <li>Liên kết bạn truy cập đã lỗi thời, ví dụ từ công cụ tìm kiếm hoặc dấu trang.</li>
+ <li>Bạn đã cố truy cập một trang cần xác thực.</li>
+ <li>Một liên kết nội bộ trên trang chủ mục lục bị hỏng và trang không tồn tại.</li>
+ [% END %]
+ [% IF ( errno == 500 ) %]
+ <li>Đã xảy ra lỗi khi xử lý yêu cầu của bạn.</li>
+ [% END %]
+ </ul>
+ <h2>Tiếp theo là gì?</h2>
+ <ul>
+ [% IF ( errno == 401 ) && ( Koha.Preference( 'opacuserlogin' ) == 1 ) %]
+ <li>Vui lòng đăng nhập vào mục lục rồi thử lại. <a href="/cgi-bin/koha/opac-user.pl">Trang đăng nhập</a></li>
+ [% END %]
+ <li>Bạn có thể sử dụng menu và các liên kết ở đầu trang</li>
+ <li>Bạn có thể tra cứu mục lục bằng ô tìm kiếm ở đầu trang.</li>
+ <li><a href="/cgi-bin/koha/opac-main.pl">Quay lại trang chủ mục lục.</a></li>
+ </ul>
+ <h2>Báo lỗi và liên kết hỏng</h2>
+ <ul>
+ <li>Để báo lỗi này, vui lòng liên hệ Quản trị viên Koha. <a href="mailto:[% admin | uri %]">Gửi email</a>.</li>
+ </ul>
+ </div>
+ <!-- / #errormsg[% errno | html %] -->
+ </div>
+ <!-- / .col-lg10/12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

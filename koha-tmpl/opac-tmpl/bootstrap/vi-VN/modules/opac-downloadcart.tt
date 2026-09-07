@@ -1,0 +1,58 @@
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Download cart") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-downloadcart' bodyclass='popup' %]
+<nav class="navbar fixed-top">
+ <ul class="navbar-nav">
+ <li class="nav-item">
+ <button aria-label="Thoát" class="btn-close close" type="button"></button>
+ </li>
+ </ul>
+</nav>
+<main class="main">
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <div id="userdownloadcart" class="maincontent">
+ <h1>Tải xuống giỏ tài liệu</h1>
+ <form method="get" action="/cgi-bin/koha/opac-downloadcart.pl">
+ <select name="format" id="format">
+ <option value="">-- Chọn định dạng --</option>
+ <option value="ris">RIS (Zotero, EndNote và các ứng dụng khác)</option>
+ <option value="bibtex">BibTeX</option>
+ <option value="isbd">ISBD</option>
+ <option value="iso2709">MARC</option>
+ [% FOREACH csv_profile IN csv_profiles %]
+ <option value="[% csv_profile.export_format_id | html %]">CSV - [% csv_profile.profile | html %]</option>
+ [% END %]
+ </select>
+ <fieldset class="action">
+ <input type="hidden" name="bib_list" value="[% bib_list | html %]" />
+ <input name="save" type="submit" value="Đi đến" />
+ <a class="cancel close" href="#">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ <p><a class="close" href="#">Đóng cửa sổ này</a></p>
+ </div>
+ <!-- / #userdownloadcart -->
+ </div>
+ <!-- / .span10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+[% INCLUDE 'opac-bottom.inc' is_popup=1 %]
+[% BLOCK jsinclude %]
+[% END %]

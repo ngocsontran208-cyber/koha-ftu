@@ -1,0 +1,61 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Quick spine label creator") | html %]
+ &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="labels_spinelabel-home" class="tools labels">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Phân hệ biên mục</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tạo nhanh nhãn gáy</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='cat-menu' %]
+ <h1>Tạo nhanh nhãn gáy</h1>
+ <form action="/cgi-bin/koha/labels/spinelabel-print.pl" method="get" id="spinelabelprint">
+ <fieldset class="brief">
+ <ol>
+ <li
+                    ><label for="barcode">Đăng ký cá biệt: </label>
+ <input type="text" name="barcode" id="barcode" class="focus" required="required" />
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Xem nhãn gáy" />
+ </fieldset>
+ </form>
+[% END %]
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#spinelabelprint").on("submit", function (e) {
+                e.preventDefault();
+                var params = $(this).serialize();
+                openWindow("/cgi-bin/koha/labels/spinelabel-print.pl?" + params, "Print spine label", 400, 400);
+                $("#barcode").val("").focus();
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

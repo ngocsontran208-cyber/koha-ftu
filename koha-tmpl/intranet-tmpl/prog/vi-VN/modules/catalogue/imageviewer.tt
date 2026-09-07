@@ -1,0 +1,222 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Images") | html %]
+ &rsaquo; [% INCLUDE 'biblio-title-head.inc' %] &rsaquo; [% t("Catalog") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    #largeCover {
+        background: transparent url("[% interface | html %]/[% theme | html %]/img/spinner-small.gif") center center no-repeat;
+    }
+    #largeCoverImg {
+        border: 1px solid #cccccc;
+        display: block;
+        margin: auto;
+        padding: 1em;
+    }
+
+    .thumbnails img.selected {
+        cursor: default;
+        opacity: 0.4;
+    }
+</style>
+</head>
+
+<body id="catalog_imageviewer" class="catalog">
+
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/catalogue/search.pl">Mục tra cứu</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ [% INCLUDE 'biblio-title.inc' link = 1 %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Hình ảnh</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='biblio-view-menu' %]
+ [% INCLUDE 'cat-toolbar.inc' %]
+
+ <h1>Ảnh bìa biểu ghi: <em>[% INCLUDE 'biblio-title.inc' %]</em></h1>
+ <h4>[% biblio.author | html %]</h4>
+
+ [% IF ( LocalCoverImages == 1 ) %]
+ [% IF images.size %]
+ <div class="row">
+ <div class="col-md-8">
+ <div id="largeCover">
+ <img id="largeCoverImg" alt="" src="/cgi-bin/koha/catalogue/image.pl?imagenumber=[% imagenumber | html %]" />
+ </div>
+ [% IF ( CAN_user_tools_upload_local_cover_images ) %]
+ <hr />
+ <p>
+ [% IF itemnumber %]
+ <span>Upload an image file for this item</span>: [% SET upload_link = '/cgi-bin/koha/tools/upload-cover-image.pl?itemnumber=' _ itemnumber _ '&amp;filetype=image' %]
+ [% ELSE %]
+ <span>Upload an image file for this bibliographic record</span>: [% SET upload_link = '/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=' _ biblionumber _ '&amp;filetype=image' %]
+ [% END %]
+ <a class="btn btn-default btn-xs" href="[% upload_link | url %]"> <i class="fa fa-upload" aria-hidden="true"></i> Tải lên</a>
+ </p>
+ [% END %]
+ </div>
+
+ <div class="col-md-4">
+ <ul class="thumbnails">
+ [% FOREACH image IN images %]
+ <li id="imagenumber-[% image.imagenumber | html %]" data-itemnumber="[% image.itemnumber | html %]" data-biblionumber="[% image.biblionumber | html %]" class="thumbnail">
+ <a class="show_cover" data-coverimg="[% image.imagenumber | html %]" href="/cgi-bin/koha/catalogue/imageviewer.pl?biblionumber=[% biblionumber | html %]&amp;imagenumber=[% image.imagenumber | html %]">
+ [% IF image.imagenumber == imagenumber %]
+ <img alt="Ảnh thu nhỏ" class="selected" id="thumbnail_[% image.imagenumber | html %]" src="/cgi-bin/koha/catalogue/image.pl?imagenumber=[% image.imagenumber | html %]&thumbnail=1" />
+ [% ELSE %]
+ <img alt="Ảnh thu nhỏ" id="thumbnail_[% image.imagenumber | html %]" src="/cgi-bin/koha/catalogue/image.pl?imagenumber=[% image.imagenumber | html %]&thumbnail=1" />
+ [% END %]
+ </a>
+ [% IF CAN_user_tools_upload_local_cover_images %]
+ <a href="#" class="remove" data-coverimg="[% image.imagenumber | html %]"><i class="fa fa-trash-can"></i> Xóa hình ảnh</a>
+ [% END %]
+ </li>
+ [% END # /FOREACH img %]
+ </ul>
+ <!-- /ul.thumbnails -->
+ </div>
+ <!-- /.col-md-4 -->
+ </div>
+ <!-- /.row -->
+ [% ELSE %]
+ [% IF itemnumber %]
+ <div class="alert alert-info">There are no images for this item.</div>
+ [% ELSE %]
+ <div class="alert alert-info">Hiện tại biểu ghi này chưa có ảnh bìa.</div>
+ [% END %]
+ [% IF ( CAN_user_tools_upload_local_cover_images ) %]
+ <hr />
+ <p>
+ <span>Upload an image file</span>:
+ [% IF itemnumber %]
+ [% SET upload_link = '/cgi-bin/koha/tools/upload-cover-image.pl?itemnumber=' _ itemnumber _ '&amp;filetype=image' %]
+ [% ELSE %]
+ [% SET upload_link = '/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=' _ biblionumber _ '&amp;filetype=image' %]
+ [% END %]
+ <a class="btn btn-default btn-xs" href="[% upload_link | url %]"> <i class="fa fa-upload" aria-hidden="true"></i> Tải lên</a>
+ </p>
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ <div class="alert alert-info">Tính năng ảnh bìa của biểu ghi chưa được kích hoạt. Bạn vui lòng liên hệ với cán bộ quản trị.</div>
+ [% END %]
+[% END %]
+
+[% IF ( Koha.Preference('CatalogConcerns') ) %]
+ [% INCLUDE 'modals/add_catalog_concern.inc' %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'catalog-strings.inc' %]
+ [% Asset.js("lib/dayjs/dayjs.min.js") | $raw %]
+ [% Asset.js("lib/dayjs/plugin/isSameOrAfter.js") | $raw %]
+ [% Asset.js("lib/dayjs/plugin/isSameOrBefore.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        dayjs.extend(window.dayjs_plugin_isSameOrAfter);
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        dayjs.extend(window.dayjs_plugin_isSameOrBefore);
+    </script>
+ [% Asset.js("js/catalog.js") | $raw %]
+
+ [% IF Koha.Preference('EnableBooking') %]
+ [% INCLUDE 'calendar.inc' %]
+ [% INCLUDE 'select2.inc' %]
+ [% Asset.js("js/modals/place_booking.js") | $raw %]
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        /* Set a variable needed by add_catalog_concern.js */
+        var logged_in_user_borrowernumber = "[% logged_in_user.borrowernumber | html %]";
+
+        var interface = "[% interface | html %]";
+        var theme = "[% theme | html %]";
+
+        const imagenumber = [% imagenumber | html %];
+    </script>
+ [% IF ( Koha.Preference('CatalogConcerns') ) %]
+ [% Asset.js("js/modals/add_catalog_concern.js") | $raw %]
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            showCover(imagenumber);
+            $(".show_cover").on("click", function (e) {
+                e.preventDefault();
+                if ($(this).find("img").hasClass("selected")) {
+                    return false;
+                } else {
+                    $("#largeCoverImg").attr("src", interface + "/" + theme + "/img/spinner-small.gif");
+                    var imagenumber = $(this).data("coverimg");
+                    showCover(imagenumber);
+                }
+            });
+
+            $(".thumbnails .remove").on("click", function (e) {
+                e.preventDefault();
+                var result = confirm(_("Bạn chắc chắn muốn xóa ảnh bìa này?"));
+                var imagenumber = $(this).data("coverimg");
+                if (result == true) {
+                    removeLocalImage(imagenumber);
+                }
+            });
+        });
+
+        function removeLocalImage(imagenumber) {
+            var thumbnail = $("#imagenumber-" + imagenumber);
+            var itemnumber = $(thumbnail).data("itemnumber");
+            var biblionumber = $(thumbnail).data("biblionumber");
+            var copy = thumbnail.html();
+            thumbnail.find("img").css("opacity", ".2");
+            thumbnail.find("a.remove").html("<img style='display:inline-block' src='" + interface + "/" + theme + "/img/spinner-small.gif' alt='' />");
+
+            const client = APIClient.cover_image;
+            client.cover_images.delete(imagenumber).then(
+                success => {
+                    if (success.deleted == 1) {
+                        if (itemnumber) {
+                            location.href = "/cgi-bin/koha/catalogue/imageviewer.pl?itemnumber=" + itemnumber;
+                        } else {
+                            location.href = "/cgi-bin/koha/catalogue/imageviewer.pl?biblionumber=" + biblionumber;
+                        }
+                    } else {
+                        thumbnail.html(copy);
+                        alert(_("Xảy ra lỗi khi bạn xóa hình ảnh này"));
+                    }
+                },
+                error => {
+                    thumbnail.html(copy);
+                    alert(_("Xảy ra lỗi khi bạn xóa hình ảnh này"));
+                    console.warn("Something wrong happened: %s".format(error));
+                }
+            );
+        }
+
+        function showCover(img) {
+            $(".thumbnail img").removeClass("selected");
+            $("#largeCoverImg")
+                .attr("src", "")
+                .attr("src", "/cgi-bin/koha/catalogue/image.pl?imagenumber=" + img);
+            $("#thumbnail_" + img).addClass("selected");
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

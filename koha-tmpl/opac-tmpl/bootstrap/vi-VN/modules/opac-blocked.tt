@@ -1,0 +1,43 @@
+[% USE raw %]
+[% USE AdditionalContents %]
+[% SET OpacSuppressionMessage = AdditionalContents.get( location => "OpacSuppressionMessage", lang => lang, library => branchcode || default_branch ) %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Record blocked") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-blocked' %]
+[% INCLUDE 'masthead.inc' %]
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Biểu ghi đã bị khóa</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row justify-content-center">
+ <div class="col-md-10 col-lg-6">
+ <div id="opac-blocked-message" class="maincontent">
+ <h1>Biểu ghi đã bị khóa</h1>
+ <p>Bạn không có quyền xem biểu ghi này.</p>
+ [% IF ( OpacSuppressionMessage ) %]
+ <div id="opacsuppressionmessage"> [% PROCESS koha_news_block news => OpacSuppressionMessage %] </div>
+ [% END %]
+ </div>
+ </div>
+ </div>
+ </div>
+
+ [% INCLUDE 'opac-bottom.inc' %]
+ [% BLOCK jsinclude %]
+ [% END %]
+</main>

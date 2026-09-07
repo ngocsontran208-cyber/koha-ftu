@@ -1,0 +1,234 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your privacy management") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-privacy' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Quản lý quyền riêng tư của bạn</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+ <div id="userprivacy" class="maincontent">
+ <h1>Quản lý quyền riêng tư của bạn</h1>
+
+ [% IF delete_all_requested || delete_checkouts_requested || delete_holds_requested %]
+ [% IF delete_all_requested || delete_checkouts_requested %]
+ [% IF deleted_checkouts %]
+ <div class="alert alert-success">Lịch sử mượn tài liệu của bạn đã được xóa.</div>
+ [% ELSIF error_deleting_checkouts_history %]
+ <div class="alert alert-warning"
+                                    >Việc xóa lịch sử mượn tài liệu thất bại vì có sự cố với cấu hình của tính năng này. Vui lòng giúp khắc phục hệ thống bằng cách thông báo lỗi này cho thư viện của bạn</div
+                                >
+ [% ELSIF no_checkouts_to_delete %]
+ <div class="alert alert-warning">Không có lịch sử mượn tài liệu để xóa</div>
+ [% END %]
+ [% END %]
+
+ [% IF delete_all_requested || delete_holds_requested %]
+ [% IF deleted_holds %]
+ <div class="alert alert-success">Lịch sử đặt mượn của bạn đã được xóa.</div>
+ [% ELSIF error_deleting_holds_history %]
+ <div class="alert alert-warning">Việc xóa lịch sử đặt mượn thất bại. Vui lòng giúp khắc phục hệ thống bằng cách thông báo lỗi này cho thư viện của bạn</div>
+ [% ELSIF no_holds_to_delete %]
+ <div class="alert alert-warning">Không có lịch sử đặt mượn để xóa</div>
+ [% END %]
+ [% END %]
+ [% END %]
+
+ [% IF ( privacy_updated ) %]
+ <div class="alert alert-success">Quy tắc quyền riêng tư của bạn đã được cập nhật.</div>
+ [% END %]
+
+ [% IF ( Ask_data ) %]
+ <p>Chúng tôi rất cẩn trọng trong việc bảo vệ quyền riêng tư của bạn. Trên màn hình này, bạn có thể thiết lập thời gian chúng tôi lưu trữ lịch sử mượn và đặt mượn tài liệu của bạn.</p>
+ <p>Các tùy chọn của bạn là: </p>
+ <ul id="opac-privacy-options-list">
+ <li class="privacy0">Mãi mãi: lưu giữ lịch sử của tôi không giới hạn. Đây là tùy chọn dành cho những người dùng muốn theo dõi những tài liệu họ đang đọc hoặc đã đặt mượn.</li>
+ <li class="privacy1">Mặc định: lưu giữ lịch sử của tôi theo quy định của thư viện. Đây là tùy chọn mặc định: thư viện sẽ lưu giữ lịch sử của bạn trong thời hạn được thiết lập theo quy định của thư viện.</li>
+ <li class="privacy2">Không lưu : Xóa lịch sử của tôi ngay lập tức. Tùy chọn này sẽ xóa tất cả bản ghi tài liệu đã mượn ngay khi trả, và lịch sử đặt mượn ngay khi hoàn tất hoặc hủy bỏ.</li>
+ </ul>
+ <p id="note1">Vui lòng lưu ý rằng thông tin về bất kỳ cuốn sách nào vẫn đang mượn đều phải được thư viện lưu giữ dù bạn chọn tùy chọn quyền riêng tư nào.</p>
+ <p id="note2">Vui lòng lưu ý thêm rằng nhân viên thư viện không thể cập nhật các giá trị này thay bạn: đó là quyền riêng tư của bạn!</p>
+ <form action="/cgi-bin/koha/opac-privacy.pl" method="post" id="opac-privacy-update-form">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Quy tắc quyền riêng tư</legend>
+ <input type="hidden" name="op" value="cud-update_privacy" />
+ <fieldset>
+ <label for="privacy">Vui lòng chọn quy tắc quyền riêng tư của bạn:</label>
+ <div class="form-group row">
+ <div class="col-6">
+ <select class="form-select" name="privacy" id="privacy">
+ [% IF ( privacy0 ) %]
+ <option value="0" selected="selected" class="privacy0">Mãi mãi</option>
+ [% ELSE %]
+ <option value="0" class="privacy0">Mãi mãi</option>
+ [% END %]
+ [% IF ( privacy1 ) %]
+ <option value="1" selected="selected" class="privacy1">Mặc định</option>
+ [% ELSE %]
+ <option value="1" class="privacy1">Mặc định</option>
+ [% END %]
+ [% IF ( privacy2 ) %]
+ <option value="2" selected="selected" class="privacy2">Không lưu</option>
+ [% ELSE %]
+ <option value="2" class="privacy2">Không lưu</option>
+ [% END %]
+ </select>
+ </div>
+ <!-- /.col-6 -->
+ </div>
+ <!-- /.form-group.row -->
+ <div id="never-warning" class="alert alert-danger">Tùy chọn này sẽ xóa toàn bộ lịch sử mượn trước đó ngay lập tức.</div>
+
+ [% IF has_guarantor_flag && (Koha.Preference('AllowPatronToSetCheckoutsVisibilityForGuarantor') || Koha.Preference('AllowPatronToSetFinesVisibilityForGuarantor') ) %]
+ [% IF Koha.Preference('AllowPatronToSetCheckoutsVisibilityForGuarantor') %]
+ <div class="form-group row">
+ <div class="col-6">
+ <label for="privacy_guarantor_checkouts">Cho phép người bảo lãnh xem các tài liệu bạn đang mượn?</label>
+ <select class="form-select" name="privacy_guarantor_checkouts">
+ [% IF borrower.privacy_guarantor_checkouts %]
+ <option value="0">Không</option>
+ <option value="1" selected>Có</option>
+ [% ELSE %]
+ <option value="0" selected>Không</option>
+ <option value="1">Có</option>
+ [% END %]
+ </select>
+ </div>
+ <!-- /.col-6 -->
+ </div>
+ <!-- /.form-group.row -->
+ [% END # /IF Koha.Preference('AllowPatronToSetCheckoutsVisibilityForGuarantor') %]
+
+ [% IF Koha.Preference('AllowPatronToSetFinesVisibilityForGuarantor') %]
+ <div class="form-group row">
+ <div class="col-6">
+ <label for="privacy_guarantor_fines">Cho phép người bảo lãnh xem các khoản phí hiện tại của bạn?</label>
+ <select class="form-select" name="privacy_guarantor_fines">
+ [% IF borrower.privacy_guarantor_fines %]
+ <option value="0">Không</option>
+ <option value="1" selected>Có</option>
+ [% ELSE %]
+ <option value="0" selected>Không</option>
+ <option value="1">Có</option>
+ [% END %]
+ </select>
+ </div>
+ <!-- /.col-6 -->
+ </div>
+ <!-- /.form-group.row -->
+ [% END %]
+
+ <span class="hint">
+ Guaranteed by
+ [% FOREACH gr IN borrower.guarantor_relationships %]
+ [% SET g = gr.guarantor %]
+ [% g.firstname | html %]
+ [% g.surname | html %]
+ [%- IF ! loop.last %],[% END %]
+ [% END %]
+ </span>
+ [% END # /IF has_guarantor_flag.. %]
+ <fieldset class="action">
+ <button type="Submit" class="btn btn-primary">Lưu</button>
+ </fieldset>
+ </fieldset>
+ </form>
+ <!-- /#opac-privacy-update-form -->
+
+ <hr />
+
+ <h2>Xóa ngay lập tức</h2>
+
+ <p>Bạn có thể xóa toàn bộ lịch sử mượn và đặt mượn của mình ngay lập tức bằng cách nhấp vào đây. <strong>LƯU Ý</strong>. Một khi bạn đã xác nhận xóa, không ai có thể khôi phục lại danh sách!</p>
+
+ <form action="/cgi-bin/koha/opac-privacy.pl" method="post" id="opac-privacy-delete-checkouts">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete_record" />
+ <input type="hidden" name="checkouts" value="1" />
+ </form>
+
+ <form action="/cgi-bin/koha/opac-privacy.pl" method="post" id="opac-privacy-delete-holds">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete_record" />
+ <input type="hidden" name="holds" value="1" />
+ </form>
+
+ <form action="/cgi-bin/koha/opac-privacy.pl" method="post" id="opac-privacy-delete-all">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete_record" />
+ <input type="hidden" name="all" value="1" />
+ </form>
+ <table class="table table-bordered table-condensed table-striped" role="presentation">
+ <tr>
+ <td colspan="7">Xóa ngay lập tức lịch sử mượn của tôi. Hành động này không thể hoàn tác.</td>
+ <td colspan="1">
+ <fieldset class="action">
+ <input class="btn btn-danger btn-block privacy-confirm-delete" form="opac-privacy-delete-checkouts" type="submit" value="Xóa lịch sử mượn" />
+ </fieldset>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="7">Xóa ngay lập tức lịch sử đặt mượn của tôi. Hành động này không thể hoàn tác.</td>
+ <td colspan="1">
+ <fieldset class="action">
+ <input class="btn btn-danger btn-block privacy-confirm-delete" form="opac-privacy-delete-holds" type="submit" value="Xóa lịch sử đặt mượn" />
+ </fieldset>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="7">Xóa ngay lập tức lịch sử mượn & lịch sử đặt mượn của tôi. Hành động này không thể hoàn tác.</td>
+ <td colspan="1">
+ <fieldset class="action">
+ <input class="btn btn-danger btn-block privacy-confirm-delete" form="opac-privacy-delete-all" type="submit" value="Xóa lịch sử mượn và đặt mượn" />
+ </fieldset>
+ </td>
+ </tr>
+ </table>
+
+ [% IF Koha.Preference('StoreLastBorrower') %]
+ <p id="store-last-borrower-msg">Vui lòng lưu ý, người cuối cùng trả tài liệu sẽ được ghi nhận để phục vụ việc quản lý các tài liệu bị hư hỏng khi trả.</p>
+ [% END %]
+ [% END # / IF Ask_data %]
+ </div>
+ <!-- / .userprivacy -->
+ </div>
+ <!-- / .col-lg-10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% Asset.js('js/privacy.js') | $raw %]
+[% END %]

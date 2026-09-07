@@ -1,0 +1,90 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( nopermission ) %]
+ [% t("Access denied") | html %]
+ [% END %]
+ [% IF ( timed_out ) %]
+ [% t("Session timed out") | html %]
+ [% END %]
+ [% IF ( different_ip ) %]
+ [% t("IP address change") | html %]
+ [% END %]
+ [% IF ( invalid_username_or_password ) %]
+ [% t("Invalid username or password") | html %]
+ [% END %]
+ [% IF ( loginprompt ) %]
+ [% t("Log in to the Koha web installer") | html %]
+ [% END %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'installer-doc-head-close.inc' %]
+</head>
+
+<body id="installer" class="installer">
+<div class="container-fluid">
+ <div class="row justify-content-md-center">
+ <div id="installer-login" class="installer-main col-sm-6 col-md-6">
+ <div id="logo"><a href="#">Koha</a></div>
+
+ [% IF ( nopermission ) %]
+ <div id="login_error" class="alert alert-danger"><strong>Lỗi: </strong>Unauthorized user <a href="/cgi-bin/koha/mainpage.pl?logout.x=1">Đăng xuất</a></div>
+ [% END %]
+
+ [% IF ( timed_out ) %]
+ <div id="login_error" class="alert alert-danger"><strong>Lỗi: </strong>Phiên đăng nhập quá hạn, hãy đăng nhập lại</div>
+ [% END %]
+
+ [% IF ( different_ip ) %]
+ <div id="login_error" class="alert alert-danger"><strong>Lỗi: </strong>Địa chỉ IP thay đổi, đăng nhập lại </div>
+ [% END %]
+
+ [% IF ( invalid_username_or_password ) %]
+ <div id="login_error" class="alert alert-danger"><strong>Lỗi: </strong>Tên đăng nhập hoặc mật khẩu không hợp lệ</div>
+ [% END %]
+
+ [% IF ( loginprompt ) %]
+ <h1>Welcome to the Koha [%- Koha.Version.release | html -%] web installer</h1>
+
+ <p
+                    >Trước khi bắt đầu, hãy kiểm tra lại các thông tin. Đăng nhập bằng tài khoản hệ thống cung cấp trong file cấu hình<code>koha-conf.xml</code> configuration file.</p
+                >
+
+ <form action="[% url | html %]" method="post" id="mainform">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="login_op" value="cud-login" />
+ [% FOREACH INPUT IN INPUTS %]
+ [% NEXT IF INPUT.name == "csrf_token" %]
+ [% NEXT IF INPUT.name == "login_userid" %]
+ [% NEXT IF INPUT.name == "login_password" %]
+ <input type="hidden" name="[% INPUT.name | html %]" value="[% INPUT.value | html %]" />
+ [% END %]
+
+ <fieldset>
+ <legend>Please enter your username and password</legend>
+
+ <div class="form-group">
+ <label>Tên đăng nhập:</label>
+ <input type="text" class="form-control" name="login_userid" id="userid" value="[% userid | html %]" size="20" tabindex="1" />
+ </div>
+ <div class="form-group">
+ <label>Mật khẩu:</label>
+ <input type="password" class="form-control" name="login_password" id="password" value="" size="20" tabindex="2" />
+ </div>
+ <div class="form-group mt-2">
+ <input class="btn btn-primary" id="submit" tabindex="3" type="submit" value="Đăng nhập" />
+ </div>
+ </fieldset>
+ </form>
+ [% END %]
+ </div>
+ <!-- / #installer-login -->
+ </div>
+ <!-- / .row --> </div
+><!-- / .container-fluid -->
+
+[% INCLUDE 'installer-intranet-bottom.inc' %]

@@ -1,0 +1,1114 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Price %]
+[% USE ItemTypes %]
+[% USE AuthorisedValues %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'patron-search.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( ordernumber ) %]
+ [% tx("Modify order details (line #{ordernumber})", { ordernumber = ordernumber }) | html %]
+ [% ELSE %]
+ [% t("New order") | html %]
+ [% END %]
+ &rsaquo; [% tx("Basket {basketnumber}", { basketnumber = basketno }) | html %] &rsaquo; [% t("Acquisitions") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        #itemfieldset label,
+        #itemfieldset span.label {
+            flex-basis: 25%;
+            font-weight: 700;
+            margin-right: 1rem;
+            text-align: right;
+            width: 9rem;
+            font-size: 100%;
+            width: 25%;
+        }
+
+        #itemfieldset .input_marceditor {
+            flex-basis: 50%;
+        }
+
+        #itemfieldset .input_marceditor.flatpickr-input {
+            width: 50%;
+        }
+
+        #itemfieldset .subfield_line {
+            display: flex;
+            flex-basis: 100%;
+        }
+    </style>
+[% END %]
+[% Asset.js("js/acquisitions-menu.js") | $raw %]
+[% Asset.js("js/acq.js") | $raw %]
+[% Asset.js("js/additem.js") | $raw %]
+[% Asset.js("js/cataloging.js") | $raw %]
+[% Asset.js("js/additional-fields-entry.js") | $raw %]
+[% INCLUDE 'calendar.inc' %]
+[% INCLUDE 'select2.inc' %]
+<script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+    const AcqCreateItemOrdering = [% AcqCreateItemOrdering ? 1 : 0 | html %];
+    const is_standing = [% basket.is_standing ? 1 : 0 | html %];
+    const ordernumber = "[% ordernumber | html %]";
+    const from_suggestion = [% suggestion ? 1 : 0 | html %];
+    const quantityrec = [% quantityrec || 0 | html %];
+    const subscriptionid = "[% subscriptionid | html %]";
+    Koha.addPrefs({
+        UniqueItemFields: "[% Koha.Preference("UniqueItemFields") | html %]",
+    });
+</script>
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    actTotal = "";
+
+    function Check(ff) {
+        if (AcqCreateItemOrdering) {
+            // Remove last itemblock if it is not in items_list
+            var lastitemblock = $("#outeritemblock > div:last");
+            var tobedeleted = true;
+            var listitems = $("#items_list tr");
+            $(listitems).each(function () {
+                if ($(this).attr("idblock") == $(lastitemblock).attr("id")) {
+                    tobedeleted = false;
+                }
+            });
+            if (tobedeleted) {
+                $(lastitemblock).remove();
+            }
+        }
+
+        var ok = 0;
+        var _alertString = _("Phát hiện các lỗi sau đây, bạn vui lòng kiểm tra và chỉnh sửa lại:") + "\n";
+
+        _alertString += "-------------------------------------------------------------------\n\n";
+
+        if (isNull(ff.budget_id, 1)) {
+            ok = 1;
+            _alertString += "\n- " + _("Phải lựa chọn một nguồn ngân sách");
+        }
+
+        if (!isNum(ff.quantity, 0) || ff.quantity.value == 0) {
+            ok = 1;
+            _alertString += "\n- " + _("Số lượng đặt mua phải khác '0'");
+        }
+
+        if (!isNum(ff.listprice, 0)) {
+            ok = 1;
+            _alertString += "\n- " + _("Giá nhà cung cấp phải là con số");
+        }
+
+        if (!isNum(ff.total, 0)) {
+            ok = 1;
+            _alertString += "\n- " + _("Tổng giá trị phải là con số");
+        }
+
+        if (totalExceedsBudget(ff.budget_id.value, ff.total.value)) {
+            ok = 1;
+            _alertString += "\n- " + _("Order total (%s) exceeds budget available (%s)").format(ff.total.value, actTotal);
+        }
+
+        if (ff.field_value) {
+            var empty_item_mandatory = CheckMandatorySubfields(ff);
+            if (empty_item_mandatory > 0) {
+                ok = 1;
+                _alertString += "\n- " + _("%s Các trường bắt buộc của tài liệu bị bỏ trống").format(empty_item_mandatory);
+            }
+        }
+
+        if (ok) {
+            alert(_alertString);
+            if (AcqCreateItemOrdering) {
+                if (tobedeleted) {
+                    $(lastitemblock).appendTo("#outeritemblock");
+                }
+            }
+            return false;
+        }
+
+        if (AcqCreateItemOrdering) {
+            if (check_additem(Koha.prefs.UniqueItemFields) == false) {
+                alert(_("Phát hiện các dữ liệu giống nhau. Bạn hãy kiểm tra lại các lỗi vào gửi lại yêu cầu."));
+                if (tobedeleted) {
+                    $(lastitemblock).appendTo("#outeritemblock");
+                }
+                return false;
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        if (!ordernumber) {
+            $("#items_list").hide();
+        }
+
+        if (AcqCreateItemOrdering && !is_standing) {
+            cloneItemBlock(0, Koha.prefs.UniqueItemFields);
+        }
+
+        if (from_suggestion) {
+            updateCosts();
+        }
+        $("#quantity").change(function () {
+            updateCosts();
+        });
+
+        //We apply the function only for modify option
+        if (quantityrec && !subscriptionid) {
+            if (AcqCreateItemOrdering) {
+                $("#quantity").blur(function () {
+                    // if user decreases the quantity
+                    if ($(this).val() < quantityrec) {
+                        alert(_("Bạn đã xóa các tài liệu trong đơn hàng, và cần phải xóa các tài liệu đó trong biểu ghi thư mục"));
+                        return true;
+                    } else {
+                        // if user increases the quantity
+                        alert(_("Bạn không thể thêm một tài liệu mới, bạn phải tạo một đơn hàng mới"));
+                        // and we replace the original value
+                        $(this).val(quantityrec);
+                        updateCosts(); // blur is invoked after change which updated values
+                        return false;
+                    }
+                });
+            }
+        }
+
+        //keep a copy of all budgets before removing the inactives
+        disabledBudgetsCopy = $("#budget_id").html();
+        $("#budget_id .b_inactive").remove();
+
+        $("#showallbudgets").click(function () {
+            if ($(this).is(":checked")) {
+                $("#budget_id").html(disabledBudgetsCopy); //Puts back all the funds
+            } else {
+                $("#budget_id .b_inactive").remove();
+            }
+        });
+
+        $("#budget_id").change(function () {
+            var destination_sort1 = $(this).parents("fieldset.rows").find('input[name="sort1"]');
+            var sort1_authcat = $(this).find("option:selected").attr("data-sort1-authcat");
+            var sort1 = $(destination_sort1).val() || "";
+            if (destination_sort1.length < 1) {
+                destination_sort1 = $(this).parents("fieldset.rows").find('select[name="sort1"]');
+            }
+            var destination_sort2 = $(this).parents("fieldset.rows").find('input[name="sort2"]');
+            var sort2_authcat = $(this).find("option:selected").attr("data-sort2-authcat");
+            var sort2 = $(destination_sort2).val() || "";
+            if (destination_sort2.length < 1) {
+                destination_sort2 = $(this).parents("fieldset.rows").find('select[name="sort2"]');
+            }
+            getAuthValueDropbox("sort1", sort1_authcat, destination_sort1, sort1);
+            getAuthValueDropbox("sort2", sort2_authcat, destination_sort2, sort2);
+        });
+        $("#budget_id").change();
+
+        // Servicing Instructions Management
+        initServicingInstructions();
+    });
+
+    function add_user(borrowernumber, borrowername) {
+        var ids = $("#users_ids").val();
+        if (ids.length > 0) {
+            ids = ids.split(":");
+        } else {
+            ids = new Array();
+        }
+        if (ids.indexOf(borrowernumber.toString()) < 0) {
+            ids.push(borrowernumber);
+            $("#users_ids").val(ids.join(":"));
+            var li = '<li id="user_' + borrowernumber + '">' + borrowername + ' [<a style="cursor:pointer" onclick="del_user(' + borrowernumber + ');">' + _("Loại bỏ") + "</a>]</li>";
+            $("#users_names").append(li);
+            return 0;
+        }
+        return -1;
+    }
+
+    function del_user(borrowernumber) {
+        $("#user_" + borrowernumber).remove();
+        var ids = $("#users_ids").val().split(":");
+        ids.splice(ids.indexOf(borrowernumber.toString()), 1);
+        $("#users_ids").val(ids.join(":"));
+    }
+
+    // Servicing Instructions Management
+    var servicingInstructionGroups = [];
+    var servicingInstructionAVs = [];
+
+    function initServicingInstructions() {
+        // Load authorised values and existing data from hidden fields rather than
+        // interpolating them directly into inline JS, so free-text values can't break
+        // out of a JS string literal (see bug 30144 security follow-up).
+        try {
+            var avsData = JSON.parse($("#servicing_instruction_avs_json").val() || "[]");
+            servicingInstructionAVs = Array.isArray(avsData) ? avsData : [];
+        } catch (e) {
+            console.error("Failed to parse servicing instruction authorised values:", e);
+            servicingInstructionAVs = [];
+        }
+
+        try {
+            var existingData = JSON.parse($("#servicing_instruction_groups_json").val() || "[]");
+            servicingInstructionGroups = Array.isArray(existingData) ? existingData : [];
+        } catch (e) {
+            console.error("Failed to parse servicing instruction groups:", e);
+            servicingInstructionGroups = [];
+        }
+
+        renderServicingInstructions();
+        updateJSON();
+
+        // Add group button handler
+        $("#add_servicing_group").on("click", function () {
+            addServicingGroup();
+        });
+
+        // Form submission handler - update JSON before submit
+        $("form").on("submit", function () {
+            updateJSON();
+        });
+    }
+
+    function addServicingGroup() {
+        servicingInstructionGroups.push([]);
+        renderServicingInstructions();
+        updateJSON();
+    }
+
+    function removeServicingGroup(groupIndex) {
+        servicingInstructionGroups.splice(groupIndex, 1);
+        renderServicingInstructions();
+        updateJSON();
+    }
+
+    function addInstructionToGroup(groupIndex, type, value) {
+        var group = servicingInstructionGroups[groupIndex];
+
+        // Validate: max 2 instructions per group
+        if (group.length >= 2) {
+            alert(_("Each service group can contain at most 2 instructions (one LVC and/or one LVT)."));
+            return;
+        }
+
+        if (!type) type = "LVC"; // Default to LVC (coded)
+        if (!value) value = "";
+
+        // Check if this type already exists in the group
+        var hasLVC = group.some(function (inst) {
+            return inst.type === "LVC";
+        });
+        var hasLVT = group.some(function (inst) {
+            return inst.type === "LVT";
+        });
+
+        if (type === "LVC" && hasLVC) {
+            alert(_("This group already has an LVC instruction. Each group can have only one LVC."));
+            return;
+        }
+        if (type === "LVT" && hasLVT) {
+            alert(_("This group already has an LVT instruction. Each group can have only one LVT."));
+            return;
+        }
+
+        servicingInstructionGroups[groupIndex].push({ type: type, value: value });
+        renderServicingInstructions();
+        updateJSON();
+    }
+
+    function removeInstructionFromGroup(groupIndex, instructionIndex) {
+        servicingInstructionGroups[groupIndex].splice(instructionIndex, 1);
+        renderServicingInstructions();
+        updateJSON();
+    }
+
+    function updateInstruction(groupIndex, instructionIndex, type, value) {
+        var group = servicingInstructionGroups[groupIndex];
+
+        // Check if changing type would create a duplicate
+        for (var i = 0; i < group.length; i++) {
+            if (i !== instructionIndex && group[i].type === type) {
+                alert(_("This group already has a %s instruction. Each group can have only one of each type.").format(type));
+                renderServicingInstructions(); // Re-render to reset the select
+                return;
+            }
+        }
+
+        servicingInstructionGroups[groupIndex][instructionIndex] = { type: type, value: value };
+        updateJSON();
+    }
+
+    function renderServicingInstructions() {
+        var container = $("#servicing_instructions_container");
+        container.empty();
+
+        if (servicingInstructionGroups.length === 0) {
+            container.append('<div class="hint">' + _("No servicing instructions added yet. Use the Add servicing group button to add one.") + "</div>");
+            return;
+        }
+
+        servicingInstructionGroups.forEach(function (group, groupIndex) {
+            var groupDiv = $('<div class="servicing_group"></div>');
+            groupDiv.css({
+                border: "1px solid #ddd",
+                padding: "10px",
+                "margin-bottom": "10px",
+                background: "#f9f9f9",
+                "border-radius": "4px",
+            });
+
+            var groupHeader = $('<div style="margin-bottom: 10px;"></div>');
+            groupHeader.append("<strong>" + _("Service Group %s").format(groupIndex + 1) + "</strong> ");
+            groupHeader.append(
+                $('<button type="button" class="btn btn-default btn-xs" style="margin-left: 10px;">' + '<i class="fa fa-trash"></i> ' + _("Remove group") + "</button>").on("click", function () {
+                    removeServicingGroup(groupIndex);
+                })
+            );
+            groupDiv.append(groupHeader);
+
+            if (group.length === 0) {
+                groupDiv.append('<div class="hint" style="margin-left: 20px;">' + _("Empty group") + "</div>");
+            }
+
+            group.forEach(function (instruction, instructionIndex) {
+                var instructionDiv = $('<div class="servicing_instruction" style="margin-left: 20px; margin-bottom: 5px;"></div>');
+
+                var typeSelect = $('<select style="width: 100px; margin-right: 5px;"></select>')
+                    .append('<option value="LVC"' + (instruction.type === "LVC" ? " selected" : "") + ">" + _("LVC (Coded)") + "</option>")
+                    .append('<option value="LVT"' + (instruction.type === "LVT" ? " selected" : "") + ">" + _("LVT (Text)") + "</option>")
+                    .on("change", function () {
+                        var newType = $(this).val();
+                        var valueInput = $(this).next();
+                        updateInstruction(groupIndex, instructionIndex, newType, valueInput.val());
+                        renderServicingInstructions(); // Re-render to update input type
+                    });
+
+                var valueInput;
+                if (instruction.type === "LVC" && servicingInstructionAVs.length > 0) {
+                    valueInput = $('<select style="width: 300px; margin-right: 5px;"></select>');
+                    valueInput.append('<option value="">' + _("Select...") + "</option>");
+                    servicingInstructionAVs.forEach(function (av) {
+                        valueInput.append(
+                            $("<option></option>")
+                                .attr("value", av.value)
+                                .text(av.label)
+                                .prop("selected", av.value === instruction.value)
+                        );
+                    });
+                } else {
+                    valueInput = $('<input type="text" style="width: 300px; margin-right: 5px;" />').val(instruction.value);
+                }
+
+                valueInput.on("change", function () {
+                    updateInstruction(groupIndex, instructionIndex, typeSelect.val(), $(this).val());
+                });
+
+                var removeBtn = $('<button type="button" class="btn btn-default btn-xs">' + '<i class="fa fa-trash"></i> ' + _("Loại bỏ") + "</button>").on("click", function () {
+                    removeInstructionFromGroup(groupIndex, instructionIndex);
+                });
+
+                instructionDiv.append(typeSelect);
+                instructionDiv.append(valueInput);
+                instructionDiv.append(removeBtn);
+                groupDiv.append(instructionDiv);
+            });
+
+            // Determine what can be added to this group
+            var hasLVC = group.some(function (inst) {
+                return inst.type === "LVC";
+            });
+            var hasLVT = group.some(function (inst) {
+                return inst.type === "LVT";
+            });
+            var canAddMore = group.length < 2;
+
+            if (canAddMore) {
+                var btnLabel = _("Add instruction");
+                if (hasLVC && !hasLVT) {
+                    btnLabel += " " + _("(LVT only)");
+                } else if (hasLVT && !hasLVC) {
+                    btnLabel += " " + _("(LVC only)");
+                } else if (group.length === 0) {
+                    btnLabel += " " + _("to this group");
+                }
+                var btnText = '<i class="fa fa-plus"></i> ' + btnLabel;
+
+                var addInstructionBtn = $('<button type="button" class="btn btn-default btn-xs" style="margin-left: 20px; margin-top: 5px;">' + btnText + "</button>").on("click", function () {
+                    // Determine default type based on what's already in the group
+                    var defaultType = "LVC";
+                    if (hasLVC && !hasLVT) defaultType = "LVT";
+                    else if (hasLVT && !hasLVC) defaultType = "LVC";
+                    addInstructionToGroup(groupIndex, defaultType);
+                });
+                groupDiv.append(addInstructionBtn);
+            } else {
+                var maxMsg = $('<div class="hint" style="margin-left: 20px; margin-top: 5px; color: #666;">' + _("Maximum 2 instructions per group (one LVC + one LVT)") + "</div>");
+                groupDiv.append(maxMsg);
+            }
+
+            container.append(groupDiv);
+        });
+    }
+
+    function updateJSON() {
+        // Filter out empty groups and instructions with empty values
+        var filtered = servicingInstructionGroups
+            .map(function (group) {
+                return group.filter(function (instruction) {
+                    return instruction.value && instruction.value.trim() !== "";
+                });
+            })
+            .filter(function (group) {
+                return group.length > 0;
+            });
+
+        var json = JSON.stringify(filtered);
+        $("#servicing_instruction_groups_json").val(json);
+    }
+</script>
+[% Asset.css("css/addbiblio.css") | $raw %]
+</head>
+
+<body id="acq_neworderempty" class="acq">
+
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'acquisitions-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/acqui/acqui-home.pl">Phân hệ bổ sung</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/acquisition/vendors/[% booksellerid | uri %]">[% name | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% basketno | uri %]">Giỏ đặt hàng số [% basketno | html %]</a>
+ [% END %]
+ [% IF ( ordernumber ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Modify order details (line #[% ordernumber | html %])</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>New order</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='acquisitions-menu' %]
+ <h1>
+ [% IF ( ordernumber ) %] Chỉnh sửa đơn hàng [% ELSE %] Tạo đơn hàng [% END %] </h1>
+
+ <div class="alert alert-warning order_error" style="display:none"></div>
+
+ [% IF ( basketno ) %]
+ <div id="acqui_basket_summary">
+ <fieldset class="rows">
+ <legend>Thông tin giỏ đặt hàng</legend>
+ <ol>
+ [% IF ( basketnote ) %]<li><span class="label">Ghi chú nội bộ:</span> [% basketnote | html %]</li>[% END %]
+ [% IF ( basketbooksellernote ) %]<li><span class="label">Ghi chú nhà cung cấp:</span> [% basketbooksellernote | html %]</li>[% END %]
+ [% IF ( basketcontractno ) %]
+ <li><span class="label">Số hợp đồng </span>[% basketcontractno | html %]</li>
+ <li><span class="label">Tên hợp đồng:</span> <a href="/cgi-bin/koha/admin/aqcontract.pl?op=add_form&amp;contractnumber=[% basketcontractno | uri %]">[% basketcontractname | html %]</a></li>
+ [% END %]
+ [% IF ( authorisedbyname ) %]<li><span class="label">[% tp('Acquisitions basket managed by user', 'Managed by:') | html %]</span> [% authorisedbyname | html %]</li>[% END %]
+ [% IF ( creationdate ) %]<li><span class="label">Ngày tạo:</span> [% creationdate | $KohaDates %]</li>[% END %]
+ [% IF ( closedate ) %]
+ <form action="/cgi-bin/koha/acqui/basketgroup.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <li><span class="label">Ngày đóng:</span> [% closedate | $KohaDates %]</li>
+ [% IF ( basketgroups ) %]
+ <li
+                                    >Nhóm giỏ đặt hàng: <select id="basketgroupid" name="basketgroupid">
+ [% FOREACH basketgroup IN basketgroups %]
+ [% IF ( basketgroup.default ) %]
+ <option value="[% basketgroup.id | html %]" selected="selected">[% basketgroup.name | html %]</option>
+ [% ELSE %]
+ <option value="[% basketgroup.id | html %]">[% basketgroup.name | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ <input type="hidden" id="basketno" value="[% basketno | html %]" name="basketno" />
+ <input type="hidden" value="cud-mod_basket" name="op" />
+ <input type="hidden" name="booksellerid" value="[% booksellerid | html %]" />
+ </li>
+ <fieldset class="action"><input class="btn btn-primary" type="submit" value="Chỉnh sửa nhóm giỏ đặt hàng" /></fieldset>
+ [% END %]
+ </form>
+ [% END %]
+ </ol>
+ </fieldset>
+ </div>
+ [% END %]
+
+ <form action="/cgi-bin/koha/acqui/addorder.pl" method="post" class="validated noEnterSubmit marc_editor" id="Aform" onsubmit="return Check(this);">
+ [% INCLUDE 'csrf-token.inc' %]
+
+ <fieldset class="rows">
+ <legend>Bạn đọc</legend>
+ <ol>
+ <li>
+ <span class="label">To notify on receiving:</span>
+ <div style="float:left">
+ <ul id="users_names" style="padding-left:0">
+ [% FOREACH user IN users %]
+ <li id="user_[% user.borrowernumber | html %]"> [% user.firstname | html %] [% user.surname | html %] [<a onclick="del_user([% user.borrowernumber | html %]);" style="cursor:pointer">Loại bỏ</a>] </li>
+ [% END %]
+ </ul>
+ <input type="hidden" id="users_ids" name="users_ids" value="[% users_ids | html %]" />
+ <a href="#patron_search_modal" id="add_user" class="btn btn-default" data-bs-toggle="modal"><i class="fa fa-plus"></i> Thêm quản lý</a>
+ </div>
+ </li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="rows">
+ <legend>
+ Thông tin biểu ghi tài liệu [% IF ( biblionumber ) %] <span><a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber | uri %]"> Sửa biểu ghi</a></span>
+ [% END %]
+ </legend>
+ [% UNLESS ( existing ) %]
+ <input type="hidden" name="existing" value="no" />
+ [% END %]
+ <input type="hidden" name="ordernumber" value="[% ordernumber | html %]" />
+ <input type="hidden" name="basketno" value="[% basketno | html %]" />
+ <input type="hidden" name="booksellerid" value="[% booksellerid | html %]" />
+ <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+ <input type="hidden" name="listinc" id="listinc" value="[% listincgst | html %]" />
+ <input type="hidden" name="invoiceincgst" id="invoiceincgst" value="[% invoiceincgst | html %]" />
+ <input type="hidden" name="suggestionid" value="[% suggestion.suggestionid | html %]" />
+ <input type="hidden" name="import_batch_id" value="[% import_batch_id | html %]" />
+
+ [% FOREACH c IN currencies %]
+ <input type="hidden" id="currency_rate_[% c.currency | html %]" name="[% c.currency | html %]" value="[% c.rate | html %]" />
+ [% END %]
+
+ [% IF NOT Koha.Preference('UseACQFrameworkForBiblioRecords') OR NoACQframework %]
+ <ol
+                    ><li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Nhan đề:</span>
+ <input type="hidden" name="title" value="[% title | html %]" /> <span class="title">[% title | html %]</span>
+ [% ELSE %]
+ <label for="entertitle">Nhan đề: </label>
+ <input type="text" id="entertitle" size="50" name="title" value="[% title | html %]" class="focus" required="required" />
+ <span class="required">Bắt buộc</span>
+ [% END %]
+ </li>
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Tác giả: </span>
+ <input type="hidden" name="author" id="author" value="[% author | html %]" />[% author | html %]
+ [% ELSE %]
+ <label for="author">Tác giả: </label>
+ <input type="text" size="50" name="author" id="author" value="[% author | html %]" />
+ [% END %]
+ </li>
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Nhà xuất bản: </span>
+ <input type="hidden" name="publishercode" id="publishercode" value="[% publishercode | html %]" />[% publishercode | html %]
+ [% ELSE %]
+ <label for="publishercode"> Nhà xuất bản: </label>
+ <input type="text" size="50" name="publishercode" id="publishercode" value="[% publishercode | html %]" />
+ [% END %]
+ </li>
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Ấn bản: </span>
+ <input type="hidden" name="editionstatement" id="editionstatement" value="[% editionstatement | html %]" />[% editionstatement | html %]
+ [% ELSE %]
+ <label for="editionstatement">Ấn bản: </label>
+ <input type="text" size="20" name="editionstatement" id="editionstatement" value="[% editionstatement | html %]" />
+ [% END %]
+ </li>
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Năm xuất bản: </span>
+ <input type="hidden" name="publicationyear" id="publicationyear" value="[% publicationyear | html %]" />[% publicationyear | html %]
+ [% ELSE %]
+ <label for="publicationyear">Năm xuất bản: </label>
+ <input type="text" size="10" name="publicationyear" id="publicationyear" value="[% publicationyear | html %]" />
+ [% END %]
+ </li>
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Số ISBN: </span>
+ <input type="hidden" name="isbn" id="ISBN" value="[% isbn | html %]" />[% isbn | html %]
+ [% ELSE %]
+ <label for="ISBN">Số ISBN: </label>
+ <input type="text" size="50" name="isbn" id="ISBN" value="[% isbn | html %]" />
+ [% END %]
+ </li>
+ [% IF (UNIMARC) %]
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">EAN: </span>
+ <input type="hidden" name="ean" id="EAN" value="[% ean | html %]" />[% ean | html %]
+ [% ELSE %]
+ <label for="EAN">EAN: </label>
+ <input type="text" size="20" name="ean" id="EAN" value="[% ean | html %]" />
+ [% END %]
+ </li>
+ [% END %]
+ <li>
+ [% IF ( biblionumber ) %]
+ <span class="label">Tùng thư: </span>
+ <input type="hidden" name="series" id="series" value="[% seriestitle | html %]" />[% seriestitle | html %]
+ [% ELSE %]
+ <label for="series">Tùng thư: </label>
+ <input type="text" size="50" name="series" id="series" value="[% seriestitle | html %]" />
+ [% END %]
+ </li>
+ [% UNLESS ( biblionumber ) %]
+ [% IF ( itemtypeloop ) %]
+ <li>
+ <span class="label">Kiểu tài liệu:</span>
+ <select name="itemtype" style="width:12em;">
+ [% FOREACH itemtype IN itemtypeloop %]
+ <option value="[% itemtype.itemtype | html %]">[% itemtype.description | html %]</option>
+ [% END %]
+ </select>
+ </li>
+ [% END %]
+ [% END %]
+ </ol>
+ [% ELSE %]
+ <input type="hidden" name="use_ACQ_framework" value="1" />
+ [% IF biblionumber %]
+ <ol>
+ [% FOREACH field IN catalog_details %]
+ <li class="subfield_line">
+ <label>[% field.marc_lib | html %] ([% field.tag | html %][% field.subfield | html %])</label>
+ [% field.value | html %]
+ </li>
+ [% END %]
+ </ol>
+ [% ELSE %]
+ <ol>
+ [% FOREACH field IN catalog_details %]
+ <li class="subfield_line"> [% PROCESS display_subfield field=field %] </li>
+ [% END %]
+ </ol>
+ [% END %]
+ [% END %]
+ </fieldset>
+
+ [% IF ( suggestion ) %]
+ <fieldset class="rows">
+ <legend>Đề xuất mua</legend>
+ <ol>
+ <li>
+ <span class="label">Người đề xuất: </span>
+ [% suggestion.suggester.surname | html %][% IF ( suggestion.suggester.firstname ) %], [% suggestion.suggester.firstname | html %][% END %] (<a
+                            href="/cgi-bin/koha/suggestion/suggestion.pl?suggestionid=[% suggestion.suggestionid | uri %]&amp;op=show"
+                            >Đề xuất mua số [% suggestion.suggestionid | html %]</a
+                        >)
+ </li>
+ </ol>
+ </fieldset>
+ [% END %]
+
+ [% UNLESS subscriptionid || basket.is_standing %]
+ [%# it is a suggestion, we have not items %]
+ [% IF (AcqCreateItemOrdering) %]
+ <div id="items_list" class="page-section">
+ <p><strong>Danh sách tài liệu</strong></p>
+ <div style="width:100%;overflow:auto;">
+ <table>
+ <thead>
+ <tr>
+ <th class="no-export">Thao tác</th>
+ <th>Mã vạch</th>
+ <th>Thư viện chủ quản</th>
+ <th>Thư viện sở hữu</th>
+ <th>Không cho mượn</th>
+ <th>Bị khóa tài khoản</th>
+ <th>Vị trí</th>
+ <th>Số phân loại</th>
+ <th>Số bản sao</th>
+ <th>Số kiểm kê</th>
+ <th>Bộ sưu tập</th>
+ <th>Kiểu tài liệu</th>
+ <th>Tài liệu</th>
+ <th>Ghi chú</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH item IN items %]
+ <tr idblock="itemblock[% item.id | html %]">
+ <td>&nbsp;</td>
+ <td>[% item.barcode | html %]</td>
+ <td>[% Branches.GetName(item.homebranch) | html %]</td>
+ <td>[% Branches.GetName(item.holdingbranch) | html %]</td>
+ <td>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.notforloan', authorised_value => item.notforloan ) | html %]</td>
+ <td>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.restricted', authorised_value => item.restricted ) | html %]</td>
+ <td>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => item.location ) | html %]</td>
+ <td>[% item.itemcallnumber | html %]</td>
+ <td>[% item.copynumber | html %]</td>
+ <td>[% item.stocknumber | html %]</td>
+ <td>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode', authorised_value => item.ccode ) | html %]</td>
+ <td>[% ItemTypes.GetDescription( item.itype ) | html %]</td>
+ <td>[% item.materials | html %]</td>
+ <td>[% item.itemnotes | html %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ </div>
+
+ <fieldset class="rows" id="itemfieldset">
+ <legend>Tài liệu</legend>
+ [% IF ( NoACQframework ) %]
+ <div class="alert alert-info">Không có khổ mẫu biên mục cho các tài liệu mới bổ sung, sử dụng khổ mẫu mặc định. Bạn nên tạo ra một khổ mẫu biên mục với mã ACQ để sử dụng cho các tài liệu mới bổ sung</div>
+ [% END %]
+
+ [% UNLESS Koha.Preference('autoBarcode') == 'OFF' %]
+ <div class="alert alert-info">The autoBarcode system preference is set to [% Koha.Preference('autoBarcode') | html %] and items with blank barcodes will have barcodes generated upon save to database</div>
+ [% END %]
+
+ <div id="outeritemblock" class="marc_editor"></div>
+ </fieldset>
+ [% END %][%# | html UNLESS subscriptionid %]
+ [% END %][%# IF (AcqCreateItemOrdering) %]
+ <fieldset class="rows">
+ <legend>Thông tin tài khoản</legend>
+ <ol>
+ <li>
+ <label class="required" for="quantity">Số lượng: </label>
+ [% IF subscriptionid %]
+ <input type="text" size="20" id="quantity" name="quantity" value="1" onchange="updateCosts();" />
+ [% ELSIF AcqCreateItemOrdering %]
+ [% IF basket.is_standing %]
+ <input type="text" readonly="readonly" size="20" id="quantity" name="quantity" value="1" />
+ [% ELSE %]
+ <input type="text" readonly="readonly" size="20" id="quantity" name="quantity" value="[% quantityrec | html %]" />
+ [% IF quantitysugg %]
+ (suggested: [% quantitysugg | html %])
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ [% IF basket.is_standing %]
+ <input type="text" readonly="readonly" size="20" id="quantity" name="quantity" value="1" />
+ [% ELSE %]
+ <input type="text" size="20" id="quantity" name="quantity" value="[% quantityrec | html %]" onchange="updateCosts();" />
+ [% IF quantitysugg %]
+ (suggested: [% quantitysugg | html %])
+ [% END %]
+ [% END %]
+ [% END %]
+ <span class="required">Bắt buộc</span>
+ <!-- origquantityrec only here for javascript compatibility (additem.js needs it, useless here, useful when receiving an order -->
+ <input id="origquantityrec" readonly="readonly" type="hidden" name="origquantityrec" value="1" />
+
+ [% IF subscription %]
+ <br />
+ <div class="hint">
+ <span>Tuần suất phát hành:</span> [% subscription.frequency.description | html %] | [% IF subscription.numberlength %]<span>Number of issues: [% subscription.numberlength | html %]</span>[% END %]
+ [% IF subscription.weeklength %]<span>Number of weeks: [% subscription.weeklength | html %]</span>[% END %]
+ [% IF subscription.monthlength %]<span>Number of months: [% subscription.monthlength | html %]</span>[% END %]
+ </div>
+ [% END %]
+ </li>
+ <li>
+ <label class="required" for="budget_id">Nguồn quỹ: </label>
+ [% active_count = 0 %]
+ [% IF !ordernumber %]
+ [% FOREACH budget_loo IN budget_loop %]
+ [% active_count= active_count + budget_loo.b_active %]
+ [% END %]
+ [% END %]
+ <select class="select2" id="budget_id" name="budget_id">
+ <option value="">Chọn quỹ thanh toán</option>
+ [% FOREACH budget_loo IN budget_loop %]
+ [% level_indent_cnt = 0 %]
+ [% level_indent = "" %]
+ [% WHILE level_indent_cnt < budget_loo.b_level %]
+ [% level_indent = level_indent _ " -- " %]
+ [% level_indent_cnt = level_indent_cnt +1 %]
+ [% END %]
+
+ [% SET bdgclass = "" %]
+ [% IF ( budget_loo.b_sel ) %]
+ [% active_count = 0 #select no other fund %]
+ [% ELSIF active_count==1 && budget_loo.b_active %]
+
+ [% ELSE %]
+ [% bdgclass=budget_loo.b_active? "": "b_inactive" | html %]
+ [% END %]
+
+ [% IF ( budget_loo.b_sel ) %]
+ <option
+                                    value="[% budget_loo.b_id | html %]"
+                                    class="[% bdgclass | html %]"
+                                    data-sort1-authcat="[% budget_loo.b_sort1_authcat | html %]"
+                                    data-sort2-authcat="[% budget_loo.b_sort2_authcat | html %]"
+                                    selected="selected"
+                                >
+ [% level_indent | html %][% budget_loo.b_txt | html %][% IF !budget_loo.b_active %](inactive)[% END %]
+ </option>
+ [% ELSE %]
+ <option value="[% budget_loo.b_id | html %]" class="[% bdgclass | html %]" data-sort1-authcat="[% budget_loo.b_sort1_authcat | html %]" data-sort2-authcat="[% budget_loo.b_sort2_authcat | html %]">
+ [% level_indent | html %][% budget_loo.b_txt | html %][% IF !budget_loo.b_active %](inactive)[% END %]
+ </option>
+ [% END %]
+ [% END %]
+ </select>
+ <span class="required">Bắt buộc</span>
+ <label for="showallbudgets" style="float:none;">&nbsp;Show inactive:</label>
+ <input type="checkbox" id="showallbudgets" />
+ </li>
+ <li>
+ <label for="currency">Đơn vị tiền tệ:</label>
+ <select name="currency" id="currency" onchange="updateCosts();">
+ [% FOREACH c IN currencies %]
+ [% IF ordernumber and c.currency == currency or not ordernumber and c.currency == vendor_currency %]
+ <option value="[% c.currency | html %]" selected="selected">[% c.currency | html %]</option>
+ [% ELSIF not c.archived %]
+ <option value="[% c.currency | html %]">[% c.currency | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li>
+ <label for="listprice">Giá nhà cung cấp: </label>
+ <input class="decimal" type="text" size="20" name="listprice" id="listprice" value="[% listprice | html %]" onchange="updateCosts()" /> [% IF (listincgst == 1) %](có thuế)[% ELSE %](chưa có thuế)[% END %] </li>
+ <li>
+ <label for="uncertainprice">Giá tạm tính: </label>
+ [% IF ( uncertainprice ) %]
+ <input type="checkbox" name="uncertainprice" id="uncertainprice" value="1" checked="checked" />
+ [% ELSE %]
+ <input type="checkbox" name="uncertainprice" id="uncertainprice" value="1" />
+ [% END %]
+ </li>
+ <li>
+ [% IF ( gst_values ) %]
+ <label for="tax_rate">Thuế suất: </label>
+ <select name="tax_rate" id="tax_rate" onchange="updateCosts();">
+ [% SET gst_found = 0 %]
+ [% FOREACH gst IN gst_values %]
+ [% IF ( gst.option == tax_rate ) %]
+ <option value="[% gst.option | html %]" selected="selected">[% gst.option * 100 | html %]%</option>
+ [% SET gst_found = 1 %]
+ [% ELSE %]
+ <option value="[% gst.option | html %]">[% gst.option * 100 | html %]%</option>
+ [% END %]
+ [% END %]
+
+ [% IF !gst_found %]
+ <option value="[% tax_rate | html %]" selected="selected">[% tax_rate * 100 | html %]%</option>
+ [% END %]
+ </select>
+
+ [% IF !gst_found %]<span class="required">Tax rate not defined in system preference TaxRates!</span>[% END %]
+ [% ELSE %]
+ <input type="hidden" name="tax_rate" value="0" />
+ [% END %]
+ </li>
+ <li>
+ <label for="discount">Giảm giá: </label>
+ [% IF ( ordernumber ) %]
+ <input type="text" size="6" name="discount" id="discount" value="[% orderdiscount | html %]" onchange="updateCosts();" />%
+ [% ELSE %]
+ <input type="text" size="6" name="discount" id="discount" value="[% discount | html %]" onchange="updateCosts();" />%
+ [% END %]
+ </li>
+ <li>
+ <label for="rrp">Retail price: </label>
+ <input class="decimal" type="text" size="20" name="rrp" id="rrp" value="[% rrp | $Price on_editing => 1 %]" /> (được điều chỉnh cho [% cur_active | html %], [% IF (listincgst == 1) %]sau thuế[% ELSE %]trước thuế[% END %]) </li>
+ <li>
+ <label for="replacementprice">Đơn giá: </label>
+ <input class="decimal" type="text" size="20" name="replacementprice" id="replacementprice" value="[% replacementprice | html | $Price on_editing => 1 %]" />
+ </li>
+ <li>
+ <label for="ecost">Giá thanh toán: </label>
+ <input type="text" size="20" name="ecost" id="ecost" value="[% ecost | html %]" readonly="readonly" /> [% IF (listincgst == 1) %](có thuế)[% ELSE %](chưa có thuế)[% END %] </li>
+ <li>
+ <label for="total">Tổng số (Dự kiến): </label>
+ <input type="text" id="total" size="20" name="total" value="[% total | html %]" readonly="readonly" /> (bằng giá thanh toán * số lượng)</li>
+ <li class="ordering_unitprice">
+ <label for="unitprice">Chi phí thực tế: </label>
+ <input class="decimal" type="text" id="unitprice" size="20" name="unitprice" value="[% unitprice | html %]" />
+ [% IF (invoiceincgst == 1) %](có thuế)[% ELSE %](chưa có thuế)[% END %] </li>
+ <li>
+ <label for="order_internalnote">Ghi chú nội bộ:: </label>
+ <textarea id="order_internalnote" cols="30" rows="3" name="order_internalnote">[% IF ( order_internalnote ) %][% order_internalnote | html %][% END %]</textarea>
+ </li>
+ <li>
+ <label for="order_vendornote">Ghi chú nhà cung cấp: </label>
+ <textarea id="order_vendornote" cols="30" rows="3" name="order_vendornote">[% IF ( order_vendornote ) %][% order_vendornote | html %][% END %]</textarea>
+ </li>
+ <li>
+ <label for="servicing_instructions">Servicing instructions: </label>
+ <div id="servicing_instructions_container">
+ <!-- Servicing instruction groups will be populated here -->
+ </div>
+ <button type="button" id="add_servicing_group" class="btn btn-default btn-xs"> <i class="fa fa-plus"></i> Add servicing group </button>
+ <input type="hidden" id="servicing_instruction_groups_json" name="servicing_instruction_groups_json" value="[% servicing_instruction_groups_json | html %]" />
+ <input type="hidden" id="servicing_instruction_avs_json" value="[% servicing_instruction_avs_json | html %]" />
+ <div class="hint">EDIFACT servicing instructions (GIR LVT/LVC). Each group can contain multiple coded (LVC) and/or free-text (LVT) instructions that work together.</div>
+ </li>
+ <li>
+ <label for="estimated_delivery_date">Estimated delivery date: </label>
+ <input type="text" id="estimated_delivery_date" size="10" name="estimated_delivery_date" class="flatpickr" value="[% estimated_delivery_date | html %]" />
+ <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
+ </li>
+ <li>
+ <div class="hint">Hai dữ liệu sau đây có thể được sử dụng cho mục đích thống kê của bạn. </div>
+ </li>
+ <li>
+ <label for="sort1">Thống kê 1: </label>
+ <input id="sort1" type="text" id="sort1" size="20" name="sort1" value="[% sort1 | html %]" />
+ </li>
+ <li>
+ <label for="sort2">Thống kê 2: </label>
+ <input id="sort2" type="text" id="sort2" size="20" name="sort2" value="[% sort2 | html %]" />
+ </li>
+ </ol>
+ </fieldset>
+
+ [% IF additional_fields.size %]
+ [% INCLUDE 'additional-fields-entry.inc' available = additional_fields values = additional_field_values %]
+ [% END %]
+
+ <fieldset class="action">
+ <input type="hidden" id="op" name="op" value="cud-order" />
+ <input type="hidden" name="subscriptionid" value="[% subscriptionid | html %]" />
+ <input class="btn btn-primary" type="submit" value="Lưu" />
+ [% IF (suggestion) %]
+ <a class="cancel" href="/cgi-bin/koha/acqui/newordersuggestion.pl?booksellerid=[% booksellerid | html %]&amp;basketno=[% basketno | html %]">Hủy bỏ</a>
+ [% ELSE %]
+ [% IF subscriptionid %]
+ <a class="cancel" href="/cgi-bin/koha/acqui/newordersubscription.pl?booksellerid=[% booksellerid | html %]&amp;basketno=[% basketno | html %]">Hủy bỏ</a>
+ [% ELSE %]
+ <a class="cancel" href="/cgi-bin/koha/acqui/basket.pl?basketno=[% basketno | html %]">Hủy bỏ</a>
+ [% END %]
+ [% END %]
+ </fieldset>
+ </form>
+
+ <div id="procModal" data-backdrop="static" class="modal" aria-labelledby="procModal" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title">Add multiple items</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <h3>Processing multiple items</h3>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <div id="multiCountModal" class="modal" aria-labelledby="multiCountModal" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title">Add multiple items</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div class="alert alert-warning">
+ <h3>Invalid number of copies</h3>
+ <p>Please enter a <strong>number</strong>, lớn hơn hay bằng 1</p>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ </div>
+ </div>
+[% END %]
+
+[% SET columns = ['cardnumber','name','category','branch','action'] %]
+[% PROCESS patron_search_modal columns => columns, modal_title => t("Add user") %]
+[% PROCESS patron_search_js columns => columns, actions => ["add"], preview_on_name_click => 1 %]
+
+[% MACRO jsinclude BLOCK %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]
+
+[% BLOCK display_subfield %]
+ <label>[% field.marc_lib | html %] ([% field.tag | html %][% field.subfield | html %])</label>
+
+ [% SET mv = field.marc_value %]
+ [% IF ( mv.type == 'text' ) %]
+ [% IF ( mv.readonly == 1 ) %]
+ <input
+                type="text"
+                id="[%- mv.id | html -%]"
+                name="bib_field_value"
+                value="[%- mv.value | html -%]"
+                class="input_marceditor readonly"
+                tabindex="1"
+                size="[%- mv.size | html -%]"
+                maxlength="[%- mv.maxlength | html -%]"
+                readonly="readonly"
+            />
+ [% ELSE %]
+ <input type="text" id="[%- mv.id | html -%]" name="bib_field_value" value="[%- mv.value | html -%]" class="input_marceditor" tabindex="1" size="[%- mv.size | html -%]" maxlength="[%- mv.maxlength | html -%]" />
+ [% END %]
+ [% ELSIF ( mv.type == 'text_complex' ) %]
+ <input
+            type="text"
+            id="[%- mv.id | html -%]"
+            name="bib_field_value"
+            value="[%- mv.value | html -%]"
+            class="input_marceditor framework_plugin"
+            tabindex="1"
+            size="[%- mv.size | html -%]"
+            maxlength="[%- mv.maxlength | html -%]"
+            data-plugin="[% mv.plugin | html %]"
+        />
+ [% mv.javascript | $raw %]
+ [% ELSIF ( mv.type == 'hidden' ) %]
+ <input tabindex="1" type="hidden" id="[%- mv.id | html -%]" name="bib_field_value" size="[%- mv.size | html -%]" maxlength="[%- mv.maxlength | html -%]" value="[%- mv.value | html -%]" />
+ [% ELSIF ( mv.type == 'textarea' ) %]
+ <textarea cols="70" rows="4" id="[%- mv.id | html -%]" name="bib_field_value" class="input_marceditor" tabindex="1">[%- mv.value | html -%]</textarea>
+ [% ELSIF ( mv.type == 'select' ) %]
+ <select name="bib_field_value" tabindex="1" class="input_marceditor select2" id="[%- mv.id | html -%]">
+ [% FOREACH aval IN mv.values %]
+ [% IF aval == mv.default %]
+ <option value="[%- aval | html -%]" selected="selected">[%- mv.labels.$aval | html -%]</option>
+ [% ELSE %]
+ <option value="[%- aval | html -%]">[%- mv.labels.$aval | html -%]</option>
+ [% END %]
+ [% END %]
+ </select>
+ [% END  # /IF (mv.type...) %]
+
+ <div class="subfield_controls">
+ [% IF ( mv.type == 'text_complex' ) %]
+ [% IF mv.noclick %]
+ <span class="buttonDot tag_editor disabled" tabindex="-1" title="Field autofilled by plugin"></span>
+ [% ELSE %]
+ [% IF mv.plugin == "upload.pl" %]
+ <a href="#" id="buttonDot_[% mv.id | html %]" class="tag_editor upload framework_plugin" tabindex="1" data-plugin="[% mv.plugin | html %]"><i class="fa fa-upload" aria-hidden="true"></i> Tải lên</a>
+ [% ELSE %]
+ <a href="#" id="buttonDot_[% mv.id | html %]" class="buttonDot tag_editor framework_plugin" tabindex="1" title="Tag editor" data-plugin="[% mv.plugin | html %]">Tag editor</a>
+ [% END %]
+ [% END %]
+ [% END %]
+ </div>
+
+ <input type="hidden" name="bib_kohafield" value="[% field.kohafield | html %]" />
+ <input type="hidden" name="bib_tag" value="[% field.tag | html %]" />
+ <input type="hidden" name="bib_subfield" value="[% field.subfield | html %]" />
+ [% IF field.mandatory %]<span class="required">Bắt buộc</span>[% END %]
+[% END %]

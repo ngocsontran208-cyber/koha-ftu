@@ -1,0 +1,170 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Offline circulation file upload") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="ocirc_process_koc" class="circ ocirc">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+
+ [% IF ( transactions_loaded ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/offline_circ/process_koc.pl">Tải tệp tin lưu thông ngoại tuyến lên Koha</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Kết quả</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tải tệp tin lưu thông ngoại tuyến lên Koha</span>
+ [% END %]
+ [% END # /IF transactions_loaded %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+
+ [% IF ( transactions_loaded ) %]
+ <h1>Lưu thông ngoại tuyến Koha</h1>
+ <p>Dữ liệu của bạn đã được xử lý. Đây là kết quả sau khi xử lý:</p>
+ [% FOREACH message IN messages %]
+ [% IF ( message.message ) %]
+ <div class="alert alert-warning">
+ [% IF ( message.ERROR_file_version ) %]<p>Cảnh báo: Phiên bản của tệp tin này là [% message.upload_version | html %], phiên bản được hỗ trợ tốt nhất là phiên bản [% message.current_version | html %]. Do đó kết quả có thể không theo ý bạn.</p>[% END %]
+ </div>
+ [% END %]
+ [% IF ( message.ERROR_no_borrower_from_item ) %]<p>Cảnh báo: Bạn không thể xác định bạn đọc ghi mượn tài liệu từ đăng ký cá biệt của tài liệu ([% message.badbarcode | html %]). Do đó bạn không thể ghi trả cho bạn đọc.</p>[% END %]
+ [% IF ( message.issue ) %]
+ <p
+                    >Được ghi mượn <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% message.biblionumber | uri %]">[% message.title | html %]</a> ([% message.barcode | html %]) tới bạn đọc <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% message.borrowernumber | uri %]">[% message.firstname | html %] [% message.surname | html %]</a> ([% message.cardnumber | html %]):
+ [% message.datetime | html %]</p
+                >
+ [% END %]
+ [% IF ( message.renew ) %]
+ <p
+                    >Được gia hạn <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% message.biblionumber | uri %]">[% message.title | html %]</a> ([% message.barcode | html %]) cho bạn đọc <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% message.borrowernumber | uri %]">[% message.firstname | html %] [% message.surname | html %]</a> ([% message.cardnumber | html %]):
+ [% message.datetime | html %]</p
+                >
+ [% END %]
+ [% IF ( message.return ) %]
+ <p
+                    >Được ghi trả <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% message.biblionumber | uri %]">[% message.title | html %]</a> ([% message.barcode | html %]) từ bạn đọc <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% message.borrowernumber | uri %]">[% message.firstname | html %] [% message.surname | html %]</a> ([% message.cardnumber | html %]):
+ [% message.datetime | html %]</p
+                >
+ [% END %]
+ [% IF ( message.payment ) %]
+ <p
+                    >Chấp nhận thanh toán khoản tiền phạt ([% message.amount | html %]) từ bạn đọc <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% message.borrowernumber | uri %]">[% message.firstname | html %] [% message.surname | html %]</a> ([% message.cardnumber | html %]):
+ [% message.datetime | html %]</p
+                >
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ <h1>Tải dữ liệu lưu thông ngoại tuyến lên Koha</h1>
+
+ <div id="fileuploadform">
+ <form method="post" action="/cgi-bin/koha/offline_circ/process_koc.pl" enctype="multipart/form-data" class="validated">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-upload" />
+ <fieldset class="brief">
+ <ol
+                        ><li
+                            ><label for="fileToUpload">Chọn tệp tin .koc: </label>
+ <input class="required" required="required" type="file" id="fileToUpload" size="50" name="fileToUpload" />
+ <span class="required">Bắt buộc</span>
+ </li></ol
+                    >
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" id="upload_file" type="button" value="Tải lên" />
+ </fieldset>
+ </form>
+ <div id="fileuploadstatus" class="progress_panel" style="display:none">Tiến trình tải lên: <progress id="fileuploadprogress" max="100" value="0"></progress> <span class="fileuploadpercent"></span>%</div>
+ <div id="fileuploadfailed" style="display:none"></div>
+ </div>
+
+ <form action="enqueue_koc.pl" id="processfile" method="post" enctype="multipart/form-data">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-enqueue" />
+ <input type="hidden" name="uploadedfileid" id="uploadedfileid" value="" />
+ <input id="queueformsubmit" type="submit" value="Thêm vào dữ liệu lưu thông ngoại tuyến" />
+ </form>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/file-upload.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        var xhr;
+        $(document).ready(function () {
+            $("#enqueuefile").hide();
+            $("#processfile").hide();
+            $("#upload_file").on("click", function () {
+                StartUpload();
+            });
+            $("#queueformsubmit").on("click", function () {
+                var processfile = document.getElementById("processfile");
+                return CheckForm(processfile);
+            });
+            $("#mainformsubmit").on("click", function () {
+                var enqueuefile = document.getElementById("enqueuefile");
+                return CheckForm(enqueuefile);
+            });
+        });
+
+        function StartUpload() {
+            if ($("#fileToUpload").prop("files").length == 0) return;
+            $("#fileuploadform input.submit").prop("disabled", true);
+            $("#fileuploadfailed").hide();
+            $("#processfile").hide();
+            $("#fileuploadstatus").show();
+            $("form#processfile #uploadedfileid").val("");
+            $("form#enqueuefile #uploadedfileid").val("");
+            xhr = AjaxUpload($("#fileToUpload"), $("#fileuploadprogress"), "temp=1", cbUpload);
+        }
+
+        function cbUpload(status, fileid, errors) {
+            if (status == "done") {
+                $("form#processfile #uploadedfileid").val(fileid);
+                $("form#enqueuefile #uploadedfileid").val(fileid);
+                $("#fileToUpload").prop("disabled", true);
+                $("#processfile").show();
+                $("#enqueuefile").show();
+            } else {
+                var errMsgs = [_("Error code 0 not used"), _("File already exists"), _("Directory is not writeable"), _("Root directory for uploads not defined"), _("Temporary directory for uploads not defined")];
+                var errCode = errors[$("#fileToUpload").prop("files")[0].name].code;
+                $("#fileuploadstatus").hide();
+                $("#fileuploadfailed").show();
+                $("#fileuploadfailed").text(_("Upload status: ") + (status == "failed" ? _("Failed") + " - (" + errCode + ") " + errMsgs[errCode] : status == "denied" ? _("Denied") : status));
+            }
+        }
+
+        function CheckForm(f) {
+            if (f.uploadedfileid.value == "") {
+                alert(_("Vui lòng tải lên một tệp tin trước."));
+            } else {
+                return f.submit();
+            }
+            return false;
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

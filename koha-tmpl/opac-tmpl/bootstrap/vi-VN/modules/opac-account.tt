@@ -1,0 +1,192 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE AuthorisedValues %]
+[% USE Price %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET ENABLE_OPAC_PAYMENTS = payment_methods %]
+[% USE AdditionalContents %]
+[% SET DISPLAY_PAYMENT_BLOCK = 0 %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your charges") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+
+[% INCLUDE 'bodytag.inc' bodyid='opac-account' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Các khoản phí của bạn</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+ <div id="useraccount" class="maincontent">
+ <h1>Các khoản phí của bạn</h1>
+ [% IF message %]
+ <div class="alert alert-info">
+ [% IF message == 'valid_payment' %]
+ <p>Khoản thanh toán $[% message_value | html %] của bạn đã được xử lý thành công!</p>
+ [% ELSIF message == 'duplicate_payment' %]
+ <p>Khoản thanh toán với mã giao dịch '[% message_value | html %]' đã được ghi nhận vào tài khoản.</p>
+ <p>Vui lòng liên hệ với thủ thư để biết chi tiết.</p>
+ [% ELSIF message == 'invalid_payment' %]
+ <p>Mã giao dịch '[% message_value | html %]' cho khoản thanh toán này không hợp lệ.</p>
+ <p>Vui lòng liên hệ với thủ thư để biết chi tiết.</p>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF payment_error %]
+ <div id="error" class="alert alert-warning">
+ <p><strong>Lỗi:</strong> có lỗi xảy ra khi xử lý khoản thanh toán của bạn</p>
+ </div>
+ [% ELSIF payment %]
+ <div class="alert alert-info">
+ <p><strong>Khoản thanh toán đã áp dụng:</strong> khoản thanh toán [% payment | html %] đã được áp dụng vào tài khoản của bạn</p>
+ </div>
+ [% END %]
+
+ [% PROCESS 'account-table.inc' ACCOUNT_LINES = ACCOUNT_LINES, ENABLE_OPAC_PAYMENTS = ENABLE_OPAC_PAYMENTS, plugins = plugins %]
+ </div>
+ <!-- / #useraccount -->
+ </div>
+ <!-- / .col-10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        const ENABLE_OPAC_PAYMENTS = [% ENABLE_OPAC_PAYMENTS ? 1 : 0 | html %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            var txtActivefilter = _("Lọc các giao dịch đã thanh toán");
+            var txtInactivefilter = _("Hiển thị tất cả giao dịch");
+
+            var fines_table = $("#finestable").kohaTable({
+                ...(ENABLE_OPAC_PAYMENTS ? { order: [[1, "desc"]] } : { order: [[0, "desc"]] }),
+                dom: '<"#filter_p">',
+                responsive: {
+                    details: { type: "column", target: -1 },
+                },
+                columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+                drawCallback: function () {
+                    show_hiddentfoot("#finestable");
+                },
+            });
+
+            $('table[id^="finestable-"]').kohaTable({
+                responsive: {
+                    details: { type: "column", target: -1 },
+                },
+                columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+                drawCallback: function () {
+                    show_hiddentfoot('table[id^="finestable-"]');
+                },
+            });
+
+            function show_hiddentfoot(selector) {
+                $(".finestable tfoot .sum").show();
+                if ($(".finestable tfoot td.dtr-hidden").length > 0) {
+                    $(selector + " tfoot th").removeAttr("colspan");
+                    $(".finestable tfoot .dtr-control").hide();
+                }
+            }
+            $("#filter_p").html('<p><a href="#" id="filter_paid"><i class="fa fa-filter" aria-hidden="true"></i> ' + txtActivefilter + "</a>");
+            $("#filter_paid").click(function (e) {
+                e.preventDefault();
+                let filteredValue = "";
+                if ($(this).hasClass("filtered")) {
+                    $(this).html('<i class="fa fa-filter" aria-hidden="true"></i> ' + txtActivefilter);
+                } else {
+                    //Not filtered. Let's do it!
+                    filteredValue = "^((?!0.00).*)$"; //Filter not matching 0.00 http://stackoverflow.com/a/406408
+                    $(this).html('<i class="fa fa-filter" aria-hidden="true"></i> ' + txtInactivefilter);
+                }
+                fines_table.DataTable().columns(-2).search(filteredValue, { regex: true }).draw();
+                $(this).toggleClass("filtered");
+            });
+
+            //Start filtered
+            $("#filter_paid").click();
+
+            $(".pay-online").removeClass("hidden");
+
+            $("#amount-to-pay-label").hide();
+
+            $(".checkbox-pay, input[name='payment_method']").change(function () {
+                // Disable the pay button if no fees are selected
+                //$("#submit-pay").prop("disabled", ! $(".checkbox-pay:checked").length );
+
+                // Calculate the total amount to be paid based on selected fees
+                var total = 0;
+                $(".checkbox-pay").each(function () {
+                    if ($(this).is(":checked")) {
+                        var id = this.id.split("checkbox-pay-")[1];
+                        total += parseFloat($("#amount-" + id).val());
+                    }
+                });
+
+                var p = Promise.resolve();
+                if (total) {
+                    p = Promise.all(
+                        $('input[name="payment_method"]')
+                            .map(function () {
+                                var self = this;
+                                return new Promise(function (resolve, reject) {
+                                    var threshold = $(self).data("threshold");
+                                    var help = $(self).parent().siblings(".help-block");
+                                    if (!threshold || threshold == "" || threshold <= total) {
+                                        $(self).prop("disabled", false);
+                                        help.addClass("hide");
+                                    } else {
+                                        $(self).prop("disabled", true);
+                                        help.html(_("Số tiền tối thiểu dịch vụ này cần là %s").format(parseInt(threshold, 10).toFixed(2))).removeClass("hide");
+                                    }
+                                    resolve();
+                                });
+                            })
+                            .toArray()
+                    );
+
+                    $("#amount-to-pay").html(total.toFixed(2));
+                    $("#amount-to-pay-label").show();
+                } else {
+                    $('input[name="payment_method"]').prop("disabled", false).parent().siblings(".help-block").addClass("hide");
+                    $("#amount-to-pay-label").hide();
+                }
+                p.then(function () {
+                    $("#submit-pay").prop("disabled", !$(".checkbox-pay:checked").length || !$('input[name="payment_method"]:checked:not(:disabled)').length);
+                });
+            });
+        });
+    </script>
+[% END %]

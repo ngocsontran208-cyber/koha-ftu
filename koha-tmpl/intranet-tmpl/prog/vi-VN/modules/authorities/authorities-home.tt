@@ -1,0 +1,49 @@
+[% USE raw %]
+[% PROCESS 'i18n.inc' %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% USE Branches %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Authorities") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="auth_authorities_home" class="auth">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'authorities-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Dữ liệu kiểm soát</span>
+ [% END %]
+ [% END %]
+[% END %]
+
+[% WRAPPER 'main-container.inc' %]
+ [% INCLUDE 'authorities-toolbar.inc' %]
+
+ <h1>Dữ liệu kiểm soát</h1>
+
+ <div id="merge_in_progress" class="alert alert-info" style="display:none;"></div>
+
+ [%- SET StaffAuthoritiesHome = AdditionalContents.get( location => "StaffAuthoritiesHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]
+ [%- FOREACH block IN StaffAuthoritiesHome.content -%]
+ <div class="page-section"> [%- block.content | $raw -%] </div>
+ [%- END -%]
+[% END %]
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        const searchType = "[% marclist | html %]";
+    </script>
+ [% Asset.js("js/authorities.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

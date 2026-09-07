@@ -1,0 +1,322 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE ItemTypes %]
+[% USE AdditionalContents %]
+[% USE Price %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+
+<title
+    >[% FILTER collapse %]
+ [% title_in_title = INCLUDE 'biblio-title-head.inc' %]
+ [% tx("Request article from {title}", { title = title_in_title }) | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+
+[% INCLUDE 'bodytag.inc' bodyid='opac-request-article' %]
+[% INCLUDE 'masthead.inc' %]
+
+[% SET disclaimer = AdditionalContents.get( location => "ArticleRequestsDisclaimerText", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
+[% SET AllPublicBranches = Branches.all(  search_params => { public => 1 } ) %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Chi tiết cho: [% biblio.title | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Yêu cầu bài báo</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid maincontent">
+ <div class="row">
+ <div class="col">
+ [% IF error_message %]
+ <h1 class="title">[% biblio.title | html %]</h1>
+ <div class="alert alert-info">
+ [% SWITCH error_message %]
+ [% CASE 'article_request_limit_reached' %]
+ <span>Bạn đã đạt giới hạn số lượng yêu cầu bài báo đang chờ xử lý.</span>
+ [% CASE 'article_request_unhandled_exception' %]
+ <span>Đã xảy ra lỗi.</span>
+ [% END %]
+ </div>
+ [% ELSIF biblio.can_article_request( patron ) %]
+ <h1>Gửi yêu cầu bài báo cho [% biblio.title | html %]</h1>
+ [% IF ( disclaimer && !accepted ) %]
+ <div class="alert alert-warning">
+ [% PROCESS koha_news_block news => disclaimer %]
+ <a href="/cgi-bin/koha/opac-request-article.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;accepted=1" class="btn btn-sm btn-primary"><i class="fa fa-check" aria-hidden="true"></i> Chấp nhận</a>
+ </div>
+ [% ELSE %]
+ [% SET article_request_type = biblio.article_request_type( patron ) %]
+
+ [% IF article_request_type == 'yes' %][% SET mandatory_fields = Koha.Preference('ArticleRequestsMandatoryFields') %][% END %]
+ [% IF article_request_type == 'bib_only' %][% SET mandatory_fields = Koha.Preference('ArticleRequestsMandatoryFieldsRecordOnly') %][% END %]
+ [% IF article_request_type == 'item_only' %][% SET mandatory_fields = Koha.Preference('ArticleRequestsMandatoryFieldsItemOnly') %][% END %]
+
+ [% IF article_request_fee > 0 %]
+ <div class="alert alert-warning"> Bạn sẽ bị tính phí <strong>[% article_request_fee | $Price %]</strong> cho mỗi yêu cầu </div>
+ [% END %]
+
+ <form id="place-article-request" method="post" action="/cgi-bin/koha/opac-request-article.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Gửi yêu cầu bài báo</legend>
+ <input type="hidden" name="op" value="cud-create" />
+ <input type="hidden" name="biblionumber" id="biblionumber" value="[% biblio.biblionumber | html %]" />
+
+ <fieldset class="rows">
+ <ul>
+ <li>
+ [% IF mandatory_fields.search('title') %]
+ <label for="title" class="required">Nhan đề:</label>
+ <input type="text" required="required" name="title" id="title" size="50" value="[% title | html %]" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="title">Nhan đề:</label>
+ <input type="text" name="title" id="title" size="50" value="[% title | html %]" />
+ [% END %]
+ </li>
+
+ <li>
+ [% IF mandatory_fields.search('author') %]
+ <label for="author" class="required">Tác giả:</label>
+ <input type="text" required="required" name="author" id="author" size="50" value="[% author | html %]" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="author">Tác giả:</label>
+ <input type="text" name="author" id="author" size="50" value="[% author | html %]" />
+ [% END %]
+ </li>
+
+ <li>
+ [% IF mandatory_fields.search('volume') %]
+ <label for="volume" class="required">Tập:</label>
+ <input type="text" required="required" name="volume" id="volume" size="50" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="volume">Tập:</label>
+ <input type="text" name="volume" id="volume" size="50" />
+ [% END %]
+ </li>
+
+ <li>
+ [% IF mandatory_fields.search('issue') %]
+ <label for="issue" class="required">Số:</label>
+ <input type="text" required="required" name="issue" id="issue" size="50" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="issue">Số:</label>
+ <input type="text" name="issue" id="issue" size="50" />
+ [% END %]
+ </li>
+
+ <li>
+ [% IF mandatory_fields.search('date') %]
+ <label for="date" class="required">Ngày:</label>
+ <input type="text" required="required" name="date" id="date" size="50" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="date">Ngày:</label>
+ <input type="text" name="date" id="date" size="50" />
+ [% END %]
+ </li>
+
+ <li>
+ <label for="toc_request">Mục lục:</label>
+ <input type="checkbox" name="toc_request" value="1" />
+ </li>
+
+ <li>
+ [% IF mandatory_fields.search('pages') %]
+ <label for="pages" class="required">Trang:</label>
+ <input type="text" required="required" name="pages" id="pages" size="50" value="[% pageinfo | html %]" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="pages">Trang:</label>
+ <input type="text" name="pages" id="pages" size="50" value="[% pageinfo | html %]" />
+ [% END %]
+ </li>
+
+ <li>
+ [% IF mandatory_fields.search('chapters') %]
+ <label for="chapters" class="required">Chương:</label>
+ <input type="text" required="required" name="chapters" id="chapters" size="50" />
+ <div class="required_label required">Bắt buộc</div>
+ [% ELSE %]
+ <label for="chapters">Chương:</label>
+ <input type="text" name="chapters" id="chapters" size="50" />
+ [% END %]
+ </li>
+
+ <li>
+ <label for="patron_notes">Ghi chú:</label>
+ <input type="text" name="patron_notes" id="patron_notes" size="50" />
+ </li>
+
+ [% SET ArticleRequestsSupportedFormats = Koha.MultivaluePreference('ArticleRequestsSupportedFormats') %]
+ [% IF ArticleRequestsSupportedFormats.size %]
+ <li>
+ <label for="format">Định dạng:</label>
+ <select name="format" id="format">
+ [% FOR format IN ArticleRequestsSupportedFormats %]
+ [% IF format == 'PHOTOCOPY' %]
+ <option value="PHOTOCOPY">Bản sao</option>
+ [% ELSIF format == 'SCAN' %]
+ <option value="SCAN">Bản quét số</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ [% END %]
+
+ [% IF AllPublicBranches.size > 1 %]
+ <li>
+ <label for="branchcode">Thư viện nhận sách:</label>
+ <select name="branchcode" id="branchcode" required="required">
+ [% FOREACH b IN AllPublicBranches %]
+ [% IF b.branchcode == Branches.GetLoggedInBranchcode %]
+ <option value="[% b.branchcode | html %]" selected="selected">[% b.branchname | html %]</option>
+ [% ELSE %]
+ <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ [% ELSE %]
+ <input type="hidden" name="branchcode" value="[% Branches.GetLoggedInBranchcode | html %]" />
+ [% END %]
+ </ul>
+ </fieldset>
+
+ [% IF article_request_type != 'bib_only' %]
+ <table class="copiesrow table table-bordered table-striped">
+ <caption>Chọn một tài liệu cụ thể:</caption>
+ <thead>
+ <tr>
+ <th>&nbsp;</th>
+ <th>Kiểu tài liệu</th>
+ <th>Mã vạch</th>
+ <th>Thư viện chủ quản</th>
+ <th>Số phân loại</th>
+ <th>Số định danh ấn phẩm</th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH item IN biblio.items %]
+ [% IF item.can_article_request( patron ) %]
+ <tr>
+ <td>
+ [% IF article_request_type == 'item_only' && !checked %]
+ [% SET checked = 1 %]
+ <input type="radio" name="itemnumber" value="[% item.itemnumber | html %]" checked="checked" />
+ [% ELSE %]
+ <input type="radio" name="itemnumber" value="[% item.itemnumber | html %]" />
+ [% END %]
+ </td>
+ <td> [% ItemTypes.GetDescription( item.itype ) | html %] </td>
+ <td> [% item.barcode | html %] </td>
+ <td> [% Branches.GetName( item.homebranch ) | html %] </td>
+ <td> [% item.itemcallnumber | html %] </td>
+ <td> [% item.enumchron | html %] </td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% IF article_request_type != 'item_only' %]
+ <tr>
+ <td>
+ <input type="radio" name="itemnumber" value="" checked="checked" />
+ </td>
+ <td colspan="6"> Bất kỳ tài liệu nào </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% END %]
+
+ <input class="btn btn-primary" type="submit" value="Gửi yêu cầu" />
+ </form>
+ [% END %]
+ [% ELSE %]
+ <h1 class="title">[% biblio.title | html %]</h1>
+ <div class="alert alert-info"> Không thể tạo yêu cầu bài báo cho bản ghi này. </div>
+ [% END %]
+ </div>
+ <!-- /.col -->
+ </div>
+ <!-- /.row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+
+[% BLOCK jsinclude %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        $(document).ready( function() {
+            allow_submit = false;
+            $('#place-article-request').on('submit', function( event ){
+                if ( ! allow_submit ) {
+                    event.preventDefault();
+
+                    [% IF article_request_type == 'item_only' %]
+                        if ( ! $("input:radio[name='itemnumber']").is(":checked") ) {
+                            alert( _("Vui lòng chọn một tài liệu cụ thể cho yêu cầu bài báo này.") );
+                            return 0;
+                        }
+                    [% END %]
+
+                    var mandatory_fields = "[% mandatory_fields | html %]";
+                    var m = new Array();
+                    if ( mandatory_fields ) m = mandatory_fields.split(",");
+                    var f = new Array();
+
+                    for (i = 0; i < m.length; i++) {
+                        if ( ! $("#" + m[i]).val() ) {
+                            f.push( m[i] );
+                        }
+                    }
+
+                    // Initialize format(s)
+                    var supported_formats = "[% Koha.Preference('ArticleRequestsSupportedFormats') | $raw %]";
+                    if( !supported_formats.match(/PHOTOCOPY/) )
+                        $('#format option[value="PHOTOCOPY"]').remove();
+                    if( !supported_formats.match(/SCAN/) )
+                        $('#format option[value="SCAN"]').remove();
+
+                    if( $('#format option').length > 1 ) {
+                        // Select first listed format
+                        var first_format = supported_formats.split('|')[0].replace(/^\s*|\s*$/g, '');
+                        $('#format option[value="'+first_format+'"]').attr('selected', true);
+                    }
+
+                    if ( f.length ) {
+                        alert( _("Các trường sau đây là bắt buộc và chưa được điền: ") + f.join(", ") );
+                        return 0;
+                    }
+
+                    // Check if all fields are blank
+                    if( m.length == 0 && $('#title').val()=='' && $('#author').val()=='' && $('#volume').val()=='' && $('#issue').val()=='' && $('#date').val()=='' && $('#pages').val()=='' && $('#chapters').val()=='' && $('#patron_notes').val()=='' && !$('input[name="toc_request"]').prop('checked') ) {
+                        alert( _("Vui lòng điền vào ít nhất một trường.") );
+                        return 0;
+                    }
+
+                    allow_submit = true;
+                    $('#place-article-request').submit();
+                }
+            });
+
+        });
+    </script>
+[% END %]

@@ -1,0 +1,94 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Price %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Discharge") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+<body id="opac-discharge" class="scrollto">
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Xác nhận thanh toán mượn trả</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ <div id="discharge" class="maincontent">
+ <h1>Xác nhận thanh toán mượn trả</h1>
+ [% FOR message IN messages %]
+ <div class="alert alert-[% message.type | html %]">
+ [% IF message.code == "unable_to_generate_pdf" %] Lỗi xảy ra khi tạo tập tin pdf. Vui lòng liên hệ với nhân viên để sửa lỗi này. [% END %] </div>
+ [% END %]
+
+ [% IF success %]
+ <p>Yêu cầu cấp giấy xác nhận đã được gửi. Giấy xác nhận của bạn sẽ có trên trang này trong vòng vài ngày.</p>
+ [% ELSIF available %]
+ <p><a href="/cgi-bin/koha/opac-discharge.pl?op=get">Nhận giấy xác nhận mượn trả</a></p>
+ [% ELSIF pending %]
+ <p>Giấy xác nhận của bạn sẽ có trên trang này trong vòng vài ngày.</p>
+ [% ELSIF not messages %]
+ <h2>Giấy xác nhận mượn trả là gì?</h2>
+ <p
+                            >Tài liệu này chứng nhận rằng bạn đã trả lại tất cả các tài liệu đã mượn. Yêu cầu này đôi khi được đưa ra khi chuyển hồ sơ từ trường này sang trường khác. Giấy xác nhận sẽ được chúng tôi gửi đến trường của bạn. Bạn cũng có thể tìm thấy nó trong tài khoản bạn đọc của mình.</p
+                        >
+ <p><strong>Cảnh báo</strong>: Yêu cầu này chỉ hợp lệ nếu bạn không vi phạm bất kỳ quy định nào của thư viện. Sau khi nộp yêu cầu, bạn sẽ không thể mượn tài liệu của thư viện nữa.</p>
+ [% IF can_be_discharged %]
+ <form action="/cgi-bin/koha/opac-discharge.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-request" />
+ <button class="btn btn-primary" type="submit">Yêu cầu cấp giấy xác nhận mượn trả</button>
+ </form>
+ [% ELSE %]
+ [% IF failure %]
+ <p>There was an error during the discharge process</p>
+ [% END %]
+ <div class="alert alert-info"
+                                >You cannot be discharged because:
+ <ul>
+ [% IF discharge_problems.checkouts > 1 %]
+ <li>You have [% discharge_problems.checkouts | html %] items checked out. Please return them before reapplying.</li>
+ [% ELSIF discharge_problems.checkouts == 1 %]
+ <li>You currently have an item checked out. Please return it before reapplying.</li>
+ [% END %]
+
+ [% IF discharge_problems.debt %]
+ <li>You have unpaid charges of [% discharge_problems.debt | $Price %]. Please pay them before reapplying.</li>
+ [% END %]
+ </ul>
+ </div>
+ [% END %]
+ [% END %]
+ </div>
+ <!-- / #discharge -->
+ </div>
+ <!-- / .col-10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

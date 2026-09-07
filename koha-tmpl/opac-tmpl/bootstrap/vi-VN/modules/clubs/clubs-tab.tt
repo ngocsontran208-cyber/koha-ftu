@@ -1,0 +1,134 @@
+[% USE Koha %]
+[% USE raw %]
+[% USE KohaDates %]
+
+[% IF enrollments %]
+ <h2>Clubs currently enrolled in</h2>
+
+ <table id="clubs-table-enrolled" class="table table-bordered table-striped">
+ <caption class="visually-hidden">Clubs</caption>
+ <thead>
+ <tr>
+ <th class="all">Tên</th>
+ <th>Thông tin mô tả</th>
+ <th>Date enrolled</th>
+ <th class="no-sort all">&nbsp;</th>
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH e IN enrollments %]
+ <tr>
+ <td>[% e.club.name | html %]</td>
+ <td>[% e.club.description | html %]</td>
+ <td>[% e.date_enrolled | $KohaDates %]</td>
+ <td>
+ [% IF e.club.club_template.is_enrollable_from_opac %]
+ <button class="btn btn-sm btn-danger cancel_enrollment" data-id="[% e.id | html %]"> <i class="fa fa-times" aria-hidden="true"></i> Cancel enrollment </button>
+ [% ELSE %] Vui lòng liên hệ với thư viện để hủy tư cách tham gia câu lạc bộ này. [% END %] </td>
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+[% END %]
+
+[% IF clubs %]
+ <h2>Clubs you can enroll in</h2>
+
+ <table id="clubs-table-unenrolled" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th class="all">Tên</th>
+ <th>Thông tin mô tả</th>
+ <th class="no-sort all">&nbsp;</th>
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH c IN clubs %]
+ <tr>
+ <td>[% c.name | html %]</td>
+ <td>[% c.description | html %]</td>
+ <td>
+ [% IF !c.club_template.is_email_required || ( c.club_template.is_email_required && borrower.notice_email_address ) %]
+ <button class="btn btn-sm btn-primary load_enrollment" data-id="[% c.id | html %]"> <i class="fa fa-plus" aria-hidden="true"></i> Đăng ký </button>
+ [% ELSE %]
+ <span class="hint">Bạn cần có địa chỉ email để đăng ký</span>
+ [% END %]
+ </td>
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+[% END %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    const patron_id = "[% borrower.borrowernumber | html %]";
+    Koha.addPrefs({
+        OPACTableColExpandedByDefault: [% Koha.Preference('OPACTableColExpandedByDefault') ? 1 : 0 | html %],
+    });
+</script>
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    function loadEnrollmentForm(id) {
+        $("body").css("cursor", "progress");
+        $("#opac-user-clubs_panel").load("/cgi-bin/koha/clubs/enroll.pl?borrowernumber=" + patron_id + "&id=" + id, function () {
+            $("body").css("cursor", "default");
+        });
+
+        return false;
+    }
+
+    function cancelEnrollment(id) {
+        $("body").css("cursor", "progress");
+        $.ajax({
+            type: "POST",
+            url: "/cgi-bin/koha/svc/club/cancel_enrollment",
+            data: { id: id, csrf_token: $('meta[name="csrf-token"]').attr("content") },
+            success: function (data) {
+                if (data.success) {
+                    $("#opac-user-clubs_panel").load("/cgi-bin/koha/clubs/clubs-tab.pl?borrowernumber=" + patron_id, function () {
+                        $("body").css("cursor", "default");
+                    });
+                } else {
+                    alert(_("Không thể hủy đăng ký!"));
+                }
+            },
+            dataType: "json",
+        });
+        return false;
+    }
+
+    var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
+
+    var Tables = $("#clubs-table-enrolled,#clubs-table-unenrolled");
+    Tables.each(function () {
+        $(this).kohaTable({
+            searching: false,
+            paging: false,
+            info: false,
+            responsive: {
+                details: {
+                    display: responsive_display,
+                    type: "column",
+                    target: -1,
+                },
+            },
+            columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+        });
+    });
+
+    $(".cancel_enrollment").on("click", function (e) {
+        e.preventDefault();
+        let clubid = $(this).data("id");
+        cancelEnrollment(clubid);
+    });
+
+    $(".load_enrollment").on("click", function (e) {
+        e.preventDefault();
+        let clubid = $(this).data("id");
+        loadEnrollmentForm(clubid);
+    });
+</script>

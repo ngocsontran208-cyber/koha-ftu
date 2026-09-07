@@ -1,0 +1,426 @@
+[% USE raw %]
+[% USE To %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% USE AuthorisedValues %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( total || breeding_loop ) %]
+ [% tx("Search results for '{query}'", {query = query}) | html %]
+ &rsaquo;
+ [% ELSIF ( query ) %]
+ [% t("No results found") | html %]
+ &rsaquo;
+ [% END %]
+ [% t("Cataloging") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="cat_addbooks" class="cat">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cataloging-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% IF ( total || breeding_loop || query ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Phân hệ biên mục</a>
+ [% END %]
+ [% END %]
+ [% IF ( total || breeding_loop ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% tx("Search results for '{query}'", {query = query}) | html %]
+ [% END %]
+ [% ELSIF ( query ) %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Không tìm thấy kết quả phù hợp</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Phân hệ biên mục</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+
+ [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
+ <div id="toolbar" class="btn-toolbar">
+ [% IF Koha.Preference( 'EnableAdvancedCatalogingEditor' ) == 1 && CAN_user_editcatalogue_advanced_editor %]
+ <a id="useadvanced" href="/cgi-bin/koha/cataloguing/editor.pl" class="btn btn-default"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Advanced editor</a>
+ [% END %]
+ <div class="btn-group">
+ <button class="btn btn-default" id="newRecord"><i class="fa fa-plus"></i> Tạo biểu ghi</button>
+ <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+ <ul class="dropdown-menu dropdown-menu-end">
+ <li><a class="dropdown-item" id="newRecordDefault" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=">Khung mẫu mặc định</a></li>
+ [% FOREACH framework IN frameworks %]
+ <li><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=[% framework.frameworkcode | uri %]">[% framework.frameworktext | html %]</a></li>
+ [% END %]
+ </ul>
+ </div>
+ [% IF servers.count > 0 %]
+ <div class="btn-group">
+ <button class="btn btn-default" id="z3950search"><i class="fa fa-search"></i> New from Z39.50/SRU</button>
+ <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+ <ul class="dropdown-menu dropdown-menu-end">
+ <li id="Default" class="z3950searchFw"><a class="dropdown-item" href="#">Khung mẫu mặc định</a></li>
+ [% FOREACH framework IN frameworks %]
+ <li id="[% framework.frameworkcode | html %]" class="z3950searchFw"><a class="dropdown-item" href="#">[% framework.frameworktext | html %]</a></li>
+ [% END %]
+ </ul>
+ </div>
+ [% END # /IF servers.count %]
+ [% IF ( total ) %]
+ <div class="btn-group"
+                    ><button type="submit" class="btn btn-default merge-items"><i class="fa fa-compress"></i> Sát nhập</button></div
+                >
+ [% END %]
+ </div>
+ <!-- /#toolbar -->
+ [% END # /IF CAN_user_editcatalogue_edit_catalogue %]
+
+ <h1>Phân hệ biên mục</h1>
+
+ [% IF ( noitemsfound ) %]
+ <div class="alert alert-info"> [% tx("No catalog search results for '{query}'", {query = query}) | html %] </div>
+ <!-- /.page-section -->
+ [% END %]
+
+ [%# display the search results %]
+
+ [% IF ( total ) %]
+ <h2>[% tx("Catalog search results for '{query}'", {query = query}) | html %]</h2>
+ <div class="page-section">
+ <div>
+ [% total | html %] kết quả tìm thấy trong biên mục, <a href="#searchresult-breeding">[% breeding_count | html %] kết quả được tìm thấy trong tệp tin dữ liệu</a>
+ </div>
+ <nav class="pages" id="pagination_top"> [% pagination_bar | $raw %] </nav>
+ <div class="searchresults">
+ <table>
+ <tr>
+ <th>&nbsp;</th>
+ <th>Nhan đề</th>
+ <th>Vị trí</th>
+ <th>&nbsp;</th>
+ </tr>
+ [% FOREACH resultsloo IN resultsloop %]
+ <tr>
+ <td><input type="checkbox" class="selection" id="bib[% resultsloo.biblionumber | html %]" name="biblionumber" value="[% resultsloo.biblionumber | html %]" /></td>
+ <td>
+ <p> [% INCLUDE 'biblio-title.inc' biblio=resultsloo link = 1 %] </p>
+ [% IF ( resultsloo.summary ) %]
+ <p>[% resultsloo.summary | html %]</p>
+ [% ELSE %]
+ <p>
+ [% IF ( resultsloo.author ) %]
+ [% resultsloo.author | html %]
+ [% ELSE %]
+ &nbsp;
+ [% END %]
+ [% IF ( resultsloo.isbn ) %]- [% resultsloo.isbn | html %][% END %]
+ [% IF ( resultsloo.publicationyear ) %]- [% resultsloo.publicationyear | html %][% END %]
+ [% IF ( resultsloo.publishercode ) %]- [% resultsloo.publishercode | html %][% END %]
+ [% IF ( resultsloo.copyrightdate ) %]- [% resultsloo.copyrightdate | html %][% END %]
+ [% IF ( resultsloo.edition ) %]<span>Ấn bản: </span>[% resultsloo.edition | html %][% END %]
+ [% IF ( resultsloo.place ) %]; [% resultsloo.place | html %][% END %]
+ [% IF ( resultsloo.pages ) %]- [% resultsloo.pages | html %][% END %]
+ [% IF ( resultsloo.item('size') ) %]; [% resultsloo.item('size') | html %][% END %]
+ [% IF ( resultsloo.timestamp ) %]<em>(được chỉnh sửa ngày [% resultsloo.timestamp | html %])</em>[% END %]
+ </p>
+ [% END %]
+ </td>
+ <td class="availability">
+ [% IF resultsloo.availablecount > 0 %]
+ <div class="results_available_count">Available:</div>
+ <span class="available">
+ [% FOREACH items_loo IN resultsloo.available_items_loop %]
+ [% items_loo.count | html %]
+ [% items_loo.branchname | html %]
+ [% IF ( items_loo.location ) %]<span class="shelvingloc">[% items_loo.location | html %]</span>[% END %]
+ [% IF ( items_loo.itemcallnumber ) %][% items_loo.itemcallnumber | html %][% END %]
+ [% IF ( items_loo.classification ) %]
+ <a href="/cgi-bin/koha/catalogue/search.pl?q=callnum:[% items_loo.classification |url %]"> [% items_loo.classification | html %] </a>
+ [% END %]
+ <br />
+ [% END %]
+ </span>
+ [% END %]
+ <!--unavailable-->
+ [% IF resultsloo.onloancount > 0 || resultsloo.othercount > 0  && !( resultsloo.notforloancount || resultsloo.orderedcount) %]
+ <div class="results_unavailable">Unavailable:</div>
+ <span class="unavailable">
+ <!-- Checked out -->
+ [% IF ( resultsloo.onloancount ) %]
+ <span
+                                                >Checked out (
+ [% FOREACH items_loo IN resultsloo.onloan_items_loop %]
+ [% IF (!items_loo.notforloan ) %]
+ [% items_loo.count | html %]
+ [% IF ( items_loo.branchname ) %][% items_loo.branchname | html %][% END %]
+ [% IF ( items_loo.location ) %]<span class="shelvingloc">[% items_loo.location | html %]</span>[% END %]
+ [% IF ( items_loo.itemcallnumber ) %][% items_loo.itemcallnumber | html %][% END %]
+ <br />
+ [% END %]
+ [% END %])</span
+                                            >,<br />
+ [% END %]
+ [% FOREACH items_loo IN resultsloo.other_items_loop %]
+ [% IF (!items_loo.notforloan ) %]
+ [% items_loo.count | html %]
+ [% IF ( items_loo.branchname ) %][% items_loo.branchname | html %][% END %]
+ [% IF ( items_loo.location ) %]<span class="shelvingloc">[% items_loo.location | html %]</span>[% END %]
+ [% IF ( items_loo.itemcallnumber ) %][% items_loo.itemcallnumber | html %][% END %]
+ [% IF ( items_loo.withdrawn ) %]([% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.withdrawn', authorised_value => items_loo.withdrawn ) | html %])[% END %]
+ [% IF ( items_loo.itemlost ) %]([% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.itemlost', authorised_value => items_loo.itemlost ) | html %])[% END %]
+ [% IF ( items_loo.damaged ) %]([% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.damaged', authorised_value => items_loo.damaged ) | html %])[% END %]
+ [% IF ( items_loo.intransit ) %](<span>Đang vận chuyển</span>)<br />[% END %]
+ [% IF ( items_loo.onhold ) %](<span>Đặt mượn</span>)<br />[% END %]
+ <br />
+ [% END %]
+ [% END %]
+ </span>
+ [% END %]
+ <!--Not for loan-->
+ [% IF ( resultsloo.notforloancount || resultsloo.orderedcount) %]
+ <div class="results_not_for_loan">Not for loan:</div>
+ <span class="notforloan">
+ [% FOREACH items_loo IN resultsloo.other_items_loop %]
+ [% IF ( items_loo.notforloan ) %]
+ [% items_loo.count | html %]
+ [% items_loo.branchname | html %]
+ [% IF ( items_loo.location ) %]<span class="shelvingloc">[% items_loo.location | html %]</span>[% END %]
+ [% IF ( items_loo.itemcallnumber ) %][% items_loo.itemcallnumber | html %][% END %]
+ ([% items_loo.notforloan | html %])
+ <br />
+ [% END %]
+ [% END %]
+ </span>
+ [% END %]
+ </td>
+ <td>
+ <div class="btn-group dropup">
+ <button type="button" class="btn btn-default btn-xs dropdown-toggle" id="cataloguesearchactions[% resultsloo.biblionumber | html %]" data-bs-toggle="dropdown"> Thao tác </button>
+ <ul class="dropdown-menu dropdown-menu-end" role="menu" aria-labelledby="cataloguesearchactions[% resultsloo.biblionumber | html %]">
+ <li
+                                            ><a href="/cgi-bin/koha/catalogue/showmarc.pl?id=[% resultsloo.biblionumber | uri %]" class="previewData dropdown-item"><i class="fa-solid fa-eye"></i> MARC preview</a></li
+                                        >
+ <li
+                                            ><a href="/cgi-bin/koha/catalogue/showmarc.pl?viewas=card&amp;id=[% resultsloo.biblionumber | uri %]" class="previewData dropdown-item"><i class="fa-solid fa-eye"></i> Card preview</a></li
+                                        >
+ [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
+ <li
+                                                ><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% resultsloo.biblionumber | uri %]"
+                                                    ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa biểu ghi</a
+                                                ></li
+                                            >
+ [% END %]
+ [% IF ( CAN_user_editcatalogue_edit_items ) %]
+ <li
+                                                ><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% resultsloo.biblionumber | uri %]"><i class="fa fa-plus"></i> Add or edit items</a></li
+                                            >
+ [% END %]
+ </ul>
+ </div>
+ <!-- /.dropup -->
+ </td>
+ </tr>
+ [% END # /FOREACH resultsloo %]
+ </table>
+ <nav class="pages" id="pagination_bottom"> [% pagination_bar | $raw %] </nav>
+ </div>
+ <!-- /.searchresults -->
+ </div>
+ <!-- /.page-section -->
+ [% ELSE # IF total %]
+ [% IF ( query ) %]
+ <div class="alert alert-info"> [% tx("No catalog search results for '{query}'", {query = query}) | html %] </div>
+ [% IF ( error ) %]
+ <div class="alert alert-warning"> Lỗi: <span class="error">[% error | html %]</span> </div>
+ [% END %]
+ [% END %]
+ [% END # /IF total %]
+
+ [% IF ( query ) %]
+ <div id="searchresult-breeding">
+ [% IF ( breeding_loop ) %]
+ <h2>[% tx("Reservoir search results for '{query}'", {query = query}) | html %]</h2>
+ <div class="page-section">
+ <table id="reservoir-table">
+ <thead>
+ <tr>
+ <th>Nhan đề</th>
+ <th>Số ISBN</th>
+ <th>Đến từ</th>
+ <th>Import date</th>
+ <th class="no-sort no-export">&nbsp;</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH breeding_loo IN breeding_loop %]
+ <tr>
+ <td> [% breeding_loo.title | html %] [% breeding_loo.author | html %] </td>
+ <td>[% breeding_loo.isbn | html %]</td>
+ <td>[% breeding_loo.file | html %]</td>
+ <td data-sort="[% breeding_loo.upload_timestamp | html %]">[% breeding_loo.upload_timestamp | $KohaDates %]</td>
+ <td>
+ <div class="dropup">
+ <a class="btn btn-default btn-xs dropdown-toggle" id="reservoirsearchactions[% breeding_loo.id | html %]" role="button" data-bs-toggle="dropdown" href="#"> Thao tác </a>
+ <ul class="dropdown-menu dropdown-menu-end" role="menu" aria-labelledby="reservoirsearchactions[% breeding_loo.id | html %]">
+ <li
+                                                    ><a href="/cgi-bin/koha/catalogue/showmarc.pl?importid=[% breeding_loo.id | uri %]" class="dropdown-item previewData"><i class="fa-solid fa-eye"></i> MARC preview</a></li
+                                                >
+ <li
+                                                    ><a href="/cgi-bin/koha/catalogue/showmarc.pl?viewas=card&amp;importid=[% breeding_loo.id | uri %]" class="dropdown-item previewData"><i class="fa-solid fa-eye"></i> Card preview</a></li
+                                                >
+ [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
+ <li
+                                                        ><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?breedingid=[% breeding_loo.id | uri %]"><i class="fa fa-plus"></i> Tạo biểu ghi</a></li
+                                                    >
+ [% END %]
+ </ul>
+ </div>
+ </td>
+ </tr>
+ [% END # /IF breeding_loo %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% ELSE %]
+ <div class="alert alert-info"> [% tx("No reservoir search results for '{query}'", {query = query}) | html %] </div>
+ [% END # /IF breeding_loop %]
+ </div>
+ <!-- /#searchresult-breeding -->
+ [% END # /IF query %]
+
+ <div id="dataPreview" class="modal" tabindex="-1" role="dialog" aria-labelledby="dataPreviewLabel" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="dataPreviewLabel">Xem trước</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+ </div>
+ <!-- /#dataPreview -->
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var table_settings = [% TablesSettings.GetTableSettings( 'cataloguing', 'addbooks', 'reservoir-table', 'json' ) | $raw %]
+        const interface = "[% interface | html %]";
+        const theme = "[% theme | html %]";
+        const biblionumber = "[% biblionumber | html %]";
+        var logged_in_user_borrowernumber = "[% logged_in_user.borrowernumber | html %]";
+        var z3950_search_params = [% To.json(z3950_search_params || []) | $raw %];
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            //Set focus to cataloging search
+            $("input[name=q]:eq(0)").focus();
+
+            $("#newRecord").click(function () {
+                var url = $("a#newRecordDefault").prop("href");
+                window.location.href = url;
+                return false;
+            });
+
+            $("#z3950search").click(function () {
+                PopupZ3950("Default");
+                return false;
+            });
+
+            $(".z3950searchFw").click(function () {
+                PopupZ3950($(this).prop("id"));
+                return false;
+            });
+            $(".merge-items").on("click", function (e) {
+                e.preventDefault();
+                MergeItems();
+            });
+
+            $("#useadvanced").click(function () {
+                Cookies.set(`catalogue_editor_${logged_in_user_borrowernumber}`, "advanced", { expires: 365, path: "/", sameSite: "Lax" });
+                return true;
+            });
+
+            $(".previewData").on("click", function (e) {
+                e.preventDefault();
+                var ltitle = $(this).text();
+                var page = $(this).attr("href");
+                $("#dataPreviewLabel").text(ltitle);
+                $("#dataPreview .modal-body").load(page + " div");
+                $("#dataPreview").modal("show");
+            });
+            $("#dataPreview").on("hidden.bs.modal", function () {
+                $("#dataPreviewLabel").html("");
+                $("#dataPreview .modal-body").html('<div id="loading"><img src="' + interface + "/" + theme + '/img/spinner-small.gif" alt="" /> ' + _("Đang tải") + "</div>");
+            });
+
+            var reservoirt = $("#reservoir-table").kohaTable(
+                {
+                    pagingType: "simple",
+                },
+                table_settings
+            );
+        });
+
+        /* this function open a popup to search on z3950 server.  */
+        function PopupZ3950(fw) {
+            var strQuery = GetZ3950Terms(fw);
+            if (strQuery) {
+                window.open("/cgi-bin/koha/cataloguing/z3950_search.pl?biblionumber=" + biblionumber + strQuery, "z3950search", "width=800,height=500,location=yes,toolbar=no,scrollbars=yes,resize=yes");
+            }
+        }
+
+        /**
+         * This function checks if the adequate number of records are checked for merging
+         */
+        function MergeItems() {
+            var checkboxes = $("input:checkbox:checked");
+            if (checkboxes.length < 2) {
+                alert(_("At least two records must be selected for merging."));
+            } else {
+                var params = [];
+                $(checkboxes).each(function () {
+                    params.push("biblionumber=" + $(this).val());
+                });
+                var url = "/cgi-bin/koha/cataloguing/merge.pl?" + params.join("&");
+                location.href = url;
+            }
+            return false;
+        }
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        /* provide Z3950 search points */
+        function GetZ3950Terms(fw) {
+            var strQuery = "&frameworkcode=" + fw;
+            z3950_search_params.forEach(function (z3950_search_param) {
+                strQuery += "&" + encodeURIComponent(z3950_search_param.name) + "=" + encodeURIComponent(z3950_search_param.value);
+            });
+            return strQuery;
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

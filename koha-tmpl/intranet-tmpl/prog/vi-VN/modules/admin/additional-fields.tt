@@ -1,0 +1,378 @@
+[% USE Koha %]
+[% USE AuthorisedValues %]
+[% USE raw %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% SWITCH op %]
+ [% CASE 'add_form' %]
+ [% IF field %]
+ [% tx("Modify field '{field_name}'", { field_name = field.name }) | html %]
+ &rsaquo;
+ [% ELSE %]
+ [% t("New field") | html %]
+ &rsaquo;
+ [% END %]
+ [% tx("Table '{table_name}'", { table_name = tablename } ) | html %]
+ &rsaquo;
+ [% CASE 'list' %]
+ [% tx("Table '{table_name}'", { table_name = tablename } ) | html %]
+ &rsaquo;
+ [% END %]
+ [% t("Additional fields") | html %]
+ &rsaquo; [% t("Administration") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+[% marcfield_tables = ['subscription', 'aqorders'] %]
+[% searchable_tables = ['subscription', 'aqbasket', 'aqinvoices', 'erm_licenses', 'erm_agreements', 'erm_packages', 'aqbooksellers:vendor', 'erm_titles'] %]
+[% show_marcfield = marcfield_tables.grep('^' _ tablename _ '$').size ? 1 : 0 %]
+[% show_searchable = searchable_tables.grep('^' _ tablename _ '$').size ? 1 : 0 %]
+
+<body id="ser_add_fields" class="ser">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+ [% END %]
+ [% SWITCH op %]
+ [% CASE 'add_form' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/additional-fields.pl">Additional fields</a>
+ [% END %]
+ [% IF field %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/additional-fields.pl?tablename=[% tablename | uri %]">[% tx("Table '{table_name}'", { table_name = tablename } ) | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% tx("Modify field '{field_name}'", { field_name = field.name }) | html %]
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/additional-fields.pl?tablename=[% tablename | uri %]">[% tx("Table '{table_name}'", { table_name = tablename } ) | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% t("New field" ) | html %]
+ [% END %]
+ [% END %]
+ [% CASE 'list' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/additional-fields.pl">Additional fields</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% tx("Table '{table_name}'", { table_name = tablename } ) | html %]
+ [% END %]
+ [% CASE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Additional fields</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+
+ [% IF op == 'list' %]
+ <div id="toolbar" class="btn-toolbar">
+ <a class="btn btn-default" id="newfields" href="?op=add_form&amp;tablename=[% tablename | uri %]"><i class="fa fa-plus"></i> New field</a>
+ </div>
+ [% END %]
+
+ [% IF messages %]
+ [% FOR message IN messages %]
+ [% IF message.code == 'insert' %]
+ [% IF message.number > 0 %]
+ <div class="alert alert-info">The field has been added.</div>
+ [% ELSE %]
+ <div class="alert alert-warning">The field could not be added. Perhaps the name already exists?</div>
+ [% END %]
+ [% ELSIF message.code == 'update' %]
+ [% IF message.number > 0 %]
+ <div class="alert alert-info">The field has been updated.</div>
+ [% ELSE %]
+ <div class="alert alert-warning">The field could not be updated. Perhaps the name already exists?</div>
+ [% END %]
+ [% ELSIF message.code == 'delete' %]
+ [% IF message.number > 0 %]
+ <div class="alert alert-info">The field has been deleted.</div>
+ [% ELSE %]
+ <div class="alert alert-warning">The field could not be deleted. Check the log for details.</div>
+ [% END %]
+ [% END %]
+ [% END %]
+ [% END %]
+
+ [% IF op == 'list_tables' %]
+ [% IF CAN_user_acquisition_order_manage || CAN_user_serials_edit_subscription || CAN_user_updatecharges_remaining_permissions || CAN_user_erm %]
+ <h1>Additional fields</h1>
+
+ <div class="page-section">
+ [% BLOCK table_option %]
+ <li
+                        ><a href="?tablename=[% value | uri %]">[% content | $raw %] (<span class="ex">[% value | html %]</span>)</a></li
+                    >
+ [% END %]
+ [% IF CAN_user_acquisition_order_manage || CAN_user_acquisition_edit_invoices %]
+ <h2>Phân hệ bổ sung</h2>
+ <ul>
+ [% IF CAN_user_acquisition_edit_invoices %]
+ [% WRAPPER table_option value="aqinvoices" %]<span>Hóa đơn</span>[% END %]
+ [% END %]
+ [% IF CAN_user_acquisition_order_manage %]
+ [% WRAPPER table_option value="aqbasket" %]<span>Order baskets</span>[% END %]
+ [% WRAPPER table_option value="aqorders" %]<span>Order lines</span>[% END %]
+ [% WRAPPER table_option value="aqbooksellers:vendor" %]<span>Vendors</span>[% END %]
+ [% END %]
+ </ul>
+ [% END %]
+ [% IF CAN_user_parameters_manage_libraries %]
+ <h2>Quản trị hệ thống</h2>
+ <ul>
+ [% WRAPPER table_option value="branches" %]<span>Thư viện</span>[% END %]
+ </ul>
+ [% END %]
+ [% IF CAN_user_erm %]
+ <h2>E-resource management</h2>
+ <ul>
+ [% WRAPPER table_option value="erm_agreements" %]Agreements[% END %]
+ [% WRAPPER table_option value="erm_licenses" %]Licenses[% END %]
+ [% WRAPPER table_option value="erm_packages" %]Packages[% END %]
+ [% WRAPPER table_option value="erm_titles" %]Titles[% END %]
+ [% WRAPPER table_option value="erm_agreement_periods" %]Agreement periods[% END %]
+ </ul>
+ [% END %]
+ [% IF CAN_user_updatecharges_remaining_permissions || CAN_user_parameters_manage_accounts %]
+ <h2>Bạn đọc</h2>
+ <ul>
+ [% IF CAN_user_updatecharges_remaining_permissions %]
+ [% WRAPPER table_option value="accountlines:credit" %]Account lines (credit)[% END %]
+ [% WRAPPER table_option value="accountlines:debit" %]Account lines (debit)[% END %]
+ [% END %]
+ [% IF ( CAN_user_parameters_manage_accounts ) %]
+ [% WRAPPER table_option value="account_credit_types" %]Account credit types[% END %]
+ [% WRAPPER table_option value="account_debit_types" %]Account debit types[% END %]
+ [% END %]
+ </ul>
+ [% END %]
+ [% IF CAN_user_serials_edit_subscription %]
+ <h2>Ấn phẩm định kỳ</h2>
+ <ul>
+ [% WRAPPER table_option value="subscription" %]<span>Các đợt đăng ký mua</span>[% END %]
+ </ul>
+ [% END %] </div
+            ><!-- /.page-section -->
+ [% ELSE %]
+ Additional permissions are required for editing additional fields
+ [% END %]
+ [% ELSIF op == 'list' %]
+ <h1>Trường bổ sung cho '[% tablename | html %]'</h1>
+ [% IF fields %]
+ <div class="page-section">
+ <table id="fieldst">
+ <thead>
+ <tr>
+ <th>Tên</th>
+ <th>Authorized value category</th>
+ [% IF show_marcfield %]
+ <th>Trường MARC</th>
+ <th>MARC field mode</th>
+ [% END %]
+ [% IF show_searchable %]
+ <th>Searchable</th>
+ [% END %]
+ <th>Lặp lại</th>
+ <th class="no-export">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOR field IN fields %]
+ <tr>
+ <td>[% field.name | html %]</td>
+ <td>[% field.authorised_value_category | html %]</td>
+ [% IF show_marcfield %]
+ <td>[% field.marcfield | html %]</td>
+ <td>
+ [% SWITCH field.marcfield_mode %]
+ [% CASE 'get' %]
+ Get value from MARC record
+ [% CASE 'set' %]
+ Save value to MARC record
+ [% END %]
+ </td>
+ [% END %]
+ [% IF show_searchable %]
+ <td> [% IF field.searchable %]Yes[% ELSE %]No[% END %] </td>
+ [% END %]
+ <td> [% IF field.repeatable %]Yes[% ELSE %]No[% END %] </td>
+ <td class="actions">
+ <a class="btn btn-default btn-xs" href="?op=add_form&amp;field_id=[% field.id | html %]"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a>
+ <a
+                                        class="submit-form-link btn btn-default btn-xs"
+                                        href="#"
+                                        data-action="additional-fields.pl"
+                                        data-method="post"
+                                        data-op="cud-delete"
+                                        data-field_id="[% field.id | html %]"
+                                        data-tablename="[% tablename | html %]"
+                                        data-confirmation-msg="[% t('Are you sure you want to delete this field?') | html %]"
+                                        ><i class="fa fa-trash-can"></i> Xóa</a
+                                    >
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table> </div
+            ><!-- /.page-section -->
+ [% ELSE %]
+ [% IF tablename %]There are no additional fields defined for this table.[% END %]
+ [% END %]
+ [% ELSIF op == 'add_form' %]
+ [% IF field %]
+ <h1>[% tx("Modify field '{field_name}' for table '{table_name}'", { field_name = field.name, table_name = tablename }) | html %]</h1>
+ [% ELSE %]
+ <h1>[% tx("New field for table '{table_name}'", { table_name = tablename } ) | html %]</h1>
+ [% END %]
+ <form action="" name="add_form" id="add_field" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="fg">
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="name" class="required">Name: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="name" id="name" value="[% field.name | html %]" class="required focus" required="required" />
+ </div>
+ <div class="required">Bắt buộc</div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="av">Giá trị định trước: </label>
+ </div>
+ <div class="fg-input">
+ <select id="av" name="authorised_value_category">
+ <option value="">Không có</option>
+ [% PROCESS options_for_authorised_value_categories authorised_value_categories = AuthorisedValues.GetCategories({selected => field.authorised_value_category}) %]
+ </select>
+ </div>
+ </div>
+ <div class="fg-row input-checkbox">
+ <div class="fg-label">
+ <label for="repeatable">Repeatable </label>
+ </div>
+ <div class="fg-input">
+ [% IF field.repeatable %]
+ <input type="checkbox" name="repeatable" id="repeatable" checked="checked" />
+ [% ELSE %]
+ <input type="checkbox" name="repeatable" id="repeatable" />
+ [% END %]
+ </div>
+ </div>
+ [% IF show_marcfield %]
+ <div class="fg-row input-sm">
+ <div class="fg-label">
+ <label for="marcfield">Trường MARC</label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="marcfield" id="marcfield" value="[% field.marcfield | html %]" />
+ </div>
+ <div class="hint">Example: 942$c</div>
+ </div>
+ <div class="fg-row">
+ <div class="fg-label">
+ <label for="marcfield_mode">MARC field mode</label>
+ </div>
+ <div class="fg-input">
+ <select id="marcfield_mode" name="marcfield_mode">
+ [% IF field.marcfield_mode == 'get' %]
+ <option value="get" selected>Get value from MARC record (not modifiable)</option>
+ [% ELSE %]
+ <option value="get">Get value from MARC record (not modifiable)</option>
+ [% END %]
+
+ [% IF field.marcfield_mode == 'set' %]
+ <option value="set" selected>Save value to MARC record</option>
+ [% ELSE %]
+ <option value="set">Save value to MARC record</option>
+ [% END %]
+ </select>
+ </div>
+ </div>
+ [% END %]
+ [% IF show_searchable %]
+ <div class="fg-row input-checkbox">
+ <div class="fg-label">
+ <label for="searchable">Searchable</label>
+ </div>
+ <div class="fg-input">
+ [% IF field.searchable %]
+ <input type="checkbox" name="searchable" id="searchable" checked="checked" />
+ [% ELSE %]
+ <input type="checkbox" name="searchable" id="searchable" />
+ [% END %]
+ </div>
+ </div>
+ [% END %]
+ </fieldset>
+ <fieldset class="action">
+ [% IF field %]
+ <input type="hidden" name="field_id" value="[% field.id | html %]" />
+ [% END %]
+ <input type="hidden" name="tablename" value="[% tablename | html %]" />
+ <input type="hidden" name="op" value="cud-add" />
+ <input class="btn btn-primary" type="submit" value="Lưu" />
+ <a href="?tablename=[% tablename | uri %]" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE "datatables.inc" %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#selecttable").find(":submit").hide();
+            $("#selecttable select").change(function () {
+                $("#selecttable").submit();
+            });
+
+            $("#fieldst").kohaTable({
+                autoWidth: false,
+                dom: 't<"bottom pager"ilpf>',
+                pagingType: "full",
+                lengthMenu: [
+                    [10, 20, 50, 100, -1],
+                    [10, 20, 50, 100, "All"],
+                ],
+                pageLength: 20,
+                order: [[0, "asc"]],
+            });
+
+            $("#add_field").on("submit", function () {
+                if ($("#marcfield").length && $("select[name='authorised_value_category']").length) {
+                    if ($("#marcfield").val().length > 0 && $("select[name='authorised_value_category']").val().length > 0) {
+                        alert(_("You cannot select an authorised value category and a MARC field"));
+                        return false;
+                    }
+                }
+                if ($("#marcfield").length && $("#repeatable").length) {
+                    if ($("#marcfield").val().length > 0 && $("#repeatable").prop("checked") == true) {
+                        alert(_("You cannot set a MARC field as repeatable"));
+                        return false;
+                    }
+                }
+                return true;
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

@@ -1,0 +1,21 @@
+---
+description:
+- ILL batch statuses used in Koha
+tables:
+- illbatch_statuses:
+    multiline: []
+    rows:
+    - code: NEW
+      is_system: '1'
+      name: New
+    - code: IN_PROGRESS
+      is_system: '1'
+      name: In progress
+    - code: COMPLETED
+      is_system: '1'
+      name: Completed
+    - code: UNKNOWN
+      is_system: '1'
+      name: Unknown
+    translatable:
+    - description

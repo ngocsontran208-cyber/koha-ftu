@@ -1,0 +1,64 @@
+[% USE AdditionalContents %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your payment") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+
+<body id="opac-account-pay-return" class="scrollto">
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ <nav aria-label="Đường dẫn điều hướng" class="breadcrumbs" id="breadcrumbs">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-main.pl">Trang chủ</a>
+ </li>
+ <li class="breadcrumb-item">
+ <a href="/cgi-bin/koha/opac-routing-lists.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ </li>
+ <li class="breadcrumb-item active">
+ <a href="#" aria-current="page" aria-disabled="true" tabindex="-1">Khoản thanh toán của bạn</a>
+ </li>
+ </ol>
+ </nav>
+ <!-- /#breadcrumbs -->
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-10 order-first order-md-first order-lg-2">
+ <div id="useraccount" class="maincontent">
+ <h1>Thanh toán tài khoản</h1>
+ [% IF error %]
+ <div id="error" class="alert alert-warning">
+ <p><strong>Lỗi:</strong> có lỗi xảy ra khi xử lý khoản thanh toán của bạn</p>
+ </div>
+ [% END %]
+
+ <a href="/cgi-bin/koha/opac-account.pl">Quay lại chi tiết tiền phạt</a>
+ </div>
+ <!-- / #useraccount -->
+ </div>
+ <!-- / .col-10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

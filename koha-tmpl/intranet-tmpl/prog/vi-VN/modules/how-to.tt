@@ -1,0 +1,1050 @@
+[% USE raw %]
+[% USE Koha %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha staff client</title>
+[% INCLUDE 'doc-head-close.inc' %]
+
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    i.fa-check, .correct { color: green; }
+    i.fa-remove, .wrong { color: red; }
+    .hint { display: block; margin: 1em 2em; }
+    .qa { margin: 1em; }
+    ol li { list-style: disc; }
+    code {
+        padding: 2px 4px;
+        font-size: 90%;
+        color: #0f3b54;
+        background-color: #f1faff;
+        border-radius: 4px;
+    }
+    .number {
+     display: inline-block;
+        padding: .2em;
+        margin-right: .2em;
+        min-width: 2em;
+        text-align: center;
+     font-weight: bold;
+    }
+    .prompt::before {
+        /* Using the content property allows
+           the user to select the whole line
+           for copy and paste */
+        content: "% ";
+    }
+    .prompt {
+        text-indent: -10000em;
+    }
+    .step-heading {
+        display: inline-block;
+        background-color: #e6f0f2;
+        border-radius: 5px;
+        padding: .2em .4em;
+    }
+    .substep {
+        color: #326069;
+    }
+    pre { /* From bootstrap.css */
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        color: #333;
+        display: block;
+        font-size: 13px;
+        line-height: 1.42857;
+        margin: 0 0 10px;
+        padding: 9.5px;
+        word-break: break-all;
+        word-wrap: break-word;
+        white-space: pre-line;
+    }
+    #howto-body {
+        border: 5px solid #e6f0f2;
+        border-radius: 10px;
+        box-shadow: 12px 12px 12px -7px rgba(0, 0, 0, .2);
+        font-size: 120%;
+        line-height: 1.6em;
+        margin: auto;
+        padding: 1em;
+        width: 100%;
+    }
+
+    #howto-body h2 {
+        margin: .6em 0;
+    }
+    #howto-body .alert {
+        background: #fff7c2 none;
+        text-align: left;
+        width: 100%;
+    }
+    #howto-body .alert h3 {
+        text-align: left;
+        margin: .5em 0;
+        color: #336590;
+    }
+    #howto-body .alert i.fa-refresh {
+        color: green;
+        margin-right: .2em;
+    }
+    #howto-body .alert i.fa-arrow-right { color: #477caa; }
+    #howto-body .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    #howto-body .btn-default {
+        background: #FCFCFC none;
+        border-color: #dbdbdb;
+        text-shadow: 0 1px 0 #fff;
+    }
+    #howto-body .btn-default:hover {
+        background: #FFF none;
+        border-color: #efefef;
+    }
+    #howto-body .btn-primary {
+        color: #eee;
+        background-color: #477caa;
+        border-color: #1f496e;
+    }
+    #howto-body .btn-primary:hover {
+        background-color: #477caa;
+        border-color: #1f496e;
+    }
+    #howto-body .btn-success {
+        color: #fff;
+        background-color: #559255;
+        border-color: #437743;
+    }
+    #howto-body .btn-success:hover {
+        background-color: #6cab6c;;
+        border-color: #437743;
+    }
+    #howto-body ol {
+        padding: 0 1.5em;
+    }
+    .alert > p {
+        margin-bottom: .5em;
+    }
+    @media only screen and (min-width: 940px) {
+        #howto-body .alert {
+            width: 90%;
+        }
+    }
+</style>
+
+
+<script nonce="[% Koha.CSPNonce | $raw %]">
+//<![CDATA[
+    [% IF step == 1 %]
+    var qas = [
+        {
+            'question': _("What is the name of the bug tracker we use?"),
+            'answer': 2,
+            'type': 'option',
+            'options': ['Redmine', 'Track', 'Bugzilla', 'Mantis' ],
+            'hint': _("You can find it at %s").format('<a href="https://bugs.koha-community.org">bugs.koha-community.org</a>'),
+        },
+        {
+            'question': _("What does it mean to sign off on a patch?"),
+            'answer': 2,
+            'type': 'option',
+            'options': [_('Nothing'), _('It does not work'), _('It has been tested and it works as advertised') ],
+            'hint': _(""),
+        },
+        {
+            'question': _("What does it mean to QA a patch?"),
+            'answer': 2,
+            'type': 'option',
+            'options': [_('Nothing'), _('Test a patch'), _('Code review') ],
+            'hint': _("The QA step is a technical review of the patches"),
+        },
+        {
+            'question': _("Who can open a new bug report?"),
+            'answer': 0,
+            'type': 'option',
+            'options': ['Anyone', 'QA team', 'Release manager' ],
+            'hint': _("They just need to create an account!"),
+        },
+        {
+            'question': _("Who can submit patches?"),
+            'answer': 0,
+            'type': 'option',
+            'options': ['Anyone', 'QA team', 'Release manager' ],
+            'hint': _(""),
+        },
+        {
+            'question': _("Who can test patches?"),
+            'answer': 0,
+            'type': 'option',
+            'options': ['Anyone', 'QA team', 'Release manager' ],
+            'hint': _("With sandboxes it is very easy to test patches, see %s").format('<a href="https://wiki.koha-community.org/wiki/Sandboxes">Sandboxes</a>'),
+        },
+        {
+            'question': _("Who can QA patches?"),
+            'answer': 2,
+            'type': 'option',
+            'options': ['Anyone', 'Testers', 'QA team', 'Release manager' ],
+            'hint': _("See the %s").format('<a href="https://wiki.koha-community.org/wiki/Guidelines_for_Patch_Acceptance/Rejection">Guidelines for Patch Acceptance/Rejection</a>'),
+        },
+        {
+            'question': _("Who can fail QA patches?"),
+            'answer': 0,
+            'type': 'option',
+            'options': ['Anyone', 'Testers', 'QA team', 'Release manager' ],
+            'hint': _("If you test a patch and it does not work you are allowed to change the status to 'Failed QA'"),
+        },
+        {
+            'question': _("Who can push a patch to the main branch?"),
+            'answer': 3,
+            'type': 'option',
+            'options': ['Anyone', 'Testers', 'QA team', 'Release manager' ],
+            'hint': _("See %s").format('<a href="https://wiki.koha-community.org/wiki/How_the_RM_push">How the RM push</a>'),
+        },
+        {
+            'question': _("What is the license of Koha?"),
+            'answer': 2,
+            'type': 'option',
+            'options': ['Public domain', 'GPLv2', 'GPLv3', 'Beerware', 'BSD', 'LGPL' ],
+            'hint': _("See the '1.2 License' section of coding guidelines"),
+        },
+        {
+            'question': _("What is the indentation rule?"),
+            'answer': 5,
+            'type': 'option',
+            'options': ['No indentation', 'Your choice', '1 tab', '4 tabs', '2 spaces', '4 spaces' ],
+            'hint': _("See the 'PERL6: Indentation' section of the coding guidelines"),
+        },
+        {
+            'question': _("How should you start a commit message for bug 12342?"),
+            'answer': 2,
+            'type': 'option',
+            'options': ['12342', 'bug 12342', 'Bug 12342', 'BUG 12342', ' B U G 42424' ],
+            'hint': _("See %s").format('<a href="https://wiki.koha-community.org/wiki/Commit_messages">Commit messages</a>'),
+        },
+        {
+            'question': _("When signing off, what should you add at the end of the commit message?"),
+            'answer': 0,
+            'type': 'option',
+            'options': ['Signed-off-by: ', 'Signed off by:', 'Tested by me' ],
+            'hint': _("See %s").format('<a href="https://wiki.koha-community.org/wiki/Commit_messages">Commit messages</a>'),
+        },
+        {
+            'question': _("After I open a new bug report I have to change the status."),
+            'answer': 1,
+            'type': 'option',
+            'options': ['True', 'False' ],
+            'hint': _("You change the status to 'Assigned' only if you plan to submit a patch."),
+        },
+        {
+            'question': _("When I attach a patch to a bug and it is ready to be tested I change the status to "),
+            'answer': 1,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _(""),
+        },
+        {
+            'question': _("When I have tested a patch and I confirm it works as expected, I change the status to "),
+            'answer': 2,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _(""),
+        },
+        {
+            'question': _("If a member of the QA team finds something wrong with my patch, they will switch the status to"),
+            'answer': 3,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _(""),
+        },
+        {
+            'question': _("When I test a patch and it does not work as expected, I change the status to "),
+            'answer': 3,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _(""),
+        },
+        {
+            'question': _("I can safely update my production installation with patches from a bug report that is marked as "),
+            'answer': 6,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _("Of course you can backport any patches to your production servers, at your own risks!"),
+        },
+        {
+            'question': _("If someone uses the 'In discussion' status, you should abandon it. It is lost in limbo for sure!"),
+            'answer': 1,
+            'type': 'option',
+            'options': ['True', 'False' ],
+            'hint': _("No! It just means that we need to assign it the correct status. We open a discussion and try to understand what is best for everybody."),
+        },
+        {
+            'question': _("Just before the Release Manager pushes a patch, the status should be "),
+            'answer': 4,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _(""),
+        },
+        {
+            'question': _("And just after?"),
+            'answer': 5,
+            'type': 'option',
+            'options': ['Assigned', 'Needs Signoff', 'Signed Off', 'Failed QA', 'Passed QA', 'Pushed to Main', 'Pushed to Stable' ],
+            'hint': _(""),
+        },
+    ];
+    [% ELSIF step == 3 %]
+    var qas = [
+        {
+            'question': _("Where are Koha's oriented object modules?"),
+            'answer': 2,
+            'type': 'option',
+            'options': ['src', 'lib', 'Koha', 'C4'],
+            'hint': _("Our new modules are in the Koha namespace. The legacy code is in C4 and will be moved to Koha"),
+        },
+        {
+            'question': _("Where are Koha's templates for the staff interface?"),
+            'answer': 1,
+            'type': 'option',
+            'options': ['koha/templates', 'koha-tmpl/intranet-tmpl', 'koha-tmpl/opac-tmpl' ],
+            'hint': _("Specifically, take a look at koha-tmpl/intranet-tmpl/prog/en/modules"),
+        },
+        {
+            'question': _("Where is the Koha module named 'Koha::Patrons?'"),
+            'answer': 3,
+            'type': 'option',
+            'options': ['lib/Koha/Patrons.pm', 'Koha/Patrons', 'C4/Patrons.pm', 'Koha/Patrons.pm' ],
+            'hint': _("To know the location of a module you can you use <code>pmpath Koha::Patrons</code>"),
+        },
+        {
+            'question': _("How could you find all occurrences of 'Koha::Biblios?'"),
+            'correct_matches': [
+                { 're': /git grep ["']?Koha::Biblios["']?/, 'hint': '' },
+            ],
+            'answer': 'git grep Koha::Biblios',
+            'type': 'text',
+            'hint': _(""),
+        },
+        {
+            'question': _("How could you find all occurrences of 'Koha::Biblios' in the administration module (directory <code>admin</code>)?"),
+            'correct_matches': [
+                { 're': /git grep ["']?Koha::Biblios["']? admin\/?/, 'hint': '' },
+            ],
+            'answer': 'git grep Koha::Biblios admin',
+            'type': 'text',
+            'hint': _(""),
+        },
+        {
+            'question': _("How could you find all occurrences of 'Koha::Biblios' in all <code>.pl</code> files?"),
+            'correct_matches': [
+                { 're': /git grep ["']?Koha::Biblios["']? \*\*\/\*\.pl/, 'hint': '' },
+            ],
+            'answer': 'git grep Koha::Biblios **/*.pl',
+            'type': 'text',
+            'hint': _(""),
+        },
+        {
+            'question': _("Knowing that a method is defined with the 'sub' keyword, how could you list all the methods of the 'Koha::Patrons' module?"),
+            'correct_matches': [
+                { 're': /git grep ["']?^sub ?["']? Koha\/Patrons.pm/, 'hint': 'Better to add a space' },
+            ],
+            'answer': 'git grep "^sub " Koha/Patrons.pm',
+            'type': 'text',
+            'hint': _(""),
+        },
+    ];
+
+    [% END %]
+
+    [% IF  step == 1
+        OR step == 3 %]
+    var qa_step = 0;
+    var current_qa = qas[qa_step];
+    var points = 0;
+
+    function get_previous_score() {
+        var score = sessionStorage.getItem('koha-howto');
+        if ( score ) {
+            score = JSON.parse(score);
+            var previous_score = score['[% step %]-[% substep %]'];
+            return previous_score;
+        }
+    }
+    function get_current_score() {
+        return points + '/' + $(qas).size();
+    }
+
+    function store_current_score() {
+        var score = sessionStorage.getItem('koha-howto');
+        if ( score ) {
+            score = JSON.parse(score);
+        } else {
+            score = {};
+        }
+        score['[% step %]-[% substep %]'] = get_current_score();
+        sessionStorage.setItem('koha-howto', JSON.stringify(score));
+    }
+
+    function next () {
+        current_qa = qas[qa_step];
+        var done = $("#current_qa").clone();
+        var a = get_user_answer();
+        if ( a == '' ) { return; }
+        if ( validate( current_qa, a ) ) {
+            $(done).find(".status").html('<i class="fa fa-fw fa-check"></i>');
+            $(done).find(".answer").html('');
+            points += 1;
+        } else {
+            $(done).find(".status").html('<i class="fa fa-fw fa-remove"></i>');
+            var wrong_answer;
+            if ( current_qa['type'] == 'option' ) {
+                wrong_answer = $('#current_qa > .answer > select > option:selected').text();
+            } else if ( current_qa['type'] == 'text' ) {
+                wrong_answer = $('#current_qa > .answer > input[type="text"]').val();
+            }
+            $(done).find(".answer").html('<span class="wrong">'+wrong_answer+'</span>');
+        }
+        if ( current_qa['type'] == 'option' ) {
+            $(done).find(".the_answer").html('<span class="correct">'+current_qa['options'][current_qa['answer']]+'</span>');
+        } else if ( current_qa['type'] == 'text' ) {
+            $(done).find(".the_answer").html('<span class="correct">'+current_qa['answer']+'</span>');
+        }
+        $(done).attr('id', 'qa_'+qa_step);
+        $(done).find(".hint").html(current_qa['hint']);
+        $("#previous_qas").append(done);
+
+        window.scrollTo(0,document.body.scrollHeight);
+
+        if ( $(qas).size() > qa_step + 1 ) {
+            // Display next Q&A
+            qa_step++;
+            display_qa(qas[qa_step]);
+            $("#current_qa > .answer > :first").focus();
+        } else {
+            // No more Q&A
+            $("#current_qa").remove();
+            $("#validate").hide();
+            var score = get_current_score();
+            store_current_score();
+            $("<div class='score'>Score: "+score+"</div>").insertBefore("#next_step");
+            $("#next_step").off("click").text(_('Continue to the next step'));
+        }
+    }
+
+    function get_user_answer() {
+        var a = $("#current_qa > .answer");
+        if ( current_qa['type'] == 'option' ) {
+            a = $(a).find('select > option:selected').val();
+        } else if ( current_qa['type'] == 'text' ) {
+            a = $(a).find('input[type="text"]').val();
+        }
+        return a;
+    }
+
+    function validate( q, a ) {
+        if ( q['type'] == 'option' ) {
+            a = $('#current_qa > .answer > select > option:selected').val();
+            if ( a.toString() === q['answer'].toString() ) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if ( q['type'] == 'text' ) {
+            a = $('#current_qa > .answer > input[type="text"]').val();
+            if ( a.toString() === q['answer'].toString() ) {
+                return true;
+            } else if ( $(q['correct_matches']).size() > 0 ) {
+                var match = false;
+                $(q['correct_matches']).each(function(i, e) {
+                    if ( a.toString().match(e['re']) ) {
+                        match = true;
+                        return false; // Stop the loop on correct_matches
+                    }
+                });
+                return match;
+            }
+        }
+        return false;
+    }
+    function display_qa( q ) {
+        var a;
+        if ( q['type'] == 'option' ) {
+            a = $('<select name="answer"></select>');
+            a.append('<option value="">'+_('Chọn')+'</option>');
+            $(q['options']).each(function(i, e) {
+                a.append('<option value="'+i+'">'+e+'</option>');
+            });
+        } else if ( q['type'] == 'text' ) {
+            a = $('<input type="text" value="" name="answer" />');
+        }
+        $("#current_qa > .number").html(( qa_step + 1 ) + '. ');
+        $("#current_qa > .question").html(q['question']);
+        $("#current_qa > .answer").html($(a));
+        $("#current_qa > .the_answer").html('');
+        $("#current_qa > .status").html('');
+    }
+    $(document).ready(function(){
+        display_qa( qas[0] );
+        $("#validate").on('click', function(e){e.preventDefault(); next();});
+        $("#next_step").on('click', function(e){
+            return confirm( _("Are you sure you want to skip this step?"));
+        });
+
+        var previous_score = get_previous_score();
+        if ( previous_score ) {
+            $("h1").append(" (<span class='score'>Previous score: "+previous_score+"</span>)");
+        }
+    });
+    [% END %]
+
+    $(document).ready(function(){
+        $("li#nav_[% step %][% substep %] > a").css('font-weight','bold');
+    });
+//]]>
+</script>
+
+</head>
+<body id="howto-main" class="howto">
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'home-search.inc' %]
+
+<div id="breadcrumbs" >Home &rsaquo; How to hack Koha?</div>
+ <div id="container-main" class="container-fluid">
+ <div class="row">
+
+ [% INCLUDE display_messages messages=messages, not_a_step=1%]
+ <div class="col-sm-10 col-sm-push-2">
+ <div id="howto-body">
+ [% SWITCH step %]
+ [% CASE '0' %]
+
+ <h1>How to hack Koha?</h1>
+
+ <p>
+ You did it!
+ You have a fully working development environment. You can now learn how to hack Koha!
+ The following tutorial will guide you step-by-step to write your first patch and learn the coding guidelines of the Koha community.
+ </p>
+
+ <p>
+ You can find useful resources on our wiki:
+ </p>
+
+ <ol>
+ <li><a href="https://wiki.koha-community.org/wiki/Development_workflow">Our development workflow</a></li>
+ <li><a href="https://wiki.koha-community.org/wiki/Coding_Guidelines">Our coding guidelines</a></li>
+ <li><a href="https://wiki.koha-community.org/wiki/Submitting_A_Patch">Submitting a patch</a></li>
+ </ol>
+
+ <p>
+ <a href="/cgi-bin/koha/how-to.pl?step=[% next_step %]" id="next_step" class="btn btn-success btn-sm"> Start <i class="fa fa-arrow-right"></i></a>
+ </p>
+
+ [% CASE '1' %]
+
+ <h1><span class="step-heading">Step [% step %]</span> Test your knowledge</h1>
+
+ <p>
+ We all know it's boring to read documentation, but we need to make sure you know what we're talking about :)<br/>
+ Let's start with a few questions about our development workflow.
+ </p>
+
+ <div id="QandA">
+ <div id="previous_qas"></div>
+ <div id="current_qa" class="qa">
+ <span class="number">1</span>
+ <span class="question"></span>
+ <span class="status"></span>
+ <span class="answer"></span>
+ <span class="the_answer"></span>
+ <span class="hint"></span>
+ </div>
+
+ <a href="#" id="validate" class="btn btn-success btn-sm">Check your answer</a>
+ <a href="/cgi-bin/koha/how-to.pl?step=[% next_step %]" id="next_step" class="btn btn-primary btn-sm">Skip to the next step <i class="fa fa-arrow-right"></i></a>
+ </div>
+
+ [% CASE '2' %]
+
+ <h1><span class="step-heading">Step [% step %]</span> Terminology</h1>
+
+ <p>If compare Koha's code with the text of the interface you will notice that sometimes the terminology used is not the same. It has historical reason, the community decided to switch to the US English (Simplified).</p>
+
+ <p>This process is not complete yet, so you will encounter terms like "borrowers," "members," "users," or "patron." They all refer to "patron."</p>
+
+ <p>To know the correct term to use, see the <a href="https://wiki.koha-community.org/wiki/Terminology">Terminology page on our wiki</a></p>
+
+ <p><a href="/cgi-bin/koha/how-to.pl?step=[% next_step %]" id="next_step" class="btn btn-primary btn-sm"> Next step <i class="fa fa-arrow-right"></i></a></p>
+
+ [% CASE '3' %]
+
+ <h1><span class="step-heading">Step [% step %]</span> Browse the code</h1>
+ Now that you understand the Koha community workflow, we are going to guide you through the code.
+
+ <h2>Types of files</h2>
+
+ <p>In the Koha code you can find four main type of files:</p>
+
+ <ol>
+ <li><code>.pl</code> - The perl scripts</li>
+ <li><code>.pm</code> - The perl modules</li>
+ <li><code>.tt</code> - The template files (with their include files <code>.inc</code>)</li>
+ <li><code>.t</code> - The test files</li>
+ </ol>
+
+ <h2>Browse the code</h2>
+
+ <p>To find a pattern you can use the <code>git grep</code> command.</p>
+
+ <p>Examples:</p>
+
+ <p>Return all the occurrences of "Koha::Objects"</p>
+
+ <pre><span class="prompt"></span> git grep Koha::Objects</pre>
+
+ <p>Return all the occurrences of "Koha::Objects" in <code>.pm</code> files</p>
+
+ <pre><span class="prompt"></span> git grep Koha::Objects **/*.pm</pre>
+
+ <h2>Your turn!</h2>
+
+ <div id="QandA">
+ <div id="previous_qas"></div>
+ <div id="current_qa" class="qa">
+ <span class="number">1. </span>
+ <span class="question"></span>
+ <span class="status"></span>
+ <span class="answer"></span>
+ <span class="the_answer"></span>
+ <span class="hint"></span>
+ </div>
+ <a href="#" id="validate" class="btn btn-success btn-sm">Check your answer</a>
+ <a href="/cgi-bin/koha/how-to.pl?step=[% next_step %]" id="next_step" class="btn btn-primary btn-sm">Skip to the next step <i class="fa fa-arrow-right"></i></a>
+ </div>
+
+ [% CASE '4' %]
+
+ [% SWITCH substep %]
+
+ [% CASE '' %]
+
+ <h1><span class="step-heading">Step [% step %]</span> Let's get your hands dirty in the code!</h1>
+
+ <p>
+ Yes, all what you wanted to know is how to write a patch and send it to us. Here we go!
+ </p>
+
+ <p>
+ In the next steps we are going to write step-by-step:
+ </p>
+
+ <ol>
+ <li>Create a very simple patch to fix a small bug</li>
+ <li>Make sure your patch pass the basic QA-tests script</li>
+ <li>Attach it to our bug tracker</li>
+ <li>Apply a patch locally from our bug tracker</li>
+ <li>Test it and sign it off</li>
+ <li>Attach the signed off patch to our bug tracker</li>
+ </ol>
+
+ <p>You must have a minimum of knowledge of git before continuing. You should be aware of the existence of the following commands and know what they do:</p>
+
+ <ol>
+ <li><code>git add</code> - Add files to the index</li>
+ <li><code>git commit</code> - Commit your changes</li>
+ <li><code>git status</code> - Find out what state you are in</li>
+ <li><code>git log</code> - View the commit history. Not that you can also use <code>tig</code> for a browsable history</li>
+ <li><code>git diff</code> - Display the changes that can be added</li>
+ </ol>
+
+ <p>If that is not clear, read <a href="https://git-scm.com/docs/gittutorial">this quick tutorial</a>. And <a href="https://git-scm.com/docs/user-manual.html">the user manual</a> if you want to go further.</p>
+
+ <h3>Ready?</h3>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% next_substep %]" id="next_substep" class="btn btn-success btn-sm"> Yes!</a>
+ <a href="/cgi-bin/koha/how-to.pl?step=[% next_step + 1 %]" id="next_step" class="btn btn-primary btn-sm"> No, I want to skip this step!</a>
+ [% CASE 'a' %]
+
+ <h1><span class="step-heading">Step [% step %] <span class="substep">[% substep %]</span></span> Create your very first Koha patch</h1>
+
+ [% INCLUDE display_messages messages=step_messages %]
+
+ <p>Here you will be guided to find a trivial bug, commit your changes, and submit the patch to our bug tracker</p>
+
+ <p>According to our <a href="https://wiki.koha-community.org/wiki/Coding_Guidelines#PERL6:_Indentation">coding guidelines</a> a line of code should not contain trailing spaces. Therefore we are then going to write a patch to remove a trailing space.</p>
+
+ <h2>Tell us you are working on a bug</h2>
+
+ <p>
+ First you should tell the community you are going to work on this bug. If you don't want to tell us anything you are free to continue anyway.
+ </p>
+
+ <p>
+ Letting us know by assigning the bug to yourself helps prevent duplication of work.
+ </p>
+
+ <p>
+ A bug report has been opened for didactic purpose: <a href="https://bugs.koha-community.org/bugzilla3/show_bug.cgi?id=18584">Bug 18584 - Our legacy code contains trailing spaces</a>
+ </p>
+
+ <p>
+ Go there and assign the bug to yourself: click on 'take' next to the 'Assignee:' field, and change the status to 'ASSIGNED'.
+ </p>
+
+ <h2>Create a working branch</h2>
+
+ <p>
+ Whether you want to develop a new feature or want to fix a very small bug, a good practice is to create a local branch with the number of the bug.
+ </p>
+
+ <p>
+ In our case <code>bug_18584</code> is a good name.
+ You will need first to update your remotes, then create a branch tracking main:
+ </p>
+
+ <pre>
+ <span class="prompt"></span> git remote update
+ <span class="prompt"></span> git checkout -b bug_18584 origin/main
+ </pre>
+
+ <h2>Fix the issue</h2>
+
+ <p>We are going to find an occurrence in the code that has a trailing space and remove it</p>
+
+ <p>
+ To list the trailing spaces in the legacy code (<code>C4</code> directory) you can do:
+ </p>
+ <pre><span class="prompt"></span> git grep ' $' C4/*.pm</pre>
+
+ <p>You can use the <code>-n</code> option to see the line numbers.</p>
+
+ <div class="note">Note: There are no occurrences of trailing spaces in our Koha module! We have now strong tools that check that during the QA step</div>
+
+ <p>Pick one in the list, edit the file, locate one line (and only one!) with trailing spaces, and remove them!</p>
+
+ <p>Add the change to the git index and commit:</p>
+
+ <pre>
+ <span class="prompt"></span> git status
+ <span class="prompt"></span> git diff
+ <span class="prompt"></span> git add C4/your_file.pm
+ <span class="prompt"></span> git commit
+ </pre>
+
+ <h2>Write your commit message</h2>
+
+ <p>You are now ready to write your commit message!</p>
+
+ <p>You can take a look at the wiki to know <a href="https://wiki.koha-community.org/wiki/Commit_messages">how to write good commit messages</a>.</p>
+
+ <p>The main things to keep in mind are:</p>
+
+ <ol>
+ <li>
+ The very first line should contain a very short explanation of what your patch does.<br/>
+ You are not supposed to copy paste the title of the bug report! The bug report tell what the bug is and the commit message tell what the patch does.
+ </li>
+ <li>The first character of the first line has to contain the bug number: 'Bug XXXXX: '</li>
+ <li>The body should contain a description of what your patch does and a test plan</li>
+ </ol>
+
+ <p>When you think you have correctly formatted your patch, you can continue</p>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-success btn-sm"> Verify</a>
+
+ [% CASE 'b' %]
+
+ <h1><span class="step-heading">Step [% step %] <span class="substep">[%substep %]</span></span> - Check that your patch passes the QA-tests script</h1>
+
+ [% INCLUDE display_messages messages=step_messages %]
+
+ <p>
+ The Koha community <a href="https://gitlab.com/koha-community/qa-test-tools">provides a script</a> that will let us know if your patch does not break some basic coding guidelines.<br/>
+ Tests like trailing-whitespaces, uses of tabulation instead of 4 spaces, patterns to avoid, etc. are easy to automatized.<br/>
+ </p>
+
+ <p>
+ The use of this script is really easy, if you are using a <code>koha-testing-docker</code> there is a <code>qa</code> alias.
+ The alias is defined in <code>~/.bash_aliases</code>: <code>alias qa="/kohadevbox/qa-test-tools/koha-qa.pl -v 2 --failures"</code><br/>
+ It takes 2 parameters:
+ </p>
+
+ <ol>
+ <li><code>-c</code>: Specify the number of commit you want to test</li>
+ <li><code>-v</code>: Specify the verbosity you wish (2 is the usual value to see the detailed report)</li>
+ </ol>
+
+ <div class="note">You must be inside a koha-shell to run this command.</div>
+
+ <p>Run this script and make sure you patch passes the QA tests!</p>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-success btn-sm"> Confirm you executed the script</a>
+
+ [% CASE 'c' %]
+
+ <h1><span class="step-heading">Step [% step %] <span class="substep">[%substep %]</span></span> - Attach the patch to the bug tracker</h1>
+
+ [% INCLUDE display_messages messages=step_messages %]
+
+ <p>You are a smart person and you want to share your work with us, don't you?</p>
+
+ <p>
+ There are several ways to do so. The easiest one is using <code>git-bz</code>.<br />
+ <code><a href="https://wiki.koha-community.org/wiki/Git_bz_configuration">git-bz</a></code> it a small tool that will let you interact with our bug tracker from the command line.
+ </p>
+
+ <p>
+ It is very useful for developer because you can attach several patches, update the status of the bug report as well as other fields in one go.
+ </p>
+
+ <div class="note">Note: The content of your commit message will be displayed, you should not edit it at this point! If you do, it will only edit the message you are going to post on the bug tracker, not the content of the patch itself.</div>
+
+ [% INCLUDE attach_patch %]
+
+ <p>
+ When it is done you should see your patch attached to the <a href="https://bugs.koha-community.org/bugzilla3/show_bug.cgi?id=18584">bug report</a>.
+ If you forgot to switch the status to <code>Needs Signoff</code> when you attach your patch, you should do it now to tell the community your patch is ready to be tested.
+ </p>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-success btn-sm"> Your patch is attached!</a>
+
+ [% CASE 'd' %]
+
+ <h1><span class="step-heading">Step [% step %] <span class="substep">[%substep %]</span></span> - Apply a patch locally from the bug tracker</h1>
+
+ [% INCLUDE display_messages messages=step_messages %]
+
+ <p>
+ If you want to test a patch to contribute to the community effort and tell us that it works as advertised (or not!), you will need to apply the patch locally to test it.<br/>
+ Using <code>git-bz</code> it will be very easy.
+ </p>
+
+ <p>
+ We are going to reuse the patch you have just uploaded on bug 18584. You must know that you are not supposed to test your own patches, but for didactic purpose we will assume that the author that sent a patch in the previous step is not the same person as the tester in this step (have some imagination!)
+ </p>
+
+ <p>
+ First you will need to create a new branch tracking <code>origin/main</code>:
+ </p>
+
+ <pre><span class="prompt"></span> git checkout -b bug_18584_so origin/main</pre>
+
+ <p>
+ Use <code>git log</code> to see that your patch is not on your current branch.
+ </p>
+
+ <p>
+ And then to apply the patch from the bug tracker:
+ </p>
+
+ <pre><span class="prompt"></span> git bz apply 18584</pre>
+
+ <p>
+ Using <code>git log</code> again you should now see your patch correctly applied.
+ </p>
+
+ <div class="note">Ghi chú: <code>git bz apply 18584</code> will list you the patches that are attached to the bug report and ask you if you really want to apply them:<br/> <code>Apply? [(y)es, (n)o, (i)nteractive]</code><br/> You can agree (y), refuse (n) or pick some patches or even apply them in a different order if you choose the interactive mode (i)</div>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-success btn-sm"> The patch is applied!</a>
+
+ [% CASE 'e' %]
+
+ <h1><span class="step-heading">Step [% step %] <span class="substep">[%substep %]</span></span> - Test the patch and sign it off!</h1>
+
+ [% INCLUDE display_messages messages=step_messages %]
+
+ <p>
+ Now that the patch is applied you must restart service that Koha uses (<code>Plack</code>, <code>memcached</code>, etc.) using the following koha-testing-docker alias:
+ </p>
+
+ <pre><span class="prompt"></span> restart_all</pre>
+
+ <p>
+ You are now ready to test the patch!
+ </p>
+
+ <p>
+ Read the different comment on the bug report, follow the test plan and confirm that everything passes.
+ </p>
+ <p>
+ Depending on your tests you will have several possibilities:
+ </p>
+
+ <ol>
+ <li>If there is something you do not understand, you can leave a comment on the bug report to ask for more information</li>
+ <li>If there is something wrong with the test plan or if does not pass, you can switch the status to <code>Failed QA</code> and leave a note explaining why</li>
+ <li>
+ If the patch does not apply cleanly, you switch the status to <code>Does not apply</code> and wait for the author to rebase the patch.<br/>
+ You will need to execute <code>% git bz apply --abort</code> to get back to a correct state.
+ <div class="note">Note: When a patch does not apply you do not have to copy and paste the whole output to the bug report. You do not even really need to let a comment on the bug.<br/> By switching the status you notify the author of the patch that you are willing to test it but cannot at the moment.</div>
+ </li>
+ <li>If everything passes and is clear for you, you can sign the patch off and tell the community you confirm the patch works and the bug is fixed</li>
+ </ol>
+
+ <p>
+ đến <a href="https://wiki.koha-community.org/wiki/Sign_off_on_patches">sign off on the patch</a>, the easiest method is to use the <code>-s</code> option of <code>git commit --amend</code>:
+ </p>
+
+ <pre><span class="prompt"></span> git commit --amend -s</pre>
+
+ <p>
+ A <code>Signed-off-by:</code> line followed by your name will be added at the end of the commit message.
+ </p>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-success btn-sm"> You signed off on the patch!</a>
+
+ [% CASE 'f' %]
+
+ <h1><span class="step-heading">Step [% step %] <span class="substep">[%substep %]</span></span> - Attach the signed-off patch to our bug tracker</h1>
+
+ [% INCLUDE display_messages messages=step_messages %]
+
+ <p>
+ To attach it to the relevant bug report you need to reuse the same command as previously.
+ </p>
+
+ [% INCLUDE attach_patch %]
+
+ <p>
+ You can switch the status to <code>Signed off</code> when attaching your patch using <code>git bz</code>, or change the status manually on the bug report.
+ </p>
+
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-success btn-sm"> You attached your signed-off patch!</a>
+
+ [% END %]
+
+ [% CASE '5' %]
+ <h2>Congratulations!</h2>
+ <p>You have finished the tutorial! More are coming, so stay tuned!</p>
+
+ [% END %]
+ </div>
+ </div>
+
+ <div class="col-sm-2 col-sm-pull-10">
+ <aside>
+ <div id="navmenu">
+ <div id="navmenulist">
+ <h5>How to?</h5>
+ <ul>
+ <li id="nav_0"><a href="/cgi-bin/koha/how-to.pl">Welcome!</a></li>
+ <li id="nav_1"><a href="/cgi-bin/koha/how-to.pl?step=1">Step 1 - Basic knowledge</a></li>
+ <li id="nav_2"><a href="/cgi-bin/koha/how-to.pl?step=2">Step 2 - Terminology</a></li>
+ <li id="nav_3"><a href="/cgi-bin/koha/how-to.pl?step=3">Step 3 - Browse the code</a></li>
+ <li id="nav_4"><a href="/cgi-bin/koha/how-to.pl?step=4">Step 4 - Let's patch!</a>
+ <ol>
+ <li id="nav_4a"><a href="/cgi-bin/koha/how-to.pl?step=4&substep=a">a - Write your first patch</a></li>
+ <li id="nav_4b"><a href="/cgi-bin/koha/how-to.pl?step=4&substep=b">b - Validate your patch</a></li>
+ <li id="nav_4c"><a href="/cgi-bin/koha/how-to.pl?step=4&substep=c">c - Share your patch</a></li>
+ <li id="nav_4d"><a href="/cgi-bin/koha/how-to.pl?step=4&substep=d">d - Apply a patch locally</a></li>
+ <li id="nav_4e"><a href="/cgi-bin/koha/how-to.pl?step=4&substep=e">e - Sign off on a patch</a></li>
+ <li id="nav_4f"><a href="/cgi-bin/koha/how-to.pl?step=4&substep=f">f - Attach a signed-off patch</a></li>
+ </ol>
+ </li>
+ </ul>
+ </div>
+ </div>
+ </aside>
+ </div>
+ </div>
+ </div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]
+
+[% BLOCK display_messages %]
+ [% UNLESS messages AND messages.size %][% RETURN %][% END %]
+ <div class="dialog alert">
+ [% IF messages.size > 1 %]
+ <h3 style="padding-left: 1em;">Please try again</h3>
+ <ol>
+ [% ELSE %]
+ <h3>Please try again</h3>
+ [% END %]
+ [% FOREACH m IN messages %]
+ [% IF messages.size > 1 %]<li>[% ELSE %]<p>[% END %]
+ [% SWITCH m %]
+ [% CASE 'using_db_user' %]
+ You are using the database user. You should never use this user. Use a superlibrarian user instead.
+ [% CASE 'no_koha_git_dir' %]
+ This tutorial is supposed to be used inside Koha.
+ [% CASE 'commit_does_not_start_with_bug_number' %]
+ The commit message must start with 'Bug 18584: '
+ [% CASE 'commit_does_not_contain_spaces' %]
+ The first line of the commit message must specify that you are removing trailing spaces
+ [% CASE 'first_line_too_long' %]
+ The first line of the commit message is too long (more than 80 characters)
+ [% CASE 'too_many_files_modified' %]
+ You should have one and only one file modified
+ [% CASE 'too_many_lines_modified' %]
+ You should have one and only one line modified
+ [% CASE 'commit_message_does_not_contain_filename' %]
+ The first line of the commit message must specify the filename you touch.<br/>
+ <strong>Ghi chú:</strong> Most of the time you do not need to specify it. In our case it is different: several commits will be needed to fix all the trailing spaces. To differentiate the commits it will be preferable to highlight the filename in the commit message.
+ [% CASE 'commit_message_does_not_contain_test_plan' %]
+ The commit message must contain a test plan.<br/>
+ <strong>Ghi chú:</strong> In this situation the test plan will be very short. A simple line "Open the file and confirm that the trailing spaces are gone" would be enough.<br/>
+ For a more complex patch we will expect a step-by-step plan to confirm the issue is fixed.
+ [% CASE 'branch_without_bugnumber' %]
+ You must work on a branch that contain the number of the bug, something like <code>bug_18584</code>
+ [% CASE 'too_many_commits_diff_with_main' %]
+ There are too many commits of difference between <code>origin/main</code> and your local branch.<br/> Are you sure your local branch is up-to-date with <code>origin/main</code>?
+ [% CASE 'not_executed' %]
+ You did not execute the QA script, or the number of commits you tested were wrong.<br/>
+ You need to execute the following command: <code>qa -c 1 -v 2</code>.
+ [% CASE 'report_not_nso' %]
+ The bug report is not in the 'Needs Signoff' status. You should update it if your patch is attached.
+ [% CASE 'patch_not_applied' %]
+ The patch is not applied correctly!
+ [% CASE 'patch_not_signed_off' %]
+ The patch is not signed off!
+ [% CASE 'report_not_so' %]
+ The bug report is not in the 'Signed Off' status. You should update it if your signed-off patch is attached.
+ [% CASE %][% m %]
+ [% END %]
+ [% IF messages.size > 1 %]</li>[% ELSE %]</p>[% END %]
+ [% END %]
+ [% IF messages.size > 1 %]</ol>[% END %]
+
+ [% UNLESS not_a_step %]
+ [% IF substep %]
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&substep=[% substep %]&verify=1" id="next_step" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Retry</a>
+ [% ELSE %]
+ <a href="/cgi-bin/koha/how-to.pl?step=[% step %]&verify=1" id="next_step" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Retry</a>
+ [% END %]
+ [% IF next_substep %]
+ <a href="/cgi-bin/koha/how-to.pl?step=[% next_step %]&substep=[% next_substep %]" id="next_step" class="btn btn-default btn-sm"> Skip this step <i class="fa fa-arrow-right"></i></a>
+ [% ELSE %]
+ <a href="/cgi-bin/koha/how-to.pl?step=[% next_step %]" id="next_step" class="btn btn-default btn-sm"> Skip this step <i class="fa fa-arrow-right"></i></a>
+ [% END %]
+ [% END %]
+ </div>
+[% END %]
+
+[% BLOCK attach_patch %]
+ <p>
+ To attach the last patch of the branch you can use:
+ </p>
+
+ <pre><span class="prompt"></span> git bz attach -e 18584 HEAD</pre>
+
+ <ol>
+ <li><code>-e</code>: To switch the status of the bug report to <code>Needs Signoff</code> (among other things)</li>
+ <li><code>18584</code>: It is of course the bug number of the bug report where you want to attach your patch</li>
+ <li><code>HEAD</code>: In git jargon it means the latest commit from the branch you are in</li>
+ </ol>
+
+ <div class="note">
+ Note: Sometimes you will want to attach several patches to a bug report in a row. It is easily feasible modifying the last parameter using git intervals.<br/>
+ For instance: <code>HEAD~2..HEAD</code> will attach the last 2 patches.<br/>
+ In this syntax the last <code>HEAD</code> is optional. So you could also use <code>HEAD~2..</code> as an equivalent.
+ </div>
+[% END %]
+

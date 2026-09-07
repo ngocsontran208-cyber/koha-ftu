@@ -1,13 +1,13 @@
 <template>
     <div id="admin-menu" class="sidebar_menu">
         <template v-if="can_user_parameters_manage_sysprefs">
-            <h5>{{ $__("System preferences") }}</h5>
+            <h5>{{ $__("Cấu hình hệ thống") }}</h5>
             <ul>
                 <li>
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/preferences.pl"
-                        >{{ $__("System preferences") }}</a
+                        >{{ $__("Cấu hình hệ thống") }}</a
                     >
                 </li>
             </ul>
@@ -20,21 +20,21 @@
                 can_user_parameters_manage_auth_values
             "
         >
-            <h5>{{ $__("Basic parameters") }}</h5>
+            <h5>{{ $__("Thông số cơ bản") }}</h5>
             <ul>
                 <template v-if="can_user_parameters_manage_libraries">
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/branches.pl"
-                            >{{ $__("Libraries") }}</a
+                            >{{ $__("Thư viện") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/library_groups.pl"
-                            >{{ $__("Library groups") }}</a
+                            >{{ $__("Nhóm thư viện") }}</a
                         >
                     </li>
                 </template>
@@ -42,14 +42,14 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/itemtypes.pl"
-                        >{{ $__("Item types") }}</a
+                        >{{ $__("Kiểu tài liệu") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_auth_values">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/authorised_values.pl"
-                        >{{ $__("Authorized values") }}</a
+                        >{{ $__("Giá trị định chuẩn") }}</a
                     >
                 </li>
             </ul>
@@ -67,27 +67,27 @@
                 can_user_parameters_manage_patron_restrictions
             "
         >
-            <h5>{{ $__("Patrons and circulation") }}</h5>
+            <h5>{{ $__("Bạn đọc và lưu thông") }}</h5>
             <ul>
                 <li v-if="can_user_parameters_manage_patron_categories">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/categories.pl"
-                        >{{ $__("Patron categories") }}</a
+                        >{{ $__("Kiểu bạn đọc") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_circ_rules">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/smart-rules.pl"
-                        >{{ $__("Circulation and fine rules") }}</a
+                        >{{ $__("Quy tắc mượn trả và tiền phạt") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_patron_attributes">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/patron-attr-types.pl"
-                        >{{ $__("Patron attribute types") }}</a
+                        >{{ $__("Kiểu thuộc tính bạn đọc") }}</a
                     >
                 </li>
                 <template v-if="can_user_parameters_manage_transfers">
@@ -95,21 +95,21 @@
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/branch_transfer_limits.pl"
-                            >{{ $__("Library transfer limits") }}</a
+                            >{{ $__("Giới hạn chuyển tài liệu") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/transport-cost-matrix.pl"
-                            >{{ $__("Transport cost matrix") }}</a
+                            >{{ $__("Bảng phí vận chuyển") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/float_limits.pl"
-                            >{{ $__("Library float limits") }}</a
+                            >{{ $__("Giới hạn luân chuyển") }}</a
                         >
                     </li>
                 </template>
@@ -117,7 +117,7 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/sip2/sip2.pl"
-                        >{{ $__("Self-service circulation (SIP2)") }}</a
+                        >{{ $__("Lưu thông tự phục vụ (SIP2)") }}</a
                     >
                 </li>
                 <li
@@ -129,14 +129,14 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/shibboleth/shibboleth.pl"
-                        >{{ $__("Shibboleth configuration") }}</a
+                        >{{ $__("Cấu hình Shibboleth") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_item_circ_alerts">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/item_circulation_alerts.pl"
-                        >{{ $__("Item circulation alerts") }}</a
+                        >{{ $__("Cảnh báo mượn trả") }}</a
                     >
                 </li>
                 <li
@@ -148,28 +148,28 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/desks.pl"
-                        >{{ $__("Desks") }}</a
+                        >{{ $__("Bàn làm việc") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_cities">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/cities.pl"
-                        >{{ $__("Cities and towns") }}</a
+                        >{{ $__("Thành phố và thị trấn") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_curbside_pickups">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/curbside_pickup.pl"
-                        >{{ $__("Curbside pickup") }}</a
+                        >{{ $__("Nhận tài liệu ngoài lề đường") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_patron_restrictions">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/restrictions.pl"
-                        >{{ $__("Patron restriction types") }}</a
+                        >{{ $__("Kiểu hạn chế bạn đọc") }}</a
                     >
                 </li>
             </ul>
@@ -181,21 +181,21 @@
                 (usecashregisters && can_user_parameters_manage_cash_registers)
             "
         >
-            <h5>{{ $__("Accounting") }}</h5>
+            <h5>{{ $__("Kế toán") }}</h5>
             <ul>
                 <template v-if="can_user_parameters_manage_accounts">
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/debit_types.pl"
-                            >{{ $__("Debit types") }}</a
+                            >{{ $__("Loại ghi nợ") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/credit_types.pl"
-                            >{{ $__("Credit types") }}</a
+                            >{{ $__("Loại ghi có") }}</a
                         >
                     </li>
                 </template>
@@ -208,33 +208,33 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/cash_registers.pl"
-                        >{{ $__("Cash registers") }}</a
+                        >{{ $__("Máy tính tiền") }}</a
                     >
                 </li>
             </ul>
         </template>
 
         <template v-if="can_user_plugins && plugins_enabled">
-            <h5>{{ $__("Plugins") }}</h5>
+            <h5>{{ $__("Gói mở rộng (Plugins)") }}</h5>
             <ul>
                 <li>
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/plugins/plugins-home.pl"
-                        >{{ $__("Plugins") }}</a
+                        >{{ $__("Gói mở rộng (Plugins)") }}</a
                     >
                 </li>
             </ul>
         </template>
 
         <template v-if="can_user_parameters_manage_background_jobs">
-            <h5>{{ $__("Jobs") }}</h5>
+            <h5>{{ $__("Tác vụ nền") }}</h5>
             <ul>
                 <li>
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/background_jobs.pl"
-                        >{{ $__("Jobs") }}</a
+                        >{{ $__("Tác vụ nền") }}</a
                     >
                 </li>
             </ul>
@@ -253,35 +253,35 @@
                     can_user_parameters_manage_search_filters)
             "
         >
-            <h5>{{ $__("Catalog") }}</h5>
+            <h5>{{ $__("Biên mục") }}</h5>
             <ul>
                 <template v-if="can_user_parameters_manage_marc_frameworks">
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/biblio_framework.pl"
-                            >{{ $__("MARC bibliographic framework") }}</a
+                            >{{ $__("Khung mẫu biên mục MARC") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/koha2marclinks.pl"
-                            >{{ $__("Koha to MARC mapping") }}</a
+                            >{{ $__("Ánh xạ Koha - MARC") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/checkmarc.pl"
-                            >{{ $__("MARC bibliographic framework test") }}</a
+                            >{{ $__("Kiểm tra khung mẫu biên mục MARC") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/authtypes.pl"
-                            >{{ $__("Authority types") }}</a
+                            >{{ $__("Kiểu dữ liệu kiểm soát") }}</a
                         >
                     </li>
                 </template>
@@ -289,42 +289,42 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/classsources.pl"
-                        >{{ $__("Classification configuration") }}</a
+                        >{{ $__("Cấu hình khung phân loại") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_matching_rules">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/matching-rules.pl"
-                        >{{ $__("Record matching rules") }}</a
+                        >{{ $__("Quy tắc so khớp biểu ghi") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_record_sources">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/record_sources"
-                        >{{ $__("Record sources") }}</a
+                        >{{ $__("Nguồn biểu ghi") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_marc_overlay_rules">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/marc-overlay-rules.pl"
-                        >{{ $__("Record overlay rules") }}</a
+                        >{{ $__("Quy tắc ghi đè biểu ghi") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_oai_sets">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/oai_sets.pl"
-                        >{{ $__("OAI sets configuration") }}</a
+                        >{{ $__("Cấu hình tập hợp OAI") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_item_search_fields">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/items_search_fields.pl"
-                        >{{ $__("Item search fields") }}</a
+                        >{{ $__("Trường tìm kiếm tài liệu") }}</a
                     >
                 </li>
                 <li
@@ -336,7 +336,7 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/search_filters.pl"
-                        >{{ $__("Search filters") }}</a
+                        >{{ $__("Bộ lọc tìm kiếm") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_search_engine_config">
@@ -344,7 +344,7 @@
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/searchengine/elasticsearch/mappings.pl"
                         >{{
-                            $__("Search engine configuration (Elasticsearch)")
+                            $__("Cấu hình máy tìm kiếm (Elasticsearch)")
                         }}</a
                     >
                 </li>
@@ -361,27 +361,27 @@
                     can_user_acquisition_marc_order_manage)
             "
         >
-            <h5>{{ $__("Acquisition parameters") }}</h5>
+            <h5>{{ $__("Thông số bổ sung") }}</h5>
             <ul>
                 <li v-if="can_user_acquisition_currencies_manage">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/currency.pl"
-                        >{{ $__("Currencies and exchange rates") }}</a
+                        >{{ $__("Tiền tệ và tỷ giá") }}</a
                     >
                 </li>
                 <li v-if="can_user_acquisition_period_manage">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/aqbudgetperiods.pl"
-                        >{{ $__("Budgets") }}</a
+                        >{{ $__("Ngân sách") }}</a
                     >
                 </li>
                 <li v-if="can_user_acquisition_budget_manage">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/aqbudgets.pl"
-                        >{{ $__("Funds") }}</a
+                        >{{ $__("Quỹ") }}</a
                     >
                 </li>
                 <template v-if="edifact && can_user_acquisition_edi_manage">
@@ -389,14 +389,14 @@
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/edi_accounts.pl"
-                            >{{ $__("EDI accounts") }}</a
+                            >{{ $__("Tài khoản EDI") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/edi_ean_accounts.pl"
-                            >{{ $__("Library EANs") }}</a
+                            >{{ $__("Mã EAN thư viện") }}</a
                         >
                     </li>
                 </template>
@@ -409,7 +409,7 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/marc_order_accounts.pl"
-                        >{{ $__("MARC ordering accounts") }}</a
+                        >{{ $__("Tài khoản đặt mua MARC") }}</a
                     >
                 </li>
             </ul>
@@ -432,13 +432,13 @@
                     can_user_parameters_manage_keyboard_shortcuts)
             "
         >
-            <h5>{{ $__("Additional parameters") }}</h5>
+            <h5>{{ $__("Thông số bổ sung khác") }}</h5>
             <ul>
                 <li v-if="can_user_parameters_manage_identity_providers">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/identity_providers.pl"
-                        >{{ $__("Identity providers") }}</a
+                        >{{ $__("Nhà cung cấp định danh") }}</a
                     >
                 </li>
                 <template v-if="can_user_parameters_manage_search_targets">
@@ -446,14 +446,14 @@
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/z3950servers.pl"
-                            >{{ $__("Z39.50/SRU servers") }}</a
+                            >{{ $__("Máy chủ Z39.50/SRU") }}</a
                         >
                     </li>
                     <li>
                         <a
                             :ref="el => templateRefs.push(el)"
                             href="/cgi-bin/koha/admin/oai_servers.pl"
-                            >{{ $__("OAI repositories") }}</a
+                            >{{ $__("Kho lưu trữ OAI") }}</a
                         >
                     </li>
                 </template>
@@ -461,35 +461,35 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/smtp_servers.pl"
-                        >{{ $__("SMTP servers") }}</a
+                        >{{ $__("Máy chủ SMTP") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_file_transports">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/file_transports.pl"
-                        >{{ $__("File transports") }}</a
+                        >{{ $__("Truyền tải tập tin") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_didyoumean">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/didyoumean.pl"
-                        >{{ $__("Did you mean?") }}</a
+                        >{{ $__("Có phải bạn muốn tìm?") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_column_config">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/columns_settings.pl"
-                        >{{ $__("Table settings") }}</a
+                        >{{ $__("Cài đặt bảng") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_audio_alerts">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/audio_alerts.pl"
-                        >{{ $__("Audio alerts") }}</a
+                        >{{ $__("Cảnh báo âm thanh") }}</a
                     >
                 </li>
                 <li
@@ -501,28 +501,28 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/sms_providers.pl"
-                        >{{ $__("SMS cellular providers") }}</a
+                        >{{ $__("Nhà cung cấp dịch vụ SMS") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_usage_stats">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/usage_statistics.pl"
-                        >{{ $__("Share usage statistics") }}</a
+                        >{{ $__("Chia sẻ thống kê sử dụng") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_mana">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/share_content.pl"
-                        >{{ $__("Share content with Mana KB") }}</a
+                        >{{ $__("Chia sẻ nội dung với Mana KB") }}</a
                     >
                 </li>
                 <li v-if="can_user_parameters_manage_additional_fields">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/additional-fields.pl"
-                        >{{ $__("Additional fields") }}</a
+                        >{{ $__("Trường dữ liệu bổ sung") }}</a
                     >
                 </li>
                 <li
@@ -534,14 +534,14 @@
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/adveditorshortcuts.pl"
-                        >{{ $__("Keyboard shortcuts") }}</a
+                        >{{ $__("Phím tắt") }}</a
                     >
                 </li>
                 <li v-if="illmodule && can_user_ill">
                     <a
                         :ref="el => templateRefs.push(el)"
                         href="/cgi-bin/koha/admin/ill_batch_statuses.pl"
-                        >{{ $__("Interlibrary loan batch statuses") }}</a
+                        >{{ $__("Trạng thái lô mượn liên thư viện") }}</a
                     >
                 </li>
             </ul>

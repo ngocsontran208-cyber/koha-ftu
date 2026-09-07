@@ -273,6 +273,7 @@ while ( my $c = $sth->fetchrow_hashref() ) {
         can_renew_error        => $can_renew_error,
         can_renew_date         => $can_renew_date,
         itemnumber             => $c->{itemnumber},
+        issue_id               => $c->{issue_id},
         borrowernumber         => $c->{borrowernumber},
         biblionumber           => $c->{biblionumber},
         issuedate              => $c->{issuedate},

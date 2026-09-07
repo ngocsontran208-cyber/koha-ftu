@@ -1,0 +1,157 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNavRight = AdditionalContents.get( location => "OpacNavRight", lang => news_lang, library => logged_in_user.branchcode || default_branch ) %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET PatronSelfRegistrationAdditionalInstructions = AdditionalContents.get( location => "PatronSelfRegistrationAdditionalInstructions", lang => lang, library => branchcode || default_branch ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-registration-confirmation' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% IF ( ! confirmed ) %]
+ <span>Đang chờ đăng ký</span>
+ [% ELSE %]
+ <span>Đăng ký hoàn tất</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% IF ( OpacNav ||  OpacNavBottom ) %]
+ <div class="col-12 col-lg-2 order-3 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+ </div>
+ [% END %]
+
+ [% SET column_class = "col order-md-1 maincontent" %]
+ [% IF ( OpacNav ||  OpacNavBottom && OpacNavRight ) %]
+ [%#  Three-column layout with right and left sidebars %]
+ [% column_class = "col-12 col-lg-7 order-md-1 maincontent" %]
+ [% ELSIF ( OpacNavRight ) %]
+ [%#  Two-column layout with right sidebar %]
+ [% column_class = "col-12 col-lg-9 order-md-1 maincontent" %]
+ [% ELSIF ( OpacNav ||  OpacNavBottom  ) %]
+ [% column_class = "col-12 col-lg-10 order-md-1 maincontent" %]
+ [% END %]
+ <div class="[% column_class | html %]">
+ [% IF ( ! confirmed ) %]
+ <div id="registration-pending">
+ <h1>Đang chờ đăng ký</h1>
+ <p id="confirm-instruction" class="registration-line">Nhấp vào nút bên dưới để xác nhận đăng ký.</p>
+ <form action="/cgi-bin/koha/opac-registration-verify.pl" method="post" name="confirm_registration" id="confirm_registration">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="token" value="[% token | html %]" />
+ <input type="hidden" name="op" value="cud-confirmed" />
+ <input class="btn btn-primary" type="submit" value="Xác nhận" />
+ </form>
+ </div>
+ [% ELSE %]
+ <div id="registration-complete">
+ <h1>Đăng ký hoàn tất!</h1>
+
+ <p>Bạn đã đăng ký thành công tài khoản mới.</p>
+ [% IF Koha.Preference('PatronSelfRegistrationPrefillForm') %]
+ <p>Để đăng nhập, hãy sử dụng thông tin xác thực sau:</p>
+
+ <p id="patron-userid-p" class="registration-line">
+ <span id="patron-userid-label" class="registration-label">Tên đăng nhập:</span>
+ <span id="patron-userid" class="registration-value">[% borrower.userid | html %]</span>
+ </p>
+ <p id="patron-password-p" class="registration-line">
+ <span id="patron-password-label" class="registration-label">Mật khẩu:</span>
+ <span id="patron-password" class="registration-value">[% password_cleartext | html %]</span>
+ </p>
+
+ [% IF borrower.cardnumber %]
+ <p id="patron-cardnumber-p" class="registration-line">
+ <span id="patron-cardnumber-label" class="registration-label">Số thẻ:</span>
+ <span id="patron-cardnumber" class="registration-value">[% borrower.cardnumber | html %]</span>
+ </p>
+ [% END %]
+
+ <p id="patron-instructions">
+ [% IF borrower.category.effective_change_password %]
+ <span>Để thuận tiện cho bạn, ô đăng nhập trên trang này đã được điền sẵn thông tin này. Vui lòng đăng nhập và đổi mật khẩu của bạn.</span>
+ [% ELSE %]
+ <span>Để thuận tiện cho bạn, ô đăng nhập trên trang này đã được điền sẵn thông tin này. Vui lòng đăng nhập.</span>
+ [% END %]
+ </p>
+ [% END %]
+
+ [% IF ( PatronSelfRegistrationAdditionalInstructions ) %]
+ <div id="PatronSelfRegistrationAdditionalInstructions"> [% PROCESS koha_news_block news => PatronSelfRegistrationAdditionalInstructions %] </div>
+ [% END %]
+ </div>
+ <!-- /#registration-complete -->
+ [% END %]
+ </div>
+ <!-- / .col-7/9 -->
+
+ <div class="col-12 col-lg-3 order-md-2">
+ [% UNLESS ( loggedinusername ) %]
+ [% UNLESS ( casAuthentication ) %]
+ <div id="login">
+ <form action="/cgi-bin/koha/opac-user.pl" method="post" name="auth" id="auth" autocomplete="off">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="koha_login_context" value="opac" />
+ <input type="hidden" name="login_op" value="cud-login" />
+ <fieldset class="brief">
+ <legend>Đăng nhập vào tài khoản của bạn:</legend>
+ [% PROCESS login_label for="userid" %]
+ [% IF Koha.Preference('PatronSelfRegistrationPrefillForm') %]
+ <input class="form-control" type="text" id="userid" size="10" name="login_userid" value="[% borrower.userid | html %]" autocomplete="off" />
+ [% ELSE %]
+ <input class="form-control" type="text" id="userid" size="10" name="login_userid" value="" autocomplete="off" />
+ [% END %]
+ <label for="password">Mật khẩu:</label>
+ [% IF Koha.Preference('PatronSelfRegistrationPrefillForm') %]
+ <input class="form-control" type="password" id="password" size="10" name="login_password" value="[% password_cleartext | html %]" autocomplete="off" />
+ [% ELSE %]
+ <input class="form-control" type="password" id="password" size="10" name="login_password" value="" autocomplete="off" />
+ [% END %]
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Đăng nhập" />
+ </fieldset>
+ [% IF PatronSelfRegistration && PatronSelfRegistrationDefaultCategory %]
+ <div id="patronregistration">
+ <p><a href="/cgi-bin/koha/opac-memberentry.pl">Tạo tài khoản</a></p>
+ </div>
+ [% END %]
+ </fieldset>
+ </form>
+ <!-- /#auth -->
+ </div>
+ <!-- /#login -->
+ [% END # /casAuthentication %]
+ [% END # / loggedinusername %]
+ [% IF ( OpacNavRight ) %]
+ [% PROCESS koha_news_block news => OpacNavRight %]
+ [% END # /OpacNavRight %]
+ </div>
+ <!-- / .col-lg-3 -->
+ </div>
+ <!-- /.row -->
+ </div>
+ <!-- /.container-fluid -->
+</main>
+<!-- /.main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

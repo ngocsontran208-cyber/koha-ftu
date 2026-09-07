@@ -1,0 +1,149 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Change your password") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-passwd' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ [% END %]
+ [% IF ( password_updated ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-passwd.pl">Đổi mật khẩu của bạn</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Đã cập nhật mật khẩu</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Đổi mật khẩu của bạn</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-10 order-first order-lg-2">
+ <div id="userpasswd" class="maincontent">
+ <h1>Đổi mật khẩu của bạn </h1>
+
+ [% IF ( Error_messages ) %]
+ <div class="alert alert-warning">
+ <h2>Đã xảy ra lỗi với yêu cầu đã gửi của bạn</h2>
+ <p>
+ [% IF ( passwords_mismatch ) %]
+ <span>Mật khẩu không trùng khớp. Vui lòng nhập lại mật khẩu mới.</span>
+ [% END %]
+ [% IF password_too_short %]
+ <span>Mật khẩu phải có độ dài ít nhất [% minPasswordLength | html %] ký tự.</span>
+ [% END %]
+ [% IF password_too_weak %]
+ <span>Mật khẩu phải chứa ít nhất một chữ số, một ký tự thường và một ký tự viết hoa.</span>
+ [% END %]
+ [% IF password_has_whitespaces %]
+ <span>Mật khẩu không được chứa khoảng trắng ở đầu hoặc cuối.</span>
+ [% END %]
+
+ [% IF ( WrongPass ) %]
+ <span>Mật khẩu hiện tại của bạn nhập chưa chính xác. Nếu sự cố này vẫn tiếp diễn, vui lòng yêu cầu thủ thư đặt lại mật khẩu giúp bạn.</span>
+ [% END %]
+ </p>
+ </div>
+ [% END # /IF Error_messages %]
+
+ [% IF logged_in_user.category.effective_change_password %]
+ [% IF ( Ask_data ) %]
+ <form action="/cgi-bin/koha/opac-passwd.pl" name="mainform" id="mainform" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Đổi mật khẩu của bạn</legend>
+ <fieldset>
+ [% IF ( logged_in_user.category.effective_require_strong_password ) %]
+ <div class="alert alert-info">Mật khẩu của bạn phải chứa ít nhất [% logged_in_user.category.effective_min_password_length | html %] ký tự, bao gồm chữ IN HOA, chữ thường và chữ số.</div>
+ [% ELSE %]
+ <div class="alert alert-info">Mật khẩu của bạn phải dài ít nhất [% logged_in_user.category.effective_min_password_length | html %] ký tự.</div>
+ [% END %]
+ <div class="form-group">
+ <label for="Oldkey">Mật khẩu hiện tại:</label>
+ <input class="form-control focus" type="password" id="Oldkey" size="25" name="Oldkey" autocomplete="current-password" />
+ </div>
+ <div class="form-group">
+ <label for="Newkey">Mật khẩu mới:</label>
+ <input class="form-control" type="password" id="Newkey" size="25" name="Newkey" autocomplete="new-password" />
+ </div>
+ <div class="form-group">
+ <label for="Confirm">Nhập lại mật khẩu mới:</label>
+ <input class="form-control" type="password" id="Confirm" size="25" name="Confirm" autocomplete="new-password" />
+ </div>
+ </fieldset>
+ <fieldset class="action">
+ <input type="hidden" name="op" value="cud-change_password" />
+ <input class="btn btn-primary" type="submit" value="Đổi mật khẩu" />
+ <a href="/cgi-bin/koha/opac-user.pl" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ [% END # /IF Ask_data %]
+ [% ELSE %]
+ <div class="alert alert-warning">Bạn không thể đổi mật khẩu.</div>
+ [% END # /IF logged_in_user.category.effective_change_password %]
+
+ [% IF ( password_updated ) %]
+ <div class="alert alert-info">
+ <strong>Đã cập nhật mật khẩu</strong>
+ <br />
+ Mật khẩu của bạn đã được thay đổi </div>
+ <a class="btn btn-primary" href="/cgi-bin/koha/opac-user.pl">Quay lại tài khoản của tôi</a>
+ [% END # /IF password_updated %]
+ </div>
+ <!-- / #userpasswd -->
+ </div>
+ <!-- / .col-10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% Asset.js("lib/jquery/plugins/jquery.validate.min.js") | $raw %]
+ [% PROCESS 'password_check.inc' new_password => 'Newkey', minPasswordLength => logged_in_user.category.effective_min_password_length, RequireStrongPassword => logged_in_user.category.effective_require_strong_password %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#mainform").validate({
+                rules: {
+                    Newkey: {
+                        required: true,
+                        password_strong: true,
+                        password_no_spaces: true,
+                    },
+                    Confirm: {
+                        required: true,
+                        password_match: true,
+                    },
+                },
+            });
+        });
+    </script>
+[% END %]

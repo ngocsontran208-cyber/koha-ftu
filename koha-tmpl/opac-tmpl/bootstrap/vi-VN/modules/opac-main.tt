@@ -1,0 +1,315 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE Categories %]
+[% USE Price %]
+[% USE AdditionalContents %]
+[% USE AuthClient %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavRight = AdditionalContents.get( location => "OpacNavRight", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
+[% SET OpacLoginInstructions = AdditionalContents.get( location => "OpacLoginInstructions", lang => lang, library => branchcode || default_branch ) %]
+[% SET AllPublicBranches = Branches.all( search_params => { public => 1 }, selected => branchcode, unfiltered => 1 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>[% FILTER collapse %][% PROCESS 'library_name_title' %][% END %]</title>
+<link rel="canonical" href="[% OPACBaseURL | url %]/" />
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-main' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main ftu-main-simple">
+    <!-- HERO SEARCH SECTION (Clean, Minimalist & Focused) -->
+    <section class="ftu-hero-section">
+        <div class="ftu-hero-content">
+            <h1 class="ftu-hero-title">Khám phá Tri thức</h1>
+            <p class="ftu-hero-subtitle">Thư viện Đại học Ngoại thương</p>
+
+            <!-- Search Tabs -->
+            <div class="ftu-search-tabs">
+                <button type="button" class="ftu-search-tab active" data-target="all">Tất cả tài nguyên</button>
+                <button type="button" class="ftu-search-tab" data-target="books">Sách & Giáo trình</button>
+                <button type="button" class="ftu-search-tab" data-target="digital">Tài liệu số</button>
+            </div>
+
+            <!-- Search Bar Card -->
+            <div class="ftu-search-card ftu-search-simple">
+                <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform" role="search" class="ftu-search-form">
+                    <input type="hidden" name="limit" id="ftu-search-limit" value="">
+                    <i class="fa fa-search ftu-search-icon-left" aria-hidden="true"></i>
+                    <input type="text" name="q" id="ftu-main-search-input" class="ftu-search-input-large" placeholder="Nhập tên tài liệu, tác giả, ngành học..." autocomplete="off" aria-label="Nội dung tìm kiếm" required />
+                    <button type="submit" class="ftu-search-btn-large">
+                        Tìm kiếm
+                    </button>
+                </form>
+            </div>
+
+            <!-- SEARCH OPTIONS (Minimalist Chips) -->
+            <div class="ftu-search-chips">
+                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary">
+                    <i class="fa fa-sliders"></i> Tìm kiếm nâng cao
+                </a>
+                <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Lu%E1%BA%ADn+v%C4%83n" class="ftu-chip">
+                    Khóa luận & Luận văn
+                </a>
+                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip">
+                    Tài liệu học phần
+                </a>
+                <a href="/cgi-bin/koha/opac-browser.pl" class="ftu-chip">
+                    Duyệt chuyên đề
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TASK-ORIENTED SHORTCUTS (How do I... / Tôi muốn...) -->
+    <section class="ftu-section-container ftu-shortcuts-section">
+        <div class="ftu-shortcuts-grid">
+            <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
+                <div class="ftu-shortcut-icon">
+                    <i class="fa fa-book-reader"></i>
+                </div>
+                <div class="ftu-shortcut-info">
+                    <div class="ftu-shortcut-title">Gia hạn sách mượn</div>
+                    <div class="ftu-shortcut-desc">Kiểm tra tài khoản và gia hạn sách trực tuyến</div>
+                </div>
+            </a>
+
+            <a href="#" class="ftu-shortcut-card">
+                <div class="ftu-shortcut-icon">
+                    <i class="fa fa-users"></i>
+                </div>
+                <div class="ftu-shortcut-info">
+                    <div class="ftu-shortcut-title">Đặt phòng học nhóm</div>
+                    <div class="ftu-shortcut-desc">Đăng ký sử dụng phòng học chung tại Thư viện</div>
+                </div>
+            </a>
+
+            <a href="/cgi-bin/koha/opac-suggestions.pl" class="ftu-shortcut-card">
+                <div class="ftu-shortcut-icon">
+                    <i class="fa fa-lightbulb"></i>
+                </div>
+                <div class="ftu-shortcut-info">
+                    <div class="ftu-shortcut-title">Yêu cầu mua sách</div>
+                    <div class="ftu-shortcut-desc">Đề xuất Thư viện bổ sung giáo trình mới</div>
+                </div>
+            </a>
+
+            <a href="#" class="ftu-shortcut-card">
+                <div class="ftu-shortcut-icon">
+                    <i class="fa fa-user-tie"></i>
+                </div>
+                <div class="ftu-shortcut-info">
+                    <div class="ftu-shortcut-title">Nhờ thủ thư hỗ trợ</div>
+                    <div class="ftu-shortcut-desc">Hướng dẫn tra cứu & tìm kiếm tài liệu chuyên sâu</div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- NEW ARRIVALS / TÀI LIỆU MỚI (Modern Horizontal Scroll or Grid) -->
+    <section class="ftu-section-container ftu-new-arrivals-section">
+        <div class="ftu-section-header">
+            <h2 class="ftu-section-title">Tài liệu mới cập nhật</h2>
+            <a href="/cgi-bin/koha/opac-search.pl?q=an&sort_by=acqdate_dsc" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
+        </div>
+        <div class="ftu-books-grid" id="ftu-dynamic-new-arrivals">
+            <!-- Dữ liệu sách mới sẽ được load tự động bằng JavaScript -->
+            <div class="ftu-loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--ftu-red);"></i>
+                <p style="margin-top: 1rem; color: var(--ftu-text-muted);">Đang tải sách mới...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWS & WORKSHOPS -->
+    <section class="ftu-section-container ftu-news-section">
+        <div class="ftu-news-grid">
+            <!-- Cột Tin tức -->
+            <div class="ftu-news-col">
+                <div class="ftu-section-header">
+                    <h2 class="ftu-section-title">Tin tức Thư viện</h2>
+                    <a href="#" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
+                </div>
+                <div class="ftu-news-list">
+                    <a href="#" class="ftu-news-item">
+                        <div class="ftu-news-date">
+                            <span class="day">15</span>
+                            <span class="month">Thg 9</span>
+                        </div>
+                        <div class="ftu-news-content">
+                            <h4>Thông báo lịch nghỉ lễ Quốc khánh 2/9 năm 2026</h4>
+                            <p>Thư viện tạm ngưng phục vụ trong thời gian nghỉ lễ, các dịch vụ trực tuyến vẫn hoạt động bình thường.</p>
+                        </div>
+                    </a>
+                    <a href="#" class="ftu-news-item">
+                        <div class="ftu-news-date">
+                            <span class="day">10</span>
+                            <span class="month">Thg 9</span>
+                        </div>
+                        <div class="ftu-news-content">
+                            <h4>Bổ sung CSDL ProQuest vào hệ thống tra cứu</h4>
+                            <p>Sinh viên đã có thể tra cứu toàn văn hàng triệu bài báo quốc tế trực tiếp qua hệ thống OPAC.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Cột Sự kiện -->
+            <div class="ftu-news-col">
+                <div class="ftu-section-header">
+                    <h2 class="ftu-section-title">Sự kiện & Workshop</h2>
+                    <a href="#" class="ftu-view-all">Đăng ký ngay <i class="fa fa-arrow-right"></i></a>
+                </div>
+                <div class="ftu-event-card">
+                    <div class="ftu-event-img">
+                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=600" alt="Workshop">
+                        <div class="ftu-event-tag">Sắp diễn ra</div>
+                    </div>
+                    <div class="ftu-event-details">
+                        <h3>Workshop: Kỹ năng tra cứu & Trích dẫn tài liệu với EndNote</h3>
+                        <p><i class="fa fa-calendar-alt"></i> 20/09/2026 • 09:00 - 11:00</p>
+                        <p><i class="fa fa-map-marker-alt"></i> Phòng Hội thảo tầng 2, Thư viện CS Hà Nội</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURED COLLECTIONS / BỘ SƯU TẬP NỔI BẬT -->
+    <section class="ftu-section-container ftu-collections-section">
+        <div class="ftu-section-header">
+            <h2 class="ftu-section-title">Khám phá Bộ sưu tập</h2>
+        </div>
+        <div class="ftu-collections-grid">
+            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Kinh+t%E1%BA%BF" class="ftu-collection-card ftu-col-1">
+                <div class="ftu-collection-overlay"></div>
+                <div class="ftu-collection-content">
+                    <h3>Kinh tế học & Quản trị</h3>
+                    <p>Khám phá hơn 10,000 tài liệu</p>
+                </div>
+            </a>
+            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Lu%E1%BA%ADt" class="ftu-collection-card ftu-col-2">
+                <div class="ftu-collection-overlay"></div>
+                <div class="ftu-collection-content">
+                    <h3>Luật học & Pháp chế</h3>
+                    <p>Luật thương mại, quốc tế...</p>
+                </div>
+            </a>
+            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Ngo%E1%BA%A1i+ng%E1%BB%AF" class="ftu-collection-card ftu-col-3">
+                <div class="ftu-collection-overlay"></div>
+                <div class="ftu-collection-content">
+                    <h3>Ngoại ngữ & Văn hóa</h3>
+                    <p>Tiếng Anh, Nhật, Trung, Pháp...</p>
+                </div>
+            </a>
+            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=K%E1%BB%B9+n%C4%83ng" class="ftu-collection-card ftu-col-4">
+                <div class="ftu-collection-overlay"></div>
+                <div class="ftu-collection-content">
+                    <h3>Kỹ năng & Khởi nghiệp</h3>
+                    <p>Phát triển bản thân, startup...</p>
+                </div>
+            </a>
+        </div>
+    </section>
+</main>
+
+<!-- FLOATING ACTION BUTTON (ASK A LIBRARIAN) -->
+<div class="ftu-fab-container">
+    <a href="mailto:thuvien@ftu.edu.vn" class="ftu-fab-btn">
+        <i class="fa fa-comment-dots"></i>
+    </a>
+    <div class="ftu-fab-tooltip">Hỏi Thủ thư</div>
+</div>
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+<script>
+    $(document).ready(function() {
+        // Tabbed Search Logic
+        $('.ftu-search-tab').on('click', function() {
+            $('.ftu-search-tab').removeClass('active');
+            $(this).addClass('active');
+            
+            var target = $(this).data('target');
+            var $input = $('#ftu-main-search-input');
+            var $limit = $('#ftu-search-limit');
+            
+            if(target === 'books') {
+                $input.attr('placeholder', 'Nhập tên sách in, giáo trình...');
+                $limit.val('mc-itype:BK');
+            } else if(target === 'digital') {
+                $input.attr('placeholder', 'Nhập bài báo khoa học, khóa luận điện tử...');
+                $limit.val('mc-itype:COMP');
+            } else {
+                $input.attr('placeholder', 'Nhập tên tài liệu, tác giả, ngành học...');
+                $limit.val('');
+            }
+        });
+
+        // Tối ưu hóa: Load "Tài liệu mới cập nhật" (New Arrivals) cực nhanh qua SQL Report JSON API
+        // Tránh tình trạng sập hệ thống khi dùng RSS sort trên thư viện lớn
+        var apiUrl = "/cgi-bin/koha/svc/report?id=1&phase=Run";
+        var defaultCover = "/opac-tmpl/bootstrap/images/ftu_default_cover.jpg";
+
+        $.ajax({
+            url: apiUrl,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var $grid = $('#ftu-dynamic-new-arrivals');
+                $grid.empty(); // Xóa spinner
+
+                // data trả về là mảng, phần tử đầu tiên là Header (biblionumber, title, author)
+                // Các phần tử sau là dữ liệu thật
+                if (data && data.length > 1) {
+                    var itemCount = 0;
+                    for (var i = 1; i < data.length; i++) {
+                        if (itemCount >= 5) break;
+                        
+                        var row = data[i];
+                        var biblioNum = row[0] || '';
+                        var title = row[1] || 'Chưa có tiêu đề';
+                        var author = row[2] || 'Thư viện ĐH Ngoại thương';
+                        
+                        // Cắt bớt phần " /" ở cuối title nếu có
+                        title = title.replace(/\s*\/\s*$/, '');
+
+                        var link = "/cgi-bin/koha/opac-detail.pl?biblionumber=" + biblioNum;
+                        
+                        // Gọi ảnh bìa thực tế, nếu lỗi sẽ dùng ảnh mặc định
+                        var imgUrl = biblioNum ? "/cgi-bin/koha/opac-image.pl?thumbnail=1&biblionumber=" + biblioNum : defaultCover;
+                        
+                        var cardHtml = `
+                        <a href="${link}" class="ftu-book-card">
+                            <div class="ftu-book-cover">
+                                <img src="${imgUrl}" alt="${title}" onerror="this.onerror=null; this.src='${defaultCover}';">
+                                <div class="ftu-book-badge">Mới nhập</div>
+                            </div>
+                            <div class="ftu-book-details">
+                                <h3 class="ftu-book-title" title="${title}">${title}</h3>
+                                <div class="ftu-book-author">${author}</div>
+                                <div class="ftu-book-meta"><i class="fa fa-book"></i> Xem chi tiết</div>
+                            </div>
+                        </a>`;
+                        
+                        $grid.append(cardHtml);
+                        itemCount++;
+                    }
+                } else {
+                    $grid.html('<p style="grid-column: 1/-1; text-align: center;">Chưa có tài liệu mới nào được cập nhật.</p>');
+                }
+            },
+            error: function() {
+                console.error("Không thể tải dữ liệu Sách mới từ API.");
+                $('#ftu-dynamic-new-arrivals').html('<p style="grid-column: 1/-1; text-align: center; color: red;">Đã xảy ra lỗi khi tải dữ liệu sách mới.</p>');
+            }
+        });
+    });
+</script>
+[% END %]

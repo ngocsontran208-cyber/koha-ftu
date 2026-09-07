@@ -1,0 +1,95 @@
+[% USE raw %]
+[% USE HtmlTags %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Add reserves") | html %]
+ &rsaquo; [% course.course_name | html %][%- IF course.section -%][% " - "_ course.section | html %][%- END -%] &rsaquo; [% t("Course reserves") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="courses_add_items_step1" class="course">
+
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/course_reserves/course-reserves.pl">Tài liệu học phần</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/course_reserves/course-details.pl?course_id=[% course.course_id | uri %]">[% course.course_name | html %][%- IF course.section -%][% " - "_ course.section | html %][%- END -%]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Thêm tài liệu</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+ [% course_em = ( course.section ? course.course_name _" - "_ course.section : course.course_name ) | html | $HtmlTags tag="em" %]
+ <h1> [% tx("Add reserves for course {course_name}", { course_name = course_em }) | $raw %] </h1>
+
+ [% IF ERROR_ITEM_NOT_FOUND %]
+ [% IF UNKNOWN_BARCODE %]
+ <div class="alert alert-warning">Không tìm thấy tài liệu với đăng ký cá biệt [% UNKNOWN_BARCODE | html %]</div>
+ [% ELSIF UNKNOWN_BIBLIONUMBER %]
+ <div class="alert alert-warning">No bibliographic record found with biblionumber [% UNKNOWN_BIBLIONUMBER | html %]</div>
+ [% ELSE %]
+ <div class="alert alert-warning">No item or bibliographic record found</div>
+ [% END %]
+ [% END %]
+
+ <form method="get" action="/cgi-bin/koha/course_reserves/add_items.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="course_id" value="[% course.course_id | html %]" />
+ <input type="hidden" name="op" value="lookup" />
+
+ <fieldset class="rows">
+ <legend>Add items by barcode</legend>
+ <ol>
+ <li>
+ <label class="required" for="barcode">Đăng ký cá biệt:</label>
+ <input id="barcode" name="barcode" class="focus" type="text" />
+ </li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="rows">
+ <legend>Or use biblionumber of a bibliographic record</legend>
+ <ol>
+ <li>
+ <label class="required" for="biblionumber">Số biểu ghi:</label>
+ <input id="biblionumber" name="biblionumber" type="text" />
+ </li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+
+ <a href="/cgi-bin/koha/course_reserves/course-details.pl?course_id=[% course.course_id | uri %]" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("input[type='submit']").click(function (e) {
+                if ($("#biblionumber").val().length > 0 && $("#barcode").val().length > 0) {
+                    e.preventDefault();
+                    alert(_("Please enter only a barcode, or only a biblionumber."));
+                }
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

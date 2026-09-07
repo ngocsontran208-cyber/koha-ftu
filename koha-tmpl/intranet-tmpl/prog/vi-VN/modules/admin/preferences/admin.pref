@@ -1,0 +1,312 @@
+Quản trị:
+# Only used internally, omitted: FrameworksLoaded, Version
+    Tùy chọn giao diện:
+        -
+            - "Địa chỉ email của quản trị viên Koha: "
+            - pref: KohaAdminEmailAddress
+              class: email
+            - "(Đây là địa chỉ Từ: mặc định cho email trừ khi thư viện có địa chỉ riêng, và được tham chiếu khi xảy ra lỗi nội bộ.)"
+        -
+            - "Địa chỉ email đặt làm reply-to trong email: "
+            - pref: ReplytoDefault
+              class: email
+        -
+            - "Địa chỉ return path hoặc bounce cho thư không gửi được: "
+            - pref: ReturnpathDefault
+              class: email
+            - "Nếu để trống, sẽ dùng địa chỉ From (thường mặc định là địa chỉ quản trị)."
+        -
+            - "Email chuyển hướng tất cả tin nhắn đến: "
+            - pref: SendAllEmailsTo
+              class: email
+            - "(Để trống để gửi tin nhắn đến người nhận bình thường.)"
+        -
+            - "Địa chỉ email nhận thông báo quá hạn gửi thất bại: "
+            - pref: AddressForFailedOverdueNotices
+              class: email
+            - 'Nếu để trống sẽ dùng địa chỉ đầu tiên trong danh sách: ReplyTo thư viện, Email thư viện, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=ReplytoDefault">ReplytoDefault</a> và <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=KohaAdminEmailAddress">KohaAdminEmailAddress</a>.'
+        -
+
+            - "Mức độ thông tin debug hiển thị trên trình duyệt khi xảy ra lỗi nội bộ: "
+            - pref: DebugLevel
+              default: 0
+              choices:
+                  0: Không có
+                  1: Một số
+                  2: Tất cả
+        -
+            - pref: noItemTypeImages
+              default: 0
+              choices:
+                  1: "Không hiển thị"
+                  0: "Hiển thị"
+            - "biểu tượng loại tài liệu trên giao diện thủ thư."
+        -
+            - "Ký tự phân cách mặc định cho cột trong file CSV xuất ra: "
+            - pref: CSVDelimiter
+              default: ","
+              choices:
+                  ';': dấu chấm phẩy
+                  tabulation: tab
+                  ',': dấu phẩy
+                  '/': dấu gạch chéo
+                  '\': dấu gạch chéo ngược
+                  '#': "dấu #"
+        -
+            - "Cho phép thủ thư và bạn đọc tạo và xem danh sách lưu biểu ghi thư mục: "
+            - pref: virtualshelves
+              choices:
+                  1: "Có"
+                  0: "Không"
+        -
+            - "Chế độ xem mặc định khi chỉnh sửa quy tắc mượn trả: "
+            - pref: DefaultToLoggedInLibraryCircRules
+              choices:
+                  1: "Thư viện đang đăng nhập"
+                  0: "Tất cả thư viện"
+        -
+            - "Chế độ xem mặc định khi chỉnh sửa thông báo và phiếu: "
+            - pref: DefaultToLoggedInLibraryNoticesSlips
+              choices:
+                  1: "Thư viện đang đăng nhập"
+                  0: "Tất cả thư viện"
+        -
+            - "Chế độ xem mặc định khi chỉnh sửa thông báo quá hạn/kích hoạt trạng thái: "
+            - pref: DefaultToLoggedInLibraryOverdueTriggers
+              choices:
+                  1: "Thư viện đang đăng nhập"
+                  0: "Tất cả thư viện"
+
+        -
+            - pref: EmailOverduesNoEmail
+              choices:
+                  1: "Gửi"
+                  0: "Không gửi"
+            - "thông báo quá hạn cho bạn đọc không có email đến thủ thư."
+
+    Tùy chọn đăng nhập:
+        -
+            - "Thời gian chờ (giây) để tự động đăng xuất người dùng: "
+            - pref: timeout
+              class: integer
+            - Thêm d để chỉ định theo ngày, ví dụ 1d là timeout 1 ngày.
+        -
+            - "Giới hạn thư viện thủ thư có thể chọn khi đăng nhập theo địa chỉ IP của máy tính trong phạm vi thư viện hoặc các thư viện không có giới hạn IP: "
+            - pref: StaffLoginRestrictLibraryByIP
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+            - <a href="/cgi-bin/koha/admin/branches.pl">Liên kết đến quản lý thư viện</a>
+            - 'Thủ thư chỉ có thể chọn thư viện khi đăng nhập nếu có quyền "loggedinlibrary". Cài đặt này sẽ ghi đè tùy chỉnh <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=StaffLoginLibraryBasedOnIP">StaffLoginLibraryBasedOnIP</a>.'
+        -
+            - "Bật kiểm tra thay đổi địa chỉ IP từ xa cho bảo mật phiên: "
+            - pref: SessionRestrictionByIP
+              default: 1
+              choices:
+                  1: "Có"
+                  0: "Không"
+            - (Tắt chỉ khi địa chỉ IP từ xa thay đổi thường xuyên.)
+        -
+            - "Đặt thư viện đăng nhập cho thủ thư theo IP hiện tại khớp với cấu hình thư viện: "
+            - pref: StaffLoginLibraryBasedOnIP
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+            - "Lưu ý: Nếu IP trùng lặp, kết quả khớp đầu tiên sẽ được dùng."
+            - 'Cài đặt này sẽ bị ghi đè bởi tùy chỉnh <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=StaffLoginRestrictLibraryByIP">StaffLoginRestrictLibraryByIP</a>.'
+        # PostgreSQL is supported by CGI::Session but not by Koha.
+        -
+            - "Lưu trữ thông tin phiên đăng nhập: "
+            - pref: SessionStorage
+              default: mysql
+              choices:
+                  mysql: Cơ sở dữ liệu MySQL
+                  Pg: Cơ sở dữ liệu PostgreSQL (không được hỗ trợ)
+                  tmp: Tệp tạm thời
+                  memcached: Máy chủ Memcached
+        -
+            - "Ngăn thủ thư (không phải siêu thủ thư) chỉnh sửa đối tượng (giữ chỗ, tài liệu, bạn đọc...) thuộc thư viện khác: "
+            - pref: IndependentBranches
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+            - "<p class='text-danger'><strong>Cảnh báo:</strong> Thay đổi tùy chỉnh này sẽ làm thay đổi đáng kể hoạt động của Koha. Không khuyến khích thay đổi trên hệ thống đang hoạt động.</p>"
+        -
+            - "Ngăn thủ thư (không phải siêu thủ thư) xem và duyệt/từ chối yêu cầu chỉnh sửa thông tin bạn đọc thuộc thư viện khác: "
+            - pref: IndependentBranchesPatronModifications
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+        -
+            - "Ngăn thủ thư (không phải siêu thủ thư) chuyển tài liệu sang thư viện khác: "
+            - pref: IndependentBranchesTransfers
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+        -
+            - pref: ForceLibrarySelection
+              choices:
+                  1: "Bắt buộc"
+                  0: "Không bắt buộc"
+            - "chọn thư viện khi đăng nhập vào giao diện thủ thư."
+
+    Xác thực CAS:
+        -
+            - "Sử dụng CAS để xác thực đăng nhập: "
+            - pref: casAuthentication
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+        -
+            - "Đăng xuất khỏi CAS khi đăng xuất khỏi Koha: "
+            - pref: casLogout
+              default: 0
+              choices:
+                  1: "Có"
+                  0: "Không"
+        -
+            - "URL của máy chủ Central Authentication Service (CAS): "
+            - pref: casServerUrl
+              class: url
+        -
+            - "Phiên bản máy chủ CAS mà Koha kết nối: "
+            - pref: casServerVersion
+              choices:
+                2: 'CAS 2 hoặc cũ hơn'
+                3: 'CAS 3 hoặc mới hơn'
+    Xác thực chứng chỉ SSL máy khách:
+        -
+            - "Trường dùng cho xác thực chứng chỉ SSL client: "
+            - pref: AllowPKIAuth
+              default: None
+              choices:
+                  None: "Không"
+                  Common Name: Common Name
+                  emailAddress: emailAddress
+    Tác vụ nền:
+        -
+            - "Sử dụng "
+            - pref: JobsNotificationMethod
+              default: STOMP
+              choices:
+                STOMP: "STOMP"
+                polling: "polling"
+            - là phương thức thông báo worker ưu tiên. STOMP (mặc định) yêu cầu RabbitMQ chạy. Polling sẽ được dùng làm dự phòng nếu RabbitMQ không truy cập được.
+    Google OpenID Connect:
+        -
+            - "Sử dụng đăng nhập Google OpenID Connect trên OPAC: "
+            - pref: GoogleOpenIDConnect
+              choices:
+                1: "Có"
+                0: "Không"
+            - Bạn cần chọn OAuth2 khi tạo ứng dụng trong Google cloud console, đặt web origin thành your_opac_url và redirect url thành your_opac_url/cgi-bin/koha/svc/auth/googleopenidconnect. Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOAuth2ClientID">GoogleOAuth2ClientID</a> và <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOAuth2ClientSecret">GoogleOAuth2ClientSecret</a> được đặt.
+        -
+            - "Google OAuth2 Client ID: "
+            - pref: GoogleOAuth2ClientID
+            -  Cùng với <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOAuth2ClientSecret">GoogleOAuth2ClientSecret</a>, bật <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOpenIDConnect">GoogleOpenIDConnect</a>.
+        -
+            - "Google OAuth2 Client Secret: "
+            - pref: GoogleOAuth2ClientSecret
+            -  Cùng với <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOAuth2ClientID">GoogleOAuth2ClientID</a>, bật <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOpenIDConnect">GoogleOpenIDConnect</a>.
+        -
+            - "Giới hạn Google OpenID Connect cho tên miền này (hoặc tên miền con): "
+            - pref: GoogleOpenIDConnectDomain
+            - Để trống cho tất cả tên miền Google. Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOpenIDConnect">GoogleOpenIDConnect</a>.
+        -
+            - pref: GoogleOpenIDConnectAutoRegister
+              choices:
+                1: Cho phép
+                0: "Không cho phép"
+            - bạn đọc đăng nhập Google Open ID tự động đăng ký. Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOpenIDConnect">GoogleOpenIDConnect</a>.
+        -
+            - "Sử dụng mã loại bạn đọc khi tự động đăng ký bạn đọc Google Open ID: "
+            - pref: GoogleOpenIDConnectDefaultCategory
+              choices: patron-categories
+            - Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOpenIDConnect">GoogleOpenIDConnect</a>.
+        -
+            - "Sử dụng mã thư viện khi tự động đăng ký bạn đọc Google Open ID: "
+            - pref: GoogleOpenIDConnectDefaultBranch
+            - Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=GoogleOpenIDConnect">GoogleOpenIDConnect</a>.
+    Chia sẻ thống kê ẩn danh:
+        -
+            - "Chia sẻ dữ liệu sử dụng Koha ẩn danh với cộng đồng Koha: "
+            - pref: UsageStats
+              default: 2
+              choices:
+                  1: "Có"
+                  0: "Không"
+                  2: "Không, để tôi suy nghĩ"
+            - .
+            - "<br>Website nơi thống kê sử dụng được công bố: <a href=\"https://hea.koha-community.org\">Hea Koha community website</a>."
+            - <br><strong>LƯU Ý:</strong> Các tùy chỉnh <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> khác không có hiệu lực nếu tùy chỉnh này được đặt là "Không".
+            - "<br><strong>LƯU Ý:</strong> Tùy chỉnh này cần cronjob <code>misc/cronjobs/share_usage_with_koha_community.pl</code>. Yêu cầu quản trị viên lên lịch chạy."
+            - "<br><strong>LƯU Ý:</strong> Dùng <a href=\"/cgi-bin/koha/admin/usage_statistics.pl\">trang cấu hình chuyên dụng</a> để chỉnh sửa thống kê chia sẻ."
+        -
+            - "Tên thư viện hiển thị trên website Hea Community: "
+            - pref: UsageStatsLibraryName
+            - . Nếu để trống dữ liệu sẽ được gửi ẩn danh.
+            - <br><strong>LƯU Ý:</strong> Giá trị này không có hiệu lực nếu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> được đặt là "Không".
+        -
+            - "Quốc gia nơi thư viện đặt trụ sở để hiển thị trên website Hea Community: "
+            - pref: UsageStatsCountry
+              type: countries
+
+            - . Sẽ được hiển thị trên <a href="https://hea.koha-community.org">website Hea Koha community</a>.
+            - <br><strong>LƯU Ý:</strong> Giá trị này không có hiệu lực nếu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> được đặt là "Không".
+        -
+            - "URL thư viện hiển thị trên website Hea Community: "
+            - pref: UsageStatsLibraryUrl
+              class: url
+            - <br><strong>LƯU Ý:</strong> Giá trị này không có hiệu lực nếu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> được đặt là "Không".
+        -
+            - "Loại thư viện hiển thị trên website Hea Community: "
+            - pref: UsageStatsLibraryType
+              default: ""
+              choices:
+                  ""          : ""
+                  public      : "Công cộng"
+                  school      : "Trường học"
+                  academic    : "Học thuật"
+                  research    : "Nghiên cứu"
+                  private     : "Tư nhân"
+                  societyAssociation: "Hội/hiệp hội"
+                  corporate   : "Doanh nghiệp"
+                  government  : "Chính phủ"
+                  religiousOrg: "Tổ chức tôn giáo"
+                  subscription: "Đăng ký"
+            - <br><strong>LƯU Ý:</strong> Giá trị này không có hiệu lực nếu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> được đặt là "Không".
+        -
+            - pref: UsageStatsLibrariesInfo
+              choices:
+                  1: "Chia sẻ"
+                  0: "Không chia sẻ"
+            - "thông tin thư viện (tên, URL, quốc gia)."
+            - <br><strong>LƯU Ý:</strong> Giá trị này không có hiệu lực nếu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> được đặt là "Không".
+        -
+            - "Vị trí địa lý của thư viện chính: "
+            - pref: UsageStatsGeolocation
+            - <br><strong>LƯU Ý:</strong> Giá trị này không có hiệu lực nếu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UsageStats">UsageStats</a> được đặt là "Không".
+            - "<br><strong>LƯU Ý:</strong> Bạn phải dùng <a href=\"/cgi-bin/koha/admin/usage_statistics.pl\">trang cấu hình chuyên dụng</a> để đặt và chỉnh sửa tùy chỉnh này."
+    Máy tìm kiếm:
+        -
+            - "Sử dụng máy tìm kiếm: "
+            - pref: SearchEngine
+              default: Zebra
+              choices:
+                Zebra: Zebra
+                Elasticsearch: Elasticsearch
+        -
+            - "Định dạng MARC Elasticsearch: "
+            - pref: ElasticsearchMARCFormat
+              default: "base64ISO2709"
+              choices:
+                "base64ISO2709": "ISO2709 (định dạng trao đổi)"
+                "ARRAY": "Mảng có thể tìm kiếm"
+            - <br>Định dạng ISO2709 được khuyến nghị vì nhanh hơn và tốn ít không gian hơn, trong khi định dạng mảng cho phép tìm kiếm toàn bộ biểu ghi MARC.
+            - <br><strong>LƯU Ý:</strong> Tìm kiếm toàn bộ biểu ghi có thể ảnh hưởng tiêu cực đến độ liên quan của kết quả tìm kiếm.

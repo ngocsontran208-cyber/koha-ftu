@@ -1,0 +1,157 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Serials subscriptions stats") | html %]
+ &rsaquo; [% t("Reports") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    .sql {
+        display: none;
+    }
+</style>
+</head>
+
+<body id="rep_serials_stats" class="rep">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/reports-home.pl">Báo cáo</a>
+ [% END %]
+ [% IF ( do_it ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/serials_stats.pl">Serials subscriptions stats</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Kết quả</span>
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Serials subscriptions stats</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='reports-menu' %]
+ <h1>Báo cáo phân hệ ÂPĐK</h1>
+ [% IF ( do_it ) %]
+ <table id="resulttable">
+ <thead>
+ <tr>
+ <th>Nhà cung cấp</th>
+ <th class="anti-the">Nhan đề</th>
+ <th>Subscription ID</th>
+ <th>Thư viện</th>
+ <th>Số phân loại</th>
+ <th>Kỳ đầu</th>
+ <th>Kỳ cuối</th>
+ <th>Hết hạn?/Đóng?</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH data IN datas %]
+ <tr>
+ <td><a href="/cgi-bin/koha/acquisition/vendors/[% data.aqbooksellerid | uri %]">[% data.name | html %]</a></td>
+ <td><a href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% data.subscriptionid | uri %]">[% data.title | html %]</a></td>
+ <td>[% data.subscriptionid | html %]</td>
+ <td>[% Branches.GetName( data.branchcode ) | html %]</td>
+ <td>[% data.callnumber | html %]</td>
+ <td data-order="[% data.startdate | html %]">[% data.startdate | $KohaDates %]</td>
+ <td data-order="[% data.enddate | html %]">[% data.enddate | $KohaDates %]</td>
+ <td>
+ [% IF data.closed %]
+ <span>Đóng</span>
+ [% ELSIF data.expired %]
+ <span>Expired</span>
+ [% END %]
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% ELSE %]
+ <form method="get" action="/cgi-bin/koha/reports/serials_stats.pl">
+ <fieldset class="rows">
+ <ol>
+ <li>
+ <label for="bookseller"> Nhà cung cấp: </label>
+ <select name="bookseller" id="bookseller">
+ <option value="">Tất cả</option>
+ [% FOREACH bookseller IN booksellers %]
+ <option value="[% bookseller.aqbooksellerid | html %]">[% bookseller.name | html %]</option>
+ [% END %]
+ </select> </li
+                    ><li>
+ <label for="branchcode"> Thư viện: </label>
+ <select name="branchcode" id="branchcode">
+ <option value="">Tất cả</option>
+ [% PROCESS options_for_libraries libraries => Branches.all() %]
+ </select>
+ </li>
+ <li>
+ <label for="expired">Bao gồm ÂPĐK hết hạn: </label>
+ <input type="checkbox" name="expired" id="expired" />
+ </li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="rows">
+ <legend>Hiển thị báo cáo</legend>
+ <ol>
+ <li> <label for="outputscreen">To screen in the browser: </label><input type="radio" checked="checked" name="output" id="outputscreen" value="screen" /> </li>
+ <li>
+ <label for="outputfile">Xuất ra tệp tin:</label> <input type="radio" name="output" value="file" id="outputfile" /> <label class="inline" for="basename">Tên tệp tin: </label
+                        ><input id="basename" name="basename" type="text" value="Xuất dữ liệu" />
+ <label class="inline" for="MIME">Into an application:</label>
+ <select name="MIME" id="MIME">
+ [% FOREACH value IN CGIextChoice %]
+ <option value="[% value | html %]">[% value | html %]</option>
+ [% END %]
+ </select>
+ <select name="sep" id="sep">
+ [% FOREACH value IN CGIsepChoice.values.sort() %]
+ [% IF ( value == CGIsepChoice.default ) %]
+ <option value="[% value | html %]" selected="selected">[% value | html %]</option>
+ [% ELSE %]
+ <option value="[% value | html %]">[% value | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ <input type="hidden" name="report_name" value="[% report_name | html %]" />
+ <input type="hidden" name="do_it" value="1" />
+ </fieldset>
+ </form>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#resulttable").kohaTable({
+                paging: false,
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

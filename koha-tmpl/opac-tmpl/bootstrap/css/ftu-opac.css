@@ -1,0 +1,1494 @@
+/**
+ * FTU OPAC - Design System & Modern Library Stylesheet
+ * Foreign Trade University Library (Thư viện Đại học Ngoại thương)
+ * Theme: Light, Fresh, Minimalist, No Visual Noise, Zero GIFs
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --ftu-font: 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ftu-red: #b91c1c;
+  --ftu-red-hover: #991b1b;
+  --ftu-red-light: #dc2626;
+  --ftu-red-soft: #fef2f2;
+  --ftu-red-glow: rgba(185, 28, 28, 0.12);
+  
+  --ftu-gold: #c8922a;
+  --ftu-gold-hover: #a16207;
+  --ftu-gold-soft: #fefce8;
+  
+  --ftu-bg-page: #f8fafc;
+  --ftu-bg-card: #ffffff;
+  --ftu-border-subtle: #f1f5f9;
+  --ftu-border-light: #e2e8f0;
+  --ftu-border-focus: #fca5a5;
+  
+  --ftu-text-dark: #0f172a;
+  --ftu-text-body: #334155;
+  --ftu-text-muted: #64748b;
+  --ftu-text-subtle: #94a3b8;
+  
+  --ftu-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --ftu-shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --ftu-shadow-lg: 0 12px 30px -4px rgba(185, 28, 28, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  --ftu-shadow-card: 0 2px 10px rgba(0, 0, 0, 0.03);
+  
+  --ftu-radius-sm: 6px;
+  --ftu-radius-md: 10px;
+  --ftu-radius-lg: 16px;
+  --ftu-radius-full: 9999px;
+}
+
+/* ==========================================================================
+   Global Reset & Typography
+   ========================================================================== */
+html, body {
+  font-family: var(--ftu-font) !important;
+  background-color: var(--ftu-bg-page) !important;
+  color: var(--ftu-text-body) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--ftu-font) !important;
+  color: var(--ftu-text-dark) !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--ftu-red);
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+}
+
+a:hover {
+  color: var(--ftu-red-hover);
+  text-decoration: none;
+}
+
+/* Eliminate redundant borders & visual clutter */
+#wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
+.divider-vertical {
+  display: none !important;
+}
+
+fieldset.brief, fieldset.rows {
+  border: 1px solid var(--ftu-border-subtle) !important;
+  background: #ffffff !important;
+  border-radius: var(--ftu-radius-md) !important;
+  padding: 1.25rem !important;
+}
+
+legend {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: var(--ftu-text-dark) !important;
+  border-bottom: none !important;
+  padding: 0 0.5rem !important;
+  width: auto !important;
+}
+
+/* ==========================================================================
+   Header & Navbar (Clean, White, FTU Crimson Underline)
+   ========================================================================== */
+#header-region {
+  background: #ffffff !important;
+  border-bottom: 2px solid var(--ftu-red) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+  position: relative;
+  z-index: 1000;
+}
+
+.navbar,
+#header-region .navbar {
+  background: #ffffff !important;
+  padding: 0.65rem 1.75rem !important;
+  border: none !important;
+  min-height: 64px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1.5rem !important;
+}
+
+/* FTU Brand Logo - Overrides Koha Green Leaf & Height:0 clip */
+#logo,
+#header-region #logo,
+#header-region .navbar #logo,
+#header-region .navbar:has(#cart-list-nav) #logo {
+  background: none !important;
+  background-image: none !important;
+  width: auto !important;
+  min-width: 250px !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  order: 1 !important;
+}
+
+#logo a,
+#logo .navbar-brand,
+#header-region #logo a,
+#header-region .navbar #logo a,
+#header-region .navbar:has(#cart-list-nav) #logo a {
+  background: none !important;
+  background-image: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 44px !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+
+.ftu-logo-img,
+#logo a img,
+#logo .ftu-logo-img {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid rgba(185, 28, 28, 0.2) !important;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.12) !important;
+  display: block !important;
+  transition: transform 0.2s ease;
+}
+
+.ftu-logo-img:hover {
+  transform: scale(1.05);
+}
+
+.ftu-brand-title-wrap,
+#logo a .ftu-brand-title-wrap {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  line-height: 1.25 !important;
+}
+
+.ftu-brand-main-title,
+#logo a .ftu-brand-main-title {
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+  color: var(--ftu-red) !important;
+  letter-spacing: 0.02em !important;
+  text-transform: uppercase !important;
+  display: block !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.ftu-brand-sub-title,
+#logo a .ftu-brand-sub-title {
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  color: var(--ftu-text-muted) !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  display: block !important;
+}
+
+#header-region .navbar:has(#cart-list-nav) #cart-list-nav {
+  flex-grow: 0 !important;
+}
+
+#cart-list-nav {
+  order: 2 !important;
+}
+
+#members {
+  order: 3 !important;
+  margin-left: auto !important;
+}
+
+/* Hide Koha clumsy moresearches and opacheader rows on home page */
+body#opac-main #masthead-search-container,
+body#opac-main #moresearches,
+body#opac-main .mastheadsearch,
+body#opac-main #opacheader,
+body#opac-main #opac-main-search,
+body#opac-main .breadcrumbs {
+  display: none !important;
+}
+
+/* Nav Links & Action Pills */
+.navbar-nav {
+  align-items: center !important;
+  gap: 0.35rem !important;
+}
+
+.navbar-nav .nav-link {
+  color: var(--ftu-text-body) !important;
+  font-weight: 500 !important;
+  font-size: 0.88rem !important;
+  padding: 0.45rem 0.85rem !important;
+  border-radius: var(--ftu-radius-full) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--ftu-red) !important;
+  background-color: var(--ftu-red-soft) !important;
+}
+
+.navbar-nav .nav-link i,
+.navbar-nav .nav-link svg {
+  color: var(--ftu-red) !important;
+  font-size: 0.95rem;
+}
+
+.navbar-nav .login-link {
+  background: var(--ftu-red-soft) !important;
+  color: var(--ftu-red) !important;
+  font-weight: 600 !important;
+  border: 1px solid rgba(185, 28, 28, 0.2) !important;
+}
+
+.navbar-nav .login-link:hover {
+  background: var(--ftu-red) !important;
+  color: #ffffff !important;
+  border-color: var(--ftu-red) !important;
+}
+
+.navbar-nav .login-link:hover i {
+  color: #ffffff !important;
+}
+
+#basketcount {
+  background: var(--ftu-red) !important;
+  color: #ffffff !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  margin-left: 0.25rem;
+}
+
+/* Dropdown Menus */
+.dropdown-menu {
+  border: 1px solid var(--ftu-border-light) !important;
+  border-radius: var(--ftu-radius-md) !important;
+  box-shadow: var(--ftu-shadow-md) !important;
+  padding: 0.5rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.dropdown-item {
+  font-size: 0.86rem !important;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: var(--ftu-radius-sm) !important;
+  color: var(--ftu-text-body) !important;
+}
+
+.dropdown-item:hover {
+  background: var(--ftu-red-soft) !important;
+  color: var(--ftu-red) !important;
+}
+
+/* ==========================================================================
+   OPAC Main Masthead Search (Header Search on Non-Home Pages)
+   ========================================================================== */
+body:not(#opac-main) .mastheadsearch {
+  background: #ffffff !important;
+  padding: 0.85rem 1.5rem !important;
+  border-bottom: 1px solid var(--ftu-border-light) !important;
+  box-shadow: var(--ftu-shadow-sm) !important;
+}
+
+body:not(#opac-main) .mastheadsearch form {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+body#opac-main #opac-main-search {
+  display: none !important; /* On home page, we have our dedicated clean hero search */
+}
+
+/* ==========================================================================
+   FTU Hero Banner & Central Search (Home Page)
+   ========================================================================== */
+.ftu-hero-section {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 1)), 
+              url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600') center/cover no-repeat;
+  padding: 2rem 1.5rem 3rem;
+  position: relative;
+  text-align: center;
+}
+
+.ftu-hero-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.ftu-hero-title {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--ftu-text-dark);
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.ftu-hero-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--ftu-red);
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tabbed Search Bar */
+.ftu-search-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ftu-search-tab {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--ftu-text-dark);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.45rem 1.25rem;
+  border-radius: var(--ftu-radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ftu-search-tab:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.ftu-search-tab.active {
+  background: #ffffff;
+  color: var(--ftu-red);
+  border-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Modern Pill Search Box */
+.ftu-search-card.ftu-search-simple {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--ftu-radius-full);
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  max-width: 850px;
+  margin: 0 auto 1.5rem;
+}
+
+.ftu-search-card.ftu-search-simple:focus-within {
+  border-color: var(--ftu-red-light);
+  box-shadow: 0 15px 50px rgba(185, 28, 28, 0.15), 0 0 0 4px rgba(185, 28, 28, 0.1);
+  background: #ffffff;
+}
+
+.ftu-search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.ftu-search-icon-left {
+  color: var(--ftu-text-subtle);
+  font-size: 1.2rem;
+}
+
+.ftu-search-card.ftu-search-simple:focus-within .ftu-search-icon-left {
+  color: var(--ftu-red);
+}
+
+.ftu-search-input-large {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  font-size: 1.15rem !important;
+  color: var(--ftu-text-dark) !important;
+  padding: 0.85rem 0.5rem !important;
+  outline: none !important;
+  font-family: var(--ftu-font) !important;
+}
+
+.ftu-search-input-large::placeholder {
+  color: var(--ftu-text-subtle);
+  font-weight: 400;
+}
+
+.ftu-search-btn-large {
+  background: var(--ftu-red) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.85rem 2.25rem !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  border-radius: var(--ftu-radius-full) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 15px rgba(185, 28, 28, 0.3) !important;
+  white-space: nowrap;
+}
+
+.ftu-search-btn-large:hover {
+  background: var(--ftu-red-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(185, 28, 28, 0.4) !important;
+}
+
+/* ==========================================================================
+   Search Options Directly Below Search Bar
+   ========================================================================== */
+.ftu-search-chips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.ftu-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 1.1rem;
+  background: transparent;
+  color: var(--ftu-text-muted) !important;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--ftu-radius-full);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
+}
+
+.ftu-chip:hover {
+  color: var(--ftu-text-dark) !important;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.ftu-chip.ftu-chip-primary {
+  color: var(--ftu-text-dark) !important;
+  background: #ffffff;
+  border: 1px solid var(--ftu-border-light);
+  box-shadow: var(--ftu-shadow-sm);
+}
+
+.ftu-chip.ftu-chip-primary:hover {
+  border-color: var(--ftu-red-light);
+  color: var(--ftu-red) !important;
+  box-shadow: var(--ftu-shadow-md);
+}
+
+.ftu-chip.ftu-chip-primary i {
+  color: var(--ftu-red);
+}
+
+/* ==========================================================================
+   Section Layout & Compact 4 Shortcuts Grid
+   ========================================================================== */
+.ftu-section-container {
+  max-width: 92%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.ftu-shortcuts-section {
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.ftu-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .ftu-shortcuts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .ftu-shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ftu-shortcut-card {
+  background: #ffffff;
+  border-radius: var(--ftu-radius-lg);
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--ftu-border-subtle);
+  box-shadow: var(--ftu-shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none !important;
+  transition: all 0.22s ease;
+}
+
+.ftu-shortcut-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ftu-shadow-md);
+  border-color: #fecaca;
+}
+
+.ftu-shortcut-static:hover {
+  transform: none;
+  border-color: var(--ftu-border-subtle);
+}
+
+.ftu-shortcut-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--ftu-radius-md);
+  background: var(--ftu-red-soft);
+  color: var(--ftu-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.ftu-shortcut-card:hover .ftu-shortcut-icon {
+  background: var(--ftu-red);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.ftu-shortcut-static:hover .ftu-shortcut-icon {
+  transform: none;
+}
+
+.ftu-icon-green {
+  background: #ecfdf5 !important;
+  color: #10b981 !important;
+}
+
+.ftu-badge-open {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--ftu-radius-full);
+  background: #dcfce7;
+  color: #15803d;
+  margin-left: 0.35rem;
+}
+
+.ftu-shortcut-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ftu-shortcut-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--ftu-text-dark);
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.ftu-shortcut-desc {
+  font-size: 0.78rem;
+  color: var(--ftu-text-muted);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Compact Modern Footer (Fresh, Slate, Clean 3 Campuses)
+   ========================================================================== */
+.ftu-footer {
+  background: #ffffff !important;
+  border-top: 1px solid var(--ftu-border-light) !important;
+  margin-top: 2rem;
+  padding: 2rem 1.5rem 1.5rem;
+  color: var(--ftu-text-body);
+}
+
+.ftu-footer-inner {
+  max-width: 92%;
+  margin: 0 auto;
+}
+
+.ftu-footer-compact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ftu-border-subtle);
+}
+
+.ftu-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ftu-footer-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(185, 28, 28, 0.25);
+}
+
+.ftu-footer-title {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--ftu-red);
+  letter-spacing: 0.02em;
+}
+
+.ftu-footer-subtitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ftu-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.ftu-footer-contact {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.84rem;
+  color: var(--ftu-text-muted);
+}
+
+.ftu-footer-campuses-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--ftu-text-muted);
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--ftu-border-subtle);
+}
+
+.dot-sep {
+  color: var(--ftu-text-subtle);
+}
+
+.ftu-footer-bottom-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--ftu-text-subtle);
+  padding-top: 1rem;
+}
+
+/* Hide Koha default ugly changelanguage footer bar */
+#changelanguage {
+  display: none !important;
+}
+
+#changelanguage .navbar-nav {
+  margin: 0 auto;
+}
+
+/* Breadcrumbs cleanup */
+.breadcrumbs {
+  background: transparent !important;
+  padding: 0.85rem 1.5rem 0 !important;
+  margin: 0 !important;
+}
+
+.breadcrumb {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.84rem !important;
+}
+
+/* Tables in Koha OPAC - Cleaner styling */
+.table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: var(--ftu-radius-md) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--ftu-border-subtle) !important;
+  background: #ffffff !important;
+}
+
+.table th {
+  background-color: var(--ftu-bg-page) !important;
+  color: var(--ftu-text-dark) !important;
+  font-weight: 700 !important;
+  font-size: 0.86rem !important;
+  border-bottom: 1px solid var(--ftu-border-light) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.table td {
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid var(--ftu-border-subtle) !important;
+  font-size: 0.86rem !important;
+}
+
+/* Buttons in Koha */
+.btn-primary {
+  background-color: var(--ftu-red) !important;
+  border-color: var(--ftu-red) !important;
+  color: #ffffff !important;
+  border-radius: var(--ftu-radius-full) !important;
+  padding: 0.45rem 1.25rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--ftu-red-hover) !important;
+  border-color: var(--ftu-red-hover) !important;
+}
+
+/* ==========================================================================
+   New Arrivals / Sách Mới (Glassmorphism & Cards)
+   ========================================================================== */
+.ftu-new-arrivals-section,
+.ftu-collections-section {
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+.ftu-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--ftu-border-subtle);
+}
+
+.ftu-section-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ftu-text-dark);
+  margin: 0;
+  position: relative;
+}
+
+.ftu-section-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.85rem;
+  height: 2px;
+  width: 60px;
+  background: var(--ftu-red);
+}
+
+.ftu-view-all {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ftu-red);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ftu-view-all:hover {
+  color: var(--ftu-red-hover);
+  text-decoration: underline;
+}
+
+.ftu-books-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 1400px) {
+  .ftu-books-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 1024px) {
+  .ftu-books-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .ftu-books-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .ftu-books-grid { grid-template-columns: 1fr; }
+}
+
+.ftu-book-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: var(--ftu-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--ftu-border-subtle);
+  box-shadow: var(--ftu-shadow-card);
+  transition: all 0.3s ease;
+  text-decoration: none !important;
+  height: 100%;
+}
+
+.ftu-book-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--ftu-shadow-lg);
+  border-color: #fca5a5;
+}
+
+.ftu-book-cover {
+  position: relative;
+  width: 100%;
+  padding-top: 130%; /* Aspect ratio for books */
+  background: var(--ftu-bg-page);
+  overflow: hidden;
+}
+
+.ftu-book-cover img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.ftu-book-card:hover .ftu-book-cover img {
+  transform: scale(1.05);
+}
+
+.ftu-book-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  color: var(--ftu-text-dark);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--ftu-radius-full);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-transform: uppercase;
+}
+
+.ftu-book-details {
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.ftu-book-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ftu-text-dark);
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ftu-book-author {
+  font-size: 0.85rem;
+  color: var(--ftu-text-muted);
+  margin-bottom: 0.75rem;
+  flex-grow: 1;
+}
+
+.ftu-book-meta {
+  font-size: 0.75rem;
+  color: #10b981; /* Green for available */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+/* ==========================================================================
+   News & Workshops (2 Columns Layout)
+   ========================================================================== */
+.ftu-news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .ftu-news-grid { grid-template-columns: 1fr; }
+}
+
+.ftu-news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ftu-news-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border-radius: var(--ftu-radius-md);
+  border: 1px solid var(--ftu-border-subtle);
+  box-shadow: var(--ftu-shadow-sm);
+  text-decoration: none !important;
+  transition: all 0.25s ease;
+}
+
+.ftu-news-item:hover {
+  transform: translateX(5px);
+  border-color: #fca5a5;
+  box-shadow: var(--ftu-shadow-md);
+}
+
+.ftu-news-date {
+  background: var(--ftu-red-soft);
+  color: var(--ftu-red);
+  padding: 0.5rem;
+  border-radius: var(--ftu-radius-sm);
+  text-align: center;
+  min-width: 60px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ftu-news-date .day { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+.ftu-news-date .month { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-top: 0.2rem; }
+
+.ftu-news-content h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ftu-text-dark);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.ftu-news-content p {
+  font-size: 0.85rem;
+  color: var(--ftu-text-muted);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ftu-event-card {
+  background: #ffffff;
+  border-radius: var(--ftu-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--ftu-border-subtle);
+  box-shadow: var(--ftu-shadow-card);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ftu-event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ftu-shadow-lg);
+  border-color: #fca5a5;
+}
+
+.ftu-event-img {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
+.ftu-event-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ftu-event-tag {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--ftu-red);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--ftu-radius-full);
+}
+
+.ftu-event-details {
+  padding: 1.5rem;
+}
+
+.ftu-event-details h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ftu-text-dark);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.ftu-event-details p {
+  font-size: 0.85rem;
+  color: var(--ftu-text-muted);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ftu-event-details p i { color: var(--ftu-red); width: 14px; text-align: center; }
+
+/* ==========================================================================
+   Featured Collections (Gradient Cards)
+   ========================================================================== */
+.ftu-collections-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .ftu-collections-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .ftu-collections-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .ftu-collections-grid { grid-template-columns: 1fr; }
+}
+
+.ftu-collection-card {
+  position: relative;
+  height: 200px;
+  border-radius: var(--ftu-radius-lg);
+  overflow: hidden;
+  text-decoration: none !important;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+  box-shadow: var(--ftu-shadow-md);
+  transition: all 0.3s ease;
+  background-size: cover;
+  background-position: center;
+}
+
+.ftu-col-1 { background-image: url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600'); }
+.ftu-col-2 { background-image: url('https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=600'); }
+.ftu-col-3 { background-image: url('https://images.unsplash.com/photo-1522881451255-f59ad836fdf8?auto=format&fit=crop&q=80&w=600'); }
+.ftu-col-4 { background-image: url('https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&q=80&w=600'); }
+
+.ftu-collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.ftu-collection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.2) 100%);
+  transition: background 0.3s ease;
+}
+
+.ftu-collection-card:hover .ftu-collection-overlay {
+  background: linear-gradient(to top, rgba(185, 28, 28, 0.85) 0%, rgba(185, 28, 28, 0.3) 100%);
+}
+
+.ftu-collection-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+}
+
+.ftu-collection-content h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  margin-bottom: 0.25rem;
+}
+
+.ftu-collection-content p {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Floating Action Button (Ask a Librarian)
+   ========================================================================== */
+.ftu-fab-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+}
+
+.ftu-fab-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--ftu-red);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(185, 28, 28, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-decoration: none !important;
+}
+
+.ftu-fab-btn:hover {
+  transform: scale(1.1);
+  background: var(--ftu-red-hover);
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5);
+}
+
+.ftu-fab-tooltip {
+  position: absolute;
+  right: 75px;
+  top: 50%;
+  transform: translateY(-50%) translateX(10px);
+  background: #ffffff;
+  color: var(--ftu-text-dark);
+  padding: 0.5rem 1rem;
+  border-radius: var(--ftu-radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--ftu-shadow-md);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.ftu-fab-tooltip::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 0 5px 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent #ffffff;
+}
+
+.ftu-fab-container:hover .ftu-fab-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ftu-brand-main-title {
+    font-size: 1.15rem;
+  }
+  
+  .ftu-brand-sub-title {
+    font-size: 0.65rem;
+  }
+
+  .ftu-hero-title {
+    font-size: 2.25rem;
+  }
+}
+
+/* ==========================================================================
+   Global Cover Images (Local Uploads & Search Results)
+   ========================================================================== */
+.bookcover {
+  margin-bottom: 1rem;
+}
+
+.cover-image img {
+  border-radius: var(--ftu-radius-md);
+  box-shadow: var(--ftu-shadow-card);
+  max-width: 100%;
+  height: auto;
+  transition: all 0.3s ease;
+  object-fit: cover;
+  border: 1px solid var(--ftu-border-subtle);
+}
+
+.cover-image img:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ftu-shadow-lg);
+  border-color: #fca5a5;
+}
+
+/* Tinh gọn hint "Ảnh bìa cục bộ" */
+.cover-image .hint {
+  display: none;
+}
+
+/* Kích thước trang danh sách kết quả */
+#searchresults .cover-image img {
+  width: 100px;
+  height: 145px;
+}
+
+/* Kích thước trang chi tiết tài liệu */
+#catalogue_detail_biblio .cover-image img {
+  width: 220px;
+  height: 320px;
+}
+
+@media (max-width: 768px) {
+  .ftu-search-form {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+  .ftu-search-select {
+    max-width: 100%;
+    width: 100%;
+  }
+  .ftu-search-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .ftu-search-card {
+    border-radius: var(--ftu-radius-lg);
+  }
+}
+
+/* ==========================================================================
+   Mega Footer (FTU Premium Clean Light)
+   ========================================================================== */
+.ftu-footer-premium {
+  background-color: #ffffff;
+  color: #334155;
+  padding: 4rem 0 2rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.02);
+}
+
+.ftu-footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.ftu-footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 992px) {
+  .ftu-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ftu-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Brand Column */
+.ftu-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.ftu-footer-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ftu-footer-logo-img {
+  width: 65px;
+  height: auto;
+}
+
+.ftu-footer-brand-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #b91c1c;
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.ftu-footer-brand p {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Titles */
+.ftu-footer-title {
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Links */
+.ftu-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.ftu-footer-links li a {
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.ftu-footer-links li a:hover {
+  color: #b91c1c;
+  transform: translateX(5px);
+}
+
+/* Contact */
+.ftu-footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.ftu-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.ftu-contact-item i {
+  color: #b91c1c;
+  font-size: 1.1rem;
+  margin-top: 3px;
+  width: 16px; /* Ensure fixed width for alignment */
+  text-align: center;
+}
+
+/* Bottom */
+.ftu-footer-bottom {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .ftu-footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+/* Integration: DSpace 856 URL Styling */
+.online_resources a,
+span.online_resources a,
+.results_summary.online_resources a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10b981, #059669); /* Beautiful green */
+    color: #ffffff !important;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none !important;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1);
+}
+
+.online_resources a::before,
+span.online_resources a::before,
+.results_summary.online_resources a::before {
+    content: "\f02d"; /* FontAwesome book-open icon */
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    margin-right: 8px;
+}
+
+.online_resources a:hover,
+span.online_resources a:hover,
+.results_summary.online_resources a:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3), 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}

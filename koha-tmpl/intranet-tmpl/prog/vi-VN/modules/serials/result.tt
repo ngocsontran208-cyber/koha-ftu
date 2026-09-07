@@ -1,0 +1,89 @@
+[% USE raw %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Search results") | html %]
+ &rsaquo; [% t("Serials") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="ser_result" class="ser">
+
+<div class="main container-fluid">
+ [% INCLUDE 'messages.inc' %]
+
+ [% IF ( total ) %]
+ <h1>Hiển thị từ [% from | html %] tới [% to | html %]  trong tổng số [% total | html %]kết quả được tìm thấy.</h1>
+ <div class="page-section">
+ <table>
+ <tr>
+ <th>Nhan đề</th>
+ <th>Tác giả</th>
+ <th>Nhà xuất bản</th>
+ <th>Năm xuất bản</th>
+ <th>Số ISSN</th>
+ <th>&nbsp;</th>
+ </tr>
+ [% FOREACH resultsloo IN resultsloop %]
+ <tr>
+ <td class="title"> [% INCLUDE 'biblio-title.inc' biblio=resultsloo %] </td>
+ <td> [% resultsloo.author | html %] </td>
+ <td> [% resultsloo.publishercode | html %] </td>
+ <td> [% resultsloo.publicationyear | html %] </td>
+ <td> [% resultsloo.issn | html %] </td>
+ <td><a class="btn btn-default btn-xs select_title" data-biblionumber="[% resultsloo.biblionumber | html %]" href="#" title="Chọn ấn phẩm này">Chọn</a></td>
+ </tr>
+ [% END %]
+ </table>
+ </div>
+ [% ELSE %]
+ <div class="alert alert-info">
+ <p>Không tìm thấy kết quả liên quan đến <strong>[% query | html %]</strong></p>
+ </div>
+ [% END %]
+
+ <div class="pages">
+ [% IF ( displayprev ) %]
+ <a class="nav" href="/cgi-bin/koha/serials/subscription-bib-search.pl?op=do_search&amp;type=intranet&amp;startfrom=[% startfromprev |url %]&amp;q=[% query |url %]">&lt;&lt; Trang trước</a>
+ [% END %]
+ [% IF ( displaynext ) %]
+ <a class="nav" href="/cgi-bin/koha/serials/subscription-bib-search.pl?op=do_search&amp;type=intranet&amp;startfrom=[% startfromnext |url %]&amp;q=[% query |url %]">Trang sau &gt;&gt;</a>
+ [% END %]
+ </div>
+
+ <nav class="navbar navbar-default fixed-bottom">
+ <div class="container-fluid">
+ <fieldset class="action">
+ <form action="/cgi-bin/koha/serials/subscription-bib-search.pl">
+ <button class="btn btn-default" type="submit"><i class="fa fa-arrow-left"></i> Tìm kiếm mới</button>
+ </form>
+ <button type="button" class="btn btn-default close_window">Đóng</button>
+ </fieldset>
+ </div>
+ </nav>
+</div>
+<!-- /.main.container-fluid -->
+
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $(".select_title").on("click", function (e) {
+                e.preventDefault();
+                var biblionumber = $(this).data("biblionumber");
+                GetIt(biblionumber, $(this));
+            });
+        });
+        function GetIt(bibno, title) {
+            title = title.parents("tr").find(".title").text();
+            opener.document.f.biblionumber.value = bibno;
+            opener.document.f.title.value = title;
+            window.close();
+        }
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' popup_window=1 %]

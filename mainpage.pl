@@ -34,9 +34,12 @@ use Koha::BiblioFrameworks;
 use Koha::ProblemReports;
 use Koha::Quotes;
 use Koha::Suggestions;
+use Koha::Patrons;
+use Koha::Biblios;
 use Koha::BackgroundJobs;
 use Koha::CurbsidePickups;
 use Koha::Tickets;
+use Koha::Checkouts;
 
 my $query = CGI->new;
 
@@ -160,6 +163,24 @@ $template->param(
     pending_discharge_requests     => $pending_discharge_requests,
     pending_article_requests       => $pending_article_requests,
     pending_problem_reports        => $pending_problem_reports,
+);
+
+# KPI Statistics for FTU Dashboard
+my $kpi_total_patrons   = Koha::Patrons->search({ anonymized => 0 })->count;
+my $kpi_total_biblios   = Koha::Biblios->search({})->count;
+my $kpi_checkouts_today = Koha::Checkouts->search({
+    issuedate => { '>=' => DateTime->now->ymd . ' 00:00:00' }
+})->count;
+my $kpi_pending_total   = ($pendingcomments || 0)
+    + ($pendingtags || 0)
+    + ($pending_borrower_modifications || 0)
+    + ($pending_article_requests || 0);
+
+$template->param(
+    kpi_total_patrons   => $kpi_total_patrons,
+    kpi_total_biblios   => $kpi_total_biblios,
+    kpi_checkouts_today => $kpi_checkouts_today,
+    kpi_pending_total   => $kpi_pending_total,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

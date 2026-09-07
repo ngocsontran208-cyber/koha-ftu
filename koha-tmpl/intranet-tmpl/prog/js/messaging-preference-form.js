@@ -160,9 +160,9 @@ $(document).ready(function () {
     });
 
     function toggle_digest(id) {
-        let phone_checked = TalkingTechItivaPhoneNotification
+        let phone_checked = (typeof TalkingTechItivaPhoneNotification !== 'undefined' && TalkingTechItivaPhoneNotification)
             ? false
-            : PhoneNotification
+            : (typeof PhoneNotification !== 'undefined' && PhoneNotification)
               ? $("#phone" + id).prop("checked")
               : false;
         if (

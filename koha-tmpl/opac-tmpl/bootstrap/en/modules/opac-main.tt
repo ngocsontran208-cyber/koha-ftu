@@ -39,6 +39,172 @@
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 
+    <!-- ========================================================================= -->
+    <!-- FTU FULL-WIDTH HERO SECTION, SHORTCUTS, AND NEWS -->
+    <!-- ========================================================================= -->
+    [% IF ( opac_name == 'opac-main' || !opac_name ) && !news_id && !advsearch %]
+    <section class="ftu-hero-section">
+        <div class="ftu-hero-content">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <img src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" style="width: 75px; height: auto; margin-bottom: 0.5rem; border-radius: 50%; border: 3px solid rgba(185, 28, 28, 0.15); box-shadow: 0 8px 25px rgba(185, 28, 28, 0.15); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                <h1 class="ftu-hero-title" style="font-size: 1.8rem; margin-bottom: 0.2rem; color: #b91c1c !important; letter-spacing: 0.25em; text-indent: 0.25em;">THƯ VIỆN</h1>
+                <h2 class="ftu-hero-subtitle" style="font-size: 0.95rem; font-weight: 600; color: #b91c1c !important; letter-spacing: 0.15em; margin: 0;">PHÂN HIỆU TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</h2>
+            </div>
+            
+            <div class="ftu-search-card ftu-search-simple">
+                <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform" role="search" class="ftu-search-form">
+                    <i class="fa fa-search ftu-search-icon-left"></i>
+                    <input type="text" name="q" class="ftu-search-input-large" placeholder="Nhập tên sách, tác giả, chủ đề..." />
+                    <input type="hidden" name="idx" value="kw" />
+                    <button type="submit" class="ftu-search-btn-large">Tìm kiếm</button>
+                </form>
+            </div>
+            
+            <div class="ftu-search-chips">
+                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary"><i class="fa fa-sliders"></i> Tìm kiếm nâng cao</a>
+                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip"><i class="fa fa-graduation-cap"></i> Giáo trình & Bài giảng</a>
+                <a href="/cgi-bin/koha/opac-authorities-home.pl" class="ftu-chip"><i class="fa fa-tags"></i> Tìm theo Từ khóa</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="ftu-section-container ftu-shortcuts-section">
+       <div class="ftu-shortcuts-grid">
+           <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon"><i class="fa fa-book-open"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Sách mới về <span class="ftu-badge-open">Mới</span></span>
+                   <span class="ftu-shortcut-desc">Cập nhật tài liệu mới nhất</span>
+               </div>
+           </a>
+           <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon ftu-icon-green"><i class="fa fa-history"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Lịch sử mượn</span>
+                   <span class="ftu-shortcut-desc">Tra cứu sách đã mượn</span>
+               </div>
+           </a>
+           <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon"><i class="fa fa-id-card"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Tài khoản của tôi</span>
+                   <span class="ftu-shortcut-desc">Gia hạn & thông tin mượn</span>
+               </div>
+           </a>
+           <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon"><i class="fa fa-bookmark"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Giá sách yêu thích</span>
+                   <span class="ftu-shortcut-desc">Quản lý danh sách sách</span>
+               </div>
+           </a>
+       </div>
+    </div>
+
+    <!-- DANH MỤC SÁCH MỚI -->
+    <!-- DANH MỤC SÁCH MỚI (Real Data & Auto-Scroll) -->
+    <div class="ftu-section-container ftu-new-arrivals-section">
+        <div class="ftu-section-header">
+            <h3 class="ftu-section-title">SÁCH MỚI CẬP NHẬT</h3>
+            <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
+        </div>
+        
+        <style>
+            .ftu-books-scroller-wrap {
+                overflow: hidden;
+                width: 100%;
+                position: relative;
+                padding: 10px 0;
+            }
+            .ftu-books-grid-dynamic {
+                display: flex;
+                gap: 1.5rem;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+                animation: marquee 25s linear infinite;
+            }
+            .ftu-books-grid-dynamic:hover {
+                animation-play-state: paused;
+            }
+            .ftu-books-grid-dynamic .ftu-book-card {
+                flex: 0 0 220px;
+                min-width: 220px;
+                white-space: normal; /* Restore text wrapping inside card */
+            }
+            @keyframes marquee {
+                0% { transform: translateX(10%); }
+                100% { transform: translateX(-100%); }
+            }
+            /* Loading State */
+            .ftu-loading-books {
+                text-align: center;
+                padding: 2rem;
+                color: var(--ftu-text-muted);
+                font-size: 1.1rem;
+            }
+            .ftu-loading-books i { margin-right: 8px; color: var(--ftu-red); }
+        </style>
+
+        <div class="ftu-books-scroller-wrap">
+            <div id="ftu-dynamic-books" class="ftu-books-grid-dynamic">
+                <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Đang tải dữ liệu sách mới nhất...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIN TỨC VÀ SỰ KIỆN -->
+    <div class="ftu-section-container">
+        <h3 style="font-weight: 800; color: var(--ftu-red); margin-bottom: 1.5rem;">TIN TỨC & SỰ KIỆN</h3>
+        <div class="ftu-news-grid">
+            <div class="ftu-news-list">
+                <a href="#" class="ftu-news-item">
+                    <div class="ftu-news-date">
+                        <span class="day">15</span>
+                        <span class="month">Th10</span>
+                    </div>
+                    <div class="ftu-news-content">
+                        <h4>Khai trương không gian tự học mới</h4>
+                        <p>Thư viện FTU chính thức đưa vào hoạt động không gian tự học nhóm chuẩn quốc tế tại tầng 3.</p>
+                    </div>
+                </a>
+                <a href="#" class="ftu-news-item">
+                    <div class="ftu-news-date">
+                        <span class="day">10</span>
+                        <span class="month">Th10</span>
+                    </div>
+                    <div class="ftu-news-content">
+                        <h4>Tập huấn kỹ năng tìm kiếm tài liệu điện tử</h4>
+                        <p>Dành cho sinh viên Khóa 62. Hướng dẫn sử dụng cơ sở dữ liệu ProQuest và ScienceDirect.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="ftu-news-list">
+                <a href="#" class="ftu-news-item">
+                    <div class="ftu-news-date">
+                        <span class="day">05</span>
+                        <span class="month">Th10</span>
+                    </div>
+                    <div class="ftu-news-content">
+                        <h4>Cập nhật hàng trăm tựa sách ngoại văn</h4>
+                        <p>Các tài liệu mới nhất về Kinh tế số, Logistics và Tài chính quốc tế đã sẵn sàng phục vụ.</p>
+                    </div>
+                </a>
+                <a href="#" class="ftu-news-item">
+                    <div class="ftu-news-date">
+                        <span class="day">01</span>
+                        <span class="month">Th10</span>
+                    </div>
+                    <div class="ftu-news-content">
+                        <h4>Chính sách mượn trả tài liệu năm học mới</h4>
+                        <p>Một số thay đổi về hạn mức mượn sách và quy trình gia hạn trực tuyến. Vui lòng xem chi tiết.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    [% END %]
+    <!-- ========================================================================= -->
+
     [% SET container_id = "notloggedin" %]
     [% IF Koha.Preference( 'opacuserlogin' ) == 1 && loggedinusername %]
         [% container_id = "loggedin" %]
@@ -315,4 +481,65 @@
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
+<script>
+$(document).ready(function() {
+    if ($('#ftu-dynamic-books').length) {
+        // Fetch real books from recent acquisitions sort
+        $.ajax({
+            url: '/cgi-bin/koha/opac-search.pl?q=itype:BK&sort_by=acqdate_dsc&limit=15',
+            method: 'GET',
+            dataType: 'html',
+            success: function(response) {
+                var htmlContent = '';
+                var doc = new DOMParser().parseFromString(response, "text/html");
+                var items = $(doc).find('table.table tbody tr'); // Find search results rows
+                
+                if (items.length === 0) {
+                    $('#ftu-dynamic-books').html('<div class="ftu-loading-books">Không tìm thấy tài liệu mới nào.</div>');
+                    return;
+                }
+                
+                var bookCount = 0;
+                items.each(function(index) {
+                    if(bookCount >= 10) return false; // Limit to 10 books for the slider
+                    
+                    var titleElem = $(this).find('a.title');
+                    var title = titleElem.text().trim();
+                    var link = titleElem.attr('href');
+                    var author = $(this).find('.author a').first().text().trim() || 'Không rõ tác giả';
+                    
+                    // Extract biblionumber from link (/cgi-bin/koha/opac-detail.pl?biblionumber=XXX)
+                    var bibNumMatch = link.match(/biblionumber=(\d+)/);
+                    var bibNum = bibNumMatch ? bibNumMatch[1] : '';
+                    
+                    var coverUrl = bibNum ? '/cgi-bin/koha/opac-image.pl?thumbnail=1&biblionumber=' + bibNum : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400';
+                    
+                    htmlContent += `
+                        <a href="${link}" class="ftu-book-card">
+                            <div class="ftu-book-cover">
+                                <img src="${coverUrl}" alt="Cover" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400';" />
+                                <span class="ftu-book-badge">MỚI</span>
+                            </div>
+                            <div class="ftu-book-details">
+                                <h4 class="ftu-book-title" title="${title}">${title}</h4>
+                                <p class="ftu-book-author">${author}</p>
+                                <div class="ftu-book-meta"><i class="fa fa-check-circle" style="margin-right: 4px;"></i> Sẵn sàng</div>
+                            </div>
+                        </a>
+                    `;
+                    bookCount++;
+                });
+                
+                // Duplicate items to ensure smooth infinite marquee
+                htmlContent += htmlContent;
+                
+                $('#ftu-dynamic-books').html(htmlContent);
+            },
+            error: function() {
+                $('#ftu-dynamic-books').html('<div class="ftu-loading-books">Lỗi tải dữ liệu.</div>');
+            }
+        });
+    }
+});
+</script>
 [% END %]

@@ -1,0 +1,185 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE AuthorisedValues %]
+[% USE ItemTypes %]
+[% USE Branches %]
+[% USE TablesSettings %]
+[% USE HtmlScrubber %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [%- IF course.section -%]
+ [% tx("Course reserves for '{course_name}' - {section}", { course_name = course.course_name, section = course.section }) | html %]
+ [%- ELSE -%]
+ [% tx("Course reserves for '{course_name}'", { course_name = course.course_name }) | html %]
+ [%- END -%]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-course-details' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-course-reserves.pl">Tài liệu học phần</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [%- IF course.section -%]
+ [% tx("Course reserves for '{course_name}' - {section}", { course_name = course.course_name, section = course.section }) | html %]
+ [%- ELSE -%]
+ [% tx("Course reserves for '{course_name}'", { course_name = course.course_name }) | html %]
+ [%- END -%]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col">
+ <div id="course_reserves" class="maincontent">
+ <h1>
+ [%- IF course.section -%]
+ [% tx("Course reserves for '{course_name}' - {section}", { course_name = course.course_name, section = course.section }) | html %]
+ [%- ELSE -%]
+ [% tx("Course reserves for '{course_name}'", { course_name = course.course_name }) | html %]
+ [%- END -%]
+ </h1>
+ <div class="rows">
+ <ol>
+ [% IF ( course.term ) %]<li><span class="label">[% tp('Semester', 'Term:') | html %]</span> [% AuthorisedValues.GetByCode( 'TERM', course.term, 1 ) | html %]</li>[% END %]
+ <li><span class="label">Khoa:</span> [% AuthorisedValues.GetByCode( 'DEPARTMENT', course.department, 1 ) | html %]</li>
+ [% IF ( course.course_number ) %]<li><span class="label">Mã số khóa học:</span> [% course.course_number | html %]</li>[% END %]
+ [% IF ( course.section ) %]<li><span class="label">Nhóm lớp:</span> [% course.section | html %]</li>[% END %]
+ [% IF ( course.instructors ) %]
+ <li
+                                    ><span class="label">Giảng viên:</span>
+ <ul>
+ [% FOREACH i IN course.instructors %]
+ <li><div class="instructor">[% i.firstname | html %] [% i.surname | html %]</div></li>
+ [% END %]
+ </ul>
+ </li>
+ [% END %]
+ [% IF ( course.public_note ) %]<li><span class="label">Ghi chú:</span> [% course.public_note | scrub_html type => 'note' | $raw %]</li>[% END %]
+ </ol>
+ </div>
+
+ [% IF ( course_reserves ) %]
+ <div class="rows">
+ <table id="course-items-table" class="table table-bordered table-striped table-condensed">
+ <caption class="visually-hidden">Khóa học</caption>
+ <thead>
+ <tr>
+ <th class="anti-the">Nhan đề</th>
+ <th>Tác giả</th>
+ <th>Kiểu tài liệu</th>
+ <th>Vị trí</th>
+ <th>Bộ sưu tập</th>
+ <th>Số phân loại</th>
+ <th>Số bản sao</th>
+ <th>Trạng thái</th>
+ <th>Ngày hết hạn</th>
+ <th>Ghi chú</th>
+ <th>Đường dẫn</th>
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH cr IN course_reserves %]
+ <tr>
+ <td><a href="opac-detail.pl?biblionumber=[% cr.biblio.biblionumber | uri %]">[% INCLUDE 'biblio-title-head.inc' biblio=cr.biblio %]</a></td>
+ <td>[% cr.biblio.author | html %]</td>
+ <td>[% ItemTypes.GetDescription( cr.item.itype ) | html %]</td>
+ <td
+                                                >[% Branches.GetName( cr.item.holdingbranch ) | html %] <br />
+ <em>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.location', authorised_value => cr.item.location, opac => 1 ) | html %]</em></td
+                                            >
+ <td>[% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode', authorised_value => cr.item.ccode, opac => 1 ) | html %]</td>
+ <td>[% cr.item.itemcallnumber | html %]</td>
+ <td>[% cr.item.copynumber | html %]</td>
+ <td>
+ [% IF cr.item %]
+ [% INCLUDE 'item-status.inc' item=cr.item issue=cr.issue show_recall_link=Koha.Preference('UseRecalls') %]
+ [% END %]
+ </td>
+ <td data-order="[% cr.issue.date_due | html %]">[% cr.issue.date_due | $KohaDates  as_due_date => 1 %]</td>
+ <td
+                                                >[% IF ( cr.public_note ) %]
+ [% cr.public_note | scrub_html type => 'note' | $raw %]
+ [% ELSIF ( cr.item.itemnotes ) %]
+ [% cr.item.itemnotes | $raw %]
+ [% END %]
+ </td>
+ <td
+                                                >[% IF (cr.item.uri) %]
+ <a href="[% cr.item.uri | url %]">URI của tài liệu</a>
+ [% ELSIF (cr.biblioitem.url) %]
+ <a href="[% cr.biblioitem.url | url %]">URL của biểu ghi</a>
+ [% END %]
+ </td>
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ [% ELSE %]
+ <br style="clear:both;" />
+ <div class="alert alert-info">
+ <p>Không có tài liệu dự trữ nào được chọn cho khóa học này.</p>
+ </div>
+ [% END %]
+ </div>
+ <!-- / #course_reserves -->
+ </div>
+ <!-- / .col -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        table_settings = [% TablesSettings.GetTableSettings( 'opac', 'course_items', 'course-items-table', 'json' ) | $raw %];
+        Koha.addPrefs({
+            OPACTableColExpandedByDefault: [% Koha.Preference('OPACTableColExpandedByDefault') ? 1 : 0 | html %],
+        });
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
+            $("#course-items-table").kohaTable(
+                {
+                    dom: '<"top"<"table_controls"f>>rt<"clear">',
+                    sorting: [[1, "asc"]],
+                    language: {
+                        search: "_INPUT_",
+                        searchPlaceholder: _("Tìm kiếm tài liệu dự trữ khóa học"),
+                    },
+                    responsive: {
+                        details: {
+                            display: responsive_display,
+                            type: "column",
+                            target: -1,
+                        },
+                    },
+                    columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+                },
+                table_settings
+            );
+        });
+    </script>
+[% END %]

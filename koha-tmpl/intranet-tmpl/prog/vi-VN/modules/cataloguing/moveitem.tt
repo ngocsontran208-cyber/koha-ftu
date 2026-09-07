@@ -1,0 +1,148 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Attach an item to") | html %]
+ [% INCLUDE 'biblio-title-head.inc' %]
+ &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="catalog_moveitem" class="catalog">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/catalogue/search.pl">Mục tra cứu</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ [% INCLUDE 'biblio-title.inc' link = 1 %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Attach an item</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% SWITCH Koha.Preference('IntranetBiblioDefaultView') %]
+[% CASE 'marc' %]
+ [% action_link = "/cgi-bin/koha/catalogue/MARCdetail.pl" %]
+[% CASE 'labeled_marc' %]
+ [% action_link = "/cgi-bin/koha/catalogue/labeledMARCdetail.pl" %]
+[% CASE 'isbd' %]
+ [% action_link = "/cgi-bin/koha/catalogue/ISBDdetail.pl" %]
+[% CASE %]
+ [% action_link = "/cgi-bin/koha/catalogue/detail.pl" %]
+[% END %]
+[% action_link = action_link _ '?biblionumber=' _ biblio.biblionumber %]
+
+[% WRAPPER 'main-container.inc' %]
+ <h1>Attach an item [% IF ( biblio.title ) %]to [% INCLUDE 'biblio-title.inc' %][% END %]</h1>
+
+ [% IF ( error ) %]
+ <div class="alert alert-warning">
+ [% IF errornonewitem %]
+ <span>ERROR: Unable to create the new item.</span>
+ [% ELSIF errornoitem %]
+ <span>ERROR: Unable to get the item.</span>
+ [% END %]
+ <p>
+ <a href="[% action_link | $raw %]" class="btn btn-primary approve"><i class="fa fa-fw fa-check"></i> OK</a>
+
+ <a href="/cgi-bin/koha/cataloguing/moveitem.pl?biblionumber=[% biblio.biblionumber | uri %]" class="btn btn-default new"><i class="fa fa-fw fa-plus"></i> Thử lại đăng ký cá biệt khác</a>
+ </p>
+ </div>
+ [% ELSE %]
+ [% IF ( success ) %]
+ [% IF from_biblio.items.count == 0 && CAN_user_editcatalogue_edit_catalogue %]
+ <div class="alert alert-warning" id="del-bib-alert">
+ <div id="del-bib-action">
+ The record <em><a class="title" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% from_biblio.id | html %]">[% from_biblio.title | html %]</a></em> has [% from_biblio.items.count | html %] attached items.
+ <p
+                            ><button id="delete-biblio-btn" data-biblionumber="[% from_biblio.id | html %]"
+                                ><i id="del-bib-spn" class="fa fa-spinner fa-pulse fa-fw" style="display:none"></i><i class="fa fa-fw fa-trash-can"></i> Delete record
+ </button></p
+                        >
+ </div>
+ <p id="del-bib-result">
+ <span id="del-bib-success" style="display:none"><i class="fa fa-check success"></i> Record deleted</span>
+ <span id="del-bib-failure" style="display:none"><i class="fa-solid fa-triangle-exclamation"></i> Attempt to delete record failed.</span>
+ </p>
+ </div>
+ [% END %]
+
+ <div class="alert alert-info">
+ The item has successfully been attached to [% INCLUDE 'biblio-title.inc' link = 1 %].
+ <p>
+ <a href="[% action_link | $raw %]" class="btn btn-primary approve"><i class="fa fa-fw fa-check"></i> OK</a>
+ <a href="/cgi-bin/koha/cataloguing/moveitem.pl?biblionumber=[% biblio.biblionumber | uri %]" class="btn btn-default new"><i class="fa fa-fw fa-plus"></i> Chuyển tài liệu khác</a>
+ </p>
+ </div>
+ [% ELSE %]
+ [% IF ( missingparameter ) %]
+ <form method="post" action="/cgi-bin/koha/cataloguing/moveitem.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ [% IF ( missingbiblionumber ) %]
+ <fieldset id="biblionumber_fieldset">
+ <label for="biblionumber">Chọn biểu ghi thư mục để chuyển bản tài liệu tới</label>
+ <div class="hint">Nhập số biểu ghi:</div>
+ <input type="text" name="biblionumber" id="biblionumber" class="focus" size="14" />
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ </fieldset>
+ [% ELSE %]
+ <input type="hidden" name="biblionumber" id="biblionumber" value="[% biblio.biblionumber | html %]" />
+ [% END %]
+
+ [% IF ( missingbarcode ) %]
+ <fieldset id="barcode_fieldset">
+ <label for="barcode">Nhập đăng ký cá biệt tài liệu:</label>
+ <p class="hint">Tài liệu được chọn sẽ chuyển đến biểu ghi đích.</p>
+ <input type="text" name="barcode" id="barcode" class="barcode focus" size="14" />
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ </fieldset>
+ [% ELSE %]
+ <input type="hidden" name="barcode" id="barcode" value="[% barcode | html %]" />
+ [% END %]
+ <input type="hidden" name="op" value="cud-moveitem" />
+ </form>
+ [% END %]
+ [% END %]
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $("#delete-biblio-btn").on("click", function () {
+            if (confirm(_("Bạn có chắc chắn xóa biểu ghi này không?"))) {
+                $("#del-bib-spn").show();
+                let biblionumber = $(this).data("biblionumber");
+                $.ajax({
+                    url: "/api/v1/biblios/" + biblionumber,
+                    type: "DELETE",
+                    success: function (result) {
+                        $("#del-bib-action").hide();
+                        $("#del-bib-success").show();
+                        $("#del-bib-alert").attr("class", "alert alert-info");
+                    },
+                    error: function (result) {
+                        $("#delete-biblio-btn").hide();
+                        $("#del-bib-failure").show();
+                    },
+                });
+            }
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

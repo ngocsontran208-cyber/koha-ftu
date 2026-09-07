@@ -1,0 +1,293 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Branches %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE TablesSettings %]
+[% USE To %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Bookings to collect") | html %]
+ &rsaquo; [% t("Circulation") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="circ_pendingbookings" class="circ">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/circ/circulation-home.pl">Phân hệ lưu thông</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Bookings to collect</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+<div class="main container-fluid">
+ <div class="row">
+ <!-- Results -->
+ <div class="col-md-10 order-md-2 order-sm1">
+ <main>
+ [% INCLUDE 'messages.inc' %]
+ <h1>Items required for bookings between <span id="from_date">[% from | $KohaDates %]</span> Và <span id="to_date">[% to | $KohaDates %]</span></h1>
+ <h2>Thống kê vào ngày [% todaysdate | $KohaDates %]</h2>
+ <p>The following items have not been collected for bookings.</p>
+ <div id="searchresults">
+ <table id="bookingst"></table>
+ </div>
+ </main>
+ </div>
+
+ <!-- Filters & Navigation -->
+ <div class="col-md-2 order-sm-2 order-md-1">
+ <aside>
+ <form id="bookingsf">
+ <fieldset class="brief">
+ <h4>Bộ lọc dữ liệu</h4>
+ <ol>
+ <li>
+ <label for="holding_library">Thư viện sở hữu:</label>
+ <select name="holding_library" id="holding_library">
+ [% SET libraries = Branches.all( only_from_group => 1 ) %]
+ [% IF libraries.size != 1 %]
+ <option value="">Bất kỳ</option>
+ [% END %]
+ [% FOREACH l IN libraries %]
+ [% IF (l.branchcode == branchcode) %]
+ <option value="[% l.branchcode | html %]" selected="selected">[% l.branchname | html %]</option>
+ [% ELSE %]
+ <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li>
+ <label for="pickup_library">Thư viện nhận sách:</label>
+ <select name="pickup_library" id="pickup_library">
+ [% SET libraries = Branches.all( only_from_group => 1 ) %]
+ [% IF libraries.size != 1 %]
+ <option value="">Bất kỳ</option>
+ [% END %]
+ [% FOREACH l IN libraries %]
+ [% IF (l.branchcode == branchcode) %]
+ <option value="[% l.branchcode | html %]" selected="selected">[% l.branchname | html %]</option>
+ [% ELSE %]
+ <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li>
+ <label for="from">Starts after: </label>
+ <input type="text" size="10" id="from" name="from" value="[% from | html %]" class="flatpickr" data-date_to="to" />
+ </li>
+ <li>
+ <label for="to">Starts before: </label>
+ <input type="text" size="10" id="to" name="to" value="[% to | html %]" class="flatpickr" />
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" name="run_report" type="submit" value="Gửi" />
+ </fieldset>
+ </form>
+
+ [% INCLUDE 'circ-nav.inc' %]
+ </aside>
+ </div>
+ </div>
+ <!-- /.row -->
+</div>
+<!-- /.main.container-fluid -->
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'calendar.inc' %]
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'js-biblio-format.inc' %]
+ [% INCLUDE 'js-date-format.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        let table_settings = [% TablesSettings.GetTableSettings( 'circ', 'bookings', 'bookings-to-collect', 'json' ) | $raw %];
+
+        let all_libraries  = [% To.json(Branches.all) | $raw %].map(e => {
+            e['_id'] = e.branchcode;
+            e['_str'] = e.branchname;
+            return e;
+        });
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        var coded_values = {
+            library: new Map(all_libraries.map(l => [l.branchname, l.branchcode])),
+        };
+
+        let filters_options = {
+            libraries: all_libraries,
+        };
+        $(document).ready(function () {
+            let additional_filters = {
+                status: function () {
+                    return "new";
+                },
+                start_date: function () {
+                    let fromdate = $("#from");
+                    let isoFrom;
+                    if (fromdate.val() !== "") {
+                        let selectedDate = fromdate.get(0)._flatpickr.selectedDates[0];
+                        selectedDate.setHours(0, 0, 0, 0);
+                        isoFrom = selectedDate.toISOString();
+                    }
+
+                    let todate = $("#to");
+                    let isoTo;
+                    if (todate.val() !== "") {
+                        let selectedDate = todate.get(0)._flatpickr.selectedDates[0];
+                        selectedDate.setHours(23, 59, 59, 999);
+                        isoTo = selectedDate.toISOString();
+                    }
+
+                    if (isoFrom || isoTo) {
+                        return { ">=": isoFrom, "<=": isoTo };
+                    } else {
+                        return;
+                    }
+                },
+                "item.holding_library_id": function () {
+                    let library = $("#holding_library").find(":selected").val();
+                    return library;
+                },
+                pickup_library_id: function () {
+                    let library = $("#pickup_library").find(":selected").val();
+                    return library;
+                },
+            };
+
+            var bookings_table_url = "/api/v1/bookings?";
+            var bookings_table = $("#bookingst").kohaTable(
+                {
+                    ajax: {
+                        url: bookings_table_url,
+                    },
+                    embed: ["biblio", "item+strings", "item.checkout", "patron", "pickup_library"],
+                    order: [[7, "asc"]],
+                    columns: [
+                        {
+                            data: "booking_id",
+                            title: _("Booking ID"),
+                            visible: false,
+                        },
+                        {
+                            data: "me.pickup_library_id",
+                            title: _("Thư viện nhận sách"),
+                            datatype: "coded_value:library",
+                            dataFilter: "libraries",
+                            searchable: true,
+                            orderable: true,
+                            render: function (data, type, row, meta) {
+                                return escape_str(row.pickup_library_id ? row.pickup_library.name : row.pickup_library_id);
+                            },
+                        },
+                        {
+                            data: "biblio.title",
+                            title: _("Nhan đề"),
+                            searchable: true,
+                            orderable: true,
+                            render: function (data, type, row, meta) {
+                                return $biblio_to_html(row.biblio, {
+                                    link: "bookings",
+                                });
+                            },
+                        },
+                        {
+                            data: "item.external_id",
+                            title: _("Tài liệu"),
+                            searchable: true,
+                            orderable: true,
+                            defaultContent: _("Any item"),
+                            render: function (data, type, row, meta) {
+                                if (row.item) {
+                                    return row.item.external_id + " (" + row.booking_id + ")";
+                                } else {
+                                    return null;
+                                }
+                            },
+                        },
+                        {
+                            data: "item.callnumber",
+                            title: _("Callnumber"),
+                            searchable: true,
+                            orderable: true,
+                            render: function (data, type, row, meta) {
+                                if (row.item) {
+                                    return row.item.callnumber;
+                                } else {
+                                    return null;
+                                }
+                            },
+                        },
+                        {
+                            data: "item.location",
+                            title: _("Vị trí"),
+                            searchable: false,
+                            orderable: false,
+                            render: function (data, type, row, meta) {
+                                if (row.item) {
+                                    if (row.item.checked_out_date) {
+                                        return _("On loan, due: ") + $date(row.item.checked_out_date);
+                                    } else {
+                                        return row.item._strings.location.str;
+                                    }
+                                } else {
+                                    return null;
+                                }
+                            },
+                        },
+                        {
+                            data: "patron.firstname:patron.surname",
+                            title: _("Bạn đọc"),
+                            searchable: true,
+                            orderable: true,
+                            render: function (data, type, row, meta) {
+                                return $patron_to_html(row.patron, {
+                                    display_cardnumber: true,
+                                    url: true,
+                                });
+                            },
+                        },
+                        {
+                            data: "start_date",
+                            name: "start_date",
+                            title: _("Booking dates"),
+                            type: "date",
+                            searchable: false,
+                            orderable: true,
+                            render: function (data, type, row, meta) {
+                                return $date(row.start_date) + " - " + $date(row.end_date);
+                            },
+                        },
+                    ],
+                },
+                table_settings,
+                1,
+                additional_filters,
+                filters_options
+            );
+
+            /** Date filtering */
+            $("#bookingsf").on("submit", function (e) {
+                /* stop form from submitting normally */
+                e.preventDefault();
+                bookings_table.DataTable().draw();
+            });
+        });
+    </script>
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

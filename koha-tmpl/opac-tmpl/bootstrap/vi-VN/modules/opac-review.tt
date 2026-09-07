@@ -1,0 +1,95 @@
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% title_in_title = INCLUDE 'biblio-title-head.inc' %]
+ [% tx("Comments on {title}", { title = title_in_title }) | html %]
+ [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='comment' bodyclass='popup' %]
+<nav class="navbar fixed-top">
+ <div class="navbar-brand">
+ <h1>Bài phê bình</h1>
+ </div>
+ <ul class="navbar-nav">
+ <li class="nav-item">
+ <button aria-label="Thoát" class="btn-close close" type="button"></button>
+ </li>
+ </ul>
+</nav>
+<main class="main">
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col">
+ <div id="userreview" class="maincontent">
+ [% IF ( ERRORS ) %]
+ <div class="alert alert-warning">
+ [% FOREACH ERROR IN ERRORS %]
+ [% IF ( ERROR.nobiblio ) %]
+ <p>Lỗi: không thể tìm thấy bản ghi thư mục này.</p>
+ [% END %]
+ [% IF ( ERROR.unauthorized ) %]
+ <p>Rất tiếc, chỉ người tạo bình luận này mới có quyền thay đổi nó.</p>
+ [% END %]
+ [% IF ( ERROR.scrubbed ) %]
+ <p>Lưu ý: bình luận của bạn có chứa mã đánh dấu không hợp lệ. Hệ thống đã lưu lại sau khi loại bỏ các mã này như bên dưới. Bạn có thể tiếp tục chỉnh sửa bình luận hoặc hủy để giữ nguyên bình luận hiện tại.</p>
+ [% END %]
+
+ [% IF ( ERROR.scrubbed_all ) %]
+ <p>Lỗi! Bình luận của bạn hoàn toàn là mã đánh dấu không hợp lệ. Bình luận KHÔNG được thêm vào.</p>
+ [% END %]
+
+ [% IF ( ERROR.empty ) %]
+ <p>Lỗi! Bạn không thể thêm bình luận trống. Vui lòng nhập nội dung hoặc hủy.</p>
+ [% END %] [% END # / FOREACH ERROR %] [% IF ( WINDOW_CLOSE ) %] Lưu ý: cửa sổ này sẽ tự động đóng trong 5 giây. [% END %] </div>
+ [% END # / ERRORs %]
+
+ <h2>Bình luận về <em>[% INCLUDE 'biblio-title.inc' %]</em></h2>
+ [% IF ( biblio.author ) %]<h3>[% biblio.author | html %]</h3>[% END %]
+ <form id="reviewf" action="/cgi-bin/koha/opac-review.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Bình luận</legend>
+ <input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />
+ [% IF ( reviewid ) %]
+ <input type="hidden" name="reviewid" value="[% reviewid | html %]" />
+ <input type="hidden" name="op" value="cud-edit" />
+ [% ELSE %]
+ <input type="hidden" name="op" value="cud-add" />
+ [% END %]
+ <fieldset>
+ <textarea id="review" name="review" cols="60" rows="8">[% review | html %]</textarea>
+ </fieldset>
+ <p>Lưu ý: Bình luận của bạn phải được thủ thư duyệt. </p>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi và đóng cửa sổ này" />
+ <a class="cancel close" href="#">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ </div>
+ <!-- / #userreview -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' is_popup=1 %]
+[% BLOCK jsinclude %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        $(document).ready(function() {
+            [% IF WINDOW_CLOSE %]
+                opener.location.reload();
+                window.close();
+            [% END %]
+        });
+    </script>
+[% END %]

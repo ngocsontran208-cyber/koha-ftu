@@ -1,0 +1,235 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE Branches %]
+[% SET footerjs = 1 %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Transport cost matrix") | html %]
+ &rsaquo; [% t("Administration") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    .disabled-transfer {
+        background-color: #ff8888;
+    }
+</style>
+</head>
+
+<body id="admin_transport_cost_matrix" class="admin">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'prefs-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Giá vận chuyển tài liệu</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+ <h1 class="parameters"> Transport cost matrix </h1>
+ <div id="toolbar" class="btn-toolbar">
+ <a id="enable_all_cells" class="btn btn-default" href="#"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Enable all cells</a>
+ <a id="disable_all_empty_cells" class="btn btn-default" href="#"><i class="fa-solid fa-ban" aria-hidden="true"></i> Disable empty cells</a>
+ <div id="addchild" class="btn-group">
+ <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-plus"></i> Populate empty cells</button>
+ <ul class="dropdown-menu">
+ <li><a class="populate_empty_cells dropdown-item" data-value="0" href="#"></a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="10" href="#">10</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="20" href="#">20</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="30" href="#">30</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="40" href="#">40</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="50" href="#">50</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="60" href="#">60</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="70" href="#">70</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="80" href="#">80</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="90" href="#">90</a></li>
+ <li><a class="populate_empty_cells dropdown-item" data-value="100" href="#">100</a></li>
+ </ul>
+ </div>
+ </div>
+
+ [% IF ( WARNING_transport_cost_matrix_off ) %]
+ <div class="alert alert-info"
+            >Because the "UseTransportCostMatrix" system preference is currently not enabled, the transport cost matrix is not being used. <br />Go to the
+ <a href="/cgi-bin/koha/admin/preferences.pl?op=search&amp;searchfield=UseTransportCostMatrix">UseTransportCostMatrix</a> system preference if you wish to enable this feature.</div
+        >
+ [% END %]
+
+ [% IF ( errors ) %]
+ <div class="alert alert-warning">
+ <h4>Đề xuất của bạn không chính xác, bạn hãy kiểm tra lại.</h4>
+ <ul>
+ [% FOR e IN errors %]
+ <li>Invalid value for [% e | html %]</li>
+ [% END %]
+ </ul>
+ </div>
+ [% END %]
+
+ <form method="post" action="/cgi-bin/koha/admin/transport-cost-matrix.pl" id="cost_matrix_form">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-set-cost-matrix" />
+ <fieldset id="transport-cost-matrix">
+ <div class="help">
+ <p>Giá vận chuyển tài liệu do thư viện quyết định, là một giá trị thập phân với giá trị nhỏ nhất là 0 (không mất phí vận chuyển).</p>
+ <p>Ô màu đỏ có nghĩa là tài liệu không được phép vận chuyển.</p>
+ <p>Kích vào từng ô cụ thể để chỉnh sửa thông tin.</p>
+ </div>
+
+ <table>
+ <tr>
+ <th id="to_from">Từ \ Tới</th>
+ [% FOR b IN Branches.all() %]
+ <th>[% b.branchname | html %]</th>
+ [% END %]
+ </tr>
+ [% FOR bf IN branchfromloop %]
+ <tr>
+ <th title="[% bf.name | html %]">[% bf.name | html %]</th>
+ [% FOR bt IN bf.branchtoloop %]
+ <td title="[% bf.name | html %] / [% bt.name | html %]">
+ [% IF bt.skip %]
+ &nbsp;
+ [% ELSE %]
+ [% IF bt.disabled %]
+ [% SET div_class="disabled-transfer" %]
+ [% ELSE %]
+ [% SET div_class="" %]
+ [% END %]
+ <div id="celldiv_[% bt.id | html %]" class="[% div_class | html %]">
+ <div class="enable_cost_input" data-cost-id="[% bt.id | html %]">[% IF bt.disabled %]&nbsp;[% ELSE %][% bt.value | html %][% END %]</div>
+ <input type="hidden" name="cost_[% bt.id | html %]" value="[% bt.value | html %]" />
+ [% IF bt.disabled %]
+ <input type="hidden" name="disable_[% bt.id | html %]" value="1" />
+ [% END %]
+ </div>
+ [% END %]
+ </td>
+ [% END %]
+ </tr>
+ [% END %]
+ </table>
+ </fieldset>
+ <fieldset class="action"> <input class="btn btn-primary" type="submit" value="Lưu" /> <a href="/cgi-bin/koha/admin/transport-cost-matrix.pl" class="cancel">Hủy bỏ</a> </fieldset>
+ </form>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/admin-menu.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function check_transport_cost(e) {
+            var val = e.value;
+            if (val && val != "" && !isNaN(parseFloat(val)) && val >= 0.0) {
+                return;
+            }
+            alert(_("Cost must be expressed as a decimal number >= 0"));
+        }
+
+        function disable_transport_cost_chg(e) {
+            var input_name = e.name;
+            var cost_id = input_name.replace(/disable_/, ""); // Parse the code_id out of the input name
+            disable_transport_cost(cost_id, e.checked);
+        }
+
+        function disable_transport_cost(cost_id, disable) {
+            if (disable) {
+                $("#celldiv_" + cost_id)
+                    .find("input[type=text]")
+                    .prop("disabled", true)
+                    .addClass("disabled-transfer");
+            } else {
+                $("#celldiv_" + cost_id)
+                    .find("input:disabled")
+                    .prop("disabled", false)
+                    .removeClass("disabled-transfer");
+            }
+        }
+
+        function enable_cost_input(cost_id) {
+            var cell = $("#celldiv_" + cost_id);
+            var cost = $(cell).text();
+            var disabled = $(cell).hasClass("disabled-transfer");
+            $(cell).removeClass("disabled-transfer");
+
+            $("#celldiv_" + cost_id).html(
+                '<input type="text" name="cost_' +
+                    cost_id +
+                    '" class="cost_input" size="4" value="' +
+                    $.trim(cost) +
+                    '" />' +
+                    "<br/>" +
+                    _("Disable ") +
+                    '<input name="disable_' +
+                    cost_id +
+                    '" value="1" class="disable_transport_cost" type="checkbox" ' +
+                    (disabled ? "checked" : "") +
+                    " />"
+            );
+            disable_transport_cost(cost_id, disabled);
+        }
+
+        function form_submit(f) {
+            $(f).find("input:disabled").prop("disabled", false);
+            return true;
+        }
+
+        $(document).ready(function () {
+            $(".enable_cost_input").on("click", function () {
+                var cost_id = $(this).data("cost-id");
+                enable_cost_input(cost_id);
+            });
+
+            $("body").on("blur", ".cost_input", function () {
+                check_transport_cost(this);
+            });
+
+            $("body").on("change", ".disable_transport_cost", function () {
+                disable_transport_cost_chg(this);
+            });
+
+            $("#cost_matrix_form").on("submit", function () {
+                return form_submit(this);
+            });
+
+            $("#enable_all_cells").on("click", function () {
+                $(".enable_cost_input").each(function () {
+                    $(this).trigger("click");
+                });
+
+                $(".disable_transport_cost")
+                    .filter(":checked")
+                    .each(function () {
+                        $(this).trigger("click");
+                    });
+            });
+
+            $("#disable_all_empty_cells").on("click", function () {
+                $(".cost_input").each(function () {
+                    if ($(this).val() == "") {
+                        $(this).siblings(".disable_transport_cost").filter(":not(:checked)").trigger("click");
+                    }
+                });
+            });
+
+            $(".populate_empty_cells").on("click", function () {
+                var value = $(this).data("value");
+                $(".cost_input").each(function () {
+                    if ($(this).val() == "") {
+                        $(this).val(value);
+                    }
+                });
+            });
+        });
+    </script>
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]

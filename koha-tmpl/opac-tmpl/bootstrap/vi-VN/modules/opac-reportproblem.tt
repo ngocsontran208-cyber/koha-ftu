@@ -1,0 +1,126 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Report a problem") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-reportproblem' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% IF messages %]
+ [% FOR m IN messages %]
+ [% SWITCH m.code %]
+ [% CASE 'success_on_send' %]
+ <span>Báo cáo đã được gửi</span>
+ [% CASE 'error_on_send' %]
+ <span>Lỗi khi gửi báo cáo</span>
+ [% CASE %]
+
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ <span>Báo sự cố</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ [% SET column_class = "col order-first order-md-first order-lg-2" %]
+ [% IF ( OpacNav ||  OpacNavBottom ) %]
+ [% column_class = "col-10 order-first order-md-first order-lg-2" %]
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+ </div>
+ [% END %]
+
+ <div class="[% column_class | html %]">
+ <h1>Báo sự cố</h1>
+
+ [% IF messages %]
+ [% FOR m IN messages %]
+ <div class="alert alert-[% m.type | html %]">
+ [% SWITCH m.code %]
+ [% CASE 'success_on_send' %]
+ [% IF recipient == 'admin' %]
+ <span>Báo cáo sự cố của bạn đã được gửi tới quản trị viên Koha.</span>
+ [% ELSE %]
+ <span>Báo cáo sự cố của bạn đã được gửi tới thư viện.</span>
+ [% END %]
+ [% CASE 'error_on_send' #We really should avoid reaching this! %]
+ <span>Đã xảy ra lỗi khi gửi báo cáo. Vui lòng liên hệ với thư viện của bạn.</span>
+ [% END %]
+ </div>
+ [% END %]
+ [% ELSE %]
+ <div id="reportproblem" class="maincontent toptabs">
+ <form name="reportlibform" action="/cgi-bin/koha/opac-reportproblem.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Báo sự cố</legend>
+ <input type="hidden" name="op" value="cud-addreport" />
+ <fieldset class="rows">
+ <ol>
+ <li>
+ <label for="recipient">Gửi báo cáo sự cố tới: </label>
+ [% IF library.inbound_email_address && library.inbound_email_address != Koha.Preference('KohaAdminEmailAddress') %]
+ <select name="recipient" id="recipient">
+ <option value="library">Thủ thư</option>
+ <option value="admin">Quản trị viên Koha</option>
+ </select>
+ [% ELSE %]
+ <span>Quản trị viên Koha</span>
+ [% END %]
+ </li>
+ <li>
+ <label for="problempage">Sự cố phát hiện tại trang: </label>
+ <input type="hidden" name="problempage" id="problempage" value="[% problempage | url %]" />
+ [% problempage | html %]<br />
+ </li>
+ <li>
+ <label for="user">Tên đăng nhập: </label>
+ <input type="hidden" name="user" id="user" value="[% username | html %]" />
+ [% username | html %] </li
+                                    ><li>
+ <label for="subject">Tiêu đề: </label>
+ <input type="text" name="subject" id="subject" value="[% subject | html %]" />
+ </li>
+ <li>
+ <label for="message">Tin nhắn: </label>
+ <textarea name="message" id="message" rows="7" cols="60"></textarea>
+ </li>
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ </fieldset>
+ </form>
+ </div>
+ <!-- / #reportproblem -->
+ [% END # /IF messages %]
+ </div>
+ <!-- / .col-10/12 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+[% END %]

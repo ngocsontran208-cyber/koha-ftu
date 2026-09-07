@@ -1,0 +1,164 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE Price %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% PROCESS 'accounts.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Create manual invoice") | html %]
+ &rsaquo; [% t("Patrons") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="pat_maninvoice" class="pat">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'patron-search-header.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/members-home.pl">Bạn đọc</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% patron.borrowernumber | uri %]">[% INCLUDE 'patron-title.inc' %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tạo khoản tiền phạt</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='circ-menu' %]
+ [% INCLUDE 'members-toolbar.inc' %]
+
+ <h1>Tạo khoản tiền phạt</h1>
+
+ <!-- The manual invoice and credit buttons -->
+ <div id="account-tabs" class="toptabs">
+ <ul class="nav nav-tabs" role="tablist">
+ <li role="presentation" class="nav-item transactions">
+ <a class="nav-link" href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | uri %]" role="tab">Transactions</a>
+ </li>
+ <li role="presentation" class="nav-item makepayment">
+ <a class="nav-link" href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% patron.borrowernumber | uri %]" role="tab">Make a payment</a>
+ </li>
+ <li role="presentation" class="nav-item manualinvoice">
+ <a class="nav-link active" href="/cgi-bin/koha/members/maninvoice.pl?borrowernumber=[% patron.borrowernumber | uri %]" role="tab">Tạo khoản tiền phạt</a>
+ </li>
+ [% IF CAN_user_updatecharges_manual_credit %]
+ <li role="presentation" class="nav-item manualcredit">
+ <a class="nav-link" href="/cgi-bin/koha/members/mancredit.pl?borrowernumber=[% patron.borrowernumber | uri %]" role="tab">Thanh toán trả trước</a>
+ </li>
+ [% END %]
+ </ul>
+ <!-- /.nav.nav-tabs -->
+ <div class="tab-content">
+ <div role="tabpanel" class="tab-pane active">
+ [% IF error == 'itemnumber' %]
+ <div id="error_message" class="alert alert-warning"> Error: Invalid item barcode entered, please try again </div>
+ [% ELSIF error %]
+ <div id="error_message" class="alert alert-warning"> An error occurred, please try again: [% error | html %] </div>
+ [% END %]
+ <form action="/cgi-bin/koha/members/maninvoice.pl" method="post" id="maninvoice">
+ <input type="hidden" name="op" value="cud-add" />
+ <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% patron.borrowernumber | html %]" />
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset class="rows">
+ <legend>Tạo khoản tiền phạt</legend>
+ <ol>
+ <li>
+ <label for="type">Kiểu: </label>
+ <select name="type" id="type">
+ [% FOREACH debit_type IN debit_types %]
+ [% IF debit_type.code == type %]
+ <option value="[% debit_type.code | html %]" selected="selected">[%- PROCESS debit_type_description debit_type=debit_type -%]</option>
+ [% ELSE %]
+ <option value="[% debit_type.code | html %]">[%- PROCESS debit_type_description debit_type=debit_type -%]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ <li><label for="barcode">Item barcode: </label><input type="text" name="barcode" id="barcode" value="[% barcode | html %]" /></li>
+ <li><label for="desc">Thông tin mô tả: </label><input type="text" name="desc" id="desc" size="50" value="[% desc | html %]" /></li>
+ <li><label for="note">Ghi chú: </label><input type="text" name="note" size="50" id="note" value="[% note | html %]" /></li>
+ <li class="additional_field"><label for="cost">Cost: </label><input type="text" inputmode="decimal" pattern="^\d+(\.\d{2})?$" name="cost" id="cost" min="0" value="[% amount | $Price on_editing => 1 %]" /></li>
+ <li class="additional_field"><label for="quantity">Số lượng: </label><input type="text" name="quantity" id="quantity" value="1" /></li>
+ <li
+                                ><label for="amount">Số tiền: </label
+                                ><input type="text" inputmode="decimal" pattern="^\d+(\.\d{2})?$" name="amount" id="amount" required="required" min="0" value="[% amount | $Price on_editing => 1 %]" /> Ví dụ như: 5.00</li
+                            >
+ </ol>
+ </fieldset>
+
+ [% IF available_additional_fields %]
+ [% INCLUDE 'additional-fields-entry.inc' available=available_additional_fields values=additional_field_values %]
+ [% END %]
+
+ <fieldset class="action">
+ <button type="submit" name="add" class="btn btn-primary" value="save">Lưu</button>
+ <button type="submit" name="add" class="btn btn-primary" value="save and pay">Save and pay</button>
+ <a class="cancel" href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | html %]">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ </div>
+ <!-- /.tab-pane -->
+ </div>
+ <!-- /.tab-content -->
+ </div>
+ <!-- /.toptabs -->
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'str/members-menu.inc' %]
+ [% Asset.js("js/members-menu.js") | $raw %]
+ [% Asset.js("js/additional-fields-entry.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        var type_fees = {};
+        [% FOREACH debit_type IN debit_types %]
+            type_fees['[% debit_type.code | html %]'] = "[% IF debit_type.default_amount %][% debit_type.default_amount | $Price on_editing => 1 %][% END %]";
+        [% END %]
+        $(document).ready(function(){
+            $('#maninvoice').preventDoubleFormSubmit();
+            $("fieldset.rows input, fieldset.rows select").addClass("noEnterSubmit");
+            $("#invoice_type").on("change",function(){
+                this.form.desc.value = this.options[this.selectedIndex].value;
+                this.form.amount.value = type_fees[this.options[this.selectedIndex].value];
+            });
+            [% UNLESS amount.defined %]
+            $("#maninvoice #desc").val($("#maninvoice #type option:selected").text());
+            $("#maninvoice #amount").val(type_fees[$("#maninvoice #type option:selected").val()]);
+            $("#maninvoice #cost").val(type_fees[$("#maninvoice #type option:selected").val()]);
+            if(!type_fees[$("#maninvoice #type option:selected").val()]){
+                $("#maninvoice li.additional_field").hide();
+            }
+            [% END %]
+            $("#maninvoice #type").change(function(){
+                $("#maninvoice #desc").val($(this).find("option:selected").text());
+                $("#maninvoice #amount").val(type_fees[$(this).val()]);
+                $("#maninvoice #cost").val(type_fees[$(this).val()]);
+                $("#maninvoice #quantity").val('1');
+                if(type_fees[$(this).val()]){
+                    $("#maninvoice li.additional_field").show();
+                }
+                else{
+                    $("#maninvoice li.additional_field").hide();
+                }
+            });
+            $("#maninvoice #quantity").blur(function(){
+                $("#maninvoice #amount").val(($("#maninvoice #cost").val() * $(this).val()).toFixed(2));
+            })
+            $("#maninvoice #cost").blur(function(){
+                $("#maninvoice #amount").val(($("#maninvoice #quantity").val() * $(this).val()).toFixed(2));
+            })
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

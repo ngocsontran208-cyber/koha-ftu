@@ -1,0 +1,234 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% tx("MARC view for: {title}", { title = bibliotitle }) | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-marcdetail' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Chế độ xem MARC: [% bibliotitle | html %]</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-9">
+ <div id="opac-detail" class="maincontent">
+ <div id="usermarcdetail">
+ <div id="catalogue_detail_biblio">
+ <div id="views">
+ <span class="view"
+                                    ><a id="Normalview" class="btn btn-link" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Chế độ xem thông thường</a></span
+                                >
+ <span class="view current-view"
+                                    ><span id="MARCview"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> Chế độ xem MARC</span></span
+                                >
+ [% IF ( ISBD ) %]
+ <span class="view"
+                                        ><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> Chế độ xem ISBD</a></span
+                                    >
+ [% END %]
+ </div>
+ <h1 class="title">[% bibliotitle | html %] (Biểu ghi số [% biblio.biblionumber | html %])</h1>
+
+ <div id="switchview_div">[ <a id="switchview" href="/cgi-bin/koha/opac-showmarc.pl?id=[% biblio.biblionumber | html %]&amp;viewas=html">xem văn bản thuần</a> ]</div>
+ <div id="plainmarc"></div>
+
+ <div id="labeledmarc">
+ <table id="marc" class="table table-bordered table-striped">
+ <caption class="visually-hidden">Chi tiết MARC</caption>
+ [% FOREACH tab0X IN tab0XX %]
+ <tr><th colspan="2">[% tab0X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab0X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+ [% FOREACH tab1X IN tab1XX %]
+ <tr><th colspan="2">[% tab1X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab1X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab2X IN tab2XX %]
+ <tr><th colspan="2">[% tab2X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab2X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab3X IN tab3XX %]
+ <tr><th colspan="2">[% tab3X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab3X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab4X IN tab4XX %]
+ <tr><th colspan="2">[% tab4X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab4X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab5X IN tab5XX %]
+ <tr><th colspan="2">[% tab5X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab5X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab6X IN tab6XX %]
+ <tr><th colspan="2">[% tab6X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab6X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab7X IN tab7XX %]
+ <tr><th colspan="2">[% tab7X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab7X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab8X IN tab8XX %]
+ <tr><th colspan="2">[% tab8X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab8X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+
+ [% FOREACH tab9X IN tab9XX %]
+ <tr><th colspan="2">[% tab9X.tag | html %]</th></tr>
+ [% FOREACH subfiel IN tab9X.subfield %]
+ <tr>
+ <td>[% subfiel.marc_lib | html %]</td>
+ <td>[% subfiel.marc_value | html %]</td>
+ </tr>
+ [% END %]
+ [% END %]
+ </table>
+ </div>
+ [% IF ( item_header_loop ) %]
+ <table id="items" class="table table-bordered table-condensed table-striped">
+ <caption>Bản tài liệu</caption>
+ <thead>
+ <tr>
+ [% FOREACH header IN item_header_loop %]
+ <th>[% header | html %]</th>
+ [% END %]
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH item IN item_loop %]
+ <tr>
+ [% FOREACH sf_code IN item_subfield_codes %]
+ <td>[% item.$sf_code | $raw %]</td>
+ [% END %]
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% ELSE %]
+ <p>Không có tài liệu nào sẵn sàng.</p>
+ [% END %]
+ </div>
+ <!-- / #catalogue_detail_biblio -->
+ </div>
+ <!-- / #usermarcdetail -->
+ </div>
+ <!-- / #opac-detail -->
+ </div>
+ <!-- / .col-lg-9 -->
+ <div class="col-lg-3"> [% INCLUDE 'opac-detail-sidebar.inc' %] </div>
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% IF Koha.Preference('OpacCatalogConcerns') %]
+ [% INCLUDE 'modals/catalog_concern.inc' %]
+[% END %]
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% IF Koha.Preference('OpacCatalogConcerns') %]
+ [% Asset.js("js/modals/catalog_concern.js") | $raw %]
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        $(document).ready(function(){
+            var loaded = 0;
+            var toggle = 0;
+            $("#switchview").on("click",function(e){
+                e.preventDefault();
+                if( toggle == 0){
+                    $(this).text(_("xem theo nhãn"));
+                    $("#labeledmarc").hide();
+                    if(!loaded){
+                        $("#plainmarc").show().html("<div style=\"margin:1em;padding:1em;border:1px solid #EEE;font-size:150%;\"><img src=\"[% interface | html %]/[% theme | html %]/images/loading.gif\" /> "+_("Đang tải")+"...</div>");
+                        var plain_marc = $.get( "/cgi-bin/koha/opac-showmarc.pl", { id: "[% biblio.biblionumber | html %]", viewas: "html" })
+                        .done(function( data ) {
+                            $("#plainmarc").html( data );
+                            loaded = 1;
+                        })
+                        .fail(function() {
+                            $('#switchview').parent().html("<div class=\"alert alert-warning\">"+_("Xin lỗi, chế độ xem văn bản thuần tạm thời không khả dụng")+".</div>");
+                            $("#plainmarc").hide();
+                            $("#labeledmarc").show();
+                        });
+                    } else {
+                        $("#plainmarc").show();
+                    }
+                    toggle = 1;
+                } else {
+                    $(this).text(_("xem văn bản thuần"));
+                    $("#labeledmarc").show();
+                    $("#plainmarc").hide();
+                    toggle = 0;
+                }
+            });
+        });
+    </script>
+[% END %]

@@ -22,6 +22,77 @@
     </div> <!-- / #wrapper in masthead.inc -->
     <!-- prettier-ignore-end -->
 
+    <!-- ========================================================================= -->
+    <!-- FTU MEGA FOOTER (Premium Dark Mode)                                       -->
+    <!-- ========================================================================= -->
+    <div class="ftu-footer-premium noprint">
+        <div class="ftu-footer-container">
+            <div class="ftu-footer-grid">
+                
+                <!-- Cột 1: Thương hiệu -->
+                <div class="ftu-footer-brand">
+                    <div class="ftu-footer-brand-header">
+                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" class="ftu-footer-logo-img" />
+                    </div>
+                    <div class="ftu-contact-item" style="margin-top: 0.5rem;">
+                        <i class="fa fa-clock-o"></i>
+                        <span><strong>Giờ mở cửa:</strong><br>Thứ 2 - 6: 8h00 - 18h00<br>Thứ 7: 8h00 - 16h00</span>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Hỗ trợ bạn đọc -->
+                <div>
+                    <h4 class="ftu-footer-title">HỖ TRỢ BẠN ĐỌC</h4>
+                    <ul class="ftu-footer-links">
+                        <li><a href="#">Hướng dẫn sử dụng Thư viện</a></li>
+                        <li><a href="#">Quy định & Nội quy</a></li>
+                        <li><a href="#">Chính sách mượn - trả sách</a></li>
+                        <li><a href="#">Hướng dẫn gia hạn trực tuyến</a></li>
+                        <li><a href="/cgi-bin/koha/opac-reportproblem.pl">Góp ý & Báo cáo lỗi</a></li>
+                    </ul>
+                </div>
+
+                <!-- Cột 3: Nguồn tài nguyên -->
+                <div>
+                    <h4 class="ftu-footer-title">NGUỒN TÀI NGUYÊN</h4>
+                    <ul class="ftu-footer-links">
+                        <li><a href="/cgi-bin/koha/opac-search.pl">Tra cứu danh mục (OPAC)</a></li>
+                        <li><a href="#">Tài liệu điện tử (DSpace)</a></li>
+                        <li><a href="#">Cơ sở dữ liệu ProQuest</a></li>
+                        <li><a href="#">Cơ sở dữ liệu ScienceDirect</a></li>
+                        <li><a href="/cgi-bin/koha/opac-course-reserves.pl">Giáo trình & Bài giảng</a></li>
+                    </ul>
+                </div>
+
+                <!-- Cột 4: Liên hệ -->
+                <div>
+                    <h4 class="ftu-footer-title">THÔNG TIN LIÊN HỆ</h4>
+                    <div class="ftu-footer-contact">
+                        <div class="ftu-contact-item">
+                            <i class="fa fa-map-marker"></i>
+                            <span>15 Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh</span>
+                        </div>
+                        <div class="ftu-contact-item">
+                            <i class="fa fa-phone"></i>
+                            <span>Hotline: (028) 3512 7258</span>
+                        </div>
+                        <div class="ftu-contact-item">
+                            <i class="fa fa-envelope"></i>
+                            <span>Email: thuvien.cs2@ftu.edu.vn</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="ftu-footer-bottom">
+                <div>&copy; 2026 Thư viện Cơ sở II Trường Đại học Ngoại Thương. Tất cả quyền được bảo lưu.</div>
+                <div>Thiết kế bởi <strong>Thư viện số</strong></div>
+            </div>
+        </div>
+    </div>
+    <!-- ========================================================================= -->
+
     [% IF ( Koha.Preference('OPACReportProblem') && Koha.Preference('KohaAdminEmailAddress') ) || Koha.Preference( 'CookieConsent' ) || OpacKohaUrl || ( ( opaclanguagesdisplay ) && ( ! one_language_enabled ) && ( languages_loop ) && ( OpacLangSelectorMode == 'both' || OpacLangSelectorMode == 'footer') ) %]
         <footer id="changelanguage" class="navbar navbar-expand navbar-light bg-light noprint">
             <div class="container-fluid">

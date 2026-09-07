@@ -1,69 +1,69 @@
 Accounting:
-    Policy:
+    Chính sách:
         -
             - pref: AccountAutoReconcile
               choices:
-                  1: "Do"
-                  0: "Don't"
-            - reconcile patron balances automatically on each transaction adding debits or credits.
+                  1: "Có"
+                  0: "Không"
+            - tự động cân đối số dư tài khoản bạn đọc sau mỗi giao dịch phát sinh khoản nợ hoặc tín dụng.
         -
             - pref: FinePaymentAutoPopup
               choices:
-                  1: "Do"
-                  0: "Don't"
-            - automatically display a print dialog for a payment receipt when making a payment.
+                  1: "Có"
+                  0: "Không"
+            - tự động hiển thị hộp thoại in biên lai thanh toán khi thực hiện thanh toán.
         -
             - pref: RequirePaymentType
               choices:
-                  0: "Don't require"
-                  1: "Require"
-            - staff to select a payment type when a payment is made.
-            - This preference has no effect when <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a> is enabled or when no payment types are defined in the <a href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=PAYMENT_TYPE">PAYMENT_TYPE</a> authorized value category.
+                  0: "Không bắt buộc"
+                  1: "Bắt buộc"
+            - thủ thư chọn phương thức thanh toán khi thực hiện thanh toán.
+            - Tùy chỉnh này không có hiệu lực khi <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a> được bật hoặc khi không có loại thanh toán nào được định nghĩa trong danh mục giá trị được phép <a href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=PAYMENT_TYPE">PAYMENT_TYPE</a>.
         -
             - pref: RoundFinesAtPayment
               choices:
-                  1: Do
-                  0: "Don't"
-            - round fines to the nearest cent when collecting payments. Enabling this preference allows paying fines of partial cents which may not be visible in the interface.
-    Features:
+                  1: Có
+                  0: "Không"
+            - làm tròn tiền phạt đến cent gần nhất khi thu tiền. Bật tùy chỉnh này cho phép thanh toán tiền phạt theo phần cent nhỏ có thể không hiển thị trên giao diện.
+    Tính năng:
         -
             - pref: UseCashRegisters
               default: no
               choices:
-                1: "Use"
-                0: "Don't use"
-            - " cash registers with the accounting system to track payments."
-            - "<p class='text-danger'><strong>Warning:</strong> Enabling this setting will make the register a required field for all CASH type transactions; This includes SIP00 transactions, so please ensure your SIP configurations are updated to map a register to your SIP device.</p>"
+                1: "Sử dụng"
+                0: "Không sử dụng"
+            - " máy tính tiền với hệ thống kế toán để theo dõi thanh toán."
+            - "<p class='text-danger'><strong>Cảnh báo:</strong> Bật cài đặt này sẽ bắt buộc chọn máy tính tiền trong tất cả giao dịch loại CASH; Bao gồm cả giao dịch SIP00, vì vậy hãy đảm bảo cập nhật cấu hình SIP để ánh xạ máy tính tiền cho thiết bị SIP.</p>"
         -
-            - "When collecting a payment, "
+            - "Khi thu tiền, "
             - pref: RequireCashRegister
               default: no
               choices:
-                0: "require a cash register only when the CASH payment type is selected"
-                1: "always require a cash register"
-            - '. (Requires <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a>)'
+                0: "chỉ yêu cầu máy tính tiền khi chọn phương thức thanh toán CASH"
+                1: "luôn luôn yêu cầu máy tính tiền"
+            - '. (Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a>)'
         -
             - pref: EnablePointOfSale
               default: no
               choices:
-                1: "Enable"
-                0: "Disable"
-            - ' the point of sale feature to allow anonymous transactions with the accounting system. (Requires <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a>.)'
+                1: "Bật"
+                0: "Tắt"
+            - ' tính năng điểm bán hàng để cho phép giao dịch ẩn danh với hệ thống kế toán. (Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a>.)'
         -
             - pref: AutoCreditNumber
               choices:
-                '': 'Do not automatically generate credit numbers'
-                annual: 'Automatically generate credit numbers in the form <year>-0001'
-                branchyyyymmincr: 'Automatically generate credit numbers in the form <branchcode>yyyymm0001'
-                incremental: 'Automatically generate credit numbers in the form 1, 2, 3'
-            - Automatic generation also has to be enabled for each credit type (<a href="/cgi-bin/koha/admin/credit_types.pl">Configure credit types</a>).
+                '': 'Không tự động tạo số tín dụng'
+                annual: 'Tự động tạo số tín dụng theo dạng <year>-0001'
+                branchyyyymmincr: 'Tự động tạo số tín dụng theo dạng <branchcode>yyyymm0001'
+                incremental: 'Tự động tạo số tín dụng theo dạng 1, 2, 3'
+            - Tự động tạo cũng phải được bật cho từng loại tín dụng (<a href="/cgi-bin/koha/admin/credit_types.pl">Cấu hình loại tín dụng</a>).
         -
             - pref: CashupReconciliationNoteRequired
               choices:
-                1: "Require"
-                0: "Don't require"
-            - a reconciliation note when completing cashup with discrepancies between expected and actual amounts.
+                1: "Bắt buộc"
+                0: "Không bắt buộc"
+            - ghi chú đối soát khi hoàn tất thu ngân với sai lệch giữa số tiền dự kiến và thực tế.
         -
-            - "Use authorized value category "
+            - "Sử dụng danh mục giá trị được phép "
             - pref: CashupReconciliationNoteAuthorisedValue
-            - " for reconciliation notes during cashup. Leave empty to allow free text entry."
+            - " cho ghi chú đối soát trong quá trình thu ngân. Để trống để cho phép nhập tự do."

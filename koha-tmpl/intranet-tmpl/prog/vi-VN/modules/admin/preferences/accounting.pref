@@ -1,0 +1,69 @@
+Kế toán:
+    Chính sách:
+        -
+            - pref: AccountAutoReconcile
+              choices:
+                  1: "Có"
+                  0: "Không"
+            - tự động cân đối số dư tài khoản bạn đọc sau mỗi giao dịch phát sinh khoản nợ hoặc tín dụng.
+        -
+            - pref: FinePaymentAutoPopup
+              choices:
+                  1: "Có"
+                  0: "Không"
+            - tự động hiển thị hộp thoại in biên lai thanh toán khi thực hiện thanh toán.
+        -
+            - pref: RequirePaymentType
+              choices:
+                  0: "Không bắt buộc"
+                  1: "Bắt buộc"
+            - thủ thư chọn phương thức thanh toán khi thực hiện thanh toán.
+            - Tùy chỉnh này không có hiệu lực khi <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a> được bật hoặc khi không có loại thanh toán nào được định nghĩa trong danh mục giá trị được phép <a href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=PAYMENT_TYPE">PAYMENT_TYPE</a>.
+        -
+            - pref: RoundFinesAtPayment
+              choices:
+                  1: Có
+                  0: "Không"
+            - làm tròn tiền phạt đến cent gần nhất khi thu tiền. Bật tùy chỉnh này cho phép thanh toán tiền phạt theo phần cent nhỏ có thể không hiển thị trên giao diện.
+    Tính năng:
+        -
+            - pref: UseCashRegisters
+              default: no
+              choices:
+                1: "Sử dụng"
+                0: "Không sử dụng"
+            - " máy tính tiền với hệ thống kế toán để theo dõi thanh toán."
+            - "<p class='text-danger'><strong>Cảnh báo:</strong> Bật cài đặt này sẽ bắt buộc chọn máy tính tiền trong tất cả giao dịch loại CASH; Bao gồm cả giao dịch SIP00, vì vậy hãy đảm bảo cập nhật cấu hình SIP để ánh xạ máy tính tiền cho thiết bị SIP.</p>"
+        -
+            - "Khi thu tiền, "
+            - pref: RequireCashRegister
+              default: no
+              choices:
+                0: "chỉ yêu cầu máy tính tiền khi chọn phương thức thanh toán CASH"
+                1: "luôn luôn yêu cầu máy tính tiền"
+            - '. (Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a>)'
+        -
+            - pref: EnablePointOfSale
+              default: no
+              choices:
+                1: "Bật"
+                0: "Tắt"
+            - ' tính năng điểm bán hàng để cho phép giao dịch ẩn danh với hệ thống kế toán. (Yêu cầu <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=UseCashRegisters">UseCashRegisters</a>.)'
+        -
+            - pref: AutoCreditNumber
+              choices:
+                '': 'Không tự động tạo số tín dụng'
+                annual: 'Tự động tạo số tín dụng theo dạng <year>-0001'
+                branchyyyymmincr: 'Tự động tạo số tín dụng theo dạng <branchcode>yyyymm0001'
+                incremental: 'Tự động tạo số tín dụng theo dạng 1, 2, 3'
+            - Tự động tạo cũng phải được bật cho từng loại tín dụng (<a href="/cgi-bin/koha/admin/credit_types.pl">Cấu hình loại tín dụng</a>).
+        -
+            - pref: CashupReconciliationNoteRequired
+              choices:
+                1: "Bắt buộc"
+                0: "Không bắt buộc"
+            - ghi chú đối soát khi hoàn tất thu ngân với sai lệch giữa số tiền dự kiến và thực tế.
+        -
+            - "Sử dụng danh mục giá trị được phép "
+            - pref: CashupReconciliationNoteAuthorisedValue
+            - " cho ghi chú đối soát trong quá trình thu ngân. Để trống để cho phép nhập tự do."

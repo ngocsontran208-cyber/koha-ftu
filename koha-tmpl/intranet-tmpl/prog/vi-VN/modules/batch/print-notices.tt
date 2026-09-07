@@ -1,0 +1,43 @@
+[% USE raw %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% tx("Print notices for {today}", { today = today }) | html %]
+ [% END %]</title
+>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- prettier-ignore-start -->
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        <!--
+        .message { page-break-after: always }
+        pre { font-family: monospace }
+        pre {white-space: pre-wrap;}
+        -->
+    </style>
+[% IF ( stylesheet ) %]
+ <link rel="stylesheet" type="text/css" href="[% stylesheet | url %]" />
+[% END %]
+[% IF ( all_notice_css ) %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">[% all_notice_css | $raw %]</style>
+[% END %]
+[% IF ( print_notice_css ) %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">[% print_notice_css | $raw %]</style>
+[% END %]
+<!-- prettier-ignore-end -->
+</head>
+<body id="batch_print-notices" class="batch">
+[% FOREACH message IN messages %]
+ <div class="message">
+ [% IF ( message.is_html ) %]
+ [% message.content | $raw %]
+ [% ELSE %]
+ <pre>[% message.content | $raw %]</pre>
+ [% END %]
+ </div>
+[% END %]
+</body>
+<!-- prettier-ignore-start -->
+</html>
+<!-- prettier-ignore-end -->

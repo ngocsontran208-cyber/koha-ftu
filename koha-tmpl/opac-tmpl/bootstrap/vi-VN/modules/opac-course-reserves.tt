@@ -1,0 +1,117 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE AuthorisedValues %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+[% USE HtmlScrubber %]
+<title
+    >[% FILTER collapse %]
+ [% t("Course reserves") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-course-reserves' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tài liệu học phần</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <div id="courses" class="maincontent">
+ <h1>Tài liệu học phần</h1>
+
+ <table id="course_reserves_table" class="table table-bordered table-striped table-condensed">
+ <caption class="visually-hidden">Khóa học</caption>
+ <thead>
+ <tr>
+ <th>Tên</th>
+ <th>Khoa.</th>
+ <th>Mã học phần #</th>
+ <th>Nhóm lớp</th>
+ <th>[% tp('Semester', 'Term') | html %]</th>
+ <th>Giảng viên</th>
+ <th>Ghi chú</th>
+ <th class="dtr-control-col">[% t('Expand') | html %]</th>
+ </tr>
+ </thead>
+
+ <tbody>
+ [% FOREACH c IN courses %]
+ <tr>
+ <td><a href="opac-course-details.pl?course_id=[% c.course_id | uri %]">[% c.course_name | html %][%- IF c.section -%]- [% c.section | html %][%- END -%]</a></td>
+ <td>[% AuthorisedValues.GetByCode( 'DEPARTMENT', c.department, 1 ) | html %]</td>
+ <td>[% c.course_number | html %]</td>
+ <td>[% c.section | html %]</td>
+ <td>[% AuthorisedValues.GetByCode( 'TERM' c.term, 1 ) | html %]</td>
+ <td>
+ [% FOREACH i IN c.instructors %]
+ <div class="instructor"
+                                                ><span class="inst_surname">[% i.surname | html %]</span>[% IF i.firstname %]<span class="instr_separator">, </span><span class="instr_firstname">[% i.firstname | html %]</span>[% END %]</div
+                                            >
+ [% END %]
+ </td>
+ <td>[% c.public_note | scrub_html type => 'note' | $raw %]</td>
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- / #courses -->
+ </div>
+ <!-- / .col -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        table_settings = [% TablesSettings.GetTableSettings( 'opac', 'course_list', 'course_reserves_table', 'json' ) | $raw %]
+        Koha.addPrefs({
+            OPACTableColExpandedByDefault: [% Koha.Preference('OPACTableColExpandedByDefault') ? 1 : 0 | html %],
+        });
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
+            $("#course_reserves_table").kohaTable(
+                {
+                    dom: '<"top"<"table_controls"f>>rt<"clear">',
+                    order: [[1, "asc"]],
+                    asColumnDefs: [{ aTargets: [1], sType: "nsb-nse" }],
+                    language: {
+                        search: "<span class='visually-hidden'>" + _("Tìm kiếm khóa học") + "</span> _INPUT_",
+                        searchPlaceholder: _("Tìm kiếm khóa học"),
+                    },
+                    responsive: {
+                        details: {
+                            display: responsive_display,
+                            type: "column",
+                            target: -1,
+                        },
+                    },
+                    cColumnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+                },
+                table_settings
+            );
+        });
+    </script>
+[% END %]

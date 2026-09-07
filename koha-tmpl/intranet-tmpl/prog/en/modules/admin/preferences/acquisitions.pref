@@ -1,165 +1,165 @@
 Acquisitions:
-    Policy:
+    Chính sách:
         -
-            - Create an item when
+            - Tạo tài liệu khi
             - pref: AcqCreateItem
               choices:
-                  ordering: placing an order.
-                  receiving: receiving an order.
-                  cataloguing: cataloging the record.
-            - This is only the default behavior, and can be changed per-basket.
+                  ordering: đặt đơn hàng.
+                  receiving: nhận đơn hàng.
+                  cataloguing: biên mục bản ghi.
+            - Đây chỉ là hành vi mặc định và có thể thay đổi theo từng giỏ hàng.
         -
-            - "The following <a href='https://schema.koha-community.org/__VERSION__/tables/items.html' target='_blank'>database columns</a> should be unique in an item:"
+            - "Các <a href='https://schema.koha-community.org/__VERSION__/tables/items.html' target='_blank'>cột cơ sở dữ liệu</a> sau phải duy nhất trong một tài liệu:"
             - pref: UniqueItemFields
               type: modalselect
               source: items
         -
-            - When closing or reopening a basket,
+            - Khi đóng hoặc mở lại giỏ hàng,
             - pref: BasketConfirmations
               default: 1
               choices:
-                  1: always ask for confirmation.
-                  2: do not ask for confirmation.
+                  1: luôn hỏi xác nhận.
+                  2: không hỏi xác nhận.
         -
             - pref: CancelOrdersInClosedBaskets
               choices:
-                  1: Allow
-                  0: "Don't allow"
-            - cancelling order lines in closed baskets.
+                  1: Cho phép
+                  0: "Không cho phép"
+            - huỷ dòng đơn hàng trong giỏ hàng đã đóng.
         -
-            - Show baskets
+            - Hiển thị giỏ hàng
             - pref: AcqViewBaskets
               choices:
-                  user: created or managed by staff member.
-                  branch: from staff member's library.
-                  all: in system, regardless of owner.
+                  user: do thủ thư tạo hoặc quản lý.
+                  branch: từ thư viện của thủ thư.
+                  all: trong hệ thống, không phân biệt chủ sở hữu.
         -
-            - Display currencies using the following format
+            - Hiển thị tiền tệ theo định dạng
             - pref: CurrencyFormat
               choices:
                   US: 360,000.00 (US)
                   FR: 360 000,00 (FR)
                   CH: 360'000.00 (CH)
         -
-            - Tax rates are
+            - Thuế suất là
             - pref: TaxRates
-            - . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe).
-            - "<br/><strong>NOTE:</strong> The database will only accept values up to 4 decimals precision, further values will be rounded."
-            - "<br/><strong>NOTE:</strong> Vendor tax rate information may need updating if tax rate values are removed."
+            - . Nhập theo dạng số, 0.12 cho 12%. Mục đầu tiên sẽ được chọn mặc định. Để nhiều giá trị, dùng ký tự | (pipe) để phân cách.
+            - "<br/><strong>LƯU Ý:</strong> Cơ sở dữ liệu chỉ chấp nhận giá trị tối đa 4 chữ số thập phân, các giá trị dư sẽ bị làm tròn."
+            - "<br/><strong>LƯU Ý:</strong> Thông tin thuế suất của nhà cung cấp có thể cần cập nhật nếu xóa giá trị thuế suất."
         -
             - pref: CalculateFundValuesIncludingTax
               choices:
-                  1: Include
-                  0: Exclude
-            - "tax in the calculated fund values (spent, ordered). Note this rule applies to all vendors regardless of their configuration."
+                  1: Bao gồm
+                  0: Không bao gồm
+            - "thuế trong giá trị quỹ được tính (đã chi, đã đặt). Lưu ý quy tắc này áp dụng cho tất cả nhà cung cấp bất kể cấu hình của họ."
         -
             - pref: AcqWarnOnDuplicateInvoice
               choices:
-                  1: Warn
-                  0: "Do not warn"
-            - when the librarian tries to create an invoice with a duplicate number.
+                  1: Cảnh báo
+                  0: "Không cảnh báo"
+            - khi thủ thư cố tạo hóa đơn có số trùng lặp.
         -
-            - "Upon receiving items, update their subfields if they were created when placing an order (e.g. o=5|a=\"foo bar\"):"
+            - "Khi nhận tài liệu, cập nhật các trường con nếu chúng được tạo khi đặt đơn (ví dụ: o=5|a=\"foo bar\"):"
             - pref: AcqItemSetSubfieldsWhenReceived
         -
-            - "Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\"):"
+            - "Khi hủy phiếu nhận, cập nhật các trường con của tài liệu nếu chúng được tạo khi đặt đơn (ví dụ: o=5|a=\"bar foo\"):"
             - pref: AcqItemSetSubfieldsWhenReceiptIsCancelled
         -
             - pref: AcqEnableFiles
               choices:
-                  1: Do
-                  0: "Don't"
-            - enable the ability to upload and attach arbitrary files to invoices.
+                  1: Có
+                  0: "Không"
+            - cho phép tải lên và đính kèm tệp tùy ý vào hóa đơn.
         -
-            - Set the mapping values for a new order line created from a MARC record in a staged file.
+            - Đặt giá trị ánh xạ cho dòng đơn hàng mới được tạo từ biểu ghi MARC trong tệp đã phân đoạn.
             - pref: MarcFieldsToOrder
               type: textarea
               syntax: text/x-yaml
-            - "<p>You can use the following fields: price, replacementprice, quantity, budget_code, discount, sort1, sort2</p>"
-            - "<p>For example:<br/>price: 947$a|947$c<br/>quantity: 969$h<br/>budget_code: 922$a</p>"
-            - "<br><p>When there is no mapping for price, Koha will use 345$c and 020$c for MARC21 records and 345$c and 010$c for UNIMARC records.</p>"
+            - "<p>Bạn có thể sử dụng các trường sau: price, replacementprice, quantity, budget_code, discount, sort1, sort2</p>"
+            - "<p>Ví dụ:<br/>price: 947$a|947$c<br/>quantity: 969$h<br/>budget_code: 922$a</p>"
+            - "<br><p>Khi không có ánh xạ cho price, Koha sẽ sử dụng 345$c và 020$c cho biểu ghi MARC21, và 345$c và 010$c cho biểu ghi UNIMARC.</p>"
         -
-            - Set the mapping values for new item records created from a MARC record in a staged file.
+            - Đặt giá trị ánh xạ cho biểu ghi tài liệu mới được tạo từ biểu ghi MARC trong tệp đã phân đoạn.
             - pref: MarcItemFieldsToOrder
               type: textarea
               syntax: text/x-yaml
-            - "You can use the following fields: homebranch, holdingbranch, itype, nonpublic_note, public_note, loc, ccode, notforloan, uri, copyno, price, replacementprice, itemcallnumber, coded_location_qualifier, barcode, and enumchron. Special fields: quantity and budget_code"
-            - "<br/>For example:<br/>holdingbranch: 975$b<br/>itype: 975$9|975$z"
-            - "<p>If a field is missing or not mapped, <a href=\"/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=MarcFieldsToOrder\">MarcFieldsToOrder</a> will be checked and used for that field (except quantity).</p>"
+            - "Bạn có thể sử dụng các trường sau: homebranch, holdingbranch, itype, nonpublic_note, public_note, loc, ccode, notforloan, uri, copyno, price, replacementprice, itemcallnumber, coded_location_qualifier, barcode, enumchron. Trường đặc biệt: quantity và budget_code"
+            - "<br/>Ví dụ:<br/>holdingbranch: 975$b<br/>itype: 975$9|975$z"
+            - "<p>Nếu thiếu hoặc chưa ánh xạ, <a href=\"/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=MarcFieldsToOrder\">MarcFieldsToOrder</a> sẽ được kiểm tra và dùng cho trường đó (ngoại trừ quantity).</p>"
         -
             - pref: ClaimsBccCopy
               default: no
               choices:
-                1: Send
-                0: Don't send
-            - blind copy (BCC) to logged in user when sending serial or acquisitions claims notices.
+                1: Gửi
+                0: Không gửi
+            - bản sao mù (BCC) đến người dùng đang đăng nhập khi gửi thông báo khiếu nại báo/tạp chí hoặc bổ sung.
         -
-            - Keep accepted or rejected purchase suggestions for a period of
+            - Lưu giữ đề xuất mua đã chấp nhận hoặc từ chối trong
             - pref: PurgeSuggestionsOlderThan
               class: integer
-            - "days. Example: [30] Sets purgation of suggestions for those older than 30 days."
-            - "<br><strong>WARNING:</strong> Leave this field empty if you don't want to activate this automatic feature."
-            - "<br><strong>NOTE:</strong> This system preference requires the <code>misc/cronjobs/purge_suggestions.pl</code> cronjob. Ask your system administrator to schedule it."
+            - "ngày. Ví dụ: [30] Xóa các đề xuất cũ hơn 30 ngày."
+            - "<br><strong>CẢNH BÁO:</strong> Để trống trường này nếu bạn không muốn kích hoạt tính năng tự động này."
+            - "<br><strong>LƯU Ý:</strong> Tùy chỉnh này cần cronjob <code>misc/cronjobs/purge_suggestions.pl</code>. Yêu cầu quản trị viên lên lịch chạy."
         -
             - pref: OrderPriceRounding
               default: ''
               choices:
-                '': Don't round
-                nearest_cent: Round
-            - to nearest cent.<br>
-            - Determines whether full precision values or rounded values should be used in price calculations.
+                '': Không làm tròn
+                nearest_cent: Làm tròn
+            - đến cent gần nhất.<br>
+            - Xác định dùng giá trị chính xác đầy đủ hay giá trị đã làm tròn trong tính toán giá.
         -
             - pref: UseACQFrameworkForBiblioRecords
               default: no
               choices:
-                1: "Use"
-                0: "Don't use"
-            - " the framework 'ACQ' for bibliographic records fields."
+                1: "Sử dụng"
+                0: "Không sử dụng"
+            - " khung 'ACQ' cho các trường biểu ghi thư mục."
         -
-            - "Choose email address that new purchase suggestions will be sent to: "
+            - "Chọn địa chỉ email gửi đề xuất mua mới đến: "
             - pref: EmailPurchaseSuggestions
               default: 0
               choices:
-                  0: none
+                  0: không gửi
                   EmailAddressForSuggestions: EmailAddressForSuggestions
-                  BranchEmailAddress: email address of library
+                  BranchEmailAddress: email của thư viện
                   KohaAdminEmailAddress: KohaAdminEmailAddress
-            - '<br>If you choose <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=EmailAddressForSuggestions">EmailAddressForSuggestions</a> you have to enter a valid email address:'
+            - '<br>Nếu chọn <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=EmailAddressForSuggestions">EmailAddressForSuggestions</a> hãy nhập địa chỉ email hợp lệ:'
             - pref: EmailAddressForSuggestions
               class: email
         -
-            - Use the from email address
+            - Sử dụng địa chỉ email người gửi
             - pref: AcquisitionsDefaultEmailAddress
               class: email
-            - 'when sending acquisitions order and claim notices.'
-            - '<br>If left empty, it will fall back to the first defined address in the following list: library email, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=KohaAdminEmailAddress">KohaAdminEmailAddress</a>.'
+            - 'khi gửi thông báo đặt hàng và khiếu nại bổ sung.'
+            - '<br>Nếu để trống, sẽ dùng địa chỉ đầu tiên trong danh sách: email thư viện, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=KohaAdminEmailAddress">KohaAdminEmailAddress</a>.'
         -
-            - Use the reply-to email address
+            - Sử dụng địa chỉ email trả lời
             - pref: AcquisitionsDefaultReplyTo
               class: email
-            - 'when sending acquisitions order and claim notices.'
-            - '<br>If left empty, it will fall back to the first defined address in the following list: library reply-to, library email, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=ReplytoDefault">ReplytoDefault</a>, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=KohaAdminEmailAddress">KohaAdminEmailAddress</a>.'
+            - 'khi gửi thông báo đặt hàng và khiếu nại bổ sung.'
+            - '<br>Nếu để trống, sẽ dùng địa chỉ đầu tiên trong danh sách: reply-to thư viện, email thư viện, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=ReplytoDefault">ReplytoDefault</a>, <a href="/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=KohaAdminEmailAddress">KohaAdminEmailAddress</a>.'
         -
             - pref: MarcOrderingAutomation
               default: no
               choices:
-                1: Enable
-                0:  Disable
-            - automatic order line creation from MARC records.
-    Printing:
+                1: Bật
+                0: Tắt
+            - tự động tạo dòng đơn hàng từ biểu ghi MARC.
+    In ấn:
         -
-            - Use the
+            - Sử dụng bố cục
             - pref: OrderPdfFormat
               choices:
-                  "pdfformat::layout1page":    English 1-page
-                  "pdfformat::layout2pages":   English 2-page
-                  "pdfformat::layout3pages":   English 3-page
-                  "pdfformat::layout3pagesfr": French 3-page
-                  "pdfformat::layout2pagesde": German 2-page
-            - layout when printing basket groups.
+                  "pdfformat::layout1page":    Tiếng Anh 1 trang
+                  "pdfformat::layout2pages":   Tiếng Anh 2 trang
+                  "pdfformat::layout3pages":   Tiếng Anh 3 trang
+                  "pdfformat::layout3pagesfr": Tiếng Pháp 3 trang
+                  "pdfformat::layout2pagesde": Tiếng Đức 2 trang
+            - khi in nhóm giỏ hàng.
         -
-            - "Text to be used above the order table in the English 1-page order PDF file. Note: Press enter to add line breaks to your sentence."
-            - <br><strong>NOTE:</strong> To prevent the bottom of your text from being cut off by the order table please do not save more than 3 lines of text in this system preference.</span>
+            - "Văn bản hiển thị trên bảng đơn hàng trong file PDF đặt hàng 1 trang (Tiếng Anh). Lưu ý: Nhấn Enter để xuống dòng."
+            - <br><strong>LƯU Ý:</strong> Để tránh bị che khuất bởi bảng đơn hàng, không lưu quá 3 dòng văn bản trong tùy chỉnh này.</span>
             - pref: 1PageOrderPDFText
               type: textarea
 
@@ -168,31 +168,31 @@ Acquisitions:
             - pref: EDIFACT
               default: no
               choices:
-                1: Enable
-                0:  Disable
-            - EDIFACT message exchange for acquisitions.
+                1: Bật
+                0: Tắt
+            - trao đổi tin nhắn EDIFACT cho bổ sung tài liệu.
         -
             - pref: EdifactInvoiceImport
               default: no
               choices:
-                automatic: "Do"
-                manual: "Don't"
-            - " automatically import EDIFACT invoice message files when they are downloaded."
+                automatic: "Có"
+                manual: "Không"
+            - " tự động nhập tệp tin nhắn hóa đơn EDIFACT khi tải xuống."
         -
-            - "Map sequence code (GIR:LSQ) field to "
+            - "Ánh xạ trường sequence code (GIR:LSQ) sang "
             - pref: EdifactLSQ
               default: location
               choices:
-                location: "location"
-                ccode: "collection"
-                "": "ignore"
-            - " in items."
+                location: "vị trí"
+                ccode: "bộ sưu tập"
+                "": "bỏ qua"
+            - " trong tài liệu."
         -
-            - "Map sub-location code (GIR:LSL) field to "
+            - "Ánh xạ trường sub-location code (GIR:LSL) sang "
             - pref: EdifactLSL
               default: ""
               choices:
-                location: "location"
-                ccode: "collection"
-                "": "ignore"
-            - " in items."
+                location: "vị trí"
+                ccode: "bộ sưu tập"
+                "": "bỏ qua"
+            - " trong tài liệu."

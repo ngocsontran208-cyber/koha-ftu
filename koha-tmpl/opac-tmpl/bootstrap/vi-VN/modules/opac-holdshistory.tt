@@ -1,0 +1,215 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE KohaDates %]
+[% USE TablesSettings %]
+[% USE ItemTypes %]
+[% USE AdditionalContents %]
+[% USE AuthorisedValues %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your holds history") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        .controls .paginate_button {
+            font-family: "FontAwesome";
+            text-decoration: none;
+        }
+
+        .controls .paginate_button:not(.disabled) {
+            cursor: pointer;
+        }
+
+        .controls .paginate_button.disabled {
+            color: grey;
+        }
+
+        .controls .previous:before {
+            content: "\f104";
+            padding-right: 0.5em;
+        }
+
+        .controls .next:after {
+            content: "\f105";
+            padding-left: 0.5em;
+        }
+    </style>
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-holdshistory' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Lịch sử đặt mượn của bạn</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col col-lg-2 order-2 order-lg-1">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-md-12 col-lg-10 order-1">
+ <div id="userholdshistory">
+ <h1>Lịch sử đặt trước</h1>
+
+ [% IF !holds %] Không có dữ liệu [% ELSE %] [% SET show_itemtype_column = Koha.Preference('AllowHoldItemTypeSelection') %] <div id="opac-user-holdsrec">
+ <div id="tabs-container">
+ <div class="controls">
+ <div class="resultscontrol resort d-print-none">
+ <form id="sortform" action="/cgi-bin/koha/opac-holdshistory.pl" method="get">
+ [% IF ( unlimit ) %]<input type="hidden" name="unlimit" value="1" />[% END %]
+ <select name="sort" id="sort">
+ [% IF ( sort == 'reservedate' ) %]<option value="reservedate" selected="selected">Sắp xếp theo ngày</option>[% ELSE %]<option value="reservedate">Sắp xếp theo ngày</option>[% END %]
+ [% IF ( sort == 'biblio.title' ) %]<option value="biblio.title" selected="selected">Sắp xếp theo nhan đề</option>[% ELSE %]<option value="biblio.title">Sắp xếp theo nhan đề</option>[% END %]
+ [% IF ( sort == 'biblio.author' ) %]<option value="biblio.author" selected="selected">Sắp xếp theo tác giả</option>[% ELSE %]<option value="biblio.author">Sắp xếp theo tác giả</option>[% END %]
+ </select>
+ <input class="submit clearfix" id="sortsubmit" type="submit" value="Đi đến" />
+ </form>
+ </div>
+
+ [% UNLESS unlimit %]
+ <p class="d-print-none"> Đang hiển thị 50 tài liệu. <a href="/cgi-bin/koha/opac-holdshistory.pl?unlimit=1[% IF ( sort ) %]&amp;sort=[% sort | url %][% END %]">Hiển thị tất cả tài liệu</a> </p>
+ [% ELSE %]
+ <p class="d-print-none"> Đang hiển thị tất cả tài liệu. <a href="/cgi-bin/koha/opac-holdshistory.pl[% IF ( sort ) %]?sort=[% sort | url %][% END %]">Hiển thị 50 tài liệu</a> </p>
+ [% END %]
+ </div>
+ <table id="table_holdshistory" class="table table-bordered table-striped">
+ <caption class="visually-hidden">Lịch sử đặt trước</caption>
+ <thead>
+ <tr>
+ <th class="anti-the">Nhan đề</th>
+ [% IF Koha.Preference('DisplayAddHoldGroups') %]
+ <th>Hold group ID</th>
+ [% END %]
+ <th>Tác giả</th>
+ <th>Mã vạch</th>
+ <th>Thư viện</th>
+ <th>Ngày đặt mượn</th>
+ <th>Ngày hết hạn</th>
+ <th>Ngày chờ nhận</th>
+ <th>Ngày hủy</th>
+ [% IF show_itemtype_column %]
+ <th>Kiểu tài liệu yêu cầu</th>
+ [% END %]
+ <th>Trạng thái</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH hold IN holds %]
+ <tr>
+ [% IF hold.biblio %]
+ <td>[% INCLUDE 'biblio-title.inc' biblio=hold.biblio link=>1 %]</td>
+ [% IF Koha.Preference('DisplayAddHoldGroups') %]
+ <td>[% hold.hold_group_id | html %]</td>
+ [% END %]
+ <td>[% hold.biblio.author | html %]</td>
+ [% ELSE %]
+ <td>[% INCLUDE 'biblio-title.inc' biblio=hold.deleted_biblio link=>0 deleted=>1 %]</td>
+ [% IF Koha.Preference('DisplayAddHoldGroups') %]
+ <td>[% hold.hold_group_id | html %]</td>
+ [% END %]
+ <td>[% hold.deleted_biblio.author | html %]</td>
+ [% END %]
+ <td>[% hold.item.barcode | html %]</td>
+ <td>[% Branches.GetName( hold.branchcode ) | html %]</td>
+ <td data-order="[% hold.reservedate | html %]">[% hold.reservedate | $KohaDates %]</td>
+ <td data-order="[% hold.expirationdate | html %]">
+ [% IF hold.expirationdate %]
+ [% hold.expirationdate | $KohaDates %]
+ [% END %]
+ </td>
+ <td data-order="[% hold.waitingdate | html %]">
+ [% IF hold.waitingdate %]
+ [% hold.waitingdate | $KohaDates %]
+ [% END %]
+ </td>
+ <td data-order="[% hold.cancellationdate | html %]">
+ [% IF hold.cancellationdate %]
+ [% hold.cancellationdate | $KohaDates %]
+ [% END %]
+ </td>
+ [% IF show_itemtype_column %]
+ <td>
+ [% IF hold.itemtype %]
+ [% ItemTypes.GetDescription( hold.itemtype ) | html %]
+ [% ELSE %]
+ <span>Bất kỳ kiểu tài liệu nào</span>
+ [% END %]
+ </td>
+ [% END %]
+ <td>
+ [% IF hold.found == 'F' %]
+ <span>Đã hoàn thành</span>
+ [% ELSIF hold.cancellationdate %]
+ <span>Đã hủy</span>
+ [% IF hold.cancellation_reason %]
+ ([% AuthorisedValues.GetByCode('HOLD_CANCELLATION', hold.cancellation_reason, 1) | html %])
+ [% END %]
+ [% ELSIF hold.found == 'W' %]
+ [% IF hold.cancellation_requests.count == 0 %]
+ <span>Đang chờ</span>
+ [% ELSE %]
+ <span>Đã hủy</span>
+ [% END %]
+ [% ELSIF hold.found == 'T' %]
+ <span>Đang vận chuyển</span>
+ [% ELSE %]
+ <span>Đang xử lý</span>
+ [% END %]
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- / .tabs-container -->
+ </div>
+ <!-- / .opac-user-holdsrec -->
+ [% END # / IF old_holds_count %]
+ </div>
+ <!-- / .userholdshistory -->
+ </div>
+ <!-- / .span10 -->
+ </div>
+ <!-- / .row-fluid -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#sort").change(function () {
+                $("#sortform").submit();
+            });
+            var table = $("#table_holdshistory").kohaTable({
+                dom: '<"top"<"table_entries"i><"table_controls"fB>>t',
+                autoWidth: false,
+                order: [[4, "desc"]],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: _("Tìm kiếm"),
+                },
+            });
+        });
+    </script>
+[% END %]

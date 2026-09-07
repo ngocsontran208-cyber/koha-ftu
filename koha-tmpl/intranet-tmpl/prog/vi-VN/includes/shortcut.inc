@@ -1,0 +1,9 @@
+<nav id="shortcut" class="shortcut" aria-label="Quick shortcuts">
+ [% IF Koha.Preference('showLastPatron') %]
+ [% INCLUDE 'last-borrower.inc' %]
+ [% END %]
+
+ <div>
+ <a class="" href="/cgi-bin/koha/help.pl" id="helper"><i class="fa-solid fa-circle-question"></i> <span>Trợ giúp</span></a>
+ </div>
+</nav>

@@ -1,0 +1,119 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
+[% SET consentview = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Your consents") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-patron-consent' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-user.pl">[% patron.firstname | html %] [% patron.surname | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Sự đồng ý của bạn</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-2">
+ <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+ </div>
+ <div class="col-lg-10 order-first order-md-first order-lg-2">
+ <div id="patronconsents" class="maincontent">
+ <form action="/cgi-bin/koha/opac-patron-consent.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-save" />
+ <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
+ <h1>Sự đồng ý của bạn</h1>
+ [% FOREACH consent IN consents %]
+ [% SET consent_type = consent.type %]
+ [% IF consent_type == 'GDPR_PROCESSING' %]
+ <legend><h2>Chấp thuận chính sách bảo mật</h2></legend>
+ <div class="alert alert-warning">
+ <p>Để duy trì đăng nhập cho bạn, chúng tôi cần bạn chấp thuận việc xử lý dữ liệu cá nhân theo quy định trong chính sách bảo mật được liên kết dưới đây.</p>
+ <p>Nếu bạn chọn rút lại sự đồng ý của mình, chúng tôi sẽ <strong>xóa tài khoản của bạn</strong> trong một khoảng thời gian hợp lý và bạn nên đăng xuất ngay bây giờ.</p>
+ </div>
+ <p>Tôi đồng ý với việc xử lý dữ liệu cá nhân của tôi theo quy định trong <a target="_blank" href="[% Koha.Preference('PrivacyPolicyURL') | url %]">chính sách bảo mật</a>.</p>
+ [% ELSIF consent_types.$consent_type %]
+ [% SET consent_title = ( consent_types.$consent_type.title.$lang || consent_types.$consent_type.title.en ) %]
+ [% SET consent_desc  = ( consent_types.$consent_type.description.$lang || consent_types.$consent_type.description.en ) %]
+ <legend><h2>[% consent_title | html %]</h2></legend>
+ <p>[% consent_desc | html %]</p>
+ <p>Bạn có đồng ý không?</p>
+ [% ELSE %]
+ <legend><h2>Chấp thuận cho [% consent_type | html %]</h2></legend>
+ <p>Bạn có đồng ý không?</p>
+ [% END %]
+ <fieldset>
+ [% IF consent.given_on %]
+ <label><input type="radio" name="check_[% consent_type | html %]" value="1" checked="checked" /> Có</label><br />
+ <label><input type="radio" name="check_[% consent_type | html %]" value="0" /> Không</label>
+ [% ELSIF consent.refused_on %]
+ <label> <input type="radio" name="check_[% consent_type | html %]" value="1" /> Có</label><br />
+ <label><input type="radio" name="check_[% consent_type | html %]" value="0" checked="checked" /> Không </label>
+ [% ELSE %]
+ <label><input type="radio" name="check_[% consent_type | html %]" value="1" /> Có</label><br />
+ <label><input type="radio" name="check_[% consent_type | html %]" value="0" /> Không</label>
+ [% END %]
+ [% IF consent.given_on %]
+ <p class="consent_info"><strong>Sự đồng ý của bạn đã được ghi nhận vào [% consent.given_on | html %].</strong></p>
+ [% ELSIF consent.refused_on %]
+ <p class="dissent_info"><strong>Chúng tôi ghi nhận rằng bạn không đồng ý vào [% consent.refused_on | html %].</strong></p>
+ [% END %]
+ </fieldset>
+ [% END %]
+ <fieldset class="action">
+ <input class="btn btn-primary" id="saveconsent" type="submit" value="Lưu" />
+ </fieldset>
+ </form>
+ </div>
+ <!-- / #patronconsents -->
+ </div>
+ <!-- / .col-lg-10 -->
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            // Initially no choice is made or no change, so disable button
+            $("#saveconsent").prop("disabled", true);
+
+            $("input[type='radio']").click(function () {
+                $("#saveconsent").prop("disabled", false);
+                var v = $(this).val();
+                // If former registration info present, toggle
+                if (v == 1) {
+                    $(this).siblings(".consent_info").show();
+                    $(this).siblings(".dissent_info").hide();
+                } else {
+                    $(this).siblings(".consent_info").hide();
+                    $(this).siblings(".dissent_info").show();
+                }
+            });
+        });
+    </script>
+[% END %]

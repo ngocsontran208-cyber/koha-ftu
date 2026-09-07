@@ -1,0 +1,92 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Subscription history") | html %]
+ &rsaquo; [% title | html %] &rsaquo; [% t("Serials") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="ser_subscription_history" class="ser">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'serials-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/serials/serials-home.pl">Ấn phẩm định kỳ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% subscriptionid | uri %]"><em>[% title | html %]</em></a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Subscription history</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='serials-menu' %]
+ <h1>Subscription history for <em>[% title | html %]</em></h1>
+
+ <div id="subscription_form_history">
+ <form method="post" action="/cgi-bin/koha/serials/subscription-history.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-mod" />
+ <input type="hidden" name="subscriptionid" value="[% subscriptionid | html %]" />
+ <p
+                >Hint : you can update the serial history manually. This can be useful for an old subscription or to clean the existing history. Modify those fields with care, as future serial receive will continue to update them
+ automatically.</p
+            >
+ <fieldset class="rows">
+ <table>
+ <tr>
+ <td>Ngày bắt đầu</td>
+ <td>
+ <input type="text" size="10" name="histstartdate" value="[% histstartdate | html %]" class="flatpickr" data-date_to="histenddate" /> (start date of the 1st subscription)
+ <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
+ </td>
+ </tr>
+ <tr>
+ <td>Ngày kết thúc</td>
+ <td>
+ <input type="text" size="10" id="histenddate" name="histenddate" value="[% histenddate | html %]" class="flatpickr" />(if empty, subscription is still active)
+ <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
+ </td>
+ </tr>
+ <tr>
+ <td>Kỳ nhận về</td>
+ <td><textarea name="receivedlist" cols="60" rows="5">[% receivedlist | html %]</textarea></td>
+ </tr>
+ <tr>
+ <td>Kỳ ấn phẩm thiếu</td>
+ <td><textarea name="missinglist" cols="60" rows="5">[% missinglist | html %]</textarea></td>
+ </tr>
+ <tr>
+ <td>Ghi chú bạn đọc</td>
+ <td><textarea name="opacnote" cols="60" rows="5">[% opacnote | html %]</textarea></td>
+ </tr>
+ <tr>
+ <td>Ghi chú thử thư</td>
+ <td><textarea name="librariannote" cols="60" rows="5">[% librariannote | html %]</textarea></td>
+ </tr>
+ </table>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Lưu ÂPĐK thư viện có" />
+ </fieldset>
+ </form>
+ </div>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'calendar.inc' %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

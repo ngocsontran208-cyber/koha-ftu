@@ -1418,7 +1418,7 @@ Circulation:
             - pref: SCOBatchCheckoutsValidCategories
               choices: patron-categories
               class: multiple
-    Course reserves:
+    Tài liệu học phần:
         -
             - pref: UseCourseReserves
               choices:

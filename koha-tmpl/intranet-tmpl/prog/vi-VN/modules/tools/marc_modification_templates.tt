@@ -1,0 +1,473 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE JSON.Escape %]
+[% USE Asset %]
+[% USE TablesSettings %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+[% IF ( TemplatesLoop ) %]
+ [% FOREACH TemplatesLoo IN TemplatesLoop %]
+ [% IF ( TemplatesLoo.selected ) %]
+ [% SET template_name = TemplatesLoo.name %]
+ [% END %]
+ [% END %]
+[% END %]
+<title
+    >[% FILTER collapse %]
+ [% IF ( template_name ) %]
+ [% tx("Actions for template '{template_name}'", template_name = template_name ) | html %]
+ &rsaquo;
+ [% END %]
+ [% t("MARC modification templates") | html %]
+ &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
+        #add_action {
+            display: none;
+        }
+
+        #character_position {
+            display: none;
+        }
+
+        .action_line {
+            margin-bottom: 1em;
+        }
+    </style>
+[% END %]
+</head>
+
+<body id="tools_marc_modification_templates" class="tools">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Phân hệ biên mục</a>
+ [% END %]
+
+ [% IF ( template_name ) %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/tools/marc_modification_templates.pl">Mẫu chỉnh sửa biểu ghi MARC</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% tx("Actions for template '{template_name}'", template_name = template_name ) | html %]
+ [% END %]
+ [% ELSE %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Mẫu chỉnh sửa biểu ghi MARC</span>
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='cat-menu' %]
+ <div id="toolbar" class="btn-toolbar">
+ <a href="#" data-bs-toggle="modal" data-template_id="" data-bs-target="#createTemplate" id="new_template" class="btn btn-default duplicate_template"><i class="fa fa-plus"></i> New template</a>
+ [% IF ( template_id != '' ) %]
+ <a href="#" class="btn btn-default new_action"><i class="fa fa-plus"></i> New action</a>
+ <form action="/cgi-bin/koha/tools/marc_modification_templates.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="template_id" value="[% template_id | html %]" />
+ <input type="hidden" name="op" value="cud-delete_template" />
+ <button type="submit" class="btn btn-default confirm-delete-template"><i class="fa fa-fw fa-trash-can"></i> Delete template</button>
+ </form>
+ [% ELSE %]
+ <div class="btn-group">
+ <a href="#" class="btn btn-default" data-bs-toggle="dropdown"><i class="fa fa-download"></i> Xuất dữ liệu</a>
+ <div class="dropdown-menu">
+ <a class="dropdown-item" href="/cgi-bin/koha/tools/marc_modification_templates.pl?op=export&export_all=1">Export all templates</a>
+ [% FOREACH TemplatesLoo IN TemplatesLoop %]
+ <a class="dropdown-item" href="/cgi-bin/koha/tools/marc_modification_templates.pl?op=export&template_ids=[% TemplatesLoo.template_id | html %]">Export [% TemplatesLoo.name | html %]</a>
+ [% END %]
+ </div>
+ </div>
+ <a href="#" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#importTemplate"><i class="fa fa-upload"></i> Nhập dữ liệu</a>
+ [% END %]
+ </div>
+
+ [% IF error %]
+ [% IF error == 'no_from_field' %]
+ <div class="alert alert-info">Lỗi: Chưa khai báo giá trị của trường.</div>
+ [% END %]
+ [% END %]
+
+ [% IF ( TemplatesLoop ) %]
+
+ [% IF ( template_id == '' ) %]
+ <h1>MARC modification templates [% template_id | html %]</h1>
+
+ <div class="page-section">
+ <table id="templatest">
+ <thead>
+ <tr>
+ <th>Mã</th>
+ <th>Template</th>
+ <th class="no-sort no-export">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH TemplatesLoo IN TemplatesLoop %]
+ <tr>
+ <td>[% TemplatesLoo.template_id | html %]</td>
+ <td>[% TemplatesLoo.name | html %]</td>
+ <td class="actions">
+ <a class="btn btn-default btn-xs" href="/cgi-bin/koha/tools/marc_modification_templates.pl?template_id=[% TemplatesLoo.template_id | html %]&amp;op=select_template"
+                                        ><i class="fa-fw fa-solid fa-pencil" aria-hidden="true"></i> Edit actions</a
+                                    >
+ <a class="btn btn-default btn-xs duplicate_template" href="#" data-bs-toggle="modal" data-template_id="[% TemplatesLoo.template_id | html %]" data-bs-target="#createTemplate"
+                                        ><i class="fa fa-fw fa-copy"></i> Sao chép</a
+                                    >
+
+ <form action="/cgi-bin/koha/tools/marc_modification_templates.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete_template" />
+ <input type="hidden" name="template_id" value="[% TemplatesLoo.template_id | html %]" />
+ <button type="submit" class="btn btn-default btn-xs confirm-delete-template"><i class="fa fa-fw fa-trash-can"></i> Xóa</button>
+ </form>
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% ELSE %]
+ <h1>[% tx("Actions for template '{template_name}'", template_name = template_name ) | html %]</h1>
+
+ [% IF ( ActionsLoop ) %]
+ <div class="page-section">
+ <table id="template_actions" class="template_actions">
+ <thead>
+ <tr>
+ <th>Đổi thứ tự</th>
+ <th>Thứ tự</th>
+ <th>Thao tác</th>
+ <th>Thông tin mô tả</th>
+ <th>&nbsp;</th>
+ <th>&nbsp;</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH ActionsLoo IN ActionsLoop %]
+ <tr>
+ <td class="actions">
+ <a href="marc_modification_templates.pl?op=move_action&where=up&template_id=[% ActionsLoo.template_id | html %]&mmta_id=[% ActionsLoo.mmta_id | html %]" title="Chuyển thao tác lên trên">
+ <i class="fa fa-arrow-up fa-lg order-control"></i>
+ </a>
+
+ <a href="marc_modification_templates.pl?op=move_action&where=top&template_id=[% ActionsLoo.template_id | html %]&mmta_id=[% ActionsLoo.mmta_id | html %]" title="Chuyển thao tác lên trên cùng">
+ <i class="fa fa-arrow-up fa-lg overline order-control"></i>
+ </a>
+
+ <a href="marc_modification_templates.pl?op=move_action&where=bottom&template_id=[% ActionsLoo.template_id | html %]&mmta_id=[% ActionsLoo.mmta_id | html %]" title="Chuyển thao tác xuống dưới cùng">
+ <i class="fa fa-arrow-down fa-lg underline order-control"></i>
+ </a>
+
+ <a href="marc_modification_templates.pl?op=move_action&where=down&template_id=[% ActionsLoo.template_id | html %]&mmta_id=[% ActionsLoo.mmta_id | html %]" title="Chuyển thao tác xuống dưới">
+ <i class="fa fa-arrow-down fa-lg order-control"></i>
+ </a>
+ </td>
+
+ <td>[% ActionsLoo.ordering | html %]</td>
+ <td>
+ [% IF ( ActionsLoo.action_delete_field ) %]<span>Xóa</span>[% END %]
+ [% IF ( ActionsLoo.action_add_field ) %]<span>Add new</span>[% END %]
+ [% IF ( ActionsLoo.action_update_field ) %]<span>Update existing or add new</span>[% END %]
+ [% IF ( ActionsLoo.action_move_field ) %]<span>Di chuyển</span>[% END %]
+ [% IF ( ActionsLoo.action_copy_field ) %]<span>Sao chép</span>[% END %]
+ [% IF ( ActionsLoo.action_copy_and_replace_field ) %]<span>Copy and replace</span>[% END %]
+
+ [% UNLESS ( ActionsLoo.action_update_field ) %]
+ [% IF ( ActionsLoo.field_number ) %]
+ <span>1st</span>
+ [% END %]
+ [% END %]
+
+ <span>field</span>
+
+ [% ActionsLoo.from_field | html %][% IF ( ActionsLoo.from_subfield.length ) %]$[% ActionsLoo.from_subfield | html %][% END %]
+
+ [% IF ( ActionsLoo.field_value ) %]
+ <span>with value</span> <em>[% ActionsLoo.field_value | html %]</em>
+ [% END %]
+
+ [% IF ( ActionsLoo.to_field ) %]
+ <span>to</span> [% ActionsLoo.to_field | html %][% IF ( ActionsLoo.to_subfield.length ) %]$[% ActionsLoo.to_subfield | html %][% END %]
+
+ [% IF ( ActionsLoo.to_regex_search ) %]
+ <span>using RegEx</span> s<strong>/[% ActionsLoo.to_regex_search | html %]/[% ActionsLoo.to_regex_replace | html %]/[% ActionsLoo.to_regex_modifiers | html %]</strong>
+ [% END %]
+ [% END %]
+
+ [% IF ( ActionsLoo.conditional ) %]
+ [% IF ( ActionsLoo.conditional_if ) %]<span>nếu</span>[% END %]
+ [% IF ( ActionsLoo.conditional_unless ) %]<span>trừ khi</span>[% END %]
+
+ [% ActionsLoo.conditional_field | html %][% IF ( ActionsLoo.conditional_subfield.length ) %]$[% ActionsLoo.conditional_subfield | html %][% END %]
+
+ [% IF ( ActionsLoo.conditional_comparison_exists ) %]<span>tồn tại</span>[% END %]
+ [% IF ( ActionsLoo.conditional_comparison_not_exists ) %]<span>does not exist</span>[% END %]
+ [% IF ( ActionsLoo.conditional_comparison_equals ) %]<span>Phù hợp</span>[% END %]
+ [% IF ( ActionsLoo.conditional_comparison_not_equals ) %]<span>does not match</span>[% END %]
+
+ [% IF ( ActionsLoo.conditional_regex ) %]<span>RegEx</span> m/[% END %]<strong>[% ActionsLoo.conditional_value | html %]</strong>[% IF ( ActionsLoo.conditional_regex ) %]/[% END %]
+ [% END %]
+ </td>
+ <td>[% ActionsLoo.description | html %]</td>
+ <td>
+ <a class="btn btn-default btn-xs edit_action" href="#modaction" data-mmta_id="[% ActionsLoo.mmta_id | html %]"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a>
+ </td>
+ <td>
+ <form action="marc_modification_templates.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="template_id" value="[% ActionsLoo.template_id | html %]" />
+ <input type="hidden" name="op" value="cud-delete_action" />
+ <input type="hidden" name="mmta_id" value="[% ActionsLoo.mmta_id | html %]" />
+ <button type="submit" class="btn btn-default btn-xs confirm-delete-action"><i class="fa fa-trash-can"></i> Xóa</button>
+ </form>
+ </td>
+ </tr>
+ [% END # /FOREACH ActionsLoo %]
+ </tbody>
+ </table>
+ </div>
+ <!-- /.page-section -->
+ [% ELSE %]
+ <div class="alert alert-info" id="no_defined_actions">
+ <p>Hiện tại chưa có thao tác nào được định nghĩa cho mẫu này.</p>
+ <p
+                        ><a href="#" class="btn btn-default approve new_action"><i class="fa fa-plus" aria-hidden="true"></i> New action</a></p
+                    >
+ </div>
+ [% END # /IF ActionsLoop %]
+
+ <form method="post" action="/cgi-bin/koha/tools/marc_modification_templates.pl" id="add_action">
+ [% INCLUDE 'csrf-token.inc' %]
+ <fieldset>
+ <legend id="modaction_legend">Tạo thao tác mới</legend>
+ <div id="warning_multivalued" style="color:red; display:none;"
+                        >Bạn có thể chọn một điều kiện trên trường tương tự như trường gốc. Nếu biểu ghi của bạn chứa các trường có nhiều giá trị, chúng tôi khuyến cáo bạn không nên thực hiện việc đó.</div
+                    >
+
+ <div class="action_line">
+ <select name="action" id="action">
+ <option value="delete_field">Xóa</option>
+ <option value="add_field">Add new</option>
+ <option value="update_field">Update existing or add new</option>
+ <option value="move_field">Di chuyển</option>
+ <option value="copy_field">Sao chép</option>
+ <option value="copy_and_replace_field">Copy and replace</option>
+ </select>
+
+ <span id="field_number_block">
+ <select name="field_number" id="field_number">
+ <option value="0">Tất cả</option>
+ <option value="1">1st</option>
+ </select>
+ </span>
+
+ trường <input type="text" name="from_field" id="from_field" size="3" maxlength="3" /> <span id="character_position">starting from character position </span
+                        ><input type="text" name="from_subfield" id="from_subfield" size="2" maxlength="2" title="let blank for the entire field" />
+
+ <span name="with_value_block" id="with_value_block" style="display:none;"> với giá trị <input type="text" name="field_value" id="field_value" /> </span>
+
+ <span name="to_field_block" id="to_field_block" style="display:none;">
+ tới trường <input type="text" name="to_field" id="to_field" size="3" maxlength="3" /> <input type="text" name="to_subfield" id="to_subfield" size="1" maxlength="1" title="let blank for the entire field" />
+
+ <span name="to_field_regex_block" id="to_field_regex_block">
+ <sup>
+ <label for="to_field_regex">RegEx</label>
+ <input type="checkbox" name="to_field_regex" id="to_field_regex" />
+
+ <span name="to_field_regex_value_block" id="to_field_regex_value_block" style="display:none;">
+ s/<input id="to_regex_search" name="to_regex_search" placeholder="Mẫu thông dụng" type="text" />/<input id="to_regex_replace" name="to_regex_replace" placeholder="Thay thế thông thường" type="text" />/<input type="text" name="to_regex_modifiers" id="to_regex_modifiers" placeholder="ig" size="3" />
+ </span>
+ </sup>
+ </span>
+ </span>
+ </div>
+
+ <div class="action_line">
+ <select name="conditional" id="conditional">
+ <option value="" selected="selected" />
+ <option value="if">nếu</option>
+ <option value="unless">trừ khi</option>
+ </select>
+
+ <span name="conditional_block" id="conditional_block" style="display:none;">
+ trường <input type="text" name="conditional_field" id="conditional_field" size="3" maxlength="3" /> <input type="text" name="conditional_subfield" id="conditional_subfield" size="1" maxlength="1" />
+
+ <select name="conditional_comparison" id="conditional_comparison">
+ <option value="" />
+ <option value="exists">tồn tại</option>
+ <option value="not_exists">không tồn tại</option>
+ <option value="equals">Phù hợp</option>
+ <option value="not_equals">không phù hợp</option>
+ </select>
+
+ <span name="conditional_comparison_block" id="conditional_comparison_block" style="display:none;">
+ <span class="match_regex_prefix">m/</span><input type="text" id="conditional_value" name="conditional_value" /><span class="match_regex_suffix">/</span>
+
+ <sup>
+ <label for="conditional_regex">RegEx</label>
+ <input type="checkbox" name="conditional_regex" id="conditional_regex" />
+ </sup>
+ </span>
+ </span>
+ </div>
+
+ <div class="action_line">
+ <label for="description">Thông tin mô tả:</label>
+ <input type="text" name="description" id="description" size="60" />
+ </div>
+
+ <fieldset class="action">
+ <input type="hidden" name="template_id" value="[% template_id | html %]" />
+ <input type="hidden" name="mmta_id" id="mmta_id" />
+ <input type="hidden" name="op" value="cud-add_action" />
+ <input class="btn btn-primary" id="action_submit" type="submit" value="Tạo thao tác" />
+ <a href="#modaction" class="cancel" id="cancel_edit">Hủy bỏ</a>
+ </fieldset>
+ </fieldset>
+ </form>
+ [% END %]
+ [% ELSE %]
+ <h1>Mẫu chỉnh sửa biểu ghi MARC</h1>
+ <div class="alert alert-info">
+ <p>Hiện tại chưa có mẫu chỉnh sửa biểu ghi MARC. Bạn vui lòng tạo mẫu chỉnh sửa biểu ghi trước.</p>
+ <a href="#" data-bs-toggle="modal" data-bs-target="#createTemplate" class="btn btn-default"><i class="fa fa-plus" aria-hidden="true"></i> Tạo mẫu mới</a>
+ </div>
+ [% END # /IF TemplatesLoop %]
+
+ <!-- Modal to create new template -->
+ <div class="modal" id="createTemplate" tabindex="-1" role="dialog" aria-labelledby="LabelcreateTemplate" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="LabelcreateTemplate">Tạo mẫu mới</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="post" action="/cgi-bin/koha/tools/marc_modification_templates.pl" id="add_template" class="validated">
+ [% INCLUDE 'csrf-token.inc' %]
+ <div class="modal-body">
+ <fieldset>
+ <p>
+ <label for="template_name" class="required">Name: </label>
+ <input name="template_name" id="template_name" type="text" size="30" required="required" class="required" />
+ <span class="required">Bắt buộc</span>
+ </p>
+
+ <input type="hidden" name="op" value="cud-create_template" />
+
+ <p>
+ <label for="duplicate_a_template">Duplicate a template:</label>
+ <select name="template_id" id="duplicate_a_template">
+ <option value=""> -- Không có --</option>
+ [% FOREACH TemplatesLoo IN TemplatesLoop %]
+ <option value="[% TemplatesLoo.template_id | html %]"> [% TemplatesLoo.name | html %]</option>
+ [% END %]
+ </select>
+ <input type="hidden" name="duplicate_current_template" id="duplicate_current_template" />
+ </p>
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button type="submit" class="btn btn-primary">Gửi</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </div>
+
+ <!-- Modal to import templates -->
+ <div class="modal" id="importTemplate" tabindex="-1" role="dialog" aria-labelledby="LabelimportTemplate" aria-hidden="true">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="LabelimportTemplate">Import MARC modification templates</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="post" action="/cgi-bin/koha/tools/marc_modification_templates.pl" enctype="multipart/form-data" id="import_template" class="validated">
+ [% INCLUDE 'csrf-token.inc' %]
+ <div class="modal-body">
+ <fieldset>
+ <p>
+ <label for="import_file" class="required">JSON file:</label>
+ <input type="file" name="import_file" id="import_file" required="required" class="required" />
+ <span class="required">Bắt buộc</span>
+ </p>
+
+ <p>
+ <label>
+ <input type="checkbox" name="skip_existing" id="skip_existing" value="1" checked />
+ Skip existing templates (do not overwrite)
+ </label>
+ </p>
+
+ <input type="hidden" name="op" value="cud-import" />
+
+ [% IF import_error %]
+ [% IF import_error == 'no_file_uploaded' %]
+ <div class="alert alert-danger">Error: No file was uploaded.</div>
+ [% END %]
+ [% END %]
+
+ [% IF import_success || import_skipped || import_overwrote %]
+ <div class="alert alert-success">
+ [% IF import_success %]
+ <p>Successfully imported [% import_success | html %] template(s).</p>
+ [% END %]
+ [% IF import_skipped %]
+ <p>Skipped [% import_skipped | html %] template(s) that already exist.</p>
+ [% END %]
+ [% IF import_overwrote %]
+ <p>Overwrote [% import_overwrote | html %] template(s) that already exist.</p>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF import_errors %]
+ [% FOREACH error IN import_errors %]
+ <div class="alert alert-danger">Lỗi: [% error | html %]</div>
+ [% END %]
+ [% END %]
+ </fieldset>
+ </div>
+ <div class="modal-footer">
+ <button type="submit" class="btn btn-primary">Nhập dữ liệu</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </div>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        table_settings = [% TablesSettings.GetTableSettings('tools', 'marc-modification-templates', 'templatest', 'json') | $raw %];
+        var mmtas = [];
+        [% IF ActionsLoop %]
+            mmtas = [% ActionsLoop.json | $raw %]
+        [% END %]
+
+        // Show import modal if there are import results
+        [% IF show_import_modal %]
+            $(document).ready(function() {
+                $('#importTemplate').modal('show');
+            });
+        [% END %]
+    </script>
+ [% Asset.js("js/marc_modification_templates.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

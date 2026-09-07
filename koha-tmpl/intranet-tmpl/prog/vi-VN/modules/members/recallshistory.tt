@@ -1,0 +1,57 @@
+[% USE raw %]
+[% USE KohaDates %]
+[% USE Koha %]
+[% USE Branches %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Recalls history for") | html %]
+ [% INCLUDE 'patron-title.inc' %]
+ [% t("Patrons") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="recalls_history" class="pat">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'patron-search-header.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/members-home.pl">Bạn đọc</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ [% INCLUDE 'patron-title.inc' %]
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Lịch sử yêu cầu thu hồi</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='circ-menu' %]
+ [% INCLUDE 'members-toolbar.inc' %]
+ <h1>Lịch sử yêu cầu thu hồi</h1>
+ [% IF Koha.Preference('UseRecalls') %]
+ [% IF recalls.count %]
+ <input type="checkbox" id="hide_old" name="hide_old" checked="checked" />
+ <label for="hide_old">Show old recalls</label>
+ [% END %]
+ <div class="page-section"> [% INCLUDE 'recalls.inc' %] </div>
+ [% ELSE %]
+ <div class="alert alert-info">Recalls have not been enabled. Enable the <a href="/cgi-bin/koha/admin/preferences.pl?tab=circulation">UseRecalls</a> system preference to use recalls.</div>
+ [% END %]
+[% END %]
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'datatables.inc' %]
+ [% Asset.js("js/recalls.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

@@ -1,0 +1,186 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>
+ [% FILTER collapse %]
+ [% t("Restore deleted records") | html %]
+ &rsaquo; [% t("Tools") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="tools_restore-records" class="tools">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/tools/tools-home.pl">Công cụ bổ trợ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Restore deleted records</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+<div class="main container-fluid">
+ <div class="row">
+ <div class="col-md-10 order-md-2 order-sm-1">
+ <main>
+ <h1>Restore deleted records</h1>
+
+ <div id="messages"></div>
+
+ <h2>Deleted bibliographic records</h2>
+ <div class="page-section">
+ <table id="deleted_biblios_table" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th>Biblio ID</th>
+ <th>Nhan đề</th>
+ <th>Tác giả</th>
+ <th>Deleted on</th>
+ <th class="NoSort">Thao tác</th>
+ </tr>
+ </thead>
+ </table>
+ </div>
+
+ <h2>Deleted items</h2>
+ <div class="page-section">
+ <table id="deleted_items_table" class="table table-bordered table-striped">
+ <thead>
+ <tr>
+ <th>Item ID</th>
+ <th>Biblio ID</th>
+ <th>Mã vạch</th>
+ <th>Số phân loại</th>
+ <th>Thư viện chủ quản</th>
+ <th>Deleted on</th>
+ <th class="NoSort">Thao tác</th>
+ </tr>
+ </thead>
+ </table>
+ </div>
+ </main>
+ </div>
+
+ <div class="col-md-2 order-sm-2 order-md-1">
+ <aside>
+ <div id="filters">
+ <fieldset class="brief">
+ <h4>Filter results</h4>
+ <ol>
+ <li>
+ <label for="from">Deleted from:</label>
+ <input type="text" size="10" id="from" name="from" class="flatpickr" data-date_to="to" />
+ <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
+ </li>
+ <li>
+ <label for="to">Deleted to:</label>
+ <input type="text" size="10" id="to" name="to" class="flatpickr" />
+ <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
+ </li>
+ </ol>
+ <fieldset class="action">
+ <button type="button" id="filter_table" class="btn btn-primary btn-sm">Apply</button>
+ <button type="button" id="clear_filters" class="btn btn-default btn-sm">Xóa</button>
+ </fieldset>
+ </fieldset>
+ </div>
+
+ [% INCLUDE 'cat-menu.inc' %]
+ </aside>
+ </div>
+ </div>
+</div>
+
+<!-- Modal for deleted biblio warning -->
+<div class="modal" id="deletedBiblioModal" tabindex="-1" role="dialog" aria-labelledby="deletedBiblioModalLabel">
+ <div class="modal-dialog" role="document">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h4 class="modal-title" id="deletedBiblioModalLabel">Bibliographic record deleted</h4>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <p>This item belongs to a deleted bibliographic record:</p>
+ <dl>
+ <dt>Biblio ID:</dt>
+ <dd id="modal-biblio-id"></dd>
+ <dt>Nhan đề:</dt>
+ <dd id="modal-biblio-title"></dd>
+ <dt>Tác giả:</dt>
+ <dd id="modal-biblio-author"></dd>
+ </dl>
+ <p><strong>You must restore the bibliographic record before restoring this item.</strong></p>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ <button type="button" class="btn btn-primary" id="restore-biblio-button">Restore bibliographic record</button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- Modal for biblio restoration with items -->
+<div class="modal" id="restoreBiblioModal" tabindex="-1" role="dialog" aria-labelledby="restoreBiblioModalLabel">
+ <div class="modal-dialog modal-lg" role="document">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h4 class="modal-title" id="restoreBiblioModalLabel">Restore bibliographic record with items</h4>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <p>Restore bibliographic record:</p>
+ <dl>
+ <dt>Biblio ID:</dt>
+ <dd id="restore-modal-biblio-id"></dd>
+ <dt>Nhan đề:</dt>
+ <dd id="restore-modal-biblio-title"></dd>
+ <dt>Tác giả:</dt>
+ <dd id="restore-modal-biblio-author"></dd>
+ </dl>
+ <div id="items-section">
+ <hr />
+ <p><strong>This bibliographic record has deleted items. Select items to restore:</strong></p>
+ <table class="table table-sm table-bordered" id="deleted-items-list">
+ <thead>
+ <tr>
+ <th class="NoSort"><input type="checkbox" id="select-all-items" /></th>
+ <th>Item ID</th>
+ <th>Mã vạch</th>
+ <th>Số phân loại</th>
+ <th>Thư viện chủ quản</th>
+ </tr>
+ </thead>
+ <tbody></tbody>
+ </table>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ <button type="button" class="btn btn-primary" id="restore-biblio-with-items-button">Restore</button>
+ </div>
+ </div>
+ </div>
+</div>
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/tools-menu.js") | $raw %]
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'calendar.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        var libraries_where_can_edit = [% libraries_where_can_edit_json | $raw %];
+    </script>
+ [% Asset.js("js/pages/restore_records.js") | $raw %]
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

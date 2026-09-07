@@ -1,0 +1,100 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Preview routing list") | html %]
+ &rsaquo; [% title | html %] &rsaquo; [% t("Serials") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="ser_routing-preview" class="ser">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'serials-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/serials/serials-home.pl">Ấn phẩm định kỳ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=[% subscriptionid | uri %]"><em>[% title | html %]</em></a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Preview routing list</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='serials-menu' %]
+ <h1>Xem trước danh sách nhận của <em>[% title | html %]</em></h1>
+
+ <fieldset class="rows">
+ <ol>
+ <li><span class="label">Số:</span>[% issue | html %]</li>
+ <li
+                ><span class="label">Danh sách bạn đọc:</span
+                ><table style="clear:none;margin:0;">
+ <tr><th>Tên</th></tr>
+ [% FOREACH memberloo IN memberloop %]
+ <tr><td>[% memberloo.surname | html %], [% memberloo.firstname | html %]</td></tr>
+ [% END %]
+ </table></li
+            >
+ <li><span class="label">Ghi chú:</span><div class="d-inline-block">[% routingnotes | html | html_line_break %]</div></li>
+ </ol>
+ </fieldset>
+
+ <fieldset class="action">
+ <form method="post" id="save_and_preview_form" action="routing-preview.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" id="subscriptionid" name="subscriptionid" value="[% subscriptionid | html %]" />
+ <input type="hidden" id="issue_escaped" name="issue_escaped" value="[% issue_escaped | html %]" />
+ <input type="hidden" name="op" value="cud-save_and_preview" />
+ <input class="btn btn-primary" id="save_and_preview" type="submit" value="Lưu và xem trước danh sách" />
+ </form>
+
+ <form method="post" action="routing-preview.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" id="subscriptionid" name="subscriptionid" value="[% subscriptionid | html %]" />
+ <input type="hidden" id="issue_escaped" name="issue_escaped" value="[% issue_escaped | html %]" />
+ <input type="hidden" name="op" value="cud-edit" />
+ <input class="btn btn-primary" type="submit" value="Sửa" />
+ </form>
+
+ <form method="post" action="routing-preview.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" id="subscriptionid" name="subscriptionid" value="[% subscriptionid | html %]" />
+ <input type="hidden" id="issue_escaped" name="issue_escaped" value="[% issue_escaped | html %]" />
+ <input type="hidden" name="op" value="cud-delete" />
+ <input class="btn btn-primary" type="submit" value="Xóa" />
+ </form>
+ </fieldset>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#save_and_preview_form").on("submit", function (e) {
+                var myurl = "routing-preview.pl?op=print&subscriptionid=" + $("#subscriptionid").val() + "&issue=" + $("#issue_escaped").val();
+                window.open(myurl, "PrintSlip", "width=500,height=500,toolbar=no,scrollbars=yes");
+            });
+            /*    e.preventDefault();
+                print_slip( $("#subscriptionid").val(), $("#issue_escaped").val() );
+            });
+        });
+        function print_slip(subscriptionid,issue){
+            var myurl = 'routing-preview.pl?op=print&subscriptionid='+subscriptionid+'&issue='+issue;
+            window.open(myurl,'PrintSlip','width=500,height=500,toolbar=no,scrollbars=yes');
+            window.location.href='subscription-detail.pl?subscriptionid=' + subscriptionid;
+            */
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

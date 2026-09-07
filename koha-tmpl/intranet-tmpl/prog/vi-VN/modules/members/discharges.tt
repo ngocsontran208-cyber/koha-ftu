@@ -1,0 +1,84 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE Branches %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Pending discharge requests") | html %]
+ &rsaquo; [% t("Patrons") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="pat_discharges" class="pat">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'patron-search-header.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/members/members-home.pl">Bạn đọc</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Pending discharge requests</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' %]
+
+ [% IF pending_discharges %]
+ <h1>Pending discharge requests</h1>
+ <div id="pending_updates" class="page-section">
+ <table>
+ <thead>
+ <tr>
+ <th>Bạn đọc</th>
+ <th>Thư viện</th>
+ <th>Date requested</th>
+ <th class="no-sort">Cho phép</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH d IN pending_discharges %]
+ <tr>
+ <td><a href="/cgi-bin/koha/members/discharge.pl?borrowernumber=[% d.borrower.borrowernumber | uri %]">[% d.borrower.surname | html %], [% d.borrower.firstname | html %]</a></td>
+ <td>[% d.borrower.branchcode.branchname | html %]</td>
+ <td data-order="[% d.needed | html %]">[% d.needed | $KohaDates %]</td>
+ <td
+                                ><a class="btn btn-xs btn-default" href="/cgi-bin/koha/members/discharges.pl?op=allow&borrowernumber=[% d.borrower.borrowernumber | html %]"><i class="fa fa-check"></i> Cho phép</a></td
+                            >
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+ [% ELSE %]
+ <div class="alert alert-info">
+ <h1>There are no pending discharge requests.</h1>
+ </div>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% INCLUDE 'str/members-menu.inc' %]
+ [% Asset.js("js/members-menu.js") | $raw %]
+
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        $(document).ready(function () {
+            $("#pending_updates table").kohaTable({
+                paging: false,
+                searching: true,
+                order: [[2, "asc"]],
+            });
+        });
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

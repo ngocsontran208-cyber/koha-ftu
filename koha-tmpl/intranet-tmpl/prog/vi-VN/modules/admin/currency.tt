@@ -1,0 +1,339 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% USE TablesSettings %]
+[% USE HtmlTags %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% IF op == 'add_form' %]
+ [% IF currency %]
+ [% tx("Modify currency '{currency_name}'", { currency_name = currency.currency }) | html %]
+ &rsaquo;
+ [% ELSE %]
+ [% t("New currency") | html %]
+ &rsaquo;
+ [% END %]
+ [% END %]
+ [% IF op == 'delete_confirm' %]
+ [% tx("Confirm deletion of currency '{currency_name}'", { currency_name = currency.currency }) | html %]
+ &rsaquo;
+ [% END %]
+ [% t("Currencies and exchange rates") | html %]
+ &rsaquo; [% t("Administration") | html %] &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+
+<body id="admin_currency" class="admin">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'currencies-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+ [% END %]
+ [% IF op == 'add_form' || op == 'delete_confirm' %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/admin/currency.pl">Tiền tệ và tỷ giá</a>
+ [% END %]
+ [% ELSIF op == 'list' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Tiền tệ và tỷ giá</span>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'add_form' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% IF currency %]
+ [% tx("Modify currency '{currency_name}'", { currency_name = currency.currency }) | html %]
+ [% ELSE %]
+ <span>Tạo đơn vị tiền tệ</span>
+ [% END %]
+ [% END %]
+ [% END %]
+
+ [% IF op == 'delete_confirm' %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% tx("Confirm deletion of currency '{currency_name}'", { currency_name = currency.currency }) | html %]
+ [% END %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+
+ [% IF op == 'list' %]
+ <div id="toolbar" class="btn-toolbar">
+ <a class="btn btn-default" id="newcurrency" href="/cgi-bin/koha/admin/currency.pl?op=add_form"><i class="fa fa-plus"></i> Tạo đơn vị tiền tệ</a>
+ </div>
+ [% END %]
+
+ [% FOR m IN messages %]
+ <div class="alert alert-[% m.type | html %]">
+ [% SWITCH m.code %]
+ [% CASE 'error_on_update' %]
+ <span>An error occurred when updating this currency. Perhaps it already exists.</span>
+ [% CASE 'error_on_insert' %]
+ <span>An error occurred when adding this currency. The currency code might already exist.</span>
+ [% CASE 'error_on_delete' %]
+ <span>An error occurred when deleting this currency. Check the logs for details.</span>
+ [% CASE 'success_on_update' %]
+ <span>Currency updated successfully.</span>
+ [% CASE 'success_on_insert' %]
+ <span>Currency added successfully.</span>
+ [% CASE 'success_on_delete' %]
+ <span>Currency deleted successfully.</span>
+ [% CASE %]
+ <span>[% m.code | html %]</span>
+ [% END %]
+ </div>
+ [% END %]
+
+ [% IF op == 'add_form' %]
+ <h1>
+ [% IF currency %]
+ [% tx("Modify currency '{currency_name}'", { currency_name = currency.currency }) | html %]
+ [% ELSE %]
+ <span>Tạo đơn vị tiền tệ</span>
+ [% END %]
+ </h1>
+
+ <form action="/cgi-bin/koha/admin/currency.pl" name="Aform" method="post" class="validated">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-add_validate" />
+ <fieldset class="fg">
+ <legend class="visually-hidden">New currency entry form</legend>
+ <div class="fg-row input-md">
+ [% IF currency %]
+ <div class="fg-label">
+ <span class="label">Tiền tệ: </span>
+ </div>
+ <div class="fg-text">
+ [% currency.currency | html %]
+ <input type="hidden" name="is_a_modif" value="1" />
+ <input type="hidden" name="currency_code" id="currency" value="[% currency.currency | html %]" />
+ </div>
+ [% ELSE %]
+ <div class="fg-label">
+ <label for="currency_code" class="required">Tiền tệ: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="currency_code" id="currency_code" class="focus required" size="50" maxlength="50" required="required" />
+ </div>
+ <div class="required">Bắt buộc</div>
+ [% END %]
+ </div>
+ <div class="fg-row input-sm">
+ <div class="fg-label">
+ <label for="rate" class="required">Tỷ giá: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="rate" id="rate" size="10" maxlength="10" value="[% currency.rate | html %]" required="required" class="required" />
+ </div>
+ <div class="required">Bắt buộc</div>
+ </div>
+ <div class="fg-row input-sm">
+ <div class="fg-label">
+ <label for="symbol" class="required">Ký hiệu: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="symbol" id="symbol" size="5" maxlength="5" value="[% currency.symbol | html %]" required="required" class="required" />
+ </div>
+ <div class="required">Bắt buộc</div>
+ </div>
+ <div class="fg-row input-sm">
+ <div class="fg-label">
+ <label for="isocode">Mã ISO: </label>
+ </div>
+ <div class="fg-input">
+ <input type="text" name="isocode" id="isocode" size="5" maxlength="5" value="[% currency.isocode | html %]" />
+ </div>
+ </div>
+ [% IF ( currency ) %]
+ <div class="fg-row">
+ <div class="fg-label">
+ <span class="label">Lần cập nhật cuối: </span>
+ </div>
+ <div class="fg-text"> [% currency.timestamp | $KohaDates %] </div>
+ </div>
+ [% END %]
+ <div class="fg-row input-checkbox">
+ <div class="fg-label">
+ <label for="p_sep_by_space">Space separation between symbol and value</label>
+ </div>
+ <div class="fg-input">
+ [% IF currency.p_sep_by_space %]
+ <input type="checkbox" id="p_sep_by_space" name="p_sep_by_space" value="1" checked="checked" />
+ [% ELSE %]
+ <input type="checkbox" id="p_sep_by_space" name="p_sep_by_space" value="1" />
+ [% END %]
+ </div>
+ </div>
+ <div class="fg-row input-checkbox">
+ <div class="fg-label">
+ <label for="p_cs_precedes">Currency symbol precedes value</label>
+ </div>
+ <div class="fg-input">
+ [% IF currency.p_cs_precedes %]
+ <input type="checkbox" id="p_cs_precedes" name="p_cs_precedes" value="1" checked="checked" />
+ [% ELSE %]
+ <input type="checkbox" id="p_cs_precedes" name="p_cs_precedes" value="1" />
+ [% END %]
+ </div>
+ </div>
+ <div class="fg-row input-checkbox">
+ <div class="fg-label">
+ <label for="active">Kích hoạt</label>
+ </div>
+ <div class="fg-input">
+ [% IF currency.active %]
+ <input type="checkbox" id="active" name="active" value="1" checked="checked" />
+ [% ELSE %]
+ <input type="checkbox" id="active" name="active" value="1" />
+ [% END %]
+ </div>
+ <div id="hint" class="hint"></div>
+ </div>
+ </fieldset>
+
+ <fieldset class="action">
+ <input class="btn btn-primary" type="submit" value="Gửi" />
+ <a href="/cgi-bin/koha/admin/currency.pl" class="cancel">Hủy bỏ</a>
+ </fieldset>
+ </form>
+ [% END %]
+
+ [% IF op =='delete_confirm' %]
+ [% IF nb_of_orders or nb_of_vendors %]
+ <div class="alert alert-warning">
+ <h1>Cannot delete currency [% currency.currency | html | $HtmlTags tag='span' attributes=>'class="ex"' %]</h1>
+ <p>
+ [% IF nb_of_orders %]
+ <span>This currency is used by [% nb_of_orders | html %] orders.</span>
+ [% ELSIF nb_of_vendors %]
+ <span>This currency is used by [% nb_of_vendors | html %] vendors.</span>
+ [% END %]
+ <span>Deletion not possible</span>
+ </p>
+ <form action="/cgi-bin/koha/admin/currency.pl" method="get">
+ <button type="submit" class="btn btn-default approve"><i class="fa fa-fw fa-check"></i> OK</button>
+ </form>
+ </div>
+ [% ELSE %]
+ <div class="alert alert-warning">
+ <h1>[% tx("Confirm deletion of currency '{currency_name}'", { currency_name = currency.currency }) | html %]</h1>
+ <table>
+ <tr
+                        ><th>Tiền tệ</th>
+ <td>[% currency.currency | html %]</td>
+ </tr>
+ <tr
+                        ><th>Tỷ giá</th>
+ <td>[% currency.rate | html %]</td>
+ </tr>
+ </table>
+ <form action="/cgi-bin/koha/admin/currency.pl" method="post">
+ [% INCLUDE 'csrf-token.inc' %]
+ <input type="hidden" name="op" value="cud-delete_confirmed" />
+ <input type="hidden" name="currency_code" value="[% currency.currency | html %]" />
+ <button type="submit" class="btn btn-default approve"><i class="fa fa-fw fa-check"></i> Yes, delete this currency</button>
+ </form>
+ <form action="/cgi-bin/koha/admin/currency.pl" method="get">
+ <button type="submit" class="btn btn-default deny"><i class="fa fa-fw fa-times"></i> Không xóa</button>
+ </form>
+ </div>
+ [% END %]
+ [% END %]
+
+ [% IF op == 'list' %]
+ <h1>Tiền tệ và tỷ giá</h1>
+
+ [% IF currencies and no_active_currency %]
+ <div class="alert alert-warning"><h3>Hệ thống chưa có đơn vị tiền tệ chính.</h3><p>Không có đơn vị tiền tệ chính được kích hoạt</p></div>
+ [% END %]
+
+ [% IF searchfield %]
+ <span>You searched for [% searchfield | html %]</span>
+ [% END %]
+
+ <div class="page-section">
+ <table id="currencies-table">
+ <thead>
+ <tr>
+ <th>Tiền tệ</th>
+ <th>Tỷ giá</th>
+ <th>Ký hiệu</th>
+ <th>Mã ISO</th>
+ <th>Lần cập nhật cuối</th>
+ <th>Kích hoạt</th>
+ <th>Archived</th>
+ <th class="no-sort no-export">Thao tác</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH currency IN currencies %]
+ <tr>
+ <td>[% currency.currency | html %]</td>
+ <td>[% currency.rate | html %]</td>
+ <td>[% currency.symbol | html %]</td>
+ <td>[% currency.isocode | html %]</td>
+ <td data-order="[% currency.timestamp | html %]">[% currency.timestamp | $KohaDates %]</td>
+ <td style="color:green;">[% IF currency.active %]✓[% END %]</td>
+ <td>[% IF currency.archived %]Yes[% END %]</td>
+ <td class="actions">
+ <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/currency.pl?op=add_form&amp;currency_code=[% currency.currency | html %]"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a>
+ <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/currency.pl?op=delete_confirm&amp;currency_code=[% currency.currency | html %]"><i class="fa fa-trash-can"></i> Xóa</a>
+ </td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ </div>
+
+ <div class="hint">
+ <p> Khi bạn nhập tệp tin MARC thông qua công cụ bổ trợ, hệ thống sẽ thực hiện tìm kiếm và sử dụng giá của đơn vị tiền tệ chính hiện tại.</p>
+ <p> Trường giá phù hợp bao gồm: "$9.99", "9.99 USD", "$9.99 USD", "9.99 USD (10.00 CAN)", "$9.99 USD (tiền giấy)". Trong ví dụ này, đồng tiền USD là đơn bị tiền tệ chính. </p>
+ </div>
+ [% END %]
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+ [% Asset.js("js/admin-menu.js") | $raw %]
+ [% INCLUDE 'datatables.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+        let table_settings = [% TablesSettings.GetTableSettings( 'admin', 'currency', 'currencies-table', 'json' ) | $raw %]
+    </script>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+        function check_currency(val) {
+            if (val == 1.0) {
+                $("#active").prop("disabled", false);
+                $("#hint").html("");
+            } else {
+                $("#active").prop("checked", false);
+                $("#active").prop("disabled", true);
+                $("#hint").html(_("Đơn vị tiền tệ chính của Koha phải có tỷ giá là 1.0"));
+            }
+        }
+
+        $(document).ready(function () {
+            $("#currencies-table").kohaTable({}, table_settings);
+
+            // prevents users to check active with a currency != 1
+            $("#rate").keyup(function () {
+                check_currency($(this).val());
+            });
+            check_currency($("#rate").val());
+            $("#currency_code").on("blur", function () {
+                toUC(this);
+            });
+        });
+    </script>
+[% END %]
+[% INCLUDE 'intranet-bottom.inc' %]
