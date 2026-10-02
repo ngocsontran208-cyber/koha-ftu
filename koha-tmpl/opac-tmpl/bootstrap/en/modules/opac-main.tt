@@ -432,56 +432,82 @@ $(document).ready(function() {
     if ($grid.length) {
         var fallbackSvg = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='420' viewBox='0 0 300 420'%3E%3Crect width='100%25' height='100%25' fill='%23b91c1c'/%3E%3Crect x='15' y='15' width='270' height='390' fill='none' stroke='%23fca5a5' stroke-width='2'/%3E%3Ctext x='50%25' y='45%25' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3ETHƯ VIỆN FTU%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='sans-serif' font-size='14' fill='%23fecaca' text-anchor='middle'%3ETài liệu học tập%3C/text%3E%3C/svg%3E";
 
+        function renderBooks(items) {
+            if (!items || items.length === 0) {
+                $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
+                return;
+            }
+            
+            var htmlContent = '';
+            var renderedCount = 0;
+            
+            items.forEach(function(item) {
+                if (renderedCount >= 10) return;
+                
+                var bibNum = item.biblionumber || item.id;
+                if (!bibNum) return;
+                var title = (item.title || 'Chưa có tiêu đề').replace(/\s*[\/:]\s*$/, '').trim();
+                var author = (item.author || '[% FTU_BRAND.library_name_short %]').replace(/\s*[\/,]\s*$/, '').trim();
+                var link = item.link || ('/cgi-bin/koha/opac-detail.pl?biblionumber=' + bibNum);
+                var coverUrl = '/cgi-bin/koha/opac-image.pl?biblionumber=' + bibNum + '&v=' + (item.cover_ts || '1');
+                
+                htmlContent += `
+                    <a href="${link}" class="ftu-book-card">
+                        <div class="ftu-book-cover">
+                            <img src="${coverUrl}" alt="${title}" onload="if(this.naturalWidth<=1){this.src='${fallbackSvg}';}" onerror="this.onerror=null;this.src='${fallbackSvg}';" />
+                            <span class="ftu-book-badge">${bibNum == 445 ? 'DIGITAL' : 'MỚI'}</span>
+                        </div>
+                        <div class="ftu-book-details">
+                            <h4 class="ftu-book-title" title="${title}">${title}</h4>
+                            <p class="ftu-book-author">${author}</p>
+                            <div class="ftu-book-meta"><i class="fa fa-check-circle" style="margin-right: 4px;"></i> Sẵn sàng</div>
+                        </div>
+                    </a>
+                `;
+                renderedCount++;
+            });
+            
+            if (renderedCount > 0) {
+                if ($grid.hasClass('ftu-books-grid-dynamic')) {
+                    htmlContent = htmlContent + htmlContent;
+                }
+                $grid.html(htmlContent);
+            } else {
+                $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
+            }
+        }
+
+        function fetchBooksFallback() {
+            $.ajax({
+                url: '/cgi-bin/koha/portal-posts.pl?type=books&limit=10&_t=' + Date.now(),
+                method: 'GET',
+                dataType: 'json',
+                success: function(items) {
+                    if (items && items.length > 0) {
+                        renderBooks(items);
+                    } else {
+                        $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
+                    }
+                },
+                error: function() {
+                    $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
+                }
+            });
+        }
+
         $.ajax({
             url: '/cgi-bin/koha/svc/report?id=1&annotated=1&_t=' + Date.now(),
             method: 'GET',
             dataType: 'json',
             success: function(items) {
-                if (!items || items.length === 0) {
-                    $grid.html('<div class="ftu-loading-books">Không tìm thấy tài liệu mới nào.</div>');
-                    return;
-                }
-                
-                var htmlContent = '';
-                var renderedCount = 0;
-                
-                items.forEach(function(item) {
-                    if (renderedCount >= 10) return;
-                    
-                    var bibNum = item.biblionumber;
-                    var title = (item.title || 'Chưa có tiêu đề').replace(/\s*[\/:]\s*$/, '').trim();
-                    var author = (item.author || '[% FTU_BRAND.library_name_short %]').replace(/\s*[\/,]\s*$/, '').trim();
-                    var link = '/cgi-bin/koha/opac-detail.pl?biblionumber=' + bibNum;
-                    
-                    var coverUrl = '/cgi-bin/koha/opac-image.pl?biblionumber=' + bibNum + '&v=' + (item.cover_ts || '1');
-                    
-                    htmlContent += `
-                        <a href="${link}" class="ftu-book-card">
-                            <div class="ftu-book-cover">
-                                <img src="${coverUrl}" alt="${title}" onload="if(this.naturalWidth<=1){this.src='${fallbackSvg}';}" onerror="this.onerror=null;this.src='${fallbackSvg}';" />
-                                <span class="ftu-book-badge">${bibNum == 445 ? 'DIGITAL' : 'MỚI'}</span>
-                            </div>
-                            <div class="ftu-book-details">
-                                <h4 class="ftu-book-title" title="${title}">${title}</h4>
-                                <p class="ftu-book-author">${author}</p>
-                                <div class="ftu-book-meta"><i class="fa fa-check-circle" style="margin-right: 4px;"></i> Sẵn sàng</div>
-                            </div>
-                        </a>
-                    `;
-                    renderedCount++;
-                });
-                
-                if (renderedCount > 0) {
-                    if ($grid.hasClass('ftu-books-grid-dynamic')) {
-                        htmlContent = htmlContent + htmlContent;
-                    }
-                    $grid.html(htmlContent);
+                if (items && items.length > 0) {
+                    renderBooks(items);
                 } else {
-                    $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
+                    fetchBooksFallback();
                 }
             },
             error: function() {
-                $grid.html('<div class="ftu-loading-books">Lỗi tải dữ liệu sách mới.</div>');
+                fetchBooksFallback();
             }
         });
     }

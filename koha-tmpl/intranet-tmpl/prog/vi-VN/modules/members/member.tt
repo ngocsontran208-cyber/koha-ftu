@@ -1512,6 +1512,13 @@ body#pat_member aside .patron_search_form {
         const ssoBaseUrl = (ssoPref && !ssoPref.includes('myDNSname')) ? ssoPref.replace(/\/+$/, '') : ('http://' + (window.location.hostname || 'localhost') + ':8090');
         $('#ftu-sso-portal-top-link').attr('href', ssoBaseUrl);
 
+        // Helper chuẩn hóa mọi request sang Cổng SSO kèm header định danh Thủ thư Koha Staff
+        async function ssoFetch(url, options = {}) {
+            options = Object.assign({}, options);
+            options.headers = Object.assign({}, options.headers, { 'x-koha-staff': '1' });
+            return fetch(url, options);
+        }
+
         // Hàm chuẩn hóa chuỗi tiếng Việt (bỏ dấu) để tìm kiếm linh hoạt
         function removeVietnameseTones(str) {
             if (!str) return '';
@@ -1559,7 +1566,7 @@ body#pat_member aside .patron_search_form {
                     </tr>
                 `);
 
-                const res = await fetch(ssoBaseUrl + '/api/v1/sso/users?role=LEARNER');
+                const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users?role=LEARNER');
                 const json = await res.json();
 
                 if (json.success && Array.isArray(json.data)) {
@@ -2222,7 +2229,7 @@ body#pat_member aside .patron_search_form {
                 const btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang nhận...');
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/sync-from-koha', { method: 'POST' });
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/sync-from-koha', { method: 'POST' });
                     const json = await res.json();
                     if (json.success) {
                         alert('Đã cập nhật trạng thái từ Koha về Cổng SSO thành công: ' + json.syncedCount + ' bạn đọc!');
@@ -2242,7 +2249,7 @@ body#pat_member aside .patron_search_form {
                 const btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang đồng bộ...');
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ onlyLearners: true })
@@ -2341,7 +2348,7 @@ body#pat_member aside .patron_search_form {
                 const name = $(this).data('fullname') || uid;
                 if (!confirm('Bạn có chắc muốn KHÓA THẺ bạn đọc [' + name + ' - ' + uid + ']? Thao tác này sẽ cập nhật ngay vào CSDL Koha và Hệ thống SSO.')) return;
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/update-status', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/update-status', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: 'LOCKED', reason: 'Thủ thư khóa thẻ trên Koha' })
@@ -2364,7 +2371,7 @@ body#pat_member aside .patron_search_form {
                 const name = $(this).data('fullname') || uid;
                 if (!confirm('Bạn có chắc muốn MỞ KHÓA THẺ cho bạn đọc [' + name + ' - ' + uid + ']?')) return;
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/update-status', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/update-status', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: 'ACTIVE' })
@@ -2387,7 +2394,7 @@ body#pat_member aside .patron_search_form {
                 const name = $(this).data('fullname') || uid;
                 if (!confirm('GIA HẠN THẺ thêm 1 năm cho bạn đọc [' + name + ' - ' + uid + ']? Hạn mới sẽ đồng bộ ngay sang Koha.')) return;
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/renew', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/renew', {
                         method: 'POST'
                     });
                     const json = await res.json();
@@ -2413,7 +2420,7 @@ body#pat_member aside .patron_search_form {
                 const user = allLearners.find(u => String(u.uid).trim() === uid || String(u.cardNumber).trim() === uid);
                 if (user && !user.kohaSynced) {
                     try {
-                        await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                        await ssoFetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ uid })
@@ -2431,7 +2438,7 @@ body#pat_member aside .patron_search_form {
                 const btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ uid })
@@ -2511,7 +2518,7 @@ body#pat_member aside .patron_search_form {
                 const btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang lưu...');
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -2519,7 +2526,7 @@ body#pat_member aside .patron_search_form {
                     const json = await res.json();
                     if (json.success) {
                         try {
-                            await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                            await ssoFetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ uid: uid })
@@ -2560,7 +2567,7 @@ body#pat_member aside .patron_search_form {
                 // Fallback nạp trực tiếp từ SSO API nếu cache chưa có
                 if (!u) {
                     try {
-                        const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid));
+                        const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid));
                         const json = await res.json();
                         if (json && json.success && json.data) {
                             u = json.data;
@@ -2710,7 +2717,7 @@ body#pat_member aside .patron_search_form {
                 const btn = $(this);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
                 try {
-                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(selectedResetUid) + '/reset-password', {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(selectedResetUid) + '/reset-password', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ newPassword })

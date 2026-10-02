@@ -35,6 +35,32 @@ if ($id) {
     exit;
 }
 
+if ($type eq "books") {
+    # Tự động đảm bảo Report 1 trong saved_sql luôn tồn tại cho svc/report
+    eval {
+        my $chk = $dbh->selectrow_array("SELECT id FROM saved_sql WHERE id = 1");
+        if (!$chk) {
+            $dbh->do("INSERT INTO saved_sql (id, report_name, savedsql, public, date_created) VALUES (1, 'Sách mới cập nhật trang chủ', 'SELECT b.biblionumber, b.title, b.author, bi.publicationyear AS year, UNIX_TIMESTAMP(b.timestamp) AS cover_ts FROM biblio b LEFT JOIN biblioitems bi ON b.biblionumber = bi.biblionumber ORDER BY b.biblionumber DESC LIMIT 20', 1, NOW())");
+        }
+    };
+
+    my $b_sth = $dbh->prepare("
+        SELECT b.biblionumber, b.biblionumber AS id, b.title, b.author, bi.publicationyear AS year, bi.isbn, bi.itemtype, UNIX_TIMESTAMP(b.timestamp) AS cover_ts
+        FROM biblio b
+        LEFT JOIN biblioitems bi ON b.biblionumber = bi.biblionumber
+        ORDER BY b.biblionumber DESC
+        LIMIT $limit
+    ");
+    $b_sth->execute();
+    my @books;
+    while (my $row = $b_sth->fetchrow_hashref) {
+        $row->{link} = "/cgi-bin/koha/opac-detail.pl?biblionumber=" . $row->{biblionumber};
+        push @books, $row;
+    }
+    print to_json(\@books);
+    exit;
+}
+
 my $query = "SELECT * FROM koha_portal_posts WHERE status = ?";
 my @params = ("published");
 
