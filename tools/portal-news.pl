@@ -119,22 +119,51 @@ if (($op eq "toggle_status" || $op eq "cud-toggle_status")) {
     exit;
 }
 
+if (($op eq "toggle_banner_text" || $op eq "cud-toggle_banner_text")) {
+    my $id = int($cgi->param("id") || 0);
+    if ($id > 0) {
+        my $sth = $dbh->prepare("SELECT content FROM koha_portal_posts WHERE id = ?");
+        $sth->execute($id);
+        my ($curr) = $sth->fetchrow_array;
+        my $new_content = ($curr && $curr eq "show_text") ? "" : "show_text";
+        my $new_feat = ($new_content eq "show_text") ? 1 : 0;
+        $dbh->do("UPDATE koha_portal_posts SET content = ?, is_featured = ? WHERE id = ?", undef, $new_content, $new_feat, $id);
+    }
+    print $cgi->redirect("/cgi-bin/koha/tools/portal-news.pl?op=list&section=banner&msg=banner_text_updated");
+    exit;
+}
+
 if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_db" || $op eq "save_banner" || $op eq "cud-save_banner")) {
     my $id                  = int($cgi->param("id") || 0);
     my $sort_order          = int($cgi->param("sort_order") || 1);
     my $post_type           = $cgi->param("post_type") || ($op =~ /_db/ ? "database" : ($op =~ /_banner/ ? "banner" : "news"));
-    my $title               = $cgi->param("title") || "Chưa đặt tiêu đề";
+    my $title               = $cgi->param("title");
     my $excerpt             = $cgi->param("excerpt") || "";
-    my $classification      = $cgi->param("classification") || ($post_type eq 'database' ? "CSDL THƯƠNG MẠI" : "");
+    my $classification      = $cgi->param("classification") || ($post_type eq 'database' ? "CSDL THƯƠNG MẠI" : ($post_type eq 'banner' ? "THƯ VIỆN FTU" : ""));
     my $access_instructions = $cgi->param("access_instructions") || "";
     my $db_user             = $cgi->param("db_user") || "";
     my $db_pass             = $cgi->param("db_pass") || "";
     my $support_link        = $cgi->param("support_link") || "";
-    my $content             = $cgi->param("content") || $excerpt || "";
+    my $content             = "";
+    my $is_featured         = 0;
+
+    if ($post_type eq 'banner') {
+        # Checkbox sends 'show_text' if checked; undef/empty if unchecked
+        my $show_text = $cgi->param("show_text") // $cgi->param("content");
+        $content = ($show_text && ($show_text eq 'show_text' || $show_text eq '1' || $show_text eq 'on')) ? 'show_text' : '';
+        $is_featured = ($content eq 'show_text') ? 1 : 0;
+        if (!defined $title || $title =~ /^\s*$/) {
+            $title = "Banner " . ($sort_order || $id || "FTU");
+        }
+    } else {
+        $title = "Chưa đặt tiêu đề" unless defined $title && $title =~ /\S/;
+        $content = $cgi->param("content") || $excerpt || "";
+        $is_featured = int($cgi->param("is_featured") || 0);
+    }
+
     my $featured_image      = $cgi->param("featured_image") || "";
     my $author_name         = $cgi->param("author_name") || "Thư viện ĐH Ngoại thương";
     my $status              = $cgi->param("status") || "published";
-    my $is_featured         = int($cgi->param("is_featured") || 0);
     
     my $event_start  = $cgi->param("event_start");
     $event_start     = undef if defined $event_start && $event_start eq "";

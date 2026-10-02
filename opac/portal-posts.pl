@@ -82,4 +82,9 @@ sub format_post {
         $p->{event_time}  = "$4:$5";
         $p->{formatted_event_date} = "$p->{event_day}/$2/$1";
     }
+
+    # Format banner text visibility
+    if ($p->{post_type} && $p->{post_type} eq 'banner') {
+        $p->{show_text} = ($p->{content} && $p->{content} eq 'show_text') ? 1 : 0;
+    }
 }
