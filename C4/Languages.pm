@@ -128,6 +128,9 @@ sub getTranslatedLanguages {
             join( ',', C4::Context->preference( 'StaffInterfaceLanguages', C4::Context->preference('OPACLanguages') ) );
         @enabled_languages = uniq @enabled_languages;
     }
+    # FTU Library: ensure vi-VN and en are always enabled
+    push @enabled_languages, 'vi-VN' unless any { $_ eq 'vi-VN' } @enabled_languages;
+    push @enabled_languages, 'en' unless any { $_ eq 'en' } @enabled_languages;
 
     my $cache     = Koha::Caches->get_instance;
     my $cache_key = "languages_${interface}_${theme}";
@@ -767,6 +770,14 @@ sub getlanguage {
         my $preference_value = C4::Context->preference($preference_to_check);
         if ($preference_value) {
             @languages = split /,/, $preference_value;
+        }
+
+        # FTU Library: ensure vi-VN is recognized and prioritized by default
+        if ( ! any { $_ eq 'vi-VN' } @languages ) {
+            unshift @languages, 'vi-VN';
+        }
+        if ( ! any { $_ eq 'en' } @languages ) {
+            push @languages, 'en';
         }
 
         # Choose language from the URL

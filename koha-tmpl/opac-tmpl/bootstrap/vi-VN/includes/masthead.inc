@@ -127,6 +127,26 @@
  [% IF ( ( opaclanguagesdisplay ) && ( ! one_language_enabled ) && ( languages_loop ) && ( OpacLangSelectorMode == 'both' || OpacLangSelectorMode == 'top') ) %]
  [% context = "header" %]
  [% INCLUDE 'langmenu.inc' %]
+ [% ELSE %]
+ <!-- Fallback FTU Language Selector (đảm bảo luôn hiển thị trên thanh điều hướng) -->
+ <div id="header_langmenu" class="langmenu">
+     <ul class="navbar-nav">
+         <li class="nav-item dropdown">
+             <a href="#" title="Chuyển ngôn ngữ / Switch languages" class="nav-link dropdown-toggle" id="langmenu_fb_vi" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                 <i class="fa fa-flag fa-fw fa-icon-header" aria-hidden="true"></i> <span class="langlabel">Ngôn ngữ</span> <b class="caret"></b>
+             </a>
+             <div aria-labelledby="langmenu_fb_vi" role="menu" class="dropdown-menu dropdown-menu-end">
+                 <a class="dropdown-item" href="/cgi-bin/koha/opac-changelanguage.pl?language=vi-VN" tabindex="-1" role="menuitem">
+                     Tiếng Việt <i class="fa fa-check" aria-hidden="true"></i>
+                 </a>
+                 <a class="dropdown-item" href="/cgi-bin/koha/opac-changelanguage.pl?language=en" tabindex="-1" role="menuitem">
+                     English
+                 </a>
+             </div>
+         </li>
+         <li class="divider-vertical" aria-hidden="false" role="presentation"></li>
+     </ul>
+ </div>
  [% END %]
  <ul id="members" class="navbar-nav">
  <li class="nav-item dropdown dropdown-menu-end">
