@@ -136,19 +136,22 @@
         
         <style>
             .ftu-books-scroller-wrap {
-                overflow: hidden;
+                overflow-x: auto;
                 width: 100%;
                 position: relative;
                 padding: 10px 0;
+                scrollbar-width: thin;
             }
             .ftu-books-grid-dynamic {
                 display: flex;
                 gap: 1.5rem;
                 flex-wrap: nowrap;
                 white-space: nowrap;
-                animation: marquee 25s linear infinite;
             }
-            .ftu-books-grid-dynamic:hover {
+            .ftu-books-grid-dynamic.has-marquee {
+                animation: marquee 30s linear infinite;
+            }
+            .ftu-books-grid-dynamic.has-marquee:hover {
                 animation-play-state: paused;
             }
             .ftu-books-grid-dynamic .ftu-book-card {
@@ -157,8 +160,8 @@
                 white-space: normal; /* Restore text wrapping inside card */
             }
             @keyframes marquee {
-                0% { transform: translateX(10%); }
-                100% { transform: translateX(-100%); }
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
             }
             /* Loading State */
             .ftu-loading-books {
@@ -441,11 +444,14 @@ $(document).ready(function() {
             var htmlContent = '';
             var renderedCount = 0;
             
+            var seenBibs = new Set();
             items.forEach(function(item) {
                 if (renderedCount >= 10) return;
                 
                 var bibNum = item.biblionumber || item.id;
-                if (!bibNum) return;
+                if (!bibNum || seenBibs.has(bibNum)) return;
+                seenBibs.add(bibNum);
+
                 var title = (item.title || 'Chưa có tiêu đề').replace(/\s*[\/:]\s*$/, '').trim();
                 var author = (item.author || '[% FTU_BRAND.library_name_short %]').replace(/\s*[\/,]\s*$/, '').trim();
                 var link = item.link || ('/cgi-bin/koha/opac-detail.pl?biblionumber=' + bibNum);
@@ -468,8 +474,10 @@ $(document).ready(function() {
             });
             
             if (renderedCount > 0) {
-                if ($grid.hasClass('ftu-books-grid-dynamic')) {
-                    htmlContent = htmlContent + htmlContent;
+                if (renderedCount >= 6) {
+                    $grid.addClass('has-marquee');
+                } else {
+                    $grid.removeClass('has-marquee');
                 }
                 $grid.html(htmlContent);
             } else {

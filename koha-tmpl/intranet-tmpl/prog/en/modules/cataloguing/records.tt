@@ -1971,6 +1971,9 @@
   };
 
   // --- Cover Image Upload & Drag-Drop (POST) ---
+  let activeUploadBase64 = null;
+  let activeUploadFile = null;
+
   window.openUploadCoverModal = function(biblionumber) {
     const $row = $('#rec-row-' + biblionumber);
     const title = $row.find('.rec-meta-title').text().trim() || `#${biblionumber}`;
@@ -1981,12 +1984,14 @@
     document.getElementById('coverFileInput').value = '';
     document.getElementById('btnConfirmUploadCover').disabled = true;
     activeUploadBase64 = null;
+    activeUploadFile = null;
     window.openModal('modalUploadCover');
   };
 
   window.handleCoverFileSelected = function(files) {
     if (!files || !files[0]) return;
     const file = files[0];
+    activeUploadFile = file;
     const reader = new FileReader();
     reader.onload = (e) => {
       activeUploadBase64 = e.target.result;
@@ -1999,17 +2004,26 @@
 
   window.submitCoverUpload = function() {
     const biblionumber = document.getElementById('upload_biblionumber').value;
-    if (!activeUploadBase64) return;
+    if (!activeUploadBase64 && !activeUploadFile) return;
 
     const btn = document.getElementById('btnConfirmUploadCover');
-    if (btn) btn.disabled = true;
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Uploading...';
+    }
 
     const token = window.getCsrfToken();
-    const formData = new URLSearchParams();
+    const formData = new FormData();
     formData.append('csrf_token', token);
     formData.append('op', 'cud-upload_cover');
     formData.append('biblionumber', biblionumber);
-    formData.append('base64_data', activeUploadBase64);
+    if (activeUploadFile) {
+      formData.append('cover_file', activeUploadFile);
+    }
+    if (activeUploadBase64) {
+      formData.append('base64_data', activeUploadBase64);
+    }
 
     fetch('/cgi-bin/koha/cataloguing/records.pl', {
       method: 'POST',
@@ -2018,7 +2032,10 @@
     })
     .then(parseApiResponse)
     .then(res => {
-      if (btn) btn.disabled = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
       if (res.success) {
         window.showToast(res.message);
         window.closeModal('modalUploadCover');
@@ -2038,7 +2055,10 @@
         window.showToast(res.error || 'Error uploading cover', true);
       }
     }).catch(e => {
-      if (btn) btn.disabled = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
       window.showToast(e.message, true);
     });
   };

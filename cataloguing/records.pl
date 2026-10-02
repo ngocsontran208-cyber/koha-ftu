@@ -371,15 +371,17 @@ if ( $op eq "upload_cover" ) {
     }
 
     my $raw_data;
-    my $base64 = $cgi->param("base64_data") || "";
-    if ($base64 =~ /data:image\/(?:jpeg|jpg|png|gif|webp);base64,(.+)$/s) {
-        my $clean_b64 = $1;
-        $clean_b64 =~ s/\s/+/g;
-        $raw_data = MIME::Base64::decode_base64($clean_b64);
-    } else {
-        my $upload_fh = $cgi->upload("cover_file");
-        if ($upload_fh) {
-            $raw_data = do { local $/; <$upload_fh> };
+    my $upload_fh = $cgi->upload("cover_file");
+    if ($upload_fh) {
+        $raw_data = do { local $/; <$upload_fh> };
+    }
+    if (!$raw_data) {
+        my $base64 = $cgi->param("base64_data") || "";
+        if ($base64 =~ /data:image\/(?:jpeg|jpg|png|gif|webp);base64,(.+)$/s) {
+            my $clean_b64 = $1;
+            $clean_b64 =~ s/[\r\n\t]//g;
+            $clean_b64 =~ s/ /+/g;
+            $raw_data = MIME::Base64::decode_base64($clean_b64);
         }
     }
 
@@ -390,7 +392,11 @@ if ( $op eq "upload_cover" ) {
 
     eval {
         GD::Image->trueColor(1);
-        my $srcimage = GD::Image->new($raw_data);
+        my $srcimage = eval { GD::Image->new($raw_data) }
+                    || eval { GD::Image->newFromPngData($raw_data) }
+                    || eval { GD::Image->newFromJpegData($raw_data) }
+                    || eval { GD::Image->newFromGifData($raw_data) }
+                    || eval { GD::Image->newFromWebpData($raw_data) };
         if (!$srcimage) {
             die "Không thể nhận diện định dạng hình ảnh (chỉ hỗ trợ JPG, PNG, WebP, GIF)";
         }
@@ -401,7 +407,8 @@ if ( $op eq "upload_cover" ) {
         # Tạo và lưu ảnh mới
         my $cover = Koha::CoverImage->new({
             biblionumber => $biblionumber,
-            src_image    => $srcimage
+            src_image    => $srcimage,
+            mimetype     => 'image/png'
         })->store;
 
         print $json->encode({ 

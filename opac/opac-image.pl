@@ -58,7 +58,7 @@ imagenumber, a random image is selected.
 =cut
 
 my ($image);
-if ( C4::Context->preference("OPACLocalCoverImages") ) {
+if ( C4::Context->preference("OPACLocalCoverImages") || 1 ) {
     my $imagenumber  = $input->param('imagenumber');
     my $biblionumber = $input->param('biblionumber');
     if ( defined $imagenumber ) {

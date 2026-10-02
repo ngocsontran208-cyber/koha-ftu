@@ -45,9 +45,10 @@ if ($type eq "books") {
     };
 
     my $b_sth = $dbh->prepare("
-        SELECT b.biblionumber, b.biblionumber AS id, b.title, b.author, bi.publicationyear AS year, bi.isbn, bi.itemtype, UNIX_TIMESTAMP(b.timestamp) AS cover_ts
+        SELECT b.biblionumber, b.biblionumber AS id, b.title, b.author, MAX(bi.publicationyear) AS year, MAX(bi.isbn) AS isbn, MAX(bi.itemtype) AS itemtype, UNIX_TIMESTAMP(b.timestamp) AS cover_ts
         FROM biblio b
         LEFT JOIN biblioitems bi ON b.biblionumber = bi.biblionumber
+        GROUP BY b.biblionumber
         ORDER BY b.biblionumber DESC
         LIMIT $limit
     ");
