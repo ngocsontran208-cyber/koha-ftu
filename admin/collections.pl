@@ -25,6 +25,22 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 );
 
 my $dbh = C4::Context->dbh;
+
+# Đảm bảo bảng koha_collection_meta luôn tồn tại trên mọi môi trường DB
+eval {
+    $dbh->do("
+        CREATE TABLE IF NOT EXISTS koha_collection_meta (
+            ccode VARCHAR(80) NOT NULL PRIMARY KEY,
+            description TEXT NULL,
+            image_url VARCHAR(500) NULL,
+            is_featured TINYINT(1) DEFAULT 1,
+            sort_order INT(11) DEFAULT 99,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+};
+
 my @messages;
 
 # Preset image list for quick selection

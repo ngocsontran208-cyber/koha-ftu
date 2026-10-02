@@ -19,6 +19,21 @@ use C4::Output qw( output_html_with_http_headers );
 my $query = CGI->new;
 my $dbh   = C4::Context->dbh;
 
+# Đảm bảo bảng koha_collection_meta luôn tồn tại trên mọi môi trường DB
+eval {
+    $dbh->do("
+        CREATE TABLE IF NOT EXISTS koha_collection_meta (
+            ccode VARCHAR(80) NOT NULL PRIMARY KEY,
+            description TEXT NULL,
+            image_url VARCHAR(500) NULL,
+            is_featured TINYINT(1) DEFAULT 1,
+            sort_order INT(11) DEFAULT 99,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+};
+
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
     {
         template_name   => "opac-collections.tt",
@@ -79,8 +94,8 @@ while ( my $row = $sth->fetchrow_hashref ) {
 my ($count_all) = $dbh->selectrow_array("SELECT COUNT(*) FROM authorised_values WHERE category = 'CCODE'");
 my ($count_feat) = $dbh->selectrow_array("
     SELECT COUNT(*) FROM authorised_values av 
-    JOIN koha_collection_meta m ON av.authorised_value = m.ccode 
-    WHERE av.category = 'CCODE' AND m.is_featured = 1
+    LEFT JOIN koha_collection_meta m ON av.authorised_value = m.ccode 
+    WHERE av.category = 'CCODE' AND COALESCE(m.is_featured, 1) = 1
 ");
 
 # Check if public virtual shelves exist

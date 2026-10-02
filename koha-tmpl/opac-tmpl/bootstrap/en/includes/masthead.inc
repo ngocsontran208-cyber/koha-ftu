@@ -112,8 +112,8 @@
                 [% END # / IF virtualshelves %]
                 <li role="presentation" class="divider-vertical"></li>
                 <li class="nav-item" id="csdl-nav-item">
-                    <a href="/cgi-bin/koha/opac-databases.pl" class="nav-link" title="Databases (CSDL)" id="csdlmenulink" role="button">
-                        <i id="csdlicon" class="fa fa-database fa-fw fa-icon-black" aria-hidden="true"></i> <span class="csdllabel">Databases (CSDL)</span>
+                    <a href="/cgi-bin/koha/opac-databases.pl" class="nav-link" title="Databases" id="csdlmenulink" role="button">
+                        <i id="csdlicon" class="fa fa-database fa-fw fa-icon-black" aria-hidden="true"></i> <span class="csdllabel">Databases</span>
                     </a>
                 </li>
                 <li role="presentation" class="divider-vertical"></li>
