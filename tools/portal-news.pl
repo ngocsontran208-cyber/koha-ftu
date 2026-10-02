@@ -262,22 +262,31 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         copyright_text         => $cgi->param("copyright_text") || "© 2026 Thư viện Trường Đại học Ngoại thương (Foreign Trade University Library). Bảo lưu mọi quyền."
     );
 
-    if (open(my $fh, "<:encoding(UTF-8)", $cfg_file)) {
-        my $content = do { local $/; <$fh> };
-        close $fh;
-        for my $k (keys %new_vals) {
-            my $v = $new_vals{$k};
-            $v =~ s/\\/\\\\/g;
-            $v =~ s/\"/\\"/g;
-            if ($content =~ /^\s*\Q$k\E\s*=>\s*"[^"\\]*(?:\\.[^"\\]*)*"/m) {
-                $content =~ s/^(\s*\Q$k\E\s*=>\s*)"[^"\\]*(?:\\.[^"\\]*)*"/$1"$v"/m;
-            } else {
-                $content =~ s/(\}\s*\%\])/    $k => "$v",\n$1/;
+    my @cfg_files = (
+        "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc",
+        "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/en/includes/ftu-brand-config.inc",
+        "/kohadevbox/koha/koha-tmpl/intranet-tmpl/prog/vi-VN/includes/ftu-brand-config.inc",
+        "/kohadevbox/koha/koha-tmpl/intranet-tmpl/prog/en/includes/ftu-brand-config.inc",
+    );
+
+    for my $f (@cfg_files) {
+        if (open(my $fh, "<:encoding(UTF-8)", $f)) {
+            my $content = do { local $/; <$fh> };
+            close $fh;
+            for my $k (keys %new_vals) {
+                my $v = $new_vals{$k};
+                $v =~ s/\\/\\\\/g;
+                $v =~ s/\"/\\"/g;
+                if ($content =~ /^\s*\Q$k\E\s*=>\s*"[^"\\]*(?:\\.[^"\\]*)*"/m) {
+                    $content =~ s/^(\s*\Q$k\E\s*=>\s*)"[^"\\]*(?:\\.[^"\\]*)*"/$1"$v"/m;
+                } else {
+                    $content =~ s/(\}\s*\%\])/    $k => "$v",\n$1/;
+                }
             }
-        }
-        if (open(my $out, ">:encoding(UTF-8)", $cfg_file)) {
-            print $out $content;
-            close $out;
+            if (open(my $out, ">:encoding(UTF-8)", $f)) {
+                print $out $content;
+                close $out;
+            }
         }
     }
 
