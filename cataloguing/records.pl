@@ -23,6 +23,17 @@ my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
 my $json = JSON->new->utf8;
 
+# Tự động đảm bảo bảng biblio_quantities luôn tồn tại
+eval {
+    $dbh->do("
+        CREATE TABLE IF NOT EXISTS biblio_quantities (
+            biblionumber INT(11) NOT NULL,
+            quantity INT(11) NOT NULL DEFAULT 0,
+            PRIMARY KEY (biblionumber)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+};
+
 # Authentication and permissions
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
     {
