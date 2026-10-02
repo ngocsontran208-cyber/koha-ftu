@@ -62,6 +62,11 @@ body#catalog_advsearch .col-md-10.offset-md-1.col-lg-8.offset-lg-2 {
     color: var(--ftu-primary) !important;
 }
 
+body#catalog_advsearch h1::before {
+    display: none !important;
+    content: none !important;
+}
+
 body#catalog_advsearch h1:not(.ftu-clean-title) {
     display: none !important;
 }
@@ -532,7 +537,7 @@ body#catalog_advsearch .search-action-bottom .btn-link:hover {
                 </div>
             [% ELSE %]
                 <input type="hidden" name="advsearch" value="1" />
-                <h1 class="ftu-clean-title"><i class="fa fa-magnifying-glass"></i> Tra cứu danh mục tài liệu</h1>
+                <h1 class="ftu-clean-title">Tra cứu danh mục tài liệu</h1>
 
                 <!-- SEARCH BUTTONS -->
                 <div id="toolbar" class="btn-toolbar sticky">

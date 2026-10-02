@@ -1135,18 +1135,8 @@ body#catalog_results h1::after {
 }
 
 body#catalog_advsearch h1::before {
-    content: '\f002';
-    font-family: "Font Awesome 6 Free", "FontAwesome";
-    font-weight: 900;
-    font-size: 1.25rem;
-    color: var(--ftu-red);
-    background: var(--ftu-red-light);
-    width: 38px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
+    display: none !important;
+    content: none !important;
 }
 
 body#catalog_results h1::before {
