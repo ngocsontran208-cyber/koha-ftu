@@ -11,11 +11,11 @@
 <title
     >[% FILTER collapse %]
         [% IF (loop) %]
-            [% t("Results") | html %]
+            Kết quả
             &rsaquo;
         [% END %]
-        [% t("Inventory") | html %]
-        &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+        Kiểm kê kho tài liệu
+        &rsaquo; Biên mục &rsaquo; Koha
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -37,26 +37,26 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
 
         [% IF (loop) %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/tools/inventory.pl">Inventory</a>
+                <a href="/cgi-bin/koha/tools/inventory.pl">Kiểm kê kho tài liệu</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>Results</span>
+                <span>Kết quả</span>
             [% END %]
         [% ELSE %]
             [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>Inventory</span>
+                <span>Kiểm kê kho tài liệu</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' aside='cat-menu' %]
-    <h1>Inventory</h1>
+    <h1 class="ftu-clean-title"><i class="fa fa-clipboard-check"></i> Kiểm kê kho tài liệu</h1>
     [% IF (moddatecount) %]
         <div class="alert alert-info">[% moddatecount | html %] items modified : datelastseen set to [% date | $KohaDates with_hours => 1 %]</div>
         <div class="alert alert-warning">Number of potential barcodes read: [% LinesRead | html %]</div>

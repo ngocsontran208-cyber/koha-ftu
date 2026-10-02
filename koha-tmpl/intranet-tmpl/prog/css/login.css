@@ -1,279 +1,398 @@
 /* ==========================================================
-   FTU Library – Login Page (Card Only, Light)
+   FTU Library – Staff Login Page Design (Tailwind / Inter Style)
    Thư viện Phân hiệu Trường Đại học Ngoại thương
    ========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --ftu-red: #a3000b;
+    --ftu-dark: #820009;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+}
 
 html, body {
     height: 100%;
-    font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-body {
-    background: #f0f2f5;
-    min-height: 100vh;
-    overflow: auto;
-}
-
-/* Subtle dot pattern background */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle, #c0c4cc 1px, transparent 1px);
-    background-size: 28px 28px;
-    opacity: 0.4;
-    z-index: 0;
-}
-
-/* ── Main container: center the card ── */
-.main.container-fluid {
-    position: relative;
-    z-index: 1;
+body#main_auth,
+body.main_main-auth {
+    background-color: var(--gray-50) !important;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-}
-
-/* ── Login card ── */
-#login {
-    background: #ffffff;
-    border-radius: 18px;
-    box-shadow:
-        0 1px 3px rgba(0,0,0,0.06),
-        0 8px 32px rgba(0,0,0,0.10),
-        0 2px 8px rgba(0,0,0,0.04);
-    width: 420px;
-    max-width: 100%;
-    padding: 3rem 2.8rem 2.4rem;
-    position: relative;
-    /* Reset old Koha defaults */
-    top: auto;
-    right: auto;
+    padding: 1rem;
     margin: 0;
-    border: none;
-    animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    position: relative;
 }
 
-@keyframes cardIn {
-    from { opacity: 0; transform: translateY(20px); }
+/* Remove any background pattern/pseudo-elements */
+body#main_auth::before,
+body.main_main-auth::before {
+    display: none !important;
+}
+
+/* Hide unneeded Koha navigation, headers, and quick-search elements on login page */
+nav.navbar,
+#header_search,
+.sub-header-search,
+#ftu-header-unified,
+#changelanguage,
+#nav_lang_menu,
+#i18nMenu,
+.langmenu,
+#login h1:not(.ftu-title) {
+    display: none !important;
+}
+
+/* Main centering container */
+.main.container-fluid {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    min-height: unset;
+    position: relative;
+    z-index: 1;
+}
+
+/* ==========================================================
+   Login Card (max-w-[420px] rounded-2xl shadow-xl border border-gray-100)
+   ========================================================== */
+#login {
+    background-color: #ffffff !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    border-radius: 1rem !important; /* 16px = rounded-2xl */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important; /* shadow-xl */
+    overflow: hidden !important;
+    position: relative !important;
+    border: 1px solid var(--gray-100) !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    animation: ftuCardIn 0.3s ease-out both;
+}
+
+@keyframes ftuCardIn {
+    from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Red accent top border */
+/* Vạch màu đỏ trang trí ở cạnh trên (h-1.5 w-full bg-ftu-red absolute top-0 left-0) */
 #login::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #9b1a1a, #c41e1e 50%, #9b1a1a);
-    border-radius: 18px 18px 0 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 6px; /* 1.5 = 6px */
+    background-color: var(--ftu-red) !important;
+    z-index: 20;
 }
 
-/* Hide old Koha h1 */
-#login h1 { display: none; }
-
-/* ── FTU Header ── */
-#ftu-header {
-    text-align: center;
-    margin-bottom: 1.8rem;
+/* Nội dung card với padding chuẩn, cân đối và thanh lịch */
+.login-card-inner {
+    padding: 2.25rem 2rem 2rem 2rem !important;
 }
 
-#ftu-logo-img {
-    width: 82px;
-    height: 82px;
-    object-fit: contain;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-    transition: transform 0.3s ease;
-    filter: drop-shadow(0 4px 12px rgba(185,28,28,0.2));
+@media (min-width: 640px) {
+    .login-card-inner {
+        padding: 2.75rem 2.5rem 2.25rem 2.5rem !important;
+    }
 }
 
-#ftu-logo-img:hover { transform: scale(1.05); }
-
-#ftu-name-line1 {
-    font-size: 1.55rem;
-    font-weight: 800;
-    color: #b91c1c;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    line-height: 1;
-    margin-bottom: 0.3rem;
+/* ==========================================================
+   Header: Real FTU Logo, Title, Subtitle
+   ========================================================== */
+.ftu-header-block {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-bottom: 1.75rem !important;
+    text-align: center !important;
 }
 
-#ftu-name-line2 {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #6b7280;
-    line-height: 1.4;
+/* Logo FTU chính thức */
+.ftu-real-logo {
+    width: 82px !important;
+    height: 82px !important;
+    max-width: 82px !important;
+    max-height: 82px !important;
+    object-fit: contain !important;
+    margin: 0 auto 0.85rem auto !important;
+    display: block !important;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08)) !important;
 }
 
-/* Short red divider */
-#ftu-divider {
-    width: 40px;
-    height: 3px;
-    background: #b91c1c;
-    border-radius: 3px;
-    margin: 1.3rem auto 1.6rem;
+/* Tiêu đề 1: THƯ VIỆN (font đứng, đậm, in hoa) */
+.ftu-title,
+#login h1.ftu-title {
+    display: block !important;
+    font-size: 1.45rem !important; /* ~23px */
+    font-weight: 800 !important;
+    color: var(--ftu-red) !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    font-style: normal !important;
+    line-height: 1.15 !important;
+    margin: 0 0 0.25rem 0 !important;
+    text-align: center !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
-/* ── Form ── */
-#loginform p { margin-bottom: 1rem; }
-
-#loginform label {
-    display: block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #9ca3af;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 0.38rem;
+/* Tiêu đề 2: PHÂN HIỆU TRƯỜNG ĐH NGOẠI THƯƠNG (font đứng, đậm, in hoa, khoảng cách dòng nhỏ) */
+.ftu-subtitle {
+    display: block !important;
+    font-size: 0.875rem !important; /* 14px */
+    font-weight: 700 !important;
+    color: var(--ftu-red) !important;
+    letter-spacing: 0.025em !important;
+    text-transform: uppercase !important;
+    font-style: normal !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    text-align: center !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
+/* ==========================================================
+   Form Fields (space-y-6)
+   ========================================================== */
+#loginform {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field-group {
+    margin-bottom: 1.25rem !important;
+}
+
+/* Label: block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 */
+.form-field-label,
+#loginform label:not(.show-password-label):not(.show-password-toggle-label) {
+    display: block !important;
+    font-size: 0.75rem !important; /* 12px = text-xs */
+    font-weight: 700 !important;
+    color: var(--gray-600) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important; /* tracking-wider */
+    margin-bottom: 0.4rem !important;
+}
+
+/* Input: w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-ftu-red focus:ring-2 focus:ring-ftu-red/20 outline-none transition-all duration-200 text-gray-800 bg-gray-50 focus:bg-white placeholder-gray-400 */
+.form-field-input,
 #loginform input[type="text"],
-#loginform input[type="password"] {
-    width: 100%;
-    font-family: 'Be Vietnam Pro', sans-serif;
-    font-size: 0.95rem;
-    color: #111827;
-    background: #f9fafb;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 0.72rem 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    outline: none;
-    margin: 0;
-}
-
-#loginform input[type="text"]:focus,
-#loginform input[type="password"]:focus {
-    background: #fff;
-    border-color: #b91c1c;
-    box-shadow: 0 0 0 3px rgba(185,28,28,0.1);
-}
-
+#loginform input[type="password"],
 #loginform select {
-    width: 100%;
-    font-family: 'Be Vietnam Pro', sans-serif;
-    font-size: 0.9rem;
-    color: #374151;
-    background: #f9fafb;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 0.68rem 1rem;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    margin: 0;
+    width: 100% !important;
+    padding: 0.75rem 1rem !important; /* px-4 py-3 (12px 16px) */
+    border-radius: 0.5rem !important; /* 8px = rounded-lg */
+    border: 1px solid var(--gray-300) !important;
+    outline: none !important;
+    transition: all 0.2s ease-in-out !important;
+    color: var(--gray-800) !important;
+    background-color: var(--gray-50) !important;
+    font-size: 0.875rem !important; /* 14px */
+    font-family: 'Inter', sans-serif !important;
+    box-sizing: border-box !important;
 }
 
-#loginform select:focus { border-color: #b91c1c; }
-
-/* ── Submit button ── */
-.submit { margin-top: 1.5rem; }
-
-#submit-button {
-    width: 100%;
-    padding: 0.82rem;
-    background: #b91c1c;
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-family: 'Be Vietnam Pro', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 4px 14px rgba(185,28,28,0.28);
+.form-field-input:focus,
+#loginform input[type="text"]:focus,
+#loginform input[type="password"]:focus,
+#loginform select:focus {
+    background-color: #ffffff !important;
+    border-color: var(--ftu-red) !important;
+    box-shadow: 0 0 0 3px rgba(163, 0, 11, 0.18) !important;
 }
 
-#submit-button:hover {
-    background: #991b1b;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(185,28,28,0.38);
+.form-field-input::placeholder,
+#loginform input::placeholder {
+    color: var(--gray-400) !important;
 }
 
-#submit-button:active {
-    transform: translateY(0);
-    background: #7f1d1d;
-    box-shadow: 0 2px 8px rgba(185,28,28,0.2);
+/* ==========================================================
+   Show Password Toggle: flex items-center mt-1
+   ========================================================== */
+.show-password-row,
+.show-password-toggle {
+    display: flex !important;
+    align-items: center !important;
+    margin-top: 0.25rem !important; /* mt-1 */
+    margin-bottom: 1.5rem !important;
 }
 
-input[type="submit"]:focus {
-    outline: 2px solid #b91c1c;
-    outline-offset: 2px;
-    box-shadow: none;
-    background: #b91c1c;
-    border: none;
+.show-password-checkbox,
+input.show-password-toggle-checkbox {
+    width: 1rem !important; /* w-4 = 16px */
+    height: 1rem !important; /* h-4 = 16px */
+    accent-color: var(--ftu-red) !important;
+    border: 1px solid var(--gray-300) !important;
+    border-radius: 0.25rem !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    float: none !important;
 }
 
-/* ── Errors ── */
-#login #login_error {
-    background: #fff1f1;
-    border: 1.5px solid #fca5a5;
-    border-radius: 10px;
-    color: #b91c1c;
-    font-size: 0.83rem;
-    font-weight: 500;
-    margin-bottom: 1.1rem;
-    padding: 0.65rem 1rem;
-    text-align: center;
-    filter: none;
-    text-shadow: none;
+.show-password-label,
+label.show-password-toggle-label {
+    margin-left: 0.5rem !important; /* ml-2 */
+    margin-bottom: 0 !important;
+    font-size: 0.875rem !important; /* text-sm = 14px */
+    color: var(--gray-600) !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: color 0.15s !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
 }
 
-#login #login_error strong { color: #991b1b; }
-#login #login_error a { color: #b91c1c; }
-
-/* ── Alerts ── */
-.alert { border-radius: 10px; font-size: 0.83rem; padding: 0.65rem 1rem; margin-bottom: 1rem; }
-.alert-danger  { background: #fff1f1; border: 1px solid #fca5a5; color: #b91c1c; }
-.alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-.alert-info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
-
-/* ── Show-password toggle ── */
-.show-password-toggle { margin: 0.35rem 0; color: #6b7280; font-size: 0.82rem; }
-input.show-password-toggle-checkbox { float: left; margin: 0 0.5rem 0 0; accent-color: #b91c1c; }
-
-/* ── Footer ── */
-#ftu-footer {
-    margin-top: 1.6rem;
-    text-align: center;
-    color: #d1d5db;
-    font-size: 0.68rem;
-    letter-spacing: 0.03em;
+.show-password-label:hover,
+label.show-password-toggle-label:hover {
+    color: var(--gray-900) !important;
 }
 
-#ftu-footer a { color: #b91c1c; text-decoration: none; opacity: 0.7; }
-#ftu-footer a:hover { opacity: 1; }
-
-/* ── Page section ── */
-.page-section {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    color: #374151;
-    font-size: 0.84rem;
-    margin-bottom: 1.2rem;
-    padding: 0.85rem 1rem;
+/* Hide duplicate show-password toggle created by Koha JS if custom one exists */
+.show-password-toggle {
+    display: none !important;
 }
 
-/* ── Links ── */
-a { color: #b91c1c; }
-a:hover { color: #991b1b; }
-a:visited { color: #7f1d1d; }
-#login > p { text-align: center; margin-top: 0.8rem; }
-#login > p a { font-size: 0.82rem; color: #9ca3af; text-decoration: none; }
-#login > p a:hover { color: #b91c1c; }
+/* ==========================================================
+   Submit Button: w-full bg-ftu-red hover:bg-ftu-dark text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 uppercase tracking-wide
+   ========================================================== */
+.submit-btn-row {
+    padding-top: 0.5rem !important; /* pt-2 */
+}
 
-/* ── Responsive ── */
-@media (max-width: 480px) {
-    #login { padding: 2.2rem 1.5rem 2rem; border-radius: 14px; }
+.btn-submit-ftu,
+#submit-button,
+#loginform input[type="submit"] {
+    width: 100% !important;
+    background-color: var(--ftu-red) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding: 0.875rem 1rem !important; /* py-3.5 px-4 (14px 16px) */
+    border-radius: 0.75rem !important; /* rounded-xl = 12px */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important; /* shadow-md */
+    transition: all 0.2s ease-in-out !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important; /* tracking-wide */
+    border: none !important;
+    cursor: pointer !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+.btn-submit-ftu:hover,
+#submit-button:hover,
+#loginform input[type="submit"]:hover {
+    background-color: var(--ftu-dark) !important;
+    box-shadow: 0 6px 12px -2px rgba(163, 0, 11, 0.25) !important;
+}
+
+.btn-submit-ftu:active,
+#submit-button:active,
+#loginform input[type="submit"]:active {
+    background-color: #6b0007 !important;
+    transform: scale(0.99) !important;
+}
+
+/* ==========================================================
+   Footer: mt-8 text-center border-t border-gray-100 pt-6
+   ========================================================== */
+.ftu-login-footer {
+    margin-top: 2rem !important; /* mt-8 = 32px */
+    text-align: center !important;
+    border-top: 1px solid var(--gray-200) !important;
+    padding-top: 1.5rem !important; /* pt-6 = 24px */
+}
+
+.ftu-login-footer p {
+    font-size: 0.75rem !important; /* text-xs = 12px */
+    color: var(--gray-400) !important;
+    margin: 0 !important;
+}
+
+.ftu-login-footer a {
+    color: inherit !important;
+    text-decoration: none !important;
+    transition: color 0.15s !important;
+}
+
+.ftu-login-footer a:hover {
+    color: var(--ftu-red) !important;
+}
+
+/* ==========================================================
+   Alerts & Error Messages
+   ========================================================== */
+#login_error,
+.alert {
+    background-color: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 0.5rem !important;
+    color: #991b1b !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.8125rem !important;
+    margin-bottom: 1.25rem !important;
+    text-align: center !important;
+}
+#login_error strong { color: #7f1d1d !important; }
+
+/* Quick demo fill box */
+.ftu-quick-hint {
+    margin-bottom: 1.25rem !important;
+    padding: 0.6rem 0.85rem !important;
+    background: #fef2f2 !important;
+    border: 1px dashed #fca5a5 !important;
+    border-radius: 8px !important;
+    font-size: 0.8rem !important;
+    color: #991b1b !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+.btn-quick-fill {
+    background: var(--ftu-red) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.15s !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+}
+.btn-quick-fill:hover {
+    background: var(--ftu-dark) !important;
 }

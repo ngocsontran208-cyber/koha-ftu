@@ -13,11 +13,11 @@
 
 [%# Display a simple form %]
 [% BLOCK patron_search_filters_simple %]
-    <form method="get" class="patron_search_form">
-        <div class="hint">Enter patron card number or partial name:</div>
-        <input type="text" size="40" id="search_patron_filter_simple" class="search_patron_filter focus" autocomplete="off" />
-        <input type="submit" class="btn btn-primary search_patron_filter_btn" value="Search" />
-    </form>
+ <form method="get" class="patron_search_form">
+ <div class="hint">Nhập số thẻ hoặc tên của bạn đọc:</div>
+ <input type="text" size="40" id="search_patron_filter_simple" class="search_patron_filter focus" autocomplete="off" />
+ <input class="btn btn-primary search_patron_filter_btn" type="submit" value="Tìm kiếm" />
+ </form>
 [% END %]
 
 [%# Display a complex patron search form %]
@@ -31,85 +31,85 @@
 [%# - search_type: select 'contains' or 'starts with' %]
 [%- searchtype = searchtype || Koha.Preference('DefaultPatronSearchMethod') -%]
 [% BLOCK patron_search_filters %]
-    [% SET has_patron_search_filters_block = 1 %]
-    <aside>
-        <form method="get" class="patron_search_form">
-            <fieldset class="brief">
-                <h3>Search for patron</h3>
-                <ol>
-                    <li>
-                        <label>Search:</label>
-                        <input type="text" id="search_patron_filter" class="search_patron_filter focus" value="[% search_filter | html %]" />
-                    </li>
+ [% SET has_patron_search_filters_block = 1 %]
+ <aside>
+ <form method="get" class="patron_search_form">
+ <fieldset class="brief">
+ <h3>Bộ lọc tìm kiếm</h3>
+ <ol>
+ <li>
+ <label for="search_patron_filter">Từ khóa:</label>
+ <input type="text" id="search_patron_filter" class="search_patron_filter focus" placeholder="Họ tên, mã thẻ, email..." value="[% search_filter | html %]" />
+ </li>
 
-                    [% FOR f IN filters %]
-                        [% SWITCH f %]
-                        [% CASE 'branch' %]
-                            <li>
-                                <label>Library:</label>
-                                <select class="branchcode_filter">
-                                    [% SET libraries = Branches.all( only_from_group => 1 ) %]
-                                    [% IF libraries.size != 1 %]
-                                        <option value="">Any</option>
-                                    [% END %]
-                                    [% FOREACH l IN libraries %]
-                                        [% IF (l.branchcode == branchcode_filter) %]
-                                            <option value="[% l.branchcode | html %]" selected="selected">[% l.branchname | html %]</option>
-                                        [% ELSE %]
-                                            <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
-                                        [% END %]
-                                    [% END %]
-                                </select>
-                            </li>
-                        [% CASE 'category' %]
-                            <li>
-                                <label>Category:</label>
-                                <select class="categorycode_filter">
-                                    <option value="">Any</option>
-                                    [% FOREACH category IN Categories.limited.unblessed %]
-                                        [% IF ( category.categorycode == categorycode_filter ) %]
-                                            <option value="[% category.categorycode | html %]" selected="selected">[% category.description | html %]</option>
-                                        [% ELSE %]
-                                            <option value="[% category.categorycode | html %]">[% category.description | html %]</option>
-                                        [% END %]
-                                    [% END %]
-                                </select>
-                            </li>
-                        [% CASE 'sort1' %]
-                            <li>
-                                <label>Sort 1:</label>
-                                [% PROCESS 'av-build-dropbox.inc' no_id => 1, name="sort1_filter", default="", category="Bsort1", empty=1, size = 20 %]
-                            </li>
-                        [% CASE 'sort2' %]
-                            <li>
-                                <label>Sort 2:</label>
-                                [% PROCESS 'av-build-dropbox.inc' no_id => 1, name="sort2_filter", default="", category="Bsort2", empty=1, size = 20 %]
-                            </li>
-                        [% CASE 'search_field' %]
-                            <li> [% INCLUDE patron_fields_dropdown %] </li>
-                        [% CASE 'search_type' %]
-                            <li>
-                                <label>Search type:</label>
-                                <select name="searchtype" class="searchtype_filter">
-                                    [% IF searchtype == "starts_with" %]
-                                        <option value="starts_with" selected="selected">Starts with</option>
-                                        <option value="contains">Contains</option>
-                                    [% ELSE %]
-                                        <option value="starts_with">Starts with</option>
-                                        <option value="contains" selected="selected">Contains</option>
-                                    [% END %]
-                                </select>
-                            </li>
-                        [% END %]
-                    [% END %]
-                </ol>
-            </fieldset>
-            <fieldset class="action">
-                <input type="submit" class="btn btn-primary search_patron_filter_btn" value="Search" />
-                <input type="button" value="Clear" class="btn btn-default clear_search" />
-            </fieldset>
-        </form>
-    </aside>
+ [% FOR f IN filters %]
+ [% SWITCH f %]
+ [% CASE 'branch' %]
+ <li>
+ <label>Cơ sở / Thư viện:</label>
+ <select class="branchcode_filter">
+ [% SET libraries = Branches.all( only_from_group => 1 ) %]
+ [% IF libraries.size != 1 %]
+ <option value="">Tất cả cơ sở</option>
+ [% END %]
+ [% FOREACH l IN libraries %]
+ [% IF (l.branchcode == branchcode_filter) %]
+ <option value="[% l.branchcode | html %]" selected="selected">[% l.branchname | html %]</option>
+ [% ELSE %]
+ <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ [% CASE 'category' %]
+ <li>
+ <label>Nhóm bạn đọc:</label>
+ <select class="categorycode_filter">
+ <option value="">Tất cả nhóm</option>
+ [% FOREACH category IN Categories.limited.unblessed %]
+ [% IF ( category.categorycode == categorycode_filter ) %]
+ <option value="[% category.categorycode | html %]" selected="selected">[% category.description | html %]</option>
+ [% ELSE %]
+ <option value="[% category.categorycode | html %]">[% category.description | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ </li>
+ [% CASE 'sort1' %]
+ <li>
+ <label>Thống kê 1:</label>
+ [% PROCESS 'av-build-dropbox.inc' no_id => 1, name="sort1_filter", default="", category="Bsort1", empty=1, size = 20 %]
+ </li>
+ [% CASE 'sort2' %]
+ <li>
+ <label>Thống kê 2:</label>
+ [% PROCESS 'av-build-dropbox.inc' no_id => 1, name="sort2_filter", default="", category="Bsort2", empty=1, size = 20 %]
+ </li>
+ [% CASE 'search_field' %]
+ <li> [% INCLUDE patron_fields_dropdown %] </li>
+ [% CASE 'search_type' %]
+ <li>
+ <label>Phương thức tìm:</label>
+ <select name="searchtype" class="searchtype_filter">
+ [% IF searchtype == "starts_with" %]
+ <option value="starts_with" selected="selected">Bắt đầu bằng</option>
+ <option value="contains">Chứa từ khóa</option>
+ [% ELSE %]
+ <option value="starts_with">Bắt đầu bằng</option>
+ <option value="contains" selected="selected">Chứa từ khóa</option>
+ [% END %]
+ </select>
+ </li>
+ [% END %]
+ [% END %]
+ </ol>
+ </fieldset>
+ <fieldset class="action">
+ <input class="btn btn-primary search_patron_filter_btn" type="submit" value="Tìm kiếm" />
+ <input class="btn btn-default clear_search" type="button" value="Đặt lại" />
+ </fieldset>
+ </form>
+ </aside>
 [% END %]
 
 [%# Display the table with: %]
@@ -123,97 +123,99 @@
 [%# columns: See patron_search_js %]
 [% BLOCK patron_search_table %]
 
-    [% UNLESS table_id %]
-        [% SET table_id = "memberresultst" %]
-    [% END %]
+ [% UNLESS table_id %]
+ [% SET table_id = "memberresultst" %]
+ [% END %]
 
-    [% IF filter == 'suggestions_managers' %]
-        <div class="alert alert-info">Only staff with superlibrarian or full suggestions permissions are returned in the search results</div>
-    [% ELSIF filter == 'orders_managers' OR filter == 'baskets_managers' %]
-        <div class="alert alert-info">Only staff with superlibrarian or acquisitions permissions (or order_manage permission if granular permissions are enabled) are returned in the search results</div>
-    [% ELSIF filter == 'funds_owners' OR filter == 'funds_users' %]
-        <div class="alert alert-info">Only staff with superlibrarian or acquisitions permissions (or budget_modify permission if granular permissions are enabled) are returned in the search results</div>
-    [% ELSIF filter == 'erm_users' %]
-        <div class="alert alert-info">Only staff with superlibrarian or ERM permissions are returned in the search results</div>
-    [% ELSIF filter == 'ill_users' %]
-        <div class="alert alert-info">Only staff with superlibrarian or ILL permissions are returned in the search results</div>
-    [% END %]
+ [% IF filter == 'suggestions_managers' %]
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền phân hệ gợi ý mua</div>
+ [% ELSIF filter == 'orders_managers' OR filter == 'baskets_managers' %]
+ <div class="alert alert-info">Chỉ cán bộ thư viện được phân quyền trong phân hệ bổ sung mới được hiển thị trong kết quả tìm kiếm</div>
+ [% ELSIF filter == 'funds_owners' OR filter == 'funds_users' %]
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền quản lý quỹ / ngân sách</div>
+ [% ELSIF filter == 'erm_users' %]
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền quản lý tài nguyên điện tử (ERM)</div>
+ [% ELSIF filter == 'ill_users' %]
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền mượn liên thư viện</div>
+ [% END %]
 
-    <div class="browse">
-        Browse by last name: [% SET alphabet = Koha.Preference('alphabet').split(' ') %]
-        [% UNLESS alphabet.size %]
-            [% alphabet = ['A' .. 'Z'] %]
-        [% END %]
-        [% FOREACH letter IN alphabet %]
-            <a href="#" class="filterByLetter">[% letter | html %]</a>
-        [% END %]
-    </div>
+ <div class="browse">
+ <span class="browse-label">Lọc theo chữ cái đầu:</span>
+ <a href="#" class="filterByLetter filterAll active">Tất cả</a>
+ [% SET alphabet = Koha.Preference('alphabet').split(' ') %]
+ [% UNLESS alphabet.size %]
+ [% alphabet = ['A' .. 'Z'] %]
+ [% END %]
+ [% FOREACH letter IN alphabet %]
+ <a href="#" class="filterByLetter">[% letter | html %]</a>
+ [% END %]
+ </div>
 
-    <h3 style="display: none;" class="search_description" data-prefix="[% I18N.t("Patrons found for: %s") %]"></h3>
+ <h3 style="display: none;" class="search_description" data-prefix="[% I18N.t("Patrons found for: %s") %]"></h3>
 
-    <div id="[% table_id | html %]_search_results" style="display:none;">
-        <div class="info alert alert-info" style="display: none; margin: 1em 0;"></div>
-        <div class="error alert alert-warning" style="display: none; margin: 1em 0"></div>
+ <div id="[% table_id | html %]_search_results" style="display:none;">
+ <div class="info alert alert-info" style="display: none; margin: 1em 0;"></div>
+ <div class="error alert alert-warning" style="display: none; margin: 1em 0"></div>
 
-        <input type="hidden" class="firstletter_filter" value="" />
-        [% SET table_class = open_on_row_click ? 'selections-table' : '' %]
-        <table id="[% table_id | html %]" class="[% table_class | html %]">
-            <thead>
-                <tr>
-                    [% FOR column IN columns %]
-                        [% SWITCH column %]
-                        [% CASE 'checkbox' %]
-                            <th class="no-export"></th>
-                        [% CASE 'cardnumber' %]
-                            <th>Card</th>
-                        [% CASE 'dateofbirth' %]
-                            <th>Date of birth</th>
-                        [% CASE 'name' %]
-                            <th>Name</th>
-                        [% CASE 'name-address' %]
-                            <th>Name</th>
-                        [% CASE 'address' %]
-                            <th>Address</th>
-                        [% CASE 'address-library' %]
-                            <th>Address</th>
-                        [% CASE 'branch' %]
-                            <th>Library</th>
-                        [% CASE 'category' %]
-                            <th>Category</th>
-                        [% CASE 'dateexpiry' %]
-                            <th>Expires on</th>
-                        [% CASE 'borrowernotes' %]
-                            <th>Notes</th>
-                        [% CASE 'phone' %]
-                            <th>Phone</th>
-                        [% CASE 'checkouts' %]
-                            <th>Checkouts</th>
-                        [% CASE 'account_balance' %]
-                            <th>Fines</th>
-                        [% CASE 'sort1' %]
-                            <th>Sort 1</th>
-                        [% CASE 'sort2' %]
-                            <th>Sort 2</th>
-                        [% CASE 'action' %]
-                            <th class="no-export">&nbsp;</th>
-                        [% END %]
-                    [% END %]
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+ <input type="hidden" class="firstletter_filter" value="" />
+ [% SET table_class = open_on_row_click ? 'selections-table' : '' %]
+ <table id="[% table_id | html %]" class="[% table_class | html %]">
+ <thead>
+ <tr>
+ [% FOR column IN columns %]
+ [% SWITCH column %]
+ [% CASE 'checkbox' %]
+ <th class="no-export"></th>
+ [% CASE 'cardnumber' %]
+ <th>Số thẻ / Mã bạn đọc</th>
+ [% CASE 'dateofbirth' %]
+ <th>Ngày sinh</th>
+ [% CASE 'name' %]
+ <th>Họ và tên</th>
+ [% CASE 'name-address' %]
+ <th>Họ và tên</th>
+ [% CASE 'address' %]
+ <th>Địa chỉ</th>
+ [% CASE 'address-library' %]
+ <th>Địa chỉ</th>
+ [% CASE 'branch' %]
+ <th>Cơ sở</th>
+ [% CASE 'category' %]
+ <th>Nhóm bạn đọc</th>
+ [% CASE 'dateexpiry' %]
+ <th>Hạn thẻ</th>
+ [% CASE 'borrowernotes' %]
+ <th>Ghi chú</th>
+ [% CASE 'phone' %]
+ <th>Điện thoại</th>
+ [% CASE 'checkouts' %]
+ <th>Mượn / Quá hạn</th>
+ [% CASE 'account_balance' %]
+ <th>Phí / Phạt</th>
+ [% CASE 'sort1' %]
+ <th>Thống kê 1</th>
+ [% CASE 'sort2' %]
+ <th>Thống kê 2</th>
+ [% CASE 'action' %]
+ <th class="no-export">Thao tác</th>
+ [% END %]
+ [% END %]
+ </tr>
+ </thead>
+ <tbody></tbody>
+ </table>
+ </div>
 
-    <!-- Patron preview modal -->
-    <div class="modal" id="patronPreview" tabindex="-1" role="dialog" aria-labelledby="patronPreviewLabel">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ <!-- Patron preview modal -->
+ <div class="modal" id="patronPreview" tabindex="-1" role="dialog" aria-labelledby="patronPreviewLabel">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-body">
+ <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
+ </div>
+ </div>
+ </div>
+ </div>
 [% END %]
 
 [%# Integrate all the JS code, outside of a script tag %]
@@ -233,12 +235,12 @@
 [%# empty_table_settings: boolean, default off. If true, it will ensure no table_settings are utilized %]
 [% BLOCK patron_search_js %]
 
-    [% IF redirect_if_one_result && !redirect_url %]
-        <script nonce="[% Koha.CSPNonce | $raw %]">
+ [% IF redirect_if_one_result && !redirect_url %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
             console.log("Wrong call of patron_search_js - missing redirect_url");
         </script>
-    [% END %]
-    <script nonce="[% Koha.CSPNonce | $raw %]">
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
         var categories = [% To.json(Categories.all.unblessed) | $raw %].map(e => {
             e['_id'] = e.categorycode.toLowerCase();
             e['_str'] = e.description;
@@ -304,10 +306,10 @@
             });
         });
     </script>
-    [% INCLUDE 'datatables.inc' %]
-    [% INCLUDE 'js-patron-get-age.inc' %]
-    [% INCLUDE 'js-patron-format-address.inc' %]
-    <script nonce="[% Koha.CSPNonce | $raw %]">
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'js-patron-get-age.inc' %]
+ [% INCLUDE 'js-patron-format-address.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
         {
 
             function get_patron_search_form(){
@@ -370,7 +372,7 @@
                 $(aLengthMenu).each(function(){
                     if ( this == -1 ) {
                         // Label for -1 is "All"
-                        aLengthMenuLabel.push(_("All"));
+                        aLengthMenuLabel.push(_("Tất cả"));
                     } else {
                         aLengthMenuLabel.push(this);
                     }
@@ -561,7 +563,7 @@
                                     searchable: true,
                                     orderable: true,
                                     render: function( data, type, row, meta ) {
-                                        return data ? "<span class=\"dateofbirth\">" + escape_str($date(data)) + "<span class=\"agehint\"> (" + _("%s years").format($get_age(data)) + ")</span></span>" : "";
+                                        return data ? "<span class=\"dateofbirth\">" + escape_str($date(data)) + "<span class=\"agehint\"> (" + _("%s tuổi").format($get_age(data)) + ")</span></span>" : "";
                                     }
                                 }
                                 [% CASE 'address' %]
@@ -608,7 +610,7 @@
                                         r += $format_address(row, { no_line_break: true, include_li: true });
 
                                         if ( row.email ) {
-                                            r += "<li class=\"patron_email\">" + _("Email: ") + "<a href='mailto:" + encodeURIComponent(row.email) + "'>" + escape_str(row.email) + "</a></li>";
+                                            r += "<li class=\"patron_email\">" + _("Thư điện tử: ") + "<a href='mailto:" + encodeURIComponent(row.email) + "'>" + escape_str(row.email) + "</a></li>";
                                         }
                                         r += '</ul></div>'
 
@@ -757,16 +759,16 @@
                                         [% FOR action IN actions %]
                                         [% SWITCH action %]
                                         [% CASE 'select' %]
-                                            action_node += '<a href="#" class="btn btn-default btn-xs select_user" data-borrowernumber="' + patron_id + '">' + _("Select") + '</a>';
+                                            action_node += '<a href="#" class="btn btn-default btn-xs select_user" data-borrowernumber="' + patron_id + '">' + _("Chọn") + '</a>';
                                         [% CASE 'add' %]
-                                            action_node += '<a href="#" class="btn btn-default btn-xs add_user" data-borrowernumber="' + patron_id + '">' + _("Add") + '</a>';
+                                            action_node += '<a href="#" class="btn btn-default btn-xs add_user" data-borrowernumber="' + patron_id + '">' + _("Thêm") + '</a>';
                                         [% CASE 'edit' %]
                                             [% IF CAN_user_borrowers_edit_borrowers %]
-                                                action_node += '<a href="/cgi-bin/koha/members/memberentry.pl?op=edit_form&amp;destination=circ&amp;borrowernumber=' + patron_id + '" class="btn btn-default btn-xs"><i class="fa-solid fa-pencil" aria-hidden="true"></i> ' + _("Edit") + '</a>';
+                                                action_node += '<a href="/cgi-bin/koha/members/memberentry.pl?op=edit_form&amp;destination=circ&amp;borrowernumber=' + patron_id + '" class="btn btn-default btn-xs ftu-btn-edit">' + _("Sửa") + '</a>';
                                             [% END %]
                                         [% CASE 'checkout' %]
                                             [% IF CAN_user_circulate_circulate_remaining_permissions %]
-                                                action_node += '<a class="btn btn-default btn-xs" href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=' + patron_id + '"><i class="fa fa-barcode"></i> ' + _("Check out") + '</a>';
+                                                action_node += '<a class="btn btn-default btn-xs ftu-btn-checkout" href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=' + patron_id + '">' + _("Ghi mượn") + '</a>';
                                             [% END %]
                                         [% END %]
                                         [% END %]
@@ -810,7 +812,10 @@
 
                 $(".filterByLetter").on("click",function(e){
                     e.preventDefault();
-                    filterByFirstLetterSurname($(this).text(), true);
+                    $(".filterByLetter").removeClass("active");
+                    $(this).addClass("active");
+                    let letter = $(this).hasClass("filterAll") ? "" : $(this).text().trim();
+                    filterByFirstLetterSurname(letter, true);
                 });
                 patrons_table.on("click",".add_user",function(e){
                     e.preventDefault();
@@ -832,7 +837,7 @@
                     var page = "/cgi-bin/koha/members/moremember.pl?print=brief&borrowernumber=" + borrowernumber;
                     $("#patron_preview_modal").load( page + " div.container-fluid", function(){
                         $("#patron_preview_modal").find(".close_window").on("click", function(){
-                            $('#patron_preview_modal').html(_("Loading...")).removeClass("show");
+                            $('#patron_preview_modal').html(_("Đang tải...")).removeClass("show");
                         });
                     });
                     $("#patron_preview_modal").addClass("show");
@@ -1002,48 +1007,48 @@
 [% END %]
 
 [% BLOCK patron_search_modal %]
-    [% UNLESS patron_search_modal_id %]
-        [% patron_search_modal_id = "patron_search_modal" %]
-    [% END %]
-    [% UNLESS table_id %]
-        [% table_id = "memberresultst" %]
-    [% END %]
+ [% UNLESS patron_search_modal_id %]
+ [% patron_search_modal_id = "patron_search_modal" %]
+ [% END %]
+ [% UNLESS table_id %]
+ [% table_id = "memberresultst" %]
+ [% END %]
 
-    [% search_results_block_id = patron_search_modal_id _ '_searchresults' %]
+ [% search_results_block_id = patron_search_modal_id _ '_searchresults' %]
 
-    <div id="[% patron_search_modal_id | html %]" class="modal modal-full patron_search_modal" tabindex="-1" role="dialog" aria-labelledby="patronSearchLabel" aria-hidden="true" data-backdrop="">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title" id="patronSearchLabel">[% modal_title | html %]</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    [% PROCESS patron_search_filters filters => ['branch','category','sort1','sort2'] %]
+ <div id="[% patron_search_modal_id | html %]" class="modal modal-full patron_search_modal" tabindex="-1" role="dialog" aria-labelledby="patronSearchLabel" aria-hidden="true" data-backdrop="">
+ <div class="modal-dialog modal-xl">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="patronSearchLabel">[% modal_title | html %]</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ [% PROCESS patron_search_filters filters => ['branch','category','sort1','sort2'] %]
 
-                    <div id="[% search_results_block_id | html %]" class="search_results_block">
-                        <!-- FIXME removed style from #searchresults, is that bad? -->
-                        [% IF columns.grep('checkbox').size %]
-                            <div class="searchheader fh-fixedHeader" style="display:none;">
-                                <div>
-                                    <a href="#" class="btn btn-link select_all"><i class="fa fa-check"></i> Select all</a>
-                                    |
-                                    <a href="#" class="btn btn-link clear_all"><i class="fa fa-remove"></i> Clear all</a>
-                                    <button class="add-selected btn btn-sm btn-default" type="submit">Add selected patrons</button>
-                                </div>
-                            </div>
-                        [% END %]
-                        [% PROCESS patron_search_table table_id => table_id, columns => columns %]
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default cancel" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="patron_preview_modal" class="basicModal"></div>
-    <script nonce="[% Koha.CSPNonce | $raw %]">
+ <div id="[% search_results_block_id | html %]" class="search_results_block">
+ <!-- FIXME removed style from #searchresults, is that bad? -->
+ [% IF columns.grep('checkbox').size %]
+ <div class="searchheader fh-fixedHeader" style="display:none;">
+ <div>
+ <a href="#" class="btn btn-link select_all"><i class="fa fa-check"></i> Chọn tất cả</a>
+ |
+ <a href="#" class="btn btn-link clear_all"><i class="fa fa-remove"></i> Bỏ tất cả</a>
+ <button class="add-selected btn btn-sm btn-default" type="submit">Add selected patrons</button>
+ </div>
+ </div>
+ [% END %]
+ [% PROCESS patron_search_table table_id => table_id, columns => columns %]
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-default cancel" data-bs-dismiss="modal">Thoát</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div id="patron_preview_modal" class="basicModal"></div>
+ <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready(function() {
             let parent_block = $("#[% search_results_block_id | html %]");
             parent_block.find(".select_all").on("click",function(e){

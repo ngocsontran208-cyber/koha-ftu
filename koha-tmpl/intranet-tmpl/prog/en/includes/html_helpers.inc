@@ -624,22 +624,22 @@
 [% END %]
 
 [% BLOCK acquisitions_filter_form %]
-    <form action="/cgi-bin/koha/acqui/histsearch.pl" method="get">
+    <form action="/cgi-bin/koha/acqui/histsearch.pl" method="get" class="ftu-orders-search-form">
         [% IF ( context == "sidebar" ) %]
-            <fieldset class="brief">
-                <h4>Search orders</h4>
+            <fieldset class="brief ftu-orders-card">
+                <h4><i class="fa fa-magnifying-glass text-danger"></i> Tra cứu đơn hàng</h4>
                 [% INCLUDE 'filter-orders.inc' context == context %]
                 <input type="hidden" name="do_search" value="1" />
             </fieldset>
         [% ELSE %]
-            <fieldset class="rows">
-                <legend>Search orders</legend>
+            <fieldset class="rows ftu-orders-card">
+                <legend><i class="fa fa-magnifying-glass text-danger"></i> Tra cứu đơn hàng &amp; danh mục đặt mua</legend>
                 [% INCLUDE 'filter-orders.inc' context == context %]
                 <input type="hidden" name="do_search" value="1" />
             </fieldset>
         [% END %]
         <fieldset class="action">
-            <input type="submit" class="btn btn-primary" value="Search" />
+            <button type="submit" class="btn btn-primary ftu-btn-primary"><i class="fa fa-magnifying-glass"></i> Tìm kiếm đơn hàng</button>
         </fieldset>
     </form>
 [% END %]

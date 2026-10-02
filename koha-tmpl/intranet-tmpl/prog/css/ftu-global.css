@@ -26,11 +26,16 @@ body {
 }
 
 /* ================================================================
-   ẨN HOÀN TOÀN: Koha nav + Quick Actions Bar (global)
+   ẨN HOÀN TOÀN: Koha nav + Quick Actions Bar + Language Switcher (global)
    ================================================================ */
 nav.navbar,
 #header_search,
-.sub-header-search { display: none !important; }
+.sub-header-search,
+#changelanguage,
+#nav_lang_menu,
+#i18nMenu,
+.langmenu,
+.navbar-nav #i18nMenu { display: none !important; }
 
 /* ================================================================
    FTU UNIFIED HEADER – Toàn cục (từ header.inc)
@@ -98,10 +103,24 @@ nav.navbar,
     background: #161616;
     border-radius: 0 0 10px 10px;
     box-shadow: 0 10px 28px rgba(0,0,0,0.38);
-    min-width: 185px; z-index: 2100; overflow: hidden;
+    min-width: 225px; z-index: 9999; overflow: hidden;
+    pointer-events: auto;
 }
-.ftu-dropdown-menu.ftu-dropdown-right { left: auto; right: 0; min-width: 210px; }
-.ftu-dropdown-menu.open { display: block; animation: ftuDropIn 0.14s ease; }
+.ftu-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+.ftu-dropdown-menu.ftu-dropdown-right { left: auto; right: 0; min-width: 225px; }
+.ftu-dropdown-menu.open,
+.ftu-nav-dropdown:hover > .ftu-dropdown-menu,
+.ftu-nav-dropdown:focus-within > .ftu-dropdown-menu { 
+    display: block !important; 
+    animation: ftuDropIn 0.14s ease; 
+}
 @keyframes ftuDropIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 .ftu-dropdown-menu a {
     display: flex; align-items: center; gap: 0.6rem;
@@ -1065,3 +1084,1156 @@ i.fa-newspaper-o:before { content: "\f1ea" !important; font-weight: 900 !importa
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
 }
+
+/* ================================================================
+   FTU CATALOGUE SEARCH REDESIGN – Chuẩn thương hiệu FTU
+   Áp dụng: body#catalog_advsearch (Tìm kiếm nâng cao) & body#catalog_results (Kết quả tìm kiếm)
+   ================================================================ */
+
+body#catalog_advsearch,
+body#catalog_results {
+    background-color: #f8fafc !important;
+    color: #1e293b !important;
+}
+
+body#catalog_advsearch #main-container,
+body#catalog_results #main-container,
+body#catalog_advsearch .main-container,
+body#catalog_results .main-container {
+    padding: 1.5rem 2rem 3rem !important;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ── Tiêu đề trang (Page Header) ── */
+body#catalog_advsearch h1,
+body#catalog_results h1 {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.02em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin: 0.5rem 0 1.25rem !important;
+    padding: 0 0 0.75rem 0 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    position: relative;
+}
+
+body#catalog_advsearch h1::after,
+body#catalog_results h1::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ftu-red) 0%, #dc2626 100%);
+    border-radius: 2px;
+}
+
+body#catalog_advsearch h1::before {
+    content: '\f002';
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: var(--ftu-red);
+    background: var(--ftu-red-light);
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+body#catalog_results h1::before {
+    content: '\f02d';
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: var(--ftu-red);
+    background: var(--ftu-red-light);
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+/* ── Floating Action Toolbar (#toolbar) ── */
+body#catalog_advsearch #toolbar,
+body#catalog_results .searchheader {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1.25rem !important;
+    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+    margin-bottom: 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+}
+
+body#catalog_advsearch #toolbar.sticky,
+body#catalog_results .searchheader.sticky {
+    position: sticky !important;
+    top: 68px !important;
+    z-index: 99 !important;
+}
+
+/* Primary Button (Tìm kiếm) */
+body#catalog_advsearch #toolbar .btn-primary,
+body#catalog_results .btn-primary {
+    background: linear-gradient(135deg, var(--ftu-red) 0%, var(--ftu-red-mid) 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    padding: 0.55rem 1.4rem !important;
+    box-shadow: 0 2px 8px rgba(185, 28, 28, 0.28) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+body#catalog_advsearch #toolbar .btn-primary:hover,
+body#catalog_results .btn-primary:hover {
+    background: linear-gradient(135deg, var(--ftu-red-mid) 0%, var(--ftu-red-dark) 100%) !important;
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Action Links in Toolbar */
+body#catalog_advsearch #toolbar .btn-link,
+body#catalog_results .searchheader .btn-link {
+    background: #f1f5f9 !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    color: #475569 !important;
+    font-weight: 500 !important;
+    font-size: 0.88rem !important;
+    padding: 0.5rem 0.95rem !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+}
+
+body#catalog_advsearch #toolbar .btn-link:hover,
+body#catalog_results .searchheader .btn-link:hover {
+    background: #fef2f2 !important;
+    color: var(--ftu-red) !important;
+    border-color: #fecaca !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Modern Card Containers (Fieldsets) ── */
+body#catalog_advsearch fieldset {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 1.5rem 1.75rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    margin-bottom: 1.5rem !important;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+body#catalog_advsearch fieldset:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+}
+
+body#catalog_advsearch fieldset legend {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    border-bottom: none !important;
+    padding: 0 0.5rem !important;
+    width: auto !important;
+    float: none !important;
+    margin-bottom: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+/* Icon for Fieldset Legends */
+body#catalog_advsearch #searchterms > legend::before {
+    content: '\f0b0';
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: var(--ftu-red);
+}
+
+body#catalog_advsearch #subtype > legend::before {
+    content: '\f15c';
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: #2563eb;
+}
+
+body#catalog_advsearch #availability > legend::before {
+    content: '\f1ad';
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: #059669;
+}
+
+body#catalog_advsearch #sortby > legend::before {
+    content: '\f161';
+    font-family: "Font Awesome 6 Free", "FontAwesome";
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: #d97706;
+}
+
+/* ── Boolean Search Rows (#searchterms) ── */
+body#catalog_advsearch #searchterms .search-term-row,
+body#catalog_advsearch #searchterms div:not(.hint):not([class*="btn"]) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 0.85rem !important;
+    padding: 0.65rem 0.9rem !important;
+    background: #f8fafc !important;
+    border-radius: 10px !important;
+    border: 1px solid #f1f5f9 !important;
+    transition: all 0.2s ease !important;
+}
+
+body#catalog_advsearch #searchterms .search-term-row:hover,
+body#catalog_advsearch #searchterms div:not(.hint):not([class*="btn"]):hover {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Operator dropdown (AND / OR / NOT) */
+body#catalog_advsearch select[name="op"] {
+    background: #1e293b !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 0.5rem 0.75rem !important;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Index selection dropdown (Nhan đề, tác giả, v.v...) */
+body#catalog_advsearch select.advsearch,
+body#catalog_advsearch select[name="idx"] {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0.55rem 1rem !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    color: #1e293b !important;
+    min-width: 200px;
+    height: 42px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+body#catalog_advsearch select.advsearch:focus,
+body#catalog_advsearch select[name="idx"]:focus {
+    border-color: var(--ftu-red) !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+    outline: none !important;
+}
+
+/* Query text input (Nhập từ khóa) */
+body#catalog_advsearch input[name="q"] {
+    flex: 1 !important;
+    min-width: 280px !important;
+    height: 42px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0.55rem 1rem !important;
+    font-size: 0.95rem !important;
+    font-family: inherit !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    transition: all 0.2s ease !important;
+}
+
+body#catalog_advsearch input[name="q"]:focus {
+    border-color: var(--ftu-red) !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.14) !important;
+    outline: none !important;
+    background: #fff !important;
+}
+
+/* ButtonPlus [+] để thêm dòng tìm kiếm */
+body#catalog_advsearch #ButtonPlus {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--ftu-red) 0%, #dc2626 100%) !important;
+    color: #ffffff !important;
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    box-shadow: 0 2px 8px rgba(185, 28, 28, 0.3) !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0;
+}
+
+body#catalog_advsearch #ButtonPlus:hover {
+    transform: scale(1.12) !important;
+    background: linear-gradient(135deg, var(--ftu-red-mid) 0%, var(--ftu-red-dark) 100%) !important;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.45) !important;
+}
+
+/* ── TABS: Giới hạn kiểu tài liệu (#advsearches) ── */
+body#catalog_advsearch #advsearches {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 1.25rem 1.5rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs {
+    border-bottom: 2px solid #e2e8f0 !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    border: none !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 0.65rem 1.25rem !important;
+    background: transparent !important;
+    transition: all 0.15s ease !important;
+    position: relative;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link:hover {
+    color: var(--ftu-red) !important;
+    background: rgba(185, 28, 28, 0.04) !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link.active {
+    color: var(--ftu-red) !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ftu-red);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Item Type Selection Grid */
+body#catalog_advsearch #advsearches .tab-pane h4 {
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 1rem !important;
+}
+
+body#catalog_advsearch #advsearches table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0.5rem !important;
+}
+
+body#catalog_advsearch #advsearches table td {
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 0.65rem 0.85rem !important;
+    transition: all 0.18s ease !important;
+}
+
+body#catalog_advsearch #advsearches table td:hover {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.08) !important;
+}
+
+body#catalog_advsearch #advsearches table td label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    color: #1e293b !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+}
+
+body#catalog_advsearch #advsearches table td input[type="checkbox"] {
+    accent-color: var(--ftu-red) !important;
+    width: 16px !important;
+    height: 16px !important;
+    cursor: pointer !important;
+}
+
+body#catalog_advsearch .itemtype-image {
+    width: 22px !important;
+    height: 22px !important;
+    object-fit: contain !important;
+}
+
+/* ── Location & Availability (#availability) ── */
+body#catalog_advsearch #availability fieldset {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: none !important;
+    margin-bottom: 0.85rem !important;
+}
+
+body#catalog_advsearch #currently-avail label {
+    font-weight: 600 !important;
+    color: #059669 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    cursor: pointer !important;
+}
+
+body#catalog_advsearch #currently-avail input[type="checkbox"] {
+    accent-color: #059669 !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+body#catalog_advsearch select#branchloop,
+body#catalog_advsearch select#categoryloop,
+body#catalog_advsearch select#sort_by,
+body#catalog_advsearch select.subtype {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.9rem !important;
+    font-size: 0.9rem !important;
+    color: #1e293b !important;
+    height: 40px !important;
+    transition: all 0.2s ease !important;
+}
+
+body#catalog_advsearch select:focus {
+    border-color: var(--ftu-red) !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+    outline: none !important;
+}
+
+/* ── KẾT QUẢ TÌM KIẾM (body#catalog_results) ── */
+body#catalog_results #search_within_results {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 0.65rem 1rem !important;
+    margin-bottom: 1rem !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+}
+
+body#catalog_results #search_within_results form {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+body#catalog_results #search_within_results input#refiner {
+    flex: 1 !important;
+    height: 38px !important;
+    border-radius: 6px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    padding: 0 0.85rem !important;
+}
+
+body#catalog_results #search_within_results input#refiner:focus {
+    border-color: var(--ftu-red) !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+    outline: none !important;
+}
+
+/* Facets Sidebar (#search-facets) */
+body#catalog_results #search-facets {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 1.25rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+}
+
+body#catalog_results #search-facets h2 {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: var(--ftu-red) !important;
+    border-bottom: 2px solid var(--ftu-red-light) !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+body#catalog_results #search-facets ul {
+    list-style: none !important;
+    padding-left: 0 !important;
+}
+
+body#catalog_results #search-facets li {
+    margin-bottom: 0.35rem !important;
+}
+
+body#catalog_results #search-facets li a {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    color: #334155 !important;
+    font-size: 0.88rem !important;
+    padding: 0.4rem 0.65rem !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+body#catalog_results #search-facets li a:hover {
+    background: var(--ftu-red-light) !important;
+    color: var(--ftu-red) !important;
+    text-decoration: none !important;
+}
+
+body#catalog_results #search-facets .facet-count {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    padding: 0.15rem 0.5rem !important;
+    border-radius: 9999px !important;
+}
+
+/* Results Table & Cards */
+body#catalog_results #searchresults table {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+body#catalog_results #searchresults table tr {
+    transition: background 0.15s ease !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body#catalog_results #searchresults table tr:hover {
+    background: #fef2f2 !important;
+}
+
+body#catalog_results #searchresults table td {
+    padding: 1rem 1.15rem !important;
+    vertical-align: top !important;
+}
+
+body#catalog_results .title {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease !important;
+}
+
+body#catalog_results .title:hover {
+    color: var(--ftu-red) !important;
+    text-decoration: none !important;
+}
+
+body#catalog_results .author {
+    color: #475569 !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+}
+
+/* Availability chips in search results */
+body#catalog_results .results_summary .status,
+body#catalog_results .available,
+body#catalog_results .status_available {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    padding: 0.2rem 0.6rem !important;
+    border-radius: 9999px !important;
+}
+
+body#catalog_results .unavailable,
+body#catalog_results .status_checkedout {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    padding: 0.2rem 0.6rem !important;
+    border-radius: 9999px !important;
+}
+
+/* Actions in search results */
+body#catalog_results .actions .btn {
+    border-radius: 6px !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.35rem !important;
+}
+
+/* ── ADVANCED SEARCH BOTTOM ACTION BAR ── */
+body#catalog_advsearch .search-action-bottom {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+    padding: 1.25rem 1.75rem !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-primary {
+    background: linear-gradient(135deg, var(--ftu-red) 0%, var(--ftu-red-dark) 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    padding: 0.65rem 1.6rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    transition: all 0.2s ease !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(185, 28, 28, 0.35) !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-link {
+    color: #64748b !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    padding: 0.65rem 1rem !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-link:hover {
+    color: var(--ftu-red) !important;
+    background: #fef2f2 !important;
+}
+
+/* ── SEARCH RESULTS ENHANCEMENTS ── */
+body#catalog_results #toolbar.btn-toolbar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 0.6rem 1rem !important;
+    margin-bottom: 1.25rem !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+}
+
+body#catalog_results .searchresults-pagination {
+    margin-top: 1.5rem !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+/* ── ACQUISITIONS ENHANCEMENTS (FTU) ── */
+body.acq {
+    background-color: #f8fafc !important;
+}
+body.acq #toolbar.btn-toolbar {
+    gap: 0.5rem !important;
+}
+body.acq #toolbar .btn-primary, body.acq #toolbar .ftu-btn-primary {
+    background-color: var(--ftu-red) !important;
+    border-color: var(--ftu-red-dark) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.25) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+body.acq #toolbar .btn-primary:hover, body.acq #toolbar .ftu-btn-primary:hover {
+    background-color: var(--ftu-red-mid) !important;
+    transform: translateY(-1px) !important;
+}
+body.acq .ftu-sidebar-menu {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+body.acq .ftu-sidebar-menu h5 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-top: 1rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+body.acq .ftu-sidebar-menu h5:first-child {
+    margin-top: 0;
+}
+body.acq .ftu-sidebar-menu ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0.5rem;
+}
+body.acq .ftu-sidebar-menu ul li a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 6px;
+    color: #475569;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+body.acq .ftu-sidebar-menu ul li a:hover {
+    background: #fef2f2;
+    color: var(--ftu-red);
+    text-decoration: none;
+    transform: translateX(2px);
+}
+body.acq .ftu-sidebar-menu ul li a.current {
+    background: #fef2f2;
+    color: var(--ftu-red);
+    font-weight: 700;
+    border-left: 3px solid var(--ftu-red);
+    border-radius: 0 6px 6px 0;
+}
+
+/* ================================================================
+   FTU REDESIGN: Quản lý Bạn đọc (body#pat_member)
+   Áp dụng: members-home.pl, member.tt
+   ================================================================ */
+
+/* ── Toolbar & Buttons ── */
+body#pat_member #toolbar.btn-toolbar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+body#pat_member #toolbar .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 0.48rem 0.95rem;
+    transition: all 0.15s ease;
+}
+
+body#pat_member #toolbar .btn-primary,
+body#pat_member #toolbar .ftu-btn-primary {
+    background: linear-gradient(135deg, var(--ftu-red) 0%, var(--ftu-red-dark) 100%) !important;
+    border: 1px solid var(--ftu-red-dark) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.25);
+}
+
+body#pat_member #toolbar .btn-primary:hover,
+body#pat_member #toolbar .ftu-btn-primary:hover {
+    background: linear-gradient(135deg, #dc2626 0%, var(--ftu-red) 100%) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(185, 28, 28, 0.35);
+}
+
+body#pat_member #toolbar .btn-default {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+}
+
+body#pat_member #toolbar .btn-default:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+/* Dropdown menu */
+body#pat_member .dropdown-menu {
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 0.4rem 0;
+    min-width: 220px;
+}
+
+body#pat_member .dropdown-menu .dropdown-item {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #334155;
+    padding: 0.45rem 1rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+body#pat_member .dropdown-menu .dropdown-item:hover {
+    background: #fef2f2;
+    color: var(--ftu-red);
+}
+
+/* ── Pending Patron Notice ── */
+body#pat_member #patron_updates_pending {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    margin-bottom: 1.1rem;
+    font-size: 0.9rem;
+    color: #92400e;
+    font-weight: 500;
+}
+
+body#pat_member #patron_updates_pending a {
+    color: #b45309;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* ── Sidebar Filter Card ── */
+body#pat_member aside .patron_search_form {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+body#pat_member aside .patron_search_form fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+body#pat_member aside .patron_search_form h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-bottom: 0.65rem;
+    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 1rem;
+}
+
+body#pat_member aside .patron_search_form ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+body#pat_member aside .patron_search_form ol li {
+    padding: 0;
+    margin: 0;
+}
+
+body#pat_member aside .patron_search_form label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.3rem;
+}
+
+body#pat_member aside .patron_search_form input[type="text"],
+body#pat_member aside .patron_search_form select {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.88rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+}
+
+body#pat_member aside .patron_search_form input[type="text"]:focus,
+body#pat_member aside .patron_search_form select:focus {
+    border-color: var(--ftu-red);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+}
+
+body#pat_member aside .patron_search_form fieldset.action {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+body#pat_member aside .patron_search_form .search_patron_filter_btn {
+    flex: 1;
+    background: linear-gradient(135deg, var(--ftu-red) 0%, var(--ftu-red-dark) 100%) !important;
+    border: 1px solid var(--ftu-red-dark) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 0.88rem;
+    border-radius: 8px;
+    padding: 0.52rem 0.85rem;
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.2);
+    transition: all 0.15s ease;
+}
+
+body#pat_member aside .patron_search_form .search_patron_filter_btn:hover {
+    background: linear-gradient(135deg, #dc2626 0%, var(--ftu-red) 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(185, 28, 28, 0.3);
+}
+
+body#pat_member aside .patron_search_form .clear_search {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.88rem;
+    border-radius: 8px;
+    padding: 0.52rem 0.85rem;
+    transition: all 0.15s ease;
+}
+
+body#pat_member aside .patron_search_form .clear_search:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+
+/* ── Alphabet Browser ── */
+body#pat_member .browse {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+body#pat_member .browse .browse-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    margin-right: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+body#pat_member .browse .filterByLetter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 0.45rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+body#pat_member .browse .filterByLetter:hover {
+    background: #fef2f2;
+    color: var(--ftu-red);
+    border-color: #fecaca;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+body#pat_member .browse .filterByLetter.active {
+    background: var(--ftu-red);
+    color: #ffffff;
+    border-color: var(--ftu-red);
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.25);
+}
+
+/* ── Batch Selection Header ── */
+body#pat_member .searchheader {
+    background: #ffffff;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--ftu-red);
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+body#pat_member .searchheader .btn {
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ── Results Table ── */
+body#pat_member table#memberresultst {
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+body#pat_member table#memberresultst thead th {
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+body#pat_member table#memberresultst tbody td {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.88rem;
+    color: #1e293b;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+body#pat_member table#memberresultst tbody tr:hover {
+    background: #f8fafc;
+}
+
+body#pat_member table#memberresultst .patron_name {
+    font-weight: 700;
+    color: var(--ftu-red);
+    text-decoration: none;
+}
+
+body#pat_member table#memberresultst .patron_name:hover {
+    text-decoration: underline;
+    color: var(--ftu-red-dark);
+}
+
+body#pat_member table#memberresultst .ftu-btn-edit {
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    text-decoration: none;
+    margin-right: 0.3rem;
+    display: inline-block;
+}
+
+body#pat_member table#memberresultst .ftu-btn-edit:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    text-decoration: none;
+}
+
+body#pat_member table#memberresultst .ftu-btn-checkout {
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--ftu-red);
+    text-decoration: none;
+    display: inline-block;
+}
+
+body#pat_member table#memberresultst .ftu-btn-checkout:hover {
+    background: var(--ftu-red);
+    color: #ffffff;
+    border-color: var(--ftu-red);
+    text-decoration: none;
+}
+
+body#pat_member .overdue {
+    color: #dc2626 !important;
+}
+
+body#pat_member .agehint {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+

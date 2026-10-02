@@ -82,7 +82,7 @@
  [% FOREACH image IN localimages %]
  <div class="cover-image local-coverimg">
  <a href="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" title="Ảnh bìa cục bộ">
- <img alt="Ảnh bìa cục bộ" data-link="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblionumber | uri %]&imagenumber=[% image.imagenumber | uri %]" src="/cgi-bin/koha/opac-image.pl?thumbnail=1&imagenumber=[% image.imagenumber | uri %]" />
+ <img alt="Ảnh bìa cục bộ" data-link="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblionumber | uri %]&imagenumber=[% image.imagenumber | uri %]" src="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" />
  </a>
  <div class="hint">Ảnh bìa cục bộ</div>
  </div>
@@ -1243,11 +1243,11 @@
  <th id="item_materials" data-colname="item_materials" class="materials">Tài liệu chi tiết</th>
  <th id="item_enumchron" data-colname="item_enumchron" class="vol_info">Thông tin tập</th>
  <th id="item_url" data-colname="item_url" class="url">URL</th>
- <th id="item_copy" data-colname="item_copy" class="copynumber">Số bản sao</th>
+ <th id="item_copy" data-colname="item_copy" class="copynumber">Bản số</th>
  <th id="item_status" data-colname="item_status" class="status">Trạng thái</th>
  <th id="item_notes" data-colname="item_notes" class="notes">Ghi chú</th>
  <th id="item_datedue" data-colname="item_datedue" class="date_due">Ngày hết hạn</th>
- <th id="item_barcode" data-colname="item_barcode" class="barcode">Mã vạch</th>
+ <th id="item_barcode" data-colname="item_barcode" class="barcode">Mã ĐKCB</th>
  <th id="item_holds" data-colname="item_holds">Lượt đặt mượn tài liệu</th>
  <th id="item_priority" data-colname="item_priority">Thứ tự ưu tiên trong hàng chờ đặt mượn</th>
  <th id="item_coursereserves" data-colname="item_coursereserves">Tài liệu học phần</th>
@@ -1307,7 +1307,9 @@
  [% END %]
 
  [% IF ( Koha.Preference('OpacLocationOnDetail') == 'holding' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
- <span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span>
+ [% IF ( ITEM_RESULT.location_description ) %]
+ <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
+ [% END %]
  [% END %]
  </td>
  [% ELSE %]
@@ -1334,7 +1336,9 @@
  [% END %]
 
  [% IF ( Koha.Preference('OpacLocationOnDetail') == 'home' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
- <span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span>
+ [% IF ( ITEM_RESULT.location_description ) %]
+ <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
+ [% END %]
  [% END %]
  </td>
  [% ELSE %]
@@ -1362,18 +1366,17 @@
  [% ITEM_RESULT.itemcallnumber | html %]
  [% IF ( OPACShelfBrowser ) %]
  [% IF ( ITEM_RESULT.itemnumber == starting_itemnumber ) %]
- (<a
-                                            class="close_shelf"
-                                            href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | html %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | html %]#[% tab | html %]"
-                                            aria-label="Browse the shelf for items near [% title | html %]"
-                                            >Duyệt giá sách<span class="visually-hidden">(Mở ở bên dưới)</span></a
-                                        >)
+ <a
+ class="close_shelf shelfbrowser-link"
+ href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | html %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | html %]#[% tab | html %]"
+ aria-label="Browse the shelf for items near [% title | html %]"
+ ><i class="fa fa-cubes"></i> Duyệt giá sách<span class="visually-hidden">(Mở ở bên dưới)</span></a>
  [% ELSE %]
- (<a
-                                            href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | uri %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | uri %]#[% tab | uri %]"
-                                            aria-label="Browse the shelf for items near [% title | html %]"
-                                            >Duyệt giá sách<span class="visually-hidden">(Mở ở bên dưới)</span></a
-                                        >)
+ <a
+ class="shelfbrowser-link"
+ href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | uri %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | uri %]#[% tab | uri %]"
+ aria-label="Browse the shelf for items near [% title | html %]"
+ ><i class="fa fa-cubes"></i> Duyệt giá sách<span class="visually-hidden">(Mở ở bên dưới)</span></a>
  [% END %]
  [% END %]
  [% END %]
@@ -1483,7 +1486,7 @@
  [% END %]
 
  [% IF ( itemdata_barcode ) %]
- <td class="barcode" property="serialNumber">[% ITEM_RESULT.barcode | html %]</td>
+ <td class="barcode" property="serialNumber"><span class="barcode-pill">[% ITEM_RESULT.barcode | html %]</span></td>
  [% ELSE %]
  [% hidden_columns_force.$table_id.push('item_barcode') %]
  <td></td>

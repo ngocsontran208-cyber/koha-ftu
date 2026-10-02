@@ -7,8 +7,8 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        [% t("Export data") | html %]
-        &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+        Xuất dữ liệu biên mục
+        &rsaquo; Biên mục &rsaquo; Koha
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -27,16 +27,16 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Export data</span>
+            <span>Xuất dữ liệu biên mục</span>
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' aside='cat-menu' %]
-    <h1>Export data</h1>
+    <h1 class="ftu-clean-title"><i class="fa fa-file-export"></i> Xuất dữ liệu biên mục</h1>
 
     [% FOR m IN messages %]
         <div class="alert alert-[% m.type | html %]">

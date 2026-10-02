@@ -1,0 +1,1 @@
+../../vi-VN/includes/ftu-brand-config.inc

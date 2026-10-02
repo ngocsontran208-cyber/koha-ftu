@@ -29,6 +29,9 @@ use Koha::Patrons;
 
 use Try::Tiny qw( catch try );
 
+use HTTP::Tiny;
+use JSON qw( encode_json decode_json );
+
 my $query = CGI->new;
 my $op    = $query->param('op') || q{};
 
@@ -48,9 +51,22 @@ if ( $patron->category->effective_change_password ) {
     {
         die "op must be set" unless $op eq 'cud-change_password';
         my $error;
+        my $old_password     = scalar $query->param('Oldkey');
         my $new_password     = $query->param('Newkey');
         my $confirm_password = $query->param('Confirm');
-        if ( C4::Auth::checkpw_hash( scalar $query->param('Oldkey'), $patron->password ) ) {
+
+        # Kiểm tra mật khẩu cũ: trước tiên qua Koha hash, sau đó thử LDAP nếu có cấu hình
+        my $password_valid = C4::Auth::checkpw_hash( $old_password, $patron->password );
+        if ( !$password_valid && C4::Context->config('useldapserver') ) {
+            eval {
+                require C4::Auth_with_ldap;
+                my $uid = $patron->userid || $patron->cardnumber;
+                my ($retval) = C4::Auth_with_ldap::checkpw_ldap( $uid, $old_password );
+                $password_valid = 1 if $retval && $retval == 1;
+            };
+        }
+
+        if ( $password_valid ) {
 
             if ( $new_password ne $confirm_password ) {
                 $template->param( 'Ask_data'           => '1' );
@@ -61,6 +77,12 @@ if ( $patron->category->effective_change_password ) {
                     $patron->set_password( { password => $new_password } );
                     $template->param( 'password_updated' => '1' );
                     $template->param( 'borrowernumber'   => $borrowernumber );
+
+                    # Đồng bộ mật khẩu mới lên hệ thống SSO / LDAP
+                    my $sso_uid = $patron->userid || $patron->cardnumber;
+                    if ($sso_uid) {
+                        _sync_password_to_sso($sso_uid, $new_password, $template);
+                    }
                 } catch {
                     $error = 'password_too_short'
                         if $_->isa('Koha::Exceptions::Password::TooShort');
@@ -105,3 +127,91 @@ $template->param(
 );
 
 output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };
+
+# ------------------------------------------------------------------------------
+# Helper: Đồng bộ mật khẩu sang hệ thống xác thực SSO (SSO Portal / OpenLDAP)
+# ------------------------------------------------------------------------------
+sub _sync_password_to_sso {
+    my ( $uid, $new_password, $tmpl ) = @_;
+    return unless $uid && length($new_password);
+
+    my $payload = encode_json({ newPassword => $new_password });
+    my $http    = HTTP::Tiny->new( timeout => 5 );
+    my $headers = { 'Content-Type' => 'application/json' };
+
+    # Lấy URL SSO từ cấu hình hệ thống FTU_SSOBaseURL
+    my $sso_pref = C4::Context->preference('FTU_SSOBaseURL') || '';
+    $sso_pref =~ s{/+$}{}; # loại bỏ dấu gạch chéo cuối nếu có
+
+    # Danh sách URL API SSO theo thứ tự ưu tiên: cấu hình hệ thống -> host.docker.internal -> localhost
+    my @candidate_urls;
+    if ($sso_pref && $sso_pref !~ /myDNSname/) {
+        push @candidate_urls, "$sso_pref/api/v1/sso/users/$uid/reset-password";
+    }
+    push @candidate_urls, (
+        "http://host.docker.internal:8090/api/v1/sso/users/$uid/reset-password",
+        "http://localhost:8090/api/v1/sso/users/$uid/reset-password",
+        "http://127.0.0.1:8090/api/v1/sso/users/$uid/reset-password"
+    );
+
+    my $synced   = 0;
+    my $last_err = '';
+
+    for my $url (@candidate_urls) {
+        my $response = eval {
+            $http->post( $url, {
+                headers => $headers,
+                content => $payload,
+            });
+        };
+        if ( $response && $response->{success} ) {
+            $synced = 1;
+            last;
+        } elsif ( $response && $response->{content} ) {
+            my $json_data = eval { decode_json( $response->{content} ) };
+            if ( $json_data && $json_data->{success} ) {
+                $synced = 1;
+                last;
+            }
+            $last_err = $json_data->{error} || $response->{reason} || ( "HTTP " . $response->{status} );
+        } else {
+            $last_err = $response ? $response->{reason} : ( $@ || 'Không thể kết nối máy chủ SSO' );
+        }
+    }
+
+    # Nếu không kết nối được qua HTTP API, dự phòng gọi trực tiếp LDAP server nếu có cấu hình
+    if ( !$synced && C4::Context->config('useldapserver') ) {
+        eval {
+            require Net::LDAP;
+            my $ldap_host = C4::Context->config('ldapserver')->{hostname} || 'host.docker.internal';
+            my $ldap_base = C4::Context->config('ldapserver')->{base}     || 'dc=thuvien,dc=vn';
+            my $ldap_user = C4::Context->config('ldapserver')->{user}     || 'cn=admin,dc=thuvien,dc=vn';
+            my $ldap_pass = C4::Context->config('ldapserver')->{pass}     || 'admin';
+
+            my $ldap = Net::LDAP->new( $ldap_host, timeout => 5 );
+            if ($ldap) {
+                my $mesg = $ldap->bind( $ldap_user, password => $ldap_pass );
+                if ( !$mesg->code ) {
+                    my $dn = "uid=$uid,ou=users,$ldap_base";
+                    my $mod_mesg = $ldap->modify( $dn, replace => { userPassword => $new_password } );
+                    if ( !$mod_mesg->code ) {
+                        $synced = 1;
+                    } else {
+                        $last_err = "LDAP error: " . $mod_mesg->error;
+                    }
+                    $ldap->unbind;
+                }
+            }
+        };
+    }
+
+    if ($synced) {
+        $tmpl->param( sso_updated => 1 ) if $tmpl;
+        warn "[SSO Sync] Đã cập nhật mật khẩu thành công cho UID: $uid lên hệ thống SSO\n";
+    } else {
+        $tmpl->param( sso_error => $last_err ) if $tmpl;
+        warn "[SSO Sync] Lỗi cập nhật mật khẩu cho UID: $uid lên SSO: $last_err\n";
+    }
+
+    return $synced;
+}

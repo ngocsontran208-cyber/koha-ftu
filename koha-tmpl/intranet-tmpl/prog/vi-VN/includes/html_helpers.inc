@@ -624,24 +624,24 @@
 [% END %]
 
 [% BLOCK acquisitions_filter_form %]
- <form action="/cgi-bin/koha/acqui/histsearch.pl" method="get">
- [% IF ( context == "sidebar" ) %]
- <fieldset class="brief">
- <h4>Tìm kiếm đơn hàng</h4>
- [% INCLUDE 'filter-orders.inc' context == context %]
- <input type="hidden" name="do_search" value="1" />
- </fieldset>
- [% ELSE %]
- <fieldset class="rows">
- <legend>Tìm kiếm đơn hàng</legend>
- [% INCLUDE 'filter-orders.inc' context == context %]
- <input type="hidden" name="do_search" value="1" />
- </fieldset>
- [% END %]
- <fieldset class="action">
- <input class="btn btn-primary" type="submit" value="Tìm kiếm" />
- </fieldset>
- </form>
+    <form action="/cgi-bin/koha/acqui/histsearch.pl" method="get" class="ftu-orders-search-form">
+        [% IF ( context == "sidebar" ) %]
+            <fieldset class="brief ftu-orders-card">
+                <h4><i class="fa fa-magnifying-glass text-danger"></i> Tra cứu đơn hàng</h4>
+                [% INCLUDE 'filter-orders.inc' context == context %]
+                <input type="hidden" name="do_search" value="1" />
+            </fieldset>
+        [% ELSE %]
+            <fieldset class="rows ftu-orders-card">
+                <legend><i class="fa fa-magnifying-glass text-danger"></i> Tra cứu đơn hàng &amp; danh mục đặt mua</legend>
+                [% INCLUDE 'filter-orders.inc' context == context %]
+                <input type="hidden" name="do_search" value="1" />
+            </fieldset>
+        [% END %]
+        <fieldset class="action">
+            <button type="submit" class="btn btn-primary ftu-btn-primary"><i class="fa fa-magnifying-glass"></i> Tìm kiếm đơn hàng</button>
+        </fieldset>
+    </form>
 [% END %]
 
 [% BLOCK modal_wrapper %]

@@ -765,18 +765,22 @@ if [ "$op" = create ] || [ "$op" = request ] || [ "$op" = use ]
 then
     # Create new user and group.
     username="$name-koha"
-    if getent passwd "$username" > /dev/null
+    if ! getent passwd "$username" > /dev/null
     then
-        die "User $username already exists."
+        if getent group "$username" > /dev/null
+        then
+            adduser --no-create-home --disabled-password \
+                --gecos "Koha instance $username" \
+                --home "/var/lib/koha/$name" \
+                --ingroup "$username" \
+                --quiet "$username"
+        else
+            adduser --no-create-home --disabled-password \
+                --gecos "Koha instance $username" \
+                --home "/var/lib/koha/$name" \
+                --quiet "$username"
+        fi
     fi
-    if getent group "$username" > /dev/null
-    then
-        die "Group $username already exists."
-    fi
-    adduser --no-create-home --disabled-password \
-        --gecos "Koha instance $username" \
-        --home "/var/lib/koha/$name" \
-        --quiet "$username"
 
     # Create the site-specific directories.
     koha-create-dirs "$name"
@@ -811,7 +815,7 @@ eof
     # Generate and install Apache site-available file and log dir.
     generate_config_file $APACHE_CONFIGFILE \
         "/etc/apache2/sites-available/$name.conf"
-    mkdir "/var/log/koha/$name"
+    mkdir -p "/var/log/koha/$name"
     chown "$username:$username" "/var/log/koha/$name"
 
 

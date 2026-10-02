@@ -67,6 +67,8 @@
                 <li><a href="/cgi-bin/koha/tools/viewlog.pl">Log viewer</a></li>
             [% END %]
             [% IF ( CAN_user_tools_edit_additional_contents ) %]
+                <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=news" style="font-weight: 700; color: #b91c1c;"><i class="fa fa-newspaper-o"></i> Tin tức &amp; Bảng tin</a></li>
+                <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=database" style="font-weight: 700; color: #1d4ed8;"><i class="fa fa-database"></i> Quản lý CSDL</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=news">News</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=html_customizations">HTML customizations</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=pages">Pages</a></li>

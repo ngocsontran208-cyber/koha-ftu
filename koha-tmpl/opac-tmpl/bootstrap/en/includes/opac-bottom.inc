@@ -5,6 +5,7 @@
 [%- USE KohaPlugins -%]
 [% USE Asset %]
 [% SET opaccredits = AdditionalContents.get( location => "opaccredits", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
+[% PROCESS 'ftu-brand-config.inc' %]
 [% PROCESS 'html_helpers.inc' %]
 [% IF Koha.Preference( 'CookieConsent' ) %]
     [% USE JSConsents %]
@@ -23,75 +24,130 @@
     <!-- prettier-ignore-end -->
 
     <!-- ========================================================================= -->
-    <!-- FTU MEGA FOOTER (Premium Dark Mode)                                       -->
+    <!-- FTU MASTER LIBRARY FOOTER (DSpace Elegant White Edition)                  -->
     <!-- ========================================================================= -->
-    <div class="ftu-footer-premium noprint">
+    <footer class="ftu-footer-master noprint">
         <div class="ftu-footer-container">
-            <div class="ftu-footer-grid">
-                
-                <!-- Cột 1: Thương hiệu -->
-                <div class="ftu-footer-brand">
-                    <div class="ftu-footer-brand-header">
-                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" class="ftu-footer-logo-img" />
+            <div class="row mb-5" style="row-gap: 2rem;">
+                <!-- Col 1: FTU Library Brand & Contact -->
+                <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+                    <div class="d-flex align-items-center mb-4" style="gap: 12px;">
+                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.svg" alt="[% FTU_BRAND.logo_alt %]" style="height: 38px; width: auto;"
+                            onerror="this.onerror=null; this.src='[% FTU_BRAND.logo_url %]'" />
+                        <span class="font-bold tracking-tight text-lg uppercase"
+                            style="font-weight: 700; color: #0F172A; font-size: 1.1rem; letter-spacing: -0.02em;">FOREIGN TRADE UNIVERSITY LIBRARY</span>
                     </div>
-                    <div class="ftu-contact-item" style="margin-top: 0.5rem;">
-                        <i class="fa fa-clock-o"></i>
-                        <span><strong>Giờ mở cửa:</strong><br>Thứ 2 - 6: 8h00 - 18h00<br>Thứ 7: 8h00 - 16h00</span>
+
+                    <div class="d-flex flex-column" style="gap: 14px; font-size: 0.875rem; color: #4B5563;">
+                        <!-- Headquarters -->
+                        <div class="d-flex align-items-start" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0; margin-top: 2px;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <span style="font-weight: 600; color: #1F2937;">Headquarters:</span>
+                                <p style="margin-top: 2px; margin-bottom: 0;">91 Chua Lang St., Lang Thuong, Dong Da Dist., Hanoi</p>
+                            </div>
+                        </div>
+
+                        <!-- HCMC Branch -->
+                        <div class="d-flex align-items-start" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0; margin-top: 2px;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <span style="font-weight: 600; color: #1F2937;">HCMC Campus:</span>
+                                <p style="margin-top: 2px; margin-bottom: 0;">No. 15 D5 St., Ward 25, Binh Thanh Dist., Ho Chi Minh City</p>
+                            </div>
+                        </div>
+
+                        <!-- Quang Ninh Campus -->
+                        <div class="d-flex align-items-start" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0; margin-top: 2px;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <span style="font-weight: 600; color: #1F2937;">Quang Ninh Campus:</span>
+                                <p style="margin-top: 2px; margin-bottom: 0;">No. 260 Bach Dang, Nam Khe, Uong Bi City, Quang Ninh</p>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="d-flex align-items-center pt-2" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <a href="mailto:hoclieuso.hcmc@ftu.edu.vn"
+                                style="color: #4B5563; font-weight: 500; text-decoration: none;">hoclieuso.hcmc@ftu.edu.vn</a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Cột 2: Hỗ trợ bạn đọc -->
-                <div>
-                    <h4 class="ftu-footer-title">HỖ TRỢ BẠN ĐỌC</h4>
-                    <ul class="ftu-footer-links">
-                        <li><a href="#">Hướng dẫn sử dụng Thư viện</a></li>
-                        <li><a href="#">Quy định & Nội quy</a></li>
-                        <li><a href="#">Chính sách mượn - trả sách</a></li>
-                        <li><a href="#">Hướng dẫn gia hạn trực tuyến</a></li>
-                        <li><a href="/cgi-bin/koha/opac-reportproblem.pl">Góp ý & Báo cáo lỗi</a></li>
+                <!-- Col 2: Discover Resources -->
+                <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                    <h4 class="font-bold mb-4 uppercase tracking-wider text-xs"
+                        style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem;">
+                        Discover Resources</h4>
+                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-collections.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Collections</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Search by Author</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Search by Subject</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-course-reserves.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Course Reserves</a></li>
+                        <li class="mb-2"><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="text-decoration-none ftu-dspace-link"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">DSpace Digital Repository</a></li>
                     </ul>
                 </div>
 
-                <!-- Cột 3: Nguồn tài nguyên -->
-                <div>
-                    <h4 class="ftu-footer-title">NGUỒN TÀI NGUYÊN</h4>
-                    <ul class="ftu-footer-links">
-                        <li><a href="/cgi-bin/koha/opac-search.pl">Tra cứu danh mục (OPAC)</a></li>
-                        <li><a href="#">Tài liệu điện tử (DSpace)</a></li>
-                        <li><a href="#">Cơ sở dữ liệu ProQuest</a></li>
-                        <li><a href="#">Cơ sở dữ liệu ScienceDirect</a></li>
-                        <li><a href="/cgi-bin/koha/opac-course-reserves.pl">Giáo trình & Bài giảng</a></li>
+                <!-- Col 3: Help & Support -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <h4 class="font-bold mb-4 uppercase tracking-wider text-xs"
+                        style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem;">
+                        Help &amp; Support</h4>
+                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-user.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Account &amp; Renewals</a></li>
+                        <li class="mb-2"><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="text-decoration-none ftu-dspace-link"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Academic Copyright Policy</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-news-detail.pl?id=1" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Frequently Asked Questions (FAQ)</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-reportproblem.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Contact Library Admin</a></li>
                     </ul>
                 </div>
-
-                <!-- Cột 4: Liên hệ -->
-                <div>
-                    <h4 class="ftu-footer-title">THÔNG TIN LIÊN HỆ</h4>
-                    <div class="ftu-footer-contact">
-                        <div class="ftu-contact-item">
-                            <i class="fa fa-map-marker"></i>
-                            <span>15 Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh</span>
-                        </div>
-                        <div class="ftu-contact-item">
-                            <i class="fa fa-phone"></i>
-                            <span>Hotline: (028) 3512 7258</span>
-                        </div>
-                        <div class="ftu-contact-item">
-                            <i class="fa fa-envelope"></i>
-                            <span>Email: thuvien.cs2@ftu.edu.vn</span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
-            <div class="ftu-footer-bottom">
-                <div>&copy; 2026 Thư viện Cơ sở II Trường Đại học Ngoại Thương. Tất cả quyền được bảo lưu.</div>
-                <div>Thiết kế bởi <strong>Thư viện số</strong></div>
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-4 border-top d-flex flex-column flex-md-row justify-content-between align-items-center"
+                style="border-top: 1px solid #F1F5F9; font-size: 13px; color: #94A3B8; gap: 1rem;">
+                <p style="margin: 0;">© 2026 Foreign Trade University. All rights reserved.</p>
+                <div class="d-flex align-items-center" style="gap: 16px;">
+                    <a href="/cgi-bin/koha/opac-oai.pl" target="_blank" style="color: #94A3B8; text-decoration: none;">OAI-PMH</a>
+                    <span style="display: inline-block; width: 4px; height: 4px; background: #CBD5E1; border-radius: 50%;"></span>
+                    <span>Powered by <a href="https://koha-community.org" target="_blank"
+                        style="color: #64748B; text-decoration: none;">Koha &amp; DSpace</a></span>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- ========================================================================= -->
+    </footer>
 
     [% IF ( Koha.Preference('OPACReportProblem') && Koha.Preference('KohaAdminEmailAddress') ) || Koha.Preference( 'CookieConsent' ) || OpacKohaUrl || ( ( opaclanguagesdisplay ) && ( ! one_language_enabled ) && ( languages_loop ) && ( OpacLangSelectorMode == 'both' || OpacLangSelectorMode == 'footer') ) %]
         <footer id="changelanguage" class="navbar navbar-expand navbar-light bg-light noprint">
@@ -276,7 +332,74 @@
 [% IF Koha.Preference( 'CookieConsent' ) %]
     [% Asset.js("js/cookieconsent.js") | $raw %]
 [% END %]
-[% KohaPlugins.get_plugins_opac_js | $raw %]
+[% IF ( loggedinusername ) %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    var kohaUser = '[% loggedinusername | html %]';
+    if (!kohaUser) return;
+
+    var ssoHost = '[% FTU_BRAND.link_sso %]' || (window.location.protocol + '//' + (window.location.hostname || 'localhost') + ':8090');
+    ssoHost = ssoHost.replace(/\/+$/, '');
+
+    // 1. Tự động đồng bộ trước phiên SSO DSpace chạy ngầm (Silent pre-auth)
+    try {
+        var ssoPreload = document.createElement('script');
+        ssoPreload.src = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&mode=json';
+        document.head.appendChild(ssoPreload);
+    } catch(e) {}
+
+    // 2. Chuyển đổi toàn bộ link trỏ đến DSpace sang Cổng chuyển giao phiên Seamless SSO
+    function patchDspaceLinks() {
+        $('a[href*=":4000/"], a[href*="/handle/"], a[href*="/items/"], .ftu-dspace-link').each(function() {
+            var href = $(this).attr('href');
+            if (href && !href.includes('/sso/koha-to-dspace') && !href.startsWith('javascript:')) {
+                var ssoBridge = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
+                $(this).attr('href', ssoBridge);
+                $(this).attr('data-sso-bridged', 'true');
+                if (!$(this).attr('title')) {
+                    $(this).attr('title', 'Truy cập liên thông FTU SSO (Tự động đăng nhập DSpace)');
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        patchDspaceLinks();
+        setTimeout(patchDspaceLinks, 500);
+        setTimeout(patchDspaceLinks, 1500);
+    });
+
+    // Bắt sự kiện click để đảm bảo an toàn tuyệt đối
+    $(document).on('click', 'a[href*=":4000/"], a[href*="/handle/"], a[href*="/items/"], .ftu-dspace-link', function(e) {
+        var href = $(this).attr('href');
+        if (href && !href.includes('/sso/koha-to-dspace') && !href.startsWith('javascript:')) {
+            e.preventDefault();
+            var ssoBridge = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
+            var target = $(this).attr('target');
+            if (target === '_blank') {
+                window.open(ssoBridge, '_blank');
+            } else {
+                window.location.href = ssoBridge;
+            }
+        }
+    });
+})();
+</script>
+[% END %]
+
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    var curHost = window.location.hostname;
+    if (curHost && curHost !== 'localhost' && curHost !== '127.0.0.1') {
+        $('a[href*="localhost:"], a[href*="127.0.0.1:"]').each(function() {
+            var href = $(this).attr('href');
+            if (href) {
+                $(this).attr('href', href.replace(/(localhost|127\.0\.0\.1)/g, curHost));
+            }
+        });
+    }
+})();
+</script>
 </body>
 <!-- prettier-ignore-start -->
 </html>

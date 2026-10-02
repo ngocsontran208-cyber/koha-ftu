@@ -20,7 +20,11 @@
     </style>
 [% END %]
 
-<link rel="shortcut icon" href="[% IF ( IntranetFavicon ) %][% IntranetFavicon | html %][% ELSE %][% interface | html %]/[% theme | html %]/img/favicon.ico[% END %]" type="image/x-icon" />
+<link rel="icon" type="image/svg+xml" href="[% interface | html %]/[% theme | html %]/img/favicon.svg?v=ftu" />
+<link rel="icon" type="image/png" sizes="32x32" href="[% interface | html %]/[% theme | html %]/img/favicon-32x32.png?v=ftu" />
+<link rel="icon" type="image/png" sizes="16x16" href="[% interface | html %]/[% theme | html %]/img/favicon-16x16.png?v=ftu" />
+<link rel="apple-touch-icon" sizes="180x180" href="[% interface | html %]/[% theme | html %]/img/apple-touch-icon.png?v=ftu" />
+<link rel="shortcut icon" href="[% IF ( IntranetFavicon ) %][% IntranetFavicon | html %][% ELSE %][% interface | html %]/[% theme | html %]/img/favicon.ico?v=ftu[% END %]" type="image/x-icon" />
 
 [% IF ( bidi ) %]
  [% Asset.css("lib/jquery/jquery-ui-rtl-1.13.2.min.css") | $raw %]

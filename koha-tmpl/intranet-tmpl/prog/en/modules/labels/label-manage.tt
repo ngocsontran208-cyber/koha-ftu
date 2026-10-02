@@ -7,28 +7,28 @@
     [%- SWITCH element -%]
 
     [%- CASE 'layout' -%]
-        [% t('layout') | html %]
+        bố cục nhãn
     [%- CASE 'Layouts' -%]
-        [% t('Label layouts') | html %]
+        Bố cục nhãn (Layouts)
     [%- CASE 'template' -%]
-        [% t('template') | html %]
+        mẫu phôi nhãn
     [%- CASE 'Templates' -%]
-        [% t('Label templates') | html %]
+        Mẫu phôi nhãn (Templates)
     [%- CASE 'profile' -%]
-        [% t('profile') | html %]
+        cấu hình máy in
     [%- CASE 'Profiles' -%]
-        [% t('Printer profiles') | html %]
+        Cấu hình máy in (Profiles)
     [%- CASE 'batch' -%]
-        [% t('batch') | html %]
+        lô nhãn in
     [%- CASE 'Batches' -%]
-        [% t('Label batches') | html %]
+        Lô nhãn in (Batches)
     [%- END -%]
 [% END %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
         [% PROCESS translate_label_element element=label_element_title %]
-        &rsaquo; [% t("Label creator") | html %] &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+        &rsaquo; Tạo nhãn gáy &amp; mã vạch &rsaquo; Biên mục &rsaquo; Koha
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -42,10 +42,10 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-home.pl">Label creator</a>
+            <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy &amp; mã vạch</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             [% PROCESS translate_label_element element=label_element_title %]
@@ -56,12 +56,11 @@
 [% WRAPPER 'main-container.inc' aside='labels-menu' %]
 
     [% INCLUDE 'labels-toolbar.inc' %]
-    <h2>[% PROCESS translate_label_element element=label_element_title %]</h2>
+    <h2 class="ftu-clean-title"><i class="fa fa-tags"></i> [% PROCESS translate_label_element element=label_element_title %]</h2>
 
     [% IF ( error ) %]
         <div class="alert alert-warning">
-            <strong>WARNING:</strong> An error was encountered and the [% op | html %] operation for [% label_element | html %] [% element_id | html %] was not completed. Please have your system administrator check the error log for
-            details.
+            <strong>CẢNH BÁO:</strong> Đã xảy ra lỗi và thao tác [% op | html %] đối với [% label_element | html %] [% element_id | html %] không thể hoàn tất. Vui lòng liên hệ quản trị hệ thống để kiểm tra nhật ký lỗi.
         </div>
     [% END %]
 
@@ -69,7 +68,7 @@
         [% IF ( table_loop ) %]
             <form method="get" name="layouts" action="/cgi-bin/koha/label-manage.pl?label_element=[% label_element | html %]">
                 <div class="page-section">
-                    <table id="labels-table">
+                    <table id="labels-table" class="table table-bordered table-striped">
                         [% FOREACH table_loo IN table_loop %]
                             [% IF ( table_loo.header_fields ) %]
                                 <thead>
@@ -77,33 +76,33 @@
                                         [% FOREACH header_field IN table_loo.header_fields %]
                                             [% SWITCH header_field.field_label %]
                                             [% CASE 'Layout ID' %]
-                                                <th>Layout ID</th>
+                                                <th>Mã bố cục</th>
                                             [% CASE 'Layout' %]
-                                                <th>Layout</th>
+                                                <th>Tên bố cục</th>
                                             [% CASE 'Barcode Type' %]
-                                                <th>Barcode type</th>
+                                                <th>Loại mã vạch</th>
                                             [% CASE 'Print Type' %]
-                                                <th>Print type</th>
+                                                <th>Kiểu in</th>
                                             [% CASE 'Template ID' %]
-                                                <th>Template ID</th>
+                                                <th>Mã phôi nhãn</th>
                                             [% CASE 'Template Name' %]
-                                                <th>Template name</th>
+                                                <th>Tên phôi nhãn</th>
                                             [% CASE 'Description' %]
-                                                <th>Description</th>
+                                                <th>Mô tả</th>
                                             [% CASE 'Actions' %]
-                                                <th class="no-export no-sort">Actions</th>
+                                                <th class="no-export no-sort">Thao tác</th>
                                             [% CASE 'Profile ID' %]
-                                                <th>Profile ID</th>
+                                                <th>Mã cấu hình</th>
                                             [% CASE 'Printer Name' %]
-                                                <th>Printer name</th>
+                                                <th>Tên máy in</th>
                                             [% CASE 'Paper Bin' %]
-                                                <th>Paper bin</th>
+                                                <th>Khay giấy</th>
                                             [% CASE 'Batch ID' %]
-                                                <th>Batch ID</th>
+                                                <th>Mã lô nhãn</th>
                                             [% CASE 'Item Count' %]
-                                                <th>Item count</th>
+                                                <th>Số tài liệu</th>
                                             [% CASE 'Fields to Print' %]
-                                                <th>Fields to print</th>
+                                                <th>Các trường in</th>
                                             [% CASE %]
                                                 <th>[% header_field.field_label | html %]</th>
                                             [% END %]
@@ -116,7 +115,7 @@
                                         [% IF ( text_field.select_field ) %]
                                             <td class="actions">
                                                 <a class="btn btn-default btn-xs" href="/cgi-bin/koha/labels/label-edit-[% label_element |url %].pl?op=edit_form&amp;element_id=[% text_field.field_value |url %]"
-                                                    ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Edit</a
+                                                    ><i class="fa-solid fa-pencil" aria-hidden="true"></i> Sửa</a
                                                 >
 
                                                 <a
@@ -127,8 +126,8 @@
                                                     data-action="label-manage.pl"
                                                     data-method="post"
                                                     data-op="cud-delete"
-                                                    data-confirmation-msg="[% t('Are you sure you want to delete this?') | html %]"
-                                                    ><i class="fa fa-trash-can"></i> Delete</a
+                                                    data-confirmation-msg="Bạn có chắc chắn muốn xóa mục này không?"
+                                                    ><i class="fa fa-trash-can"></i> Xóa</a
                                                 >
                                             </td>
                                             [% IF label_element == 'batch' %]<td><input type="checkbox" name="action" value="[% text_field.field_value | html %]" /></td>[% END %]
@@ -144,12 +143,12 @@
                     </table>
                 </div>
                 <!-- /.page-section -->
-                [% IF ( print ) %]<button type="button" class="btn btn-default" id="print">Export selected</button>[% END %]
+                [% IF ( print ) %]<button type="button" class="btn btn-primary" id="print"><i class="fa fa-print"></i> Xuất in các lô đã chọn</button>[% END %]
             </form>
         [% ELSE %]
             <div class="alert alert-info">
-                <h4>There are no [% PROCESS translate_label_element element=label_element_title %] currently available.</h4>
-                <p>Use the toolbar above to create a new [% PROCESS translate_label_element element=label_element %].</p></div
+                <h4><i class="fa fa-info-circle"></i> Hiện tại chưa có [% PROCESS translate_label_element element=label_element_title %] nào trong hệ thống.</h4>
+                <p>Sử dụng nút "Thêm mới" trên thanh công cụ phía trên để tạo một [% PROCESS translate_label_element element=label_element %] mới.</p></div
             >
         [% END %]
     </div>
@@ -167,14 +166,14 @@
                     }
                 }
                 if (batches.length < 1) {
-                    alert(_("Please select at least one batch to export."));
+                    alert(_("Vui lòng chọn ít nhất một lô nhãn để xuất in."));
                     return; // no batch selected
                 }
                 getstr = batches.join("&");
             } else if (document.layouts.action.checked) {
                 getstr = "batch_id=" + document.layouts.action.value;
             } else {
-                alert(_("Please select at least one batch to export."));
+                alert(_("Vui lòng chọn ít nhất một lô nhãn để xuất in."));
                 return; // no batch selected
             }
             location.href = "/cgi-bin/koha/labels/label-print.pl?" + getstr;
@@ -187,7 +186,7 @@
                 Xport();
             });
             $(".delete").on("click", function () {
-                return confirmDelete(_("Are you sure you want to delete this?"));
+                return confirmDelete(_("Bạn có chắc chắn muốn xóa mục này không?"));
             });
             $("#labels-table").kohaTable({
                 dom: '<"dt-info"i><"top pager"<"table_entries"lp><"table_controls"f>>tr<"bottom pager"ip>',

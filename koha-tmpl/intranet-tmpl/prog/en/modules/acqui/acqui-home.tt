@@ -10,12 +10,343 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        [% t("Acquisitions") | html %]
-        &rsaquo; [% t("Koha") | html %]
+        Bổ sung tài liệu &rsaquo; Thư viện Trường Đại học Ngoại thương
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 [% Asset.css("lib/jquery/plugins/treetable/stylesheets/jquery.treetable.css") | $raw %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+/* ══ FTU Modern Acquisitions Redesign ══ */
+body#acq_acqui-home {
+    background-color: #f8fafc;
+}
+
+/* Minimalist Clean Title (Chuẩn FTU) */
+.ftu-clean-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0.75rem 0 1.25rem 0;
+    padding: 0.75rem 1.25rem;
+    background: #ffffff;
+    border-radius: 10px;
+    border-left: 5px solid #b91c1c;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.ftu-clean-title i {
+    color: #b91c1c;
+    font-size: 1.3rem;
+}
+body#acq_acqui-home h1:not(.ftu-clean-title) {
+    display: none !important;
+}
+
+/* Toolbar Buttons */
+#toolbar {
+    margin-bottom: 1.25rem;
+    background: transparent;
+    padding: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+#toolbar .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.45rem 1rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+#toolbar .btn-primary, #toolbar .ftu-btn-primary {
+    background-color: #b91c1c !important;
+    border-color: #991b1b !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.25);
+}
+#toolbar .btn-primary:hover, #toolbar .ftu-btn-primary:hover {
+    background-color: #991b1b !important;
+    border-color: #7f1d1d !important;
+    transform: translateY(-1px);
+}
+
+/* Cards (Vendor Search & Pending Suggestions) */
+.ftu-acq-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    height: 100%;
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+.ftu-acq-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.ftu-acq-card fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+.ftu-acq-card legend {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.65rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    float: none;
+    width: 100%;
+}
+.ftu-acq-search-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.ftu-acq-search-input {
+    flex: 1;
+    min-width: 240px;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ftu-acq-search-input:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+}
+.ftu-acq-submit-btn {
+    background: #b91c1c !important;
+    color: #fff !important;
+    border: 1px solid #991b1b !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 0.55rem 1.25rem !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.2);
+}
+.ftu-acq-submit-btn:hover {
+    background: #991b1b !important;
+    transform: translateY(-1px);
+}
+
+/* Suggestion badges */
+.ftu-suggestion-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.95rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    color: #1e40af;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    margin-right: 0.5rem;
+    transition: all 0.15s ease;
+}
+.ftu-suggestion-pill:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+.ftu-suggestion-pill.all-branches {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #475569;
+}
+.ftu-suggestion-pill.all-branches:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* Orders Filter Form Card */
+.ftu-orders-search-form {
+    margin-bottom: 1.5rem;
+}
+.ftu-orders-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.ftu-orders-card legend, .ftu-orders-card h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.65rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    float: none;
+    width: 100%;
+}
+.ftu-orders-search-form fieldset.action {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 0 0 0;
+    margin: 0;
+}
+.ftu-orders-search-form .btn-primary {
+    background-color: #b91c1c !important;
+    border-color: #991b1b !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 0.55rem 1.35rem !important;
+    box-shadow: 0 2px 4px rgba(185, 28, 28, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+.ftu-orders-search-form .btn-primary:hover {
+    background-color: #991b1b !important;
+    transform: translateY(-1px);
+}
+
+/* Budgets and Funds Section */
+.ftu-section-title {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+}
+#BudgetsAndFunds {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+#BudgetsAndFunds .toolbar {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.ftu-btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.ftu-btn-pill:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+    text-decoration: none;
+}
+#library-filter {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    outline: none;
+    background-color: #ffffff;
+}
+#library-filter:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.15);
+}
+
+/* Modernized Accounts Table */
+#accounts {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100% !important;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+#accounts thead th {
+    background: #f1f5f9;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 0.86rem;
+    padding: 0.75rem 0.65rem;
+    border-bottom: 2px solid #cbd5e1;
+    white-space: nowrap;
+}
+#accounts tbody tr {
+    transition: background 0.12s;
+}
+#accounts tbody tr:hover {
+    background-color: #fef2f2 !important;
+}
+#accounts tbody td {
+    padding: 0.65rem 0.65rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.88rem;
+    color: #334155;
+    vertical-align: middle;
+}
+#accounts tbody tr.group td {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #b91c1c;
+    padding: 0.6rem 0.85rem;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.92rem;
+}
+#accounts tfoot th {
+    background: #f8fafc;
+    font-weight: 700;
+    padding: 0.75rem 0.65rem;
+    border-top: 2px solid #cbd5e1;
+    font-size: 0.9rem;
+    color: #0f172a;
+}
+#accounts .data {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+#accounts .total_amount {
+    font-weight: 700;
+    color: #0f172a;
+}
+</style>
 </head>
 
 <body id="acq_acqui-home" class="acq">
@@ -26,7 +357,7 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Acquisitions</span>
+            <span><i class="fa fa-cart-shopping"></i> Bổ sung tài liệu</span>
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 [% END %]
@@ -35,47 +366,49 @@
 
     [% INCLUDE 'acquisitions-toolbar.inc' %]
 
-    <h1>Acquisitions</h1>
+    <h1 class="ftu-clean-title"><i class="fa fa-cart-shopping"></i> Quản lý bổ sung tài liệu</h1>
     [% INCLUDE 'budgets-active-currency.inc' hide = 'yes' %]
     [% UNLESS ( loop_budget ) %]
         [% IF ( CAN_user_acquisition_period_manage ) %]
-            <div class="alert alert-warning"><a href="/cgi-bin/koha/admin/aqbudgetperiods.pl">You must define a budget in Administration</a></div>
+            <div class="alert alert-warning"><i class="fa fa-triangle-exclamation"></i> <a href="/cgi-bin/koha/admin/aqbudgetperiods.pl">Bạn cần thiết lập niên khóa ngân sách trong phần Quản trị hệ thống</a></div>
         [% ELSE %]
-            <div class="alert alert-warning">Your administrator must define a budget in Administration</div>
+            <div class="alert alert-warning"><i class="fa fa-triangle-exclamation"></i> Vui lòng liên hệ quản trị viên thư viện để thiết lập ngân sách bổ sung.</div>
         [% END %]
     [% END %]
+
     <div class="row">
-        <div class="col">
-            <div id="acqui_acqui_home_order">
+        <div class="col-md-[% IF ( CAN_user_suggestions_suggestions_manage && ( suggestions_count || all_pendingsuggestions ) ) %]6[% ELSE %]12[% END %]">
+            <div id="acqui_acqui_home_order" class="ftu-acq-card">
                 <fieldset>
-                    <legend>Search vendors</legend>
+                    <legend><i class="fa fa-truck-field text-danger"></i> Tìm kiếm nhà cung cấp</legend>
                     <form name="findsupplier" action="/cgi-bin/koha/acquisition/vendors" method="get">
-                        <p
-                            ><label for="supplierpage">Vendor: </label><input type="text" size="25" name="supplier" id="supplierpage" class="focus" />
-                            <input type="submit" class="btn btn-primary" value="Search" />
-                        </p>
+                        <div class="ftu-acq-search-form">
+                            <input type="text" size="25" name="supplier" id="supplierpage" class="focus ftu-acq-search-input" placeholder="Nhập tên đối tác, đơn vị phát hành, nhà cung cấp..." />
+                            <button type="submit" class="btn btn-primary ftu-btn-primary ftu-acq-submit-btn"><i class="fa fa-magnifying-glass"></i> Tìm kiếm</button>
+                        </div>
                     </form>
                 </fieldset>
             </div>
         </div>
 
         [% IF ( CAN_user_suggestions_suggestions_manage && ( suggestions_count || all_pendingsuggestions ) ) %]
-            <div class="col">
-                <div id="acqui_acqui_home_suggestions">
+            <div class="col-md-6">
+                <div id="acqui_acqui_home_suggestions" class="ftu-acq-card">
                     <fieldset>
-                        <legend>Pending suggestions</legend>
-                        <p>
-                            Manage suggestions:
-                            <a href="/cgi-bin/koha/suggestion/suggestion.pl?branchcode=[% Branches.GetLoggedInBranchcode | url %]#ASKED">
+                        <legend><i class="fa fa-lightbulb text-warning"></i> Yêu cầu đặt mua đang chờ duyệt</legend>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <span style="font-weight: 600; color: #475569;">Quản lý đề xuất:</span>
+                            <a class="ftu-suggestion-pill" href="/cgi-bin/koha/suggestion/suggestion.pl?branchcode=[% Branches.GetLoggedInBranchcode | url %]#ASKED">
+                                <i class="fa fa-building-user"></i>
                                 <span id="pendingsuggestions" class="pending-number-link">[% Branches.GetLoggedInBranchname | html %]: [% suggestions_count | html %]</span>
                             </a>
                             [% IF (all_pendingsuggestions > 0) %]
-                                /
-                                <a href="/cgi-bin/koha/suggestion/suggestion.pl?branchcode=__ANY__#ASKED">
-                                    <span id="all_pendingsuggestions" class="pending-number-link">All libraries: [% all_pendingsuggestions | html %]</span>
+                                <a class="ftu-suggestion-pill all-branches" href="/cgi-bin/koha/suggestion/suggestion.pl?branchcode=__ANY__#ASKED">
+                                    <i class="fa fa-globe"></i>
+                                    <span id="all_pendingsuggestions" class="pending-number-link">Tất cả thư viện: [% all_pendingsuggestions | html %]</span>
                                 </a>
                             [% END %]
-                        </p>
+                        </div>
                     </fieldset>
                 </div>
             </div>
@@ -86,14 +419,17 @@
 
     [% IF ( loop_budget ) %]
         <div class="page-section">
-            <h3>All available funds</h3>
+            <h3 class="ftu-section-title"><i class="fa fa-wallet text-success"></i> Danh mục quỹ &amp; ngân sách bổ sung khả dụng</h3>
 
             <div id="BudgetsAndFunds">
                 <div class="toolbar btn-toolbar">
-                    <span class="actions">
-                        <a href="#" id="expand_all">Expand all</a> | <a href="#" id="collapse_all">Collapse all</a> | <a href="#" id="hide_inactive">Hide inactive budgets</a> | <a href="#" id="show_inactive">Show inactive budgets</a> |
+                    <span class="actions" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="#" id="expand_all" class="ftu-btn-pill"><i class="fa fa-folder-open"></i> Mở rộng tất cả</a>
+                        <a href="#" id="collapse_all" class="ftu-btn-pill"><i class="fa fa-folder-closed"></i> Thu gọn tất cả</a>
+                        <a href="#" id="hide_inactive" class="ftu-btn-pill"><i class="fa fa-eye-slash"></i> Ẩn ngân sách hết hạn</a>
+                        <a href="#" id="show_inactive" class="ftu-btn-pill"><i class="fa fa-eye"></i> Hiện tất cả ngân sách</a>
                         <select id="library-filter">
-                            <option value="">Filter by library</option>
+                            <option value="">-- Lọc theo cơ sở thư viện --</option>
                             [% FOREACH b IN Branches.all %]
                                 <option value="[% b.branchname | html %]">[% b.branchname | html %]</option>
                             [% END %]
@@ -103,23 +439,23 @@
                 <table id="accounts">
                     <thead>
                         <tr>
-                            <th>Active</th>
-                            <th>Budget period description</th>
-                            <th>Fund code</th>
-                            <th>Fund name</th>
-                            <th>Owner</th>
-                            <th>Library</th>
-                            <th>Amount</th>
-                            <th>Ordered</th>
-                            <th>Spent</th>
-                            <th>Total available</th>
+                            <th>Trạng thái</th>
+                            <th>Niên khóa ngân sách</th>
+                            <th>Mã quỹ</th>
+                            <th>Tên nguồn quỹ</th>
+                            <th>Người phụ trách</th>
+                            <th>Thư viện</th>
+                            <th>Tổng ngân sách</th>
+                            <th>Đã đặt mua</th>
+                            <th>Đã giải ngân</th>
+                            <th>Ngân sách khả dụng</th>
                         </tr>
                     </thead>
                     <tfoot id="funds_total">
                         <tr>
                             <th></th>
                             <th></th>
-                            <th colspan="4">Total</th>
+                            <th colspan="4" style="text-align: right; font-weight: 700;">Tổng cộng:</th>
                             <th class="data"></th>
                             <th class="data"></th>
                             <th class="data"></th>
@@ -129,21 +465,28 @@
                     <tbody>
                         [% FOREACH loop_budge IN loop_budget %]
                             <tr data-tt-id="[% loop_budge.budget_id | html %]" data-tt-parent-id="[% loop_budge.budget_parent_id | html %]">
-                                <td>[% loop_budge.budget_period_active | html %]</td>
-                                <td>Budget [% loop_budge.budget_period_description | html %] [id=[% loop_budge.budget_period_id | html %]][% UNLESS loop_budge.budget_period_active %](inactive)[% END %]</td>
+                                <td>
+                                    <span style="display:none;">[% loop_budge.budget_period_active | html %]</span>
+                                    [% IF loop_budge.budget_period_active %]
+                                        <span class="badge bg-success" style="font-size: 0.8rem; font-weight: 600; padding: 4px 8px;"><i class="fa fa-check-circle"></i> Đang hiệu lực</span>
+                                    [% ELSE %]
+                                        <span class="badge bg-secondary" style="font-size: 0.8rem; font-weight: 500; padding: 4px 8px;"><i class="fa fa-circle-xmark"></i> Hết hạn</span>
+                                    [% END %]
+                                </td>
+                                <td>Niên khóa [% loop_budge.budget_period_description | html %] [Mã: [% loop_budge.budget_period_id | html %]][% UNLESS loop_budge.budget_period_active %] (Hết hiệu lực)[% END %]</td>
                                 <td>
                                     [% IF ( CAN_user_acquisition_budget_manage ) %]
-                                        <a href="/cgi-bin/koha/admin/aqbudgets.pl?budget_period_id=[% loop_budge.budget_period_id | uri %]">[% loop_budge.budget_code | html %]</a>
+                                        <a href="/cgi-bin/koha/admin/aqbudgets.pl?budget_period_id=[% loop_budge.budget_period_id | uri %]"><strong>[% loop_budge.budget_code | html %]</strong></a>
                                     [% ELSE %]
-                                        [% loop_budge.budget_code | html %]
+                                        <strong>[% loop_budge.budget_code | html %]</strong>
                                     [% END %]
                                 </td>
                                 <td>[% loop_budge.budget_name | html %]</td>
-                                <td
-                                    >[% IF ( loop_budge.budget_owner ) %]
-                                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% loop_budge.budget_owner.borrowernumber | uri %]"
-                                            >[% loop_budge.budget_owner.surname | html %], [% loop_budge.budget_owner.firstname | html %]</a
-                                        >
+                                <td>
+                                    [% IF ( loop_budge.budget_owner ) %]
+                                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% loop_budge.budget_owner.borrowernumber | uri %]">
+                                            <i class="fa fa-user-circle"></i> [% loop_budge.budget_owner.surname | html %], [% loop_budge.budget_owner.firstname | html %]
+                                        </a>
                                     [% ELSE %]
                                         &nbsp;
                                     [% END %]
@@ -154,46 +497,42 @@
                                 </td>
                                 <td class="data">
                                     [% IF loop_budge.children.size %]
-                                        <a title="Ordered from this fund" href="ordered.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
+                                        <a title="Đã đặt mua từ quỹ này" href="ordered.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
                                             (<span class="total_amount">[% loop_budge.budget_ordered | $Price %]</span>)
                                         </a>
-                                        <span title="Ordered from this fund and children" class="inclusive_amount">[% loop_budge.total_ordered | $Price %]</span>
+                                        <span title="Tổng đã đặt mua từ quỹ này và các quỹ con" class="inclusive_amount">[% loop_budge.total_ordered | $Price %]</span>
                                     [% ELSE %]
-                                        <a href="ordered.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
+                                        <a title="Đã đặt mua từ quỹ này" href="ordered.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
                                             <span class="total_amount">[% loop_budge.budget_ordered | $Price %]</span>
                                         </a>
                                     [% END %]
                                 </td>
                                 <td class="data">
                                     [% IF loop_budge.children.size %]
-                                        <a title="Spent from this fund" href="spent.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
+                                        <a title="Đã giải ngân từ quỹ này" href="spent.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
                                             (<span class="total_amount">[% loop_budge.budget_spent | $Price %]</span>)
                                         </a>
-                                        <span title="Spent from this fund and children" class="inclusive_amount">[% loop_budge.total_spent | $Price %]</span>
+                                        <span title="Tổng đã giải ngân từ quỹ này và các quỹ con" class="inclusive_amount">[% loop_budge.total_spent | $Price %]</span>
                                     [% ELSE %]
-                                        <a href="spent.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
+                                        <a title="Đã giải ngân từ quỹ này" href="spent.pl?fund=[% loop_budge.budget_id | uri %]&amp;fund_code=[% loop_budge.budget_code | uri %]">
                                             <span class="total_amount">[% loop_budge.budget_spent | $Price %]</span>
                                         </a>
                                     [% END %]
                                 </td>
                                 <td class="data">
                                     [% IF loop_budge.children.size %]
-                                        (<span title="Remaining in this fund" class="parent_amount" data-parent_id="[% loop_budge.budget_parent_id | html %]" data-self_id="[% loop_budge.budget_id | html %]"
-                                            >[% loop_budge.budget_avail | $Price %]</span
-                                        >)
-                                        <span title="Remaining with child funds included" class="total_amount" data-parent_id="[% loop_budge.budget_parent_id | html %]" data-self_id="[% loop_budge.budget_id | html %]"
-                                            >[% loop_budge.total_avail | $Price %]</span
-                                        >
+                                        (<span title="Khả dụng trong quỹ này" class="parent_amount" data-parent_id="[% loop_budge.budget_parent_id | html %]" data-self_id="[% loop_budge.budget_id | html %]">[% loop_budge.budget_avail | $Price %]</span>)
+                                        <span title="Tổng khả dụng bao gồm quỹ con" class="total_amount" style="color: #059669; font-weight: 700;" data-parent_id="[% loop_budge.budget_parent_id | html %]" data-self_id="[% loop_budge.budget_id | html %]">[% loop_budge.total_avail | $Price %]</span>
                                     [% ELSE %]
-                                        <span class="total_amount" data-parent_id="[% loop_budge.budget_parent_id | html %]" data-self_id="[% loop_budge.budget_id | html %]">[% loop_budge.budget_avail | $Price %]</span>
+                                        <span class="total_amount" style="color: #059669; font-weight: 700;" data-parent_id="[% loop_budge.budget_parent_id | html %]" data-self_id="[% loop_budge.budget_id | html %]">[% loop_budge.budget_avail | $Price %]</span>
                                     [% END %]
                                 </td>
                             </tr>
                         [% END %]
                     </tbody>
-                </table> </div
-            ><!-- /#BudgetsAndFunds --> </div
-        ><!-- /.page-section -->
+                </table>
+            </div><!-- /#BudgetsAndFunds -->
+        </div><!-- /.page-section -->
     [% END %]
 
     [%- SET StaffAcquisitionsHome = AdditionalContents.get( location => "StaffAcquisitionsHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]

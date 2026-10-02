@@ -45,25 +45,50 @@
     [% IF ( opac_name == 'opac-main' || !opac_name ) && !news_id && !advsearch %]
     <section class="ftu-hero-section">
         <div class="ftu-hero-content">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-                <img src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" style="width: 75px; height: auto; margin-bottom: 0.5rem; border-radius: 50%; border: 3px solid rgba(185, 28, 28, 0.15); box-shadow: 0 8px 25px rgba(185, 28, 28, 0.15); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
-                <h1 class="ftu-hero-title" style="font-size: 1.8rem; margin-bottom: 0.2rem; color: #b91c1c !important; letter-spacing: 0.25em; text-indent: 0.25em;">THƯ VIỆN</h1>
-                <h2 class="ftu-hero-subtitle" style="font-size: 0.95rem; font-weight: 600; color: #b91c1c !important; letter-spacing: 0.15em; margin: 0;">PHÂN HIỆU TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</h2>
+            <!-- FTU Master Banner Carousel (Auto-Slider) -->
+            <div class="ftu-banner-carousel-container" id="ftuBannerCarousel">
+                <div class="ftu-banner-slider-track" id="ftuBannerTrack">
+                    <!-- Slides are loaded dynamically via portal-posts.pl?type=banner -->
+                    <div class="ftu-banner-slide slide-center" data-index="0">
+                        <a href="/cgi-bin/koha/opac-search.pl" class="ftu-banner-link">
+                            <div class="ftu-banner-bg" style="background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(185, 28, 28, 0.65) 100%), url('/opac-tmpl/bootstrap/images/ftu-library-hero.jpg');"></div>
+                            <div class="ftu-banner-content">
+                                <span class="ftu-banner-tag"><i class="fa fa-university"></i> [% FTU_BRAND.library_name_en | upper %]</span>
+                                <h2 class="ftu-banner-title">WELCOME TO [% FTU_BRAND.library_name_short | upper %]</h2>
+                                <p class="ftu-banner-desc">[% FTU_BRAND.library_description_en %]</p>
+                                <span class="ftu-banner-btn">Explore Now <i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Navigation Arrows -->
+                <button type="button" class="ftu-banner-arrow ftu-banner-prev" aria-label="Previous banner" id="ftuBannerPrev">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <button type="button" class="ftu-banner-arrow ftu-banner-next" aria-label="Next banner" id="ftuBannerNext">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+
+                <!-- Pagination Dots -->
+                <div class="ftu-banner-dots" id="ftuBannerDots">
+                    <button type="button" class="ftu-banner-dot active" data-slide="0" aria-label="Slide 1"></button>
+                </div>
             </div>
             
             <div class="ftu-search-card ftu-search-simple">
                 <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform" role="search" class="ftu-search-form">
                     <i class="fa fa-search ftu-search-icon-left"></i>
-                    <input type="text" name="q" class="ftu-search-input-large" placeholder="Nhập tên sách, tác giả, chủ đề..." />
+                    <input type="text" name="q" class="ftu-search-input-large" placeholder="Search by title, author, subject, keyword..." />
                     <input type="hidden" name="idx" value="kw" />
-                    <button type="submit" class="ftu-search-btn-large">Tìm kiếm</button>
+                    <button type="submit" class="ftu-search-btn-large">Search</button>
                 </form>
             </div>
             
             <div class="ftu-search-chips">
-                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary"><i class="fa fa-sliders"></i> Tìm kiếm nâng cao</a>
-                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip"><i class="fa fa-graduation-cap"></i> Giáo trình & Bài giảng</a>
-                <a href="/cgi-bin/koha/opac-authorities-home.pl" class="ftu-chip"><i class="fa fa-tags"></i> Tìm theo Từ khóa</a>
+                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary"><i class="fa fa-sliders"></i> Advanced search</a>
+                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip"><i class="fa fa-graduation-cap"></i> Course reserves</a>
+                <a href="/cgi-bin/koha/opac-authorities-home.pl" class="ftu-chip"><i class="fa fa-tags"></i> Authority search</a>
             </div>
         </div>
     </section>
@@ -73,29 +98,29 @@
            <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-shortcut-card">
                <div class="ftu-shortcut-icon"><i class="fa fa-book-open"></i></div>
                <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">Sách mới về <span class="ftu-badge-open">Mới</span></span>
-                   <span class="ftu-shortcut-desc">Cập nhật tài liệu mới nhất</span>
+                   <span class="ftu-shortcut-title">New Arrivals <span class="ftu-badge-open">New</span></span>
+                   <span class="ftu-shortcut-desc">Browse newly added books</span>
                </div>
            </a>
            <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-shortcut-card">
                <div class="ftu-shortcut-icon ftu-icon-green"><i class="fa fa-history"></i></div>
                <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">Lịch sử mượn</span>
-                   <span class="ftu-shortcut-desc">Tra cứu sách đã mượn</span>
+                   <span class="ftu-shortcut-title">Reading History</span>
+                   <span class="ftu-shortcut-desc">View your borrowed books</span>
                </div>
            </a>
            <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
                <div class="ftu-shortcut-icon"><i class="fa fa-id-card"></i></div>
                <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">Tài khoản của tôi</span>
-                   <span class="ftu-shortcut-desc">Gia hạn & thông tin mượn</span>
+                   <span class="ftu-shortcut-title">My Account</span>
+                   <span class="ftu-shortcut-desc">Renewals & account info</span>
                </div>
            </a>
            <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-shortcut-card">
                <div class="ftu-shortcut-icon"><i class="fa fa-bookmark"></i></div>
                <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">Giá sách yêu thích</span>
-                   <span class="ftu-shortcut-desc">Quản lý danh sách sách</span>
+                   <span class="ftu-shortcut-title">My Lists / Shelves</span>
+                   <span class="ftu-shortcut-desc">Manage your reading lists</span>
                </div>
            </a>
        </div>
@@ -105,8 +130,8 @@
     <!-- DANH MỤC SÁCH MỚI (Real Data & Auto-Scroll) -->
     <div class="ftu-section-container ftu-new-arrivals-section">
         <div class="ftu-section-header">
-            <h3 class="ftu-section-title">SÁCH MỚI CẬP NHẬT</h3>
-            <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
+            <h3 class="ftu-section-title">NEW ARRIVALS</h3>
+            <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-view-all">View all <i class="fa fa-arrow-right"></i></a>
         </div>
         
         <style>
@@ -147,58 +172,36 @@
 
         <div class="ftu-books-scroller-wrap">
             <div id="ftu-dynamic-books" class="ftu-books-grid-dynamic">
-                <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Đang tải dữ liệu sách mới nhất...</div>
+                <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Loading latest new arrivals...</div>
             </div>
         </div>
     </div>
 
-    <!-- TIN TỨC VÀ SỰ KIỆN -->
-    <div class="ftu-section-container">
-        <h3 style="font-weight: 800; color: var(--ftu-red); margin-bottom: 1.5rem;">TIN TỨC & SỰ KIỆN</h3>
+    <!-- TIN TỨC VÀ SỰ KIỆN (DYNAMIC CMS) -->
+    <div class="ftu-section-container" id="news-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-weight: 800; color: var(--ftu-red); margin: 0;">NEWS & EVENTS</h3>
+            <a href="/cgi-bin/koha/opac-news-detail.pl?id=1" style="color: var(--ftu-red); font-weight: 600; text-decoration: none;">View all articles <i class="fa fa-arrow-right"></i></a>
+        </div>
         <div class="ftu-news-grid">
-            <div class="ftu-news-list">
-                <a href="#" class="ftu-news-item">
-                    <div class="ftu-news-date">
-                        <span class="day">15</span>
-                        <span class="month">Th10</span>
-                    </div>
-                    <div class="ftu-news-content">
-                        <h4>Khai trương không gian tự học mới</h4>
-                        <p>Thư viện FTU chính thức đưa vào hoạt động không gian tự học nhóm chuẩn quốc tế tại tầng 3.</p>
-                    </div>
-                </a>
-                <a href="#" class="ftu-news-item">
-                    <div class="ftu-news-date">
-                        <span class="day">10</span>
-                        <span class="month">Th10</span>
-                    </div>
-                    <div class="ftu-news-content">
-                        <h4>Tập huấn kỹ năng tìm kiếm tài liệu điện tử</h4>
-                        <p>Dành cho sinh viên Khóa 62. Hướng dẫn sử dụng cơ sở dữ liệu ProQuest và ScienceDirect.</p>
-                    </div>
-                </a>
+            <!-- Cột Tin tức -->
+            <div>
+                <h4 style="font-weight: 700; color: var(--ftu-text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-newspaper" style="color: var(--ftu-red);"></i> Latest Library Announcements
+                </h4>
+                <div class="ftu-news-list" id="ftu-dynamic-news-list">
+                    <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Loading news...</div>
+                </div>
             </div>
-            <div class="ftu-news-list">
-                <a href="#" class="ftu-news-item">
-                    <div class="ftu-news-date">
-                        <span class="day">05</span>
-                        <span class="month">Th10</span>
-                    </div>
-                    <div class="ftu-news-content">
-                        <h4>Cập nhật hàng trăm tựa sách ngoại văn</h4>
-                        <p>Các tài liệu mới nhất về Kinh tế số, Logistics và Tài chính quốc tế đã sẵn sàng phục vụ.</p>
-                    </div>
-                </a>
-                <a href="#" class="ftu-news-item">
-                    <div class="ftu-news-date">
-                        <span class="day">01</span>
-                        <span class="month">Th10</span>
-                    </div>
-                    <div class="ftu-news-content">
-                        <h4>Chính sách mượn trả tài liệu năm học mới</h4>
-                        <p>Một số thay đổi về hạn mức mượn sách và quy trình gia hạn trực tuyến. Vui lòng xem chi tiết.</p>
-                    </div>
-                </a>
+
+            <!-- Cột Sự kiện & Workshop -->
+            <div>
+                <h4 style="font-weight: 700; color: var(--ftu-text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-calendar-alt" style="color: var(--ftu-red);"></i> Featured Events & Workshops
+                </h4>
+                <div id="ftu-dynamic-events-container">
+                    <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Loading events...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -483,42 +486,38 @@
 [% BLOCK jsinclude %]
 <script>
 $(document).ready(function() {
-    if ($('#ftu-dynamic-books').length) {
-        // Fetch real books from recent acquisitions sort
+    var $grid = $('#ftu-dynamic-books, #ftu-dynamic-new-arrivals');
+    if ($grid.length) {
+        var fallbackSvg = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='420' viewBox='0 0 300 420'%3E%3Crect width='100%25' height='100%25' fill='%23b91c1c'/%3E%3Crect x='15' y='15' width='270' height='390' fill='none' stroke='%23fca5a5' stroke-width='2'/%3E%3Ctext x='50%25' y='45%25' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3ETHƯ VIỆN FTU%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='sans-serif' font-size='14' fill='%23fecaca' text-anchor='middle'%3ETài liệu học tập%3C/text%3E%3C/svg%3E";
+
         $.ajax({
-            url: '/cgi-bin/koha/opac-search.pl?q=itype:BK&sort_by=acqdate_dsc&limit=15',
+            url: '/cgi-bin/koha/svc/report?id=1&annotated=1&_t=' + Date.now(),
             method: 'GET',
-            dataType: 'html',
-            success: function(response) {
-                var htmlContent = '';
-                var doc = new DOMParser().parseFromString(response, "text/html");
-                var items = $(doc).find('table.table tbody tr'); // Find search results rows
-                
-                if (items.length === 0) {
-                    $('#ftu-dynamic-books').html('<div class="ftu-loading-books">Không tìm thấy tài liệu mới nào.</div>');
+            dataType: 'json',
+            success: function(items) {
+                if (!items || items.length === 0) {
+                    $grid.html('<div class="ftu-loading-books">Không tìm thấy tài liệu mới nào.</div>');
                     return;
                 }
                 
-                var bookCount = 0;
-                items.each(function(index) {
-                    if(bookCount >= 10) return false; // Limit to 10 books for the slider
+                var htmlContent = '';
+                var renderedCount = 0;
+                
+                items.forEach(function(item) {
+                    if (renderedCount >= 10) return;
                     
-                    var titleElem = $(this).find('a.title');
-                    var title = titleElem.text().trim();
-                    var link = titleElem.attr('href');
-                    var author = $(this).find('.author a').first().text().trim() || 'Không rõ tác giả';
+                    var bibNum = item.biblionumber;
+                    var title = (item.title || 'Chưa có tiêu đề').replace(/\s*[\/:]\s*$/, '').trim();
+                    var author = (item.author || '[% FTU_BRAND.library_name_short %]').replace(/\s*[\/,]\s*$/, '').trim();
+                    var link = '/cgi-bin/koha/opac-detail.pl?biblionumber=' + bibNum;
                     
-                    // Extract biblionumber from link (/cgi-bin/koha/opac-detail.pl?biblionumber=XXX)
-                    var bibNumMatch = link.match(/biblionumber=(\d+)/);
-                    var bibNum = bibNumMatch ? bibNumMatch[1] : '';
-                    
-                    var coverUrl = bibNum ? '/cgi-bin/koha/opac-image.pl?thumbnail=1&biblionumber=' + bibNum : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400';
+                    var coverUrl = '/cgi-bin/koha/opac-image.pl?biblionumber=' + bibNum + '&v=' + (item.cover_ts || '1');
                     
                     htmlContent += `
                         <a href="${link}" class="ftu-book-card">
                             <div class="ftu-book-cover">
-                                <img src="${coverUrl}" alt="Cover" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400';" />
-                                <span class="ftu-book-badge">MỚI</span>
+                                <img src="${coverUrl}" alt="${title}" onload="if(this.naturalWidth<=1){this.src='${fallbackSvg}';}" onerror="this.onerror=null;this.src='${fallbackSvg}';" />
+                                <span class="ftu-book-badge">${bibNum == 445 ? 'DIGITAL' : 'MỚI'}</span>
                             </div>
                             <div class="ftu-book-details">
                                 <h4 class="ftu-book-title" title="${title}">${title}</h4>
@@ -527,19 +526,273 @@ $(document).ready(function() {
                             </div>
                         </a>
                     `;
-                    bookCount++;
+                    renderedCount++;
                 });
                 
-                // Duplicate items to ensure smooth infinite marquee
-                htmlContent += htmlContent;
-                
-                $('#ftu-dynamic-books').html(htmlContent);
+                if (renderedCount > 0) {
+                    if ($grid.hasClass('ftu-books-grid-dynamic')) {
+                        htmlContent = htmlContent + htmlContent;
+                    }
+                    $grid.html(htmlContent);
+                } else {
+                    $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
+                }
             },
             error: function() {
-                $('#ftu-dynamic-books').html('<div class="ftu-loading-books">Lỗi tải dữ liệu.</div>');
+                $grid.html('<div class="ftu-loading-books">Lỗi tải dữ liệu sách mới.</div>');
             }
         });
     }
-});
+
+        // Load News from Portal CMS
+        $.ajax({
+            url: '/cgi-bin/koha/portal-posts.pl?type=news&limit=4&_t=' + Date.now(),
+            method: 'GET',
+            dataType: 'json',
+            success: function(newsItems) {
+                var $newsList = $('#ftu-dynamic-news-list');
+                if (!newsItems || newsItems.length === 0) {
+                    $newsList.html('<p class="text-muted">Chưa có tin tức mới.</p>');
+                    return;
+                }
+                var newsHtml = '';
+                newsItems.forEach(function(item) {
+                    var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + item.id;
+                    newsHtml += `
+                        <a href="${link}" class="ftu-news-item">
+                            <div class="ftu-news-date">
+                                <span class="day">${item.created_day || '01'}</span>
+                                <span class="month">${item.created_month || 'Thg 9'}</span>
+                            </div>
+                            <div class="ftu-news-content">
+                                <h4>${item.title}</h4>
+                                <p>${item.excerpt || ''}</p>
+                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 6px; display: flex; align-items: center; gap: 12px;">
+                                    <span><i class="fa fa-eye" style="color: #0284c7;"></i> ${item.views_count || 0} views</span>
+                                    <span><i class="fa fa-user-edit" style="color: #64748b;"></i> ${item.author_name || 'FTU Library'}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                });
+                $newsList.html(newsHtml);
+            }
+        });
+
+        // Load Events from Portal CMS
+        $.ajax({
+            url: '/cgi-bin/koha/portal-posts.pl?type=event&limit=1&_t=' + Date.now(),
+            method: 'GET',
+            dataType: 'json',
+            success: function(events) {
+                var $eventContainer = $('#ftu-dynamic-events-container');
+                if (!events || events.length === 0) {
+                    $eventContainer.html('<p class="text-muted">No upcoming events.</p>');
+                    return;
+                }
+                var evt = events[0];
+                var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + evt.id;
+                var eventHtml = `
+                    <a href="${link}" class="ftu-event-card" style="display: block; text-decoration: none;">
+                        <div class="ftu-event-img">
+                            <img src="${evt.featured_image || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=600'}" alt="${evt.title}">
+                            <div class="ftu-event-tag">${evt.event_tag || 'Upcoming'}</div>
+                        </div>
+                        <div class="ftu-event-details">
+                            <h3>${evt.title}</h3>
+                            <p><i class="fa fa-calendar-alt"></i> ${evt.formatted_event_date || ''} • ${evt.event_time || ''}</p>
+                            <p><i class="fa fa-map-marker-alt"></i> ${evt.event_location || '[% FTU_BRAND.library_name_short %]'}</p>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;"><i class="fa fa-eye" style="color: #0284c7;"></i> ${evt.views_count || 0} views</p>
+                            ${evt.event_reg_link ? `<div style="margin-top: 1rem;"><span class="btn btn-sm btn-outline-danger" style="border-radius: 20px; font-weight: 600;"><i class="fa fa-user-plus"></i> Register Now</span></div>` : ''}
+                        </div>
+                    </a>
+                `;
+                $eventContainer.html(eventHtml);
+            }
+        });
+        // Load & Initialize Hero Banners Carousel (Auto-Slider)
+        function initBannerCarousel() {
+            var $carousel = $('#ftuBannerCarousel');
+            if (!$carousel.length) return;
+
+            var $track = $('#ftuBannerTrack');
+            var $dotsContainer = $('#ftuBannerDots');
+            var $prevBtn = $('#ftuBannerPrev');
+            var $nextBtn = $('#ftuBannerNext');
+            var currentIndex = 0;
+            var slideTimer = null;
+            var slideInterval = 5000; // 5 seconds per slide
+
+            $.ajax({
+                url: '/cgi-bin/koha/portal-posts.pl?type=banner&limit=10&_t=' + Date.now(),
+                method: 'GET',
+                dataType: 'json',
+                success: function(banners) {
+                    if (banners && banners.length > 0) {
+                        var trackHtml = '';
+                        var dotsHtml = '';
+                        banners.forEach(function(b, idx) {
+                            var link = b.support_link || '/cgi-bin/koha/opac-search.pl';
+                            var isExternal = /^https?:\/\//i.test(link) && !link.includes(window.location.hostname);
+                            var targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+                            var bgImg = b.featured_image || '/opac-tmpl/bootstrap/images/ftu-library-hero.jpg';
+                            var tag = b.classification || 'FTU LIBRARY';
+                            var title = b.title || '';
+                            var desc = b.excerpt || '';
+                            var showOverlay = (b.content === 'show_text');
+
+                            trackHtml += `
+                                <div class="ftu-banner-slide" data-index="${idx}">
+                                    <a href="${link}" class="ftu-banner-link"${targetAttr}>
+                                        <div class="ftu-banner-bg" style="background-image: ${showOverlay ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(185, 28, 28, 0.6) 100%), ' : ''}url('${bgImg}');"></div>
+                                        ${showOverlay ? `
+                                        <div class="ftu-banner-content">
+                                            <span class="ftu-banner-tag"><i class="fa fa-sparkles"></i> ${tag}</span>
+                                            <h2 class="ftu-banner-title">${title}</h2>
+                                            ${desc ? `<p class="ftu-banner-desc">${desc}</p>` : ''}
+                                            <span class="ftu-banner-btn">Explore Now <i class="fa fa-arrow-right"></i></span>
+                                        </div>
+                                        ` : ''}
+                                    </a>
+                                </div>
+                            `;
+
+                            dotsHtml += `<button type="button" class="ftu-banner-dot${idx === 0 ? ' active' : ''}" data-slide="${idx}" aria-label="Slide ${idx + 1}"></button>`;
+                        });
+
+                        $track.html(trackHtml);
+                        $dotsContainer.html(dotsHtml);
+                    }
+                    startSlider();
+                },
+                error: function() {
+                    startSlider();
+                }
+            });
+
+            function startSlider() {
+                var $slides = $track.find('.ftu-banner-slide');
+                var total = $slides.length;
+                if (total <= 0) return;
+
+                if (total === 1) {
+                    $slides.removeClass('slide-left slide-right slide-hidden').addClass('slide-center active');
+                    $prevBtn.hide();
+                    $nextBtn.hide();
+                    $dotsContainer.hide();
+                    return;
+                }
+
+                function updateSlidePositions(centerIdx) {
+                    currentIndex = ((centerIdx % total) + total) % total;
+
+                    if (total === 2) {
+                        var otherIdx = (currentIndex + 1) % 2;
+                        $slides.eq(currentIndex).removeClass('slide-left slide-right slide-hidden').addClass('slide-center active');
+                        $slides.eq(otherIdx).removeClass('slide-center active slide-hidden').addClass('slide-right');
+                    } else {
+                        var leftIdx = (currentIndex - 1 + total) % total;
+                        var rightIdx = (currentIndex + 1) % total;
+
+                        $slides.each(function(idx) {
+                            var $el = $(this);
+                            $el.removeClass('slide-center slide-left slide-right slide-hidden active');
+                            if (idx === currentIndex) {
+                                $el.addClass('slide-center active');
+                            } else if (idx === leftIdx) {
+                                $el.addClass('slide-left');
+                            } else if (idx === rightIdx) {
+                                $el.addClass('slide-right');
+                            } else {
+                                $el.addClass('slide-hidden');
+                            }
+                        });
+                    }
+
+                    $dotsContainer.find('.ftu-banner-dot').removeClass('active');
+                    $dotsContainer.find('.ftu-banner-dot').eq(currentIndex).addClass('active');
+                }
+
+                function nextSlide() {
+                    updateSlidePositions(currentIndex + 1);
+                }
+
+                function prevSlide() {
+                    updateSlidePositions(currentIndex - 1);
+                }
+
+                function resetTimer() {
+                    clearInterval(slideTimer);
+                    slideTimer = setInterval(nextSlide, slideInterval);
+                }
+
+                // Initial 3-layer placement
+                updateSlidePositions(0);
+
+                // Arrow navigation buttons
+                $nextBtn.off('click').on('click', function(e) {
+                    e.preventDefault();
+                    nextSlide();
+                    resetTimer();
+                });
+
+                $prevBtn.off('click').on('click', function(e) {
+                    e.preventDefault();
+                    prevSlide();
+                    resetTimer();
+                });
+
+                // Click left layer -> rotate left slide to center
+                $track.off('click', '.ftu-banner-slide.slide-left').on('click', '.ftu-banner-slide.slide-left', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    prevSlide();
+                    resetTimer();
+                });
+
+                // Click right layer -> rotate right slide to center
+                $track.off('click', '.ftu-banner-slide.slide-right').on('click', '.ftu-banner-slide.slide-right', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    nextSlide();
+                    resetTimer();
+                });
+
+                // Click pagination dot
+                $dotsContainer.off('click', '.ftu-banner-dot').on('click', '.ftu-banner-dot', function(e) {
+                    e.preventDefault();
+                    var slideIdx = parseInt($(this).data('slide'), 10);
+                    updateSlidePositions(slideIdx);
+                    resetTimer();
+                });
+
+                // Pause on hover
+                $carousel.off('mouseenter mouseleave').on('mouseenter', function() {
+                    clearInterval(slideTimer);
+                }).on('mouseleave', function() {
+                    resetTimer();
+                });
+
+                // Touch swipe on mobile / tablet
+                var touchStartX = 0;
+                var touchEndX = 0;
+                $carousel.off('touchstart touchend').on('touchstart', function(e) {
+                    touchStartX = e.originalEvent.touches[0].clientX;
+                }).on('touchend', function(e) {
+                    touchEndX = e.originalEvent.changedTouches[0].clientX;
+                    if (touchStartX - touchEndX > 50) {
+                        nextSlide();
+                        resetTimer();
+                    } else if (touchEndX - touchStartX > 50) {
+                        prevSlide();
+                        resetTimer();
+                    }
+                });
+
+                resetTimer();
+            }
+        }
+        initBannerCarousel();
+    });
 </script>
 [% END %]

@@ -41,3 +41,14 @@ how-to.pl
 koha-tmpl/intranet-tmpl/prog/en/modules/how-to.tt
 
 misc/translator/po
+
+# FTU Temporary, Backup & Upload files
+*.bak
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+*.log
+koha-tmpl/opac-tmpl/bootstrap/images/portal_uploads/*
+!koha-tmpl/opac-tmpl/bootstrap/images/portal_uploads/.gitkeep

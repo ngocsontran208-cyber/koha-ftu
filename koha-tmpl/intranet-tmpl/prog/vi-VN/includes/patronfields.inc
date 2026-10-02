@@ -2,27 +2,27 @@
  [%- SWITCH name -%]
 
  [%- CASE 'standard' -%]
- [% t("Standard") | html %]
+ Mặc định (Tên, thẻ, tài khoản)
  [%- CASE 'full_address' -%]
- [% t("Full address") | html %]
+ Địa chỉ đầy đủ
  [%- CASE 'all_emails' -%]
- [% t("All emails") | html %]
+ Tất cả email
  [%- CASE 'all_phones' -%]
- [% t("All phones") | html %]
+ Tất cả số điện thoại
  [%- CASE 'borrowernumber' -%]
- [% t("Borrowernumber") | html %]
+ Mã bạn đọc (ID)
  [%- CASE 'cardnumber' -%]
- [% t("Card number") | html %]
+ Số thẻ bạn đọc
  [%- CASE 'surname' -%]
- [% t("Surname") | html %]
+ Họ và tên đệm
  [%- CASE 'firstname' -%]
- [% t("First name") | html %]
+ Tên
  [%- CASE 'preferred_name' -%]
- [% t("Preferred name") | html %]
+ Tên thường gọi
  [%- CASE 'middle_name' -%]
- [% t("Middle name") | html %]
+ Tên đệm
  [%- CASE 'title' -%]
- [% t("Salutation") | html %]
+ Danh xưng
  [%- CASE 'othernames' -%]
  [% t("Other name") | html %]
  [%- CASE 'initials' -%]
@@ -169,7 +169,7 @@
  [% SET select_id = '' %]
  [% SET select_class = 'searchfieldstype_filter' %]
  [% END %]
- <label for="[% label_for | html %]">Search field:</label>
+ <label for="[% label_for | html %]">Trường tìm kiếm:</label>
  <select name="searchfieldstype" class="[% select_class | html %]" [% IF select_id %]id="[% select_id | html %]"[% END %]>
  [% SET standard = Koha.Preference('DefaultPatronSearchFields') || 'firstname|preferred_name|middle_name|surname|othernames|cardnumber|userid' %]
  [%# Above is needed for adding fields from the DefaultPatronSearchFields preference to the dropdowns %]

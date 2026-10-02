@@ -5,6 +5,7 @@
 [% USE AuthClient %]
 [% USE AdditionalContents %]
 [% PROCESS 'i18n.inc' %]
+[% PROCESS 'ftu-brand-config.inc' %]
 [% PROCESS 'html_helpers.inc' %]
 [% IF Koha.Preference( 'CookieConsent' ) %]
     [% USE JSConsents %]
@@ -26,11 +27,11 @@
 <header id="header-region" class="noprint">
     <nav class="navbar navbar-expand">
         <div id="logo">
-            <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl">
-                <img class="ftu-logo-img" src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" />
+            <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl" title="[% FTU_BRAND.library_name %]">
+                <img class="ftu-logo-img" src="[% FTU_BRAND.logo_url %]" alt="[% FTU_BRAND.logo_alt %]" />
                 <span class="ftu-brand-title-wrap">
-                    <span class="ftu-brand-main-title">TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</span>
-                    <span class="ftu-brand-sub-title">PHÂN HIỆU TẠI THÀNH PHỐ HỒ CHÍ MINH</span>
+                    <span class="ftu-brand-main-title">[% FTU_BRAND.library_name %]</span>
+                    <span class="ftu-brand-sub-title">[% FTU_BRAND.library_sub_title %]</span>
                 </span>
             </a>
         </div>
@@ -109,6 +110,18 @@
                         <!-- / .nav-item.dropdown -->
                     [% END # / IF opacuserlogin || some_public_shelves < 1 %]
                 [% END # / IF virtualshelves %]
+                <li role="presentation" class="divider-vertical"></li>
+                <li class="nav-item" id="csdl-nav-item">
+                    <a href="/cgi-bin/koha/opac-databases.pl" class="nav-link" title="Databases (CSDL)" id="csdlmenulink" role="button">
+                        <i id="csdlicon" class="fa fa-database fa-fw fa-icon-black" aria-hidden="true"></i> <span class="csdllabel">Databases (CSDL)</span>
+                    </a>
+                </li>
+                <li role="presentation" class="divider-vertical"></li>
+                <li class="nav-item" id="bst-nav-item">
+                    <a href="/cgi-bin/koha/opac-collections.pl" class="nav-link" title="Collections" id="bstmenulink" role="button">
+                        <i id="bsticon" class="fa fa-cubes fa-fw fa-icon-black" aria-hidden="true"></i> <span class="bstlabel">Collections</span>
+                    </a>
+                </li>
                 [% IF Koha.Preference( 'OpacTrustedCheckout' ) %]
                     <li class="nav-item">
                         <a href="#" class="nav-link" title="Self check out" id="comenulink" role="button" data-bs-toggle="modal" data-bs-target="#checkoutModal">
@@ -162,6 +175,7 @@
                                             data-borrowernumber="[% logged_in_user.borrowernumber | html %]"
                                             data-branchcode="[% logged_in_user.branchcode | html %]"
                                             data-categorycode="[% logged_in_user.categorycode | html %]"
+                                            data-userid="[% logged_in_user.userid || loggedinusername | html %]"
                                             >Your account</span
                                         ></a
                                     >

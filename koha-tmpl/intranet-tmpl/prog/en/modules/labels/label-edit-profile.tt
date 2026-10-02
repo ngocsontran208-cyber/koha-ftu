@@ -24,19 +24,19 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-home.pl">Label creator</a>
+            <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy &amp; mã vạch</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=profile">Printer profiles</a>
+            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=profile">Cấu hình máy in</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             [% IF ( profile_id ) %]
-                <span>Edit printer profile [% profile_id | html %]</span>
+                <span>Chỉnh sửa cấu hình máy in [% profile_id | html %]</span>
             [% ELSE %]
-                <span>New printer profile</span>
+                <span>Thêm cấu hình máy in mới</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -47,14 +47,14 @@
     [% INCLUDE 'labels-toolbar.inc' %]
 
     [% IF ( profile_id ) %]
-        <h1>Edit printer profile [% profile_id | html %]</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-print"></i> Chỉnh sửa cấu hình máy in [% profile_id | html %]</h1>
     [% ELSE %]
-        <h1>New printer profile</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-print"></i> Thêm cấu hình máy in mới</h1>
     [% END %]
 
     <form name="input" action="/cgi-bin/koha/labels/label-edit-profile.pl" method="post">
         <fieldset class="rows"
-            ><legend>Profile settings</legend>
+            ><legend><i class="fa fa-sliders"></i> Cài đặt cấu hình máy in</legend>
             <ol>
                 <li>
                     [% IF ( profile_id ) %]

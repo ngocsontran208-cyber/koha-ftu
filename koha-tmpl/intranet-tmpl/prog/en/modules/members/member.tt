@@ -16,175 +16,1363 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        [% IF ( searching ) %]
-            [% t("Search results") | html %]
-            &rsaquo;
-        [% END %]
-        [% t("Patrons") | html %]
-        &rsaquo; [% t("Koha") | html %]
-    [% END %]</title
+ [% IF ( searching ) %]
+ Kết quả tìm kiếm &rsaquo;
+ [% END %]
+ Quản lý bạn đọc &rsaquo; Thư viện Phân hiệu Trường Đại học Ngoại thương
+ [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 </head>
 
 <body id="pat_member" class="pat">
 [% WRAPPER 'header.inc' %]
-    [% INCLUDE 'patron-search-header.inc' %]
+ [% INCLUDE 'patron-search-header.inc' %]
 [% END %]
 
 [% WRAPPER 'sub-header.inc' %]
-    [% WRAPPER breadcrumbs %]
-        [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Patrons</span>
-        [% END %]
-    [% END #/ WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/mainpage.pl">Trang chủ</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Quản lý bạn đọc</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
+<style>
+/* ==========================================================================
+   ELEGANT & SCIENTIFIC PATRON MANAGEMENT (FTU KOHA & SSO UNIFIED)
+   ========================================================================== */
+#pat_member {
+    background-color: #f8fafc;
+}
+
+#pat_member .main.container-fluid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 28px 48px 28px !important;
+    background-color: #f8fafc;
+    box-sizing: border-box;
+}
+
+#pat_member .main.container-fluid > .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+#pat_member .main.container-fluid > .row > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hide legacy floating Koha forms & old toolbar completely */
+#toolbar.btn-toolbar,
+body#pat_member aside,
+body#pat_member aside .patron_search_form {
+    display: none !important;
+}
+
+/* Main Unified Admin Card */
+.ftu-admin-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    margin-top: 12px;
+    margin-bottom: 32px;
+    overflow: hidden;
+}
+
+/* Top Header */
+.ftu-admin-header {
+    padding: 16px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.ftu-segmented-control {
+    display: inline-flex;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 3px;
+}
+
+.ftu-segmented-btn {
+    border: none;
+    background: transparent;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.ftu-segmented-btn:hover {
+    color: #0f172a;
+}
+
+.ftu-segmented-btn.active {
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ftu-count-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.ftu-segmented-btn.active .ftu-count-badge {
+    background: #8B1E1E;
+    color: #ffffff;
+}
+
+.ftu-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.ftu-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    display: inline-block;
+}
+
+/* Primary & Secondary Buttons */
+.ftu-btn-primary {
+    background: #8B1E1E !important;
+    color: #ffffff !important;
+    border: 1px solid #8B1E1E !important;
+    font-weight: 500;
+    font-size: 12.5px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.ftu-btn-primary:hover {
+    background: #731818 !important;
+    border-color: #731818 !important;
+    color: #ffffff !important;
+}
+
+.ftu-btn-secondary {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+    font-weight: 500;
+    font-size: 12.5px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.ftu-btn-secondary:hover,
+.ftu-btn-secondary.active {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.ftu-btn-light {
+    background: transparent !important;
+    color: #64748b !important;
+    border: 1px solid transparent !important;
+    font-weight: 500;
+    font-size: 12.5px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.ftu-btn-light:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+/* ==========================================================================
+   UNIFIED FILTER TOOLBAR (TIER 2 - KHÔNG GIAN BỘ LỌC DUY NHẤT, GỌN GÀNG)
+   ========================================================================== */
+.ftu-filter-toolbar {
+    padding: 14px 24px;
+    background: #fafbfc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.ftu-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.ftu-search-input-wrap {
+    position: relative;
+    flex: 1 1 300px;
+    max-width: 440px;
+}
+
+.ftu-search-input-wrap i.ftu-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.ftu-search-input-wrap input {
+    width: 100%;
+    padding: 7px 32px 7px 34px !important;
+    height: 36px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    color: #1e293b !important;
+    box-sizing: border-box !important;
+    transition: all 0.15s ease !important;
+}
+
+.ftu-search-input-wrap input:focus {
+    border-color: #8B1E1E !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(139, 30, 30, 0.12) !important;
+}
+
+.ftu-clear-input-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    padding: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.ftu-clear-input-btn:hover {
+    color: #475569;
+}
+
+.ftu-select-wrap {
+    flex: 0 1 210px;
+    min-width: 170px;
+}
+
+.ftu-select-wrap select {
+    width: 100%;
+    height: 36px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    padding: 6px 12px !important;
+    color: #334155 !important;
+    box-sizing: border-box !important;
+}
+
+.ftu-select-wrap select:focus {
+    border-color: #8B1E1E !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(139, 30, 30, 0.12) !important;
+}
+
+/* ==========================================================================
+   COLLAPSIBLE ADVANCED FILTER (TIER 3 - 6 TIÊU CHÍ KHOA HỌC, FULL-WIDTH)
+   ========================================================================== */
+.ftu-adv-filter-panel {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 20px 24px;
+    box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.02);
+}
+
+.ftu-adv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ftu-field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #475569;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.ftu-adv-input {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    padding: 6px 12px !important;
+    height: 36px !important;
+    color: #1e293b !important;
+    transition: all 0.15s ease !important;
+    box-sizing: border-box !important;
+    width: 100%;
+}
+
+.ftu-adv-input:focus {
+    border-color: #8B1E1E !important;
+    box-shadow: 0 0 0 3px rgba(139, 30, 30, 0.12) !important;
+    outline: none !important;
+}
+
+/* ==========================================================================
+   TABLE DESIGN & ACTION COLUMN (MINIMALIST & SCIENTIFIC)
+   ========================================================================== */
+.ftu-table,
+#memberresultst {
+    width: 100% !important;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: none;
+}
+
+.ftu-table thead th,
+#memberresultst thead th {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 12px 16px !important;
+    border-top: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    white-space: nowrap !important;
+}
+
+.ftu-table tbody tr,
+#memberresultst tbody tr {
+    transition: background-color 0.15s ease;
+    background-color: #ffffff;
+}
+
+.ftu-table tbody tr:hover,
+#memberresultst tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+.ftu-table tbody td,
+#memberresultst tbody td {
+    padding: 12px 16px !important;
+    vertical-align: middle !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+    font-size: 13px !important;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: visible;
+    min-height: 240px;
+}
+
+/* Status Badges */
+.ftu-badge-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.ftu-badge-locked {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.ftu-badge-expired {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fef3c7;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Action buttons */
+.ftu-action-btn {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.ftu-action-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.ftu-action-btn.btn-checkout {
+    color: #8B1E1E;
+    border-color: #fecaca;
+    background: #fff5f5;
+    font-weight: 600;
+}
+
+.ftu-action-btn.btn-checkout:hover {
+    background: #fee2e2;
+    color: #731818;
+}
+
+.ftu-action-btn.ftu-btn-icon {
+    padding: 4px 8px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.ftu-action-btn.ftu-btn-icon:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+/* Alphabet Browse */
+.browse {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.browse-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 6px;
+}
+
+.browse a.filterByLetter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 5px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 4px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+}
+
+.browse a.filterByLetter:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.browse a.filterByLetter.active {
+    background: #8B1E1E;
+    color: #ffffff;
+    border-color: #8B1E1E;
+    font-weight: 600;
+}
+
+.ftu-admin-card .dropdown-menu {
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    border-radius: 8px;
+    font-size: 12.5px;
+    z-index: 1060;
+}
+
+/* Phân trang bảng người học SSO */
+.ftu-pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.ftu-pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ftu-pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ftu-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.ftu-page-btn:hover:not(.disabled):not(.active) {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #8B1E1E;
+}
+
+.ftu-page-btn.active {
+    background: #8B1E1E !important;
+    border-color: #8B1E1E !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(139, 30, 30, 0.25);
+    cursor: default;
+}
+
+.ftu-page-btn.disabled,
+.ftu-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+}
+
+.ftu-page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 32px;
+    color: #94a3b8;
+    font-size: 13px;
+    user-select: none;
+}
+
+/* Phân trang DataTables bảng Koha */
+#memberresultst_wrapper .dataTables_paginate {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+#memberresultst_wrapper .dataTables_paginate .paginate_button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    font-size: 12.5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#memberresultst_wrapper .dataTables_paginate .paginate_button.current {
+    background: #8B1E1E !important;
+    border-color: #8B1E1E !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+#memberresultst_wrapper .dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #8B1E1E !important;
+}
+
+#memberresultst_wrapper .dataTables_info {
+    font-size: 13px;
+    color: #475569;
+    padding-top: 14px;
+}
+</style>
+
 <div class="main container-fluid">
-    <div class="row">
-        <div class="col-md-10 order-md-2 order-sm-1">
-            <main>
-                [% INCLUDE 'messages.inc' %]
+ <div class="row">
+  <div class="col-12">
+   <main>
+    [% INCLUDE 'messages.inc' %]
 
-                [% IF CAN_user_tools_manage_patron_lists %]
-                    <div id="patron_list_dialog" class="alert alert-info"> Added <span class="patrons-length"></span> patrons to <a></a>. </div>
-                [% END %]
+    [% IF CAN_user_tools_manage_patron_lists %]
+    <div id="patron_list_dialog" class="alert alert-success" style="display:none;"> Đã thêm <span class="patrons-length"></span> bạn đọc vào danh sách <a></a>. </div>
+    [% END %]
 
-                [% INCLUDE 'patron-toolbar.inc' %]
-                [% INCLUDE 'noadd-warnings.inc' %]
+    [% INCLUDE 'patron-toolbar.inc' %]
+    [% INCLUDE 'noadd-warnings.inc' %]
 
-                [% IF CAN_user_borrowers_edit_borrowers && pending_borrower_modifications %]
-                    <div class="pending-info" id="patron_updates_pending">
-                        <a href="/cgi-bin/koha/members/members-update.pl">Patrons requesting modifications</a>:
-                        <span class="badge bg-info-subtle"><a href="/cgi-bin/koha/members/members-update.pl">[% pending_borrower_modifications | html %]</a></span>
+    [% IF CAN_user_borrowers_edit_borrowers && pending_borrower_modifications %]
+    <div class="pending-info mb-3" id="patron_updates_pending">
+        <a href="/cgi-bin/koha/members/members-update.pl">Yêu cầu cập nhật thông tin bạn đọc</a>:
+        <span class="badge bg-warning text-dark"><a href="/cgi-bin/koha/members/members-update.pl">[% pending_borrower_modifications | html %]</a></span>
+    </div>
+    [% END %]
+
+    <!-- ========================================================================= -->
+    <!-- BẢNG ĐIỀU KHIỂN QUẢN LÝ BẠN ĐỌC: ĐỒNG BỘ, TINH GỌN, CHUYÊN NGHIỆP -->
+    <!-- ========================================================================= -->
+    <div class="ftu-admin-card">
+        <!-- 1. THANH TIÊU ĐỀ & CHUYỂN ĐỔI TAB (CỐ ĐỊNH, KHÔNG BỊ MẤT KHI CHUYỂN TAB) -->
+        <div class="ftu-admin-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <!-- Segmented Control chuyển đổi tab -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="ftu-segmented-control" role="tablist">
+                        <button type="button" class="ftu-segmented-btn active" id="btn-show-sso" role="tab" aria-selected="true">
+                            <i class="fa fa-graduation-cap"></i>
+                            <span>Người học tập trung (SSO)</span>
+                            <span class="ftu-count-badge" id="sso-badge-count">--</span>
+                        </button>
+                        <button type="button" class="ftu-segmented-btn" id="btn-show-koha" role="tab" aria-selected="false">
+                            <i class="fa fa-university"></i>
+                            <span>Bạn đọc nội bộ Koha</span>
+                            <span class="ftu-count-badge" id="koha-badge-count">CSDL</span>
+                        </button>
                     </div>
-                [% END %]
+                    <div class="ftu-status-indicator">
+                        <span class="ftu-status-dot"></span>
+                        <span id="sso-status-text">SSO Trực tuyến</span>
+                    </div>
+                </div>
 
+                <!-- Thao tác nhanh theo ngữ cảnh -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Nút thao tác tab SSO -->
+                    <div id="sso-header-actions" class="d-inline-flex align-items-center gap-2">
+                        <button type="button" class="ftu-btn-primary" id="btn-open-add-sso" title="Thêm hồ sơ bạn đọc người học mới">
+                            + Thêm bạn đọc SSO
+                        </button>
+                        <button type="button" class="ftu-btn-secondary" id="btn-refresh-sso" title="Tải lại dữ liệu từ Cổng SSO">
+                            Làm mới
+                        </button>
+                        <button type="button" class="ftu-btn-secondary" id="btn-sync-all-koha" title="Đồng bộ tất cả người học vào CSDL Koha">
+                            Đồng bộ sang Koha
+                        </button>
+                        <button type="button" class="ftu-btn-secondary" id="btn-sync-from-koha" title="Cập nhật trạng thái từ Koha về Cổng SSO">
+                            ⇄ Nhận từ Koha
+                        </button>
+                        <a href="[% Koha.Preference('FTU_SSOBaseURL') || 'http://localhost:8090' %]" id="ftu-sso-portal-top-link" target="_blank" class="ftu-btn-secondary" title="Mở trang Quản lý tập trung SSO Portal">
+                            SSO Portal ↗
+                        </a>
+                    </div>
+
+                    <!-- Nút thao tác tab Koha -->
+                    <div id="koha-header-actions" class="d-inline-flex align-items-center gap-2" style="display:none !important;">
+                        <div class="btn-group">
+                            <button type="button" class="ftu-btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                + Tạo bạn đọc Koha
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border">
+                                [% FOREACH category IN categories %]
+                                <li><a class="dropdown-item py-1.5 px-3" href="/cgi-bin/koha/members/memberentry.pl?op=add_form&amp;categorycode=[% category.categorycode | uri %]">[% category.description | html %]</a></li>
+                                [% END %]
+                            </ul>
+                        </div>
+                        [% IF CAN_user_tools_manage_patron_lists %]
+                        <a class="ftu-btn-secondary" href="/cgi-bin/koha/patron_lists/lists.pl">
+                            Danh sách bạn đọc
+                        </a>
+                        [% END %]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. THANH BỘ LỌC DUY NHẤT & CHUYÊN NGHIỆP (TIER 2 - KHÔNG BỊ TRÙNG LẶP) -->
+        <div class="ftu-filter-toolbar">
+            <div class="ftu-toolbar-row">
+                <!-- Ô tìm kiếm chính thống nhất -->
+                <div class="ftu-search-input-wrap">
+                    <i class="fa fa-search ftu-search-icon"></i>
+                    <input type="text" id="ftu-unified-search" placeholder="Tìm theo họ tên, số thẻ / MSSV, email, đơn vị..." autocomplete="off" />
+                    <button type="button" class="ftu-clear-input-btn" id="btn-clear-unified-search" style="display:none;" title="Xóa từ khóa">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                </div>
+
+                <!-- Lọc nhanh Loại bạn đọc -->
+                <div class="ftu-select-wrap">
+                    <select id="ftu-quick-role" class="form-select">
+                        <option value="">Tất cả loại bạn đọc</option>
+                        <optgroup label="Người học (SSO)">
+                            <option value="STUDENT">Sinh viên Đại học</option>
+                            <option value="POSTGRAD">Sau ĐH & Nghiên cứu sinh</option>
+                        </optgroup>
+                        <optgroup label="Bạn đọc Koha">
+                            [% FOREACH category IN categories %]
+                            <option value="KOHA_[% category.categorycode | html %]">Koha: [% category.description | html %]</option>
+                            [% END %]
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Lọc nhanh Trạng thái thẻ (tab SSO) -->
+                <div class="ftu-select-wrap" id="filter-wrapper-status">
+                    <select id="ftu-quick-status" class="form-select">
+                        <option value="">Tất cả trạng thái thẻ</option>
+                        <option value="ACTIVE">🟢 Còn hoạt động</option>
+                        <option value="LOCKED">🔴 Đã khóa thẻ</option>
+                        <option value="EXPIRED">🟡 Hết hạn thẻ</option>
+                    </select>
+                </div>
+
+                <!-- Lọc nhanh Cơ sở thư viện (tab Koha) -->
+                <div class="ftu-select-wrap" id="filter-wrapper-branch" style="display:none;">
+                    <select id="ftu-quick-branch" class="form-select">
+                        <option value="">Tất cả cơ sở thư viện</option>
+                        [% FOREACH l IN libraries %]
+                        <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
+                        [% END %]
+                    </select>
+                </div>
+
+                <!-- Nút thực thi tìm kiếm -->
+                <button type="button" class="ftu-btn-primary" id="btn-run-search">
+                    <i class="fa fa-search"></i>
+                    <span>Tìm kiếm</span>
+                </button>
+
+                <!-- Nút Bung ra / Thu gọn bộ lọc chi tiết -->
+                <button type="button" class="ftu-btn-secondary" id="btn-toggle-adv-filter" title="Bung ra / Thu gọn bộ lọc chi tiết">
+                    <i class="fa fa-sliders"></i>
+                    <span>Bộ lọc chi tiết</span>
+                    <span id="adv-active-badge" class="badge rounded-pill bg-danger ms-1" style="display:none; font-size:10px;">0</span>
+                    <i class="fa fa-chevron-down ms-1" id="adv-chevron-icon"></i>
+                </button>
+
+                <!-- Nút Đặt lại tất cả -->
+                <button type="button" class="ftu-btn-light" id="btn-unified-reset" title="Đặt lại bộ lọc về mặc định">
+                    <i class="fa fa-undo"></i>
+                    <span>Đặt lại</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. KHUNG BỘ LỌC CHI TIẾT CHUYÊN NGHIỆP (TIER 3 - BUNG RA / THU GỌN - 6 TIÊU CHÍ KHOA HỌC) -->
+        <div id="adv-filter-panel" class="ftu-adv-filter-panel" style="display: none;">
+            <div class="ftu-adv-header">
+                <div class="d-flex align-items-center gap-2">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; background:#e2e8f0; color:#334155; font-size:13px;">
+                        <i class="fa fa-sliders"></i>
+                    </span>
+                    <h6 class="mb-0 fw-bold text-dark" style="font-size: 13.5px;">Bộ lọc tìm kiếm nâng cao</h6>
+                </div>
+                <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none p-0" id="btn-adv-close" title="Thu gọn bảng lọc">
+                    <i class="fa fa-times fs-6"></i>
+                </button>
+            </div>
+
+            <!-- LƯỚI 6 TRƯỜNG THIẾT KẾ 3 CỘT × 2 HÀNG CÂN ĐỐI (ĐÃ BỎ HOÀN TOÀN 'LUẬN VĂN' VÀ 'ĐIỂM LƯU THÔNG') -->
+            <div class="row g-3">
+                <!-- 1. Khoảng số thẻ: Số thẻ từ ... Đến ... -->
+                <div class="col-md-4">
+                    <label class="ftu-field-label">Khoảng số thẻ</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="text" id="adv-card-from" class="form-control form-control-sm ftu-adv-input flex-grow-1" placeholder="Từ số thẻ (vd: 221360)" />
+                        <span class="text-muted small">đến</span>
+                        <input type="text" id="adv-card-to" class="form-control form-control-sm ftu-adv-input flex-grow-1" placeholder="Đến số thẻ (vd: 221370)" />
+                    </div>
+                </div>
+
+                <!-- 2. Số thẻ nhập lẻ cách ; -->
+                <div class="col-md-4">
+                    <label class="ftu-field-label">Số thẻ (nhập lẻ cách nhau bởi dấu ;)</label>
+                    <input type="text" id="adv-card-list" class="form-control form-control-sm ftu-adv-input" placeholder="vd: 221362; 221388; 221399" />
+                </div>
+
+                <!-- 3. Họ và tên bạn đọc -->
+                <div class="col-md-4">
+                    <label class="ftu-field-label">Họ và tên bạn đọc</label>
+                    <input type="text" id="adv-fullname" class="form-control form-control-sm ftu-adv-input" placeholder="Nhập họ và tên cần tìm..." />
+                </div>
+
+                <!-- 4. Lớp sinh viên / học viên -->
+                <div class="col-md-4">
+                    <label class="ftu-field-label">Lớp sinh viên / học viên</label>
+                    <select id="adv-class" class="form-select form-select-sm ftu-adv-input">
+                        <option value="">--- Tất cả các lớp ---</option>
+                        <option value="K62-KTQT1">K62-KTQT1</option>
+                        <option value="K62-KTQT2">K62-KTQT2</option>
+                        <option value="K62-TCNH1">K62-TCNH1</option>
+                        <option value="K61-KDQT1">K61-KDQT1</option>
+                        <option value="CH-K39">CH-K39 (Sau Đại học / Cao học)</option>
+                    </select>
+                </div>
+
+                <!-- 5. Khoảng ngày cấp thẻ: Từ ... Đến ... -->
+                <div class="col-md-4">
+                    <label class="ftu-field-label">Ngày cấp thẻ</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="flex-grow-1">
+                            <input type="date" id="adv-issuedate-from" class="form-control form-control-sm ftu-adv-input w-100" />
+                        </div>
+                        <span class="text-muted small">đến</span>
+                        <div class="flex-grow-1">
+                            <input type="date" id="adv-issuedate-to" class="form-control form-control-sm ftu-adv-input w-100" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Loại bạn đọc -->
+                <div class="col-md-4">
+                    <label class="ftu-field-label">Loại bạn đọc</label>
+                    <select id="adv-role" class="form-select form-select-sm ftu-adv-input">
+                        <option value="">--- Tất cả loại bạn đọc ---</option>
+                        <option value="STUDENT">Sinh viên Đại học (STUDENT)</option>
+                        <option value="POSTGRAD">Học viên Sau ĐH & NCS (POSTGRAD)</option>
+                        [% FOREACH category IN categories %]
+                        <option value="KOHA_[% category.categorycode | html %]">Koha: [% category.description | html %]</option>
+                        [% END %]
+                    </select>
+                </div>
+            </div>
+
+            <!-- THANH THAO TÁC CỦA KHUNG LỌC -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between pt-3 mt-3 border-top">
+                <div class="d-flex align-items-center gap-2">
+                    <span id="adv-filter-count-msg" class="small text-muted"></span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="ftu-btn-secondary" id="btn-adv-reset">
+                        <i class="fa fa-undo me-1"></i> Đặt lại
+                    </button>
+                    <button type="button" class="ftu-btn-primary" id="btn-adv-search">
+                        <i class="fa fa-search me-1"></i> Áp dụng bộ lọc
+                    </button>
+                    <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btn-adv-collapse">
+                        <i class="fa fa-chevron-up me-1"></i> Thu gọn
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. KHÔNG GIAN TAB 1: BẠN ĐỌC NGƯỜI HỌC TẬP TRUNG (SSO) -->
+        <div id="sso_pane">
+            <!-- Bảng danh sách người học SSO -->
+            <div class="table-responsive">
+                <table id="sso_learners_table" class="ftu-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 32px;"><input type="checkbox" id="sso-check-all" /></th>
+                            <th style="width: 105px;">Số thẻ</th>
+                            <th>Họ và tên</th>
+                            <th style="width: 115px;">Ngày sinh / GT</th>
+                            <th>Đơn vị & Lớp</th>
+                            <th style="width: 170px;">Liên hệ</th>
+                            <th style="width: 150px;">Hạn thẻ & Trạng thái</th>
+                            <th style="width: 95px;">Liên thông</th>
+                            <th class="text-end" style="width: 110px; white-space: nowrap;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sso_learners_tbody">
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="fa fa-spinner fa-spin fa-2x mb-2" style="color: #64748b;"></i>
+                                <div>Đang nạp dữ liệu người học từ Hệ thống Quản lý tập trung...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Thanh phân trang người học SSO -->
+            <div id="sso-pagination-container" class="ftu-pagination-bar"></div>
+        </div>
+
+        <!-- 5. KHÔNG GIAN TAB 2: BẠN ĐỌC NỘI BỘ KOHA -->
+        <div id="koha_pane" style="display: none;">
+            <!-- Form Koha native ẩn đi để tránh xung đột giao diện, phục vụ backend DataTables -->
+            <div id="koha-native-filters-hidden" style="display: none !important;">
+                [% PROCESS patron_search_filters categories => categories, libraries => libraries, filters => ['search_field', 'search_type', 'category', 'branch'], search_filter => searchmember %]
+            </div>
+
+            <div class="p-3">
                 <div id="searchresults">
                     [% IF CAN_user_tools_manage_patron_lists || CAN_user_borrowers_edit_borrowers %]
-                        <div class="searchheader fh-fixedHeader" id="searchheader" style="display:none;">
-                            <div>
-                                <a href="#" class="btn btn-link" id="select_all"><i class="fa fa-check"></i> Select all</a>
-                                |
-                                <a href="#" class="btn btn-link" id="clear_all"><i class="fa fa-times"></i> Clear all</a>
-                                [% IF CAN_user_tools_manage_patron_lists %]
-                                [% END %]
+                    <div class="searchheader fh-fixedHeader mb-2" id="searchheader" style="display:none;">
+                        <div>
+                            <a href="#" class="btn btn-link btn-sm" id="select_all">Chọn tất cả</a>
+                            |
+                            <a href="#" class="btn btn-link btn-sm" id="clear_all">Bỏ tất cả</a>
 
-                                [% IF CAN_user_tools_manage_patron_lists %]
-                                    <div id="patronlist-dropdown" class="btn-group">
-                                        <button
-                                            id="patronlist-menu"
-                                            type="button"
-                                            class="btn btn-default btn-sm dropdown-toggle patron-edits disabled"
-                                            disabled="disabled"
-                                            data-bs-toggle="dropdown"
-                                            aria-haspopup="true"
-                                            aria-expanded="false"
-                                        >
-                                            Add to patron list
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            [% IF patron_lists %]
-                                                [% FOREACH pl IN patron_lists %]
-                                                    <li><a href="#" class="patron-list-add dropdown-item" data-listid="[% pl.patron_list_id | html %]">[% pl.name | html %]</a></li>
-                                                [% END %]
-                                            [% END %]
-                                            <li><hr class="dropdown-divider" /></li>
-                                            <li><a href="#" class="patron-list-add dropdown-item" data-listid="new">New list</a></li>
-                                        </ul>
-                                    </div>
-                                [% END %]
+                            [% IF CAN_user_tools_manage_patron_lists %]
+                            <div id="patronlist-dropdown" class="btn-group">
+                                <button id="patronlist-menu" type="button" class="btn btn-default btn-sm dropdown-toggle patron-edits disabled" disabled="disabled" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Thêm vào danh sách
+                                </button>
+                                <ul class="dropdown-menu">
+                                    [% IF patron_lists %]
+                                    [% FOREACH pl IN patron_lists %]
+                                    <li><a href="#" class="patron-list-add dropdown-item" data-listid="[% pl.patron_list_id | html %]">[% pl.name | html %]</a></li>
+                                    [% END %]
+                                    [% END %]
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a href="#" class="patron-list-add dropdown-item" data-listid="new">Tạo danh sách mới...</a></li>
+                                </ul>
+                            </div>
+                            [% END %]
 
-                                [% IF CAN_user_borrowers_merge_borrowers %]
-                                    <div class="btn-group">
-                                        <button id="merge-patrons" class="btn btn-default btn-sm disabled" disabled="disabled" type="submit"><i class="fa fa-compress" aria-hidden="true"></i> Merge selected patrons</button>
-                                    </div>
-                                [% END %]
+                            [% IF CAN_user_borrowers_merge_borrowers %]
+                            <div class="btn-group">
+                                <button id="merge-patrons" class="btn btn-default btn-sm disabled" disabled="disabled" type="submit">Gộp bạn đọc</button>
+                            </div>
+                            [% END %]
 
-                                [% IF CAN_user_tools_edit_patrons %]
-                                    <div class="btn-group">
-                                        <button id="batch-mod-patrons" class="btn btn-default btn-sm disabled" disabled="disabled" type="button"><i class="fa fa-pencil" aria-hidden="true"></i> Batch patron modification</button>
-                                    </div>
-                                [% END %]
+                            [% IF CAN_user_tools_edit_patrons %]
+                            <div class="btn-group">
+                                <button id="batch-mod-patrons" class="btn btn-default btn-sm disabled" disabled="disabled" type="button">Sửa theo lô</button>
+                            </div>
+                            [% END %]
 
-                                <div id="table_search_selections" class="btn-group" style="display:none;">
-                                    <span></span>
-                                    <a href="#" id="clear-row-selection"><i class="fa fa-times"></i> Clear</a>
-                                </div>
+                            <div id="table_search_selections" class="btn-group" style="display:none;">
+                                <span></span>
+                                <a href="#" id="clear-row-selection" class="btn btn-link btn-sm">Bỏ chọn</a>
                             </div>
                         </div>
+                    </div>
                     [% END %]
 
                     [% IF CAN_user_borrowers_edit_borrowers || CAN_user_tools_manage_patron_lists %]
-                        [% columns.unshift('checkbox') | html %]
+                    [% columns.unshift('checkbox') | html %]
                     [% END %]
                     [% PROCESS patron_search_table table_id => 'memberresultst' columns => columns %]
                 </div>
-                [% IF CAN_user_tools_edit_patrons %]
-                    <form id="patron_batchmod_form" method="post" action="/cgi-bin/koha/tools/modborrowers.pl">
-                        [% INCLUDE 'csrf-token.inc' %]
-                        <input type="hidden" name="op" value="cud-show" />
-                        <textarea style="display:none" id="borrowernumberlist" name="borrowernumberlist"></textarea>
-                    </form>
-                [% END %]
-
-                [%- SET StaffPatronsHome = AdditionalContents.get( location => "StaffPatronsHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]
-                [%- FOREACH block IN StaffPatronsHome.content -%]
-                    <div class="page-section"> [%- block.content | $raw -%] </div>
-                [%- END -%]
-            </main>
+            </div>
         </div>
-        <!-- /.col-md-10.order-md-2 -->
-
-        <div class="col-md-2 order-sm-2 order-md-1">
-            [% PROCESS patron_search_filters categories => categories, libraries => libraries, filters => ['search_field', 'search_type', 'category', 'branch'], search_filter => searchmember %]
-        </div>
-        <!-- /.col-md-2 order-sm-2 order-md-1 -->
     </div>
-    <!-- /.row -->
+    <!-- /.ftu-admin-card -->
+
+    [% IF CAN_user_tools_edit_patrons %]
+    <form id="patron_batchmod_form" method="post" action="/cgi-bin/koha/tools/modborrowers.pl">
+        [% INCLUDE 'csrf-token.inc' %]
+        <input type="hidden" name="op" value="cud-show" />
+        <textarea style="display:none" id="borrowernumberlist" name="borrowernumberlist"></textarea>
+    </form>
+    [% END %]
+
+    [%- SET StaffPatronsHome = AdditionalContents.get( location => "StaffPatronsHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]
+    [%- FOREACH block IN StaffPatronsHome.content -%]
+    <div class="page-section"> [%- block.content | $raw -%] </div>
+    [%- END -%]
+   </main>
+  </div>
+  <!-- /.col-12 -->
+ </div>
+ <!-- /.row -->
 </div>
 <!-- /.main.container-fluid -->
 
 <!-- New Patron List Modal -->
 <div class="modal" id="new-patron-list" tabindex="-1" role="dialog" aria-labelledby="new-patron-listLabel">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title" id="new-patron-listLabel">Add patrons to a new patron list</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="get" id="new-patron-list_form">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="new_patron_list" class="required">Patron list name: </label>
-                        <input class="form-control required" type="text" name="new_patron_list" id="new_patron_list" required="required" />
-                        <input type="hidden" name="add_to_patron_list" id="add_to_patron_list" />
-                        <span class="required">Required</span>
-                    </div>
-                </div>
-                <!-- /.modal-body -->
-                <div class="modal-footer">
-                    <button type="submit" id="add_to_patron_list_submit" class="btn btn-default approve">Submit</button>
-                    <button type="button" class="btn btn-default deny" data-bs-dismiss="modal">Cancel</button>
-                    [% PROCESS 'members-patron-selections.inc' id="new-patron-list_form" %]
-                </div>
-                <!-- /.modal-footer -->
-            </form>
-            <!-- /#new-patron-list_form -->
-        </div>
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="new-patron-listLabel">Tạo danh sách bạn đọc mới</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <form method="get" id="new-patron-list_form">
+ <div class="modal-body">
+ <div class="form-group">
+ <label for="new_patron_list" class="required">Tên danh sách bạn đọc: </label>
+ <input class="form-control required" type="text" name="new_patron_list" id="new_patron_list" placeholder="Nhập tên danh sách..." required="required" />
+ <input type="hidden" name="add_to_patron_list" id="add_to_patron_list" />
+ <span class="required">Bắt buộc</span>
+ </div>
+ </div>
+ <!-- /.modal-body -->
+ <div class="modal-footer">
+ <button type="submit" id="add_to_patron_list_submit" class="btn btn-primary approve">Lưu danh sách</button>
+ <button type="button" class="btn btn-default deny" data-bs-dismiss="modal">Đóng</button>
+ [% PROCESS 'members-patron-selections.inc' id="new-patron-list_form" %]
+ </div>
+ <!-- /.modal-footer -->
+ </form>
+ <!-- /#new-patron-list_form -->
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
 </div>
 <!-- /#new-patron-list -->
 
+<!-- Modal Thêm Bạn đọc SSO & Định danh tập trung (54 Dân tộc) -->
+<div class="modal fade" id="modalSsoAddPatron" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom py-3 px-4" style="background: #ffffff;">
+                <div>
+                    <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Thêm bạn đọc người học mới</h5>
+                    <small class="text-muted">Đồng bộ tự động vào Hệ thống Định danh FTU SSO và Lưu hành Koha</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                <form id="form-sso-add-patron" onsubmit="return false;">
+                    <!-- 1. Thẻ & Định danh cá nhân -->
+                    <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">1. Thẻ & Định danh cá nhân</h6>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Số thẻ <span class="text-danger">(*)</span></label>
+                            <input type="text" id="add-sso-uid" class="form-control form-control-sm" placeholder="vd: 221365" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold mb-1">Họ tên <span class="text-danger">(*)</span></label>
+                            <input type="text" id="add-sso-fullname" class="form-control form-control-sm" placeholder="vd: Nguyễn Văn An" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Số CCCD</label>
+                            <input type="text" id="add-sso-cccd" class="form-control form-control-sm" placeholder="12 chữ số..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Ngày sinh <span class="text-danger">(*)</span></label>
+                            <input type="text" id="add-sso-dob" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="15/05/2004" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Giới tính <span class="text-danger">(*)</span></label>
+                            <select id="add-sso-gender" class="form-select form-select-sm">
+                                <option value="Nam" selected>Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Dân tộc</label>
+                            <select id="add-sso-ethnicity" class="form-select form-select-sm">
+                                <option value="Kinh" selected>Kinh</option>
+                                <option value="Tày">Tày</option>
+                                <option value="Thái">Thái</option>
+                                <option value="Mường">Mường</option>
+                                <option value="H'Mông">H'Mông</option>
+                                <option value="Dao">Dao</option>
+                                <option value="Khmer">Khmer</option>
+                                <option value="Nùng">Nùng</option>
+                                <option value="Hoa">Hoa</option>
+                                <option value="Gia Rai">Gia Rai</option>
+                                <option value="Ê Đê">Ê Đê</option>
+                                <option value="Ba Na">Ba Na</option>
+                                <option value="Xơ Đăng">Xơ Đăng</option>
+                                <option value="Sán Chay">Sán Chay</option>
+                                <option value="Cơ Ho">Cơ Ho</option>
+                                <option value="Chăm">Chăm</option>
+                                <option value="Sán Dìu">Sán Dìu</option>
+                                <option value="Hrê">Hrê</option>
+                                <option value="Ra Glai">Ra Glai</option>
+                                <option value="M'Nông">M'Nông</option>
+                                <option value="Xtiêng">Xtiêng</option>
+                                <option value="Bru - Vân Kiều">Bru - Vân Kiều</option>
+                                <option value="Thổ">Thổ</option>
+                                <option value="Giáy">Giáy</option>
+                                <option value="Cơ Tu">Cơ Tu</option>
+                                <option value="Giẻ Triêng">Giẻ Triêng</option>
+                                <option value="Mạ">Mạ</option>
+                                <option value="Khơ Mú">Khơ Mú</option>
+                                <option value="Co">Co</option>
+                                <option value="Tà Ôi">Tà Ôi</option>
+                                <option value="Chơ Ro">Chơ Ro</option>
+                                <option value="Kháng">Kháng</option>
+                                <option value="Xinh Mun">Xinh Mun</option>
+                                <option value="Hà Nhì">Hà Nhì</option>
+                                <option value="Chu Ru">Chu Ru</option>
+                                <option value="Lào">Lào</option>
+                                <option value="La Chí">La Chí</option>
+                                <option value="La Ha">La Ha</option>
+                                <option value="Phù Lá">Phù Lá</option>
+                                <option value="La Hủ">La Hủ</option>
+                                <option value="Lự">Lự</option>
+                                <option value="Lô Lô">Lô Lô</option>
+                                <option value="Chứt">Chứt</option>
+                                <option value="Mảng">Mảng</option>
+                                <option value="Pà Thẻn">Pà Thẻn</option>
+                                <option value="Cơ Lao">Cơ Lao</option>
+                                <option value="Cống">Cống</option>
+                                <option value="Bố Y">Bố Y</option>
+                                <option value="Si La">Si La</option>
+                                <option value="Pu Péo">Pu Péo</option>
+                                <option value="Brâu">Brâu</option>
+                                <option value="Rơ Măm">Rơ Măm</option>
+                                <option value="Ơ Đu">Ơ Đu</option>
+                                <option value="Ngái">Ngái</option>
+                                <option value="Khác">Khác / Nước ngoài</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 2. Loại bạn đọc & Quản lý đào tạo -->
+                    <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">2. Loại bạn đọc & Quản lý đào tạo</h6>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Loại bạn đọc <span class="text-danger">(*)</span></label>
+                            <select id="add-sso-role" class="form-select form-select-sm">
+                                <option value="STUDENT" selected>Sinh viên ĐH</option>
+                                <option value="POSTGRAD">Sau ĐH & NCS</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Trình độ đào tạo</label>
+                            <input type="text" id="add-sso-education" class="form-control form-control-sm" value="Đại học" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Nghề nghiệp</label>
+                            <input type="text" id="add-sso-occupation" class="form-control form-control-sm" value="Sinh viên" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Khóa học</label>
+                            <input type="text" id="add-sso-cohort" class="form-control form-control-sm" value="K62" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Đơn vị / Khoa</label>
+                            <input type="text" id="add-sso-department" class="form-control form-control-sm" value="Khoa Kinh tế Quốc tế" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-1">Năm thứ</label>
+                            <input type="text" id="add-sso-studyyear" class="form-control form-control-sm" value="Năm 3" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Lớp sinh viên</label>
+                            <input type="text" id="add-sso-class" class="form-control form-control-sm" value="K62-KTQT1" />
+                        </div>
+                    </div>
+
+                    <!-- 3. Hiệu lực thẻ & Thư viện / DRM -->
+                    <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">3. Hiệu lực thẻ & Thư viện / DRM</h6>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Tình trạng thẻ <span class="text-danger">(*)</span></label>
+                            <select id="add-sso-status" class="form-select form-select-sm">
+                                <option value="ACTIVE" selected>Còn hoạt động</option>
+                                <option value="LOCKED">Đã khóa</option>
+                                <option value="EXPIRED">Hết hạn</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Ngày cấp thẻ <span class="text-danger">(*)</span></label>
+                            <input type="text" id="add-sso-issuedate" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="01/10/2026" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Hạn sử dụng thẻ</label>
+                            <input type="text" id="add-sso-expirydate" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="01/10/2027" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-1">Mật khẩu khởi tạo</label>
+                            <input type="password" id="add-sso-password" class="form-control form-control-sm" value="123456" />
+                        </div>
+                    </div>
+
+                    <!-- 4. Liên hệ & Khác -->
+                    <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">4. Liên hệ & Khác</h6>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Số điện thoại</label>
+                            <input type="text" id="add-sso-phone" class="form-control form-control-sm" placeholder="vd: 0987654321" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Email FTU</label>
+                            <input type="email" id="add-sso-email" class="form-control form-control-sm" placeholder="vd: student@ftu.edu.vn" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-1">Nơi công tác / Học tập</label>
+                            <input type="text" id="add-sso-workplace" class="form-control form-control-sm" value="Trường Đại học Ngoại Thương" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-1">Địa chỉ thường trú</label>
+                            <input type="text" id="add-sso-address" class="form-control form-control-sm" placeholder="Số nhà, đường, quận/huyện..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-1">Ghi chú bạn đọc</label>
+                            <input type="text" id="add-sso-notes" class="form-control form-control-sm" placeholder="Ghi chú nghiệp vụ thư viện..." />
+                        </div>
+                    </div>
+
+                    <div id="add-sso-alert" class="alert alert-sm mt-3 mb-0" style="display:none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light py-2 px-4 border-top">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="ftu-btn-primary" id="btn-submit-add-sso">
+                    <i class="fa fa-save me-1"></i> Lưu & Đồng bộ Koha
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chi tiết Bạn đọc SSO (21 trường đầy đủ) -->
+<div class="modal fade" id="modalSsoPatronDetail" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom py-3 px-4" style="background: #ffffff;">
+                <div>
+                    <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Hồ sơ Bạn đọc</h5>
+                    <small class="text-muted">Thông tin tài khoản lưu hành và định danh tập trung</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4" id="modalSsoPatronDetailBody" style="max-height: 80vh; overflow-y: auto;">
+                <!-- Nội dung 21 trường được nạp qua JS -->
+            </div>
+            <div class="modal-footer bg-light" id="modalSsoPatronDetailFooter">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đổi Mật khẩu SSO -->
+<div class="modal fade" id="modalSsoResetPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom py-3 px-4" style="background: #ffffff;">
+                <div>
+                    <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Đổi Mật khẩu SSO</h5>
+                    <small class="text-muted">Cập nhật mật khẩu tài khoản người học trên OpenLDAP</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-3">
+                <p class="text-muted small mb-2">Đổi mật khẩu tài khoản người học <strong id="reset-pwd-uid" class="text-danger"></strong> trên OpenLDAP:</p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Mật khẩu mới</label>
+                    <input type="password" id="reset-pwd-input" class="form-control" placeholder="Nhập mật khẩu mới..." />
+                </div>
+                <div id="reset-pwd-alert" style="display:none;" class="alert alert-sm mb-0"></div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-sm btn-danger" id="btn-submit-reset-pwd" style="background: #990000; border-color: #990000;">Lưu mật khẩu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 [% MACRO jsinclude BLOCK %]
-    [% INCLUDE 'datatables.inc' %]
-    [% INCLUDE 'str/members-menu.inc' %]
-    [% Asset.js("js/members-menu.js") | $raw %]
-    [% Asset.js("js/members-patron-selections.js") | $raw %]
-    [% INCLUDE 'select2.inc' %]
-    <script nonce="[% Koha.CSPNonce | $raw %]">
+ [% INCLUDE 'datatables.inc' %]
+ [% INCLUDE 'str/members-menu.inc' %]
+ [% Asset.js("js/members-menu.js") | $raw %]
+ [% Asset.js("js/members-patron-selections.js") | $raw %]
+ [% INCLUDE 'select2.inc' %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready(function () {
             $("#merge-patrons, #batch-mod-patrons").prop("disabled", true);
             $("#memberresultst").on("change", "input.selection", function () {
@@ -198,89 +1386,23 @@
                     var filtered = patron_search_selections.filter(function (value) {
                         return value !== borrowernumber;
                     });
-                    if (filtered.length > 0) {
-                        localStorage.setItem("patron_search_selections", JSON.stringify(filtered));
-                        patron_search_selections = filtered;
-                        showPatronSelections(filtered.length);
-                    } else {
-                        patron_search_selections = [];
-                        localStorage.removeItem("patron_search_selections");
-                        $("#table_search_selections").hide();
-                    }
-                }
-                if (patron_search_selections.length > 1) {
-                    /* More than one checkbox has been checked. All batch options enabled */
-                    $("#batch-mod-patrons, #merge-patrons, #patronlist-menu").removeClass("disabled").prop("disabled", false);
-                } else if (patron_search_selections.length == 1) {
-                    /* Only one checkbox has been checked */
-                    $("#batch-mod-patrons, #patronlist-menu").removeClass("disabled").prop("disabled", false);
-                    /* Merge requires more than one selection */
-                    $("#merge-patrons").prop("disabled", true).addClass("disabled");
-                } else {
-                    /* No checkbox has been checked. No batch options enabled */
-                    $("#batch-mod-patrons, #merge-patrons, #patronlist-menu").addClass("disabled").prop("disabled", true);
+                    localStorage.setItem("patron_search_selections", JSON.stringify(filtered));
+                    showPatronSelections(filtered.length);
                 }
             });
 
-            $("#merge-patrons").on("click", function () {
-                var patron_search_selections = JSON.parse(localStorage.getItem("patron_search_selections")) || [];
-                var merge_patrons_url = "merge-patrons.pl?id=" + patron_search_selections.join("&id=");
-                window.location.href = merge_patrons_url;
-            });
-
-            $("#clear-row-selection").on("click", function (e) {
-                e.preventDefault();
-                $("input.selection").prop("checked", false).change();
-                localStorage.removeItem("patron_search_selections");
-                $("#table_search_selections").hide();
-                $("#merge-patrons, #patronlist-menu, #batch-mod-patrons").prop("disabled", true).addClass("disabled");
-                $("#borrowernumberlist").val("");
-            });
-
-            $("#patronlist-dropdown").on("click", ".patron-list-add", function (e) {
-                e.preventDefault();
-                var patron_search_selections = JSON.parse(localStorage.getItem("patron_search_selections")) || [];
-                if (patron_search_selections.length == 0) {
-                    alert(_("You have not selected any patrons to add to a list!"));
-                    $(".dropdown-menu").removeClass("show");
-                    return false;
-                }
-
-                var listid = $(this).data("listid");
-                $("#add_to_patron_list").val(listid);
-                if (listid == "new") {
-                    /* #add_to_patron_list value "new" in the modal form will tell API to create a new list */
-                    $("#new-patron-list").modal("show");
-                } else {
-                    /* Ajax submit the patrons to list */
-                    patronListAdd();
-                }
-            });
-
-            $("#batch-mod-patrons").on("click", function (e) {
-                e.preventDefault();
-                var patron_search_selections = JSON.parse(localStorage.getItem("patron_search_selections")) || [];
-                if (patron_search_selections.length > 0) {
-                    $("#borrowernumberlist").val(patron_search_selections.join("\n"));
-                    $("#patron_batchmod_form").submit();
-                }
-            });
-
-            /* Submit selected patrons to a list via AJAX */
             $("#new-patron-list_form").on("submit", function (e) {
                 e.preventDefault();
-                /* Upon submitting modal patron list add form... */
-                if ($("#new_patron_list").val()) {
-                    $(".patron-list-add").each(function () {
-                        /* Check each list name in the menu of patron lists */
-                        /* If submitted list name matches... */
-                        if ($(this).text() == $("#new_patron_list").val()) {
-                            alert(_("You already have a list with that name!"));
+                if ($("#new_patron_list").val().length > 0) {
+                    var new_list_name = $("#new_patron_list").val();
+                    $("#patronlist-dropdown .dropdown-menu li a").each(function () {
+                        if ($(this).text() == new_list_name) {
+                            alert(_("Tên danh sách bạn đọc '%s' đã tồn tại!").format(new_list_name));
                             return false;
                         }
                     });
                 } else {
-                    alert(_("You must give your new patron list a name!"));
+                    alert(_("Bạn phải khai báo tên cho danh sách bạn đọc mới!"));
                     return false;
                 }
                 $("#new-patron-list").modal("hide");
@@ -325,13 +1447,13 @@
                         prepSelections();
                     },
                     error => {
-                        alert(_("An error occurred. Patron list could not be updated."));
+                        alert(_("Có lỗi xảy ra, không thể cập nhật danh sách bạn đọc."));
                         console.warn("Something wrong happened: %s".format(error));
                     }
                 );
                 return true;
             } else {
-                alert(_("You have not selected any patrons to add to a list!"));
+                alert(_("Bạn chưa lựa chọn tài khoản bạn đọc để thêm vào danh sách!"));
                 return false;
             }
         }
@@ -344,7 +1466,7 @@
             }
         });
     </script>
-    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
         // Apply DataTables on the results table
         var table_settings = [% TablesSettings.GetTableSettings( 'members', 'member', 'memberresultst', 'json' ) | $raw %];
         [% UNLESS CAN_user_borrowers_edit_borrowers OR CAN_user_tools_manage_patron_lists %]
@@ -352,11 +1474,1264 @@
             table_settings['columns'].splice(0, 1);
         [% END %]
     </script>
-    [% IF circsearch == 1 %]
-        [% SET redirect_url = '/cgi-bin/koha/circ/circulation.pl' %]
-    [% ELSE %]
-        [% SET redirect_url = '/cgi-bin/koha/members/moremember.pl' %]
-    [% END %]
-    [% PROCESS patron_search_js defer_loading => defer_loading, table_id => 'memberresultst', categories => categories, libraries => libraries, columns => columns,actions => ['edit', 'checkout'], redirect_if_one_result => 1, redirect_url => redirect_url, sticky_header => "searchheader", sticky_to => "searchresults", default_sort_column => 'name-address', display_search_description => 1, remember_selections => 1, adjust_history => 1 %]
+ [% IF circsearch == 1 %]
+ [% SET redirect_url = '/cgi-bin/koha/circ/circulation.pl' %]
+ [% ELSE %]
+ [% SET redirect_url = '/cgi-bin/koha/members/moremember.pl' %]
+ [% END %]
+ [% PROCESS patron_search_js defer_loading => defer_loading, table_id => 'memberresultst', categories => categories, libraries => libraries, columns => columns,actions => ['edit', 'checkout'], redirect_if_one_result => 1, redirect_url => redirect_url, sticky_header => "searchheader", sticky_to => "searchresults", default_sort_column => 'name-address', display_search_description => 1, remember_selections => 1, adjust_history => 1 %]
+
+ <script nonce="[% Koha.CSPNonce | $raw %]">
+    // =========================================================================
+    // LOGIC KẾT NỐI VÀ QUẢN LÝ BẠN ĐỌC NGƯỜI HỌC SSO & KOHA NỘI BỘ
+    // =========================================================================
+    (function () {
+        let allLearners = [];
+        let filteredLearners = [];
+        let currentRoleFilter = 'ALL';
+        let currentStatusFilter = 'ALL';
+        let currentLetterFilter = '';
+        let currentSearchTerm = '';
+        let selectedResetUid = '';
+        let ssoCurrentPage = 1;
+        let ssoPageSize = 15;
+
+        // Trạng thái lưu trữ các giá trị của 6 trường bộ lọc nâng cao
+        let advFilterState = {
+            cardFrom: '',
+            cardTo: '',
+            cardList: '',
+            fullname: '',
+            issueDateFrom: '',
+            issueDateTo: '',
+            studentClass: '',
+            role: ''
+        };
+
+        const ssoPref = '[% Koha.Preference("FTU_SSOBaseURL") | html %]';
+        const ssoBaseUrl = (ssoPref && !ssoPref.includes('myDNSname')) ? ssoPref.replace(/\/+$/, '') : ('http://' + (window.location.hostname || 'localhost') + ':8090');
+        $('#ftu-sso-portal-top-link').attr('href', ssoBaseUrl);
+
+        // Hàm chuẩn hóa chuỗi tiếng Việt (bỏ dấu) để tìm kiếm linh hoạt
+        function removeVietnameseTones(str) {
+            if (!str) return '';
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+            str = str.replace(/đ/g, "d");
+            str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+            str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+            str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+            str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+            str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+            str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+            str = str.replace(/Đ/g, "D");
+            return str;
+        }
+
+        // Chuyển đổi chuỗi ngày DD/MM/YYYY hoặc YYYY-MM-DD sang Date Object
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            dateStr = dateStr.trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                const parts = dateStr.split('-');
+                return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            }
+            if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+                const parts = dateStr.split('/');
+                return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            }
+            return null;
+        }
+
+        // 1. Tải danh sách người học từ Cổng SSO
+        async function loadSsoLearners() {
+            try {
+                $('#sso_learners_tbody').html(`
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fa fa-spinner fa-spin fa-2x mb-2" style="color: #64748b;"></i>
+                            <div>Đang nạp dữ liệu người học từ Hệ thống Quản lý tập trung...</div>
+                        </td>
+                    </tr>
+                `);
+
+                const res = await fetch(ssoBaseUrl + '/api/v1/sso/users?role=LEARNER');
+                const json = await res.json();
+
+                if (json.success && Array.isArray(json.data)) {
+                    allLearners = json.data.filter(u => u.role === 'STUDENT' || u.role === 'POSTGRAD');
+
+                    const studentCount = allLearners.filter(u => u.role === 'STUDENT').length;
+                    const postgradCount = allLearners.filter(u => u.role === 'POSTGRAD').length;
+
+                    const activeCount = allLearners.filter(u => u.status === 'ACTIVE').length;
+                    const lockedCount = allLearners.filter(u => u.status === 'LOCKED').length;
+                    const expiredCount = allLearners.filter(u => u.status === 'EXPIRED').length;
+
+                    $('#sso-badge-count').text(allLearners.length);
+                    $('#role-count-all').text(allLearners.length);
+                    $('#role-count-student').text(studentCount);
+                    $('#role-count-postgrad').text(postgradCount);
+
+                    $('#status-count-active').text(activeCount);
+                    $('#status-count-locked').text(lockedCount);
+                    $('#status-count-expired').text(expiredCount);
+
+                    $('#sso-status-text').text('SSO Trực tuyến (' + allLearners.length + ')');
+                    $('.ftu-status-dot').css('background', '#10b981');
+
+                    // Nạp danh sách lớp động vào select dropdown
+                    const uniqueClasses = Array.from(new Set(allLearners.map(u => u.studentClass).filter(Boolean)));
+                    uniqueClasses.forEach(cls => {
+                        if ($('#adv-class option[value="' + cls + '"]').length === 0) {
+                            $('#adv-class').append('<option value="' + cls + '">' + cls + '</option>');
+                        }
+                    });
+
+                    applyFilters();
+                } else {
+                    $('#sso_learners_tbody').html(`
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-danger">
+                                <i class="fa fa-exclamation-triangle fa-2x mb-2"></i>
+                                <div>Không thể tải dữ liệu từ Cổng SSO (${json.error || 'Lỗi không xác định'})</div>
+                            </td>
+                        </tr>
+                    `);
+                    $('#sso-status-text').text('SSO Gián đoạn');
+                    $('.ftu-status-dot').css('background', '#ef4444');
+                }
+            } catch (err) {
+                console.error('Lỗi nạp SSO:', err);
+                $('#sso_learners_tbody').html(`
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="fa fa-plug fa-2x mb-2" style="color: #94a3b8;"></i>
+                            <div>Cổng SSO chưa sẵn sàng hoặc không thể kết nối tới port 8090.</div>
+                            <div class="small mt-1 text-muted">${err.message}</div>
+                        </td>
+                    </tr>
+                `);
+                $('#sso-status-text').text('Chưa kết nối SSO');
+                $('.ftu-status-dot').css('background', '#94a3b8');
+            }
+        }
+
+        // 2. Lọc danh sách người học (kết hợp tiêu chí nhanh và 6 tiêu chí nâng cao)
+        function applyFilters() {
+            let list = [...allLearners];
+
+            // A. Tiêu chí nhanh: Vai trò
+            if (currentRoleFilter !== 'ALL') {
+                list = list.filter(u => u.role === currentRoleFilter);
+            }
+
+            // B. Tiêu chí nhanh: Tình trạng thẻ
+            if (currentStatusFilter !== 'ALL') {
+                list = list.filter(u => u.status === currentStatusFilter);
+            }
+
+            // C. Tiêu chí nhanh: Chữ cái đầu
+            if (currentLetterFilter && currentLetterFilter !== 'ALL') {
+                const letter = currentLetterFilter.toUpperCase();
+                list = list.filter(u => {
+                    const parts = (u.fullName || '').trim().split(/\s+/);
+                    const firstName = parts[parts.length - 1] || '';
+                    const lastName = parts[0] || '';
+                    const uid = (u.uid || '').toUpperCase();
+                    return firstName.toUpperCase().startsWith(letter) ||
+                           lastName.toUpperCase().startsWith(letter) ||
+                           uid.startsWith(letter);
+                });
+            }
+
+            // D. Ô tìm kiếm nhanh
+            if (currentSearchTerm) {
+                const q = currentSearchTerm.toLowerCase();
+                const qClean = removeVietnameseTones(q);
+                list = list.filter(u => {
+                    const name = (u.fullName || '').toLowerCase();
+                    const nameClean = removeVietnameseTones(name);
+                    return (u.uid && u.uid.toLowerCase().includes(q)) ||
+                           name.includes(q) || nameClean.includes(qClean) ||
+                           (u.email && u.email.toLowerCase().includes(q)) ||
+                           (u.department && u.department.toLowerCase().includes(q)) ||
+                           (u.studentClass && u.studentClass.toLowerCase().includes(q)) ||
+                           (u.cohort && u.cohort.toLowerCase().includes(q)) ||
+                           (u.phone && u.phone.toLowerCase().includes(q)) ||
+                           (u.cccd && u.cccd.toLowerCase().includes(q));
+                });
+            }
+
+            // E. Bộ lọc chi tiết (6 tiêu chí chuyên nghiệp)
+            // 1. Khoảng số thẻ: Số thẻ từ ... Đến ...
+            if (advFilterState.cardFrom) {
+                const fromVal = advFilterState.cardFrom.trim();
+                const fromNum = parseInt(fromVal, 10);
+                list = list.filter(u => {
+                    const cardNum = parseInt(u.uid, 10);
+                    if (!isNaN(fromNum) && !isNaN(cardNum)) {
+                        return cardNum >= fromNum;
+                    }
+                    return (u.uid || '').localeCompare(fromVal, undefined, { numeric: true, sensitivity: 'base' }) >= 0;
+                });
+            }
+
+            if (advFilterState.cardTo) {
+                const toVal = advFilterState.cardTo.trim();
+                const toNum = parseInt(toVal, 10);
+                list = list.filter(u => {
+                    const cardNum = parseInt(u.uid, 10);
+                    if (!isNaN(toNum) && !isNaN(cardNum)) {
+                        return cardNum <= toNum;
+                    }
+                    return (u.uid || '').localeCompare(toVal, undefined, { numeric: true, sensitivity: 'base' }) <= 0;
+                });
+            }
+
+            // 2. Số thẻ nhập lẻ (cách dấu ;)
+            if (advFilterState.cardList) {
+                const tokens = advFilterState.cardList.split(/[;,]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+                if (tokens.length > 0) {
+                    list = list.filter(u => {
+                        const uid = (u.uid || '').toUpperCase();
+                        const card = (u.cardNumber || '').toUpperCase();
+                        return tokens.includes(uid) || tokens.includes(card);
+                    });
+                }
+            }
+
+            // 3. Họ và tên (tìm kiếm chính xác hoặc chứa chuỗi, có dấu & không dấu)
+            if (advFilterState.fullname) {
+                const q = advFilterState.fullname.toLowerCase().trim();
+                const qClean = removeVietnameseTones(q);
+                list = list.filter(u => {
+                    const name = (u.fullName || '').toLowerCase();
+                    const nameClean = removeVietnameseTones(name);
+                    return name.includes(q) || nameClean.includes(qClean);
+                });
+            }
+
+            // 4. Lớp sinh viên
+            if (advFilterState.studentClass) {
+                const targetCls = advFilterState.studentClass.toLowerCase().trim();
+                list = list.filter(u => (u.studentClass || '').toLowerCase().trim() === targetCls);
+            }
+
+            // 5. Ngày cấp thẻ từ ... Đến ...
+            if (advFilterState.issueDateFrom) {
+                const fromD = parseDate(advFilterState.issueDateFrom);
+                if (fromD) {
+                    list = list.filter(u => {
+                        const cardD = parseDate(u.issueDate);
+                        return cardD ? cardD >= fromD : true;
+                    });
+                }
+            }
+
+            if (advFilterState.issueDateTo) {
+                const toD = parseDate(advFilterState.issueDateTo);
+                if (toD) {
+                    list = list.filter(u => {
+                        const cardD = parseDate(u.issueDate);
+                        return cardD ? cardD <= toD : true;
+                    });
+                }
+            }
+
+            // 6. Loại bạn đọc
+            if (advFilterState.role) {
+                list = list.filter(u => u.role === advFilterState.role);
+            }
+
+            filteredLearners = list;
+            ssoCurrentPage = 1;
+            renderLearnersTable();
+
+            // Cập nhật trạng thái số tiêu chí lọc đang áp dụng
+            updateActiveAdvCount();
+        }
+
+        // Cập nhật nhãn và badge số lượng bộ lọc nâng cao
+        function updateActiveAdvCount() {
+            let count = 0;
+            if (advFilterState.cardFrom) count++;
+            if (advFilterState.cardTo) count++;
+            if (advFilterState.cardList) count++;
+            if (advFilterState.fullname) count++;
+            if (advFilterState.studentClass) count++;
+            if (advFilterState.issueDateFrom) count++;
+            if (advFilterState.issueDateTo) count++;
+            if (advFilterState.role) count++;
+
+            if (count > 0) {
+                $('#adv-active-badge').text(count).show();
+                $('#adv-filter-count-msg').html('<span class="text-success fw-semibold"><i class="fa fa-check-circle me-1"></i>Đang áp dụng ' + count + ' tiêu chí</span> — Tìm thấy ' + filteredLearners.length + ' bạn đọc');
+            } else {
+                $('#adv-active-badge').hide();
+                $('#adv-filter-count-msg').text('');
+            }
+        }
+
+        // 3. Render bảng HTML người học SSO (Có phân trang, tinh gọn)
+        function renderLearnersTable() {
+            const totalRecords = filteredLearners.length;
+
+            if (totalRecords === 0) {
+                $('#sso_learners_tbody').html(`
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted" style="background:#fafbfc;">
+                            <div style="font-size: 14px; font-weight: 500; color: #64748b;">Không tìm thấy tài khoản người học nào phù hợp với bộ lọc.</div>
+                            <div class="small mt-1 text-muted">Thử thay đổi điều kiện tìm kiếm hoặc bấm nút "Đặt lại" để xem toàn bộ danh sách.</div>
+                        </td>
+                    </tr>
+                `);
+                $('#sso-pagination-container').html(`
+                    <div class="ftu-pagination-info">
+                        <span>Không có dữ liệu phù hợp</span>
+                    </div>
+                `);
+                return;
+            }
+
+            const totalPages = Math.ceil(totalRecords / ssoPageSize) || 1;
+            if (ssoCurrentPage > totalPages) ssoCurrentPage = totalPages;
+            if (ssoCurrentPage < 1) ssoCurrentPage = 1;
+
+            const startIndex = (ssoCurrentPage - 1) * ssoPageSize;
+            const endIndex = Math.min(startIndex + ssoPageSize, totalRecords);
+            const pagedLearners = filteredLearners.slice(startIndex, endIndex);
+
+            // Bỏ chọn check all khi đổi trang
+            $('#sso-check-all').prop('checked', false);
+
+            let html = '';
+            pagedLearners.forEach(u => {
+                const isStudent = u.role === 'STUDENT';
+                
+                // Muted & Refined Status Pill
+                let statusPill = '<span class="ftu-badge-active"><span class="ftu-status-dot" style="background:#10b981;"></span>Còn hoạt động</span>';
+                if (u.status === 'LOCKED') {
+                    statusPill = '<span class="ftu-badge-locked"><span class="ftu-status-dot" style="background:#ef4444;"></span>Đã khóa</span>';
+                } else if (u.status === 'EXPIRED') {
+                    statusPill = '<span class="ftu-badge-expired"><span class="ftu-status-dot" style="background:#f59e0b;"></span>Hết hạn</span>';
+                }
+
+                const kohaBadge = u.kohaSynced
+                    ? `<span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; font-size:11px; font-weight:500;">#${u.borrowernumber}</span>`
+                    : `<button type="button" class="ftu-action-btn btn-sync-single" data-uid="${u.uid}" title="Đồng bộ vào Koha" style="font-size:11px;">Đồng bộ</button>`;
+
+                html += `
+                    <tr>
+                        <td style="width:32px;"><input type="checkbox" class="sso-user-check" value="${u.uid}" /></td>
+                        <td>
+                            <span class="font-monospace text-dark fw-semibold" style="font-size:12.5px;">${u.uid}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark btn-action-detail" data-uid="${u.uid}" style="font-size:13.5px; cursor:pointer;" title="Bấm xem chi tiết hồ sơ">${u.fullName}</div>
+                            <div class="text-muted" style="font-size:11.5px;">${u.roleName || (isStudent ? 'Sinh viên ĐH' : 'Sau ĐH & NCS')} · ${u.cohort || 'K62'}</div>
+                        </td>
+                        <td>
+                            <div class="text-dark" style="font-size:12.5px;">${u.dateOfBirth || '-'}</div>
+                            <div class="text-muted" style="font-size:11.5px;">${u.gender || 'Nam'}</div>
+                        </td>
+                        <td>
+                            <div class="text-dark text-truncate" style="max-width: 170px; font-size:12.5px;" title="${u.department || ''}">${u.department || 'ĐH Ngoại Thương'}</div>
+                            <div class="text-muted" style="font-size:11.5px;">${u.studentClass || '-'}</div>
+                        </td>
+                        <td>
+                            <div class="text-dark" style="font-size:12.5px;">${u.phone || '-'}</div>
+                            <div class="text-muted text-truncate" style="max-width: 150px; font-size:11.5px;" title="${u.email || ''}">${u.email || '-'}</div>
+                        </td>
+                        <td>
+                            <div class="text-dark fw-medium" style="font-size:12.5px;">${u.expiryDate || '01/10/2027'}</div>
+                            <div class="mt-1">${statusPill}</div>
+                        </td>
+                        <td>${kohaBadge}</td>
+                        <td class="text-end" style="white-space: nowrap;">
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <button type="button" class="ftu-action-btn btn-checkout btn-action-checkout" data-uid="${u.uid}" title="Ghi mượn sách cho bạn đọc">
+                                    Mượn
+                                </button>
+                                <div class="dropdown d-inline-block">
+                                    <button type="button" class="ftu-action-btn ftu-btn-icon" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác">
+                                        ⋯
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border py-1" style="font-size: 12.5px; min-width: 180px;">
+                                        <li>
+                                            <a class="dropdown-item py-1.5 px-3 btn-action-detail" href="javascript:void(0)" data-uid="${u.uid}">
+                                                <i class="fa fa-id-card-o me-2 text-muted" style="width:14px;"></i> Chi tiết hồ sơ
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 px-3 btn-action-renew" href="javascript:void(0)" data-uid="${u.uid}" data-fullname="${u.fullName}">
+                                                <i class="fa fa-calendar-plus-o me-2 text-primary" style="width:14px;"></i> Gia hạn thẻ (+1 năm)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-1.5 px-3 btn-action-pwd" href="javascript:void(0)" data-uid="${u.uid}">
+                                                <i class="fa fa-key me-2 text-secondary" style="width:14px;"></i> Đổi mật khẩu SSO
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            ${u.status === 'LOCKED'
+                                                ? `<a class="dropdown-item py-1.5 px-3 text-success btn-action-unlock" href="javascript:void(0)" data-uid="${u.uid}" data-fullname="${u.fullName}">
+                                                     <i class="fa fa-unlock me-2" style="width:14px;"></i> Mở khóa thẻ
+                                                   </a>`
+                                                : `<a class="dropdown-item py-1.5 px-3 text-danger btn-action-lock" href="javascript:void(0)" data-uid="${u.uid}" data-fullname="${u.fullName}">
+                                                     <i class="fa fa-lock me-2" style="width:14px;"></i> Khóa thẻ bạn đọc
+                                                   </a>`
+                                            }
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            $('#sso_learners_tbody').html(html);
+
+            // Render giao diện thanh phân trang
+            renderPaginationUI(totalRecords, totalPages, startIndex, endIndex);
+        }
+
+        // Render giao diện thanh phân trang
+        function renderPaginationUI(totalRecords, totalPages, startIndex, endIndex) {
+            let pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (ssoCurrentPage <= 4) {
+                    pages = [1, 2, 3, 4, 5, '...', totalPages];
+                } else if (ssoCurrentPage >= totalPages - 3) {
+                    pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                } else {
+                    pages = [1, '...', ssoCurrentPage - 1, ssoCurrentPage, ssoCurrentPage + 1, '...', totalPages];
+                }
+            }
+
+            let pageButtonsHtml = '';
+            pages.forEach(p => {
+                if (p === '...') {
+                    pageButtonsHtml += '<span class="ftu-page-ellipsis">…</span>';
+                } else {
+                    const isActive = p === ssoCurrentPage;
+                    pageButtonsHtml += `
+                        <button type="button" class="ftu-page-btn ${isActive ? 'active' : ''}" data-page="${p}">
+                            ${p}
+                        </button>
+                    `;
+                }
+            });
+
+            const startDisplay = startIndex + 1;
+            const endDisplay = endIndex;
+
+            const paginationHtml = `
+                <div class="ftu-pagination-info">
+                    <span>Hiển thị <strong>${startDisplay}</strong> - <strong>${endDisplay}</strong> trong tổng số <strong>${totalRecords}</strong> bạn đọc</span>
+                    <div class="d-inline-flex align-items-center gap-1 ms-3">
+                        <span class="text-muted small">Mỗi trang:</span>
+                        <select id="sso-page-size-select" class="form-select form-select-sm" style="width: auto; padding-right: 24px; font-size: 12px; font-weight: 500; border-radius: 6px; border-color: #cbd5e1; cursor: pointer;">
+                            <option value="5" ${ssoPageSize === 5 ? 'selected' : ''}>5</option>
+                            <option value="10" ${ssoPageSize === 10 ? 'selected' : ''}>10</option>
+                            <option value="15" ${ssoPageSize === 15 ? 'selected' : ''}>15</option>
+                            <option value="25" ${ssoPageSize === 25 ? 'selected' : ''}>25</option>
+                            <option value="50" ${ssoPageSize === 50 ? 'selected' : ''}>50</option>
+                            <option value="100" ${ssoPageSize === 100 ? 'selected' : ''}>100</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ftu-pagination-pages">
+                    <button type="button" class="ftu-page-btn ${ssoCurrentPage === 1 ? 'disabled' : ''}" data-page="1" title="Trang đầu" ${ssoCurrentPage === 1 ? 'disabled' : ''}>
+                        <i class="fa fa-angle-double-left"></i>
+                    </button>
+                    <button type="button" class="ftu-page-btn ${ssoCurrentPage === 1 ? 'disabled' : ''}" data-page="${ssoCurrentPage - 1}" title="Trang trước" ${ssoCurrentPage === 1 ? 'disabled' : ''}>
+                        <i class="fa fa-angle-left"></i>
+                    </button>
+                    ${pageButtonsHtml}
+                    <button type="button" class="ftu-page-btn ${ssoCurrentPage === totalPages ? 'disabled' : ''}" data-page="${ssoCurrentPage + 1}" title="Trang sau" ${ssoCurrentPage === totalPages ? 'disabled' : ''}>
+                        <i class="fa fa-angle-right"></i>
+                    </button>
+                    <button type="button" class="ftu-page-btn ${ssoCurrentPage === totalPages ? 'disabled' : ''}" data-page="${totalPages}" title="Trang cuối" ${ssoCurrentPage === totalPages ? 'disabled' : ''}>
+                        <i class="fa fa-angle-double-right"></i>
+                    </button>
+                </div>
+            `;
+
+            $('#sso-pagination-container').html(paginationHtml);
+        }
+
+        $(document).ready(function () {
+            // Chuyển trang bảng người học SSO
+            $(document).on('click', '.ftu-page-btn:not(.disabled):not(.active)', function (e) {
+                e.preventDefault();
+                const targetPage = parseInt($(this).data('page'), 10);
+                if (!isNaN(targetPage) && targetPage >= 1) {
+                    ssoCurrentPage = targetPage;
+                    renderLearnersTable();
+                    const containerEl = document.getElementById('sso_pane');
+                    if (containerEl) {
+                        const topPos = $(containerEl).offset().top - 80;
+                        if ($(window).scrollTop() > topPos) {
+                            $('html, body').animate({ scrollTop: topPos }, 150);
+                        }
+                    }
+                }
+            });
+
+            // Thay đổi số bản ghi mỗi trang
+            $(document).on('change', '#sso-page-size-select', function () {
+                ssoPageSize = parseInt($(this).val(), 10) || 15;
+                ssoCurrentPage = 1;
+                renderLearnersTable();
+            });
+            // Nạp dữ liệu người học từ cổng SSO ngay khi mở trang
+            loadSsoLearners();
+
+            // Chuyển tab sang Người học tập trung (SSO)
+            $('#btn-show-sso').on('click', function () {
+                $('#btn-show-sso').addClass('active').attr('aria-selected', 'true');
+                $('#btn-show-koha').removeClass('active').attr('aria-selected', 'false');
+                $('#sso_pane').show();
+                $('#koha_pane').hide();
+                $('#sso-header-actions').show();
+                $('#koha-header-actions').attr('style', 'display:none !important;');
+                $('#filter-wrapper-status').show();
+                $('#filter-wrapper-branch').hide();
+            });
+
+            // Chuyển tab sang Bạn đọc nội bộ Koha (Không làm mất tab SSO)
+            $('#btn-show-koha').on('click', function () {
+                $('#btn-show-koha').addClass('active').attr('aria-selected', 'true');
+                $('#btn-show-sso').removeClass('active').attr('aria-selected', 'false');
+                $('#sso_pane').hide();
+                $('#koha_pane').show();
+                $('#sso-header-actions').hide();
+                $('#koha-header-actions').attr('style', 'display:inline-flex !important;');
+                $('#filter-wrapper-status').hide();
+                $('#filter-wrapper-branch').show();
+
+                // Kích hoạt bảng kết quả Koha
+                $('#memberresultst_search_results').show();
+                if ($('#memberresultst tbody tr').length === 0 || $('#memberresultst tbody tr td.dataTables_empty').length > 0) {
+                    $('.search_patron_filter_btn').trigger('click');
+                }
+            });
+
+            // Nếu người dùng vào từ tìm kiếm URL trên thanh Koha, mở tab Koha trước
+            [% IF searching %]
+                $('#btn-show-koha').trigger('click');
+            [% END %]
+
+            // Bật / tắt bung ra hoặc thu gọn khung bộ lọc chi tiết
+            $('#btn-toggle-adv-filter').on('click', function () {
+                const panel = $('#adv-filter-panel');
+                panel.slideToggle(200, function () {
+                    const isVisible = panel.is(':visible');
+                    if (isVisible) {
+                        $('#adv-chevron-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                        $('#btn-toggle-adv-filter').addClass('active');
+                    } else {
+                        $('#adv-chevron-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                        $('#btn-toggle-adv-filter').removeClass('active');
+                    }
+                });
+            });
+
+            // Nút thu gọn / đóng bên trong panel
+            $('#btn-adv-collapse, #btn-adv-close').on('click', function () {
+                $('#adv-filter-panel').slideUp(200);
+                $('#adv-chevron-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                $('#btn-toggle-adv-filter').removeClass('active');
+            });
+
+            // Áp dụng bộ lọc nâng cao
+            $('#btn-adv-search').on('click', function () {
+                advFilterState.cardFrom = $('#adv-card-from').val().trim();
+                advFilterState.cardTo = $('#adv-card-to').val().trim();
+                advFilterState.cardList = $('#adv-card-list').val().trim();
+                advFilterState.fullname = $('#adv-fullname').val().trim();
+                advFilterState.studentClass = $('#adv-class').val();
+                advFilterState.issueDateFrom = $('#adv-issuedate-from').val();
+                advFilterState.issueDateTo = $('#adv-issuedate-to').val();
+                advFilterState.role = $('#adv-role').val();
+
+                if ($('#sso_pane').is(':visible')) {
+                    applyFilters();
+                } else {
+                    // Đồng bộ với Koha
+                    const term = advFilterState.fullname || advFilterState.cardList || advFilterState.cardFrom || '';
+                    if (term) $('#search_patron_filter').val(term);
+                    if (advFilterState.role && advFilterState.role.startsWith('KOHA_')) {
+                        $('.categorycode_filter').val(advFilterState.role.replace('KOHA_', ''));
+                    }
+                    $('.search_patron_filter_btn').trigger('click');
+                }
+            });
+
+            // Hỗ trợ nhấn Enter trong ô nhập liệu để áp dụng lọc ngay lập tức
+            $('#adv-filter-panel input').on('keypress', function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#btn-adv-search').trigger('click');
+                }
+            });
+
+            // Đặt lại toàn bộ bộ lọc nâng cao
+            $('#btn-adv-reset').on('click', function () {
+                $('#adv-card-from').val('');
+                $('#adv-card-to').val('');
+                $('#adv-card-list').val('');
+                $('#adv-fullname').val('');
+                $('#adv-class').val('');
+                $('#adv-issuedate-from').val('');
+                $('#adv-issuedate-to').val('');
+                $('#adv-role').val('');
+
+                advFilterState = {
+                    cardFrom: '',
+                    cardTo: '',
+                    cardList: '',
+                    fullname: '',
+                    studentClass: '',
+                    issueDateFrom: '',
+                    issueDateTo: '',
+                    role: ''
+                };
+
+                applyFilters();
+            });
+
+            // Hàm thực thi tìm kiếm hợp nhất
+            function executeUnifiedSearch() {
+                const term = $('#ftu-unified-search').val().trim();
+                const role = $('#ftu-quick-role').val();
+                const status = $('#ftu-quick-status').val();
+                const branch = $('#ftu-quick-branch').val();
+
+                if ($('#sso_pane').is(':visible')) {
+                    currentSearchTerm = term;
+                    currentRoleFilter = (role === 'STUDENT' || role === 'POSTGRAD') ? role : 'ALL';
+                    currentStatusFilter = status || 'ALL';
+                    applyFilters();
+                } else {
+                    $('#search_patron_filter').val(term);
+                    if (role && role.startsWith('KOHA_')) {
+                        $('.categorycode_filter').val(role.replace('KOHA_', ''));
+                    } else {
+                        $('.categorycode_filter').val('');
+                    }
+                    if (branch) {
+                        $('.branchcode_filter').val(branch);
+                    } else {
+                        $('.branchcode_filter').val('');
+                    }
+                    $('.search_patron_filter_btn').trigger('click');
+                }
+            }
+
+            // Nút Tìm kiếm chính trên toolbar
+            $('#btn-run-search').on('click', function () {
+                executeUnifiedSearch();
+            });
+
+            // Nhấn Enter trong ô tìm kiếm chính
+            $('#ftu-unified-search').on('keypress', function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    executeUnifiedSearch();
+                }
+            });
+
+            // Tìm kiếm trực tiếp khi gõ phím cho tab SSO
+            $('#ftu-unified-search').on('input', function () {
+                const val = $(this).val().trim();
+                if (val) {
+                    $('#btn-clear-unified-search').show();
+                } else {
+                    $('#btn-clear-unified-search').hide();
+                }
+                if ($('#sso_pane').is(':visible')) {
+                    currentSearchTerm = val;
+                    applyFilters();
+                }
+            });
+
+            // Xóa nhanh từ khóa trong ô tìm kiếm
+            $('#btn-clear-unified-search').on('click', function () {
+                $('#ftu-unified-search').val('');
+                $(this).hide();
+                if ($('#sso_pane').is(':visible')) {
+                    currentSearchTerm = '';
+                    applyFilters();
+                }
+            });
+
+            // Thay đổi dropdown Loại bạn đọc nhanh
+            $('#ftu-quick-role').on('change', function () {
+                const val = $(this).val();
+                if ($('#sso_pane').is(':visible')) {
+                    currentRoleFilter = (val === 'STUDENT' || val === 'POSTGRAD') ? val : 'ALL';
+                    applyFilters();
+                } else {
+                    executeUnifiedSearch();
+                }
+            });
+
+            // Thay đổi dropdown Trạng thái nhanh (SSO)
+            $('#ftu-quick-status').on('change', function () {
+                currentStatusFilter = $(this).val() || 'ALL';
+                applyFilters();
+            });
+
+            // Thay đổi dropdown Cơ sở thư viện nhanh (Koha)
+            $('#ftu-quick-branch').on('change', function () {
+                executeUnifiedSearch();
+            });
+
+            // Nút Đặt lại hợp nhất
+            $('#btn-unified-reset').on('click', function () {
+                $('#ftu-unified-search').val('');
+                $('#btn-clear-unified-search').hide();
+                $('#ftu-quick-role').val('');
+                $('#ftu-quick-status').val('');
+                $('#ftu-quick-branch').val('');
+                $('#btn-adv-reset').trigger('click');
+
+                if ($('#koha_pane').is(':visible')) {
+                    $('.clear_search').trigger('click');
+                }
+            });
+
+            // Nút làm mới dữ liệu
+            $('#btn-refresh-sso').on('click', function () {
+                loadSsoLearners();
+            });
+
+            // Nhận dữ liệu trạng thái thẻ từ CSDL Koha về Cổng SSO
+            $('#btn-sync-from-koha').on('click', async function () {
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang nhận...');
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/sync-from-koha', { method: 'POST' });
+                    const json = await res.json();
+                    if (json.success) {
+                        alert('Đã cập nhật trạng thái từ Koha về Cổng SSO thành công: ' + json.syncedCount + ' bạn đọc!');
+                        await loadSsoLearners();
+                    } else {
+                        alert('Lỗi nhận dữ liệu: ' + json.error);
+                    }
+                } catch (err) {
+                    alert('Lỗi kết nối SSO: ' + err.message);
+                } finally {
+                    btn.prop('disabled', false).html('⇄ Nhận từ Koha');
+                }
+            });
+
+            // Đồng bộ tất cả người học sang Koha
+            $('#btn-sync-all-koha').on('click', async function () {
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang đồng bộ...');
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ onlyLearners: true })
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        alert('Đã đồng bộ thành công ' + json.syncedCount + ' bạn đọc người học sang CSDL Koha!');
+                        await loadSsoLearners();
+                    } else {
+                        alert('Đồng bộ thất bại: ' + json.error);
+                    }
+                } catch (err) {
+                    alert('Lỗi kết nối tới SSO: ' + err.message);
+                } finally {
+                    btn.prop('disabled', false).html('Đồng bộ sang Koha');
+                }
+            });
+
+            // Tiện ích lấy UID an toàn dạng chuỗi từ element
+            function getUid(el) {
+                const $el = $(el);
+                const val = $el.attr('data-uid') || $el.data('uid') || $el.closest('[data-uid]').attr('data-uid') || '';
+                return String(val).trim();
+            }
+
+            // Tiện ích mở modal an toàn (tương thích cả Bootstrap 5 lẫn jQuery)
+            function showModal(modalId) {
+                const el = document.getElementById(modalId);
+                if (!el) return;
+                try {
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        const m = (typeof bootstrap.Modal.getOrCreateInstance === 'function')
+                            ? bootstrap.Modal.getOrCreateInstance(el)
+                            : new bootstrap.Modal(el);
+                        m.show();
+                        return;
+                    }
+                } catch (e1) {
+                    console.warn('Bootstrap modal show error:', e1);
+                }
+                try {
+                    if (typeof $(el).modal === 'function') {
+                        $(el).modal('show');
+                        return;
+                    }
+                } catch (e2) {
+                    console.warn('jQuery modal show error:', e2);
+                }
+                $(el).addClass('show').css('display', 'block').attr('aria-modal', 'true').removeAttr('aria-hidden');
+                if ($('.modal-backdrop').length === 0) {
+                    $('body').append('<div class="modal-backdrop fade show"></div>').addClass('modal-open');
+                }
+            }
+
+            // Tiện ích đóng modal an toàn
+            function hideModal(modalId) {
+                const el = document.getElementById(modalId);
+                if (!el) return;
+                try {
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        const inst = (typeof bootstrap.Modal.getInstance === 'function')
+                            ? bootstrap.Modal.getInstance(el)
+                            : null;
+                        if (inst) {
+                            inst.hide();
+                            return;
+                        }
+                    }
+                } catch (e1) {
+                    console.warn('Bootstrap modal hide error:', e1);
+                }
+                try {
+                    if (typeof $(el).modal === 'function') {
+                        $(el).modal('hide');
+                        return;
+                    }
+                } catch (e2) {
+                    console.warn('jQuery modal hide error:', e2);
+                }
+                $(el).removeClass('show').css('display', 'none').attr('aria-hidden', 'true').removeAttr('aria-modal');
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+            }
+
+            // Đóng modal khi bấm các nút đóng
+            $(document).on('click', '[data-bs-dismiss="modal"]', function () {
+                const modal = $(this).closest('.modal');
+                if (modal.length > 0) {
+                    hideModal(modal.attr('id'));
+                }
+            });
+
+            // Thao tác Khóa thẻ bạn đọc
+            $(document).on('click', '.btn-action-lock, .btn-modal-action-lock', async function () {
+                const uid = getUid(this);
+                const name = $(this).data('fullname') || uid;
+                if (!confirm('Bạn có chắc muốn KHÓA THẺ bạn đọc [' + name + ' - ' + uid + ']? Thao tác này sẽ cập nhật ngay vào CSDL Koha và Hệ thống SSO.')) return;
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'LOCKED', reason: 'Thủ thư khóa thẻ trên Koha' })
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        alert('Đã KHÓA THẺ bạn đọc [' + uid + '] thành công trên cả Koha và SSO!');
+                        await loadSsoLearners();
+                    } else {
+                        alert('Lỗi: ' + json.error);
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối SSO: ' + e.message);
+                }
+            });
+
+            // Thao tác Mở khóa thẻ bạn đọc
+            $(document).on('click', '.btn-action-unlock, .btn-modal-action-unlock', async function () {
+                const uid = getUid(this);
+                const name = $(this).data('fullname') || uid;
+                if (!confirm('Bạn có chắc muốn MỞ KHÓA THẺ cho bạn đọc [' + name + ' - ' + uid + ']?')) return;
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'ACTIVE' })
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        alert('Đã MỞ KHÓA THẺ bạn đọc [' + uid + '] thành công!');
+                        await loadSsoLearners();
+                    } else {
+                        alert('Lỗi: ' + json.error);
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối SSO: ' + e.message);
+                }
+            });
+
+            // Thao tác Gia hạn thẻ (+1 năm)
+            $(document).on('click', '.btn-action-renew, .btn-modal-action-renew', async function () {
+                const uid = getUid(this);
+                const name = $(this).data('fullname') || uid;
+                if (!confirm('GIA HẠN THẺ thêm 1 năm cho bạn đọc [' + name + ' - ' + uid + ']? Hạn mới sẽ đồng bộ ngay sang Koha.')) return;
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid) + '/renew', {
+                        method: 'POST'
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        alert('Đã gia hạn thẻ thành công! Hạn mới: ' + json.newExpiryDate);
+                        await loadSsoLearners();
+                    } else {
+                        alert('Lỗi gia hạn: ' + json.error);
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối SSO: ' + e.message);
+                }
+            });
+
+            // Chọn tất cả checkbox SSO
+            $('#sso-check-all').on('change', function () {
+                $('.sso-user-check').prop('checked', $(this).prop('checked'));
+            });
+
+            // Thao tác ghi mượn sách
+            $(document).on('click', '.btn-action-checkout', async function () {
+                const uid = getUid(this);
+                const user = allLearners.find(u => String(u.uid).trim() === uid || String(u.cardNumber).trim() === uid);
+                if (user && !user.kohaSynced) {
+                    try {
+                        await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ uid })
+                        });
+                    } catch (e) {
+                        console.warn(e);
+                    }
+                }
+                window.location.href = '/cgi-bin/koha/circ/circulation.pl?findborrower=' + encodeURIComponent(uid);
+            });
+
+            // Đồng bộ 1 bạn đọc lẻ
+            $(document).on('click', '.btn-sync-single', async function () {
+                const uid = getUid(this);
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ uid })
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        await loadSsoLearners();
+                    } else {
+                        alert('Đồng bộ thất bại: ' + json.error);
+                    }
+                } catch (err) {
+                    alert('Lỗi kết nối tới SSO: ' + err.message);
+                }
+            });
+
+            // Mở modal Thêm bạn đọc SSO mới
+            $('#btn-open-add-sso').on('click', function () {
+                $('#form-sso-add-patron')[0].reset();
+                $('#add-sso-issuedate').val('01/10/2026');
+                $('#add-sso-status').val('ACTIVE');
+                $('#add-sso-expirydate').val('01/10/2027');
+                $('#add-sso-password').val('123456');
+                $('#add-sso-dob').val('15/05/2004');
+                $('#add-sso-gender').val('Nam');
+                $('#add-sso-ethnicity').val('Kinh');
+                $('#add-sso-education').val('Đại học');
+                $('#add-sso-occupation').val('Sinh viên');
+                $('#add-sso-cohort').val('K62');
+                $('#add-sso-department').val('Khoa Kinh tế Quốc tế');
+                $('#add-sso-studyyear').val('Năm 3');
+                $('#add-sso-class').val('K62-KTQT1');
+                $('#add-sso-workplace').val('Trường Đại học Ngoại Thương');
+                $('#add-sso-alert').hide();
+                showModal('modalSsoAddPatron');
+            });
+
+            // Gửi dữ liệu Thêm bạn đọc SSO
+            $('#btn-submit-add-sso').on('click', async function () {
+                const uid = $('#add-sso-uid').val().trim();
+                const fullName = $('#add-sso-fullname').val().trim();
+                const dob = $('#add-sso-dob').val().trim();
+                const gender = $('#add-sso-gender').val();
+                const role = $('#add-sso-role').val();
+                const issueDate = $('#add-sso-issuedate').val().trim();
+
+                if (!uid || !fullName || !dob || !gender || !role || !issueDate) {
+                    $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
+                        .text('Vui lòng điền đủ các trường bắt buộc (*): Số thẻ, Họ tên, Ngày sinh, Giới tính, Loại bạn đọc, Ngày cấp thẻ!').show();
+                    return;
+                }
+
+                const payload = {
+                    uid: uid,
+                    fullName: fullName,
+                    dateOfBirth: dob,
+                    gender: gender,
+                    cccd: $('#add-sso-cccd').val().trim(),
+                    role: role,
+                    educationLevel: $('#add-sso-education').val().trim(),
+                    occupation: $('#add-sso-occupation').val().trim(),
+                    issueDate: issueDate,
+                    status: $('#add-sso-status').val() || 'ACTIVE',
+                    expiryDate: $('#add-sso-expirydate').val().trim() || '01/10/2027',
+                    password: $('#add-sso-password').val() || '123456',
+                    cohort: $('#add-sso-cohort').val().trim(),
+                    department: $('#add-sso-department').val().trim(),
+                    studyYear: $('#add-sso-studyyear').val().trim(),
+                    studentClass: $('#add-sso-class').val().trim(),
+                    phone: $('#add-sso-phone').val().trim(),
+                    ethnicity: $('#add-sso-ethnicity').val().trim(),
+                    address: $('#add-sso-address').val().trim(),
+                    workplace: $('#add-sso-workplace').val().trim(),
+                    notes: $('#add-sso-notes').val().trim(),
+                    email: $('#add-sso-email').val().trim()
+                };
+
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang lưu...');
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        try {
+                            await fetch(ssoBaseUrl + '/api/v1/sso/sync-to-koha', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ uid: uid })
+                            });
+                        } catch (syncErr) {
+                            console.warn('Auto sync to koha warning:', syncErr);
+                        }
+
+                        $('#add-sso-alert').removeClass('alert-danger').addClass('alert-success')
+                            .text('Đã thêm bạn đọc [' + fullName + ' - ' + uid + '] thành công và đồng bộ vào Koha!').show();
+                        setTimeout(() => {
+                            hideModal('modalSsoAddPatron');
+                            loadSsoLearners();
+                        }, 1000);
+                    } else {
+                        $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
+                            .text(json.error || 'Có lỗi xảy ra khi thêm bạn đọc').show();
+                    }
+                } catch (err) {
+                    $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
+                        .text('Lỗi kết nối SSO Portal: ' + err.message).show();
+                } finally {
+                    btn.prop('disabled', false).html('<i class="fa fa-save me-1"></i> Lưu & Đồng bộ Koha');
+                }
+            });
+
+            // Xem chi tiết hồ sơ bạn đọc người học (21 trường đầy đủ)
+            $(document).on('click', '.btn-action-detail', async function (e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                const uid = getUid(this);
+                if (!uid) return;
+
+                let u = allLearners.find(item => String(item.uid).trim() === uid || String(item.cardNumber).trim() === uid);
+
+                // Fallback nạp trực tiếp từ SSO API nếu cache chưa có
+                if (!u) {
+                    try {
+                        const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(uid));
+                        const json = await res.json();
+                        if (json && json.success && json.data) {
+                            u = json.data;
+                        }
+                    } catch (err) {
+                        console.error('Lỗi nạp chi tiết bạn đọc:', err);
+                    }
+                }
+
+                if (!u) {
+                    alert('Không tìm thấy thông tin bạn đọc: ' + uid);
+                    return;
+                }
+
+                const isStudent = u.role === 'STUDENT';
+                let modalStatusPill = '<span class="ftu-badge-active"><span class="ftu-status-dot" style="background:#10b981;"></span>Còn hoạt động</span>';
+                if (u.status === 'LOCKED') {
+                    modalStatusPill = '<span class="ftu-badge-locked"><span class="ftu-status-dot" style="background:#ef4444;"></span>Đã khóa</span>';
+                } else if (u.status === 'EXPIRED') {
+                    modalStatusPill = '<span class="ftu-badge-expired"><span class="ftu-status-dot" style="background:#f59e0b;"></span>Hết hạn</span>';
+                }
+
+                const detailHtml = `
+                    <div class="d-flex align-items-center justify-content-between p-3 mb-4 rounded-2" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                        <div>
+                            <h5 class="mb-1 fw-bold text-dark" style="font-size:16px;">${u.fullName}</h5>
+                            <div class="d-flex align-items-center gap-2 flex-wrap text-muted small">
+                                <span class="font-monospace">Số thẻ: <strong class="text-dark">${u.cardNumber || u.uid}</strong></span>
+                                <span>·</span>
+                                <span>${u.roleName || (isStudent ? 'Sinh viên ĐH' : 'Sau ĐH & NCS')}</span>
+                                <span>·</span>
+                                <span>Khóa ${u.cohort || 'K62'}</span>
+                                ${u.kohaSynced ? '<span>·</span><span class="text-secondary">Koha #' + u.borrowernumber + '</span>' : ''}
+                            </div>
+                        </div>
+                        <div>
+                            ${modalStatusPill}
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Card 1: Thẻ & Định danh cá nhân -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border shadow-none" style="background:#ffffff; border-color:#e2e8f0 !important;">
+                                <div class="card-header bg-white py-2 border-bottom fw-bold text-secondary small text-uppercase" style="font-size:11px; letter-spacing:0.04em;">
+                                    1. Thẻ & Định danh cá nhân
+                                </div>
+                                <div class="card-body p-3" style="font-size:12.5px;">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr><th class="text-muted fw-normal" style="width:40%;">Số thẻ (*):</th><td class="fw-semibold text-dark font-monospace">${u.cardNumber || u.uid}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Họ tên (*):</th><td class="fw-semibold text-dark">${u.fullName}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Ngày sinh (*):</th><td>${u.dateOfBirth || '-'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Giới tính (*):</th><td>${u.gender || 'Nam'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Số CCCD:</th><td class="font-monospace">${u.cccd || '-'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Dân tộc:</th><td>${u.ethnicity || 'Kinh'}</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Loại bạn đọc & Quản lý đào tạo -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border shadow-none" style="background:#ffffff; border-color:#e2e8f0 !important;">
+                                <div class="card-header bg-white py-2 border-bottom fw-bold text-secondary small text-uppercase" style="font-size:11px; letter-spacing:0.04em;">
+                                    2. Loại bạn đọc & Đào tạo
+                                </div>
+                                <div class="card-body p-3" style="font-size:12.5px;">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr><th class="text-muted fw-normal" style="width:40%;">Loại bạn đọc (*):</th><td><strong class="text-dark">${u.roleName || u.role}</strong></td></tr>
+                                        <tr><th class="text-muted fw-normal">Trình độ:</th><td>${u.educationLevel || 'Đại học'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Nghề nghiệp:</th><td>${u.occupation || 'Sinh viên'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Khóa:</th><td class="fw-semibold text-dark">${u.cohort || 'K62'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Đơn vị / Khoa:</th><td>${u.department || 'Khoa Kinh tế Quốc tế'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Năm thứ / Lớp:</th><td>${u.studyYear || 'Năm 3'} - ${u.studentClass || '-'}</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Hiệu lực thẻ & Thư viện / DRM -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border shadow-none" style="background:#ffffff; border-color:#e2e8f0 !important;">
+                                <div class="card-header bg-white py-2 border-bottom fw-bold text-secondary small text-uppercase" style="font-size:11px; letter-spacing:0.04em;">
+                                    3. Hiệu lực thẻ & Thư viện
+                                </div>
+                                <div class="card-body p-3" style="font-size:12.5px;">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr><th class="text-muted fw-normal" style="width:40%;">Tình trạng thẻ:</th><td>${modalStatusPill}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Ngày cấp thẻ (*):</th><td class="text-dark">${u.issueDate || '01/10/2026'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Hạn thẻ:</th><td class="fw-semibold text-dark">${u.expiryDate || '01/10/2027'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Chính sách DRM:</th><td>${u.drmPolicyName || 'Sinh viên ĐH (Tối đa 30 trang)'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Liên thông Koha:</th><td>${u.kohaSynced ? '<span class="text-dark">ID #' + u.borrowernumber + '</span>' : '<span class="text-muted">Chưa đồng bộ</span>'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">DSpace 7 SSO:</th><td><span class="text-dark">EPerson Tự động</span></td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Thông tin liên hệ & Khác -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border shadow-none" style="background:#ffffff; border-color:#e2e8f0 !important;">
+                                <div class="card-header bg-white py-2 border-bottom fw-bold text-secondary small text-uppercase" style="font-size:11px; letter-spacing:0.04em;">
+                                    4. Liên hệ & Khác
+                                </div>
+                                <div class="card-body p-3" style="font-size:12.5px;">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr><th class="text-muted fw-normal" style="width:40%;">Điện thoại:</th><td><a href="tel:${u.phone || ''}" class="text-decoration-none text-dark">${u.phone || '-'}</a></td></tr>
+                                        <tr><th class="text-muted fw-normal">Email:</th><td><a href="mailto:${u.email || ''}" class="text-decoration-none text-dark">${u.email || '-'}</a></td></tr>
+                                        <tr><th class="text-muted fw-normal">Nơi làm việc:</th><td>${u.workplace || 'Trường Đại học Ngoại Thương'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Địa chỉ:</th><td>${u.address || '-'}</td></tr>
+                                        <tr><th class="text-muted fw-normal">Ghi chú:</th><td class="text-muted fst-italic">${u.notes || '-'}</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#modalSsoPatronDetailBody').html(detailHtml);
+                const footerBtns = `
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    ${u.status === 'LOCKED'
+                        ? `<button type="button" class="btn btn-sm btn-success btn-modal-action-unlock" data-uid="${u.uid}" data-fullname="${u.fullName}" data-bs-dismiss="modal"><i class="fa fa-unlock me-1"></i>Mở khóa thẻ</button>`
+                        : `<button type="button" class="btn btn-sm btn-danger btn-modal-action-lock" data-uid="${u.uid}" data-fullname="${u.fullName}" data-bs-dismiss="modal"><i class="fa fa-lock me-1"></i>Khóa thẻ tài khoản</button>`
+                    }
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-modal-action-renew" data-uid="${u.uid}" data-fullname="${u.fullName}" data-bs-dismiss="modal"><i class="fa fa-calendar-plus-o me-1"></i>Gia hạn (+1 năm)</button>
+                `;
+                $('#modalSsoPatronDetailFooter').html(footerBtns);
+                showModal('modalSsoPatronDetail');
+            });
+
+            // Mở modal đổi mật khẩu SSO
+            $(document).on('click', '.btn-action-pwd', function () {
+                selectedResetUid = getUid(this);
+                $('#reset-pwd-uid').text(selectedResetUid);
+                $('#reset-pwd-input').val('');
+                $('#reset-pwd-alert').hide();
+                showModal('modalSsoResetPassword');
+            });
+
+            // Thực hiện đổi mật khẩu SSO
+            $('#btn-submit-reset-pwd').on('click', async function () {
+                const newPassword = $('#reset-pwd-input').val();
+                if (!newPassword) {
+                    $('#reset-pwd-alert').removeClass('alert-success').addClass('alert-danger').text('Vui lòng nhập mật khẩu mới!').show();
+                    return;
+                }
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                try {
+                    const res = await fetch(ssoBaseUrl + '/api/v1/sso/users/' + encodeURIComponent(selectedResetUid) + '/reset-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ newPassword })
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        $('#reset-pwd-alert').removeClass('alert-danger').addClass('alert-success').text('Đã đổi mật khẩu thành công!').show();
+                        setTimeout(() => {
+                            hideModal('modalSsoResetPassword');
+                        }, 1200);
+                    } else {
+                        $('#reset-pwd-alert').removeClass('alert-success').addClass('alert-danger').text(json.error || 'Đổi mật khẩu thất bại').show();
+                    }
+                } catch (err) {
+                    $('#reset-pwd-alert').removeClass('alert-success').addClass('alert-danger').text('Lỗi kết nối SSO: ' + err.message).show();
+                } finally {
+                    btn.prop('disabled', false).text('Lưu mật khẩu');
+                }
+            });
+        });
+    })();
+ </script>
 [% END %]
 [% INCLUDE 'intranet-bottom.inc' %]

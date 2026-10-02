@@ -7,11 +7,11 @@
 <title
     >[% FILTER collapse %]
         [% IF ( del ) %]
-            [% t("Batch item deletion") | html %]
+            Xóa bản tài liệu hàng loạt
         [% ELSE %]
-            [% t("Batch item modification") | html %]
+            Chỉnh sửa bản tài liệu hàng loạt
         [% END %]
-        &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+        &rsaquo; Biên mục &rsaquo; Koha
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -24,39 +24,39 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
 
         [% IF ( del ) %]
             [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>Batch item deletion</span>
+                <span>Xóa bản tài liệu hàng loạt</span>
             [% END %]
         [% ELSE %]
             [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>Batch item modification</span>
+                <span>Chỉnh sửa bản tài liệu hàng loạt</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' aside='cat-menu' %]
-    <h1>Batch item [% IF ( del ) %]deletion[% ELSE %]modification[% END %]</h1>
+    <h1 class="ftu-clean-title"><i class="fa fa-layer-group"></i> [% IF ( del ) %]Xóa bản tài liệu hàng loạt[% ELSE %]Chỉnh sửa bản tài liệu hàng loạt[% END %]</h1>
     <form method="post" enctype="multipart/form-data" action="/cgi-bin/koha/tools/batchMod.pl">
         [% INCLUDE 'csrf-token.inc' %]
         <fieldset class="rows">
-            <legend>Use a file</legend>
+            <legend><i class="fa fa-file-arrow-up"></i> Tải tệp danh sách</legend>
             <ol>
-                <li> <label for="barcode_file">Barcode file: </label><input type="radio" name="filecontent" value="barcode_file" id="barcode_file" checked="checked" /></li>
-                <li> <label for="itemid_file">Item number file: </label><input type="radio" name="filecontent" value="itemid_file" id="itemid_file" /> </li>
-                <li><label for="uploadfile">File: </label> <input type="file" id="uploadfile" name="uploadfile" /></li>
+                <li> <label for="barcode_file">Tệp danh sách mã vạch (Barcode): </label><input type="radio" name="filecontent" value="barcode_file" id="barcode_file" checked="checked" /></li>
+                <li> <label for="itemid_file">Tệp danh sách số bản (Item number): </label><input type="radio" name="filecontent" value="itemid_file" id="itemid_file" /> </li>
+                <li><label for="uploadfile">Chọn tệp tải lên: </label> <input type="file" id="uploadfile" name="uploadfile" /></li>
             </ol>
         </fieldset>
         <fieldset class="rows">
-            <legend>Or scan items one by one</legend>
+            <legend><i class="fa fa-barcode"></i> Quét mã vạch trực tiếp</legend>
             <ol>
                 <li>
-                    <label for="barcodelist">Barcode list (one barcode per line): </label>
-                    <textarea rows="10" cols="30" id="barcodelist" name="barcodelist"></textarea>
+                    <label for="barcodelist">Nhập danh sách mã vạch (mỗi mã một dòng): </label>
+                    <textarea rows="8" cols="40" id="barcodelist" name="barcodelist" placeholder="Quét hoặc nhập mã vạch vào đây..."></textarea>
                 </li>
             </ol>
             <input type="hidden" name="op" value="cud-show" />
@@ -64,12 +64,12 @@
 
         [% UNLESS del %]
             <fieldset class="rows">
-                <legend>Use default values</legend>
+                <legend><i class="fa fa-sliders"></i> Thiết lập giá trị mặc định</legend>
                 <ol class="radio">
                     <li>
-                        <label for="use_default_values">Use default values:</label>
+                        <label for="use_default_values">Dùng giá trị mặc định:</label>
                         <input type="checkbox" name="use_default_values" id="use_default_values" />
-                        <span class="hint">Populate fields with default values from default framework</span>
+                        <span class="hint">Tự động điền các trường với giá trị mặc định từ khung biên mục chuẩn</span>
                     </li>
                 </ol>
             </fieldset>
@@ -77,8 +77,8 @@
 
         <fieldset class="action">
             [% IF ( del ) %]<input type="hidden" name="del" value="1" />[% END %]
-            <input type="submit" class="btn btn-primary" value="Continue" />
-            <a class="cancel" href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cancel</a>
+            <input type="submit" class="btn btn-primary" value="Tiếp tục xử lý" />
+            <a class="cancel" href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Hủy bỏ</a>
         </fieldset>
     </form>
 [% END %]

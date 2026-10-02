@@ -24,19 +24,19 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-home.pl">Label creator</a>
+            <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy &amp; mã vạch</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=template">Label templates</a>
+            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=template">Mẫu phôi nhãn</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             [% IF ( template_id ) %]
-                <span>Edit label template [% template_id | html %]</span>
+                <span>Chỉnh sửa mẫu phôi nhãn [% template_id | html %]</span>
             [% ELSE %]
-                <span>New label template</span>
+                <span>Tạo mẫu phôi nhãn mới</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -46,9 +46,9 @@
     [% INCLUDE 'labels-toolbar.inc' %]
 
     [% IF ( template_id ) %]
-        <h1>Edit label template [% template_id | html %]</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-table-cells"></i> Chỉnh sửa mẫu phôi nhãn [% template_id | html %]</h1>
     [% ELSE %]
-        <h1>New label template</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-table-cells"></i> Tạo mẫu phôi nhãn mới</h1>
     [% END %]
 
     <form name="input" action="/cgi-bin/koha/labels/label-edit-template.pl" method="post">

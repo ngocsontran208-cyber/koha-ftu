@@ -4,11 +4,11 @@
         <form method="post" action="/cgi-bin/koha/circ/returns.pl" autocomplete="off">
             [% INCLUDE 'csrf-token.inc' %]
             <div class="form-title">
-                <label class="control-label" for="ret_barcode"><span class="control-text">Check in</span> <i class="fa fa-fw fa-download" aria-hidden="true"></i></label>
+                <label class="control-label" for="ret_barcode"><span class="control-text">Ghi trả</span> <i class="fa fa-fw fa-download" aria-hidden="true"></i></label>
             </div>
 
             <div class="form-content">
-                <input name="barcode" id="ret_barcode" class="head-searchbox form-control" accesskey="r" type="text" placeholder="Scan a barcode to check in" size="40" />
+                <input name="barcode" id="ret_barcode" class="head-searchbox form-control" accesskey="r" type="text" placeholder="Quét hoặc nhập mã vạch tài liệu để ghi trả..." size="40" />
                 <input type="hidden" name="op" value="cud-checkin" />
             </div>
             <button type="submit" aria-label="Search"><i class="fa fa-arrow-right"></i></button>

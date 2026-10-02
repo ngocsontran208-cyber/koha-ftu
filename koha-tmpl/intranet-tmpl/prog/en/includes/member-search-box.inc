@@ -10,14 +10,14 @@
             <input type="hidden" name="quicksearch" value="1" />
 
             <div class="form-title">
-                <label class="control-label" for="searchmember"><span class="control-text">Search patrons</span> <i class="fa fa-fw fa-id-card" aria-hidden="true"></i></label>
+                <label class="control-label" for="searchmember"><span class="control-text">Tìm bạn đọc</span> <i class="fa fa-fw fa-id-card" aria-hidden="true"></i></label>
             </div>
 
             <div class="form-content">
                 [% IF ( Koha.Preference('RetainPatronsSearchTerms') ) %]
-                    <input name="searchmember" id="searchmember" class="head-searchbox form-control" type="text" placeholder="Enter patron card number or partial name" size="25" value="[% searchmember | html %]" />
+                    <input name="searchmember" id="searchmember" class="head-searchbox form-control" type="text" placeholder="Tìm bạn đọc theo tên, MSSV, mã thẻ..." size="25" value="[% searchmember | html %]" />
                 [% ELSE %]
-                    <input name="searchmember" id="searchmember" class="head-searchbox form-control" type="text" placeholder="Enter patron card number or partial name" size="25" />
+                    <input name="searchmember" id="searchmember" class="head-searchbox form-control" type="text" placeholder="Tìm bạn đọc theo tên, MSSV, mã thẻ..." size="25" />
                 [% END %]
 
                 <button type="button" class="form-extra-content-toggle" title="More options"><i class="form-extra-content-icon fa-solid fa-sliders" aria-hidden="true"></i></button>

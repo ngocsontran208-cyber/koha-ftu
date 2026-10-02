@@ -11,10 +11,15 @@
 [% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
 [% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
 [% SET OpacNavRight = AdditionalContents.get( location => "OpacNavRight", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
+[% SET OpacMainUserBlock = AdditionalContents.get( location => "OpacMainUserBlock", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
 [% SET OpacLoginInstructions = AdditionalContents.get( location => "OpacLoginInstructions", lang => lang, library => branchcode || default_branch ) %]
-[% SET AllPublicBranches = Branches.all( search_params => { public => 1 }, selected => branchcode, unfiltered => 1 ) %]
+[% SET AllPublicBranches = Branches.all(  search_params => { public => 1 }, selected => branchcode, unfiltered => 1 ) %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title>[% FILTER collapse %][% PROCESS 'library_name_title' %][% END %]</title>
+<title
+    >[% FILTER collapse %]
+        [% PROCESS 'library_name_title' %]
+    [% END %]</title
+>
 <link rel="canonical" href="[% OPACBaseURL | url %]/" />
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
@@ -23,293 +28,771 @@
 [% INCLUDE 'bodytag.inc' bodyid='opac-main' %]
 [% INCLUDE 'masthead.inc' %]
 
-<main class="main ftu-main-simple">
-    <!-- HERO SEARCH SECTION (Clean, Minimalist & Focused) -->
+<main class="main">
+    [% WRAPPER breadcrumbs %]
+        [% IF news_item %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                [% news_item.title | html %]
+            [% END %]
+        [% ELSE %]
+
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
+
+    <!-- ========================================================================= -->
+    <!-- FTU FULL-WIDTH HERO SECTION, SHORTCUTS, AND NEWS -->
+    <!-- ========================================================================= -->
+    [% IF ( opac_name == 'opac-main' || !opac_name ) && !news_id && !advsearch %]
     <section class="ftu-hero-section">
         <div class="ftu-hero-content">
-            <h1 class="ftu-hero-title">Khám phá Tri thức</h1>
-            <p class="ftu-hero-subtitle">Thư viện Đại học Ngoại thương</p>
+            <!-- FTU Master Banner Carousel (Auto-Slider) -->
+            <div class="ftu-banner-carousel-container" id="ftuBannerCarousel">
+                <div class="ftu-banner-slider-track" id="ftuBannerTrack">
+                    <!-- Slides are loaded dynamically via portal-posts.pl?type=banner -->
+                    <div class="ftu-banner-slide slide-center" data-index="0">
+                        <a href="/cgi-bin/koha/opac-search.pl" class="ftu-banner-link">
+                            <div class="ftu-banner-bg" style="background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(185, 28, 28, 0.65) 100%), url('/opac-tmpl/bootstrap/images/ftu-library-hero.jpg');"></div>
+                            <div class="ftu-banner-content">
+                                <span class="ftu-banner-tag"><i class="fa fa-university"></i> [% FTU_BRAND.library_name_full | upper %]</span>
+                                <h2 class="ftu-banner-title">CHÀO MỪNG BẠN ĐỌC ĐẾN VỚI [% FTU_BRAND.library_name_short | upper %]</h2>
+                                <p class="ftu-banner-desc">[% FTU_BRAND.library_slogan %]</p>
+                                <span class="ftu-banner-btn">Khám phá ngay <i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
 
-            <!-- Search Tabs -->
-            <div class="ftu-search-tabs">
-                <button type="button" class="ftu-search-tab active" data-target="all">Tất cả tài nguyên</button>
-                <button type="button" class="ftu-search-tab" data-target="books">Sách & Giáo trình</button>
-                <button type="button" class="ftu-search-tab" data-target="digital">Tài liệu số</button>
+                <!-- Navigation Arrows -->
+                <button type="button" class="ftu-banner-arrow ftu-banner-prev" aria-label="Banner trước" id="ftuBannerPrev">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <button type="button" class="ftu-banner-arrow ftu-banner-next" aria-label="Banner kế tiếp" id="ftuBannerNext">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+
+                <!-- Pagination Dots -->
+                <div class="ftu-banner-dots" id="ftuBannerDots">
+                    <button type="button" class="ftu-banner-dot active" data-slide="0" aria-label="Slide 1"></button>
+                </div>
             </div>
-
-            <!-- Search Bar Card -->
+            
             <div class="ftu-search-card ftu-search-simple">
                 <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform" role="search" class="ftu-search-form">
-                    <input type="hidden" name="limit" id="ftu-search-limit" value="">
-                    <i class="fa fa-search ftu-search-icon-left" aria-hidden="true"></i>
-                    <input type="text" name="q" id="ftu-main-search-input" class="ftu-search-input-large" placeholder="Nhập tên tài liệu, tác giả, ngành học..." autocomplete="off" aria-label="Nội dung tìm kiếm" required />
-                    <button type="submit" class="ftu-search-btn-large">
-                        Tìm kiếm
-                    </button>
+                    <i class="fa fa-search ftu-search-icon-left"></i>
+                    <input type="text" name="q" class="ftu-search-input-large" placeholder="Nhập tên sách, tác giả, chủ đề..." />
+                    <input type="hidden" name="idx" value="kw" />
+                    <button type="submit" class="ftu-search-btn-large">Tìm kiếm</button>
                 </form>
             </div>
-
-            <!-- SEARCH OPTIONS (Minimalist Chips) -->
+            
             <div class="ftu-search-chips">
-                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary">
-                    <i class="fa fa-sliders"></i> Tìm kiếm nâng cao
-                </a>
-                <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Lu%E1%BA%ADn+v%C4%83n" class="ftu-chip">
-                    Khóa luận & Luận văn
-                </a>
-                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip">
-                    Tài liệu học phần
-                </a>
-                <a href="/cgi-bin/koha/opac-browser.pl" class="ftu-chip">
-                    Duyệt chuyên đề
-                </a>
+                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary"><i class="fa fa-sliders"></i> Tìm kiếm nâng cao</a>
+                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip"><i class="fa fa-graduation-cap"></i> Giáo trình & Bài giảng</a>
+                <a href="/cgi-bin/koha/opac-authorities-home.pl" class="ftu-chip"><i class="fa fa-tags"></i> Tìm theo Từ khóa</a>
             </div>
         </div>
     </section>
 
-    <!-- TASK-ORIENTED SHORTCUTS (How do I... / Tôi muốn...) -->
-    <section class="ftu-section-container ftu-shortcuts-section">
-        <div class="ftu-shortcuts-grid">
-            <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
-                <div class="ftu-shortcut-icon">
-                    <i class="fa fa-book-reader"></i>
-                </div>
-                <div class="ftu-shortcut-info">
-                    <div class="ftu-shortcut-title">Gia hạn sách mượn</div>
-                    <div class="ftu-shortcut-desc">Kiểm tra tài khoản và gia hạn sách trực tuyến</div>
-                </div>
-            </a>
+    <div class="ftu-section-container ftu-shortcuts-section">
+       <div class="ftu-shortcuts-grid">
+           <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon"><i class="fa fa-book-open"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Sách mới về <span class="ftu-badge-open">Mới</span></span>
+                   <span class="ftu-shortcut-desc">Cập nhật tài liệu mới nhất</span>
+               </div>
+           </a>
+           <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon ftu-icon-green"><i class="fa fa-history"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Lịch sử mượn</span>
+                   <span class="ftu-shortcut-desc">Tra cứu sách đã mượn</span>
+               </div>
+           </a>
+           <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon"><i class="fa fa-id-card"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Tài khoản của tôi</span>
+                   <span class="ftu-shortcut-desc">Gia hạn & thông tin mượn</span>
+               </div>
+           </a>
+           <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon"><i class="fa fa-bookmark"></i></div>
+               <div class="ftu-shortcut-info">
+                   <span class="ftu-shortcut-title">Giá sách yêu thích</span>
+                   <span class="ftu-shortcut-desc">Quản lý danh sách sách</span>
+               </div>
+           </a>
+       </div>
+    </div>
 
-            <a href="#" class="ftu-shortcut-card">
-                <div class="ftu-shortcut-icon">
-                    <i class="fa fa-users"></i>
-                </div>
-                <div class="ftu-shortcut-info">
-                    <div class="ftu-shortcut-title">Đặt phòng học nhóm</div>
-                    <div class="ftu-shortcut-desc">Đăng ký sử dụng phòng học chung tại Thư viện</div>
-                </div>
-            </a>
-
-            <a href="/cgi-bin/koha/opac-suggestions.pl" class="ftu-shortcut-card">
-                <div class="ftu-shortcut-icon">
-                    <i class="fa fa-lightbulb"></i>
-                </div>
-                <div class="ftu-shortcut-info">
-                    <div class="ftu-shortcut-title">Yêu cầu mua sách</div>
-                    <div class="ftu-shortcut-desc">Đề xuất Thư viện bổ sung giáo trình mới</div>
-                </div>
-            </a>
-
-            <a href="#" class="ftu-shortcut-card">
-                <div class="ftu-shortcut-icon">
-                    <i class="fa fa-user-tie"></i>
-                </div>
-                <div class="ftu-shortcut-info">
-                    <div class="ftu-shortcut-title">Nhờ thủ thư hỗ trợ</div>
-                    <div class="ftu-shortcut-desc">Hướng dẫn tra cứu & tìm kiếm tài liệu chuyên sâu</div>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <!-- NEW ARRIVALS / TÀI LIỆU MỚI (Modern Horizontal Scroll or Grid) -->
-    <section class="ftu-section-container ftu-new-arrivals-section">
+    <!-- DANH MỤC SÁCH MỚI -->
+    <!-- DANH MỤC SÁCH MỚI (Real Data & Auto-Scroll) -->
+    <div class="ftu-section-container ftu-new-arrivals-section">
         <div class="ftu-section-header">
-            <h2 class="ftu-section-title">Tài liệu mới cập nhật</h2>
-            <a href="/cgi-bin/koha/opac-search.pl?q=an&sort_by=acqdate_dsc" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
+            <h3 class="ftu-section-title">SÁCH MỚI CẬP NHẬT</h3>
+            <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
         </div>
-        <div class="ftu-books-grid" id="ftu-dynamic-new-arrivals">
-            <!-- Dữ liệu sách mới sẽ được load tự động bằng JavaScript -->
-            <div class="ftu-loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 2rem;">
-                <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--ftu-red);"></i>
-                <p style="margin-top: 1rem; color: var(--ftu-text-muted);">Đang tải sách mới...</p>
+        
+        <style>
+            .ftu-books-scroller-wrap {
+                overflow: hidden;
+                width: 100%;
+                position: relative;
+                padding: 10px 0;
+            }
+            .ftu-books-grid-dynamic {
+                display: flex;
+                gap: 1.5rem;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+                animation: marquee 25s linear infinite;
+            }
+            .ftu-books-grid-dynamic:hover {
+                animation-play-state: paused;
+            }
+            .ftu-books-grid-dynamic .ftu-book-card {
+                flex: 0 0 220px;
+                min-width: 220px;
+                white-space: normal; /* Restore text wrapping inside card */
+            }
+            @keyframes marquee {
+                0% { transform: translateX(10%); }
+                100% { transform: translateX(-100%); }
+            }
+            /* Loading State */
+            .ftu-loading-books {
+                text-align: center;
+                padding: 2rem;
+                color: var(--ftu-text-muted);
+                font-size: 1.1rem;
+            }
+            .ftu-loading-books i { margin-right: 8px; color: var(--ftu-red); }
+        </style>
+
+        <div class="ftu-books-scroller-wrap">
+            <div id="ftu-dynamic-books" class="ftu-books-grid-dynamic">
+                <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Đang tải dữ liệu sách mới nhất...</div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- NEWS & WORKSHOPS -->
-    <section class="ftu-section-container ftu-news-section">
+    <!-- TIN TỨC VÀ SỰ KIỆN (DYNAMIC CMS) -->
+    <div class="ftu-section-container" id="news-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-weight: 800; color: var(--ftu-red); margin: 0;">TIN TỨC & SỰ KIỆN</h3>
+            <a href="/cgi-bin/koha/opac-news-detail.pl?id=1" style="color: var(--ftu-red); font-weight: 600; text-decoration: none;">Xem tất cả bài viết <i class="fa fa-arrow-right"></i></a>
+        </div>
         <div class="ftu-news-grid">
             <!-- Cột Tin tức -->
-            <div class="ftu-news-col">
-                <div class="ftu-section-header">
-                    <h2 class="ftu-section-title">Tin tức Thư viện</h2>
-                    <a href="#" class="ftu-view-all">Xem tất cả <i class="fa fa-arrow-right"></i></a>
-                </div>
-                <div class="ftu-news-list">
-                    <a href="#" class="ftu-news-item">
-                        <div class="ftu-news-date">
-                            <span class="day">15</span>
-                            <span class="month">Thg 9</span>
-                        </div>
-                        <div class="ftu-news-content">
-                            <h4>Thông báo lịch nghỉ lễ Quốc khánh 2/9 năm 2026</h4>
-                            <p>Thư viện tạm ngưng phục vụ trong thời gian nghỉ lễ, các dịch vụ trực tuyến vẫn hoạt động bình thường.</p>
-                        </div>
-                    </a>
-                    <a href="#" class="ftu-news-item">
-                        <div class="ftu-news-date">
-                            <span class="day">10</span>
-                            <span class="month">Thg 9</span>
-                        </div>
-                        <div class="ftu-news-content">
-                            <h4>Bổ sung CSDL ProQuest vào hệ thống tra cứu</h4>
-                            <p>Sinh viên đã có thể tra cứu toàn văn hàng triệu bài báo quốc tế trực tiếp qua hệ thống OPAC.</p>
-                        </div>
-                    </a>
+            <div>
+                <h4 style="font-weight: 700; color: var(--ftu-text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-newspaper" style="color: var(--ftu-red);"></i> Bảng tin Thư viện mới nhất
+                </h4>
+                <div class="ftu-news-list" id="ftu-dynamic-news-list">
+                    <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Đang tải tin tức...</div>
                 </div>
             </div>
 
-            <!-- Cột Sự kiện -->
-            <div class="ftu-news-col">
-                <div class="ftu-section-header">
-                    <h2 class="ftu-section-title">Sự kiện & Workshop</h2>
-                    <a href="#" class="ftu-view-all">Đăng ký ngay <i class="fa fa-arrow-right"></i></a>
-                </div>
-                <div class="ftu-event-card">
-                    <div class="ftu-event-img">
-                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=600" alt="Workshop">
-                        <div class="ftu-event-tag">Sắp diễn ra</div>
-                    </div>
-                    <div class="ftu-event-details">
-                        <h3>Workshop: Kỹ năng tra cứu & Trích dẫn tài liệu với EndNote</h3>
-                        <p><i class="fa fa-calendar-alt"></i> 20/09/2026 • 09:00 - 11:00</p>
-                        <p><i class="fa fa-map-marker-alt"></i> Phòng Hội thảo tầng 2, Thư viện CS Hà Nội</p>
-                    </div>
+            <!-- Cột Sự kiện & Workshop -->
+            <div>
+                <h4 style="font-weight: 700; color: var(--ftu-text-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-calendar-alt" style="color: var(--ftu-red);"></i> Sự kiện & Workshop nổi bật
+                </h4>
+                <div id="ftu-dynamic-events-container">
+                    <div class="ftu-loading-books"><i class="fa fa-spinner fa-spin"></i> Đang tải sự kiện...</div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+    [% END %]
+    <!-- ========================================================================= -->
 
-    <!-- FEATURED COLLECTIONS / BỘ SƯU TẬP NỔI BẬT -->
-    <section class="ftu-section-container ftu-collections-section">
-        <div class="ftu-section-header">
-            <h2 class="ftu-section-title">Khám phá Bộ sưu tập</h2>
+    [% SET container_id = "notloggedin" %]
+    [% IF Koha.Preference( 'opacuserlogin' ) == 1 && loggedinusername %]
+        [% container_id = "loggedin" %]
+    [% END %]
+    <div id="[% container_id | html %]" class="container-fluid">
+        <div class="row">
+            [% IF ( OpacNav ||  OpacNavBottom ) %]
+                <div class="col-12 col-lg-2 order-3 order-lg-1">
+                    <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+                </div>
+            [% END %]
+
+            [% SET column_class = "col order-md-1 maincontent" %]
+            [% IF ( OpacNav ||  OpacNavBottom  ) && (Koha.Preference( 'opacuserlogin' ) == 1 || OpacNavRight) %]
+                [%#  Three-column layout with right and left sidebars %]
+                [% column_class = "col-12 col-lg-7 order-md-1 maincontent" %]
+            [% ELSIF (Koha.Preference( 'opacuserlogin' ) == 1 || OpacNavRight) %]
+                [%#  Two-column layout with right sidebar %]
+                [% column_class = "col-12 col-lg-9 order-md-1 maincontent" %]
+            [% ELSIF ( OpacNav ||  OpacNavBottom  ) %]
+                [% column_class = "col-12 col-lg-10 order-md-1 maincontent" %]
+            [% END %]
+            <div class="[% column_class | html %]">
+                <h1 class="visually-hidden">Koha home</h1>
+
+                [% IF Koha.Preference( 'OpacNewsLibrarySelect' ) && AllPublicBranches.size > 1 %]
+                    [% UNLESS news_id %]
+                        <form id="news-branch-select" class="form-inline" name="news-branch-select" method="get" action="/cgi-bin/koha/opac-main.pl">
+                            <legend class="visually-hidden">News</legend>
+                            <label for="news-branch">Display news for: </label>
+                            <select id="news-branch" name="branch">
+                                [% IF ( branchcode == "" ) %]
+                                    <option value="" selected="selected">System-wide only</option>
+                                [% ELSE %]
+                                    <option value="">System-wide only</option>
+                                [% END %]
+                                [% PROCESS options_for_libraries libraries => AllPublicBranches %]
+                            </select>
+                        </form>
+                    [% END %]
+                [% END %]
+
+                [% IF news_id %]
+                    [% SET koha_news = AdditionalContents.get( category => 'news', location => ['opac_only', 'staff_and_opac'], lang => lang, id => news_id ) %]
+                [% ELSE %]
+                    [% SET koha_news = AdditionalContents.get( category => 'news', location => ['opac_only', 'staff_and_opac'], lang => lang, library => branchcode ) %]
+                [% END %]
+                [% IF koha_news.content.count %]
+                    <div id="news" class="newscontainer">
+                        [% SET show_author = Koha.Preference('NewsAuthorDisplay') == 'opac' || Koha.Preference('NewsAuthorDisplay') == 'both' %]
+                        [% FOREACH koha_new IN koha_news.content %]
+                            <div class="newsitem">
+                                <h2 class="newsheader">
+                                    [% IF ( news_item ) %]
+                                        [% koha_new.title | html %]
+                                    [% ELSE %]
+                                        <a id="newsitem[% koha_new.additional_content.id | html %]" href="/cgi-bin/koha/opac-main.pl?news_id=[% koha_new.additional_content.id | uri %]">[% koha_new.title | html %]</a>
+                                    [% END %]
+                                </h2>
+                                <div class="newsbody">[% koha_new.content | $raw %]</div>
+                                <div class="newsfooter">
+                                    Published on [% koha_new.published_on | $KohaDates %]
+                                    [% IF ( show_author && koha_new.author ) %]
+                                        by <span class="newsauthor">[% INCLUDE 'patron-title.inc' patron=koha_new.author %]</span>
+                                    [% END %]
+                                    [% IF ( news_id ) %]
+                                        &bull; <a href="/cgi-bin/koha/opac-main.pl">Show all news</a>
+                                    [% END %]
+                                </div>
+                            </div>
+                        [% END %]
+
+                        [% UNLESS news_id %]
+                            <div id="rssnews-container">
+                                <!-- Logged in users have a branch code or it could be explicitly set -->
+                                <a href="[% OPACBaseURL | url %]/cgi-bin/koha/opac-news-rss.pl?branchcode=[% branchcode | uri %]">
+                                    <i class="fa fa-rss" aria-hidden="true"></i>
+                                    [% IF Branches.all.size == 1 %]
+                                        [% IF branchcode %]
+                                            <span>RSS feed for [% Branches.GetName( branchcode ) | html %] library news</span>
+                                        [% ELSE %]
+                                            <span>RSS feed for library news</span>
+                                        [% END %]
+                                    [% ELSE %]
+                                        [% IF branchcode %]
+                                            <span>RSS feed for [% Branches.GetName( branchcode ) | html %] and system-wide library news</span>
+                                        [% ELSE %]
+                                            <span>RSS feed for system-wide library news</span>
+                                        [% END %]
+                                    [% END %]
+                                </a>
+                            </div>
+                        [% END %]
+                    </div>
+                [% ELSIF news_id %]
+                    <!-- news_id but no koha_news.content -->
+                    <div class="alert alert-error"> This news item does not exist. </div>
+                [% ELSE %]
+                    <!-- koha news -->
+                    [% IF Koha.Preference( 'OpacNewsLibrarySelect' ) %]
+                        <div id="news" class="newscontainer">
+                            <div class="newsitem">
+                                <div class="newsbody">No news to display.</div>
+                                <div class="newsfooter"></div>
+                            </div>
+                        </div>
+                    [% END %]
+                [% END # IF koha_news %]
+
+                [% UNLESS news_item # Don't show under single news item %]
+                    [% IF ( daily_quote ) %]
+                        <div id="daily-quote">
+                            <h2>Quote of the day</h2>
+                            <div> <span id="daily-quote-text">[% daily_quote.text | html %]</span><span id="daily-quote-sep"> ~ </span><span id="daily-quote-source">[% daily_quote.source | html %]</span> </div>
+                        </div>
+                    [% END %]
+
+                    [% IF ( OpacMainUserBlock ) %]
+                        [% PROCESS koha_news_block news => OpacMainUserBlock %]
+                    [% END %]
+                [% END %]
+            </div>
+            <!-- / .col 6/8 -->
+
+            [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) || OpacNavRight ) %]
+                <div class="col-12 col-lg-3 order-md-2">
+                    [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
+                        [% UNLESS ( loggedinusername ) %]
+                            [% UNLESS ( casAuthentication || shibbolethAuthentication || Koha.Preference('opacShibOnly') ) %]
+                                <div id="login">
+                                    <form action="/cgi-bin/koha/opac-user.pl" method="post" name="auth" id="auth" autocomplete="off">
+                                        [% INCLUDE 'csrf-token.inc' %]
+                                        <input type="hidden" name="koha_login_context" value="opac" />
+                                        <h2 class="visually-hidden">Login form</h2>
+                                        <fieldset class="brief">
+                                            <legend>Log in to your account:</legend>
+                                            [% IF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
+                                                <a href="/cgi-bin/koha/svc/auth/googleopenidconnect" class="btn btn-light" id="openid_connect"><i class="fa-brands fa-google" aria-hidden="true"></i> Log in with Google</a>
+                                                <p>If you do not have a Google account, but do have a local account, you can still log in: </p>
+                                            [% END # /IF GoogleOpenIDConnect %]
+                                            [% SET identity_providers = AuthClient.get_providers('opac') %]
+                                            [% IF ( ! identity_providers.empty ) %]
+                                                [% FOREACH provider IN identity_providers %]
+                                                    <p class="clearfix">
+                                                        <a href="[% provider.url | url %]" class="btn btn-light col-md-12" id="provider_[% provider.code | html %]">
+                                                            [% IF provider.icon_url %]
+                                                                <img src="[% provider.icon_url | url %]" style="max-height: 20px; max-width: 20px;" />
+                                                            [% ELSE %]
+                                                                <i class="fa fa-user" aria-hidden="true"></i>
+                                                            [% END %]
+                                                            [% tx("Log in with {identity_provider}", { identity_provider = provider.description } ) | html %]
+                                                        </a>
+                                                    </p>
+                                                [% END %]
+                                                <hr />
+                                                <p>If you do not have an external account, but do have a local account, you can still log in: </p>
+                                            [% END # /IF  identity_providers.size %]
+                                            <div class="local-login">
+                                                [% PROCESS login_label for='userid' %]
+                                                <input class="form-control" type="text" id="userid" name="login_userid" autocomplete="off" />
+                                                <label for="password">Password:</label>
+                                                <input class="form-control" type="password" id="password" name="login_password" autocomplete="off" />
+                                                <fieldset class="action">
+                                                    <input type="hidden" name="login_op" value="cud-login" />
+                                                    <input type="submit" value="Log in" class="btn btn-primary" />
+                                                </fieldset>
+                                            </div>
+                                            [% IF ( OpacLoginInstructions ) %]
+                                                <div id="nologininstructions-main" class="nologininstructions"> [% PROCESS koha_news_block news => OpacLoginInstructions %] </div>
+                                            [% END %]
+                                            [% IF Koha.Preference('OpacResetPassword') && Categories.can_any_reset_password %]
+                                                <div id="forgotpassword-main" class="forgotpassword">
+                                                    <p><a href="/cgi-bin/koha/opac-password-recovery.pl">Forgot your password?</a></p>
+                                                </div>
+                                            [% END %]
+                                            [% IF Koha.Preference('PatronSelfRegistration') && Categories.all( categorycode => Koha.Preference('PatronSelfRegistrationDefaultCategory') ).count %]
+                                                <div id="patronregistration-main" class="patronregistration">
+                                                    <p><a href="/cgi-bin/koha/opac-memberentry.pl">Create an account</a></p>
+                                                </div>
+                                            [% END %]
+                                        </fieldset>
+                                    </form>
+                                </div>
+                                <!-- /#login -->
+                            [% END # /casAuthentication %]
+                        [% ELSE %]
+                            [% IF Koha.Preference('OPACUserSummary') && dashboard_info %]
+                                <div id="user_summary">
+                                    <h2>User summary</h2>
+                                    <p
+                                        >Welcome, <a href="/cgi-bin/koha/opac-user.pl"><span class="loggedinusername">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</span></a></p
+                                    >
+                                    <ul id="user_summary_shortcuts">
+                                        [% IF checkouts && checkouts > 0 %]
+                                            <li>
+                                                <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-checkouts">
+                                                    <span class="user_checkouts_count count_label">[% checkouts | html %]</span>
+                                                    [% tn('checkout', 'checkouts', checkouts ) | html %]
+                                                </a>
+                                            </li>
+                                        [% END %]
+                                        [% IF overdues && overdues > 0 %]
+                                            <li>
+                                                <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-overdues">
+                                                    <span class="user_overdues_count count_label">[% overdues | html %]</span>
+                                                    [% tn('overdue', 'overdues', overdues ) | html %]
+                                                </a>
+                                            </li>
+                                        [% END %]
+                                        [% IF holds_pending && holds_pending > 0 %]
+                                            <li>
+                                                <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-holds">
+                                                    <span class="user_holds_pending_count count_label">[% holds_pending | html %]</span>
+                                                    [% tn('hold pending', 'holds pending', holds_pending ) | html %]
+                                                </a>
+                                            </li>
+                                        [% END %]
+                                        [% IF holds_waiting && holds_waiting > 0 %]
+                                            <li>
+                                                <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-holds">
+                                                    <span class="user_holds_waiting_count count_label">[% holds_waiting | html %]</span>
+                                                    [% tn('hold waiting', 'holds waiting', holds_waiting ) | html %]
+                                                </a>
+                                            </li>
+                                        [% END %]
+                                        [% IF total_owing && total_owing > 0 %]
+                                            <li>
+                                                <a href="/cgi-bin/koha/opac-account.pl">
+                                                    <span class="user_fines_count count_label">[% total_owing | $Price with_symbol => 1 %]</span>
+                                                    due in fines and charges
+                                                </a>
+                                            </li>
+                                        [% END %]
+                                        [% IF patron_messages && patron_messages.filter_by_unread.count > 0 || opacnote %]
+                                            [% IF opacnote %]
+                                                <li>
+                                                    <a href="/cgi-bin/koha/opac-user.pl">
+                                                        <span class="count_label">[% patron_messages.filter_by_unread.count + 1 | html %]</span>
+                                                        [% tn('message', 'messages', patron_messages.filter_by_unread.count + 1 ) | html %]
+                                                    </a>
+                                                </li>
+                                            [% ELSE %]
+                                                <li>
+                                                    <a href="/cgi-bin/koha/opac-user.pl">
+                                                        <span class="count_label">[% patron_messages.filter_by_unread.count | html %]</span>
+                                                        [% tn('message', 'messages', patron_messages.filter_by_unread.count ) | html %]
+                                                    </a>
+                                                </li>
+                                            [% END %]
+                                        [% END %]
+                                        [% IF savings %]
+                                            <li>
+                                                <a href="/cgi-bin/koha/opac-user.pl">
+                                                    <span class="count_label">[% savings | $Price with_symbol => 1 %]</span>
+                                                    total savings
+                                                </a>
+                                            </li>
+                                        [% END %]
+                                    </ul>
+                                </div>
+                            [% END %]
+                        [% END # /loggedinusername %]
+                    [% END # /opacuserlogin %]
+                    [% PROCESS koha_news_block news => OpacNavRight %]
+                </div>
+                <!-- / .col -->
+            [% END # /opacuserlogin || OpacNavRight %]
         </div>
-        <div class="ftu-collections-grid">
-            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Kinh+t%E1%BA%BF" class="ftu-collection-card ftu-col-1">
-                <div class="ftu-collection-overlay"></div>
-                <div class="ftu-collection-content">
-                    <h3>Kinh tế học & Quản trị</h3>
-                    <p>Khám phá hơn 10,000 tài liệu</p>
-                </div>
-            </a>
-            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Lu%E1%BA%ADt" class="ftu-collection-card ftu-col-2">
-                <div class="ftu-collection-overlay"></div>
-                <div class="ftu-collection-content">
-                    <h3>Luật học & Pháp chế</h3>
-                    <p>Luật thương mại, quốc tế...</p>
-                </div>
-            </a>
-            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=Ngo%E1%BA%A1i+ng%E1%BB%AF" class="ftu-collection-card ftu-col-3">
-                <div class="ftu-collection-overlay"></div>
-                <div class="ftu-collection-content">
-                    <h3>Ngoại ngữ & Văn hóa</h3>
-                    <p>Tiếng Anh, Nhật, Trung, Pháp...</p>
-                </div>
-            </a>
-            <a href="/cgi-bin/koha/opac-search.pl?idx=su&q=K%E1%BB%B9+n%C4%83ng" class="ftu-collection-card ftu-col-4">
-                <div class="ftu-collection-overlay"></div>
-                <div class="ftu-collection-content">
-                    <h3>Kỹ năng & Khởi nghiệp</h3>
-                    <p>Phát triển bản thân, startup...</p>
-                </div>
-            </a>
-        </div>
-    </section>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
 </main>
-
-<!-- FLOATING ACTION BUTTON (ASK A LIBRARIAN) -->
-<div class="ftu-fab-container">
-    <a href="mailto:thuvien@ftu.edu.vn" class="ftu-fab-btn">
-        <i class="fa fa-comment-dots"></i>
-    </a>
-    <div class="ftu-fab-tooltip">Hỏi Thủ thư</div>
-</div>
+<!-- /.main -->
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
 <script>
-    $(document).ready(function() {
-        // Tabbed Search Logic
-        $('.ftu-search-tab').on('click', function() {
-            $('.ftu-search-tab').removeClass('active');
-            $(this).addClass('active');
-            
-            var target = $(this).data('target');
-            var $input = $('#ftu-main-search-input');
-            var $limit = $('#ftu-search-limit');
-            
-            if(target === 'books') {
-                $input.attr('placeholder', 'Nhập tên sách in, giáo trình...');
-                $limit.val('mc-itype:BK');
-            } else if(target === 'digital') {
-                $input.attr('placeholder', 'Nhập bài báo khoa học, khóa luận điện tử...');
-                $limit.val('mc-itype:COMP');
-            } else {
-                $input.attr('placeholder', 'Nhập tên tài liệu, tác giả, ngành học...');
-                $limit.val('');
-            }
-        });
-
-        // Tối ưu hóa: Load "Tài liệu mới cập nhật" (New Arrivals) cực nhanh qua SQL Report JSON API
-        // Tránh tình trạng sập hệ thống khi dùng RSS sort trên thư viện lớn
-        var apiUrl = "/cgi-bin/koha/svc/report?id=1&phase=Run";
-        var defaultCover = "/opac-tmpl/bootstrap/images/ftu_default_cover.jpg";
+$(document).ready(function() {
+    var $grid = $('#ftu-dynamic-books, #ftu-dynamic-new-arrivals');
+    if ($grid.length) {
+        var fallbackSvg = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='420' viewBox='0 0 300 420'%3E%3Crect width='100%25' height='100%25' fill='%23b91c1c'/%3E%3Crect x='15' y='15' width='270' height='390' fill='none' stroke='%23fca5a5' stroke-width='2'/%3E%3Ctext x='50%25' y='45%25' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3ETHƯ VIỆN FTU%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='sans-serif' font-size='14' fill='%23fecaca' text-anchor='middle'%3ETài liệu học tập%3C/text%3E%3C/svg%3E";
 
         $.ajax({
-            url: apiUrl,
-            type: 'GET',
+            url: '/cgi-bin/koha/svc/report?id=1&annotated=1&_t=' + Date.now(),
+            method: 'GET',
             dataType: 'json',
-            success: function(data) {
-                var $grid = $('#ftu-dynamic-new-arrivals');
-                $grid.empty(); // Xóa spinner
-
-                // data trả về là mảng, phần tử đầu tiên là Header (biblionumber, title, author)
-                // Các phần tử sau là dữ liệu thật
-                if (data && data.length > 1) {
-                    var itemCount = 0;
-                    for (var i = 1; i < data.length; i++) {
-                        if (itemCount >= 5) break;
-                        
-                        var row = data[i];
-                        var biblioNum = row[0] || '';
-                        var title = row[1] || 'Chưa có tiêu đề';
-                        var author = row[2] || 'Thư viện ĐH Ngoại thương';
-                        
-                        // Cắt bớt phần " /" ở cuối title nếu có
-                        title = title.replace(/\s*\/\s*$/, '');
-
-                        var link = "/cgi-bin/koha/opac-detail.pl?biblionumber=" + biblioNum;
-                        
-                        // Gọi ảnh bìa thực tế, nếu lỗi sẽ dùng ảnh mặc định
-                        var imgUrl = biblioNum ? "/cgi-bin/koha/opac-image.pl?thumbnail=1&biblionumber=" + biblioNum : defaultCover;
-                        
-                        var cardHtml = `
+            success: function(items) {
+                if (!items || items.length === 0) {
+                    $grid.html('<div class="ftu-loading-books">Không tìm thấy tài liệu mới nào.</div>');
+                    return;
+                }
+                
+                var htmlContent = '';
+                var renderedCount = 0;
+                
+                items.forEach(function(item) {
+                    if (renderedCount >= 10) return;
+                    
+                    var bibNum = item.biblionumber;
+                    var title = (item.title || 'Chưa có tiêu đề').replace(/\s*[\/:]\s*$/, '').trim();
+                    var author = (item.author || '[% FTU_BRAND.library_name_short %]').replace(/\s*[\/,]\s*$/, '').trim();
+                    var link = '/cgi-bin/koha/opac-detail.pl?biblionumber=' + bibNum;
+                    
+                    var coverUrl = '/cgi-bin/koha/opac-image.pl?biblionumber=' + bibNum + '&v=' + (item.cover_ts || '1');
+                    
+                    htmlContent += `
                         <a href="${link}" class="ftu-book-card">
                             <div class="ftu-book-cover">
-                                <img src="${imgUrl}" alt="${title}" onerror="this.onerror=null; this.src='${defaultCover}';">
-                                <div class="ftu-book-badge">Mới nhập</div>
+                                <img src="${coverUrl}" alt="${title}" onload="if(this.naturalWidth<=1){this.src='${fallbackSvg}';}" onerror="this.onerror=null;this.src='${fallbackSvg}';" />
+                                <span class="ftu-book-badge">${bibNum == 445 ? 'DIGITAL' : 'MỚI'}</span>
                             </div>
                             <div class="ftu-book-details">
-                                <h3 class="ftu-book-title" title="${title}">${title}</h3>
-                                <div class="ftu-book-author">${author}</div>
-                                <div class="ftu-book-meta"><i class="fa fa-book"></i> Xem chi tiết</div>
+                                <h4 class="ftu-book-title" title="${title}">${title}</h4>
+                                <p class="ftu-book-author">${author}</p>
+                                <div class="ftu-book-meta"><i class="fa fa-check-circle" style="margin-right: 4px;"></i> Sẵn sàng</div>
                             </div>
-                        </a>`;
-                        
-                        $grid.append(cardHtml);
-                        itemCount++;
+                        </a>
+                    `;
+                    renderedCount++;
+                });
+                
+                if (renderedCount > 0) {
+                    if ($grid.hasClass('ftu-books-grid-dynamic')) {
+                        htmlContent = htmlContent + htmlContent;
                     }
+                    $grid.html(htmlContent);
                 } else {
-                    $grid.html('<p style="grid-column: 1/-1; text-align: center;">Chưa có tài liệu mới nào được cập nhật.</p>');
+                    $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
                 }
             },
             error: function() {
-                console.error("Không thể tải dữ liệu Sách mới từ API.");
-                $('#ftu-dynamic-new-arrivals').html('<p style="grid-column: 1/-1; text-align: center; color: red;">Đã xảy ra lỗi khi tải dữ liệu sách mới.</p>');
+                $grid.html('<div class="ftu-loading-books">Lỗi tải dữ liệu sách mới.</div>');
             }
         });
+    }
+
+        // Load News from Portal CMS
+        $.ajax({
+            url: '/cgi-bin/koha/portal-posts.pl?type=news&limit=4&_t=' + Date.now(),
+            method: 'GET',
+            dataType: 'json',
+            success: function(newsItems) {
+                var $newsList = $('#ftu-dynamic-news-list');
+                if (!newsItems || newsItems.length === 0) {
+                    $newsList.html('<p class="text-muted">Chưa có tin tức mới.</p>');
+                    return;
+                }
+                var newsHtml = '';
+                newsItems.forEach(function(item) {
+                    var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + item.id;
+                    newsHtml += `
+                        <a href="${link}" class="ftu-news-item">
+                            <div class="ftu-news-date">
+                                <span class="day">${item.created_day || '01'}</span>
+                                <span class="month">${item.created_month || 'Thg 9'}</span>
+                            </div>
+                            <div class="ftu-news-content">
+                                <h4>${item.title}</h4>
+                                <p>${item.excerpt || ''}</p>
+                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 6px; display: flex; align-items: center; gap: 12px;">
+                                    <span><i class="fa fa-eye" style="color: #0284c7;"></i> ${item.views_count || 0} lượt xem</span>
+                                    <span><i class="fa fa-user-edit" style="color: #64748b;"></i> ${item.author_name || 'Thư viện FTU'}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                });
+                $newsList.html(newsHtml);
+            }
+        });
+
+        // Load Events from Portal CMS
+        $.ajax({
+            url: '/cgi-bin/koha/portal-posts.pl?type=event&limit=1&_t=' + Date.now(),
+            method: 'GET',
+            dataType: 'json',
+            success: function(events) {
+                var $eventContainer = $('#ftu-dynamic-events-container');
+                if (!events || events.length === 0) {
+                    $eventContainer.html('<p class="text-muted">Chưa có sự kiện sắp tới.</p>');
+                    return;
+                }
+                var evt = events[0];
+                var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + evt.id;
+                var eventHtml = `
+                    <a href="${link}" class="ftu-event-card" style="display: block; text-decoration: none;">
+                        <div class="ftu-event-img">
+                            <img src="${evt.featured_image || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=600'}" alt="${evt.title}">
+                            <div class="ftu-event-tag">${evt.event_tag || 'Sắp diễn ra'}</div>
+                        </div>
+                        <div class="ftu-event-details">
+                            <h3>${evt.title}</h3>
+                            <p><i class="fa fa-calendar-alt"></i> ${evt.formatted_event_date || ''} • ${evt.event_time || ''}</p>
+                            <p><i class="fa fa-map-marker-alt"></i> ${evt.event_location || '[% FTU_BRAND.library_name_short %]'}</p>
+                            <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;"><i class="fa fa-eye" style="color: #0284c7;"></i> ${evt.views_count || 0} lượt xem</p>
+                            ${evt.event_reg_link ? `<div style="margin-top: 1rem;"><span class="btn btn-sm btn-outline-danger" style="border-radius: 20px; font-weight: 600;"><i class="fa fa-user-plus"></i> Đăng ký tham gia</span></div>` : ''}
+                        </div>
+                    </a>
+                `;
+                $eventContainer.html(eventHtml);
+            }
+        });
+        // Load & Initialize Hero Banners Carousel (Auto-Slider)
+        function initBannerCarousel() {
+            var $carousel = $('#ftuBannerCarousel');
+            if (!$carousel.length) return;
+
+            var $track = $('#ftuBannerTrack');
+            var $dotsContainer = $('#ftuBannerDots');
+            var $prevBtn = $('#ftuBannerPrev');
+            var $nextBtn = $('#ftuBannerNext');
+            var currentIndex = 0;
+            var slideTimer = null;
+            var slideInterval = 5000; // 5 giây tự động chuyển slide
+
+            $.ajax({
+                url: '/cgi-bin/koha/portal-posts.pl?type=banner&limit=10&_t=' + Date.now(),
+                method: 'GET',
+                dataType: 'json',
+                success: function(banners) {
+                    if (banners && banners.length > 0) {
+                        var trackHtml = '';
+                        var dotsHtml = '';
+                        banners.forEach(function(b, idx) {
+                            var link = b.support_link || '/cgi-bin/koha/opac-search.pl';
+                            var isExternal = /^https?:\/\//i.test(link) && !link.includes(window.location.hostname);
+                            var targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+                            var bgImg = b.featured_image || '/opac-tmpl/bootstrap/images/ftu-library-hero.jpg';
+                            var tag = b.classification || 'THƯ VIỆN FTU';
+                            var title = b.title || '';
+                            var desc = b.excerpt || '';
+                            var showOverlay = (b.content === 'show_text');
+
+                            trackHtml += `
+                                <div class="ftu-banner-slide" data-index="${idx}">
+                                    <a href="${link}" class="ftu-banner-link"${targetAttr}>
+                                        <div class="ftu-banner-bg" style="background-image: ${showOverlay ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(185, 28, 28, 0.6) 100%), ' : ''}url('${bgImg}');"></div>
+                                        ${showOverlay ? `
+                                        <div class="ftu-banner-content">
+                                            <span class="ftu-banner-tag"><i class="fa fa-sparkles"></i> ${tag}</span>
+                                            <h2 class="ftu-banner-title">${title}</h2>
+                                            ${desc ? `<p class="ftu-banner-desc">${desc}</p>` : ''}
+                                            <span class="ftu-banner-btn">Khám phá ngay <i class="fa fa-arrow-right"></i></span>
+                                        </div>
+                                        ` : ''}
+                                    </a>
+                                </div>
+                            `;
+
+                            dotsHtml += `<button type="button" class="ftu-banner-dot${idx === 0 ? ' active' : ''}" data-slide="${idx}" aria-label="Slide ${idx + 1}"></button>`;
+                        });
+
+                        $track.html(trackHtml);
+                        $dotsContainer.html(dotsHtml);
+                    }
+                    startSlider();
+                },
+                error: function() {
+                    startSlider();
+                }
+            });
+
+            function startSlider() {
+                var $slides = $track.find('.ftu-banner-slide');
+                var total = $slides.length;
+                if (total <= 0) return;
+
+                if (total === 1) {
+                    $slides.removeClass('slide-left slide-right slide-hidden').addClass('slide-center active');
+                    $prevBtn.hide();
+                    $nextBtn.hide();
+                    $dotsContainer.hide();
+                    return;
+                }
+
+                function updateSlidePositions(centerIdx) {
+                    currentIndex = ((centerIdx % total) + total) % total;
+
+                    if (total === 2) {
+                        var otherIdx = (currentIndex + 1) % 2;
+                        $slides.eq(currentIndex).removeClass('slide-left slide-right slide-hidden').addClass('slide-center active');
+                        $slides.eq(otherIdx).removeClass('slide-center active slide-hidden').addClass('slide-right');
+                    } else {
+                        var leftIdx = (currentIndex - 1 + total) % total;
+                        var rightIdx = (currentIndex + 1) % total;
+
+                        $slides.each(function(idx) {
+                            var $el = $(this);
+                            $el.removeClass('slide-center slide-left slide-right slide-hidden active');
+                            if (idx === currentIndex) {
+                                $el.addClass('slide-center active');
+                            } else if (idx === leftIdx) {
+                                $el.addClass('slide-left');
+                            } else if (idx === rightIdx) {
+                                $el.addClass('slide-right');
+                            } else {
+                                $el.addClass('slide-hidden');
+                            }
+                        });
+                    }
+
+                    $dotsContainer.find('.ftu-banner-dot').removeClass('active');
+                    $dotsContainer.find('.ftu-banner-dot').eq(currentIndex).addClass('active');
+                }
+
+                function nextSlide() {
+                    updateSlidePositions(currentIndex + 1);
+                }
+
+                function prevSlide() {
+                    updateSlidePositions(currentIndex - 1);
+                }
+
+                function resetTimer() {
+                    clearInterval(slideTimer);
+                    slideTimer = setInterval(nextSlide, slideInterval);
+                }
+
+                // Cập nhật vị trí 3 lớp ban đầu
+                updateSlidePositions(0);
+
+                // Nhấp vào nút mũi tên điều hướng
+                $nextBtn.off('click').on('click', function(e) {
+                    e.preventDefault();
+                    nextSlide();
+                    resetTimer();
+                });
+
+                $prevBtn.off('click').on('click', function(e) {
+                    e.preventDefault();
+                    prevSlide();
+                    resetTimer();
+                });
+
+                // Nhấp vào lớp bên trái -> xoay slide trái vào giữa
+                $track.off('click', '.ftu-banner-slide.slide-left').on('click', '.ftu-banner-slide.slide-left', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    prevSlide();
+                    resetTimer();
+                });
+
+                // Nhấp vào lớp bên phải -> xoay slide phải vào giữa
+                $track.off('click', '.ftu-banner-slide.slide-right').on('click', '.ftu-banner-slide.slide-right', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    nextSlide();
+                    resetTimer();
+                });
+
+                // Nhấp vào dấu chấm chỉ mục
+                $dotsContainer.off('click', '.ftu-banner-dot').on('click', '.ftu-banner-dot', function(e) {
+                    e.preventDefault();
+                    var slideIdx = parseInt($(this).data('slide'), 10);
+                    updateSlidePositions(slideIdx);
+                    resetTimer();
+                });
+
+                // Tạm dừng chạy khi rê chuột vào banner (Pause on hover)
+                $carousel.off('mouseenter mouseleave').on('mouseenter', function() {
+                    clearInterval(slideTimer);
+                }).on('mouseleave', function() {
+                    resetTimer();
+                });
+
+                // Vuốt chuyển slide trên màn hình cảm ứng điện thoại / máy tính bảng
+                var touchStartX = 0;
+                var touchEndX = 0;
+                $carousel.off('touchstart touchend').on('touchstart', function(e) {
+                    touchStartX = e.originalEvent.touches[0].clientX;
+                }).on('touchend', function(e) {
+                    touchEndX = e.originalEvent.changedTouches[0].clientX;
+                    if (touchStartX - touchEndX > 50) {
+                        nextSlide();
+                        resetTimer();
+                    } else if (touchEndX - touchStartX > 50) {
+                        prevSlide();
+                        resetTimer();
+                    }
+                });
+
+                resetTimer();
+            }
+        }
+        initBannerCarousel();
     });
 </script>
 [% END %]

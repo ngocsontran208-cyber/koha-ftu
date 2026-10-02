@@ -22,10 +22,10 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Restore deleted records</span>
+            <span>Khôi phục biểu ghi đã xóa</span>
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
@@ -34,26 +34,26 @@
     <div class="row">
         <div class="col-md-10 order-md-2 order-sm-1">
             <main>
-                <h1>Restore deleted records</h1>
+                <h1 class="ftu-clean-title"><i class="fa fa-rotate-left"></i> Khôi phục biểu ghi đã xóa</h1>
 
                 <div id="messages"></div>
 
-                <h2>Deleted bibliographic records</h2>
+                <h2>Biểu ghi thư mục đã xóa</h2>
                 <div class="page-section">
                     <table id="deleted_biblios_table" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Biblio ID</th>
-                                <th>Title</th>
-                                <th>Author</th>
-                                <th>Deleted on</th>
-                                <th class="NoSort">Actions</th>
+                                <th>Mã biểu ghi</th>
+                                <th>Nhan đề</th>
+                                <th>Tác giả</th>
+                                <th>Ngày xóa</th>
+                                <th class="NoSort">Thao tác</th>
                             </tr>
                         </thead>
                     </table>
                 </div>
 
-                <h2>Deleted items</h2>
+                <h2>Bản tài liệu đã xóa</h2>
                 <div class="page-section">
                     <table id="deleted_items_table" class="table table-bordered table-striped">
                         <thead>

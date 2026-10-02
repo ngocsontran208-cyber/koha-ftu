@@ -137,6 +137,12 @@
  [% END %]
 
  [% IF ( CAN_user_tools_edit_additional_contents ) %]
+                    <dt><a href="/cgi-bin/koha/tools/portal-news.pl?section=news" style="font-weight: bold; color: #b91c1c;"><i class="fa fa-newspaper-o"></i> Quản lý Tin tức &amp; Sự kiện</a></dt>
+                    <dd>Đăng và quản trị các bài viết, tin tức nổi bật, lịch hội thảo và sự kiện trên OPAC</dd>
+
+                    <dt><a href="/cgi-bin/koha/tools/portal-news.pl?section=database" style="font-weight: bold; color: #1d4ed8;"><i class="fa fa-database"></i> Quản lý Cơ sở dữ liệu (CSDL)</a></dt>
+                    <dd>Quản lý danh mục CSDL điện tử: IEEE Xplore, ACM, tài khoản, mật khẩu, link truy cập</dd>
+
  <dt><a href="/cgi-bin/koha/tools/additional-contents.pl?category=news">Tin tức</a></dt>
  <dd>Soạn thảo các bản tin trên OPAC và giao diện nhân viên</dd>
 

@@ -49,19 +49,19 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
 
         [% IF ( template_name ) %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/tools/marc_modification_templates.pl">MARC modification templates</a>
+                <a href="/cgi-bin/koha/tools/marc_modification_templates.pl">Mẫu quy tắc chỉnh sửa MARC</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active= 1 %]
-                [% tx("Actions for template '{template_name}'", template_name = template_name ) | html %]
+                <span>Hành động cho mẫu '[% template_name | html %]'</span>
             [% END %]
         [% ELSE %]
             [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>MARC modification templates</span>
+                <span>Mẫu quy tắc chỉnh sửa MARC</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -69,14 +69,14 @@
 
 [% WRAPPER 'main-container.inc' aside='cat-menu' %]
     <div id="toolbar" class="btn-toolbar">
-        <a href="#" data-bs-toggle="modal" data-template_id="" data-bs-target="#createTemplate" id="new_template" class="btn btn-default duplicate_template"><i class="fa fa-plus"></i> New template</a>
+        <a href="#" data-bs-toggle="modal" data-template_id="" data-bs-target="#createTemplate" id="new_template" class="btn btn-default duplicate_template"><i class="fa fa-plus"></i> Tạo mẫu mới</a>
         [% IF ( template_id != '' ) %]
-            <a href="#" class="btn btn-default new_action"><i class="fa fa-plus"></i> New action</a>
+            <a href="#" class="btn btn-default new_action"><i class="fa fa-plus"></i> Thao tác mới</a>
             <form action="/cgi-bin/koha/tools/marc_modification_templates.pl" method="post">
                 [% INCLUDE 'csrf-token.inc' %]
                 <input type="hidden" name="template_id" value="[% template_id | html %]" />
                 <input type="hidden" name="op" value="cud-delete_template" />
-                <button type="submit" class="btn btn-default confirm-delete-template"><i class="fa fa-fw fa-trash-can"></i> Delete template</button>
+                <button type="submit" class="btn btn-default confirm-delete-template"><i class="fa fa-fw fa-trash-can"></i> Xóa mẫu này</button>
             </form>
         [% ELSE %]
             <div class="btn-group">

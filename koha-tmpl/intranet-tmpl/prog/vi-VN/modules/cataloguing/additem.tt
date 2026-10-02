@@ -58,16 +58,16 @@
  [% WRAPPER breadcrumb_item %]
  <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblio.biblionumber | uri %]">
  [% IF ( biblio.author ) %]
- [% tx('Edit {title} by {author}', { title = biblio.title, author = biblio.author }) | html %]
- ([% tp('Bibliographic record number', 'Record #') | html %] [% biblio.biblionumber | html %])
+ Chỉnh sửa [% biblio.title | html %] - Tác giả [% biblio.author | html %]
+ ([% tp('Bibliographic record number', 'Biểu ghi #') | html %] [% biblio.biblionumber | html %])
  [% ELSE %]
- [% tx('Edit {title}', title = biblio.title) | html %]
- ([% tp('Bibliographic record number', 'Record #') | html %] [% biblio.biblionumber | html %])
+ Chỉnh sửa [% biblio.title | html %]
+ ([% tp('Bibliographic record number', 'Biểu ghi #') | html %] [% biblio.biblionumber | html %])
  [% END %]
  </a>
  [% END %]
  [% WRAPPER breadcrumb_item bc_active= 1 %]
- [% tp('Items attached to a bibliographic record', 'Items') | html %]
+ Bản tài liệu
  [% END %]
  [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
@@ -76,25 +76,25 @@
  [% INCLUDE 'messages.inc' %]
  [% IF item_doesnt_exist %]
  <div class="alert alert-warning">
- <a href="/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% biblio.biblionumber | uri %]">Add a new item</a> hoặc <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblio.biblionumber | uri %]#holdings">go to the records holdings</a>.
+ <a href="/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% biblio.biblionumber | uri %]">Thêm bản tài liệu mới</a> hoặc <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblio.biblionumber | uri %]#holdings">chuyển tới danh mục lưu giữ biểu ghi</a>.
  </div>
  [% END %]
- <h1>Items for [% biblio.title | html %] [% IF ( biblio.author ) %]by [% biblio.author | html %][% END %] (Record #[% biblio.biblionumber | html %])</h1>
- <a id="newitem_jump" href="#f"><i class="fa fa-arrow-down"></i> Jump to form</a>
+ <h1>Bản tài liệu của [% biblio.title | html %] [% IF ( biblio.author ) %]- Tác giả: [% biblio.author | html %][% END %] (Biểu ghi #[% biblio.biblionumber | html %])</h1>
+ <a id="newitem_jump" href="#f"><i class="fa fa-arrow-down"></i> Chuyển tới biểu mẫu nhập</a>
 
- [% IF ( onloan_cannot_withdraw ) %]<div class="alert alert-warning"><strong>Lỗi lưu bản tài liệu</strong>: Onloan item cannot be withdrawn.</div>[% END %]
- [% IF ( intransit_cannot_withdraw ) %]<div class="alert alert-warning"><strong>Lỗi lưu bản tài liệu</strong>: In transit item cannot be withdrawn.</div>[% END %]
+ [% IF ( onloan_cannot_withdraw ) %]<div class="alert alert-warning"><strong>Lỗi lưu bản tài liệu</strong>: Bản tài liệu đang được mượn, không thể rút khỏi lưu thông.</div>[% END %]
+ [% IF ( intransit_cannot_withdraw ) %]<div class="alert alert-warning"><strong>Lỗi lưu bản tài liệu</strong>: Bản tài liệu đang trung chuyển, không thể rút khỏi lưu thông.</div>[% END %]
  [% IF ( barcode_not_unique ) %]<div class="alert alert-warning"><strong>Lỗi lưu bản tài liệu</strong>: Đăng ký cá biệt trên đã tồn tại, bạn vui lòng nhập đăng ký cá biệt khác.</div>[% END %]
  [% IF ( no_next_barcode ) %]<div class="alert alert-warning"><strong>Lỗi lưu nhiều bản tài liệu</strong>: Không thể xác định giá trị của đăng ký cá biệt. Không có bản tài liệu nào được thêm vào.</div>[% END %]
  [% IF ( book_on_loan ) %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Bản tài liệu đã được ghi mượn.</div>[% END %]
  [% IF ( book_reserved ) %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Bản tài liệu đang chờ bạn đọc đặt mượn đến lấy.</div>[% END %]
- [% IF ( item_has_holds ) %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: item has item level holds.</div>[% END %]
+ [% IF ( item_has_holds ) %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Bản tài liệu đang có bạn đọc đặt mượn.</div>[% END %]
  [% IF ( not_same_branch ) %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Bản tài liệu này thuộc về thư viện khác.</div>[% END %]
  [% IF ( linked_analytics ) %]
  <div class="alert alert-warning"><strong>Không thể xóa</strong>: Bản tài liệu đã được liên kết tới <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;analyze=1">tài liệu chủ.</a>.</div>
  [% END %]
- [% IF last_item_for_hold %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Last item for bibliographic record with biblio-level hold on it.</div>[% END %]
- [% IF item_not_found %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Item not found.</div>[% END %]
+ [% IF last_item_for_hold %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Đây là bản tài liệu cuối cùng của biểu ghi có đặt mượn.</div>[% END %]
+ [% IF item_not_found %]<div class="alert alert-warning"><strong>Không thể xóa</strong>: Không tìm thấy bản tài liệu.</div>[% END %]
 
  <div id="cataloguing_additem_itemlist">
  [% IF items %]
@@ -237,23 +237,23 @@
  [% IF op != 'cud-saveitem' %]
  <h2 id="additema">Tạo bản tài liệu [% IF (circborrowernumber) %]<em>(biên mục nhanh)</em>[% END %]</h2>
  [% ELSE %]
- <h2 id="edititem">Edit item #[% itemnumber | html %][% IF ( barcode ) %]/ Barcode [% barcode | html %][% END %]</h2>
+ <h2 id="edititem">Chỉnh sửa bản tài liệu #[% itemnumber | html %][% IF ( barcode ) %] / Đăng ký cá biệt: [% barcode | html %][% END %]</h2>
  [% END %]
 
  [% IF item_templates.owned.count || item_templates.shared.count %]
  <div id="item-template-toolbar" class="btn-toolbar">
  <select name="template_id" id="template_id" class="select2" style="width: 20em">
- <option value="0" selected="selected">Do not use template</option>
- <optgroup label="My templates">
+ <option value="0" selected="selected">Không sử dụng mẫu</option>
+ <optgroup label="Mẫu của tôi">
  [% FOREACH t IN item_templates.owned %]
  [% IF t.id == template_id %]
- <option data-editor="1" value="[% t.id | html %]" selected="selected">[% t.name | html %][% IF t.is_shared %](shared)[% END %]</option>
+ <option data-editor="1" value="[% t.id | html %]" selected="selected">[% t.name | html %][% IF t.is_shared %](dùng chung)[% END %]</option>
  [% ELSE %]
- <option data-editor="1" value="[% t.id | html %]">[% t.name | html %][% IF t.is_shared %](shared)[% END %]</option>
+ <option data-editor="1" value="[% t.id | html %]">[% t.name | html %][% IF t.is_shared %](dùng chung)[% END %]</option>
  [% END %]
  [% END %]
  </optgroup>
- <optgroup label="Shared templates">
+ <optgroup label="Mẫu dùng chung">
  [% FOREACH t IN item_templates.shared %]
  [% IF t.id == template_id %]
  [% IF CAN_user_editcatalogue_manage_item_editor_templates %]
@@ -271,7 +271,7 @@
  [% END %]
  </optgroup>
  </select>
- <button class="btn btn-default" type="submit" id="load_template_submit" name="load_template_submit" value="1"><i class="fa-solid fa-table-list"></i> Apply template</button>
+ <button class="btn btn-default" type="submit" id="load_template_submit" name="load_template_submit" value="1"><i class="fa-solid fa-table-list"></i> Áp dụng mẫu</button>
  <div>
  <label for="use_template_for_session">
  [% IF use_template_for_session %]
@@ -279,12 +279,12 @@
  [% ELSE %]
  <input type="checkbox" id="use_template_for_session" name="use_template_for_session" />
  [% END %]
- Remember for session
+ Ghi nhớ cho phiên làm việc
  </label>
  </div>
 
- <button class="btn btn-default" ype="submit" id="unload_template_submit" name="unload_template_submit" value="1"><i class="fa fa-eraser"></i> Clear template</button>
- <button class="btn btn-default" type="submit" id="delete_template_submit" name="delete_template_submit" value="1" disabled><i class="fa fa-trash-can"></i> Delete template</button>
+ <button class="btn btn-default" ype="submit" id="unload_template_submit" name="unload_template_submit" value="1"><i class="fa fa-eraser"></i> Xóa mẫu</button>
+ <button class="btn btn-default" type="submit" id="delete_template_submit" name="delete_template_submit" value="1" disabled><i class="fa fa-trash-can"></i> Xóa mẫu này</button>
  </div>
  [% END %]
 
@@ -295,35 +295,35 @@
 
  [% IF item_groups.size && op != 'cud-saveitem' && CAN_user_editcatalogue_manage_item_groups %]
  <fieldset class="rows">
- <legend><i class="fa fa-plus"></i> Add to item group</legend>
+ <legend><i class="fa fa-plus"></i> Thêm vào nhóm bản tài liệu</legend>
  [% FOREACH ig IN item_groups %]
  <input type="hidden" id="item-group-[% ig.id | html %]" value="[% ig.description | html %]" />
  [% END %]
  <ol>
  <li>
- <label for="select_item_group">Options: </label>
+ <label for="select_item_group">Tùy chọn: </label>
  <select name="item_group" id="item-group-add-or-create-form-select">
- <optgroup label="Use existing item group">
+ <optgroup label="Sử dụng nhóm có sẵn">
  [% FOREACH ig IN biblio.item_groups.search({}, {order_by => 'display_order'}) %]
  <option value="[% ig.id | html %]">[% ig.description | html %]</option>
  [% END %]
  </optgroup>
- <optgroup label="Other options">
- <option id="item-group-add-or-create-form-no-add" value="">Do not add to item group</option>
- <option value="create">Create new item group</option>
+ <optgroup label="Tùy chọn khác">
+ <option id="item-group-add-or-create-form-no-add" value="">Không thêm vào nhóm</option>
+ <option value="create">Tạo nhóm bản tài liệu mới</option>
  </optgroup>
  </select>
  </li>
  <div id="item-group-add-or-create-form-description-block">
  <li>
- <label for="item_group_description" class="required">Name: </label>
+ <label for="item_group_description" class="required">Tên nhóm: </label>
  <input name="item_group_description" id="item-group-add-or-create-form-description" type="text" size="30" class="required" />
  <span class="required">Bắt buộc</span>
  </li>
  <li>
- <label for="item_group_display_order">Display order: </label>
+ <label for="item_group_display_order">Thứ tự hiển thị: </label>
  <input name="item_group_display_order" id="item_group_display_order" type="text" pattern="\d*" size="30" />
- <div class="hint">Display order must be numerical</div>
+ <div class="hint">Thứ tự hiển thị phải là số</div>
  </li>
  </div>
  </ol>
@@ -340,35 +340,35 @@
  -->
  <span id="addsingle">
  <input name="add_submit" onclick="return Check(this.form)" type="submit" value="Tạo bản tài liệu" />
- <input type="submit" name="add_duplicate_submit" value="Add and duplicate" onclick="return Check(this.form)" />
+ <input type="submit" name="add_duplicate_submit" value="Tạo bản và nhân bản" onclick="return Check(this.form)" />
  </span>
  <span id="addmultiple">
- <input type="button" name="add_multiple_copies" id="add_multiple_copies" value="Add multiple copies of this item" />
+ <input type="button" name="add_multiple_copies" id="add_multiple_copies" value="Thêm nhiều bản sao của tài liệu này" />
  </span>
  <fieldset id="add_multiple_copies_span">
- <label for="number_of_copies">Number of copies of this item to add: </label>
+ <label for="number_of_copies">Số lượng bản sao cần thêm: </label>
  <input type="text" id="number_of_copies" name="number_of_copies" value="" size="2" maxlength="3" />
  <input id="add_multiple_copies_submit" name="add_multiple_copies_submit" onclick="javascript:return Check(this.form) && CheckMultipleAdd(this.form.number_of_copies.value);" type="submit" value="Thêm" />
  <a href="#" id="cancel_add_multiple" class="cancel">Hủy bỏ</a>
- <div class="hint"><p>Maximum currently set to 1000. The barcode you enter will be incremented for each additional item.</p></div>
+ <div class="hint"><p>Tối đa thêm 1000 bản. Đăng ký cá biệt (Mã vạch) bạn nhập sẽ tự động tăng dần cho các bản tài liệu tiếp theo.</p></div>
  </fieldset>
 
  <span id="savetemplate">
- <input type="button" name="save_as_template" id="save_as_template" value="Save as template" />
+ <input type="button" name="save_as_template" id="save_as_template" value="Lưu thành mẫu (Template)" />
  </span>
  <fieldset id="save_as_template_span">
- <legend>Save template</legend>
+ <legend>Lưu mẫu nhập</legend>
  <div class="btn-group">
  <select name="replace_template_id" id="replace_template_id" class="select2" style="width: 20em">
- <option value="0" selected="selected">Save as new template</option>
- <optgroup label="Update existing template">
+ <option value="0" selected="selected">Lưu thành mẫu mới</option>
+ <optgroup label="Cập nhật mẫu hiện có">
  [% FOREACH t IN item_templates.owned %]
- <option data-editor="1" data-shared="[% t.is_shared | html %]" value="[% t.id | html %]">[% t.name | html %][% IF t.is_shared %](shared)[% END %]</option>
+ <option data-editor="1" data-shared="[% t.is_shared | html %]" value="[% t.id | html %]">[% t.name | html %][% IF t.is_shared %](dùng chung)[% END %]</option>
  [% END %]
  [% IF CAN_user_editcatalogue_manage_item_editor_templates && item_templates.shared.count %]
- <optgroup label="Update shared template">
+ <optgroup label="Cập nhật mẫu dùng chung">
  [% FOREACH t IN item_templates.shared %]
- <option data-editor="1" data-shared="1" value="[% t.id | html %]">[% t.name | html %][% IF t.is_shared %](shared)[% END %]</option>
+ <option data-editor="1" data-shared="1" value="[% t.id | html %]">[% t.name | html %][% IF t.is_shared %](dùng chung)[% END %]</option>
  [% END %]
  </optgroup>
  [% END %]
@@ -378,7 +378,7 @@
 
  <div class="btn-group">
  <span id="template_name_block">
- <label for="template_name" class="required">Template name: </label>
+ <label for="template_name" class="required">Tên mẫu: </label>
  <input type="text" id="template_name" name="template_name" class="required" />
  <span class="required">Bắt buộc</span>
  </span>
@@ -387,7 +387,7 @@
  <div class="btn-group">
  <label for="template_is_shared">
  <input type="checkbox" id="template_is_shared" name="template_is_shared" />
- Share template
+ Chia sẻ mẫu này
  </label>
  </div>
 
@@ -406,7 +406,7 @@
  <input class="submit" onclick="return ShowSerialEditingConfirmation(this.form)" type="button" value="Lưu thay đổi" />
  <input type="hidden" name="edit-serial-issue" id="edit-serial-issue" value />
  [% END %]
- <input type="button" id="addnewitem" value="Add a new item" />
+ <input type="button" id="addnewitem" value="Thêm bản tài liệu mới" />
  <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Hủy bỏ</a>
  [% END %]</fieldset
                         >

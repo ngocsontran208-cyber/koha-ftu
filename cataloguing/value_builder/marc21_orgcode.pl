@@ -37,8 +37,9 @@ if ( $auth_status ne "ok" ) {
 
 my $builder = sub {
     my ($params) = @_;
-    my $library  = Koha::Libraries->find( C4::Context->userenv->{'branch'} );
-    my $org      = $library->get_effective_marcorgcode;
+    my $branch   = C4::Context->userenv ? C4::Context->userenv->{'branch'} : undef;
+    my $library  = $branch ? Koha::Libraries->find( $branch ) : undef;
+    my $org      = $library ? ($library->get_effective_marcorgcode // '') : (C4::Context->preference('MARCOrgCode') // '');
     return <<"HERE";
 <script>
 

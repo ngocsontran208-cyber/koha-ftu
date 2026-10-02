@@ -83,7 +83,7 @@
                                         <div class="cover-image local-coverimg">
                                             <a href="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" title="Local cover image">
                                                 <img
-                                                    src="/cgi-bin/koha/opac-image.pl?thumbnail=1&amp;imagenumber=[% image.imagenumber | uri %]"
+                                                    src="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]"
                                                     alt="Local cover image"
                                                     data-link="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblionumber | uri %]&amp;imagenumber=[% image.imagenumber | uri %]"
                                                 />
@@ -1349,7 +1349,9 @@
                             [% END %]
 
                             [% IF ( Koha.Preference('OpacLocationOnDetail') == 'holding' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
-                                <span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span>
+                                [% IF ( ITEM_RESULT.location_description ) %]
+                                    <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
+                                [% END %]
                             [% END %]
                         </td>
                     [% ELSE %]
@@ -1376,7 +1378,9 @@
                             [% END %]
 
                             [% IF ( Koha.Preference('OpacLocationOnDetail') == 'home' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
-                                <span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span>
+                                [% IF ( ITEM_RESULT.location_description ) %]
+                                    <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
+                                [% END %]
                             [% END %]
                         </td>
                     [% ELSE %]
@@ -1525,7 +1529,7 @@
                     [% END %]
 
                     [% IF ( itemdata_barcode ) %]
-                        <td class="barcode" property="serialNumber">[% ITEM_RESULT.barcode | html %]</td>
+                        <td class="barcode" property="serialNumber"><span class="barcode-pill">[% ITEM_RESULT.barcode | html %]</span></td>
                     [% ELSE %]
                         [% hidden_columns_force.$table_id.push('item_barcode') %]
                         <td></td>

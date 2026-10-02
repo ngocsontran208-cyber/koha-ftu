@@ -40,36 +40,36 @@
 [% END %]
 
 [% WRAPPER 'sub-header.inc' %]
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Phân hệ biên mục</a>
- [% END %]
- [% IF ( import_batch_id || job_enqueued ) %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/tools/manage-marc-import.pl">Quản lý các bản ghi đã được kiểm duyệt</a>
- [% END %]
- [% END %]
- [% IF ( import_batch_id ) %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Batch [% import_batch_id | html %]</span>
- [% END %]
- [% ELSIF ( job_enqueued ) %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- [% t("Job enqueued") | html %]
- [% END %]
- [% ELSE %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Quản lý các bản ghi đã được kiểm duyệt</span>
- [% END %]
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
+        [% END %]
+        [% IF ( import_batch_id || job_enqueued ) %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/tools/manage-marc-import.pl">Quản lý lô biểu ghi đã tải lên</a>
+            [% END %]
+        [% END %]
+        [% IF ( import_batch_id ) %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Lô số [% import_batch_id | html %]</span>
+            [% END %]
+        [% ELSIF ( job_enqueued ) %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Tiến trình đã xếp hàng đợi</span>
+            [% END %]
+        [% ELSE %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Quản lý lô biểu ghi đã tải lên</span>
+            [% END %]
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' aside='cat-menu' %]
- <h1>Quản lý các bản ghi đã được kiểm duyệt</h1>
- [% IF ( import_batch_id ) %]
- <h2>Batch [% import_batch_id | html %]</h2>
- [% END %]
+    <h1 class="ftu-clean-title"><i class="fa fa-list-check"></i> Quản lý lô biểu ghi đã tải lên</h1>
+    [% IF ( import_batch_id ) %]
+        <h2>Lô số [% import_batch_id | html %]</h2>
+    [% END %]
  [% FOREACH message IN messages %]
  [% SET div_class = '' %]
  [% SET div_style = '' %]

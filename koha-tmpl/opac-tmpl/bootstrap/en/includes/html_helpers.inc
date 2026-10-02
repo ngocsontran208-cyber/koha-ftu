@@ -167,11 +167,12 @@
 [% END %]
 
 [% BLOCK library_name_title %]
-    [% IF ( LibraryNameTitle ) %]
-        [% tx("{library} catalog", { library = LibraryNameTitle }) | html %]
-    [% ELSE %]
-        [% t("Koha online catalog") | html %]
-    [% END %]
+    [%- IF ( LibraryNameTitle ) -%]
+        [% LibraryNameTitle | html %]
+    [%- ELSE -%]
+        [% PROCESS "ftu-brand-config.inc" UNLESS FTU_BRAND %]
+        [% FTU_BRAND.library_name || "Thư viện Phân hiệu Trường Đại học Ngoại thương" %]
+    [%- END -%]
 [% END %]
 
 [% BLOCK login_label %]

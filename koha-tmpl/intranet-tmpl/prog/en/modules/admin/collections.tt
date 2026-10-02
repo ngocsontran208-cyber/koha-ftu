@@ -1,0 +1,547 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>
+    [% IF op == 'add_form' %]
+        New collection &rsaquo; Collection management
+    [% ELSIF op == 'edit_form' %]
+        Modify collection '[% collection.lib | html %]' &rsaquo; Collection management
+    [% ELSE %]
+        Collection management
+    [% END %]
+    &rsaquo; Administration &rsaquo; Koha
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+<style>
+.ftu-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.ftu-col-stat-card {
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.ftu-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+.ftu-stat-icon.red { background: #fee2e2; color: #b91c1c; }
+.ftu-stat-icon.amber { background: #fef3c7; color: #b45309; }
+.ftu-stat-icon.blue { background: #dbeafe; color: #1d4ed8; }
+.ftu-stat-info .num {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.1;
+}
+.ftu-stat-info .lbl {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.ftu-thumb-img {
+    width: 76px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.badge-featured {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+    border: 1px solid #fde68a;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+}
+.badge-normal {
+    background: #f1f5f9;
+    color: #64748b;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+.badge-ccode {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.preset-img-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+.preset-img-item {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.15s ease;
+    text-align: center;
+    padding-bottom: 6px;
+}
+.preset-img-item:hover, .preset-img-item.active {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.15);
+}
+.preset-img-item img {
+    width: 100%;
+    height: 60px;
+    object-fit: cover;
+}
+.preset-img-item span {
+    display: block;
+    font-size: 11px;
+    padding: 4px 4px 0;
+    line-height: 1.2;
+    color: #475569;
+}
+.preview-box {
+    margin-top: 14px;
+    border: 1px dashed #cbd5e1;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8fafc;
+    max-width: 420px;
+}
+.preview-box img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+.ftu-upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 520px;
+    margin-bottom: 14px;
+}
+.ftu-upload-zone:hover {
+    border-color: #b91c1c;
+    background: #fff5f5;
+}
+.ftu-upload-zone.dragover {
+    border-color: #b91c1c;
+    background: #fee2e2;
+}
+.btn-toggle-featured {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body id="admin_collections" class="admin">
+[% WRAPPER 'header.inc' %]
+    [% INCLUDE 'prefs-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
+        [% END %]
+        [% IF op == 'add_form' %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/admin/collections.pl">Collection management</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>New collection</span>
+            [% END %]
+        [% ELSIF op == 'edit_form' %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/admin/collections.pl">Collection management</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Modify: [% collection.lib | html %]</span>
+            [% END %]
+        [% ELSE %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Collection management</span>
+            [% END %]
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+
+    [% FOR m IN messages %]
+        <div class="alert alert-[% m.type | html %] alert-dismissible fade show" role="alert">
+            [% IF m.code == 'success_update' %]
+                <i class="fa fa-check-circle"></i> Collection <strong>'[% m.lib | html %]'</strong> (<code>[% m.ccode | html %]</code>) updated successfully.
+            [% ELSIF m.code == 'success_add' %]
+                <i class="fa fa-check-circle"></i> Collection <strong>'[% m.lib | html %]'</strong> (<code>[% m.ccode | html %]</code>) created successfully.
+            [% ELSIF m.code == 'success_delete' %]
+                <i class="fa fa-check-circle"></i> Collection <code>[% m.ccode | html %]</code> deleted successfully.
+            [% ELSIF m.code == 'success_toggle' %]
+                <i class="fa fa-check-circle"></i> Featured status for collection <code>[% m.ccode | html %]</code> updated.
+            [% ELSIF m.code == 'error_has_items' %]
+                <i class="fa fa-exclamation-triangle"></i> Cannot delete collection <code>[% m.ccode | html %]</code> because <strong>[% m.items_count | html %] items</strong> are currently assigned.
+            [% ELSIF m.code == 'error_duplicate_ccode' %]
+                <i class="fa fa-exclamation-triangle"></i> Collection code <code>[% m.ccode | html %]</code> already exists.
+            [% ELSIF m.code == 'error_missing_ccode' %]
+                <i class="fa fa-exclamation-triangle"></i> Collection code (CCODE) is required.
+            [% ELSIF m.code == 'error_missing_lib' %]
+                <i class="fa fa-exclamation-triangle"></i> Collection title is required.
+            [% ELSE %]
+                [% m.text | html %]
+            [% END %]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    [% END %]
+
+    [% IF op == 'add_form' || op == 'edit_form' %]
+        [% IF is_add %]
+            <h1>New collection</h1>
+        [% ELSE %]
+            <h1>Modify collection: [% collection.lib | html %]</h1>
+        [% END %]
+
+        <form action="/cgi-bin/koha/admin/collections.pl" method="post" id="collection-form" class="validated" enctype="multipart/form-data">
+            [% INCLUDE 'csrf-token.inc' %]
+            <input type="hidden" name="op" value="cud-save" />
+            <input type="hidden" name="is_new" value="[% is_add ? 1 : 0 %]" />
+
+            <fieldset class="rows">
+                <legend>Basic information</legend>
+                <ol>
+                    <li>
+                        <label for="ccode" class="required">Collection code (CCODE): </label>
+                        [% IF is_add %]
+                            <input type="text" name="ccode" id="ccode" value="[% collection.ccode | html %]" maxlength="80" required="required" placeholder="e.g. BST_BUSINESS" style="text-transform: uppercase;" />
+                            <span class="required">Required</span>
+                            <div class="hint">Unique identifier used by Koha catalog items (items.ccode). Use uppercase letters and underscores only.</div>
+                        [% ELSE %]
+                            <input type="hidden" name="ccode" value="[% collection.ccode | html %]" />
+                            <span class="badge-ccode">[% collection.ccode | html %]</span>
+                            <span class="hint" style="margin-left: 10px;">(Code cannot be changed after creation to maintain catalog integrity)</span>
+                        [% END %]
+                    </li>
+                    <li>
+                        <label for="lib" class="required">Collection title: </label>
+                        <input type="text" name="lib" id="lib" value="[% collection.lib | html %]" size="60" required="required" placeholder="e.g. Economics & Management" />
+                        <span class="required">Required</span>
+                        <div class="hint">Display title on OPAC portal and in cataloguing dropdowns.</div>
+                    </li>
+                    <li>
+                        <label for="description">Summary description: </label>
+                        <textarea name="description" id="description" rows="3" cols="60" placeholder="Brief summary of the collection displayed on the OPAC card...">[% collection.description | html %]</textarea>
+                    </li>
+                </ol>
+            </fieldset>
+
+            <fieldset class="rows">
+                <legend>Cover Image & Display</legend>
+                <ol>
+                    <li>
+                        <label for="upload_image">Cover image: </label>
+                        <div style="float: left; max-width: 600px;">
+                            <!-- 1. Upload from computer -->
+                            <div class="ftu-upload-zone" id="upload-zone" onclick="document.getElementById('upload_image').click()">
+                                <input type="file" name="upload_image" id="upload_image" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;" onchange="handleImageFile(this)" />
+                                <div style="font-size: 32px; color: #b91c1c; margin-bottom: 6px;"><i class="fa fa-cloud-upload"></i></div>
+                                <div style="font-weight: 700; font-size: 14px; color: #1e293b;">Click here to upload a new cover image from your computer</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Drag and drop or browse files (Supports JPG, PNG, WebP &bull; 16:9 ratio recommended)</div>
+                                <div id="upload-status" style="margin-top: 8px; font-weight: 600; color: #15803d; font-size: 12px; display: none;"></div>
+                            </div>
+
+                            <!-- 2. Preset images -->
+                            <div style="margin-top: 14px; margin-bottom: 6px;">
+                                <span style="font-weight: 600; font-size: 13px; color: #334155;">Or choose a preset collection banner:</span>
+                            </div>
+                            <div class="preset-img-picker">
+                                [% FOREACH img IN preset_images %]
+                                    <div class="preset-img-item" onclick="choosePreset('[% img.url | html %]', this)" title="[% img.name | html %]">
+                                        <img src="[% img.url | html %]" alt="" />
+                                        <span>[% img.name | html %]</span>
+                                    </div>
+                                [% END %]
+                            </div>
+
+                            <!-- 3. Custom URL -->
+                            <div style="margin-top: 12px; margin-bottom: 12px;">
+                                <span style="font-weight: 600; font-size: 13px; color: #334155; display: block; margin-bottom: 4px;">Or enter custom image URL:</span>
+                                <input type="text" name="image_url" id="image_url" value="[% collection.image_url | html %]" size="60" style="max-width: 480px;" placeholder="/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg" oninput="updatePreview(this.value)" />
+                            </div>
+
+                            <!-- 4. Preview -->
+                            <div class="preview-box">
+                                <span style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px;">
+                                    <i class="fa fa-eye"></i> OPAC COVER PREVIEW:
+                                </span>
+                                <img id="img-preview" src="[% collection.image_url || '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg' | html %]" onerror="this.src='/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg'" alt="Preview" />
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <label for="is_featured">Featured collection: </label>
+                        <input type="checkbox" name="is_featured" id="is_featured" value="1" [% IF collection.is_featured %]checked="checked"[% END %] />
+                        <label for="is_featured" style="float: none; font-weight: normal;">Mark as <strong>⭐ Featured collection</strong> (Highlighted with a star badge and shown at the top)</label>
+                    </li>
+                    <li>
+                        <label for="sort_order">Sort order: </label>
+                        <input type="number" name="sort_order" id="sort_order" value="[% collection.sort_order || 1 | html %]" size="5" min="1" max="999" />
+                        <div class="hint">Lower numbers are displayed first (1, 2, 3...)</div>
+                    </li>
+                </ol>
+            </fieldset>
+
+            <fieldset class="action">
+                <input type="submit" class="btn btn-primary" value="Save collection" />
+                <a class="cancel" href="/cgi-bin/koha/admin/collections.pl">Cancel</a>
+            </fieldset>
+        </form>
+
+    [% ELSE %]
+        <div id="toolbar" class="btn-toolbar">
+            <a class="btn btn-default" id="newcollection" href="/cgi-bin/koha/admin/collections.pl?op=add_form">
+                <i class="fa fa-plus"></i> New collection
+            </a>
+            <a class="btn btn-default" target="_blank" href="/cgi-bin/ftu/opac-collections.pl">
+                <i class="fa fa-external-link"></i> View OPAC portal
+            </a>
+            <a class="btn btn-link" href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=CCODE">
+                <i class="fa fa-cog"></i> Open native CCODE table
+            </a>
+        </div>
+
+        <h1>Collection Management</h1>
+
+        <!-- Stats Overview -->
+        <div class="ftu-stat-grid">
+            <div class="ftu-col-stat-card">
+                <div class="ftu-stat-icon red"><i class="fa fa-folder-open"></i></div>
+                <div class="ftu-stat-info">
+                    <div class="num">[% total_count | html %]</div>
+                    <div class="lbl">Total collections</div>
+                </div>
+            </div>
+            <div class="ftu-col-stat-card">
+                <div class="ftu-stat-icon amber"><i class="fa fa-star"></i></div>
+                <div class="ftu-stat-info">
+                    <div class="num">[% featured_count | html %]</div>
+                    <div class="lbl">Featured collections</div>
+                </div>
+            </div>
+            <div class="ftu-col-stat-card">
+                <div class="ftu-stat-icon blue"><i class="fa fa-book"></i></div>
+                <div class="ftu-stat-info">
+                    <div class="num">[% total_items | html %]</div>
+                    <div class="lbl">Catalogued items</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collections Table -->
+        <div class="page-section">
+            <table id="collections_table" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 85px;">Cover</th>
+                        <th>Code (CCODE)</th>
+                        <th>Collection Title</th>
+                        <th>Summary</th>
+                        <th style="text-align: center; width: 110px;">Items</th>
+                        <th style="text-align: center; width: 120px;">Status</th>
+                        <th style="text-align: center; width: 70px;">Order</th>
+                        <th style="width: 170px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    [% FOREACH col IN collections %]
+                        <tr>
+                            <td style="text-align: center;">
+                                <img src="[% col.image_url | html %]" class="ftu-thumb-img" alt="[% col.lib | html %]" onerror="this.src='/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg'" />
+                            </td>
+                            <td>
+                                <span class="badge-ccode">[% col.ccode | html %]</span>
+                            </td>
+                            <td>
+                                <strong>[% col.lib | html %]</strong>
+                                [% IF col.lib_opac && col.lib_opac != col.lib %]
+                                    <br /><small class="text-muted">OPAC: [% col.lib_opac | html %]</small>
+                                [% END %]
+                            </td>
+                            <td style="font-size: 13px; color: #475569; max-width: 320px;">
+                                [% IF col.description %]
+                                    [% col.description | html %]
+                                [% ELSE %]
+                                    <em class="text-muted">(No summary description)</em>
+                                [% END %]
+                            </td>
+                            <td style="text-align: center;">
+                                [% IF col.items_count > 0 %]
+                                    <a href="/cgi-bin/koha/catalogue/search.pl?idx=mc-ccode&amp;q=[% col.ccode | uri %]" class="badge bg-primary text-decoration-none" title="Search items in staff catalogue">
+                                        <i class="fa fa-book"></i> [% col.items_count | html %] items
+                                    </a>
+                                [% ELSE %]
+                                    <span class="badge bg-secondary">0 items</span>
+                                [% END %]
+                            </td>
+                            <td style="text-align: center;">
+                                <form action="/cgi-bin/koha/admin/collections.pl" method="post" style="display:inline;">
+                                    [% INCLUDE 'csrf-token.inc' %]
+                                    <input type="hidden" name="op" value="cud-toggle_featured" />
+                                    <input type="hidden" name="ccode" value="[% col.ccode | html %]" />
+                                    <button type="submit" class="btn-toggle-featured" title="Click to toggle featured status">
+                                        [% IF col.is_featured %]
+                                            <span class="badge-featured"><i class="fa fa-star"></i> Featured</span>
+                                        [% ELSE %]
+                                            <span class="badge-normal">Standard</span>
+                                        [% END %]
+                                    </button>
+                                </form>
+                            </td>
+                            <td style="text-align: center; font-weight: 600;">
+                                [% col.sort_order | html %]
+                            </td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <a href="/cgi-bin/koha/admin/collections.pl?op=edit_form&amp;ccode=[% col.ccode | uri %]" class="btn btn-default btn-xs" title="Edit collection">
+                                    <i class="fa-solid fa-pencil"></i> Edit
+                                </a>
+                                <a href="/cgi-bin/ftu/opac-search.pl?limit=mc-ccode:[% col.ccode | uri %]" target="_blank" class="btn btn-default btn-xs" title="View on OPAC">
+                                    <i class="fa fa-external-link"></i> OPAC
+                                </a>
+                                <form action="/cgi-bin/koha/admin/collections.pl" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete collection [% col.lib | html %] ([% col.ccode | html %])?');">
+                                    [% INCLUDE 'csrf-token.inc' %]
+                                    <input type="hidden" name="op" value="cud-delete" />
+                                    <input type="hidden" name="ccode" value="[% col.ccode | html %]" />
+                                    [% IF col.items_count > 0 %]
+                                        <button type="button" class="btn btn-default btn-xs disabled" title="Cannot delete when [% col.items_count | html %] items are assigned" onclick="alert('Cannot delete: [% col.items_count | html %] items are currently assigned to this collection.');">
+                                            <i class="fa fa-trash-can text-muted"></i>
+                                        </button>
+                                    [% ELSE %]
+                                        <button type="submit" class="btn btn-default btn-xs text-danger" title="Delete collection">
+                                            <i class="fa fa-trash-can"></i>
+                                        </button>
+                                    [% END %]
+                                </form>
+                            </td>
+                        </tr>
+                    [% END %]
+                </tbody>
+            </table>
+        </div>
+
+    [% END %]
+
+[% END #/ WRAPPER main-container.inc %]
+
+[% MACRO jsinclude BLOCK %]
+<script>
+function handleImageFile(input) {
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var preview = document.getElementById('img-preview');
+            if (preview) preview.src = e.target.result;
+
+            var status = document.getElementById('upload-status');
+            if (status) {
+                status.style.display = 'block';
+                status.innerHTML = '<i class="fa fa-check-circle"></i> Selected file: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+            }
+        };
+        reader.readAsDataURL(file);
+
+        document.querySelectorAll('.preset-img-item').forEach(function(item) {
+            item.classList.remove('active');
+        });
+    }
+}
+
+function choosePreset(url, el) {
+    document.getElementById('image_url').value = url;
+    var fileInput = document.getElementById('upload_image');
+    if (fileInput) fileInput.value = '';
+
+    var status = document.getElementById('upload-status');
+    if (status) status.style.display = 'none';
+
+    updatePreview(url);
+    document.querySelectorAll('.preset-img-item').forEach(function(item) {
+        item.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
+}
+
+function updatePreview(url) {
+    var preview = document.getElementById('img-preview');
+    if (preview && url) {
+        preview.src = url;
+    }
+}
+
+// Drag & drop support
+document.addEventListener('DOMContentLoaded', function() {
+    var dropZone = document.getElementById('upload-zone');
+    if (dropZone) {
+        ['dragenter', 'dragover'].forEach(function(eventName) {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+        ['dragleave', 'drop'].forEach(function(eventName) {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+        dropZone.addEventListener('drop', function(e) {
+            var dt = e.dataTransfer;
+            var files = dt.files;
+            if (files && files.length) {
+                var fileInput = document.getElementById('upload_image');
+                fileInput.files = files;
+                handleImageFile(fileInput);
+            }
+        }, false);
+    }
+});
+</script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

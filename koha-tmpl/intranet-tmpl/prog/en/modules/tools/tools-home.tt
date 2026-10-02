@@ -137,6 +137,12 @@
                 [% END %]
 
                 [% IF ( CAN_user_tools_edit_additional_contents ) %]
+                    <dt><a href="/cgi-bin/koha/tools/portal-news.pl?section=news" style="font-weight: bold; color: #b91c1c;"><i class="fa fa-newspaper-o"></i> Quản lý Tin tức &amp; Sự kiện</a></dt>
+                    <dd>Publish news, events, and announcements on OPAC portal</dd>
+
+                    <dt><a href="/cgi-bin/koha/tools/portal-news.pl?section=database" style="font-weight: bold; color: #1d4ed8;"><i class="fa fa-database"></i> Quản lý Cơ sở dữ liệu (CSDL)</a></dt>
+                    <dd>Manage electronic databases: IEEE Xplore, ACM, credentials, links, and access notes</dd>
+
                     <dt><a href="/cgi-bin/koha/tools/additional-contents.pl?category=news">News</a></dt>
                     <dd>Write news for the OPAC and staff interfaces</dd>
 

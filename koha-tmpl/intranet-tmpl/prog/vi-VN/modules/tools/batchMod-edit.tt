@@ -8,17 +8,17 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
- [% IF ( show ) %]
- [% t("Modifications") | html %]
- &rsaquo;
- [% END %]
- [% IF op == 'enqueued' %]
- [% t("Job enqueued") | html %]
- &rsaquo;
- [% END %]
- [% t("Batch item modification") | html %]
- &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
- [% END %]</title
+        [% IF ( show ) %]
+            Chỉnh sửa chi tiết
+            &rsaquo;
+        [% END %]
+        [% IF op == 'enqueued' %]
+            Tiến trình đã xếp hàng đợi
+            &rsaquo;
+        [% END %]
+        Chỉnh sửa bản tài liệu hàng loạt
+        &rsaquo; Biên mục &rsaquo; Koha
+    [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 <style nonce="[% Koha.CSPNonce | $raw %]">
@@ -32,271 +32,270 @@
 
 <body id="tools_batchMod-edit" class="tools">
 [% WRAPPER 'header.inc' %]
- [% INCLUDE 'cat-search.inc' %]
+    [% INCLUDE 'cat-search.inc' %]
 [% END %]
 
 [% WRAPPER 'sub-header.inc' %]
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Phân hệ biên mục</a>
- [% END %]
- [% IF ( show || op == "enqueued") %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/tools/batchMod.pl">Chỉnh sửa bản tài liệu theo lô</a>
- [% END %]
- [% ELSE %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Chỉnh sửa bản tài liệu theo lô</span>
- [% END %]
- [% END %]
- [% IF ( op == 'enqueued' ) %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- [% t("Job enqueued") | html %]
- [% END %]
- [% END %]
- [% IF ( show ) %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- [% t("Modifications") | html %]
- [% END %]
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
+        [% END %]
+        [% IF ( show || op == "enqueued") %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/tools/batchMod.pl">Chỉnh sửa bản tài liệu hàng loạt</a>
+            [% END %]
+        [% ELSE %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Chỉnh sửa bản tài liệu hàng loạt</span>
+            [% END %]
+        [% END %]
+        [% IF ( op == 'enqueued' ) %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Tiến trình đã xếp hàng đợi</span>
+            [% END %]
+        [% END %]
+        [% IF ( show ) %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Chỉnh sửa chi tiết</span>
+            [% END %]
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 <div class="main container-fluid">
- [% INCLUDE 'messages.inc' %]
+    [% INCLUDE 'messages.inc' %]
 
- <h1>Chỉnh sửa bản tài liệu theo lô</h1>
- [% IF op == 'enqueued' %]
- <div class="alert alert-info">
- <h1>The job has been enqueued!</h1>
- <p>It will be processed as soon as possible.</p>
- <p
-                ><a href="/cgi-bin/koha/admin/background_jobs.pl?op=view&id=[% job_id | uri %]" title="View detail of the enqueued job">View detail of the enqueued job</a> |
- <a href="/cgi-bin/koha/tools/batchMod.pl" title="New batch item modification">New batch item modification</a></p
+    <h1 class="ftu-clean-title"><i class="fa fa-layer-group"></i> Chỉnh sửa bản tài liệu hàng loạt</h1>
+    [% IF op == 'enqueued' %]
+        <div class="alert alert-info">
+            <h2><i class="fa fa-check-circle"></i> Tiến trình đã được đưa vào hàng đợi!</h2>
+            <p>Hệ thống sẽ thực hiện tác vụ trong thời gian sớm nhất.</p>
+            <p
+                ><a href="/cgi-bin/koha/admin/background_jobs.pl?op=view&id=[% job_id | uri %]" title="Xem chi tiết tiến trình" class="btn btn-sm btn-primary">Xem chi tiết tiến trình</a>
+                <a href="/cgi-bin/koha/tools/batchMod.pl" title="Tạo phiên chỉnh sửa mới" class="btn btn-sm btn-light">Tạo phiên chỉnh sửa mới</a></p
             >
- </div>
+        </div>
 
- <fieldset class="action">
- [% IF src == 'CATALOGUING' # from catalogue/detail.pl > Edit items in a batch %]
- [% IF searchid %]
- <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]&searchid=[% searchid | uri %]">Return to the record</a>
- [% ELSE %]
- <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]">Return to the record</a>
- [% END %]
- [% ELSIF src %]
- <a href="[% src | url %]">Return to where you were</a>
- [% ELSE %]
- <a href="/cgi-bin/koha/tools/batchMod.pl">Quay lại</a>
- [% END %]
- </fieldset>
- [% END %]
+        <fieldset class="action">
+            [% IF src == 'CATALOGUING' # from catalogue/detail.pl > Edit items in a batch %]
+                [% IF searchid %]
+                    <a class="btn btn-light" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]&searchid=[% searchid | uri %]">Quay lại biểu ghi</a>
+                [% ELSE %]
+                    <a class="btn btn-light" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]">Quay lại biểu ghi</a>
+                [% END %]
+            [% ELSIF src %]
+                <a class="btn btn-light" href="[% src | url %]">Quay lại trang trước</a>
+            [% ELSE %]
+                <a class="btn btn-light" href="/cgi-bin/koha/tools/batchMod.pl">Quay lại chỉnh sửa bản tài liệu hàng loạt</a>
+            [% END %]
+        </fieldset>
+    [% END %]
 
- [% FOREACH message IN messages %]
- [% SET message_class = "alert-info" %]
- [% IF message.type == 'success' %]
- [% message_class = "alert-info" %]
- [% ELSIF message.type == 'warning' %]
- [% message_class = "alert-warning" %]
- [% ELSIF message.type == 'error' %]
- [% message_class = "alert-warning" %]
- [% END %]
- <div class="alert [% message_class | html %]">
- [% IF message.code == 'cannot_enqueue_job' %]
- <span>Cannot enqueue this job.</span>
- [% END %]
- [% IF message.error %]
- <span>(The error was: [% message.error | html %], see the Koha log file for more information).</span>
- [% END %]
- </div>
- [% END %]
+    [% FOREACH message IN messages %]
+        [% SET message_class = "alert-info" %]
+        [% IF message.type == 'success' %]
+            [% message_class = "alert-info" %]
+        [% ELSIF message.type == 'warning' %]
+            [% message_class = "alert-warning" %]
+        [% ELSIF message.type == 'error' %]
+            [% message_class = "alert-warning" %]
+        [% END %]
+        <div class="alert [% message_class | html %]">
+            [% IF message.code == 'cannot_enqueue_job' %]
+                <span>Không thể đưa tác vụ này vào hàng đợi xử lý.</span>
+            [% END %]
+            [% IF message.error %]
+                <span>(Chi tiết lỗi: [% message.error | html %]).</span>
+            [% END %]
+        </div>
+    [% END %]
 
- [% IF ( barcode_not_unique ) %]
- <div class="alert alert-warning"> <strong>Lỗi lưu bản tài liệu</strong>: Barcode must be unique. </div>
- [% END %]
- [% IF ( no_next_barcode ) %]
- <div class="alert alert-warning"> <strong>Lỗi lưu nhiều bản tài liệu</strong>: Unable to automatically determine values for barcodes. No item has been inserted. </div>
- [% END %]
+    [% IF ( barcode_not_unique ) %]
+        <div class="alert alert-warning"> <strong>Lỗi lưu bản tài liệu</strong>: Mã vạch phải là duy nhất. </div>
+    [% END %]
+    [% IF ( no_next_barcode ) %]
+        <div class="alert alert-warning"> <strong>Lỗi lưu bản tài liệu</strong>: Không thể xác định giá trị tự động cho mã vạch. Chưa có bản tài liệu nào được thêm vào. </div>
+    [% END %]
 
- [% IF ( notfoundbarcodes.size ) %]
- <div class="alert alert-warning">
- <p>Cảnh báo, các đăng ký cá biệt sau đây không tìm thấy:</p>
- <br />
- <table style="margin:auto;">
- <thead>
- <tr><th>Không tìm thấy đăng cá biệt</th></tr>
- </thead>
- <tbody>
- [% FOREACH notfoundbarcode IN notfoundbarcodes %]
- <tr><td>[% notfoundbarcode |html %]</td></tr>
- [% END %]
- </tbody>
- </table>
- </div>
+    [% IF ( notfoundbarcodes.size ) %]
+        <div class="alert alert-warning">
+            <p><strong>Cảnh báo</strong>: Không tìm thấy các mã vạch sau trong hệ thống:</p>
+            <br />
+            <table class="table table-sm table-bordered" style="max-width: 400px; margin:auto;">
+                <thead>
+                    <tr><th>Mã vạch không tìm thấy</th></tr>
+                </thead>
+                <tbody>
+                    [% FOREACH notfoundbarcode IN notfoundbarcodes %]
+                        <tr><td>[% notfoundbarcode |html %]</td></tr>
+                    [% END %]
+                </tbody>
+            </table>
+        </div>
 
- [% IF ( item_loop ) %]
- [% UNLESS ( too_many_items_display ) %]
- <h4>Các đăng ký cá biệt được tìm thấy: </h4>
- [% END %]
- [% END %]
- [% END # /IF notfoundbarcodes.size %]
+        [% IF ( item_loop ) %]
+            [% UNLESS ( too_many_items_display ) %]
+                <h4>Các mã vạch sau đã được tìm thấy: </h4>
+            [% END %]
+        [% END %]
+    [% END # /IF notfoundbarcodes.size %]
 
- [% IF ( notfounditemnumbers.size ) %]
- <div class="alert alert-warning">
- <p>Warning, the following itemnumbers were not found:</p>
- <br />
- <table style="margin:auto;">
- <thead>
- <tr><th>Itemnumbers not found</th></tr>
- </thead>
- <tbody>
- [% FOREACH notfounditemnumber IN notfounditemnumbers %]
- <tr><td>[% notfounditemnumber |html %]</td></tr>
- [% END %]
- </tbody>
- </table>
- </div>
- [% IF ( item_loop ) %]
- [% UNLESS ( too_many_items_display ) %]
- <h4>The following itemnumbers were found: </h4>
- [% END %]
- [% END %]
- [% END # /IF notfounditemnumbers.size %]
+    [% IF ( notfounditemnumbers.size ) %]
+        <div class="alert alert-warning">
+            <p><strong>Cảnh báo</strong>: Không tìm thấy các số bản tài liệu sau trong hệ thống:</p>
+            <br />
+            <table class="table table-sm table-bordered" style="max-width: 400px; margin:auto;">
+                <thead>
+                    <tr><th>Số bản tài liệu không tìm thấy</th></tr>
+                </thead>
+                <tbody>
+                    [% FOREACH notfounditemnumber IN notfounditemnumbers %]
+                        <tr><td>[% notfounditemnumber |html %]</td></tr>
+                    [% END %]
+                </tbody>
+            </table>
+        </div>
+        [% IF ( item_loop ) %]
+            [% UNLESS ( too_many_items_display ) %]
+                <h4>Các số bản tài liệu sau đã được tìm thấy: </h4>
+            [% END %]
+        [% END %]
+    [% END # /IF notfounditemnumbers.size %]
 
- <form name="f" action="batchMod.pl" method="post">
- [% INCLUDE 'csrf-token.inc' %]
- <input type="hidden" name="op" value="[% op | html %]" />
- <input type="hidden" name="searchid" value="[% searchid | html %]" />
- <input type="hidden" name="uploadedfileid" id="uploadedfileid" value="" />
- <input type="hidden" name="src" id="src" value="[% src | html %]" />
- [% FOREACH linked_serial_id IN linked_serial_ids %]
- <input type="hidden" name="linked_serial_id" id="linked_serial_id" value="[% linked_serial_id | html %]" />
- [% END %]
- [% IF biblionumber %]
- <input type="hidden" name="biblionumber" id="biblionumber" value="[% biblionumber | html %]" />
- [% END %]
+    <form name="f" action="batchMod.pl" method="post">
+        [% INCLUDE 'csrf-token.inc' %]
+        <input type="hidden" name="op" value="[% op | html %]" />
+        <input type="hidden" name="searchid" value="[% searchid | html %]" />
+        <input type="hidden" name="uploadedfileid" id="uploadedfileid" value="" />
+        <input type="hidden" name="src" id="src" value="[% src | html %]" />
+        [% FOREACH linked_serial_id IN linked_serial_ids %]
+            <input type="hidden" name="linked_serial_id" id="linked_serial_id" value="[% linked_serial_id | html %]" />
+        [% END %]
+        [% IF biblionumber %]
+            <input type="hidden" name="biblionumber" id="biblionumber" value="[% biblionumber | html %]" />
+        [% END %]
 
- [% IF items.size %]
- [% PROCESS items_table_batchmod headers => item_header_loop, items => items, checkboxes_edit => 1, display_columns_selection => 1 %]
- [% END %]
+        [% IF items.size %]
+            [% PROCESS items_table_batchmod headers => item_header_loop, items => items, checkboxes_edit => 1, display_columns_selection => 1 %]
+        [% END %]
 
- [% IF ( simple_items_display || job_completed ) %]
- [% IF ( too_many_items_display ) %]
- <p>Too many items ([% too_many_items_display | html %]): You have edited more than [% Koha.Preference('MaxItemsToDisplayForBatchMod') | html %] items in a batch, items will not be shown.</p>
- [% ELSE %]
- <p>Bản tài liệu được chỉnh sửa:</p>
- <ul>
- [% FOREACH simple_items_displa IN simple_items_display %]
- <li>
- [% IF ( CAN_user_editcatalogue_edit_items ) %]
- <a href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&amp;biblionumber=[% simple_items_displa.biblionumber | uri %]&amp;itemnumber=[% simple_items_displa.itemnumber | uri %]"
+        [% IF ( simple_items_display || job_completed ) %]
+            [% IF ( too_many_items_display ) %]
+                <p class="alert alert-info">Quá nhiều bản tài liệu ([% too_many_items_display | html %]): Bạn đã chỉnh sửa nhiều hơn giới hạn [% Koha.Preference('MaxItemsToDisplayForBatchMod') | html %] bản tài liệu, danh sách chi tiết sẽ không hiển thị.</p>
+            [% ELSE %]
+                <p><strong>Các bản tài liệu sau đã được chỉnh sửa thành công:</strong></p>
+                <ul>
+                    [% FOREACH simple_items_displa IN simple_items_display %]
+                        <li>
+                            [% IF ( CAN_user_editcatalogue_edit_items ) %]
+                                <a href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&amp;biblionumber=[% simple_items_displa.biblionumber | uri %]&amp;itemnumber=[% simple_items_displa.itemnumber | uri %]"
                                     >[% simple_items_displa.barcode | html %]</a
                                 >
- [% ELSE %]
- [% simple_items_displa.barcode | html %]
- [% END %]
- </li>
- [% END %]
- </ul>
- [% END # /IF too_many_items_display %]
- [% END # /IF simple_items_display %]
+                            [% ELSE %]
+                                [% simple_items_displa.barcode | html %]
+                            [% END %]
+                        </li>
+                    [% END %]
+                </ul>
+            [% END # /IF too_many_items_display %]
+        [% END # /IF simple_items_display %]
 
- [% IF ( show ) %]
+        [% IF ( show ) %]
 
- [% IF ( too_many_items_process ) %]
- <p>Too many items ([% too_many_items_process | html %]): You are not allowed to edit more than [% Koha.Preference('MaxItemsToProcessForBatchMod') | html %] items in a batch.</p>
- [% ELSIF ( too_many_items_display ) %]
- <p>Too many items ([% too_many_items_display | html %]): You are editing more than [% Koha.Preference('MaxItemsToDisplayForBatchMod') | html %] items in a batch, items will not be shown.</p>
- [% FOREACH itemnumber IN itemnumbers_array %]
- <input type="hidden" name="itemnumber" value="[% itemnumber | html %]" />
- [% END %]
- [% END # /IF too_many_items_process %]
+            [% IF ( too_many_items_process ) %]
+                <p class="alert alert-warning">Quá nhiều bản tài liệu ([% too_many_items_process | html %]): Bạn không được phép chỉnh sửa đồng thời quá [% Koha.Preference('MaxItemsToProcessForBatchMod') | html %] bản tài liệu trong một lô.</p>
+            [% ELSIF ( too_many_items_display ) %]
+                <p class="alert alert-info">Quá nhiều bản tài liệu ([% too_many_items_display | html %]): Bạn đang chỉnh sửa nhiều hơn giới hạn [% Koha.Preference('MaxItemsToDisplayForBatchMod') | html %] bản tài liệu, danh sách chi tiết sẽ được thu gọn.</p>
+                [% FOREACH itemnumber IN itemnumbers_array %]
+                    <input type="hidden" name="itemnumber" value="[% itemnumber | html %]" />
+                [% END %]
+            [% END # /IF too_many_items_process %]
 
- [% UNLESS (too_many_items_process) %]
- <div id="cataloguing_additem_newitem" class="item_edit_form">
- <h2>Bản tài liệu</h2>
- <div class="hint">Checking the box right next to the subfield label will disable the entry and delete the subfield on all selected items. Leave fields blank to make no change.</div>
- <fieldset class="rows">
- [%# no_plugin from batchMod-edit, jQuery is included at the end of the template and cataloguing plugins are not working in this situation %]
- [% PROCESS subfields_for_item subfields => subfields, add_regex => 1, add_delete_checkbox => 1, no_plugin => 1 %]
- </fieldset>
+            [% UNLESS (too_many_items_process) %]
+                <div id="cataloguing_additem_newitem" class="item_edit_form">
+                    <h2><i class="fa fa-pen-to-square"></i> Chỉnh sửa thông tin bản tài liệu</h2>
+                    <div class="hint alert alert-light"><i class="fa fa-info-circle"></i> Tích chọn vào ô bên cạnh nhãn trường con để vô hiệu hóa và xóa trường con đó trên tất cả các bản tài liệu đã chọn. Để trống các trường nếu không muốn thay đổi.</div>
+                    <fieldset class="rows">
+                        [%# no_plugin from batchMod-edit, jQuery is included at the end of the template and cataloguing plugins are not working in this situation %]
+                        [% PROCESS subfields_for_item subfields => subfields, add_regex => 1, add_delete_checkbox => 1, no_plugin => 1 %]
+                    </fieldset>
 
- <fieldset class="rows">
- <legend>Other attributes</legend>
- <ol>
- <li>
- <div class="subfield_line">
- <label for="exclude_from_local_holds_priority">Exclude from local holds priority:</label>
- <select id="exclude_from_local_holds_priority" name="exclude_from_local_holds_priority" class="input_marceditor select2" style="width: 50px">
- <option selected></option>
- <option value="1">Có</option>
- <option value="0">Không</option>
- </select>
- </div>
- </li>
- </ol>
- </fieldset>
- <fieldset class="rows">
- <legend>Tùy chọn</legend>
- <ol>
- <li>
- <div class="hint"
-                                    >This option checks in items to remove them from patron accounts.<br />Items are not marked found, nor do damaged/withdrawn statuses prevent this return, nor are item locations updated. This feature is
- intended to allow removal of checkouts from patron accounts without affecting fines or other statuses.</div
+                    <fieldset class="rows">
+                        <legend><i class="fa fa-sliders"></i> Các thuộc tính khác</legend>
+                        <ol>
+                            <li>
+                                <div class="subfield_line">
+                                    <label for="exclude_from_local_holds_priority">Loại khỏi ưu tiên giữ chỗ nội bộ:</label>
+                                    <select id="exclude_from_local_holds_priority" name="exclude_from_local_holds_priority" class="input_marceditor select2" style="width: 80px">
+                                        <option selected></option>
+                                        <option value="1">Có</option>
+                                        <option value="0">Không</option>
+                                    </select>
+                                </div>
+                            </li>
+                        </ol>
+                    </fieldset>
+                    <fieldset class="rows">
+                        <legend><i class="fa fa-gear"></i> Tùy chọn xử lý</legend>
+                        <ol>
+                            <li>
+                                <div class="hint"
+                                    >Tùy chọn này thực hiện ghi trả bản tài liệu để xóa chúng khỏi tài khoản của bạn đọc.<br />Tài liệu không bị đánh dấu tìm thấy, tình trạng hỏng/hủy không ngăn cản việc ghi trả này, và vị trí tài liệu không bị cập nhật.</div
                                 ><br />
- <div class="subfield_line">
- <label for="mark_items_returned">Check in items:</label>
- <select id="mark_items_returned" name="mark_items_returned" class="input_marceditor select2" style="width: 50px">
- <option value="1">Có</option>
- <option value="0" selected>Không</option>
- </select>
- </div>
- </li>
- </ol>
- </fieldset>
+                                <div class="subfield_line">
+                                    <label for="mark_items_returned">Ghi trả bản tài liệu:</label>
+                                    <select id="mark_items_returned" name="mark_items_returned" class="input_marceditor select2" style="width: 80px">
+                                        <option value="1">Có</option>
+                                        <option value="0" selected>Không</option>
+                                    </select>
+                                </div>
+                            </li>
+                        </ol>
+                    </fieldset>
 
- <fieldset class="action">
- [% IF linked_serials %]
- <input class="submit" onclick="return ShowSerialEditingConfirmation(this.form)" type="button" value="Lưu" />
- <input type="hidden" name="edit-serial-issues" id="edit-serial-issues" value />
- [% ELSE %]
- <input class="btn btn-primary" id="mainformsubmit" type="submit" value="Lưu" />
- [% END %]
- <a href="/cgi-bin/koha/tools/batchMod.pl" class="cancel">Hủy bỏ</a>
- </fieldset>
- </div>
- <!-- /#cataloguing_additem_newitem -->
- [% ELSE %]
- <p><a href="/cgi-bin/koha/tools/batchMod.pl">Quay lại</a></p>
- [% END # /UNLESS too_many_items_process %]
- [% ELSE # IF show %]
- <fieldset class="action">
- [% IF src == 'CATALOGUING' # from catalogue/detail.pl > Edit items in a batch %]
- [% IF searchid %]
- <a class="btn btn-default" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]&searchid=[% searchid | uri %]"><i class="fa fa-check-square"></i> Return to the record</a>
- [% ELSE %]
- <a class="btn btn-default" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]"><i class="fa fa-check-square"></i> Return to the record</a>
- [% END %]
- [% ELSIF src %]
- <a class="btn btn-default" href="[% src | url %]"><i class="fa fa-check-square"></i> Return to where you were</a>
- [% ELSE %]
- <a class="btn btn-default" href="/cgi-bin/koha/tools/batchMod.pl"><i class="fa fa-check-square"></i> Quay lại</a>
- [% END %]
- </fieldset>
- <!-- /.action -->
- [% END %]
- </form>
- [% INCLUDE 'modals/edit_serial_issues.inc' batch=1 %]
+                    <fieldset class="action">
+                        [% IF linked_serials %]
+                            <input type="button" class="submit btn btn-primary" value="Lưu thay đổi" onclick="return ShowSerialEditingConfirmation(this.form)" />
+                            <input type="hidden" name="edit-serial-issues" id="edit-serial-issues" value />
+                        [% ELSE %]
+                            <input type="submit" id="mainformsubmit" class="btn btn-primary" value="Lưu thay đổi" />
+                        [% END %]
+                        <a href="/cgi-bin/koha/tools/batchMod.pl" class="cancel">Hủy bỏ</a>
+                    </fieldset>
+                </div>
+                <!-- /#cataloguing_additem_newitem -->
+            [% ELSE %]
+                <p><a href="/cgi-bin/koha/tools/batchMod.pl" class="btn btn-light">Quay lại chỉnh sửa bản tài liệu hàng loạt</a></p>
+            [% END # /UNLESS too_many_items_process %]
+        [% ELSE # IF show %]
+            <fieldset class="action">
+                [% IF src == 'CATALOGUING' # from catalogue/detail.pl > Edit items in a batch %]
+                    [% IF searchid %]
+                        <a class="btn btn-light" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]&searchid=[% searchid | uri %]"><i class="fa fa-check-square"></i> Quay lại biểu ghi</a>
+                    [% ELSE %]
+                        <a class="btn btn-light" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber | uri %]"><i class="fa fa-check-square"></i> Quay lại biểu ghi</a>
+                    [% END %]
+                [% ELSIF src %]
+                    <a class="btn btn-light" href="[% src | url %]"><i class="fa fa-check-square"></i> Quay lại trang trước</a>
+                [% ELSE %]
+                    <a class="btn btn-light" href="/cgi-bin/koha/tools/batchMod.pl"><i class="fa fa-check-square"></i> Quay lại chỉnh sửa bản tài liệu hàng loạt</a>
+                [% END %]
+            </fieldset>
+            <!-- /.action -->
+        [% END %]
+    </form>
+    [% INCLUDE 'modals/edit_serial_issues.inc' batch=1 %]
 </div>
 <!-- /.main.container-fluid -->
 
 [% MACRO jsinclude BLOCK %]
- [% Asset.js("lib/jquery/plugins/humanmsg.js") | $raw %]
- [% Asset.js("js/cataloging.js") | $raw %]
- [% INCLUDE 'datatables.inc' %]
- [% Asset.js("js/pages/batchMod.js") | $raw %]
- [% INCLUDE 'select2.inc' %]
- [% INCLUDE 'calendar.inc' %]
- <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+    [% Asset.js("lib/jquery/plugins/humanmsg.js") | $raw %]
+    [% Asset.js("js/cataloging.js") | $raw %]
+    [% INCLUDE 'datatables.inc' %]
+    [% Asset.js("js/pages/batchMod.js") | $raw %]
+    [% INCLUDE 'select2.inc' %]
+    [% INCLUDE 'calendar.inc' %]
+    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
         // Prepare array of all column headers, incrementing each index by
         // two to accommodate control and title columns
         var allColumns = new Array([% FOREACH item_header_loo IN item_header_loop %]'[% loop.count | html %]'[% UNLESS ( loop.last ) %],[% END %][% END %]);
@@ -329,7 +328,7 @@
                     $(editor).hide();
                     $(regex).show();
                     $(tag_editor).hide();
-                    $(this).html('Text');
+                    $(this).html('Văn bản');
                     $(disable_input).prop('disabled', true);
                     let input_name = $(editor).attr('name');
                     let cloned = $("input[name='"+input_name+"']");
@@ -349,18 +348,18 @@
             });
         });
     </script>
- [% IF op == 'cud-action' %]
- [%- # Loop over fields which may have plugin JavaScript -%]
- [%- UNLESS (too_many_items_process) -%]
- [%- FOREACH subfield IN subfields -%]
- [% SET mv = subfield.marc_value %]
- [%- IF ( mv.type == 'text_plugin' ) -%]
- <!-- subfield[% subfield.tag | html %][% subfield.subfield | html %][% subfield.random | html %] -->
- [% mv.javascript | $raw %]
- [%- END -%]
- [%- END -%]
- [%- END -%]
- [%- END -%]
+    [% IF op == 'cud-action' %]
+        [%- # Loop over fields which may have plugin JavaScript -%]
+        [%- UNLESS (too_many_items_process) -%]
+            [%- FOREACH subfield IN subfields -%]
+                [% SET mv = subfield.marc_value %]
+                [%- IF ( mv.type == 'text_plugin' ) -%]
+                    <!-- subfield[% subfield.tag | html %][% subfield.subfield | html %][% subfield.random | html %] -->
+                    [% mv.javascript | $raw %]
+                [%- END -%]
+            [%- END -%]
+        [%- END -%]
+    [%- END -%]
 [% END %]
 
 [% INCLUDE 'intranet-bottom.inc' %]

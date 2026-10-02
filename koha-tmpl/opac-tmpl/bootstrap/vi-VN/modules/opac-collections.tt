@@ -1,0 +1,467 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+        Bộ sưu tập tài liệu &rsaquo; [% PROCESS 'library_name_title' %]
+    [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    /* ==========================================================================
+       FTU Collections Portal (Bộ sưu tập)
+       ========================================================================== */
+    .ftu-bst-wrapper {
+        padding: 1.5rem 0 3.5rem 0;
+        font-family: inherit;
+    }
+
+    /* Page Header */
+    .ftu-bst-header {
+        margin-bottom: 2rem;
+    }
+    .ftu-bst-title-wrap {
+        margin-bottom: 1.25rem;
+    }
+    .ftu-bst-title {
+        font-size: 1.85rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        margin: 0 0 6px 0 !important;
+        letter-spacing: -0.02em;
+    }
+    .ftu-bst-subtitle {
+        font-size: 0.95rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Search & Filter Toolbar (Mô phỏng chính xác mẫu thiết kế) */
+    .ftu-bst-toolbar {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 18px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    .ftu-bst-search-box {
+        flex: 1;
+        min-width: 280px;
+        position: relative;
+    }
+    .ftu-bst-search-box i.lead-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1rem;
+        pointer-events: none;
+    }
+    .ftu-bst-search-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 16px 0 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        color: #1e293b;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+    }
+    .ftu-bst-search-input:focus {
+        outline: none;
+        border-color: var(--ftu-red, #b91c1c);
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+    }
+    .ftu-bst-filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ftu-bst-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 40px;
+        padding: 0 18px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .ftu-bst-pill:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        border-color: #cbd5e1;
+    }
+    .ftu-bst-pill.active {
+        background: #0284c7;
+        color: #ffffff;
+        border-color: #0284c7;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+    }
+    .ftu-bst-pill.active-gold {
+        background: #f59e0b;
+        color: #ffffff;
+        border-color: #f59e0b;
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Grid Layout: 3 Cột Responsive */
+    .ftu-bst-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 26px;
+        margin-bottom: 2.5rem;
+    }
+
+    /* Collection Card */
+    .ftu-bst-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        position: relative;
+    }
+    .ftu-bst-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.08), 0 6px 12px -2px rgba(0, 0, 0, 0.03);
+        border-color: #cbd5e1;
+    }
+
+    /* Thumbnail & Badges */
+    .ftu-bst-thumb-wrap {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background: #0f172a;
+        overflow: hidden;
+    }
+    .ftu-bst-thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    .ftu-bst-card:hover .ftu-bst-thumb {
+        transform: scale(1.05);
+    }
+    .ftu-bst-badge-count {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .ftu-bst-badge-featured {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #f59e0b;
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    }
+    .ftu-bst-badge-code {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        background: rgba(15, 23, 42, 0.9);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Card Body */
+    .ftu-bst-body {
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .ftu-bst-name {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 10px 0;
+        line-height: 1.45;
+        min-height: 3.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .ftu-bst-desc {
+        font-size: 0.88rem;
+        color: #475569;
+        line-height: 1.55;
+        margin: 0 0 20px 0;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Card Footer Link */
+    .ftu-bst-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: #0284c7;
+        text-decoration: none !important;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
+        margin-top: auto;
+        transition: color 0.2s ease;
+    }
+    .ftu-bst-link i {
+        font-size: 0.85rem;
+        transition: transform 0.2s ease;
+    }
+    .ftu-bst-card:hover .ftu-bst-link {
+        color: var(--ftu-red, #b91c1c);
+    }
+    .ftu-bst-card:hover .ftu-bst-link i {
+        transform: translateX(4px);
+    }
+
+    /* Empty state */
+    .ftu-bst-empty {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 48px 24px;
+        text-align: center;
+        color: #64748b;
+        grid-column: 1 / -1;
+    }
+    .ftu-bst-empty i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 16px;
+    }
+    .ftu-bst-empty h3 {
+        font-size: 1.25rem;
+        color: #1e293b;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ftu-bst-grid {
+            grid-template-columns: 1fr;
+        }
+        .ftu-bst-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .ftu-bst-filter-group {
+            justify-content: flex-start;
+        }
+    }
+</style>
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-collections' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Bộ sưu tập tài liệu</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
+
+    <div class="container-fluid ftu-bst-wrapper">
+        <div class="row">
+            <div class="col-12">
+                <!-- Page Title -->
+                <div class="ftu-bst-header">
+                    <div class="ftu-bst-title-wrap">
+                        <h1 class="ftu-bst-title">Bộ sưu tập</h1>
+                    </div>
+
+                    <!-- Search & Filter Toolbar -->
+                    <div class="ftu-bst-toolbar">
+                        <div class="ftu-bst-search-box">
+                            <i class="fa fa-search lead-icon" aria-hidden="true"></i>
+                            <input
+                                type="text"
+                                id="bstSearchInput"
+                                class="ftu-bst-search-input"
+                                placeholder="Tìm theo tên bộ sưu tập, chủ đề, từ khóa..."
+                                value="[% search_q | html %]"
+                                autocomplete="off"
+                            />
+                        </div>
+                        <div class="ftu-bst-filter-group">
+                            <button type="button" class="ftu-bst-pill [% IF filter_type != 'featured' %]active[% END %]" id="filterAllBtn">
+                                Tất cả ([% count_all | html %])
+                            </button>
+                            <button type="button" class="ftu-bst-pill [% IF filter_type == 'featured' %]active-gold[% END %]" id="filterFeaturedBtn">
+                                <i class="fa fa-star" aria-hidden="true" style="color: #f59e0b;"></i> Chuyên đề nổi bật
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collections Grid -->
+                <div class="ftu-bst-grid" id="bstGrid">
+                    [% IF collections.size > 0 %]
+                        [% FOREACH col IN collections %]
+                            <div class="ftu-bst-card" data-featured="[% col.is_featured | html %]" data-code="[% col.code | lower | html %]" data-title="[% col.title | lower | html %]" data-desc="[% col.description | lower | html %]">
+                                <div class="ftu-bst-thumb-wrap">
+                                    <img src="[% col.image_url | html %]" alt="[% col.title | html %]" class="ftu-bst-thumb" loading="eager" />
+                                    <div class="ftu-bst-badge-count">
+                                        <i class="fa fa-book" aria-hidden="true"></i>
+                                        <span>[% col.item_count | html %] tài liệu</span>
+                                    </div>
+                                    [% IF col.is_featured %]
+                                        <div class="ftu-bst-badge-featured">
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            <span>Nổi bật</span>
+                                        </div>
+                                    [% END %]
+                                    <div class="ftu-bst-badge-code">[% col.code | html %]</div>
+                                </div>
+                                <div class="ftu-bst-body">
+                                    <h3 class="ftu-bst-name">[% col.title | html %]</h3>
+                                    <p class="ftu-bst-desc">[% col.description | html %]</p>
+                                    <a href="/cgi-bin/koha/opac-search.pl?limit=mc-ccode:[% col.code | uri %]" class="ftu-bst-link">
+                                        <span>Khám phá bộ sưu tập</span>
+                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        [% END %]
+                    [% ELSE %]
+                        <div class="ftu-bst-empty">
+                            <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+                            <h3>Chưa có bộ sưu tập nào</h3>
+                            <p>Hiện chưa có bộ sưu tập nào phù hợp với điều kiện tìm kiếm của bạn.</p>
+                        </div>
+                    [% END %]
+                    
+                    <!-- Dynamic no results container for client-side search -->
+                    <div class="ftu-bst-empty" id="bstNoMatch" style="display: none;">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <h3>Không tìm thấy bộ sưu tập phù hợp</h3>
+                        <p>Vui lòng thử tìm kiếm với từ khóa khác hoặc bấm nút "Tất cả" để xem toàn bộ danh mục.</p>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.col-12 -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</main>
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    $(document).ready(function() {
+        var currentFilter = "[% filter_type | html %]" || "all";
+
+        function filterCards() {
+            var keyword = $("#bstSearchInput").val().trim().toLowerCase();
+            var visibleCount = 0;
+
+            $(".ftu-bst-card").each(function() {
+                var $card = $(this);
+                var title = ($card.data("title") || "").toString();
+                var desc = ($card.data("desc") || "").toString();
+                var code = ($card.data("code") || "").toString();
+                var isFeatured = ($card.data("featured") == 1);
+
+                var matchesKeyword = !keyword || title.indexOf(keyword) !== -1 || desc.indexOf(keyword) !== -1 || code.indexOf(keyword) !== -1;
+                var matchesFilter = (currentFilter === "all") || (currentFilter === "featured" && isFeatured);
+
+                if (matchesKeyword && matchesFilter) {
+                    $card.show();
+                    visibleCount++;
+                } else {
+                    $card.hide();
+                }
+            });
+
+            if (visibleCount === 0 && $(".ftu-bst-card").length > 0) {
+                $("#bstNoMatch").show();
+            } else {
+                $("#bstNoMatch").hide();
+            }
+        }
+
+        $("#bstSearchInput").on("input", function() {
+            filterCards();
+        });
+
+        $("#filterAllBtn").on("click", function(e) {
+            e.preventDefault();
+            currentFilter = "all";
+            $("#filterAllBtn").addClass("active");
+            $("#filterFeaturedBtn").removeClass("active-gold");
+            filterCards();
+        });
+
+        $("#filterFeaturedBtn").on("click", function(e) {
+            e.preventDefault();
+            currentFilter = "featured";
+            $("#filterFeaturedBtn").addClass("active-gold");
+            $("#filterAllBtn").removeClass("active");
+            filterCards();
+        });
+
+        if (currentFilter === "featured") {
+            $("#filterFeaturedBtn").trigger("click");
+        }
+    });
+</script>
+[% END %]

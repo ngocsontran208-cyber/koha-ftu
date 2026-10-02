@@ -19,7 +19,7 @@
 <link
     rel="alternate"
     type="application/rss+xml"
-    title="[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog recent comments"
+    title="Recent comments - [% PROCESS 'library_name_title' %]"
     href="[% OPACBaseURL | url %]/cgi-bin/koha/opac-showreviews.pl?format=rss"
 />
 </head>

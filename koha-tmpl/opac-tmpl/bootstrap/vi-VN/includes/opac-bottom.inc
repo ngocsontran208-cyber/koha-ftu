@@ -5,6 +5,7 @@
 [%- USE KohaPlugins -%]
 [% USE Asset %]
 [% SET opaccredits = AdditionalContents.get( location => "opaccredits", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
+[% PROCESS 'ftu-brand-config.inc' %]
 [% PROCESS 'html_helpers.inc' %]
 [% IF Koha.Preference( 'CookieConsent' ) %]
  [% USE JSConsents %]
@@ -19,42 +20,135 @@
  </div>
  [% END #/ opaccredits %]
 
-    <!-- FTU LIBRARY COMPACT FOOTER -->
-    <footer class="ftu-footer noprint">
-        <div class="ftu-footer-inner">
-            <div class="ftu-footer-compact-row">
-                <div class="ftu-footer-brand">
-                    <img src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" class="ftu-footer-logo">
-                    <div>
-                        <div class="ftu-footer-title">THƯ VIỆN ĐẠI HỌC NGOẠI THƯƠNG</div>
-                        <div class="ftu-footer-subtitle">FOREIGN TRADE UNIVERSITY LIBRARY</div>
-                    </div>
-                </div>
-                <div class="ftu-footer-contact">
-                    <span><i class="fa fa-phone text-danger me-1"></i> (024) 3835 6800 (Máy lẻ: 532 / 535)</span>
-                    <span class="dot-sep">•</span>
-                    <span><i class="fa fa-envelope text-danger me-1"></i> thuvien@ftu.edu.vn</span>
-                </div>
-            </div>
-
-            <div class="ftu-footer-campuses-compact">
-                <span><strong>Hà Nội:</strong> 91 Phố Chùa Láng, Đống Đa</span>
-                <span class="dot-sep">•</span>
-                <span><strong>Cơ sở II (TP.HCM):</strong> 15 Đường D5, P. 25, Bình Thạnh</span>
-                <span class="dot-sep">•</span>
-                <span><strong>Quảng Ninh:</strong> 260 Bạch Đằng, Nam Khê, Uông Bí</span>
-            </div>
-
-            <div class="ftu-footer-bottom-compact">
-                <span>© 2026 Thư viện Trường Đại học Ngoại thương. All rights reserved.</span>
-                <span>Hệ thống Quản trị Thư viện Koha</span>
-            </div>
-        </div>
-    </footer>
-
     <!-- prettier-ignore-start -->
     </div> <!-- / #wrapper in masthead.inc -->
     <!-- prettier-ignore-end -->
+
+    <!-- ========================================================================= -->
+    <!-- FTU MASTER LIBRARY FOOTER (DSpace Elegant White Edition)                  -->
+    <!-- ========================================================================= -->
+    <footer class="ftu-footer-master noprint">
+        <div class="ftu-footer-container">
+            <div class="row mb-5" style="row-gap: 2rem;">
+                <!-- Cột 1: Thương hiệu Thư viện FTU & Liên hệ -->
+                <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+                    <div class="d-flex align-items-center mb-4" style="gap: 12px;">
+                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.svg" alt="[% FTU_BRAND.logo_alt %]" style="height: 38px; width: auto;"
+                            onerror="this.onerror=null; this.src='[% FTU_BRAND.logo_url %]'" />
+                        <span class="font-bold tracking-tight text-lg uppercase"
+                            style="font-weight: 700; color: #0F172A; font-size: 1.1rem; letter-spacing: -0.02em;">THƯ VIỆN PHÂN HIỆU TRƯỜNG ĐH NGOẠI THƯƠNG</span>
+                    </div>
+
+                    <div class="d-flex flex-column" style="gap: 14px; font-size: 0.875rem; color: #4B5563;">
+                        <!-- Trụ sở chính -->
+                        <div class="d-flex align-items-start" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0; margin-top: 2px;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <span style="font-weight: 600; color: #1F2937;">Trụ sở chính:</span>
+                                <p style="margin-top: 2px; margin-bottom: 0;">Số 91 Phố Chùa Láng, Phường Láng Thượng, Quận Đống Đa, Hà Nội</p>
+                            </div>
+                        </div>
+
+                        <!-- Phân hiệu TP.HCM -->
+                        <div class="d-flex align-items-start" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0; margin-top: 2px;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <span style="font-weight: 600; color: #1F2937;">Phân hiệu tại TP. Hồ Chí Minh:</span>
+                                <p style="margin-top: 2px; margin-bottom: 0;">Số 15 Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh</p>
+                            </div>
+                        </div>
+
+                        <!-- Cơ sở Quảng Ninh -->
+                        <div class="d-flex align-items-start" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0; margin-top: 2px;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <span style="font-weight: 600; color: #1F2937;">Cơ sở Quảng Ninh:</span>
+                                <p style="margin-top: 2px; margin-bottom: 0;">Số 260 Đường Bạch Đằng, Phường Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh</p>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="d-flex align-items-center pt-2" style="gap: 12px;">
+                            <svg style="width: 20px; height: 20px; color: #9CA3AF; flex-shrink: 0;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <a href="mailto:hoclieuso.hcmc@ftu.edu.vn"
+                                style="color: #4B5563; font-weight: 500; text-decoration: none;">hoclieuso.hcmc@ftu.edu.vn</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Khám phá tài nguyên -->
+                <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                    <h4 class="font-bold mb-4 uppercase tracking-wider text-xs"
+                        style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem;">
+                        Khám phá tài nguyên</h4>
+                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-collections.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Bộ sưu tập</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Tìm kiếm theo Tác giả</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Tìm kiếm theo Chủ đề</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-course-reserves.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Giáo trình &amp; Học phần</a></li>
+                        <li class="mb-2"><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="text-decoration-none ftu-dspace-link"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Kho tài liệu số DSpace</a></li>
+                    </ul>
+                </div>
+
+                <!-- Cột 3: Hỗ trợ & Hướng dẫn -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <h4 class="font-bold mb-4 uppercase tracking-wider text-xs"
+                        style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem;">
+                        Hỗ trợ &amp; Hướng dẫn</h4>
+                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-user.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Tài khoản &amp; Gia hạn sách</a></li>
+                        <li class="mb-2"><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="text-decoration-none ftu-dspace-link"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Quy định bản quyền học thuật</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-news-detail.pl?id=1" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Câu hỏi thường gặp (FAQ)</a></li>
+                        <li class="mb-2"><a href="/cgi-bin/koha/opac-reportproblem.pl" class="text-decoration-none"
+                            style="color: #6B7280; font-weight: 500; font-size: 0.875rem;">Liên hệ Ban quản trị</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Dòng bản quyền cuối cùng -->
+            <div class="pt-4 border-top d-flex flex-column flex-md-row justify-content-between align-items-center"
+                style="border-top: 1px solid #F1F5F9; font-size: 13px; color: #94A3B8; gap: 1rem;">
+                <p style="margin: 0;">© 2026 Trường Đại học Ngoại thương. Bảo lưu mọi quyền.</p>
+                <div class="d-flex align-items-center" style="gap: 16px;">
+                    <a href="/cgi-bin/koha/opac-oai.pl" target="_blank" style="color: #94A3B8; text-decoration: none;">OAI-PMH</a>
+                    <span style="display: inline-block; width: 4px; height: 4px; background: #CBD5E1; border-radius: 50%;"></span>
+                    <span>Vận hành trên nền tảng <a href="https://koha-community.org" target="_blank"
+                        style="color: #64748B; text-decoration: none;">Koha &amp; DSpace</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
 
  [% IF ( Koha.Preference('OPACReportProblem') && Koha.Preference('KohaAdminEmailAddress') ) || Koha.Preference( 'CookieConsent' ) || OpacKohaUrl || ( ( opaclanguagesdisplay ) && ( ! one_language_enabled ) && ( languages_loop ) && ( OpacLangSelectorMode == 'both' || OpacLangSelectorMode == 'footer') ) %]
  <footer id="changelanguage" class="navbar navbar-expand navbar-light bg-light noprint">
@@ -240,6 +334,75 @@
  [% Asset.js("js/cookieconsent.js") | $raw %]
 [% END %]
 [% KohaPlugins.get_plugins_opac_js | $raw %]
+
+[% IF ( loggedinusername ) %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    var kohaUser = '[% loggedinusername | html %]';
+    if (!kohaUser) return;
+
+    var ssoHost = '[% FTU_BRAND.link_sso %]' || (window.location.protocol + '//' + (window.location.hostname || 'localhost') + ':8090');
+    ssoHost = ssoHost.replace(/\/+$/, '');
+
+    // 1. Tự động đồng bộ trước phiên SSO DSpace chạy ngầm (Silent pre-auth)
+    try {
+        var ssoPreload = document.createElement('script');
+        ssoPreload.src = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&mode=json';
+        document.head.appendChild(ssoPreload);
+    } catch(e) {}
+
+    // 2. Chuyển đổi toàn bộ link trỏ đến DSpace sang Cổng chuyển giao phiên Seamless SSO
+    function patchDspaceLinks() {
+        $('a[href*=":4000/"], a[href*="/handle/"], a[href*="/items/"], .ftu-dspace-link').each(function() {
+            var href = $(this).attr('href');
+            if (href && !href.includes('/sso/koha-to-dspace') && !href.startsWith('javascript:')) {
+                var ssoBridge = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
+                $(this).attr('href', ssoBridge);
+                $(this).attr('data-sso-bridged', 'true');
+                if (!$(this).attr('title')) {
+                    $(this).attr('title', 'Truy cập liên thông FTU SSO (Tự động đăng nhập DSpace)');
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        patchDspaceLinks();
+        setTimeout(patchDspaceLinks, 500);
+        setTimeout(patchDspaceLinks, 1500);
+    });
+
+    // Bắt sự kiện click để đảm bảo an toàn tuyệt đối
+    $(document).on('click', 'a[href*=":4000/"], a[href*="/handle/"], a[href*="/items/"], .ftu-dspace-link', function(e) {
+        var href = $(this).attr('href');
+        if (href && !href.includes('/sso/koha-to-dspace')) {
+            e.preventDefault();
+            var ssoBridge = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
+            var target = $(this).attr('target');
+            if (target === '_blank') {
+                window.open(ssoBridge, '_blank');
+            } else {
+                window.location.href = ssoBridge;
+            }
+        }
+    });
+})();
+</script>
+[% END %]
+
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    var curHost = window.location.hostname;
+    if (curHost && curHost !== 'localhost' && curHost !== '127.0.0.1') {
+        $('a[href*="localhost:"], a[href*="127.0.0.1:"]').each(function() {
+            var href = $(this).attr('href');
+            if (href) {
+                $(this).attr('href', href.replace(/(localhost|127\.0\.0\.1)/g, curHost));
+            }
+        });
+    }
+})();
+</script>
 </body>
 <!-- prettier-ignore-start -->
 </html>

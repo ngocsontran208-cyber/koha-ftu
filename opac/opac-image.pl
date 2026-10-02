@@ -84,9 +84,9 @@ if ( C4::Context->preference("OPACLocalCoverImages") ) {
 $image ||= Koha::CoverImages->no_image;
 
 my $image_data =
-      $input->param('thumbnail')
-    ? $image->thumbnail
-    : $image->imagefile;
+      ( $input->param('thumbnail') && $input->param('mini') )
+    ? ( $image->thumbnail || $image->imagefile )
+    : ( $image->imagefile || $image->thumbnail );
 
 print $input->header(
     -type           => $image->mimetype,

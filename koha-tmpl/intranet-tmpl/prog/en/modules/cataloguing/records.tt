@@ -1,0 +1,2295 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Record Management &amp; Accession Numbers &rsaquo; Cataloging &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+<style>
+  /* Force 100% Full Screen Width */
+  body#cat_records .main.container-fluid {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  body#cat_records .main.container-fluid > .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  body#cat_records .main.container-fluid > .row > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .records-container {
+    padding: 16px 0 32px 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: transparent;
+    min-height: 100vh;
+    font-family: inherit;
+    color: #1e293b;
+  }
+  .rec-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .rec-title-group h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rec-subtitle {
+    font-size: 13px;
+    color: #64748b;
+  }
+  .rec-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .rec-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .rec-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+    text-decoration: none;
+  }
+  .rec-btn-primary {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+  }
+  .rec-btn-primary:hover {
+    background: #1e293b;
+    color: #ffffff;
+    border-color: #1e293b;
+  }
+  .rec-btn-danger {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fff;
+  }
+  .rec-btn-danger:hover {
+    background: #fef2f2;
+    border-color: #f87171;
+    color: #b91c1c;
+  }
+  .rec-btn-sm {
+    padding: 4px 8px;
+    font-size: 11.5px;
+    border-radius: 4px;
+  }
+  .btn-edit-item {
+    color: #0284c7;
+    border-color: #bae6fd;
+    background: #f0f9ff;
+  }
+  .btn-edit-item:hover {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-color: #7dd3fc;
+  }
+
+  /* Filter Card */
+  .rec-filter-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .rec-filter-grid {
+    display: grid;
+    grid-template-columns: 2.5fr 1.2fr 1.2fr 1fr 1fr 1.1fr auto;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  @media (max-width: 1200px) {
+    .rec-filter-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+  @media (max-width: 768px) {
+    .rec-filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .filter-group label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin: 0;
+  }
+  .filter-group input, .filter-group select {
+    height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: 13px;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .filter-group input:focus, .filter-group select:focus {
+    border-color: #0f172a;
+  }
+
+  /* Table Card */
+  .rec-table-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .rec-table-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #64748b;
+  }
+  .rec-table-info-bar strong {
+    color: #0f172a;
+  }
+  .rec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .rec-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+  }
+  .rec-table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+  .rec-table tr:hover td {
+    background: #f8fafc;
+  }
+
+  /* Cover Thumbnail & Dropzone */
+  .cover-box {
+    position: relative;
+    width: 52px;
+    height: 72px;
+    border-radius: 5px;
+    border: 1px solid #e2e8f0;
+    background: #f1f5f9;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .cover-box:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .cover-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cover-placeholder {
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    user-select: none;
+  }
+  .cover-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    gap: 4px;
+  }
+  .cover-box:hover .cover-overlay {
+    opacity: 1;
+  }
+  .cover-overlay-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cover-overlay-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+  .cover-drop-active {
+    border: 2px dashed #0284c7 !important;
+    background: #e0f2fe !important;
+  }
+
+  /* Biblio Metadata Display */
+  .rec-meta-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 3px;
+    display: inline-block;
+  }
+  .rec-meta-title:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  .rec-badge-type {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .rec-meta-author {
+    font-size: 12.5px;
+    color: #334155;
+    margin-bottom: 2px;
+  }
+  .rec-meta-details {
+    font-size: 11.5px;
+    color: #64748b;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Item / ĐKCB Badges & Accordion */
+  .items-badge-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+  }
+  .badge-items-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+  }
+  .badge-items-count.btn-update-qty {
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    font-family: inherit;
+    line-height: inherit;
+  }
+  .badge-items-count.btn-update-qty:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .badge-items-count.btn-update-qty.qty-empty {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+  }
+  .badge-items-count.btn-update-qty.qty-empty:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  .badge-items-count.btn-update-qty.qty-full {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #15803d;
+  }
+  .badge-items-count.btn-update-qty.qty-full:hover {
+    background: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+  }
+  .badge-items-count.btn-update-qty.qty-partial {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #b45309;
+  }
+  .badge-items-count.btn-update-qty.qty-partial:hover {
+    background: #fef3c7;
+    border-color: #fcd34d;
+    color: #92400e;
+  }
+  .badge-avail {
+    color: #15803d;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+  .badge-onloan {
+    color: #b45309;
+    background: #fffbeb;
+    border-color: #fde68a;
+  }
+  .btn-toggle-items {
+    font-size: 11.5px;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+  }
+  .btn-toggle-items:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+  }
+
+  /* Expandable Subrow (Items Table) */
+  .items-accordion-row td {
+    background: #f8fafc !important;
+    padding: 0 14px 16px 14px !important;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .items-drawer-content {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-top: 6px;
+  }
+  .sub-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin-bottom: 14px;
+  }
+  .sub-items-table th {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+  }
+  .sub-items-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .sub-barcode-pill {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: #0f172a;
+    display: inline-block;
+  }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-available { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .status-onloan { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .status-lost { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  .status-damaged { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+  /* Quick Add Item Form inside Drawer */
+  .add-item-subform {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
+    flex-wrap: wrap;
+  }
+  .add-item-subform input, .add-item-subform select {
+    height: 32px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+  .add-item-subform input[name="barcode"] { width: 170px; font-family: monospace; }
+  .add-item-subform input[name="itemcallnumber"] { width: 120px; }
+  .add-item-subform select { width: 160px; }
+
+  /* Pagination Bar */
+  .rec-pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .page-btn-group {
+    display: flex;
+    gap: 4px;
+  }
+  .page-link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 12.5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .page-link-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+    text-decoration: none;
+  }
+  .page-link-btn.active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+    font-weight: 600;
+  }
+
+  /* Modals & Scroll Lock */
+  html.modal-open,
+  body.modal-open,
+  body#cat_records.modal-open {
+    overflow: hidden !important;
+  }
+  .rec-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overscroll-behavior: contain;
+  }
+  .rec-modal {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 680px;
+    overflow: hidden;
+    animation: modalPop 0.15s ease-out;
+    border: 1px solid #e2e8f0;
+    overscroll-behavior: contain;
+  }
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .rec-modal-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+  }
+  .rec-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .rec-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: #64748b;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+  }
+  .rec-modal-close:hover { color: #0f172a; }
+  .rec-modal-body {
+    padding: 20px;
+    max-height: 75vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .rec-modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: #f8fafc;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .form-grid > * { min-width: 0; }
+  .form-grid .full-col { grid-column: span 2; }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+  .form-row label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+  }
+  .form-row input, .form-row select, .form-row textarea {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+  }
+  .form-row textarea { resize: vertical; min-height: 60px; }
+
+  /* Drag Drop Zone */
+  .dropzone-box {
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dropzone-box:hover, .dropzone-box.dragover {
+    border-color: #0f172a;
+    background: #f1f5f9;
+  }
+
+  /* Toast Notification */
+  .rec-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 10px 16px;
+    background: #0f172a;
+    color: #ffffff;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .rec-toast.show { display: flex; animation: toastIn 0.2s ease; }
+  @keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+</head>
+
+<body id="cat_records" class="cat">
+[% WRAPPER 'header.inc' %]
+  [% INCLUDE 'cataloging-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+  [% WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumb_item %]
+      <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+    [% END %]
+    [% WRAPPER breadcrumb_item bc_active= 1 %]
+      <span>Record &amp; Accession Management</span>
+    [% END %]
+  [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' wide_full => 1 %]
+<div class="records-container">
+
+  <!-- Header & Primary Actions -->
+  <div class="rec-header-row">
+    <div class="rec-title-group">
+      <h1>Record Management &amp; Accession Numbers</h1>
+    </div>
+    <div class="rec-actions">
+      <button type="button" class="rec-btn rec-btn-primary btn-open-quick-create">
+        <i class="fa fa-plus"></i> Quick Create Record
+      </button>
+      <a href="/cgi-bin/koha/tools/stage-marc-import.pl" class="rec-btn">
+        <i class="fa fa-download"></i> Stage MARC
+      </a>
+      <a href="/cgi-bin/koha/tools/export.pl" class="rec-btn">
+        <i class="fa fa-upload"></i> Export Data
+      </a>
+      <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=batch" class="rec-btn">
+        <i class="fa fa-barcode"></i> Barcode Labels
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="rec-filter-card">
+    <form id="filterForm" method="get" action="/cgi-bin/koha/cataloguing/records.pl">
+      <input type="hidden" name="limit" value="[% limit | html %]">
+      <div class="rec-filter-grid">
+        <div class="filter-group">
+          <label>Search Keyword</label>
+          <input type="text" name="q" value="[% q | html %]" placeholder="Title, author, ISBN, Barcode / Accession...">
+        </div>
+        <div class="filter-group">
+          <label>Item Type</label>
+          <select name="itemtype">
+            <option value="">-- All Types --</option>
+            [% FOREACH it IN itemtypes %]
+              <option value="[% it.itemtype | html %]" [% IF selected_type == it.itemtype %]selected[% END %]>[% it.description | html %]</option>
+            [% END %]
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Branch / Holding</label>
+          <select name="branch">
+            <option value="">-- All Branches --</option>
+            [% FOREACH br IN branches %]
+              <option value="[% br.branchcode | html %]" [% IF selected_br == br.branchcode %]selected[% END %]>[% br.branchname | html %]</option>
+            [% END %]
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Cover Image</label>
+          <select name="has_cover">
+            <option value="">All</option>
+            <option value="1" [% IF has_cover == '1' %]selected[% END %]>Has Cover</option>
+            <option value="0" [% IF has_cover == '0' %]selected[% END %]>No Cover</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Copies / Items</label>
+          <select name="has_items">
+            <option value="">All</option>
+            <option value="1" [% IF has_items == '1' %]selected[% END %]>Has Items</option>
+            <option value="0" [% IF has_items == '0' %]selected[% END %]>No Items</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Sort By</label>
+          <select name="sort">
+            <option value="newest" [% IF sort == 'newest' %]selected[% END %]>Newest First</option>
+            <option value="title_asc" [% IF sort == 'title_asc' %]selected[% END %]>Title (A &rarr; Z)</option>
+            <option value="author_asc" [% IF sort == 'author_asc' %]selected[% END %]>Author (A &rarr; Z)</option>
+          </select>
+        </div>
+        <div class="filter-group" style="display: flex; flex-direction: row; gap: 6px;">
+          <button type="submit" class="rec-btn rec-btn-primary" style="height: 36px;">
+            <i class="fa fa-search"></i> Search
+          </button>
+          [% IF q || selected_type || selected_br || has_cover != '' || has_items != '' || sort != 'newest' %]
+            <a href="/cgi-bin/koha/cataloguing/records.pl" class="rec-btn" style="height: 36px;" title="Reset Filters">
+              <i class="fa fa-refresh"></i>
+            </a>
+          [% END %]
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table Card -->
+  <div class="rec-table-card">
+    <div class="rec-table-info-bar">
+      <div>
+        Found <strong>[% total_records | html %]</strong> records (Page [% current_page | html %] / [% total_pages | html %])
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>Page size:</span>
+        <select onchange="changeLimit(this.value)" style="height: 28px; font-size: 12px; border-radius: 4px; border: 1px solid #cbd5e1;">
+          <option value="10" [% IF limit == 10 %]selected[% END %]>10 items</option>
+          <option value="15" [% IF limit == 15 %]selected[% END %]>15 items</option>
+          <option value="25" [% IF limit == 25 %]selected[% END %]>25 items</option>
+          <option value="50" [% IF limit == 50 %]selected[% END %]>50 items</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="rec-table">
+      <thead>
+        <tr>
+          <th style="width: 70px; text-align: center;">Cover</th>
+          <th>Title &amp; Publication Info</th>
+          <th style="width: 140px;">Classification</th>
+          <th style="width: 200px;">Copies &amp; Accession</th>
+          <th style="width: 110px;">Date Created</th>
+          <th style="width: 150px; text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        [% IF records.size %]
+          [% FOREACH r IN records %]
+            <tr id="rec-row-[% r.biblionumber | html %]">
+              <!-- Cover image box with drag-drop and click -->
+              <td style="text-align: center;">
+                <div class="cover-box dropzone-cell btn-cover-trigger" 
+                     id="cover-box-[% r.biblionumber | html %]" 
+                     data-biblionumber="[% r.biblionumber | html %]"
+                     title="Click to change or upload cover image">
+                  [% IF r.cover_image_id %]
+                    <img id="cover-img-[% r.biblionumber | html %]" src="/cgi-bin/koha/catalogue/image.pl?biblionumber=[% r.biblionumber | html %]&amp;thumbnail=1" alt="Cover" />
+                  [% ELSE %]
+                    <div class="cover-placeholder" id="cover-placeholder-[% r.biblionumber | html %]">
+                      <i class="fa fa-camera" style="font-size: 16px;"></i>
+                      <span>+ Cover</span>
+                    </div>
+                  [% END %]
+                  <div class="cover-overlay">
+                    <span class="cover-overlay-btn btn-cover-trigger" data-biblionumber="[% r.biblionumber | html %]"><i class="fa fa-upload"></i> Change</span>
+                    [% IF r.cover_image_id %]
+                      <span class="cover-overlay-btn btn-delete-cover" data-biblionumber="[% r.biblionumber | html %]" title="Delete cover"><i class="fa fa-trash"></i></span>
+                    [% END %]
+                  </div>
+                </div>
+              </td>
+
+              <!-- Biblio Title & Info -->
+              <td>
+                <div>
+                  <a class="rec-meta-title" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% r.biblionumber | html %]" target="_blank">
+                    [% r.title | html %]
+                  </a>
+                  [% IF r.itemtype_desc %]
+                    <span class="rec-badge-type">[% r.itemtype_desc | html %]</span>
+                  [% END %]
+                </div>
+                [% IF r.subtitle %]
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 2px;">[% r.subtitle | html %]</div>
+                [% END %]
+                <div class="rec-meta-author">
+                  [% IF r.author %]<strong>Author:</strong> [% r.author | html %][% ELSE %]<span style="color: #94a3b8;">(No author)</span>[% END %]
+                </div>
+                <div class="rec-meta-details">
+                  [% IF r.publishercode || r.publicationyear %]
+                    <span><i class="fa fa-building-o"></i> [% r.publishercode | html %] [% IF r.publicationyear %]([% r.publicationyear | html %])[% END %]</span>
+                  [% END %]
+                  [% IF r.isbn %]
+                    <span><i class="fa fa-barcode"></i> ISBN: [% r.isbn | html %]</span>
+                  [% END %]
+                  <span style="color: #94a3b8;">#Biblio: [% r.biblionumber | html %]</span>
+                </div>
+              </td>
+
+              <!-- Classification & Call Number -->
+              <td>
+                <div id="display-callno-[% r.biblionumber | html %]">
+                  [% IF r.callnumber %]
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.callnumber | html %]</span>
+                  [% ELSIF r.classification && r.cutter %]
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.classification | html %]/[% r.cutter | html %]</span>
+                  [% ELSIF r.classification %]
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.classification | html %]</span>
+                  [% ELSIF r.cutter %]
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.cutter | html %]</span>
+                  [% ELSIF r.dewey %]
+                    <span style="font-weight: 600; color: #0f172a;">[% r.dewey | html %]</span>
+                  [% ELSE %]
+                    <span style="color: #94a3b8; font-weight: 400;">(None)</span>
+                  [% END %]
+                </div>
+              </td>
+
+              <!-- Items & Barcodes Badge -->
+              <td>
+                <div class="items-badge-container">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" class="badge-items-count btn-update-qty [% IF r.book_quantity == 0 && r.total_items == 0 %]qty-empty[% ELSIF r.book_quantity > 0 && r.total_items >= r.book_quantity %]qty-full[% ELSIF r.book_quantity > 0 %]qty-partial[% END %]" 
+                      id="badge-total-[% r.biblionumber | html %]" 
+                      data-biblionumber="[% r.biblionumber | html %]" 
+                      data-title="[% r.title | html %]" 
+                      data-total="[% r.total_items | html %]" 
+                      data-quantity="[% r.book_quantity | html %]" 
+                      title="Click to update total book quantity">
+                      <span id="badge-total-text-[% r.biblionumber | html %]">
+                        [% IF r.book_quantity > 0 %]
+                          [% r.total_items | html %]/[% r.book_quantity | html %] copies
+                        [% ELSE %]
+                          [% r.total_items | html %] copies
+                        [% END %]
+                      </span>
+                      <i class="fa fa-pencil" style="font-size: 10px; margin-left: 3px; opacity: 0.7;"></i>
+                    </button>
+                    [% IF r.available_items > 0 %]
+                      <span class="badge-items-count badge-avail" id="badge-avail-[% r.biblionumber | html %]">
+                        [% r.available_items | html %] available
+                      </span>
+                    [% END %]
+                    [% IF r.onloan_items > 0 %]
+                      <span class="badge-items-count badge-onloan" id="badge-onloan-[% r.biblionumber | html %]">
+                        [% r.onloan_items | html %] checked out
+                      </span>
+                    [% END %]
+                  </div>
+                  <button type="button" class="btn-toggle-items" data-biblionumber="[% r.biblionumber | html %]">
+                    <i class="fa fa-list-ul"></i> <span id="toggle-label-[% r.biblionumber | html %]">View [% r.items.size || 0 %] items</span> <i class="fa fa-angle-down"></i>
+                  </button>
+                </div>
+              </td>
+
+              <!-- Date Created -->
+              <td style="color: #64748b; font-size: 12px;">
+                [% r.datecreated || r.copyrightdate || '-' | html %]
+              </td>
+
+              <!-- Actions -->
+              <td style="text-align: right;">
+                <div style="display: inline-flex; gap: 4px;">
+                  <button type="button" class="rec-btn rec-btn-sm btn-quick-edit" data-biblionumber="[% r.biblionumber | html %]" title="Quick Edit Biblio">
+                    <i class="fa fa-pencil"></i> Edit
+                  </button>
+                  <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% r.biblionumber | html %]" target="_blank" class="rec-btn rec-btn-sm" title="Open Full MARC Editor">
+                    <i class="fa fa-external-link"></i> MARC
+                  </a>
+                  <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-biblio" data-biblionumber="[% r.biblionumber | html %]" data-items="[% r.total_items | html %]" title="Delete record &amp; items">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Expandable Items Subrow (Accordion) -->
+            <tr id="items-subrow-[% r.biblionumber | html %]" class="items-accordion-row" style="display: none;">
+              <td colspan="6">
+                <div class="items-drawer-content">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 600; font-size: 13px; color: #0f172a;">
+                      <i class="fa fa-book text-muted"></i> Accession / Item copies for record #[% r.biblionumber | html %]
+                    </div>
+                    <span style="font-size: 11.5px; color: #64748b;">Holdings &bull; Circulation status &bull; Barcodes</span>
+                  </div>
+
+                  <!-- Sub Items Table -->
+                  <table class="sub-items-table" id="sub-table-[% r.biblionumber | html %]">
+                    <thead>
+                      <tr>
+                        <th style="width: 150px;">Barcode / Accession</th>
+                        <th>Call Number</th>
+                        <th>Branch &amp; Location</th>
+                        <th>Circulation Status</th>
+                        <th>Date Added</th>
+                        <th style="width: 100px; text-align: right;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="items-tbody-[% r.biblionumber | html %]">
+                      [% IF r.items.size > 0 %]
+                        [% FOREACH it IN r.items %]
+                          <tr id="item-row-[% it.itemnumber | html %]">
+                            <td>
+                              <span class="sub-barcode-pill" id="item-barcode-pill-[% it.itemnumber | html %]">[% it.barcode | html %]</span>
+                            </td>
+                            <td id="item-callno-td-[% it.itemnumber | html %]">[% it.itemcallnumber || r.callnumber || r.classification || '-' | html %]</td>
+                            <td id="item-branch-td-[% it.itemnumber | html %]">[% it.branchname || it.homebranch | html %][% IF it.location_desc %] ([% it.location_desc | html %])[% ELSIF it.location %] ([% it.location | html %])[% END %]</td>
+                            <td>
+                              <span class="status-pill status-[% it.status_code | html %]">
+                                [% it.status_label | html %]
+                              </span>
+                            </td>
+                            <td style="color: #64748b; font-size: 11.5px;">[% it.dateaccessioned || '-' | html %]</td>
+                            <td style="text-align: right; white-space: nowrap;">
+                              <button type="button" class="rec-btn rec-btn-sm btn-edit-item" 
+                                data-itemnumber="[% it.itemnumber | html %]" 
+                                data-biblionumber="[% r.biblionumber | html %]" 
+                                data-barcode="[% it.barcode | html %]" 
+                                data-callno="[% it.itemcallnumber || r.callnumber | html %]" 
+                                data-branch="[% it.homebranch | html %]" 
+                                data-location="[% it.location | html %]" 
+                                title="Edit item barcode &amp; call number">
+                                <i class="fa fa-pencil"></i>
+                              </button>
+                              <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-item" data-itemnumber="[% it.itemnumber | html %]" data-biblionumber="[% r.biblionumber | html %]" title="Delete this item">
+                                <i class="fa fa-times"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        [% END %]
+                      [% ELSE %]
+                        <tr id="no-items-row-[% r.biblionumber | html %]">
+                          <td colspan="6" style="text-align: center; color: #94a3b8; padding: 12px;">
+                            No items attached to this record yet. Add a copy using the form below.
+                          </td>
+                        </tr>
+                      [% END %]
+                    </tbody>
+                  </table>
+
+                  <!-- Quick Add Item Form -->
+                  <div class="add-item-subform">
+                    <span style="font-weight: 600; font-size: 12px; color: #334155;">+ Add New Copy:</span>
+                    <input type="text" id="add-barcode-[% r.biblionumber | html %]" name="barcode" placeholder="Barcode / Accession" />
+                    <button type="button" class="rec-btn rec-btn-sm btn-auto-barcode" data-biblionumber="[% r.biblionumber | html %]">
+                      <i class="fa fa-magic"></i> Auto Barcode
+                    </button>
+                    <input type="text" id="add-callno-[% r.biblionumber | html %]" name="itemcallnumber" value="[% r.callnumber || r.classification | html %]" placeholder="Call number (e.g. [% r.callnumber || '338.5/N571t' | html %])" />
+                    <select id="add-branch-[% r.biblionumber | html %]">
+                      [% FOREACH br IN branches %]
+                        <option value="[% br.branchcode | html %]" [% IF br.branchcode == 'CPL' %]selected[% END %]>[% br.branchname | html %]</option>
+                      [% END %]
+                    </select>
+                    <button type="button" class="rec-btn rec-btn-primary rec-btn-sm btn-submit-item" data-biblionumber="[% r.biblionumber | html %]">
+                      <i class="fa fa-check"></i> Save Item
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          [% END %]
+        [% ELSE %]
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 48px; color: #94a3b8;">
+              <i class="fa fa-search" style="font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.4;"></i>
+              No bibliographic records matched the current filter.
+            </td>
+          </tr>
+        [% END %]
+      </tbody>
+    </table>
+
+    <!-- Pagination Bar -->
+    <div class="rec-pagination-bar">
+      <div style="font-size: 12.5px; color: #64748b;">
+        Showing <strong>[% records.size || 0 %]</strong> / [% total_records | html %] records
+      </div>
+      <div class="page-btn-group">
+        [% IF prev_page %]
+          <a class="page-link-btn" href="?page=[% prev_page | html %]&amp;q=[% q | uri %]&amp;itemtype=[% selected_type | uri %]&amp;branch=[% selected_br | uri %]&amp;has_cover=[% has_cover | uri %]&amp;has_items=[% has_items | uri %]&amp;sort=[% sort | uri %]&amp;limit=[% limit | uri %]">&laquo; Prev</a>
+        [% END %]
+
+        [% FOREACH pg IN pages_loop %]
+          <a class="page-link-btn [% IF pg.is_current %]active[% END %]" href="?page=[% pg.page_num | html %]&amp;q=[% q | uri %]&amp;itemtype=[% selected_type | uri %]&amp;branch=[% selected_br | uri %]&amp;has_cover=[% has_cover | uri %]&amp;has_items=[% has_items | uri %]&amp;sort=[% sort | uri %]&amp;limit=[% limit | uri %]">
+            [% pg.page_num | html %]
+          </a>
+        [% END %]
+
+        [% IF next_page %]
+          <a class="page-link-btn" href="?page=[% next_page | html %]&amp;q=[% q | uri %]&amp;itemtype=[% selected_type | uri %]&amp;branch=[% selected_br | uri %]&amp;has_cover=[% has_cover | uri %]&amp;has_items=[% has_items | uri %]&amp;sort=[% sort | uri %]&amp;limit=[% limit | uri %]">Next &raquo;</a>
+        [% END %]
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL 1: QUICK EDIT BIBLIO -->
+<div class="rec-modal-backdrop" id="modalQuickEdit">
+  <div class="rec-modal">
+    <div class="rec-modal-header">
+      <h3 id="editModalTitle">Edit Bibliographic Record</h3>
+      <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
+    </div>
+    <form id="quickEditForm">
+      [% INCLUDE 'csrf-token.inc' %]
+      <input type="hidden" name="op" value="cud-save_record" />
+      <input type="hidden" name="biblionumber" id="edit_biblionumber" value="" />
+      <div class="rec-modal-body">
+        <div class="form-grid">
+          <div class="form-row full-col">
+            <label>Title *</label>
+            <input type="text" name="title" id="edit_title" required />
+          </div>
+          <div class="form-row full-col">
+            <label>Subtitle</label>
+            <input type="text" name="subtitle" id="edit_subtitle" />
+          </div>
+          <div class="form-row">
+            <label>Author</label>
+            <input type="text" name="author" id="edit_author" />
+          </div>
+          <div class="form-row">
+            <label>Item Type</label>
+            <select name="itemtype" id="edit_itemtype">
+              [% FOREACH it IN itemtypes %]
+                <option value="[% it.itemtype | html %]">[% it.description | html %]</option>
+              [% END %]
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Publisher</label>
+            <input type="text" name="publishercode" id="edit_publisher" />
+          </div>
+          <div class="form-row">
+            <label>Publication Year</label>
+            <input type="text" name="publicationyear" id="edit_pubyear" />
+          </div>
+          <div class="form-row">
+            <label>Classification / DDC (MARC 082$a / 942$h)</label>
+            <input type="text" name="classification" id="edit_classification" placeholder="e.g. 005.133, 330.1" />
+          </div>
+          <div class="form-row">
+            <label>Cutter / Author number (MARC 082$b / 942$i)</label>
+            <input type="text" name="cutter" id="edit_cutter" placeholder="e.g. P881, N571t" />
+          </div>
+          <div class="form-row">
+            <label>ISBN</label>
+            <input type="text" name="isbn" id="edit_isbn" />
+          </div>
+          <div class="form-row">
+            <label>Pages</label>
+            <input type="text" name="pages" id="edit_pages" />
+          </div>
+          <div class="form-row full-col">
+            <label>Abstract / Notes</label>
+            <textarea name="abstract" id="edit_abstract" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="rec-modal-footer">
+        <a id="btnFullMarcLink" href="#" target="_blank" class="rec-btn" style="margin-right: auto;">
+          <i class="fa fa-external-link"></i> Open Full MARC Editor
+        </a>
+        <button type="button" class="rec-btn btn-close-modal">Cancel</button>
+        <button type="submit" class="rec-btn rec-btn-primary" id="btnSaveRecord">
+          <i class="fa fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 2: QUICK CREATE BIBLIO -->
+<div class="rec-modal-backdrop" id="modalQuickCreate">
+  <div class="rec-modal">
+    <div class="rec-modal-header">
+      <h3>Quick Create Record &amp; Items</h3>
+      <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
+    </div>
+    <form id="quickCreateForm">
+      [% INCLUDE 'csrf-token.inc' %]
+      <input type="hidden" name="op" value="cud-quick_create" />
+      <div class="rec-modal-body">
+        <div class="form-grid">
+          <div class="form-row full-col">
+            <label>Title *</label>
+            <input type="text" name="title" required placeholder="Enter record title..." />
+          </div>
+          <div class="form-row">
+            <label>Primary Author</label>
+            <input type="text" name="author" placeholder="Author name..." />
+          </div>
+          <div class="form-row">
+            <label>Item Type</label>
+            <select name="itemtype">
+              [% FOREACH it IN itemtypes %]
+                <option value="[% it.itemtype | html %]">[% it.description | html %]</option>
+              [% END %]
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Publisher</label>
+            <input type="text" name="publishercode" placeholder="Publisher name..." />
+          </div>
+          <div class="form-row">
+            <label>Publication Year</label>
+            <input type="text" name="publicationyear" placeholder="2026" />
+          </div>
+          <div class="form-row">
+            <label>Classification (DDC) (MARC 082$a)</label>
+            <input type="text" name="classification" placeholder="e.g. 005.133, 330.1" />
+          </div>
+          <div class="form-row">
+            <label>Cutter / Author number (MARC 082$b)</label>
+            <input type="text" name="cutter" placeholder="e.g. P881, N571t" />
+          </div>
+          <div class="form-row">
+            <label>ISBN</label>
+            <input type="text" name="isbn" placeholder="978-..." />
+          </div>
+
+          <div class="form-row full-col" style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #cbd5e1;">
+            <div style="font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 6px;">
+              Initialize Item Copies (Accession Numbers):
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Initial Copy Quantity</label>
+            <input type="number" name="num_items" value="1" min="1" max="20" />
+          </div>
+          <div class="form-row">
+            <label>Barcode Prefix</label>
+            <input type="text" name="barcode_prefix" value="FTU" />
+          </div>
+          <div class="form-row full-col">
+            <label>Holding Branch</label>
+            <select name="homebranch">
+              [% FOREACH br IN branches %]
+                <option value="[% br.branchcode | html %]" [% IF br.branchcode == 'CPL' %]selected[% END %]>[% br.branchname | html %]</option>
+              [% END %]
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="rec-modal-footer">
+        <button type="button" class="rec-btn btn-close-modal">Cancel</button>
+        <button type="submit" class="rec-btn rec-btn-primary" id="btnCreateRecord">
+          <i class="fa fa-plus"></i> Create Record
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 3: UPLOAD COVER IMAGE -->
+<div class="rec-modal-backdrop" id="modalUploadCover">
+  <div class="rec-modal" style="max-width: 480px;">
+    <div class="rec-modal-header">
+      <h3 id="coverModalTitle">Upload Cover Image</h3>
+      <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
+    </div>
+    <div class="rec-modal-body">
+      <input type="hidden" id="upload_biblionumber" value="" />
+      <div class="dropzone-box" id="modalDropzone">
+        <i class="fa fa-cloud-upload" style="font-size: 36px; color: #64748b; margin-bottom: 8px; display: block;"></i>
+        <div style="font-weight: 600; font-size: 14px; color: #0f172a; margin-bottom: 4px;">Drag &amp; drop image here or click to browse</div>
+        <div style="font-size: 12px; color: #94a3b8;">Supports JPG, PNG, WebP (Max 10MB)</div>
+      </div>
+      <input type="file" id="coverFileInput" accept="image/*" style="display: none;" />
+      <div id="coverPreviewContainer" style="display: none; margin-top: 14px; text-align: center;">
+        <img id="coverPreviewImg" src="" style="max-height: 180px; border-radius: 6px; border: 1px solid #cbd5e1;" />
+      </div>
+    </div>
+    <div class="rec-modal-footer">
+      <button type="button" class="rec-btn btn-close-modal">Close</button>
+      <button type="button" class="rec-btn rec-btn-primary" id="btnConfirmUploadCover" disabled>
+        <i class="fa fa-upload"></i> Apply Cover
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 4: CONFIRM DELETE -->
+<div class="rec-modal-backdrop" id="modalConfirmDelete">
+  <div class="rec-modal" style="max-width: 440px;">
+    <div class="rec-modal-header">
+      <h3 style="color: #dc2626;"><i class="fa fa-exclamation-triangle"></i> Confirm Delete Record</h3>
+      <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
+    </div>
+    <div class="rec-modal-body">
+      <input type="hidden" id="del_biblionumber" value="" />
+      <p style="font-size: 13.5px; color: #334155; margin-bottom: 12px;">
+        Are you sure you want to permanently delete this record:
+      </p>
+      <div id="del_record_title" style="font-weight: 700; color: #0f172a; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px;"></div>
+      <div style="font-size: 12.5px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px;">
+        <i class="fa fa-warning"></i> This action will delete all <strong id="del_items_count">0</strong> attached item copies and cannot be undone!
+      </div>
+    </div>
+    <div class="rec-modal-footer">
+      <button type="button" class="rec-btn btn-close-modal">Cancel</button>
+      <button type="button" class="rec-btn rec-btn-danger" id="btnExecuteDelete">
+        <i class="fa fa-trash"></i> Permanently Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 5: EDIT ITEM / ACCESSION BARCODE -->
+<div class="rec-modal-backdrop" id="modalEditItem">
+  <div class="rec-modal" style="max-width: 580px;">
+    <div class="rec-modal-header">
+      <h3 id="editItemModalTitle"><i class="fa fa-pencil"></i> Edit Item / Accession</h3>
+      <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
+    </div>
+    <form id="editItemForm">
+      [% INCLUDE 'csrf-token.inc' %]
+      <input type="hidden" name="op" value="cud-edit_item" />
+      <input type="hidden" name="itemnumber" id="edit_item_itemnumber" value="" />
+      <input type="hidden" name="biblionumber" id="edit_item_biblionumber" value="" />
+      <div class="rec-modal-body">
+        <div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px; line-height: 1.45;">
+          Record: <strong id="edit_item_record_title" style="color: #0f172a;"></strong>
+        </div>
+        <div class="form-grid">
+          <div class="form-row full-col">
+            <label>Accession / Barcode *</label>
+            <div style="display: flex; gap: 8px; align-items: stretch;">
+              <input type="text" name="barcode" id="edit_item_barcode" required style="flex: 1 1 0; min-width: 0; font-family: monospace; font-weight: 700; font-size: 14px; color: #0284c7; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 6px; padding: 8px 12px;" />
+              <button type="button" class="rec-btn" id="btnEditItemAutoBarcode" title="Generate next barcode" style="flex-shrink: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; padding: 0 14px; color: #0284c7; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; cursor: pointer;">
+                <i class="fa fa-magic"></i> Auto Barcode
+              </button>
+            </div>
+          </div>
+          <div class="form-row full-col">
+            <label>Item Call Number</label>
+            <input type="text" name="itemcallnumber" id="edit_item_callnumber" placeholder="e.g. 338.5/N571t" />
+          </div>
+          <div class="form-row">
+            <label>Home Library</label>
+            <select name="homebranch" id="edit_item_branch" style="text-overflow: ellipsis; overflow: hidden;">
+              [% FOREACH br IN branches %]
+                <option value="[% br.branchcode | html %]">[% br.branchname | html %]</option>
+              [% END %]
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Location</label>
+            <select name="location" id="edit_item_location" style="text-overflow: ellipsis; overflow: hidden;">
+              <option value="">-- Default (None) --</option>
+              [% FOREACH loc IN locations %]
+                <option value="[% loc.authorised_value | html %]">[% loc.lib || loc.authorised_value | html %] ([% loc.authorised_value | html %])</option>
+              [% END %]
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="rec-modal-footer">
+        <button type="button" class="rec-btn btn-close-modal">Cancel</button>
+        <button type="submit" class="rec-btn rec-btn-primary" id="btnSaveEditItem">
+          <i class="fa fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL 6: UPDATE BOOK QUANTITY -->
+<div class="rec-modal-backdrop" id="modalUpdateQuantity">
+  <div class="rec-modal" style="max-width: 440px;">
+    <div class="rec-modal-header">
+      <h3 id="updateQtyModalTitle"><i class="fa fa-book"></i> Update Book Quantity</h3>
+      <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
+    </div>
+    <form id="updateQuantityForm">
+      [% INCLUDE 'csrf-token.inc' %]
+      <input type="hidden" name="op" value="cud-update_quantity" />
+      <input type="hidden" name="biblionumber" id="qty_biblionumber" value="" />
+      <div class="rec-modal-body">
+        <div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px; line-height: 1.45;">
+          Record: <strong id="qty_record_title" style="color: #0f172a;"></strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px;">
+          <span style="font-size: 13px; color: #475569; font-weight: 500;">Existing Accessions:</span>
+          <span id="qty_current_items_badge" style="font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 2px 10px; border-radius: 12px; font-size: 13px;">0 copies</span>
+        </div>
+
+        <div class="form-row">
+          <label style="font-size: 13px; font-weight: 600; color: #1e293b;">
+            Total Allowed Copies (Quantity) *
+          </label>
+          <input type="number" name="quantity" id="qty_input" required min="0" step="1" 
+            style="font-size: 18px; font-weight: 700; color: #0f172a; padding: 8px 12px; border: 1.5px solid #0284c7; border-radius: 6px; width: 100%; box-sizing: border-box;" />
+          <div style="font-size: 12px; color: #64748b; margin-top: 6px; display: flex; align-items: flex-start; gap: 5px; line-height: 1.4;">
+            <i class="fa fa-info-circle" style="color: #0284c7; margin-top: 2px;"></i>
+            <span>Accessioned items cannot exceed this total quantity (Must be &ge; current copies).</span>
+          </div>
+        </div>
+      </div>
+      <div class="rec-modal-footer">
+        <button type="button" class="rec-btn btn-close-modal">Cancel</button>
+        <button type="submit" class="rec-btn rec-btn-primary" id="btnSaveQuantity">
+          <i class="fa fa-check"></i> Save Quantity
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Feedback -->
+<div class="rec-toast" id="globalToast">
+  <i class="fa fa-check-circle" id="toastIcon"></i>
+  <span id="toastMsg">Success</span>
+</div>
+
+[% END #/ WRAPPER 'main-container.inc' %]
+
+[% MACRO jsinclude BLOCK %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+  let activeUploadBase64 = null;
+
+  window.showToast = function(msg, isError = false) {
+    const toast = document.getElementById('globalToast');
+    const toastMsg = document.getElementById('toastMsg');
+    const toastIcon = document.getElementById('toastIcon');
+    if (!toast || !toastMsg) return;
+    toastMsg.textContent = msg;
+    if (isError) {
+      toast.style.background = '#dc2626';
+      if (toastIcon) toastIcon.className = 'fa fa-exclamation-circle';
+    } else {
+      toast.style.background = '#0f172a';
+      if (toastIcon) toastIcon.className = 'fa fa-check-circle';
+    }
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+  };
+
+  window.changeLimit = function(lim) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('limit', lim);
+    url.searchParams.set('page', 1);
+    window.location.href = url.toString();
+  };
+
+  window.openModal = function(modalId) {
+    const el = document.getElementById(modalId);
+    if (el) el.style.display = 'flex';
+    window.syncModalScrollLock();
+  };
+
+  window.closeModal = function(modalId) {
+    if (modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.style.display = 'none';
+    } else {
+      document.querySelectorAll('.rec-modal-backdrop').forEach(function(m) {
+        m.style.display = 'none';
+      });
+    }
+    window.syncModalScrollLock();
+  };
+
+  window.syncModalScrollLock = function() {
+    let hasVisibleModal = false;
+    document.querySelectorAll('.rec-modal-backdrop').forEach(function(m) {
+      if (m.style.display === 'flex' || $(m).is(':visible')) {
+        hasVisibleModal = true;
+      }
+    });
+    if (hasVisibleModal) {
+      document.documentElement.classList.add('modal-open');
+      document.body.classList.add('modal-open');
+    } else {
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+    }
+  };
+
+  // --- CSRF Token Helper ---
+  window.getCsrfToken = function() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.getAttribute('content')) {
+      return meta.getAttribute('content');
+    }
+    const inp = document.querySelector('input[name="csrf_token"]');
+    if (inp && inp.value) {
+      return inp.value;
+    }
+    return '';
+  };
+
+  // --- Safe API Response Parser ---
+  async function parseApiResponse(r) {
+    const text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch(err) {
+      console.error('Non-JSON response:', text);
+      let errMsg = 'Server error (' + r.status + ')';
+      if (text.includes('wrong_csrf_token') || text.includes('CSRF')) {
+        errMsg = 'Session expired or CSRF security check failed. Please refresh the page!';
+      }
+      throw new Error(errMsg);
+    }
+  }
+
+  // --- Accordion Items ---
+  window.toggleItemsAccordion = function(biblionumber) {
+    const $row = $('#items-subrow-' + biblionumber);
+    const $label = $('#toggle-label-' + biblionumber);
+    if (!$row.length) return;
+    if ($row.is(':visible')) {
+      $row.hide();
+      if ($label.length) {
+        $label.text($label.text().replace('Hide', 'View').replace('Đóng', 'Xem'));
+      }
+    } else {
+      $row.show();
+      if ($label.length) {
+        $label.text($label.text().replace('View', 'Hide').replace('Xem', 'Đóng'));
+      }
+    }
+  };
+
+  // --- Auto Barcode Generator (GET) ---
+  window.generateAutoBarcode = function(biblionumber) {
+    fetch('/cgi-bin/koha/cataloguing/records.pl?op=auto_barcode&prefix=FTU')
+      .then(parseApiResponse)
+      .then(res => {
+        if (res.success && res.barcode) {
+          const inp = document.getElementById('add-barcode-' + biblionumber);
+          if (inp) inp.value = res.barcode;
+          window.showToast('Next barcode generated: ' + res.barcode);
+        }
+      }).catch(e => window.showToast(e.message || 'Error generating barcode', true));
+  };
+
+  // --- Add Item (POST) ---
+  window.submitAddItem = function(biblionumber) {
+    const barcodeInput = document.getElementById('add-barcode-' + biblionumber);
+    const callnoInput = document.getElementById('add-callno-' + biblionumber);
+    const branchSelect = document.getElementById('add-branch-' + biblionumber);
+    if (!barcodeInput || !branchSelect) return;
+
+    const barcode = barcodeInput.value.trim();
+    const callno = callnoInput ? callnoInput.value.trim() : '';
+    const branch = branchSelect.value;
+
+    // Check book quantity limit
+    const badge = document.getElementById('badge-total-' + biblionumber);
+    if (badge) {
+      const cur = parseInt(badge.getAttribute('data-total'), 10) || 0;
+      const qty = parseInt(badge.getAttribute('data-quantity'), 10) || 0;
+      if (qty === 0) {
+        window.showToast('Book quantity is not yet set (currently 0). Please click the copies badge to set quantity first!', true);
+        const title = badge.getAttribute('data-title') || document.getElementById('rec-title-' + biblionumber)?.textContent?.trim() || `#${biblionumber}`;
+        window.openUpdateQuantityModal(biblionumber, title, cur, qty);
+        return;
+      }
+      if (cur >= qty) {
+        window.showToast(`Accession copies (${cur}) have reached the maximum allowed quantity (${qty} copies). Please click the copies badge to increase total quantity!`, true);
+        return;
+      }
+    }
+
+    const token = window.getCsrfToken();
+    const formData = new URLSearchParams();
+    formData.append('csrf_token', token);
+    formData.append('op', 'cud-add_item');
+    formData.append('biblionumber', biblionumber);
+    formData.append('barcode', barcode);
+    formData.append('itemcallnumber', callno);
+    formData.append('homebranch', branch);
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (res.success) {
+        window.showToast(res.message);
+        barcodeInput.value = '';
+
+        const noItemsRow = document.getElementById('no-items-row-' + biblionumber);
+        if (noItemsRow) noItemsRow.remove();
+
+        const tbody = document.getElementById('items-tbody-' + biblionumber);
+        if (tbody) {
+          const tr = document.createElement('tr');
+          tr.id = 'item-row-' + res.item.itemnumber;
+          tr.innerHTML = `
+            <td><span class="sub-barcode-pill" id="item-barcode-pill-${res.item.itemnumber}">${res.item.barcode}</span></td>
+            <td id="item-callno-td-${res.item.itemnumber}">${res.item.itemcallnumber || '-'}</td>
+            <td id="item-branch-td-${res.item.itemnumber}">${res.item.branchname}</td>
+            <td><span class="status-pill status-available">${res.item.status_label}</span></td>
+            <td style="color: #64748b; font-size: 11.5px;">${(res.item.dateaccessioned || '-').replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1')}</td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button type="button" class="rec-btn rec-btn-sm btn-edit-item" 
+                data-itemnumber="${res.item.itemnumber}" 
+                data-biblionumber="${biblionumber}" 
+                data-barcode="${res.item.barcode}" 
+                data-callno="${res.item.itemcallnumber || ''}" 
+                data-branch="${res.item.homebranch || ''}" 
+                data-location="${res.item.location || ''}" 
+                title="Edit item barcode &amp; call number">
+                <i class="fa fa-pencil"></i>
+              </button>
+              <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-item" data-itemnumber="${res.item.itemnumber}" data-biblionumber="${biblionumber}" title="Delete this copy">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+
+        const badgeEl = document.getElementById('badge-total-' + biblionumber);
+        if (badgeEl) {
+          const cur = parseInt(badgeEl.getAttribute('data-total'), 10) || 0;
+          const qty = parseInt(badgeEl.getAttribute('data-quantity'), 10) || res.quantity || 0;
+          const newTotal = cur + 1;
+          badgeEl.setAttribute('data-total', newTotal);
+          badgeEl.setAttribute('data-quantity', qty);
+          const txtSpan = document.getElementById('badge-total-text-' + biblionumber);
+          if (txtSpan) {
+            txtSpan.textContent = qty > 0 ? `${newTotal}/${qty} copies` : `${newTotal} copies`;
+          } else {
+            badgeEl.textContent = qty > 0 ? `${newTotal}/${qty} copies` : `${newTotal} copies`;
+          }
+          badgeEl.classList.remove('qty-empty', 'qty-full', 'qty-partial');
+          if (newTotal >= qty && qty > 0) {
+            badgeEl.classList.add('qty-full');
+          } else {
+            badgeEl.classList.add('qty-partial');
+          }
+        }
+      } else {
+        window.showToast(res.error || 'Error adding item', true);
+      }
+    }).catch(e => window.showToast(e.message, true));
+  };
+
+  // --- Edit Item Modal (Cập nhật mã ĐKCB / Barcode) ---
+  window.openEditItemModal = function(itemnumber, biblionumber, barcode, callno, branch, location) {
+    const $row = $('#rec-row-' + biblionumber);
+    const title = $row.find('.rec-meta-title').text().trim() || `#${biblionumber}`;
+
+    document.getElementById('edit_item_itemnumber').value = itemnumber;
+    document.getElementById('edit_item_biblionumber').value = biblionumber;
+    document.getElementById('edit_item_record_title').textContent = title;
+    document.getElementById('editItemModalTitle').innerHTML = `<i class="fa fa-pencil"></i> Edit Item: ${barcode}`;
+    document.getElementById('edit_item_barcode').value = barcode || '';
+    document.getElementById('edit_item_callnumber').value = callno || '';
+    if (branch) document.getElementById('edit_item_branch').value = branch;
+    if (location) document.getElementById('edit_item_location').value = location;
+
+    window.openModal('modalEditItem');
+  };
+
+  window.submitEditItem = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const btn = document.getElementById('btnSaveEditItem');
+    if (btn) btn.disabled = true;
+
+    const token = window.getCsrfToken();
+    const form = document.getElementById('editItemForm');
+    const formData = new URLSearchParams(new FormData(form));
+    formData.set('csrf_token', token);
+    formData.set('op', 'cud-edit_item');
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (btn) btn.disabled = false;
+      if (res.success && res.item) {
+        window.showToast(res.message);
+        window.closeModal('modalEditItem');
+
+        // Cập nhật DOM trực tiếp không cần reload
+        const itemnumber = res.item.itemnumber;
+        const pill = document.getElementById('item-barcode-pill-' + itemnumber);
+        if (pill) pill.textContent = res.item.barcode;
+
+        const callnoTd = document.getElementById('item-callno-td-' + itemnumber);
+        if (callnoTd) callnoTd.textContent = res.item.itemcallnumber || '-';
+
+        const branchTd = document.getElementById('item-branch-td-' + itemnumber);
+        if (branchTd) {
+          const locName = res.item.location_desc || res.item.location;
+          const locStr = locName ? `(${locName})` : '';
+          branchTd.textContent = `${res.item.branchname} ${locStr}`.trim();
+        }
+
+        // Cập nhật lại data attributes trên nút edit
+        const editBtn = $(`button.btn-edit-item[data-itemnumber="${itemnumber}"]`);
+        if (editBtn.length) {
+          editBtn.attr('data-barcode', res.item.barcode);
+          editBtn.attr('data-callno', res.item.itemcallnumber || '');
+          editBtn.attr('data-branch', res.item.homebranch || '');
+          editBtn.attr('data-location', res.item.location || '');
+        }
+      } else {
+        window.showToast(res.error || 'Error updating item', true);
+      }
+    }).catch(e => {
+      if (btn) btn.disabled = false;
+      window.showToast(e.message, true);
+    });
+  };
+
+  // --- Open Update Quantity Modal ---
+  window.openUpdateQuantityModal = function(biblionumber, title, totalItems, quantity) {
+    document.getElementById('qty_biblionumber').value = biblionumber;
+    document.getElementById('qty_record_title').textContent = title || `#${biblionumber}`;
+    document.getElementById('qty_current_items_badge').textContent = totalItems + ' copies';
+    
+    const input = document.getElementById('qty_input');
+    input.min = totalItems;
+    input.value = quantity > 0 ? quantity : (totalItems > 0 ? totalItems : 1);
+    
+    window.openModal('modalUpdateQuantity');
+    setTimeout(() => { input.focus(); input.select(); }, 100);
+  };
+
+  // --- Submit Update Quantity ---
+  window.submitUpdateQuantity = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const btn = document.getElementById('btnSaveQuantity');
+    if (btn) btn.disabled = true;
+
+    const token = window.getCsrfToken();
+    const form = document.getElementById('updateQuantityForm');
+    const formData = new URLSearchParams(new FormData(form));
+    formData.set('csrf_token', token);
+    formData.set('op', 'cud-update_quantity');
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (btn) btn.disabled = false;
+      if (res.success) {
+        window.showToast(res.message);
+        window.closeModal('modalUpdateQuantity');
+
+        const biblionumber = res.biblionumber;
+        const badge = document.getElementById('badge-total-' + biblionumber);
+        if (badge) {
+          badge.setAttribute('data-quantity', res.quantity);
+          badge.setAttribute('data-total', res.total_items);
+          
+          const txt = document.getElementById('badge-total-text-' + biblionumber);
+          if (txt) {
+            txt.textContent = res.quantity > 0 ? `${res.total_items}/${res.quantity} copies` : `${res.total_items} copies`;
+          } else {
+            badge.textContent = res.quantity > 0 ? `${res.total_items}/${res.quantity} copies` : `${res.total_items} copies`;
+          }
+
+          badge.classList.remove('qty-empty', 'qty-full', 'qty-partial');
+          if (res.quantity === 0 && res.total_items === 0) {
+            badge.classList.add('qty-empty');
+          } else if (res.total_items >= res.quantity && res.quantity > 0) {
+            badge.classList.add('qty-full');
+          } else {
+            badge.classList.add('qty-partial');
+          }
+        }
+      } else {
+        window.showToast(res.error || 'Error updating book quantity', true);
+      }
+    }).catch(e => {
+      if (btn) btn.disabled = false;
+      window.showToast(e.message, true);
+    });
+  };
+
+  // --- Delete Item (POST) ---
+  window.deleteItem = function(itemnumber, biblionumber) {
+    if (!confirm('Are you sure you want to delete this accession copy?')) return;
+
+    const token = window.getCsrfToken();
+    const formData = new URLSearchParams();
+    formData.append('csrf_token', token);
+    formData.append('op', 'cud-delete_item');
+    formData.append('itemnumber', itemnumber);
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (res.success) {
+        window.showToast(res.message);
+        const row = document.getElementById('item-row-' + itemnumber);
+        if (row) row.remove();
+
+        const badge = document.getElementById('badge-total-' + biblionumber);
+        if (badge) {
+          const cur = parseInt(badge.getAttribute('data-total'), 10) || 0;
+          const qty = parseInt(badge.getAttribute('data-quantity'), 10) || 0;
+          const newTotal = Math.max(0, cur - 1);
+          badge.setAttribute('data-total', newTotal);
+          const txtSpan = document.getElementById('badge-total-text-' + biblionumber);
+          if (txtSpan) {
+            txtSpan.textContent = qty > 0 ? `${newTotal}/${qty} copies` : `${newTotal} copies`;
+          } else {
+            badge.textContent = qty > 0 ? `${newTotal}/${qty} copies` : `${newTotal} copies`;
+          }
+          badge.classList.remove('qty-empty', 'qty-full', 'qty-partial');
+          if (newTotal === 0 && qty === 0) {
+            badge.classList.add('qty-empty');
+          } else if (newTotal >= qty && qty > 0) {
+            badge.classList.add('qty-full');
+          } else {
+            badge.classList.add('qty-partial');
+          }
+        }
+      } else {
+        window.showToast(res.error || 'Error deleting item', true);
+      }
+    }).catch(e => window.showToast(e.message, true));
+  };
+
+  // --- Quick Edit Modal ---
+  window.openQuickEditModal = function(biblionumber) {
+    const $row = $('#rec-row-' + biblionumber);
+    const rowTitle = $row.find('.rec-meta-title').text().trim();
+    const rawAuthor = $row.find('.rec-meta-author').text().trim();
+    const rowAuthor = rawAuthor.replace(/^Author:\s*/i, '').trim();
+
+    // Reset & prepopulate with existing row data
+    document.getElementById('edit_biblionumber').value = biblionumber;
+    document.getElementById('editModalTitle').textContent = `Edit Record #${biblionumber}`;
+    document.getElementById('btnFullMarcLink').href = `/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=${biblionumber}`;
+    document.getElementById('edit_title').value = rowTitle;
+    document.getElementById('edit_subtitle').value = '';
+    document.getElementById('edit_author').value = (rowAuthor && !rowAuthor.includes('No author')) ? rowAuthor : '';
+    document.getElementById('edit_publisher').value = '';
+    document.getElementById('edit_pubyear').value = '';
+    document.getElementById('edit_classification').value = '';
+    document.getElementById('edit_cutter').value = '';
+    document.getElementById('edit_isbn').value = '';
+    document.getElementById('edit_pages').value = '';
+    document.getElementById('edit_abstract').value = '';
+
+    // SHOW MODAL IMMEDIATELY (0ms lag!)
+    window.openModal('modalQuickEdit');
+
+    // Fetch full MARC details from server (GET)
+    fetch(`/cgi-bin/koha/cataloguing/records.pl?op=get_record&biblionumber=${biblionumber}`)
+      .then(parseApiResponse)
+      .then(res => {
+        if (res.success && res.biblio) {
+          const b = res.biblio;
+          if (b.title) document.getElementById('edit_title').value = b.title;
+          document.getElementById('edit_subtitle').value = b.subtitle || '';
+          document.getElementById('edit_author').value = b.author || '';
+          document.getElementById('edit_publisher').value = b.publishercode || '';
+          document.getElementById('edit_pubyear').value = b.publicationyear || b.copyrightdate || '';
+          document.getElementById('edit_classification').value = b.classification || b.dewey || '';
+          document.getElementById('edit_cutter').value = b.cutter || b.cn_item || '';
+          document.getElementById('edit_isbn').value = b.isbn || '';
+          document.getElementById('edit_pages').value = b.pages || '';
+          document.getElementById('edit_abstract').value = b.abstract || '';
+          if (b.itemtype) document.getElementById('edit_itemtype').value = b.itemtype;
+        }
+      }).catch(e => {
+        console.warn('Error fetching record details:', e);
+      });
+  };
+
+  window.submitSaveRecord = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const btn = document.getElementById('btnSaveRecord');
+    if (btn) btn.disabled = true;
+
+    const token = window.getCsrfToken();
+    const form = document.getElementById('quickEditForm');
+    const formData = new URLSearchParams(new FormData(form));
+    formData.set('csrf_token', token);
+    formData.set('op', 'cud-save_record');
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (btn) btn.disabled = false;
+      if (res.success) {
+        window.showToast(res.message);
+        window.closeModal('modalQuickEdit');
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        window.showToast(res.error || 'Error saving record', true);
+      }
+    }).catch(e => {
+      if (btn) btn.disabled = false;
+      window.showToast(e.message, true);
+    });
+  };
+
+  // --- Quick Create Modal ---
+  window.openQuickCreateModal = function() {
+    const form = document.getElementById('quickCreateForm');
+    if (form) form.reset();
+    window.openModal('modalQuickCreate');
+  };
+
+  window.submitQuickCreate = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const btn = document.getElementById('btnCreateRecord');
+    if (btn) btn.disabled = true;
+
+    const token = window.getCsrfToken();
+    const form = document.getElementById('quickCreateForm');
+    const formData = new URLSearchParams(new FormData(form));
+    formData.set('csrf_token', token);
+    formData.set('op', 'cud-quick_create');
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (btn) btn.disabled = false;
+      if (res.success) {
+        window.showToast(res.message);
+        window.closeModal('modalQuickCreate');
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        window.showToast(res.error || 'Error creating record', true);
+      }
+    }).catch(e => {
+      if (btn) btn.disabled = false;
+      window.showToast(e.message, true);
+    });
+  };
+
+  // --- Delete Biblio (POST) ---
+  window.confirmDeleteBiblio = function(biblionumber, title, totalItems) {
+    document.getElementById('del_biblionumber').value = biblionumber;
+    document.getElementById('del_record_title').textContent = title || `Record #${biblionumber}`;
+    document.getElementById('del_items_count').textContent = totalItems || '0';
+    window.openModal('modalConfirmDelete');
+  };
+
+  window.executeDeleteBiblio = function() {
+    const biblionumber = document.getElementById('del_biblionumber').value;
+    const btn = document.getElementById('btnExecuteDelete');
+    if (btn) btn.disabled = true;
+
+    const token = window.getCsrfToken();
+    const formData = new URLSearchParams();
+    formData.append('csrf_token', token);
+    formData.append('op', 'cud-delete_biblio');
+    formData.append('biblionumber', biblionumber);
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (btn) btn.disabled = false;
+      if (res.success) {
+        window.showToast(res.message);
+        window.closeModal('modalConfirmDelete');
+        const row = document.getElementById('rec-row-' + biblionumber);
+        const subrow = document.getElementById('items-subrow-' + biblionumber);
+        if (row) {
+          row.style.transition = 'opacity 0.3s';
+          row.style.opacity = '0';
+        }
+        setTimeout(() => {
+          if (row) row.remove();
+          if (subrow) subrow.remove();
+        }, 300);
+      } else {
+        window.showToast(res.error || 'Error deleting record', true);
+      }
+    }).catch(e => {
+      if (btn) btn.disabled = false;
+      window.showToast(e.message, true);
+    });
+  };
+
+  // --- Cover Image Upload & Drag-Drop (POST) ---
+  window.openUploadCoverModal = function(biblionumber) {
+    const $row = $('#rec-row-' + biblionumber);
+    const title = $row.find('.rec-meta-title').text().trim() || `#${biblionumber}`;
+    document.getElementById('upload_biblionumber').value = biblionumber;
+    document.getElementById('coverModalTitle').textContent = `Upload Cover: ${title}`;
+    document.getElementById('coverPreviewContainer').style.display = 'none';
+    document.getElementById('coverPreviewImg').src = '';
+    document.getElementById('coverFileInput').value = '';
+    document.getElementById('btnConfirmUploadCover').disabled = true;
+    activeUploadBase64 = null;
+    window.openModal('modalUploadCover');
+  };
+
+  window.handleCoverFileSelected = function(files) {
+    if (!files || !files[0]) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      activeUploadBase64 = e.target.result;
+      document.getElementById('coverPreviewImg').src = activeUploadBase64;
+      document.getElementById('coverPreviewContainer').style.display = 'block';
+      document.getElementById('btnConfirmUploadCover').disabled = false;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.submitCoverUpload = function() {
+    const biblionumber = document.getElementById('upload_biblionumber').value;
+    if (!activeUploadBase64) return;
+
+    const btn = document.getElementById('btnConfirmUploadCover');
+    if (btn) btn.disabled = true;
+
+    const token = window.getCsrfToken();
+    const formData = new URLSearchParams();
+    formData.append('csrf_token', token);
+    formData.append('op', 'cud-upload_cover');
+    formData.append('biblionumber', biblionumber);
+    formData.append('base64_data', activeUploadBase64);
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (btn) btn.disabled = false;
+      if (res.success) {
+        window.showToast(res.message);
+        window.closeModal('modalUploadCover');
+
+        // Update image on page immediately
+        const box = document.getElementById('cover-box-' + biblionumber);
+        if (box) {
+          box.innerHTML = `
+            <img id="cover-img-${biblionumber}" src="${res.thumb_url}" alt="Cover" />
+            <div class="cover-overlay">
+              <span class="cover-overlay-btn btn-cover-trigger" data-biblionumber="${biblionumber}"><i class="fa fa-upload"></i> Change</span>
+              <span class="cover-overlay-btn btn-delete-cover" data-biblionumber="${biblionumber}" title="Delete cover"><i class="fa fa-trash"></i></span>
+            </div>
+          `;
+        }
+      } else {
+        window.showToast(res.error || 'Error uploading cover', true);
+      }
+    }).catch(e => {
+      if (btn) btn.disabled = false;
+      window.showToast(e.message, true);
+    });
+  };
+
+  window.deleteCover = function(biblionumber) {
+    if (!confirm('Are you sure you want to delete this cover image?')) return;
+
+    const token = window.getCsrfToken();
+    const formData = new URLSearchParams();
+    formData.append('csrf_token', token);
+    formData.append('op', 'cud-delete_cover');
+    formData.append('biblionumber', biblionumber);
+
+    fetch('/cgi-bin/koha/cataloguing/records.pl', {
+      method: 'POST',
+      headers: { 'CSRF-TOKEN': token },
+      body: formData
+    })
+    .then(parseApiResponse)
+    .then(res => {
+      if (res.success) {
+        window.showToast(res.message);
+        const box = document.getElementById('cover-box-' + biblionumber);
+        if (box) {
+          box.innerHTML = `
+            <div class="cover-placeholder" id="cover-placeholder-${biblionumber}">
+              <i class="fa fa-camera" style="font-size: 16px;"></i>
+              <span>+ Cover</span>
+            </div>
+            <div class="cover-overlay">
+              <span class="cover-overlay-btn btn-cover-trigger" data-biblionumber="${biblionumber}"><i class="fa fa-upload"></i> Add</span>
+            </div>
+          `;
+        }
+      } else {
+        window.showToast(res.error || 'Error deleting cover', true);
+      }
+    }).catch(e => window.showToast(e.message, true));
+  };
+
+  // --- jQuery Event Bindings ---
+  $(document).ready(function() {
+    // 1. Accordion items
+    $(document).on('click', '.btn-toggle-items', function(e) {
+      e.preventDefault();
+      const bib = $(this).data('biblionumber') || $(this).attr('data-biblionumber');
+      if (bib) window.toggleItemsAccordion(bib);
+    });
+
+    // 2. Quick Edit
+    $(document).on('click', '.btn-quick-edit', function(e) {
+      e.preventDefault();
+      const bib = $(this).data('biblionumber');
+      if (bib) window.openQuickEditModal(bib);
+    });
+
+    // 3. Upload / Change cover (Click cover-box)
+    $(document).on('click', '.cover-box', function(e) {
+      if ($(e.target).closest('.btn-delete-cover').length) return;
+      e.preventDefault();
+      const bib = $(this).data('biblionumber');
+      if (bib) window.openUploadCoverModal(bib);
+    });
+
+    // 4. Delete cover
+    $(document).on('click', '.btn-delete-cover', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const bib = $(this).data('biblionumber') || $(this).closest('.cover-box').data('biblionumber');
+      if (bib) window.deleteCover(bib);
+    });
+
+    // 5. Delete biblio
+    $(document).on('click', '.btn-delete-biblio', function(e) {
+      e.preventDefault();
+      const bib = $(this).data('biblionumber');
+      const items = $(this).data('items');
+      const title = $('#rec-row-' + bib).find('.rec-meta-title').text().trim();
+      window.confirmDeleteBiblio(bib, title, items);
+    });
+
+    // 6. Quick create
+    $(document).on('click', '.btn-open-quick-create', function(e) {
+      e.preventDefault();
+      window.openQuickCreateModal();
+    });
+
+    // 7. Close modal & sync scroll lock
+    $(document).on('click', '.btn-close-modal', function(e) {
+      e.preventDefault();
+      $(this).closest('.rec-modal-backdrop').hide();
+      window.syncModalScrollLock();
+    });
+
+    $(document).on('click', '.rec-modal-backdrop', function(e) {
+      if (e.target === this) {
+        $(this).hide();
+        window.syncModalScrollLock();
+      }
+    });
+
+    $(document).on('keydown', function(e) {
+      if (e.key === 'Escape') {
+        $('.rec-modal-backdrop').hide();
+        window.syncModalScrollLock();
+      }
+    });
+
+    // Prevent wheel scroll on backdrop from bleeding to background
+    $(document).on('wheel touchmove', '.rec-modal-backdrop', function(e) {
+      if (e.target === this) {
+        e.preventDefault();
+      }
+    });
+
+    // Auto sync modal scroll lock with MutationObserver
+    try {
+      const modalObserver = new MutationObserver(function() {
+        window.syncModalScrollLock();
+      });
+      document.querySelectorAll('.rec-modal-backdrop').forEach(function(modalEl) {
+        modalObserver.observe(modalEl, { attributes: true, attributeFilter: ['style', 'class'] });
+      });
+    } catch(err) {
+      console.warn('MutationObserver not supported:', err);
+    }
+
+    // 8. Auto barcode
+    $(document).on('click', '.btn-auto-barcode', function(e) {
+      e.preventDefault();
+      const bib = $(this).data('biblionumber');
+      if (bib) window.generateAutoBarcode(bib);
+    });
+
+    // 9. Add Item
+    $(document).on('click', '.btn-submit-item', function(e) {
+      e.preventDefault();
+      const bib = $(this).data('biblionumber');
+      if (bib) window.submitAddItem(bib);
+    });
+
+    // 10. Edit item copy (Open edit item modal)
+    $(document).on('click', '.btn-edit-item', function(e) {
+      e.preventDefault();
+      const $btn = $(this);
+      const itemnumber = $btn.data('itemnumber') || $btn.attr('data-itemnumber');
+      const biblionumber = $btn.data('biblionumber') || $btn.attr('data-biblionumber');
+      const barcode = $btn.data('barcode') || $btn.attr('data-barcode');
+      const callno = $btn.data('callno') || $btn.attr('data-callno');
+      const branch = $btn.data('branch') || $btn.attr('data-branch');
+      const location = $btn.data('location') || $btn.attr('data-location');
+      window.openEditItemModal(itemnumber, biblionumber, barcode, callno, branch, location);
+    });
+
+    $('#btnEditItemAutoBarcode').on('click', function(e) {
+      e.preventDefault();
+      fetch('/cgi-bin/koha/cataloguing/records.pl?op=auto_barcode&prefix=FTU')
+        .then(parseApiResponse)
+        .then(res => {
+          if (res.success && res.barcode) {
+            document.getElementById('edit_item_barcode').value = res.barcode;
+            window.showToast('Generated next barcode: ' + res.barcode);
+          }
+        }).catch(e => window.showToast(e.message, true));
+    });
+
+    $('#editItemForm').on('submit', window.submitEditItem);
+
+    // 12. Update Book Quantity
+    $(document).on('click', '.btn-update-qty', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const $el = $(this);
+      const bib = $el.data('biblionumber') || $el.attr('data-biblionumber');
+      const title = $el.data('title') || $el.attr('data-title');
+      const total = parseInt($el.data('total') || $el.attr('data-total'), 10) || 0;
+      const qty = parseInt($el.data('quantity') || $el.attr('data-quantity'), 10) || 0;
+      window.openUpdateQuantityModal(bib, title, total, qty);
+    });
+
+    $('#updateQuantityForm').on('submit', window.submitUpdateQuantity);
+
+    // 11. Delete item
+    $(document).on('click', '.btn-delete-item', function(e) {
+      e.preventDefault();
+      const itemnumber = $(this).data('itemnumber');
+      const bib = $(this).data('biblionumber');
+      if (itemnumber && bib) window.deleteItem(itemnumber, bib);
+    });
+
+    // 11. Modal dropzone & file input
+    $(document).on('click', '#modalDropzone', function() {
+      $('#coverFileInput').trigger('click');
+    });
+
+    $('#coverFileInput').on('change', function() {
+      window.handleCoverFileSelected(this.files);
+    });
+
+    $('#btnConfirmUploadCover').on('click', function(e) {
+      e.preventDefault();
+      window.submitCoverUpload();
+    });
+
+    $('#btnExecuteDelete').on('click', function(e) {
+      e.preventDefault();
+      window.executeDeleteBiblio();
+    });
+
+    // 12. Submit forms
+    $('#quickEditForm').on('submit', window.submitSaveRecord);
+    $('#quickCreateForm').on('submit', window.submitQuickCreate);
+
+    // 13. Drag and Drop direct to cell
+    document.querySelectorAll('.dropzone-cell').forEach(cell => {
+      cell.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        cell.classList.add('cover-drop-active');
+      });
+      cell.addEventListener('dragleave', (e) => {
+        cell.classList.remove('cover-drop-active');
+      });
+      cell.addEventListener('drop', (e) => {
+        e.preventDefault();
+        cell.classList.remove('cover-drop-active');
+        const biblionumber = cell.dataset.biblionumber;
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          const file = e.dataTransfer.files[0];
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            activeUploadBase64 = evt.target.result;
+            document.getElementById('upload_biblionumber').value = biblionumber;
+            window.submitCoverUpload();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+
+    // 14. Drag and Drop for modal dropzone
+    const mDrop = document.getElementById('modalDropzone');
+    if (mDrop) {
+      mDrop.addEventListener('dragover', (e) => { e.preventDefault(); mDrop.classList.add('dragover'); });
+      mDrop.addEventListener('dragleave', (e) => { mDrop.classList.remove('dragover'); });
+      mDrop.addEventListener('drop', (e) => {
+        e.preventDefault();
+        mDrop.classList.remove('dragover');
+        window.handleCoverFileSelected(e.dataTransfer.files);
+      });
+    }
+  });
+</script>
+[% END #/ MACRO jsinclude %]
+[% INCLUDE 'intranet-bottom.inc' %]

@@ -45,13 +45,13 @@
 
  [% IF ( Koha.Preference('EnableBooking') && CAN_user_circulate_manage_bookings && biblio.items.filter_by_bookable.count ) %]
  <li [% IF bookingsview %]class="active"[% END %]>
- <a href="/cgi-bin/koha/bookings/list.pl?biblionumber=[% biblio_object_id | url %]">Bookings (<span class="bookings_count">[% biblio.bookings.filter_by_active.count | html %]</span>)</a>
+ <a href="/cgi-bin/koha/bookings/list.pl?biblionumber=[% biblio_object_id | url %]">Đặt trước (<span class="bookings_count">[% biblio.bookings.filter_by_active.count | html %]</span>)</a>
  </li>
  [% END %]
 
  [%- IF ( CAN_user_reserveforothers ) -%]
  <li [% IF holdsview %]class="active"[% END %]>
- <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblio_object_id | url %]">Holds ([% biblio.holds.count | html %])</a>
+ <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblio_object_id | url %]">Đặt mượn ([% biblio.holds.count | html %])</a>
  </li>
  [%- END -%]
 

@@ -3,6 +3,7 @@
 [% USE Branches %]
 [%- USE KohaPlugins -%]
 [% USE Asset %]
+[% PROCESS 'ftu-brand-config.inc' UNLESS FTU_BRAND %]
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Koha" />
 <!-- leave this for stats -->
@@ -14,8 +15,11 @@
 [% IF ( Koha.Preference('OpacMetaRobots') ) %]
  <meta name="robots" content="[% Koha.Preference('OpacMetaRobots') | html %]" />
 [% END %]
-<link rel="shortcut icon" href="[% IF ( Koha.Preference('OpacFavicon') ) %][% Koha.Preference('OpacFavicon') | url %][% ELSE %][% interface | url %]/[% theme | url %]/images/favicon.ico[% END %]" type="image/x-icon" />
-<link rel="apple-touch-icon" href="[% IF ( Koha.Preference('OpacFavicon') ) %][% Koha.Preference('OpacFavicon') | url %][% ELSE %][% interface | url %]/[% theme | url %]/images/favicon.ico[% END %]" type="image/x-icon" />
+<link rel="icon" type="image/svg+xml" href="[% FTU_BRAND.favicon_svg %]" />
+<link rel="icon" type="image/png" sizes="32x32" href="[% interface | url %]/[% theme | url %]/images/favicon-32x32.png?v=ftu" />
+<link rel="icon" type="image/png" sizes="16x16" href="[% interface | url %]/[% theme | url %]/images/favicon-16x16.png?v=ftu" />
+<link rel="apple-touch-icon" sizes="180x180" href="[% interface | url %]/[% theme | url %]/images/apple-touch-icon.png?v=ftu" />
+<link rel="shortcut icon" href="[% IF ( Koha.Preference('OpacFavicon') ) %][% Koha.Preference('OpacFavicon') | url %][% ELSE %][% FTU_BRAND.favicon_ico %][% END %]" type="image/x-icon" />
 [% IF ( Koha.Preference('opaclayoutstylesheet') && Koha.Preference('opaclayoutstylesheet') != "opac.css" ) %]
  [% SET opaclayoutstylesheet = Koha.Preference('opaclayoutstylesheet') %]
 [% ELSE %]
@@ -45,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/opac-tmpl/bootstrap/css/ftu-opac.css" />
+    <link rel="stylesheet" type="text/css" href="/opac-tmpl/bootstrap/css/ftu-opac.css?v=20261001_clean_marc" />
 
 [% IF ( bidi ) %]
  [% Asset.css("css/print-rtl.css", { media = "print" }) | $raw %]

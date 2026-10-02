@@ -7,7 +7,7 @@
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Thư viện – Phân hiệu Trường Đại học Ngoại thương</title>
+<title>Quản trị | Thư viện Phân hiệu Trường Đại học Ngoại thương</title>
 [% IF ( bidi ) %]
  [% Asset.css("css/mainpage-rtl.css") | $raw %]
 [% ELSE %]
@@ -60,8 +60,26 @@
  <!-- ── Main Layout: Sidebar + Content ── -->
  <div id="ftu-main-layout">
 
- <!-- Sidebar -->
- <aside id="ftu-sidebar">
+         <!-- Sidebar -->
+        <aside id="ftu-sidebar">
+            <div class="ftu-sidebar-card">
+                <div class="sidebar-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Quản lý trang công khai</span>
+                </div>
+                <div style="padding: 10px 0;">
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Quản lý nội dung xuất bản cổng OPAC Thư viện FTU: Tin tức &amp; Bảng tin và Cơ sở dữ liệu.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=news" class="btn btn-sm btn-default" style="font-weight: 600; color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; text-align: left; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
+                            <span>Tin tức &amp; Bảng tin</span>
+                            <span class="badge" style="background: #dbeafe; color: #1e40af;">Quản lý</span>
+                        </a>
+                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn btn-sm btn-default" style="font-weight: 600; color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; text-align: left; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
+                            <span>Cơ sở dữ liệu (CSDL)</span>
+                            <span class="badge" style="background: #dbeafe; color: #1e40af;">Quản lý</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
  [% IF ( koha_news.count ) %]
  <div class="ftu-sidebar-card">
  <div class="sidebar-card-header">
@@ -159,10 +177,26 @@
  [% END %]
 
  [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || can_see_cataloguing_module ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/cataloguing/records.pl">
+ <div class="module-icon mod-cataloging"><i class="fa fa-book"></i></div>
+ <div class="module-name">Quản lý biểu ghi</div>
+ <div class="module-desc">Tài liệu &bull; ĐKCB &bull; Ảnh bìa</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || can_see_cataloguing_module ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/cataloguing/cataloging-home.pl">
  <div class="module-icon mod-cataloging"><i class="fa fa-tag"></i></div>
  <div class="module-name">Biên mục</div>
  <div class="module-desc">Nhập &bull; Chỉnh sửa biểu ghi</div>
+ </a>
+ [% END %]
+
+ [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_parameters || CAN_user_editcatalogue_edit_catalogue ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/admin/collections.pl">
+ <div class="module-icon mod-collections" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff;"><i class="fa fa-layer-group"></i></div>
+ <div class="module-name">Bộ sưu tập</div>
+ <div class="module-desc">Quản lý chuyên đề &bull; CCODE &bull; OPAC</div>
  </a>
  [% END %]
 
@@ -212,7 +246,15 @@
  <div class="module-desc">Kiểm soát từ chuẩn</div>
  </a>
 
- [% IF ( CAN_user_tools || CAN_user_clubs ) %]
+                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/tools/portal-news.pl">
+                    <div class="module-icon mod-portal-news" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #ffffff;"><i class="fa fa-globe"></i></div>
+                    <div class="module-name">Quản lý trang công khai</div>
+                    <div class="module-desc">Tin tức &amp; Bảng tin &bull; Cơ sở dữ liệu</div>
+                </a>
+                [% END %]
+
+                [% IF ( CAN_user_tools || CAN_user_clubs ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/tools/tools-home.pl">
  <div class="module-icon mod-tools"><i class="fa fa-wrench"></i></div>
  <div class="module-name">Công cụ</div>

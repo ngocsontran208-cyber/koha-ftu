@@ -111,7 +111,17 @@
  <div class="alert alert-info">
  <strong>Đã cập nhật mật khẩu</strong>
  <br />
- Mật khẩu của bạn đã được thay đổi </div>
+ Mật khẩu của bạn đã được thay đổi.
+ [% IF ( sso_updated ) %]
+   <div style="margin-top: 8px; color: #166534; font-weight: 500;">
+     <i class="fa fa-check-circle" style="color: #16a34a;"></i> Đã đồng bộ mật khẩu mới lên hệ thống xác thực tập trung (SSO / DSpace).
+   </div>
+ [% ELSIF ( sso_error ) %]
+   <div style="margin-top: 8px; color: #9a3412;">
+     <i class="fa fa-exclamation-triangle" style="color: #ea580c;"></i> Lưu ý: Không thể đồng bộ SSO ([% sso_error | html %]). Vui lòng liên hệ thủ thư nếu cần đăng nhập các hệ thống liên kết.
+   </div>
+ [% END %]
+ </div>
  <a class="btn btn-primary" href="/cgi-bin/koha/opac-user.pl">Quay lại tài khoản của tôi</a>
  [% END # /IF password_updated %]
  </div>

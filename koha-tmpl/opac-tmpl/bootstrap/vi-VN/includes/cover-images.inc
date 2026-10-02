@@ -20,7 +20,7 @@
  [% IF ( OPACLocalCoverImages && SEARCH_RESULT.has_local_cover_image ) %]
  <div class="cover-image local-coverimg">
  <a href="/cgi-bin/koha/opac-image.pl?biblionumber=[% SEARCH_RESULT.biblionumber | uri %]">
- <img alt="Ảnh bìa cục bộ" src="/cgi-bin/koha/opac-image.pl?thumbnail=1&biblionumber=[% SEARCH_RESULT.biblionumber | uri %]" />
+ <img alt="Ảnh bìa cục bộ" src="/cgi-bin/koha/opac-image.pl?biblionumber=[% SEARCH_RESULT.biblionumber | uri %]" />
  </a>
  <div class="hint">Ảnh bìa cục bộ</div>
  </div>

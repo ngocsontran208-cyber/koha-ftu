@@ -1,0 +1,833 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE AdditionalContents %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+        Databases (CSDL) &rsaquo; [% PROCESS 'library_name_title' %]
+    [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+<style nonce="[% Koha.CSPNonce | $raw %]">
+    /* Clean, neutral aesthetic - Reduced colors, no logos */
+    .db-portal-wrapper {
+        padding: 1.5rem 0 3rem 0;
+        font-family: inherit;
+    }
+    .db-page-header {
+        margin-bottom: 1.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1.25rem;
+    }
+    .db-page-title {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .db-page-title i {
+        color: #475569;
+        font-size: 1.4rem;
+    }
+    .db-page-desc {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+    
+    /* Toolbar: Search and Filter Tabs */
+    .db-toolbar {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .db-filter-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .db-pill {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .db-pill:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+        border-color: #94a3b8;
+    }
+    .db-pill.active {
+        background: #1e293b;
+        color: #ffffff;
+        border-color: #1e293b;
+    }
+    .db-pill .badge-count {
+        background: rgba(0, 0, 0, 0.08);
+        color: inherit;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        padding: 0.1rem 0.45rem;
+    }
+    .db-pill.active .badge-count {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+    }
+
+    .db-search-box {
+        position: relative;
+        min-width: 280px;
+        flex: 1;
+        max-width: 360px;
+    }
+    .db-search-input {
+        width: 100%;
+        padding: 0.45rem 2.2rem 0.45rem 2.2rem;
+        font-size: 0.9rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #1e293b;
+    }
+    .db-search-input:focus {
+        border-color: #64748b;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.15);
+    }
+    .db-search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+    .db-search-clear {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        cursor: pointer;
+        display: none;
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 0.85rem;
+    }
+    .db-search-clear:hover {
+        color: #475569;
+    }
+
+    /* Database Table */
+    .db-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .db-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+    }
+    .db-table thead th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.85rem 1rem;
+        border-bottom: 2px solid #e2e8f0;
+        border-top: none;
+        vertical-align: middle;
+    }
+    .db-table tbody td {
+        padding: 1.1rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: top;
+        font-size: 0.92rem;
+        color: #334155;
+    }
+    .db-table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .db-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Column specifics */
+    .col-stt {
+        width: 60px;
+        text-align: center;
+        font-weight: 600;
+        color: #64748b;
+    }
+    .col-title {
+        min-width: 280px;
+    }
+    .col-class {
+        width: 170px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .col-user {
+        width: 170px;
+        text-align: center;
+    }
+    .col-pass {
+        width: 170px;
+        text-align: center;
+    }
+    .col-link {
+        width: 120px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    /* Content styling */
+    .db-name {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.35;
+        margin-bottom: 0.35rem;
+    }
+    .db-excerpt {
+        color: #475569;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        margin-bottom: 0.4rem;
+    }
+    .db-instruction {
+        color: #334155;
+        font-size: 0.85rem;
+        background: #f8fafc;
+        border-left: 3px solid #94a3b8;
+        padding: 0.35rem 0.65rem;
+        border-radius: 0 4px 4px 0;
+        margin-top: 0.4rem;
+        line-height: 1.4;
+    }
+
+    /* Subdued Classification Badges */
+    .badge-classification {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        padding: 0.3rem 0.65rem;
+        border-radius: 4px;
+        border: 1px solid #cbd5e1;
+        background: #f1f5f9;
+        color: #334155;
+    }
+    .badge-class-thuong-mai {
+        background: #f1f5f9;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+    .badge-class-nguon-mo {
+        background: #f0fdf4;
+        color: #166534;
+        border-color: #bbf7d0;
+    }
+    .badge-class-noi-sinh {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    /* Credentials Box & Actions */
+    .cred-container {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        max-width: 100%;
+    }
+    .cred-val {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        color: #0f172a;
+        word-break: break-all;
+    }
+    .cred-pass-masked {
+        letter-spacing: 2px;
+        font-size: 1rem;
+        color: #475569;
+        user-select: none;
+    }
+    .btn-cred-action {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        padding: 0.15rem 0.3rem;
+        font-size: 0.82rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: color 0.15s ease, background 0.15s ease;
+        line-height: 1;
+    }
+    .btn-cred-action:hover {
+        color: #0f172a;
+        background: #e2e8f0;
+    }
+    .btn-cred-action.copied {
+        color: #16a34a !important;
+    }
+
+    /* Action Open Link Button */
+    .btn-open-db {
+        background: #1e293b;
+        color: #ffffff !important;
+        border: 1px solid #1e293b;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 0.4rem 0.85rem;
+        border-radius: 6px;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: all 0.2s ease;
+    }
+    .btn-open-db:hover {
+        background: #334155;
+        border-color: #334155;
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    
+    .text-empty-val {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+    
+    .btn-login-to-view {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569 !important;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 0.25rem 0.6rem;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .btn-login-to-view:hover {
+        background: #e2e8f0;
+        color: #0f172a !important;
+        border-color: #94a3b8;
+    }
+    .btn-login-to-view i {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    /* Empty state */
+    .db-empty-state {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: #64748b;
+    }
+    .db-empty-state i {
+        font-size: 2.5rem;
+        color: #cbd5e1;
+        margin-bottom: 0.75rem;
+    }
+    .db-empty-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Toast notification */
+    #db-toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 0.6rem 1.1rem;
+        border-radius: 6px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 1050;
+    }
+    #db-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (max-width: 991px) {
+        .db-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .db-search-box {
+            max-width: 100%;
+        }
+        .db-table-card {
+            overflow-x: auto;
+        }
+    }
+
+    /* Client-side pagination (10 items/page) */
+    .db-pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+        color: #64748b;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .db-pagination-nav {
+        display: inline-flex;
+        gap: 4px;
+    }
+    .db-page-btn {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #334155;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .db-page-btn:hover:not(:disabled) {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+        color: #0f172a;
+    }
+    .db-page-btn.active {
+        background: #1e293b;
+        border-color: #1e293b;
+        color: #ffffff;
+        font-weight: 700;
+    }
+    .db-page-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+</style>
+[% END %]
+</head>
+
+[% INCLUDE 'bodytag.inc' bodyid='opac-databases' %]
+[% INCLUDE 'masthead.inc' %]
+
+<main class="main">
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/opac-main.pl">Home</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Databases (CSDL)</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
+
+    <div class="container-fluid db-portal-wrapper">
+        <div class="container">
+            <!-- Header Section -->
+            <div class="db-page-header">
+                <h1 class="db-page-title">
+                    Electronic Databases
+                </h1>
+            </div>
+
+            <!-- Toolbar: Filter Pills & Search -->
+            <div class="db-toolbar">
+                <div class="db-filter-pills" id="classificationFilter">
+                    <button type="button" class="db-pill active" data-class="all">
+                        All <span class="badge-count" id="count-all">[% total_count %]</span>
+                    </button>
+                    [% FOREACH c IN class_counts %]
+                        [% SET clean_class = c.classification %]
+                        <button type="button" class="db-pill" data-class="[% clean_class | html %]">
+                            [% clean_class | html %] <span class="badge-count">[% c.cnt %]</span>
+                        </button>
+                    [% END %]
+                </div>
+
+                <div class="db-search-box">
+                    <i class="fa fa-search db-search-icon" aria-hidden="true"></i>
+                    <input type="text" id="db-search-input" class="db-search-input" placeholder="Search by database name, keyword..." value="[% search_query | html %]" autocomplete="off" />
+                    <button type="button" id="db-search-clear" class="db-search-clear" title="Clear search">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Database Table -->
+            <div class="db-table-card">
+                <table class="db-table" id="dbTable">
+                    <thead>
+                        <tr>
+                            <th class="col-stt">No.</th>
+                            <th class="col-title">Database / Source</th>
+                            <th class="col-class">Category</th>
+                            <th class="col-user">Username</th>
+                            <th class="col-pass">Password</th>
+                            <th class="col-link">Access Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dbTableBody">
+                        [% IF databases.size %]
+                            [% FOREACH db IN databases %]
+                                <tr class="db-row" data-class="[% db.classification | html %]" data-search="[% db.title | lower | html %] [% db.excerpt | lower | html %] [% db.access_instructions | lower | html %] [% db.classification | lower | html %]">
+                                    <td class="col-stt">
+                                        [% db.sort_order || loop.count %]
+                                    </td>
+                                    <td class="col-title">
+                                        <div class="db-name">[% db.title | html %]</div>
+                                        [% IF db.excerpt %]
+                                            <div class="db-excerpt">[% db.excerpt | html %]</div>
+                                        [% END %]
+                                        [% IF db.access_instructions %]
+                                            <div class="db-instruction">
+                                                [% db.access_instructions | html %]
+                                            </div>
+                                        [% END %]
+                                    </td>
+                                    <td class="col-class">
+                                        [% IF db.classification == 'CSDL THƯƠNG MẠI' %]
+                                            <span class="badge-classification badge-class-thuong-mai">[% db.classification | html %]</span>
+                                        [% ELSIF db.classification == 'CSDL NGUỒN MỞ' %]
+                                            <span class="badge-classification badge-class-nguon-mo">[% db.classification | html %]</span>
+                                        [% ELSIF db.classification == 'CSDL NỘI SINH' %]
+                                            <span class="badge-classification badge-class-noi-sinh">[% db.classification | html %]</span>
+                                        [% ELSE %]
+                                            <span class="badge-classification">[% db.classification | html %]</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="col-user">
+                                        [% IF db.db_user %]
+                                            <div class="cred-container">
+                                                <span class="cred-val" id="u-[% db.id %]">[% db.db_user | html %]</span>
+                                                <button type="button" class="btn-cred-action" title="Copy username" onclick="copyCred('u-[% db.id %]', this)">
+                                                    <i class="fa fa-copy" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                        [% ELSE %]
+                                            <span class="text-empty-val">IP Authentication</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="col-pass">
+                                        [% IF db.has_pass %]
+                                            [% IF ( loggedinusername || is_logged_in ) %]
+                                                <div class="cred-container">
+                                                    <span class="cred-pass-masked" id="pass-mask-[% db.id %]">••••••••</span>
+                                                    <span class="cred-val d-none" id="pass-val-[% db.id %]">[% db.db_pass | html %]</span>
+                                                    <button type="button" class="btn-cred-action" title="Show / hide password" onclick="togglePass('[% db.id %]', this)">
+                                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                                    </button>
+                                                    <button type="button" class="btn-cred-action" title="Copy password" onclick="copyCred('pass-val-[% db.id %]', this)">
+                                                        <i class="fa fa-copy" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                            [% ELSE %]
+                                                <a href="/cgi-bin/koha/opac-user.pl" class="btn-login-to-view" title="Log in to view and copy password">
+                                                    <i class="fa fa-lock" aria-hidden="true"></i> Log in to view
+                                                </a>
+                                            [% END %]
+                                        [% ELSE %]
+                                            <span class="text-empty-val">—</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="col-link">
+                                        [% IF db.support_link %]
+                                            <a href="[% db.support_link | url %]" target="_blank" rel="noopener noreferrer" class="btn-open-db" title="Open database">
+                                                [Open link] <i class="fa fa-external-link" aria-hidden="true"></i>
+                                            </a>
+                                        [% ELSE %]
+                                            <span class="text-empty-val">—</span>
+                                        [% END %]
+                                    </td>
+                                </tr>
+                            [% END %]
+                        [% ELSE %]
+                            <tr id="server-empty-row">
+                                <td colspan="6">
+                                    <div class="db-empty-state">
+                                        <i class="fa fa-database" aria-hidden="true"></i>
+                                        <div class="db-empty-title">No databases found</div>
+                                        <p class="mb-0">The electronic database directory is being updated.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        [% END %]
+                        <!-- Client-side empty state row -->
+                        <tr id="client-empty-row" style="display: none;">
+                            <td colspan="6">
+                                <div class="db-empty-state">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                    <div class="db-empty-title">No matching databases found</div>
+                                    <p class="mb-0">Please try another keyword or clear your filter.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination Container (10 items/page) -->
+                <div id="db-pagination-container" class="db-pagination-container" style="display: none;">
+                    <div id="db-pagination-info"></div>
+                    <div id="db-pagination-nav" class="db-pagination-nav"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="db-toast"><i class="fa fa-check me-1"></i> <span id="db-toast-msg">Copied to clipboard!</span></div>
+
+[% INCLUDE 'opac-bottom.inc' %]
+
+[% BLOCK jsinclude %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+    // Copy credential helper
+    function copyCred(elementId, btn) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        var text = el.innerText || el.textContent;
+        text = text.trim();
+        
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToastAndAnimate(btn);
+            }).catch(function() {
+                fallbackCopy(text, btn);
+            });
+        } else {
+            fallbackCopy(text, btn);
+        }
+    }
+
+    function fallbackCopy(text, btn) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showToastAndAnimate(btn);
+        } catch (err) {
+            console.error('Fallback copy error', err);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function showToastAndAnimate(btn) {
+        var origHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-check"></i>';
+        btn.classList.add('copied');
+        
+        var toast = document.getElementById('db-toast');
+        toast.classList.add('show');
+        setTimeout(function() {
+            toast.classList.remove('show');
+        }, 1800);
+
+        setTimeout(function() {
+            btn.innerHTML = origHtml;
+            btn.classList.remove('copied');
+        }, 1500);
+    }
+
+    // Toggle password reveal
+    function togglePass(id, btn) {
+        var mask = document.getElementById('pass-mask-' + id);
+        var val = document.getElementById('pass-val-' + id);
+        var icon = btn.querySelector('i');
+        
+        if (val.classList.contains('d-none')) {
+            val.classList.remove('d-none');
+            mask.classList.add('d-none');
+            icon.className = 'fa fa-eye-slash';
+            btn.setAttribute('title', 'Hide password');
+        } else {
+            val.classList.add('d-none');
+            mask.classList.remove('d-none');
+            icon.className = 'fa fa-eye';
+            btn.setAttribute('title', 'Show password');
+        }
+    }
+
+    // Live search, tab filtering, and 10-item pagination
+    $(document).ready(function() {
+        var pageSize = 10;
+        var currentPage = 1;
+        var activeClass = 'all';
+        var searchInput = $('#db-search-input');
+        var clearBtn = $('#db-search-clear');
+        var rows = $('#dbTableBody .db-row');
+        var emptyRow = $('#client-empty-row');
+        var paginationContainer = $('#db-pagination-container');
+        var paginationInfo = $('#db-pagination-info');
+        var paginationNav = $('#db-pagination-nav');
+
+        function applyFilter(targetPage) {
+            if (targetPage) currentPage = targetPage;
+            var query = searchInput.val().toLowerCase().trim();
+            if (query.length > 0) {
+                clearBtn.show();
+            } else {
+                clearBtn.hide();
+            }
+
+            var matchedRows = [];
+            rows.each(function() {
+                var row = $(this);
+                var rowClass = row.data('class');
+                var rowSearch = row.data('search') || '';
+
+                var matchesClass = (activeClass === 'all' || rowClass === activeClass);
+                var matchesSearch = (query === '' || rowSearch.indexOf(query) !== -1);
+
+                if (matchesClass && matchesSearch) {
+                    matchedRows.push(row);
+                } else {
+                    row.hide();
+                }
+            });
+
+            var totalMatched = matchedRows.length;
+            var totalPages = Math.ceil(totalMatched / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            if (totalMatched === 0 && rows.length > 0) {
+                emptyRow.show();
+                paginationContainer.hide();
+            } else {
+                emptyRow.hide();
+
+                var startIndex = (currentPage - 1) * pageSize;
+                var endIndex = Math.min(startIndex + pageSize, totalMatched);
+
+                for (var i = 0; i < totalMatched; i++) {
+                    if (i >= startIndex && i < endIndex) {
+                        matchedRows[i].show();
+                    } else {
+                        matchedRows[i].hide();
+                    }
+                }
+
+                if (totalMatched > 0) {
+                    paginationContainer.show();
+                    paginationInfo.html('Showing <strong>' + (startIndex + 1) + '</strong> - <strong>' + endIndex + '</strong> of <strong>' + totalMatched + '</strong> databases');
+
+                    if (totalPages > 1) {
+                        var navHtml = '';
+                        navHtml += '<button type="button" class="db-page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' data-page="' + (currentPage - 1) + '">« Prev</button>';
+                        for (var p = 1; p <= totalPages; p++) {
+                            navHtml += '<button type="button" class="db-page-btn ' + (p === currentPage ? 'active' : '') + '" data-page="' + p + '">' + p + '</button>';
+                        }
+                        navHtml += '<button type="button" class="db-page-btn ' + (currentPage === totalPages ? 'disabled' : '') + ' data-page="' + (currentPage + 1) + '">Next »</button>';
+                        paginationNav.html(navHtml).show();
+                    } else {
+                        paginationNav.hide();
+                    }
+                } else {
+                    paginationContainer.hide();
+                }
+            }
+        }
+
+        // Category pill click
+        $('.db-filter-pills .db-pill').on('click', function(e) {
+            e.preventDefault();
+            $('.db-filter-pills .db-pill').removeClass('active');
+            $(this).addClass('active');
+            activeClass = $(this).data('class');
+            currentPage = 1;
+            applyFilter(1);
+        });
+
+        // Search typing
+        searchInput.on('input keyup', function() {
+            currentPage = 1;
+            applyFilter(1);
+        });
+
+        // Clear search
+        clearBtn.on('click', function() {
+            searchInput.val('').focus();
+            currentPage = 1;
+            applyFilter(1);
+        });
+
+        // Pagination buttons
+        $(document).on('click', '.db-page-btn', function() {
+            if ($(this).attr('disabled')) return;
+            var p = parseInt($(this).data('page'), 10);
+            if (p && p !== currentPage) {
+                applyFilter(p);
+                var card = document.querySelector('.db-table-card');
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        });
+
+        // Initial run
+        applyFilter(1);
+    });
+</script>
+[% END %]

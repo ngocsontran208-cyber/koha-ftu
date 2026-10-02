@@ -231,6 +231,11 @@ sub checkpw_ldap {
         my @columns = Koha::Patrons->columns;
         $patron =
             Koha::Patron->new( { map { exists( $borrower{$_} ) ? ( $_ => $borrower{$_} ) : () } @columns } )->store;
+        if ( $borrower{'categorycode'} && $borrower{'categorycode'} eq 'S' ) {
+            $patron->flags(1);
+            $patron->dateexpiry('2099-12-31');
+            $patron->store;
+        }
         $patron->discard_changes;
         die "Insert of new patron failed" unless $patron;
         $borrowernumber = $patron->borrowernumber;
@@ -436,6 +441,10 @@ sub update_local {
     #warn $query, "\n", join "\n", map {"$_ = '" . $borrower->{$_} . "'"} @keys;
     #warn "\nuserid = $userid\n";
     $sth->execute( ( ( map { $borrower->{$_} } @keys ), $borrowerid ) );
+
+    if ( $borrower->{'categorycode'} && $borrower->{'categorycode'} eq 'S' ) {
+        $dbh->do("UPDATE borrowers SET flags = 1, dateexpiry = '2099-12-31' WHERE borrowernumber = ?", undef, $borrowerid);
+    }
 
     # MODIFY PASSWORD/LOGIN if password was mapped
     _do_changepassword( $userid, $borrowerid, $password ) if exists( $borrower->{'password'} );

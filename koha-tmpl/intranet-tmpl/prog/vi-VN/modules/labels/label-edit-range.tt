@@ -5,57 +5,59 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
- [% t("Print barcode range") | html %]
- &rsaquo; [% t("Label creator") | html %] &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
- [% END %]</title
+        In dải mã vạch liên tục
+        &rsaquo; Tạo nhãn gáy &amp; mã vạch &rsaquo; Biên mục &rsaquo; Koha
+    [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 </head>
 <body id="labels_label-home" class="tools labels">
 [% WRAPPER 'header.inc' %]
- [% INCLUDE 'cat-search.inc' %]
+    [% INCLUDE 'cat-search.inc' %]
 [% END %]
 
 [% WRAPPER 'sub-header.inc' %]
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Phân hệ biên mục</a>
- [% END %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy</a>
- [% END %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Print barcode range</span>
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy &amp; mã vạch</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>In dải mã vạch liên tục</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' aside='labels-menu' %]
- [% INCLUDE 'labels-toolbar.inc' %]
- <h1>Print barcode range</h1>
- <form name="add_by_number" action="/cgi-bin/koha/labels/label-edit-batch.pl" method="post">
- [% INCLUDE 'csrf-token.inc' %]
- <input type="hidden" name="op" value="cud-add" />
- <fieldset class="rows">
- <ol>
- <li>
- <label for="from-input">Từ ngày:</label>
- <input type="text" inputmode="numeric" pattern="[0-9]*" name="from" id="from-input" value="0" style="text-align: right;" />
- </li>
- <li>
- <label for="to-input">Đến ngày:</label>
- <input type="text" inputmode="numeric" pattern="[0-9]*" name="to" id="to-input" value="0" style="text-align: right;" />
- </li>
- </ol>
- </fieldset>
- <fieldset class="action">
- <button type="button" class="btn btn-primary" id="print">Print range</button>
- </fieldset>
- </form>
+    [% INCLUDE 'labels-toolbar.inc' %]
+    <h1 class="ftu-clean-title"><i class="fa fa-barcode"></i> In dải mã vạch liên tục</h1>
+    <form name="add_by_number" action="/cgi-bin/koha/labels/label-edit-batch.pl" method="post">
+        [% INCLUDE 'csrf-token.inc' %]
+        <input type="hidden" name="op" value="cud-add" />
+        <fieldset class="rows">
+            <legend><i class="fa fa-sliders"></i> Thiết lập dải mã vạch</legend>
+            <ol>
+                <li>
+                    <label for="from-input">Từ mã: </label>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="from" id="from-input" value="0" style="text-align: right;" />
+                </li>
+                <li>
+                    <label for="to-input">Đến mã: </label>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" name="to" id="to-input" value="0" style="text-align: right;" />
+                </li>
+            </ol>
+        </fieldset>
+        <fieldset class="action">
+            <button type="button" class="btn btn-primary" id="print"><i class="fa fa-print"></i> In dải mã vạch</button>
+            <a class="cancel" href="/cgi-bin/koha/labels/label-home.pl">Hủy bỏ</a>
+        </fieldset>
+    </form>
 [% END %]
 
 [% MACRO jsinclude BLOCK %]
- <script nonce="[% Koha.CSPNonce | $raw %]">
+    <script nonce="[% Koha.CSPNonce | $raw %]">
         function Xport() {
             var str = "";
             str += "from=" + document.getElementById("from-input").value + "&";
@@ -68,67 +70,28 @@
             if (_from[0] == "0" || _to[0] == "0") {
                 switch (_id) {
                     case "from-input":
-                        var to_inp = $("#to-input");
-                        if (to_inp.hasClass("error")) {
-                            to_inp.removeClass("error").addClass("valid");
-                            $("to-input-error").remove();
-                        }
-                        if ($("#to-input-error").length) {
-                            $("#to-input-error").remove();
-                        }
-                        return result;
+                        return result && parseInt(_from) <= parseInt(_to);
                     case "to-input":
-                        var from_inp = $("#from-input");
-                        if (from_inp.hasClass("error")) {
-                            from_inp.removeClass("error").addClass("valid");
-                        }
-                        if ($("#from-input-error").length) {
-                            $("#from-input-error").remove();
-                        }
-                        return result;
+                        return result && parseInt(_from) <= parseInt(_to);
                 }
+            } else {
+                return parseInt(_from) <= parseInt(_to);
             }
-            return true;
         }
 
         $(document).ready(function () {
-            $('.sidebar_menu a[href$="/cgi-bin/koha/labels/label-home.pl"]').addClass("current");
-            $.validator.addMethod(
-                "gt",
-                function (value, element, params) {
-                    return parseInt(value) >= parseInt($(params).val());
-                },
-                _("Must be greater or equal to the from value.")
-            );
-
-            $.validator.addMethod(
-                "eq",
-                function (value, element, params) {
-                    return checkTwoValue($("#from-input").val(), $("#to-input").val(), $(element).attr("id"));
-                },
-                _("From and to values must have the same length.")
-            );
-
-            $("form[name=add_by_number]").validate({
-                rules: {
-                    from: {
-                        required: true,
-                        eq: "#from-input",
-                        eq: "#to-input",
-                    },
-                    to: {
-                        required: true,
-                        gt: "#from-input",
-                        eq: "#from-input",
-                        eq: "#to-input",
-                    },
-                },
-            });
-
-            $("#print").on("click", function () {
-                if ($("form[name=add_by_number]").valid()) {
-                    return Xport();
+            $("#print").click(function () {
+                var from = document.getElementById("from-input").value;
+                var to = document.getElementById("to-input").value;
+                if (!from || !to) {
+                    alert(_("Vui lòng nhập cả hai giá trị 'Từ mã' và 'Đến mã'."));
+                    return false;
                 }
+                if (!checkTwoValue(from, to, "from-input")) {
+                    alert(_("Giá trị 'Từ mã' phải nhỏ hơn hoặc bằng 'Đến mã' và cùng định dạng."));
+                    return false;
+                }
+                Xport();
             });
         });
     </script>

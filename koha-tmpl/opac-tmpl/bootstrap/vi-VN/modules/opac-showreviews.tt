@@ -16,7 +16,7 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
 [% END %]
-<link href="[% OPACBaseURL | url %]/cgi-bin/koha/opac-showreviews.pl?format=rss" rel="alternate" title="[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog bình luận mới nhất" type="application/rss+xml" />
+<link href="[% OPACBaseURL | url %]/cgi-bin/koha/opac-showreviews.pl?format=rss" rel="alternate" title="Bình luận mới nhất - [% PROCESS 'library_name_title' %]" type="application/rss+xml" />
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='opac-showreviews' bodyclass='scrollto' %]
 [% INCLUDE 'masthead.inc' %]

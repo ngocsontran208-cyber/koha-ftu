@@ -52,7 +52,30 @@ html, body {
   line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* Reset Koha's default right-aligned italic placeholder */
+::placeholder {
+  text-align: left !important;
+  font-style: normal !important;
+}
+::-webkit-input-placeholder {
+  text-align: left !important;
+  font-style: normal !important;
+}
+::-moz-placeholder {
+  text-align: left !important;
+  font-style: normal !important;
+}
+:-ms-input-placeholder {
+  text-align: left !important;
+  font-style: normal !important;
+}
+
+h1:not(.ftu-footer-master *),
+h2:not(.ftu-footer-master *),
+h3:not(.ftu-footer-master *),
+h4:not(.ftu-footer-master *),
+h5:not(.ftu-footer-master *),
+h6:not(.ftu-footer-master *) {
   font-family: var(--ftu-font) !important;
   color: var(--ftu-text-dark) !important;
   font-weight: 700;
@@ -218,14 +241,113 @@ legend {
   order: 2 !important;
 }
 
-#members {
+/* Database (CSDL) Tab in Navbar */
+#csdl-nav-item .nav-link {
+  font-weight: 600 !important;
+}
+
+.csdllabel {
+  display: inline !important;
+}
+
+@media only screen and (max-width: 850px) {
+  .csdllabel {
+    display: none !important;
+  }
+}
+
+/* Collections (BST) Tab in Navbar */
+#bst-nav-item .nav-link {
+  font-weight: 600 !important;
+}
+
+.bstlabel {
+  display: inline !important;
+}
+
+@media only screen and (max-width: 850px) {
+  .bstlabel {
+    display: none !important;
+  }
+}
+
+/* Language Selector in Navbar */
+#header_langmenu {
   order: 3 !important;
   margin-left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+#header_langmenu .nav-link {
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 20px !important;
+  padding: 0.35rem 0.85rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  transition: all 0.2s ease !important;
+}
+
+#header_langmenu .nav-link:hover {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+}
+
+#header_langmenu .nav-link i.fa-flag {
+  color: #b91c1c !important;
+}
+
+#header_langmenu .dropdown-menu {
+  min-width: 150px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+  padding: 6px 0 !important;
+  margin-top: 6px !important;
+}
+
+#header_langmenu .dropdown-item {
+  padding: 8px 16px !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  color: #1e293b !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  transition: background-color 0.15s ease !important;
+}
+
+#header_langmenu .dropdown-item:hover {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+}
+
+#header_langmenu .dropdown-item.menu-inactive {
+  font-weight: 700 !important;
+  color: #b91c1c !important;
+  background-color: #fff1f2 !important;
+}
+
+#header_langmenu .dropdown-item i.fa-check {
+  color: #b91c1c !important;
+  margin-left: 8px !important;
+}
+
+#members {
+  order: 4 !important;
+  margin-left: 0.5rem !important;
 }
 
 /* Hide Koha clumsy moresearches and opacheader rows on home page */
 body#opac-main #masthead-search-container,
 body#opac-main #moresearches,
+body#opac-news-detail #moresearches,
 body#opac-main .mastheadsearch,
 body#opac-main #opacheader,
 body#opac-main #opac-main-search,
@@ -333,16 +455,376 @@ body#opac-main #opac-main-search {
    FTU Hero Banner & Central Search (Home Page)
    ========================================================================== */
 .ftu-hero-section {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 1)), 
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 1)), 
               url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600') center/cover no-repeat;
-  padding: 2rem 1.5rem 3rem;
+  padding: 1.5rem 1rem 2.5rem;
   position: relative;
   text-align: center;
+  overflow: hidden;
 }
 
 .ftu-hero-content {
-  max-width: 1000px;
+  max-width: 1560px;
   margin: 0 auto;
+}
+
+/* ==========================================================================
+   FTU 3-Layer Stage Carousel (1160px x 400px CoverFlow)
+   - Lớp ở giữa: Đang hiển thị chính (Active, Scale 1, Full Brightness)
+   - Lớp trái: Peek previous banner (Scale 0.85, Shift Left, Dimmed)
+   - Lớp phải: Peek next banner (Scale 0.85, Shift Right, Dimmed)
+   ========================================================================== */
+.ftu-banner-carousel-container {
+  position: relative;
+  width: 100%;
+  max-width: 1560px;
+  height: 440px;
+  margin: 0 auto 1.5rem auto;
+  perspective: 1200px;
+  overflow: visible;
+}
+
+.ftu-banner-slider-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+/* Base style for each banner card - Standard 1160px x 400px */
+.ftu-banner-slide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1160px;
+  max-width: 72vw;
+  height: 400px;
+  max-height: calc(72vw * (400 / 1160));
+  aspect-ratio: 1160 / 400;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 0.65s ease, 
+              filter 0.65s ease, 
+              box-shadow 0.65s ease;
+  transform: translate(-50%, -50%) scale(0.65);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
+}
+
+/* 1. LỚP Ở GIỮA: Đang hiển thị chính (Center Active) */
+.ftu-banner-slide.slide-center {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 10;
+  filter: brightness(1);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+/* 2. LỚP BÊN TRÁI: Peek Layer Left (Previous) */
+.ftu-banner-slide.slide-left {
+  transform: translate(calc(-50% - 48%), -50%) scale(0.85);
+  opacity: 0.65;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 5;
+  filter: brightness(0.6) saturate(0.85);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.ftu-banner-slide.slide-left:hover {
+  opacity: 0.9;
+  filter: brightness(0.85) saturate(1);
+  transform: translate(calc(-50% - 48%), -50%) scale(0.88);
+}
+
+/* 3. LỚP BÊN PHẢI: Peek Layer Right (Next) */
+.ftu-banner-slide.slide-right {
+  transform: translate(calc(-50% + 48%), -50%) scale(0.85);
+  opacity: 0.65;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 5;
+  filter: brightness(0.6) saturate(0.85);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.ftu-banner-slide.slide-right:hover {
+  opacity: 0.9;
+  filter: brightness(0.85) saturate(1);
+  transform: translate(calc(-50% + 48%), -50%) scale(0.88);
+}
+
+/* Các banner khác ẩn an toàn */
+.ftu-banner-slide.slide-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.6);
+  z-index: 1;
+}
+
+.ftu-banner-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.ftu-banner-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.ftu-banner-slide.slide-center:hover .ftu-banner-bg {
+  transform: scale(1.03);
+}
+
+/* Content Overlay: Chỉ hiển thị chi tiết cho slide trung tâm */
+.ftu-banner-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem 2.25rem;
+  background: linear-gradient(0deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.45) 55%, transparent 100%);
+  color: #ffffff;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  z-index: 3;
+  transition: opacity 0.4s ease;
+}
+
+.ftu-banner-slide.slide-left .ftu-banner-content,
+.ftu-banner-slide.slide-right .ftu-banner-content {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ftu-banner-slide.slide-left .ftu-banner-desc,
+.ftu-banner-slide.slide-right .ftu-banner-desc,
+.ftu-banner-slide.slide-left .ftu-banner-btn,
+.ftu-banner-slide.slide-right .ftu-banner-btn {
+  display: none !important;
+}
+
+.ftu-banner-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(185, 28, 28, 0.92);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.ftu-banner-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff !important;
+  margin: 0;
+  line-height: 1.25;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.01em;
+}
+
+.ftu-banner-desc {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  margin: 0;
+  line-height: 1.45;
+  max-width: 800px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ftu-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 13px;
+  border-radius: 6px;
+  margin-top: 3px;
+  transition: all 0.2s ease;
+}
+
+.ftu-banner-link:hover .ftu-banner-btn {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.4);
+}
+
+/* Nút mũi tên điều hướng hai bên */
+.ftu-banner-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.ftu-banner-prev {
+  left: 20px;
+}
+
+.ftu-banner-next {
+  right: 20px;
+}
+
+.ftu-banner-arrow:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 15px rgba(185, 28, 28, 0.5);
+}
+
+/* Dấu chấm chỉ số (Pagination Dots) nằm giữa bên dưới */
+.ftu-banner-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 20;
+}
+
+.ftu-banner-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ftu-banner-dot:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.ftu-banner-dot.active {
+  width: 26px;
+  border-radius: 9999px;
+  background: #b91c1c;
+  border-color: #ef4444;
+  box-shadow: 0 2px 8px rgba(185, 28, 28, 0.5);
+}
+
+/* Responsive cho máy tính bảng và điện thoại */
+@media (max-width: 1024px) {
+  .ftu-banner-carousel-container {
+    height: 350px;
+  }
+  .ftu-banner-slide {
+    width: 100%;
+    max-width: 84%;
+    height: 300px;
+  }
+  .ftu-banner-slide.slide-left {
+    transform: translate(calc(-50% - 46%), -50%) scale(0.85);
+  }
+  .ftu-banner-slide.slide-right {
+    transform: translate(calc(-50% + 46%), -50%) scale(0.85);
+  }
+}
+
+@media (max-width: 768px) {
+  .ftu-hero-section {
+    padding: 1rem 0.5rem 2rem;
+  }
+  .ftu-banner-carousel-container {
+    height: 230px;
+    margin-bottom: 1.25rem;
+  }
+  .ftu-banner-slide {
+    width: 90%;
+    max-width: 90%;
+    height: calc(90vw * (400 / 1160));
+    min-height: 180px;
+    border-radius: 12px;
+  }
+  .ftu-banner-slide.slide-left {
+    opacity: 0.25;
+    transform: translate(calc(-50% - 42%), -50%) scale(0.8);
+  }
+  .ftu-banner-slide.slide-right {
+    opacity: 0.25;
+    transform: translate(calc(-50% + 42%), -50%) scale(0.8);
+  }
+  .ftu-banner-title {
+    font-size: 1.05rem;
+  }
+  .ftu-banner-content {
+    padding: 0.85rem 1rem;
+    gap: 0.2rem;
+  }
+  .ftu-banner-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 0.8rem;
+  }
+  .ftu-banner-prev {
+    left: 8px;
+  }
+  .ftu-banner-next {
+    right: 8px;
+  }
 }
 
 .ftu-hero-title {
@@ -435,16 +917,46 @@ body#opac-main #opac-main-search {
   flex: 1;
   border: none !important;
   background: transparent !important;
-  font-size: 1.15rem !important;
+  font-size: 1.12rem !important;
   color: var(--ftu-text-dark) !important;
-  padding: 0.85rem 0.5rem !important;
+  padding: 0.85rem 0.85rem !important;
   outline: none !important;
   font-family: var(--ftu-font) !important;
+  text-align: left !important;
+  direction: ltr !important;
 }
 
 .ftu-search-input-large::placeholder {
-  color: var(--ftu-text-subtle);
-  font-weight: 400;
+  color: var(--ftu-text-subtle) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  text-align: left !important;
+  direction: ltr !important;
+  opacity: 0.85 !important;
+}
+.ftu-search-input-large::-webkit-input-placeholder {
+  color: var(--ftu-text-subtle) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  text-align: left !important;
+  direction: ltr !important;
+  opacity: 0.85 !important;
+}
+.ftu-search-input-large::-moz-placeholder {
+  color: var(--ftu-text-subtle) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  text-align: left !important;
+  direction: ltr !important;
+  opacity: 0.85 !important;
+}
+.ftu-search-input-large:-ms-input-placeholder {
+  color: var(--ftu-text-subtle) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  text-align: left !important;
+  direction: ltr !important;
+  opacity: 0.85 !important;
 }
 
 .ftu-search-btn-large {
@@ -637,94 +1149,7 @@ body#opac-main #opac-main-search {
   text-overflow: ellipsis;
 }
 
-/* ==========================================================================
-   Compact Modern Footer (Fresh, Slate, Clean 3 Campuses)
-   ========================================================================== */
-.ftu-footer {
-  background: #ffffff !important;
-  border-top: 1px solid var(--ftu-border-light) !important;
-  margin-top: 2rem;
-  padding: 2rem 1.5rem 1.5rem;
-  color: var(--ftu-text-body);
-}
 
-.ftu-footer-inner {
-  max-width: 92%;
-  margin: 0 auto;
-}
-
-.ftu-footer-compact-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--ftu-border-subtle);
-}
-
-.ftu-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.ftu-footer-logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid rgba(185, 28, 28, 0.25);
-}
-
-.ftu-footer-title {
-  font-size: 0.94rem;
-  font-weight: 800;
-  color: var(--ftu-red);
-  letter-spacing: 0.02em;
-}
-
-.ftu-footer-subtitle {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--ftu-text-muted);
-  letter-spacing: 0.04em;
-}
-
-.ftu-footer-contact {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  font-size: 0.84rem;
-  color: var(--ftu-text-muted);
-}
-
-.ftu-footer-campuses-compact {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  font-size: 0.82rem;
-  color: var(--ftu-text-muted);
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--ftu-border-subtle);
-}
-
-.dot-sep {
-  color: var(--ftu-text-subtle);
-}
-
-.ftu-footer-bottom-compact {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  font-size: 0.8rem;
-  color: var(--ftu-text-subtle);
-  padding-top: 1rem;
-}
 
 /* Hide Koha default ugly changelanguage footer bar */
 #changelanguage {
@@ -897,6 +1322,10 @@ body#opac-main #opac-main-search {
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .ftu-book-card:hover .ftu-book-cover img {
@@ -1252,42 +1681,121 @@ body#opac-main #opac-main-search {
 
 /* ==========================================================================
    Global Cover Images (Local Uploads & Search Results)
+   Đồng bộ kích thước ảnh bìa tài liệu trên toàn bộ hệ thống OPAC
    ========================================================================== */
-.bookcover {
-  margin-bottom: 1rem;
+/* Cột bìa sách trong bảng kết quả tìm kiếm */
+td.covercol,
+th.covercol {
+  width: 125px !important;
+  min-width: 120px !important;
+  max-width: 135px !important;
+  vertical-align: top !important;
+  padding: 12px 8px !important;
+  text-align: center !important;
 }
 
+td.covercol .bookcover,
+td.covercol .cover-slider,
+td.covercol .cover-image,
+.coverimages,
+.coverimages .bookcover,
+.coverimages .cover-slider,
+.coverimages .cover-image {
+  width: 110px !important;
+  max-width: 110px !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+/* Trong danh sách kết quả, chỉ hiển thị duy nhất 1 ảnh bìa đầu tiên (ẩn các ảnh dự phòng trùng lặp) */
+td.covercol .cover-image ~ .cover-image,
+.coverimages .cover-image ~ .cover-image {
+  display: none !important;
+}
+
+/* Kích thước CHUẨN 100% ĐỒNG BỘ cho toàn bộ bìa trong danh sách, bảng kết quả, giá sách */
+td.covercol .cover-image img,
+td.covercol .bookcover img,
+.coverimages img,
+.coverimages .cover-image img,
+#userresults .cover-image img,
+#userresults .bookcover img,
+.table-striped td.covercol img,
+.table td.covercol img,
 .cover-image img {
-  border-radius: var(--ftu-radius-md);
-  box-shadow: var(--ftu-shadow-card);
-  max-width: 100%;
-  height: auto;
-  transition: all 0.3s ease;
-  object-fit: cover;
-  border: 1px solid var(--ftu-border-subtle);
+  width: 110px !important;
+  height: 155px !important;
+  min-width: 110px !important;
+  min-height: 155px !important;
+  max-width: 110px !important;
+  max-height: 155px !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background-color: #f8fafc !important;
+  display: block !important;
+  margin: 0 auto !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
 }
 
+td.covercol .cover-image img:hover,
+.coverimages img:hover,
+#userresults .cover-image img:hover,
 .cover-image img:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--ftu-shadow-lg);
-  border-color: #fca5a5;
+  transform: translateY(-3px) scale(1.03) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+  border-color: #b91c1c !important;
 }
 
-/* Tinh gọn hint "Ảnh bìa cục bộ" */
+/* Ẩn dòng chữ chú thích không cần thiết bên dưới ảnh bìa trong bảng kết quả */
+td.covercol .hint,
+.coverimages .hint,
+#userresults .hint,
 .cover-image .hint {
-  display: none;
+  display: none !important;
 }
 
-/* Kích thước trang danh sách kết quả */
-#searchresults .cover-image img {
-  width: 100px;
-  height: 145px;
+/* Kích thước bìa trên trang chi tiết tài liệu (opac-detail) */
+#catalogue_detail_biblio .bookcover,
+#catalogue_detail_biblio .cover-slider,
+#catalogue_detail_biblio .cover-image {
+  max-width: 220px !important;
+  margin-bottom: 1rem !important;
 }
 
-/* Kích thước trang chi tiết tài liệu */
-#catalogue_detail_biblio .cover-image img {
-  width: 220px;
-  height: 320px;
+#catalogue_detail_biblio .cover-image img,
+#catalogue_detail_biblio .bookcover img {
+  width: 200px !important;
+  height: 285px !important;
+  min-width: 200px !important;
+  min-height: 285px !important;
+  max-width: 200px !important;
+  max-height: 285px !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background-color: #f8fafc !important;
+  display: block !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+#catalogue_detail_biblio .cover-image img:hover {
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2) !important;
+  border-color: #b91c1c !important;
+}
+
+#catalogue_detail_biblio .hint {
+  display: block !important;
+  font-size: 0.75rem !important;
+  color: #64748b !important;
+  text-align: center !important;
+  margin-top: 6px !important;
 }
 
 @media (max-width: 768px) {
@@ -1309,152 +1817,87 @@ body#opac-main #opac-main-search {
 }
 
 /* ==========================================================================
-   Mega Footer (FTU Premium Clean Light)
+   Master Library Footer (DSpace Elegant White Edition)
    ========================================================================== */
-.ftu-footer-premium {
-  background-color: #ffffff;
-  color: #334155;
-  padding: 4rem 0 2rem;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  border-top: 1px solid #e2e8f0;
-  box-shadow: 0 -4px 30px rgba(0,0,0,0.02);
+.ftu-footer-master {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #ffffff !important;
+  color: #4b5563 !important;
+  font-family: var(--ftu-font, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
+  border-top: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+  position: relative !important;
+  overflow: visible !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  clear: both !important;
+  margin-top: 4rem !important;
+  padding-top: 3.5rem !important;
+  padding-bottom: 1.5rem !important;
+  flex-shrink: 0 !important;
+  min-height: auto !important;
 }
 
-.ftu-footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+.ftu-footer-master::before {
+  display: none !important;
 }
 
-.ftu-footer-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
-  gap: 3rem;
-  margin-bottom: 3rem;
+.ftu-footer-master .ftu-footer-container {
+  max-width: min(95vw, 1680px) !important;
+  margin: 0 auto !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
 }
 
-@media (max-width: 992px) {
-  .ftu-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.ftu-footer-master a {
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease-in-out !important;
 }
 
-@media (max-width: 768px) {
-  .ftu-footer-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
+.ftu-footer-master a:hover {
+  color: #a31a24 !important;
+  text-decoration: none !important;
 }
 
-/* Brand Column */
-.ftu-footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+.ftu-footer-master .row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  margin-left: -15px !important;
+  margin-right: -15px !important;
 }
 
-.ftu-footer-brand-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.ftu-footer-master h4 {
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.75rem !important;
+  margin-bottom: 1rem !important;
 }
 
-.ftu-footer-logo-img {
-  width: 65px;
-  height: auto;
+.ftu-footer-master ul {
+  padding-left: 0 !important;
+  margin-bottom: 0 !important;
+  list-style: none !important;
 }
 
-.ftu-footer-brand-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #b91c1c;
-  line-height: 1.3;
-  margin: 0;
-  letter-spacing: 0.02em;
+.ftu-footer-master li {
+  margin-bottom: 0.5rem !important;
 }
 
-.ftu-footer-brand p {
-  font-size: 0.95rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin: 0;
+.ftu-footer-master p {
+  line-height: 1.5 !important;
+  margin-bottom: 0 !important;
 }
 
-/* Titles */
-.ftu-footer-title {
-  color: #0f172a;
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Links */
-.ftu-footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.ftu-footer-links li a {
-  color: #475569;
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  display: inline-block;
-}
-
-.ftu-footer-links li a:hover {
-  color: #b91c1c;
-  transform: translateX(5px);
-}
-
-/* Contact */
-.ftu-footer-contact {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-
-.ftu-contact-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.8rem;
-  font-size: 0.95rem;
-  color: #475569;
-  line-height: 1.5;
-  text-align: left;
-}
-
-.ftu-contact-item i {
-  color: #b91c1c;
-  font-size: 1.1rem;
-  margin-top: 3px;
-  width: 16px; /* Ensure fixed width for alignment */
-  text-align: center;
-}
-
-/* Bottom */
-.ftu-footer-bottom {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
-@media (max-width: 768px) {
-  .ftu-footer-bottom {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
+/* Hide default Koha language footer to keep footer clean and cohesive */
+#changelanguage {
+  display: none !important;
 }
 
 /* Integration: DSpace 856 URL Styling */
@@ -1492,3 +1935,823 @@ span.online_resources a:hover,
     transform: translateY(-2px);
     box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3), 0 4px 6px -1px rgba(16, 185, 129, 0.2);
 }
+
+/* Holdings table barcode pill */
+.barcode-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Holdings table location & shelving location */
+.shelvingloc-wrap {
+    margin-top: 5px;
+}
+
+td.location .shelvingloc,
+.shelvingloc {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 10px !important;
+    background: #f0fdf4 !important;
+    color: #166534 !important;
+    border: 1px solid #bbf7d0 !important;
+    border-radius: 9999px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+}
+
+td.location .shelvingloc::before,
+.shelvingloc::before {
+    content: "\f02b"; /* fontawesome tag */
+    font-family: "Font Awesome 6 Free", "FontAwesome" !important;
+    font-weight: 900 !important;
+    font-size: 0.72rem;
+    color: #15803d;
+}
+
+/* Holdings table Call number (Số phân loại) */
+td.call_no {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    font-size: 0.9rem !important;
+}
+
+.shelfbrowser-link,
+#shelfbrowser,
+.close_shelf {
+    display: none !important;
+}
+
+/* Holdings table status badge */
+td.status .available {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #15803d !important;
+    font-weight: 600;
+}
+
+.results_summary.ddc .classification_edition {
+    color: #64748b;
+    font-size: 0.88em;
+    font-weight: normal;
+}
+
+/* ==========================================================================
+   MARC Detail View (opac-MARCdetail)
+   ========================================================================== */
+#usermarcdetail #marc {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+}
+
+#usermarcdetail #marc th {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-size: 0.92rem !important;
+  padding: 10px 14px !important;
+  border-top: 2px solid #e2e8f0 !important;
+}
+
+#usermarcdetail #marc td:first-child {
+  font-weight: 600;
+  color: #334155;
+  width: 32%;
+  background-color: #f8fafc;
+  border-right: 1px solid #f1f5f9;
+}
+
+#usermarcdetail #marc td {
+  padding: 9px 14px;
+  vertical-align: middle;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+#usermarcdetail #marc td a {
+  color: var(--ftu-red);
+  font-weight: 500;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+#usermarcdetail #items th {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   FTU OPAC - Modern Advanced Search (opac-search.pl / opac-advsearch.tt)
+   Design System: Academic, Premium, Clean, Zero Ugly Clip-Art Icons
+   ========================================================================== */
+
+/* 1. Global image suppression for outdated Koha clip-art icons */
+img.itemtype-image,
+.adv-search-item img,
+#advsearches img {
+  display: none !important;
+}
+
+/* 2. Page Container & Breadcrumbs */
+#advsearch .main {
+  padding-bottom: 60px;
+}
+
+#advsearch .breadcrumbs {
+  margin-bottom: 24px;
+}
+
+/* 3. Header Section */
+.ftu-advsearch-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ftu-advsearch-title {
+  font-size: 1.85rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.02em;
+}
+
+.ftu-advsearch-title i {
+  color: var(--ftu-red, #b91c1c);
+  font-size: 1.6rem;
+}
+
+.ftu-advsearch-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 4. Query Builder Card (#booleansearch) */
+#booleansearch {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 24px 28px !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+  margin-bottom: 24px !important;
+}
+
+#booleansearch > h1,
+#booleansearch legend {
+  display: none !important;
+}
+
+#booleansearch fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.ftu-query-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ftu-query-builder-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ftu-query-builder-title i {
+  color: var(--ftu-red, #b91c1c);
+}
+
+.ftu-query-builder-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* 5. Search Term Rows */
+.advanced-search-terms {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-term-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 0 !important;
+  padding: 4px 0;
+}
+
+.search-term-row .search-term-input {
+  display: flex;
+  align-items: center;
+}
+
+/* Left cell: Operator / Badge */
+.term-op-cell {
+  width: 140px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.ftu-term-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  text-align: center;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.ftu-term-badge.ftu-term-first {
+  background: #f8fafc;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+}
+
+.ftu-term-badge.ftu-term-and {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1.5px solid #bfdbfe;
+}
+
+.ftu-term-op-select {
+  width: 100%;
+  height: 42px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border-radius: 8px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background-color: #f8fafc !important;
+  cursor: pointer;
+}
+
+.ftu-term-op-select:focus {
+  border-color: var(--ftu-red, #b91c1c) !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+/* Field dropdown cell */
+.term-field-cell {
+  width: 250px;
+  min-width: 210px;
+  flex-shrink: 0;
+}
+
+.ftu-term-idx-select {
+  width: 100%;
+  height: 42px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #1e293b;
+  border-radius: 8px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background-color: #ffffff !important;
+}
+
+.ftu-term-idx-select:focus {
+  border-color: var(--ftu-red, #b91c1c) !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+/* Query input cell */
+.term-query-cell {
+  flex: 1;
+}
+
+.ftu-term-query-input {
+  width: 100%;
+  height: 42px !important;
+  font-size: 0.95rem !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  padding: 8px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ftu-term-query-input:focus {
+  border-color: var(--ftu-red, #b91c1c) !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+  background-color: #ffffff !important;
+}
+
+/* Row action buttons cell */
+.term-actions-cell {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ftu-btn-term-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.15s ease;
+  text-decoration: none !important;
+}
+
+.ftu-btn-add {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1.5px solid #a7f3d0;
+}
+
+.ftu-btn-add:hover {
+  background: #059669;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.ftu-btn-remove {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1.5px solid #fecaca;
+}
+
+.ftu-btn-remove:hover {
+  background: #dc2626;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* 6. Action Buttons Bar */
+.ftu-advsearch-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 18px 0 28px 0;
+  flex-wrap: wrap;
+}
+
+.btn-ftu-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  padding: 10px 28px !important;
+  border-radius: 10px !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer;
+}
+
+.btn-ftu-primary:hover {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(185, 28, 28, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.btn-ftu-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.btn-ftu-secondary:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-ftu-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.btn-ftu-ghost:hover {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 7. Item Types Card & Modern Grid */
+#advsearches {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+}
+
+#advsearches .nav-tabs {
+  border-bottom: 2px solid #f1f5f9;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+#advsearches .nav-tabs > li > a {
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  margin-bottom: -2px;
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #64748b;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+#advsearches .nav-tabs > li.active > a,
+#advsearches .nav-tabs > li > a:hover {
+  color: var(--ftu-red, #b91c1c) !important;
+  border-bottom-color: var(--ftu-red, #b91c1c) !important;
+  background: transparent !important;
+}
+
+.ftu-itypes-fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.ftu-itypes-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ftu-itypes-legend {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ftu-itypes-legend i {
+  color: var(--ftu-red, #b91c1c);
+}
+
+.ftu-itypes-quick-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-quick-toggle {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-quick-toggle:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.adv-search-grid {
+  display: grid !important;
+  gap: 12px !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+@media (max-width: 1100px) {
+  .adv-search-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .adv-search-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.ftu-itype-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  user-select: none;
+}
+
+.ftu-itype-card:hover {
+  border-color: var(--ftu-red, #b91c1c) !important;
+  background: #fff8f8 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.08) !important;
+}
+
+/* Checked state */
+.ftu-itype-card:has(input:checked),
+.ftu-itype-card.is-checked {
+  border: 1.5px solid var(--ftu-red, #b91c1c) !important;
+  background: #fef2f2 !important;
+  background-color: #fef2f2 !important;
+  box-shadow: 0 0 0 1px var(--ftu-red, #b91c1c) !important;
+}
+
+.ftu-itype-checkbox-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ftu-itype-checkbox-box input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--ftu-red, #b91c1c);
+}
+
+.ftu-itype-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.ftu-itype-icon-badge i {
+  color: inherit !important;
+}
+
+/* Type-specific modern icon badge palettes */
+.itype-code-bk .ftu-itype-icon-badge {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.itype-code-cf .ftu-itype-icon-badge {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.itype-code-cr .ftu-itype-icon-badge {
+  background: #d1fae5;
+  color: #065f46;
+}
+.itype-code-mp .ftu-itype-icon-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+.itype-code-mu .ftu-itype-icon-badge {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+.itype-code-mx .ftu-itype-icon-badge {
+  background: #e2e8f0;
+  color: #334155;
+}
+.itype-code-ref .ftu-itype-icon-badge {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+.itype-code-vm .ftu-itype-icon-badge {
+  background: #ccfbf1;
+  color: #115e59;
+}
+
+.ftu-itype-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ftu-itype-info .itypetext {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #1e293b;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 8. Limits & Filters Grid (#advsearch_limits and #subtypes) */
+#advsearch_limits,
+#subtypes {
+  margin-bottom: 24px;
+}
+
+.ftu-limit-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 18px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: all 0.2s ease !important;
+}
+
+.ftu-limit-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+
+.ftu-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid #f1f5f9;
+}
+
+.ftu-card-heading i {
+  color: var(--ftu-red, #b91c1c);
+  font-size: 1.05rem;
+}
+
+.ftu-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ftu-field-group {
+  margin-bottom: 10px;
+}
+
+.ftu-field-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.ftu-limit-select,
+.ftu-limit-input {
+  width: 100%;
+  height: 40px !important;
+  font-size: 0.88rem !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background-color: #ffffff !important;
+  padding: 6px 12px !important;
+}
+
+.ftu-limit-select:focus,
+.ftu-limit-input:focus {
+  border-color: var(--ftu-red, #b91c1c) !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+.ftu-card-hint {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+}
+
+.ftu-card-hint code {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.ftu-checkbox-group {
+  margin-top: 10px;
+}
+
+.ftu-toggle-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #334155;
+  margin: 0;
+  user-select: none;
+}
+
+.ftu-toggle-checkbox {
+  margin-top: 3px !important;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ftu-red, #b91c1c);
+}
+
+.ftu-input-icon-wrap {
+  position: relative;
+}
+
+.input-lead-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.ftu-input-icon-wrap .ftu-limit-input {
+  padding-left: 34px !important;
+}
+
+
+

@@ -937,10 +937,10 @@ function _dt_buttons(params) {
             autoClose: true,
             fade: 100,
             className: "copyConditions_controls",
-            titleAttr: __("Copy shareable link"),
+            titleAttr: "Sao chép liên kết chia sẻ",
             text:
                 '<i class="fa fa-lg fa-copy"></i> <span class="dt-button-text">' +
-                __("Copy shareable link") +
+                "Sao chép liên kết" +
                 "</span>",
             action: function (e, dt, node, config) {
                 const url = build_url_with_state(dt, table_settings);
@@ -970,10 +970,10 @@ function _dt_buttons(params) {
             attr: { href },
             className: "dt_button_configure_table",
             fade: 100,
-            titleAttr: __("Configure table"),
+            titleAttr: "Cấu hình bảng",
             text:
                 '<i class="fa fa-lg fa-wrench"></i> <span class="dt-button-text">' +
-                __("Configure") +
+                "Cấu hình" +
                 "</span>",
             action: function () {
                 window.location = href;

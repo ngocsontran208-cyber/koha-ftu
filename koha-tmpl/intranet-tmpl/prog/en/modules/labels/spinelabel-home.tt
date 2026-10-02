@@ -6,8 +6,8 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        [% t("Quick spine label creator") | html %]
-        &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+        In nhanh nhãn gáy sách
+        &rsaquo; Biên mục &rsaquo; Koha
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -21,27 +21,27 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Quick spine label creator</span>
+            <span>In nhanh nhãn gáy sách</span>
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' aside='cat-menu' %]
-    <h1>Quick spine label creator</h1>
+    <h1 class="ftu-clean-title"><i class="fa fa-tag"></i> In nhanh nhãn gáy sách</h1>
     <form action="/cgi-bin/koha/labels/spinelabel-print.pl" method="get" id="spinelabelprint">
         <fieldset class="brief">
             <ol>
                 <li
-                    ><label for="barcode">Barcode: </label>
-                    <input type="text" name="barcode" id="barcode" class="focus" required="required" />
+                    ><label for="barcode">Mã vạch tài liệu: </label>
+                    <input type="text" name="barcode" id="barcode" class="focus" required="required" placeholder="Quét hoặc nhập mã vạch..." />
                 </li>
             </ol>
         </fieldset>
         <fieldset class="action">
-            <input type="submit" class="btn btn-primary" value="View spine label" />
+            <input type="submit" class="btn btn-primary" value="Xem &amp; In nhãn gáy" />
         </fieldset>
     </form>
 [% END %]
@@ -51,7 +51,7 @@
             $("#spinelabelprint").on("submit", function (e) {
                 e.preventDefault();
                 var params = $(this).serialize();
-                openWindow("/cgi-bin/koha/labels/spinelabel-print.pl?" + params, "Print spine label", 400, 400);
+                openWindow("/cgi-bin/koha/labels/spinelabel-print.pl?" + params, "In nhãn gáy", 400, 400);
                 $("#barcode").val("").focus();
             });
         });

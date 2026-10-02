@@ -4,6 +4,7 @@
 [% USE Registers %]
 [% USE Koha %]
 [% PROCESS 'i18n.inc' %]
+[% PROCESS 'ftu-brand-config.inc' %]
 [% IF Koha.Preference( 'CookieConsent' ) %]
  [% USE JSConsents %]
 [% END %]
@@ -16,7 +17,7 @@
  </a>
  <div id="ftu-hd-titles">
  <span id="ftu-hd-title">Hệ thống Quản lý Thư viện</span>
- <span id="ftu-hd-sub">Phân hiệu Trường Đại học Ngoại thương</span>
+ <span id="ftu-hd-sub">[% FTU_BRAND.campus_name %]</span>
  </div>
  </div>
 
@@ -61,9 +62,13 @@
  <a href="/cgi-bin/koha/virtualshelves/shelves.pl"><i class="fa fa-list-alt"></i> Danh sách</a>
  [% END %]
  <a href="/cgi-bin/koha/authorities/authorities-home.pl"><i class="fa fa-link"></i> Từ điển</a>
- [% IF ( CAN_user_tools || CAN_user_clubs ) %]
- <a href="/cgi-bin/koha/tools/tools-home.pl"><i class="fa fa-wrench"></i> Công cụ</a>
- [% END %]
+                 [% IF ( CAN_user_tools || CAN_user_clubs ) %]
+                <a href="/cgi-bin/koha/tools/tools-home.pl"><i class="fa fa-wrench"></i> Công cụ</a>
+                [% END %]
+                <a href="/cgi-bin/koha/tools/portal-news.pl"><i class="fa fa-globe"></i> Quản lý trang công khai</a>
+                [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_parameters || CAN_user_editcatalogue_edit_catalogue ) %]
+                <a href="/cgi-bin/koha/admin/collections.pl"><i class="fa fa-layer-group"></i> Bộ sưu tập</a>
+                [% END %]
  [% IF ( CAN_user_parameters || CAN_user_plugins_admin ) %]
  <a href="/cgi-bin/koha/admin/admin-home.pl"><i class="fa fa-gears"></i> Quản trị</a>
  [% END %]
@@ -114,8 +119,8 @@
  </div>
  </div>
 </div>
-<script>
-$(document).ready(function() {
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
     function updateClock() {
         var now = new Date();
         var t = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
@@ -126,24 +131,57 @@ $(document).ready(function() {
     updateClock();
     setInterval(updateClock, 30000);
 
-    $('#ftu-more-btn').on('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $('#ftu-user-menu').removeClass('open');
-        $('#ftu-more-menu').toggleClass('open');
-    });
+    function toggleFtuMenu(btnId, menuId, otherMenuId, e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        var m = document.getElementById(menuId);
+        var o = document.getElementById(otherMenuId);
+        if (o) o.classList.remove('open');
+        if (m) m.classList.toggle('open');
+    }
 
-    $('#ftu-user-btn').on('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $('#ftu-more-menu').removeClass('open');
-        $('#ftu-user-menu').toggleClass('open');
-    });
+    function bindButtons() {
+        var moreBtn = document.getElementById('ftu-more-btn');
+        var userBtn = document.getElementById('ftu-user-btn');
+        if (moreBtn) {
+            moreBtn.onclick = function(e) {
+                toggleFtuMenu('ftu-more-btn', 'ftu-more-menu', 'ftu-user-menu', e);
+            };
+        }
+        if (userBtn) {
+            userBtn.onclick = function(e) {
+                toggleFtuMenu('ftu-user-btn', 'ftu-user-menu', 'ftu-more-menu', e);
+            };
+        }
+    }
 
-    $(document).on('click', function() {
-        $('.ftu-dropdown-menu').removeClass('open');
-    });
-});
+    // Bind immediately since elements exist right above this script!
+    bindButtons();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindButtons);
+    }
+
+    // Global capture-phase listener: guarantees clicks work regardless of any page script
+    document.addEventListener('click', function(e) {
+        var moreBtn = e.target.closest('#ftu-more-btn');
+        if (moreBtn) {
+            toggleFtuMenu('ftu-more-btn', 'ftu-more-menu', 'ftu-user-menu', e);
+            return;
+        }
+        var userBtn = e.target.closest('#ftu-user-btn');
+        if (userBtn) {
+            toggleFtuMenu('ftu-user-btn', 'ftu-user-menu', 'ftu-more-menu', e);
+            return;
+        }
+        if (!e.target.closest('.ftu-dropdown-menu')) {
+            document.querySelectorAll('.ftu-dropdown-menu').forEach(function(m) {
+                m.classList.remove('open');
+            });
+        }
+    }, true);
+})();
 </script>
 [% END %]
 <nav class="navbar navbar-expand navbar-dark bg-dark" aria-label="Main">

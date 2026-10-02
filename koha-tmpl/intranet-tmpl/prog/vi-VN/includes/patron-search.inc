@@ -35,22 +35,22 @@
  <aside>
  <form method="get" class="patron_search_form">
  <fieldset class="brief">
- <h3>Search for patron</h3>
+ <h3>Bộ lọc tìm kiếm</h3>
  <ol>
  <li>
- <label>Search:</label>
- <input type="text" id="search_patron_filter" class="search_patron_filter focus" value="[% search_filter | html %]" />
+ <label for="search_patron_filter">Từ khóa:</label>
+ <input type="text" id="search_patron_filter" class="search_patron_filter focus" placeholder="Họ tên, mã thẻ, email..." value="[% search_filter | html %]" />
  </li>
 
  [% FOR f IN filters %]
  [% SWITCH f %]
  [% CASE 'branch' %]
  <li>
- <label>Thư viện:</label>
+ <label>Cơ sở / Thư viện:</label>
  <select class="branchcode_filter">
  [% SET libraries = Branches.all( only_from_group => 1 ) %]
  [% IF libraries.size != 1 %]
- <option value="">Bất kỳ</option>
+ <option value="">Tất cả cơ sở</option>
  [% END %]
  [% FOREACH l IN libraries %]
  [% IF (l.branchcode == branchcode_filter) %]
@@ -63,9 +63,9 @@
  </li>
  [% CASE 'category' %]
  <li>
- <label>Danh mục:</label>
+ <label>Nhóm bạn đọc:</label>
  <select class="categorycode_filter">
- <option value="">Bất kỳ</option>
+ <option value="">Tất cả nhóm</option>
  [% FOREACH category IN Categories.limited.unblessed %]
  [% IF ( category.categorycode == categorycode_filter ) %]
  <option value="[% category.categorycode | html %]" selected="selected">[% category.description | html %]</option>
@@ -77,26 +77,26 @@
  </li>
  [% CASE 'sort1' %]
  <li>
- <label>Sort 1:</label>
+ <label>Thống kê 1:</label>
  [% PROCESS 'av-build-dropbox.inc' no_id => 1, name="sort1_filter", default="", category="Bsort1", empty=1, size = 20 %]
  </li>
  [% CASE 'sort2' %]
  <li>
- <label>Sort 2:</label>
+ <label>Thống kê 2:</label>
  [% PROCESS 'av-build-dropbox.inc' no_id => 1, name="sort2_filter", default="", category="Bsort2", empty=1, size = 20 %]
  </li>
  [% CASE 'search_field' %]
  <li> [% INCLUDE patron_fields_dropdown %] </li>
  [% CASE 'search_type' %]
  <li>
- <label>Kiểu tìm kiếm:</label>
+ <label>Phương thức tìm:</label>
  <select name="searchtype" class="searchtype_filter">
  [% IF searchtype == "starts_with" %]
- <option value="starts_with" selected="selected">bắt đầu với</option>
- <option value="contains">có chứa</option>
+ <option value="starts_with" selected="selected">Bắt đầu bằng</option>
+ <option value="contains">Chứa từ khóa</option>
  [% ELSE %]
- <option value="starts_with">bắt đầu với</option>
- <option value="contains" selected="selected">có chứa</option>
+ <option value="starts_with">Bắt đầu bằng</option>
+ <option value="contains" selected="selected">Chứa từ khóa</option>
  [% END %]
  </select>
  </li>
@@ -106,7 +106,7 @@
  </fieldset>
  <fieldset class="action">
  <input class="btn btn-primary search_patron_filter_btn" type="submit" value="Tìm kiếm" />
- <input class="btn btn-default clear_search" type="button" value="Xóa" />
+ <input class="btn btn-default clear_search" type="button" value="Đặt lại" />
  </fieldset>
  </form>
  </aside>
@@ -128,19 +128,21 @@
  [% END %]
 
  [% IF filter == 'suggestions_managers' %]
- <div class="alert alert-info">Only staff with superlibrarian or full suggestions permissions are returned in the search results</div>
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền phân hệ gợi ý mua</div>
  [% ELSIF filter == 'orders_managers' OR filter == 'baskets_managers' %]
- <div class="alert alert-info">Chỉ cán bộ thư viện được phân quyền trong phân hệ bổ sung (hoặc được phân quyền order_manage) mới được hiển thị trong kết quả tìm kiếm</div>
+ <div class="alert alert-info">Chỉ cán bộ thư viện được phân quyền trong phân hệ bổ sung mới được hiển thị trong kết quả tìm kiếm</div>
  [% ELSIF filter == 'funds_owners' OR filter == 'funds_users' %]
- <div class="alert alert-info">Only staff with superlibrarian or acquisitions permissions (or budget_modify permission if granular permissions are enabled) are returned in the search results</div>
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền quản lý quỹ / ngân sách</div>
  [% ELSIF filter == 'erm_users' %]
- <div class="alert alert-info">Only staff with superlibrarian or ERM permissions are returned in the search results</div>
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền quản lý tài nguyên điện tử (ERM)</div>
  [% ELSIF filter == 'ill_users' %]
- <div class="alert alert-info">Only staff with superlibrarian or ILL permissions are returned in the search results</div>
+ <div class="alert alert-info">Chỉ hiển thị cán bộ có quyền mượn liên thư viện</div>
  [% END %]
 
  <div class="browse">
- Browse by last name: [% SET alphabet = Koha.Preference('alphabet').split(' ') %]
+ <span class="browse-label">Lọc theo chữ cái đầu:</span>
+ <a href="#" class="filterByLetter filterAll active">Tất cả</a>
+ [% SET alphabet = Koha.Preference('alphabet').split(' ') %]
  [% UNLESS alphabet.size %]
  [% alphabet = ['A' .. 'Z'] %]
  [% END %]
@@ -165,37 +167,37 @@
  [% CASE 'checkbox' %]
  <th class="no-export"></th>
  [% CASE 'cardnumber' %]
- <th>Tóm tắt</th>
+ <th>Số thẻ / Mã bạn đọc</th>
  [% CASE 'dateofbirth' %]
  <th>Ngày sinh</th>
  [% CASE 'name' %]
- <th>Tên</th>
+ <th>Họ và tên</th>
  [% CASE 'name-address' %]
- <th>Tên</th>
+ <th>Họ và tên</th>
  [% CASE 'address' %]
  <th>Địa chỉ</th>
  [% CASE 'address-library' %]
  <th>Địa chỉ</th>
  [% CASE 'branch' %]
- <th>Thư viện</th>
+ <th>Cơ sở</th>
  [% CASE 'category' %]
- <th>Kiểu bạn đọc</th>
+ <th>Nhóm bạn đọc</th>
  [% CASE 'dateexpiry' %]
- <th>Ngày hết hạn</th>
+ <th>Hạn thẻ</th>
  [% CASE 'borrowernotes' %]
  <th>Ghi chú</th>
  [% CASE 'phone' %]
  <th>Điện thoại</th>
  [% CASE 'checkouts' %]
- <th>Đang mượn</th>
+ <th>Mượn / Quá hạn</th>
  [% CASE 'account_balance' %]
- <th>Tiền phạt</th>
+ <th>Phí / Phạt</th>
  [% CASE 'sort1' %]
  <th>Thống kê 1</th>
  [% CASE 'sort2' %]
  <th>Thống kê 2</th>
  [% CASE 'action' %]
- <th class="no-export">&nbsp;</th>
+ <th class="no-export">Thao tác</th>
  [% END %]
  [% END %]
  </tr>
@@ -762,11 +764,11 @@
                                             action_node += '<a href="#" class="btn btn-default btn-xs add_user" data-borrowernumber="' + patron_id + '">' + _("Thêm") + '</a>';
                                         [% CASE 'edit' %]
                                             [% IF CAN_user_borrowers_edit_borrowers %]
-                                                action_node += '<a href="/cgi-bin/koha/members/memberentry.pl?op=edit_form&amp;destination=circ&amp;borrowernumber=' + patron_id + '" class="btn btn-default btn-xs"><i class="fa-solid fa-pencil" aria-hidden="true"></i> ' + _("Sửa") + '</a>';
+                                                action_node += '<a href="/cgi-bin/koha/members/memberentry.pl?op=edit_form&amp;destination=circ&amp;borrowernumber=' + patron_id + '" class="btn btn-default btn-xs ftu-btn-edit">' + _("Sửa") + '</a>';
                                             [% END %]
                                         [% CASE 'checkout' %]
                                             [% IF CAN_user_circulate_circulate_remaining_permissions %]
-                                                action_node += '<a class="btn btn-default btn-xs" href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=' + patron_id + '"><i class="fa fa-barcode"></i> ' + _("Ghi mượn") + '</a>';
+                                                action_node += '<a class="btn btn-default btn-xs ftu-btn-checkout" href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=' + patron_id + '">' + _("Ghi mượn") + '</a>';
                                             [% END %]
                                         [% END %]
                                         [% END %]
@@ -810,7 +812,10 @@
 
                 $(".filterByLetter").on("click",function(e){
                     e.preventDefault();
-                    filterByFirstLetterSurname($(this).text(), true);
+                    $(".filterByLetter").removeClass("active");
+                    $(this).addClass("active");
+                    let letter = $(this).hasClass("filterAll") ? "" : $(this).text().trim();
+                    filterByFirstLetterSurname(letter, true);
                 });
                 patrons_table.on("click",".add_user",function(e){
                     e.preventDefault();

@@ -1,0 +1,826 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% PROCESS "html_helpers.inc" %]
+[% INCLUDE "doc-head-open.inc" %]
+<title>[% IF post %][% post.title | html %] - [% END %][% PROCESS "library_name_title" %]</title>
+[% INCLUDE "doc-head-close.inc" %]
+[% BLOCK cssinclude %]
+<style>
+    /* Thanh tiến trình đọc bài viết (Reading Progress Bar) */
+    #reading-progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #b91c1c 0%, #ef4444 100%);
+        z-index: 99999;
+        width: 0%;
+        transition: width 0.1s ease;
+        box-shadow: 0 1px 4px rgba(185, 28, 28, 0.4);
+    }
+
+    body#opac-news-detail .main {
+        background: transparent !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 0 3.5rem 0 !important;
+        box-shadow: none !important;
+    }
+    /* Ẩn các liên kết tìm kiếm phụ trên trang chi tiết bài viết */
+    #moresearches,
+    .row:has(#moresearches) {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .ftu-article-container {
+        width: 95%;
+        max-width: 1820px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+        box-sizing: border-box;
+    }
+    .ftu-article-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 2.5rem;
+        align-items: start;
+    }
+    @media (max-width: 1280px) {
+        .ftu-article-container {
+            width: 96%;
+            padding: 0 0.75rem;
+        }
+        .ftu-article-grid {
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 1.75rem;
+        }
+    }
+    @media (max-width: 992px) {
+        .ftu-article-container {
+            width: 100%;
+            padding: 0 0.75rem;
+        }
+        .ftu-article-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .ftu-article-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 2.5rem 3rem;
+    }
+    @media (max-width: 768px) {
+        .ftu-article-card {
+            padding: 1.5rem 1.25rem;
+        }
+    }
+    .ftu-breadcrumb {
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+    .ftu-breadcrumb a {
+        color: #b91c1c;
+        text-decoration: none;
+    }
+    .ftu-badge-type {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+    .ftu-badge-news {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .ftu-badge-event {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+    .ftu-badge-notice {
+        background: #fef3c7;
+        color: #b45309;
+    }
+    .ftu-article-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 1.25rem;
+    }
+    .ftu-article-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1.25rem;
+        padding-bottom: 1rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    .ftu-article-meta i {
+        color: #b91c1c;
+        margin-right: 5px;
+    }
+
+    /* Reading Utility Toolbar */
+    .ftu-reading-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0.65rem 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+        font-size: 0.88rem;
+    }
+    .ftu-share-btns {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ftu-share-btn {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s;
+    }
+    .ftu-share-btn:hover {
+        background: #0284c7;
+        color: #ffffff !important;
+        border-color: #0284c7;
+    }
+    .ftu-share-btn.btn-copy:hover {
+        background: #059669;
+        border-color: #059669;
+    }
+    .ftu-share-btn.btn-print:hover {
+        background: #64748b;
+        border-color: #64748b;
+    }
+
+    .ftu-article-banner {
+        width: 100%;
+        max-height: 480px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Event Box Highlight */
+    .ftu-event-box {
+        background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+        border: 2px solid #38bdf8;
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 2.25rem;
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+    }
+    .ftu-event-box-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #0369a1;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ftu-event-grid-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .ftu-event-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 0.95rem;
+        color: #1e293b;
+    }
+    .ftu-event-item i {
+        font-size: 1.3rem;
+        color: #0284c7;
+        margin-top: 2px;
+    }
+    .ftu-event-btn-reg {
+        display: inline-block;
+        background: #0284c7;
+        color: #ffffff !important;
+        font-weight: 700;
+        padding: 0.8rem 1.85rem;
+        border-radius: 8px;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+    .ftu-event-btn-reg:hover {
+        background: #0369a1;
+        transform: translateY(-2px);
+    }
+
+    /* Table of Contents (TOC) */
+    .ftu-toc-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .ftu-toc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 1.05rem;
+    }
+    .ftu-toc-list {
+        margin: 10px 0 0 1.25rem;
+        padding: 0;
+        list-style-type: decimal;
+    }
+    .ftu-toc-list li {
+        margin-bottom: 6px;
+        font-size: 0.92rem;
+    }
+    .ftu-toc-list a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .ftu-toc-list a:hover {
+        color: #b91c1c;
+        text-decoration: underline;
+    }
+
+    /* Content Typography */
+    .ftu-article-excerpt {
+        font-size: 1.18rem;
+        font-weight: 500;
+        color: #334155;
+        line-height: 1.7;
+        padding: 0.5rem 0 0.5rem 1.5rem;
+        border-left: 4px solid #b91c1c;
+        margin-bottom: 2rem;
+        font-style: italic;
+        background: #fffafa;
+        border-radius: 0 8px 8px 0;
+    }
+    .ftu-article-body {
+        font-size: 1.06rem;
+        line-height: 1.85;
+        color: #1e293b;
+        transition: font-size 0.2s ease;
+    }
+    .ftu-article-body p {
+        margin-bottom: 1.35rem;
+    }
+    .ftu-article-body h2 {
+        color: #0f172a;
+        font-weight: 800;
+        margin-top: 2.25rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .ftu-article-body h3 {
+        color: #1e293b;
+        font-weight: 700;
+        margin-top: 1.75rem;
+        margin-bottom: 0.85rem;
+        font-size: 1.25rem;
+    }
+    .ftu-article-body ul, .ftu-article-body ol {
+        margin-left: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .ftu-article-body li {
+        margin-bottom: 0.6rem;
+    }
+    .ftu-article-body img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        cursor: zoom-in;
+        transition: transform 0.2s ease;
+    }
+    .ftu-article-body img:hover {
+        opacity: 0.95;
+    }
+
+    /* Bottom Post Navigation */
+    .ftu-post-nav {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    @media (max-width: 768px) {
+        .ftu-post-nav { grid-template-columns: 1fr; }
+    }
+    .ftu-post-nav-card {
+        padding: 1rem 1.25rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        text-decoration: none !important;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s;
+    }
+    .ftu-post-nav-card:hover {
+        background: #ffffff;
+        border-color: #b91c1c;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transform: translateY(-2px);
+    }
+    .ftu-post-nav-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ftu-post-nav-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .ftu-post-nav-card:hover .ftu-post-nav-title {
+        color: #b91c1c;
+    }
+
+    /* Sidebar */
+    .ftu-sidebar-box {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        position: sticky;
+        top: 24px;
+    }
+    .ftu-sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #b91c1c;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #fee2e2;
+        margin-bottom: 1.25rem;
+    }
+    .ftu-sidebar-post {
+        display: flex;
+        gap: 12px;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        text-decoration: none !important;
+        color: inherit;
+    }
+    .ftu-sidebar-post:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .ftu-sidebar-post img {
+        width: 70px;
+        height: 70px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+    .ftu-sidebar-post h5 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 5px 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .ftu-sidebar-post:hover h5 {
+        color: #b91c1c;
+    }
+    .ftu-sidebar-date {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    /* Toast notification */
+    #ftu-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 999999;
+        display: none;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Image Lightbox */
+    #ftu-lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.9);
+        z-index: 9999999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 20px;
+    }
+    #ftu-lightbox img {
+        max-width: 90%;
+        max-height: 82vh;
+        border-radius: 8px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    #ftu-lightbox-caption {
+        color: #e2e8f0;
+        margin-top: 12px;
+        font-size: 0.95rem;
+        text-align: center;
+    }
+    #ftu-lightbox-close {
+        position: absolute;
+        top: 25px;
+        right: 30px;
+        color: #ffffff;
+        font-size: 2rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    /* Print styles */
+    @media print {
+        #reading-progress-bar, .ftu-reading-toolbar, .ftu-post-nav, aside, footer, header, #masthead, .ftu-breadcrumb {
+            display: none !important;
+        }
+        .ftu-article-card {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .ftu-article-container {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .ftu-article-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+[% END %]
+</head>
+[% INCLUDE "bodytag.inc" bodyid="opac-news-detail" %]
+[% INCLUDE "masthead.inc" %]
+
+<!-- Thanh chỉ báo tiến trình đọc bài -->
+<div id="reading-progress-bar"></div>
+
+<main class="main">
+    <div class="ftu-article-container">
+        <div class="ftu-breadcrumb">
+            <a href="/"><i class="fa fa-home"></i> Home</a> &rsaquo; 
+            <a href="/#news-section">News & Events</a> &rsaquo; 
+            <span>[% IF post %][% post.title | html %][% ELSE %]Article not found[% END %]</span>
+        </div>
+
+        [% IF post %]
+        <div class="ftu-article-grid">
+            <!-- CỘT CHÍNH: NỘI DUNG BÀI VIẾT -->
+            <article class="ftu-article-card">
+                <div>
+                    [% IF post.post_type == "event" %]
+                        <span class="ftu-badge-type ftu-badge-event"><i class="fa fa-calendar-check"></i> EVENT & WORKSHOP</span>
+                    [% ELSIF post.post_type == "notice" %]
+                        <span class="ftu-badge-type ftu-badge-notice"><i class="fa fa-bell"></i> IMPORTANT NOTICE</span>
+                    [% ELSE %]
+                        <span class="ftu-badge-type ftu-badge-news"><i class="fa fa-newspaper"></i> LIBRARY NEWS</span>
+                    [% END %]
+                </div>
+
+                <h1 class="ftu-article-title">[% post.title | html %]</h1>
+
+                <div class="ftu-article-meta">
+                    <span><i class="fa fa-user-edit"></i> [% post.author_name | html %]</span>
+                    <span><i class="fa fa-calendar-alt"></i> [% post.formatted_date | html %]</span>
+                    <span><i class="fa fa-eye"></i> [% post.views_count %] views</span>
+                </div>
+
+                <!-- THANH TIỆN ÍCH CHIA SẺ & IN BÀI VIẾT -->
+                <div class="ftu-reading-toolbar">
+                    <div class="ftu-share-btns">
+                        <button type="button" class="ftu-share-btn btn-copy" onclick="copyArticleLink()">
+                            <i class="fa fa-link"></i> Copy link
+                        </button>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=[% Koha.OPACBaseURL | url %]/cgi-bin/koha/opac-news-detail.pl?id=[% post.id %]" target="_blank" rel="noopener noreferrer" class="ftu-share-btn">
+                            <i class="fa fa-share-alt"></i> Share
+                        </a>
+                        <button type="button" class="ftu-share-btn btn-print" onclick="window.print()">
+                            <i class="fa fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                [% IF post.featured_image %]
+                    <img src="[% post.featured_image | html %]" alt="[% post.title | html %]" class="ftu-article-banner" />
+                [% END %]
+
+                [% IF post.post_type == "event" %]
+                    <!-- KHỐI THÔNG TIN SỰ KIỆN NỔI BẬT -->
+                    <div class="ftu-event-box">
+                        <div class="ftu-event-box-title">
+                            <i class="fa fa-calendar-star"></i> EVENT DETAILS
+                        </div>
+                        <div class="ftu-event-grid-info">
+                            <div class="ftu-event-item">
+                                <i class="fa fa-clock"></i>
+                                <div>
+                                    <strong>Date & Time:</strong><br>
+                                    [% post.formatted_event_date %] at [% post.event_time %]
+                                </div>
+                            </div>
+                            <div class="ftu-event-item">
+                                <i class="fa fa-map-marker-alt"></i>
+                                <div>
+                                    <strong>Location:</strong><br>
+                                    [% post.event_location | html %]
+                                </div>
+                            </div>
+                            <div class="ftu-event-item">
+                                <i class="fa fa-tag"></i>
+                                <div>
+                                    <strong>Status:</strong><br>
+                                    <span class="badge bg-primary" style="font-size: 0.85rem;">[% post.event_tag | html %]</span>
+                                </div>
+                            </div>
+                        </div>
+                        [% IF post.event_reg_link %]
+                            <a href="[% post.event_reg_link | html %]" target="_blank" rel="noopener noreferrer" class="ftu-event-btn-reg">
+                                <i class="fa fa-user-plus" style="margin-right: 6px;"></i> REGISTER NOW
+                            </a>
+                        [% END %]
+                    </div>
+                [% END %]
+
+                <!-- MỤC LỤC BÀI VIẾT TỰ ĐỘNG SINH (NẾU CÓ ĐỀ MỤC) -->
+                <div id="ftu-toc-container" style="display:none;"></div>
+
+                [% IF post.excerpt %]
+                    <div class="ftu-article-excerpt">
+                        [% post.excerpt | html %]
+                    </div>
+                [% END %]
+
+                <!-- THÂN BÀI VIẾT CHI TIẾT -->
+                <div class="ftu-article-body" id="article-body-content">
+                    [% post.content | $raw %]
+                </div>
+
+                <!-- ĐIỀU HƯỚNG BÀI VIẾT TRƯỚC / TIẾP THEO -->
+                <div class="ftu-post-nav">
+                    [% IF prev_post %]
+                        <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% prev_post.id %]" class="ftu-post-nav-card">
+                            <span class="ftu-post-nav-label"><i class="fa fa-arrow-left"></i> Previous article</span>
+                            <span class="ftu-post-nav-title">[% prev_post.title | html %]</span>
+                        </a>
+                    [% ELSE %]
+                        <div class="ftu-post-nav-card" style="opacity: 0.6; cursor: default;">
+                            <span class="ftu-post-nav-label"><i class="fa fa-arrow-left"></i> Previous article</span>
+                            <span class="ftu-post-nav-title text-muted">No previous article</span>
+                        </div>
+                    [% END %]
+
+                    [% IF next_post %]
+                        <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% next_post.id %]" class="ftu-post-nav-card" style="text-align: right;">
+                            <span class="ftu-post-nav-label" style="justify-content: flex-end;">Next article <i class="fa fa-arrow-right"></i></span>
+                            <span class="ftu-post-nav-title">[% next_post.title | html %]</span>
+                        </a>
+                    [% ELSE %]
+                        <div class="ftu-post-nav-card" style="opacity: 0.6; cursor: default; text-align: right;">
+                            <span class="ftu-post-nav-label" style="justify-content: flex-end;">Next article <i class="fa fa-arrow-right"></i></span>
+                            <span class="ftu-post-nav-title text-muted">This is the latest article</span>
+                        </div>
+                    [% END %]
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Back to Home</a>
+                    <button type="button" class="btn btn-outline-primary" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"><i class="fa fa-arrow-up"></i> Back to top</button>
+                </div>
+            </article>
+
+            <!-- CỘT PHẢI: BÀI VIẾT KHÁC -->
+            <aside>
+                <div class="ftu-sidebar-box">
+                    <h4 class="ftu-sidebar-title">LATEST POSTS</h4>
+                    [% FOREACH r IN recent_posts %]
+                        [% NEXT IF r.post_type == 'database' %]
+                        <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% r.id %]" class="ftu-sidebar-post">
+                            [% IF r.featured_image %]
+                                <img src="[% r.featured_image | html %]" alt="[% r.title | html %]" />
+                            [% ELSE %]
+                                <div style="width: 70px; height: 70px; background: #fee2e2; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #b91c1c;">
+                                    <i class="fa fa-newspaper fa-lg"></i>
+                                </div>
+                            [% END %]
+                            <div>
+                                <h5>[% r.title | html %]</h5>
+                                <div class="ftu-sidebar-date"><i class="fa fa-calendar-alt"></i> [% r.formatted_date %] &nbsp;&bull;&nbsp; <i class="fa fa-eye" style="color: #0284c7;"></i> [% r.views_count || 0 %] views</div>
+                            </div>
+                        </a>
+                    [% END %]
+                </div>
+            </aside>
+        </div>
+        [% ELSE %]
+        <div class="alert alert-warning text-center" style="padding: 3rem;">
+            <h3><i class="fa fa-exclamation-triangle"></i> Content not found</h3>
+            <p>This article or event does not exist or has been removed.</p>
+            <a href="/" class="btn btn-primary" style="margin-top: 1rem;"><i class="fa fa-home"></i> Return to Homepage</a>
+        </div>
+        [% END %]
+    </div>
+</main>
+
+<!-- Toast thông báo -->
+<div id="ftu-toast"><i class="fa fa-check-circle text-success"></i> <span id="ftu-toast-text">Link copied!</span></div>
+
+<!-- Modal phóng to ảnh (Lightbox) -->
+<div id="ftu-lightbox" onclick="closeLightbox()">
+    <button id="ftu-lightbox-close" onclick="closeLightbox()">&times;</button>
+    <img id="ftu-lightbox-img" src="" alt="Zoom" />
+    <div id="ftu-lightbox-caption"></div>
+</div>
+
+[% INCLUDE "opac-bottom.inc" %]
+[% BLOCK jsinclude %]
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    initReadingProgressBar();
+    generateTableOfContents();
+    initImageLightbox();
+});
+
+/* 1. Thanh tiến trình đọc bài */
+function initReadingProgressBar() {
+    window.addEventListener("scroll", function() {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        var bar = document.getElementById("reading-progress-bar");
+        if (bar) {
+            bar.style.width = scrolled + "%";
+        }
+    });
+}
+
+/* 4. Mục lục tự động (TOC) */
+function generateTableOfContents() {
+    var body = document.getElementById("article-body-content");
+    var tocContainer = document.getElementById("ftu-toc-container");
+    if (!body || !tocContainer) return;
+
+    var headings = body.querySelectorAll("h2, h3");
+    if (headings.length < 2) return;
+
+    var tocHtml = '<div class="ftu-toc-box">' +
+                  '<div class="ftu-toc-header" onclick="toggleToc()">' +
+                  '<span><i class="fa fa-list-ul text-primary"></i> <strong>Mục lục bài viết</strong></span>' +
+                  '<span id="toc-toggle-icon" style="font-size:0.85rem;color:#64748b;"><i class="fa fa-chevron-up"></i> Thu gọn</span>' +
+                  '</div>' +
+                  '<ol class="ftu-toc-list" id="toc-content-list">';
+
+    headings.forEach(function(heading, index) {
+        var id = "section-" + (index + 1);
+        heading.setAttribute("id", id);
+        var indent = (heading.tagName.toLowerCase() === 'h3') ? 'style="margin-left:15px;list-style-type:circle;"' : '';
+        tocHtml += '<li ' + indent + '><a href="#' + id + '" onclick="smoothScrollTo(\'' + id + '\', event)">' + heading.innerText + '</a></li>';
+    });
+
+    tocHtml += '</ol></div>';
+    tocContainer.innerHTML = tocHtml;
+    tocContainer.style.display = "block";
+}
+
+function toggleToc() {
+    var list = document.getElementById("toc-content-list");
+    var icon = document.getElementById("toc-toggle-icon");
+    if (list.style.display === "none") {
+        list.style.display = "block";
+        icon.innerHTML = '<i class="fa fa-chevron-up"></i> Thu gọn';
+    } else {
+        list.style.display = "none";
+        icon.innerHTML = '<i class="fa fa-chevron-down"></i> Mở rộng';
+    }
+}
+
+function smoothScrollTo(id, evt) {
+    evt.preventDefault();
+    var target = document.getElementById(id);
+    if (target) {
+        var topPos = target.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({ top: topPos, behavior: 'smooth' });
+    }
+}
+
+/* 5. Sao chép liên kết có Toast */
+function copyArticleLink() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+        showToast("Đã sao chép liên kết bài viết vào bộ nhớ tạm!");
+    }, function() {
+        showToast("Không thể sao chép liên kết!");
+    });
+}
+
+function showToast(msg) {
+    var toast = document.getElementById("ftu-toast");
+    var text = document.getElementById("ftu-toast-text");
+    if (!toast) return;
+    text.innerText = msg;
+    toast.style.display = "flex";
+    setTimeout(function() {
+        toast.style.display = "none";
+    }, 3000);
+}
+
+/* 6. Lightbox xem ảnh lớn */
+function initImageLightbox() {
+    var images = document.querySelectorAll("#article-body-content img");
+    images.forEach(function(img) {
+        img.addEventListener("click", function() {
+            var src = this.getAttribute("src");
+            var alt = this.getAttribute("alt") || "";
+            var lb = document.getElementById("ftu-lightbox");
+            var lbImg = document.getElementById("ftu-lightbox-img");
+            var lbCap = document.getElementById("ftu-lightbox-caption");
+            if (lb && lbImg) {
+                lbImg.src = src;
+                lbCap.innerText = alt;
+                lb.style.display = "flex";
+            }
+        });
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") closeLightbox();
+    });
+}
+
+function closeLightbox() {
+    var lb = document.getElementById("ftu-lightbox");
+    if (lb) lb.style.display = "none";
+}
+</script>
+[% END %]

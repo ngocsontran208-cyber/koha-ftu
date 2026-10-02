@@ -221,6 +221,91 @@
 
  <xsl:call-template name="show-lang-041"/>
 
+ <!-- Classification / Số phân loại (Hiển thị ngay dưới Ngôn ngữ) -->
+ <xsl:if test="marc:datafield[@tag=082]">
+ <span class="results_summary ddc">
+ <span class="label">Số phân loại: </span>
+ <ul class="resource_list">
+ <xsl:for-each select="marc:datafield[@tag=082]">
+ <li>
+ <xsl:choose>
+ <xsl:when test="marc:subfield[@code='a'] and marc:subfield[@code='b']">
+ <xsl:value-of select="marc:subfield[@code='a']"/>
+ <xsl:choose>
+ <xsl:when test="starts-with(marc:subfield[@code='b'], '/')">
+ <xsl:value-of select="marc:subfield[@code='b']"/>
+ </xsl:when>
+ <xsl:otherwise>
+ <xsl:text>/</xsl:text>
+ <xsl:value-of select="marc:subfield[@code='b']"/>
+ </xsl:otherwise>
+ </xsl:choose>
+ </xsl:when>
+ <xsl:otherwise>
+ <xsl:call-template name="subfieldSelect">
+ <xsl:with-param name="codes">ab</xsl:with-param>
+ <xsl:with-param name="delimeter"><xsl:text>&#160;</xsl:text></xsl:with-param>
+ </xsl:call-template>
+ </xsl:otherwise>
+ </xsl:choose>
+ <xsl:if test="marc:subfield[@code='2']">
+ <span class="classification_edition"> (DDC <xsl:value-of select="marc:subfield[@code='2']"/>)</span>
+ </xsl:if>
+ </li>
+ </xsl:for-each>
+ </ul>
+ </span>
+ </xsl:if>
+
+ <xsl:if test="not(marc:datafield[@tag=082]) and (marc:datafield[@tag=090] or marc:datafield[@tag=050] or marc:datafield[@tag=084] or marc:datafield[@tag=942]/marc:subfield[@code='h'])">
+ <span class="results_summary ddc">
+ <span class="label">Số phân loại: </span>
+ <ul class="resource_list">
+ <xsl:for-each select="marc:datafield[@tag=090]">
+ <li>
+ <xsl:call-template name="subfieldSelect">
+ <xsl:with-param name="codes">ab</xsl:with-param>
+ <xsl:with-param name="delimeter"><xsl:text>&#160;</xsl:text></xsl:with-param>
+ </xsl:call-template>
+ </li>
+ </xsl:for-each>
+ <xsl:for-each select="marc:datafield[@tag=050]">
+ <li>
+ <xsl:call-template name="subfieldSelect">
+ <xsl:with-param name="codes">ab</xsl:with-param>
+ <xsl:with-param name="delimeter"><xsl:text>&#160;</xsl:text></xsl:with-param>
+ </xsl:call-template>
+ <span class="classification_edition"> (LCC)</span>
+ </li>
+ </xsl:for-each>
+ <xsl:for-each select="marc:datafield[@tag=084]">
+ <li>
+ <xsl:call-template name="subfieldSelect">
+ <xsl:with-param name="codes">a</xsl:with-param>
+ <xsl:with-param name="delimeter"><xsl:text> | </xsl:text></xsl:with-param>
+ </xsl:call-template>
+ </li>
+ </xsl:for-each>
+ <xsl:if test="not(marc:datafield[@tag=090]) and not(marc:datafield[@tag=050]) and not(marc:datafield[@tag=084]) and marc:datafield[@tag=942]/marc:subfield[@code='h']">
+ <li>
+ <xsl:value-of select="marc:datafield[@tag=942]/marc:subfield[@code='h']"/>
+ <xsl:if test="marc:datafield[@tag=942]/marc:subfield[@code='i']">
+ <xsl:choose>
+ <xsl:when test="starts-with(marc:datafield[@tag=942]/marc:subfield[@code='i'], '/')">
+ <xsl:value-of select="marc:datafield[@tag=942]/marc:subfield[@code='i']"/>
+ </xsl:when>
+ <xsl:otherwise>
+ <xsl:text>/</xsl:text>
+ <xsl:value-of select="marc:datafield[@tag=942]/marc:subfield[@code='i']"/>
+ </xsl:otherwise>
+ </xsl:choose>
+ </xsl:if>
+ </li>
+ </xsl:if>
+ </ul>
+ </span>
+ </xsl:if>
+
  <!--Series: Alternate Graphic Representation (MARC 880) -->
  <xsl:if test="$display880">
  <xsl:call-template name="m880Select">
@@ -1101,73 +1186,6 @@
  </xsl:for-each>
  </xsl:if>
 
-<!-- DDC classification -->
- <xsl:if test="marc:datafield[@tag=082]">
- <span class="results_summary ddc">
- <span class="label">DDC classification: </span>
- <ul class="resource_list">
- <xsl:for-each select="marc:datafield[@tag=082]">
- <li>
- <xsl:call-template name="subfieldSelect">
- <xsl:with-param name="codes">a2b</xsl:with-param>
- <xsl:with-param name="delimeter"><xsl:text>&#160;</xsl:text></xsl:with-param>
- </xsl:call-template>
- </li>
- </xsl:for-each>
- </ul>
- </span>
- </xsl:if>
-
-<!-- LOC classification -->
- <xsl:if test="marc:datafield[@tag=050]">
- <span class="results_summary loc">
- <span class="label">LOC classification: </span>
- <ul class="resource_list">
- <xsl:for-each select="marc:datafield[@tag=050]">
- <li>
- <xsl:call-template name="subfieldSelect">
- <xsl:with-param name="codes">ab</xsl:with-param>
- <xsl:with-param name="delimeter"><xsl:text>&#160;</xsl:text></xsl:with-param>
- </xsl:call-template>
- </li>
- </xsl:for-each>
- </ul>
- </span>
- </xsl:if>
-
-<!-- NLM classification -->
- <xsl:if test="marc:datafield[@tag=060]">
- <span class="results_summary nlm">
- <span class="label">NLM classification: </span>
- <ul class="resource_list">
- <xsl:for-each select="marc:datafield[@tag=060]">
- <li>
- <xsl:call-template name="subfieldSelect">
- <xsl:with-param name="codes">a</xsl:with-param>
- <xsl:with-param name="delimeter"><xsl:text> | </xsl:text></xsl:with-param>
- </xsl:call-template>
- </li>
- </xsl:for-each>
- </ul>
- </span>
- </xsl:if>
-
-<!-- Other classification -->
- <xsl:if test="marc:datafield[@tag=084]">
- <span class="results_summary oc">
- <span class="label">Other classification: </span>
- <ul class="resource_list">
- <xsl:for-each select="marc:datafield[@tag=084]">
- <li>
- <xsl:call-template name="subfieldSelect">
- <xsl:with-param name="codes">a</xsl:with-param>
- <xsl:with-param name="delimeter"><xsl:text> | </xsl:text></xsl:with-param>
- </xsl:call-template>
- </li>
- </xsl:for-each>
- </ul>
- </span>
- </xsl:if>
 
 
  <!-- 856 -->

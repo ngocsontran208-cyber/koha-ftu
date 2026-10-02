@@ -26,21 +26,21 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-home.pl">Label creator</a>
+            <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy &amp; mã vạch</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=batch">Label batches</a>
+            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=batch">Lô nhãn in</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             [% IF description %]
-                <span>Edit [% description | html %]</span>
+                <span>Chỉnh sửa [% description | html %]</span>
             [% ELSIF batch_id %]
-                <span>Edit label batch [% batch_id | html %]</span>
+                <span>Chỉnh sửa lô nhãn [% batch_id | html %]</span>
             [% ELSE %]
-                <span>New label batch</span>
+                <span>Tạo lô nhãn mới</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -51,11 +51,11 @@
     [% INCLUDE 'labels-toolbar.inc' %]
 
     [% IF description %]
-        <h1>Edit [% description | html %]</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-list-ul"></i> Chỉnh sửa [% description | html %]</h1>
     [% ELSIF batch_id %]
-        <h1>Edit label batch [% batch_id | html %]</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-list-ul"></i> Chỉnh sửa lô nhãn [% batch_id | html %]</h1>
     [% ELSE %]
-        <h1>New label batch</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-list-ul"></i> Tạo lô nhãn mới</h1>
     [% END %]
 
     [% IF ( err ) %]
@@ -91,24 +91,24 @@
                         ><li id="description">
                             <input type="hidden" name="op" value="cud-add" />
                             <input type="hidden" name="batch_id" value="[% batch_id | html %]" />
-                            <label for="description">Batch description: </label>
+                            <label for="description">Mô tả lô nhãn: </label>
                             <input type="text" name="description" value="[% description | html %]" /> <span id="change-status"></span>
                         </li>
                         <li>
                             <input type="radio" name="number_type" id="barcode_enter" value="barcode" checked />
-                            <label for="barcode_enter">Enter by barcode:</label>
+                            <label for="barcode_enter">Nhập theo mã vạch:</label>
                         </li>
                         <li>
                             <input type="radio" name="number_type" id="itemnum_enter" value="itemnumber" />
-                            <label for="itemnum_enter">Enter by itemnumber:</label>
+                            <label for="itemnum_enter">Nhập theo số bản tài liệu:</label>
                         </li>
                         <li>
-                            <label for="number_list"> Add by barcode(s) or itemnumbers(s): </label>
-                            <textarea rows="5" id="number_list" name="number_list" tabindex="1" class="focus"></textarea>
+                            <label for="number_list"> Thêm theo mã vạch hoặc số bản tài liệu: </label>
+                            <textarea rows="5" id="number_list" name="number_list" tabindex="1" class="focus" placeholder="Nhập mỗi mã trên một dòng..."></textarea>
                             <div class="hint">
-                                One number per line.
+                                Mỗi mã trên một dòng.
                                 <br />
-                                Leave empty to add via item search (itemnumber)
+                                Để trống nếu muốn tìm kiếm tài liệu để thêm
                             </div>
                         </li></ol
                     >
@@ -116,9 +116,9 @@
             </div>
         </form>
         <div id="batch-manage" class="btn-toolbar">
-            <a class="btn btn-default" id="additems" href="#"><i class="fa fa-plus"></i> Add item(s)</a>[% IF ( table_loop ) %]
-                <a class="btn btn-default" id="savedesc" href="#" data-batch_id="[% batch_id | html %]"><i class="fa fa-save"></i> Save description</a>
-                <a class="btn btn-default" id="removeitems" href="#"><i class="fa fa-trash-can"></i> Remove selected items</a>
+            <a class="btn btn-primary" id="additems" href="#"><i class="fa fa-plus"></i> Thêm tài liệu</a>[% IF ( table_loop ) %]
+                <a class="btn btn-default" id="savedesc" href="#" data-batch_id="[% batch_id | html %]"><i class="fa fa-save"></i> Lưu mô tả</a>
+                <a class="btn btn-default" id="removeitems" href="#"><i class="fa fa-trash-can"></i> Xóa mục đã chọn</a>
 
                 <a
                     class="btn btn-default submit-form-link"
@@ -129,40 +129,40 @@
                     data-element_id="[% batch_id | html %]"
                     data-action="/cgi-bin/koha/labels/label-manage.pl"
                     data-method="post"
-                    data-confirmation-msg="[% tx("Are you sure you want to delete batch {batch_number}?", { batch_number = batch_id }) %]"
-                    ><i class="fa fa-minus-square"></i> Delete batch</a
+                    data-confirmation-msg="[% tx("Bạn có chắc chắn muốn xóa lô nhãn {batch_number} không?", { batch_number = batch_id }) %]"
+                    ><i class="fa fa-trash-can"></i> Xóa cả lô nhãn</a
                 >
 
-                <a class="btn btn-default" id="deduplicate" href="#"><i class="fa fa-minus"></i> Remove duplicates</a>
-                <a class="btn btn-default" id="exportitems" href="#"><i class="fa-solid fa-share-from-square"></i> Export selected items</a>
-                <a class="btn btn-default" id="exportbatch" href="#"><i class="fa-solid fa-share-from-square"></i> Export full batch</a>
+                <a class="btn btn-default" id="deduplicate" href="#"><i class="fa fa-ban"></i> Lọc trùng lặp</a>
+                <a class="btn btn-default" id="exportitems" href="#"><i class="fa-solid fa-share-from-square"></i> Xuất in mục đã chọn</a>
+                <a class="btn btn-default" id="exportbatch" href="#"><i class="fa-solid fa-share-from-square"></i> Xuất in toàn bộ lô</a>
             [% END %]
         </div>
         [% IF ( table_loop ) %]
             <form method="get" name="items">
-                <h2>Items in batch number [% batch_id | html %]</h2>
+                <h2><i class="fa fa-boxes-stacked"></i> Danh sách tài liệu trong lô số [% batch_id | html %]</h2>
 
                 <div class="page-section">
-                    <table id="batcht">
+                    <table id="batcht" class="table table-bordered table-striped">
                         [% IF ( table_loop.0.header_fields ) %]
                             <thead>
                                 <tr>
                                     [% FOREACH header_field IN table_loop.0.header_fields %]
                                         [% SWITCH header_field.field_label -%]
                                         [% CASE "Label number" -%]
-                                            <th>Label number</th>
+                                            <th>Số thứ tự</th>
                                         [% CASE "Summary" -%]
-                                            <th class="anti-the">Summary</th>
+                                            <th class="anti-the">Tóm tắt thông tin</th>
                                         [% CASE "Item type" %]
-                                            <th>Item type</th>
+                                            <th>Kiểu tài liệu</th>
                                         [% CASE "Call number" %]
-                                            <th>Call number</th>
+                                            <th>Ký hiệu phân loại</th>
                                         [% CASE "Barcode" %]
-                                            <th>Barcode</th>
+                                            <th>Mã vạch</th>
                                         [% CASE "Select" -%]
-                                            <th class="no-sort">Select</th>
+                                            <th class="no-sort">Chọn</th>
                                         [% CASE "Actions" -%]
-                                            <th class="no-sort">Actions</th>
+                                            <th class="no-sort">Thao tác</th>
                                         [% CASE %]
                                             <th>[% header_field.field_label | html %]</th>
                                         [% END -%]
@@ -186,8 +186,8 @@
                                                     data-label_id="[% text_field.field_value | html %]"
                                                     data-method="post"
                                                     data-action="/cgi-bin/koha/labels/label-edit-batch.pl"
-                                                    data-confirmation-msg="Are you sure you want to delete this?"
-                                                    ><i class="fa fa-trash-can"></i> Delete</a
+                                                    data-confirmation-msg="Bạn có chắc chắn muốn xóa bản tài liệu này khỏi lô không?"
+                                                    ><i class="fa fa-trash-can"></i> Xóa</a
                                                 >
                                                 <a class="btn btn-default btn-xs export" href="#" data-batch-id="[% batch_id | html %]" data-label-id="[% text_field.field_value | html %]"
                                                     ><i class="fa-solid fa-share-from-square"></i> Export</a

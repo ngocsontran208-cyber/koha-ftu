@@ -6,407 +6,884 @@
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title
-    >[% FILTER collapse %]
- [% t("Advanced search") | html %]
- &rsaquo; [% t("Catalog") | html %] &rsaquo; [% t("Koha") | html %]
- [% END %]</title
->
+<title>Tra cứu &amp; Tìm kiếm danh mục &rsaquo; Thư viện Đại học Ngoại thương (FTU)</title>
 [% INCLUDE 'doc-head-close.inc' %]
 </head>
 
+<style nonce="[% Koha.CSPNonce | $raw %]">
+/* ================================================================
+   FTU MODERN CATALOGUE ADVANCED SEARCH PORTAL
+   Thư viện Phân hiệu Trường Đại học Ngoại thương
+   ================================================================ */
+:root {
+    --ftu-primary: #b91c1c;
+    --ftu-primary-dark: #991b1b;
+    --ftu-primary-light: #fef2f2;
+    --ftu-accent: #dc2626;
+    --ftu-gold: #f59e0b;
+    --ftu-text-dark: #0f172a;
+    --ftu-text-muted: #64748b;
+    --ftu-border: #e2e8f0;
+    --ftu-card-bg: #ffffff;
+    --ftu-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --ftu-shadow-lg: 0 10px 25px -3px rgba(185, 28, 28, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+}
+
+body#catalog_advsearch {
+    background: #f8fafc !important;
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    color: var(--ftu-text-dark) !important;
+}
+
+body#catalog_advsearch .col-md-10.offset-md-1.col-lg-8.offset-lg-2 {
+    max-width: 1250px !important;
+    width: 96% !important;
+    margin: 0 auto !important;
+    flex: 0 0 96% !important;
+}
+
+/* ── CLEAN PAGE HEADER ── */
+.ftu-clean-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    color: var(--ftu-primary) !important;
+    margin: 1rem 0 1.1rem !important;
+    padding: 0.15rem 0 0.15rem 0.85rem !important;
+    border-left: 4px solid var(--ftu-primary) !important;
+    background: transparent !important;
+    letter-spacing: -0.01em !important;
+}
+
+.ftu-clean-title i {
+    font-size: 1.2rem !important;
+    color: var(--ftu-primary) !important;
+}
+
+body#catalog_advsearch h1:not(.ftu-clean-title) {
+    display: none !important;
+}
+
+/* ── STICKY TOOLBAR ── */
+body#catalog_advsearch #toolbar.btn-toolbar {
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(14px) !important;
+    border: 1px solid var(--ftu-border) !important;
+    border-radius: 14px !important;
+    padding: 0.75rem 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+    box-shadow: var(--ftu-shadow) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    flex-wrap: wrap !important;
+}
+
+body#catalog_advsearch #toolbar .btn-primary {
+    background: linear-gradient(135deg, var(--ftu-primary) 0%, var(--ftu-primary-dark) 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding: 0.6rem 1.6rem !important;
+    border-radius: 10px !important;
+    font-size: 0.95rem !important;
+    box-shadow: 0 3px 8px rgba(185, 28, 28, 0.3) !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+}
+
+body#catalog_advsearch #toolbar .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(185, 28, 28, 0.45) !important;
+}
+
+body#catalog_advsearch #toolbar .btn-link {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    padding: 0.55rem 0.95rem !important;
+    border-radius: 10px !important;
+    text-decoration: none !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+}
+
+body#catalog_advsearch #toolbar .btn-link:hover {
+    color: var(--ftu-primary) !important;
+    background: var(--ftu-primary-light) !important;
+    border-color: #fca5a5 !important;
+}
+
+/* ── SEARCH TERMS CARD ── */
+body#catalog_advsearch #searchterms {
+    background: #ffffff !important;
+    border: 1.5px solid var(--ftu-border) !important;
+    border-top: 4px solid var(--ftu-primary) !important;
+    border-radius: 18px !important;
+    padding: 1.6rem 1.9rem !important;
+    margin-bottom: 1.75rem !important;
+    box-shadow: var(--ftu-shadow-lg) !important;
+}
+
+body#catalog_advsearch #searchterms legend {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    color: var(--ftu-primary) !important;
+    margin-bottom: 1.25rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+}
+
+.search-term-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 0.95rem !important;
+    background: #f8fafc !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 12px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    transition: all 0.2s ease !important;
+}
+
+.search-term-row:focus-within {
+    border-color: var(--ftu-primary) !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+body#catalog_advsearch select.advsearch {
+    height: 46px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0 0.95rem !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+    min-width: 200px !important;
+}
+
+body#catalog_advsearch input[name="q"] {
+    flex: 1 !important;
+    min-width: 260px !important;
+    height: 46px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0 1.15rem !important;
+    font-size: 1rem !important;
+    font-family: inherit !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    transition: all 0.2s ease !important;
+}
+
+body#catalog_advsearch input[name="q"]:focus {
+    border-color: var(--ftu-primary) !important;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.15) !important;
+    outline: none !important;
+}
+
+/* Quick Search Suggestions */
+.ftu-quick-chips {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+    padding-top: 1.1rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.ftu-quick-chips-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.ftu-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.ftu-chip:hover {
+    background: var(--ftu-primary-light);
+    border-color: #fca5a5;
+    color: var(--ftu-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.12);
+}
+
+/* ── ITEM TYPE & RESOURCE TABS ── */
+body#catalog_advsearch #advsearches {
+    background: #ffffff !important;
+    border: 1.5px solid var(--ftu-border) !important;
+    border-radius: 18px !important;
+    padding: 1.6rem 1.9rem !important;
+    margin-bottom: 1.75rem !important;
+    box-shadow: var(--ftu-shadow) !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs {
+    border-bottom: 2px solid #e2e8f0 !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1.35rem !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    border: none !important;
+    padding: 0.7rem 1.3rem !important;
+    border-radius: 10px 10px 0 0 !important;
+    position: relative !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link.active {
+    color: var(--ftu-primary) !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+}
+
+body#catalog_advsearch #advsearches .nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ftu-primary);
+    border-radius: 3px 3px 0 0;
+}
+
+body#catalog_advsearch #advsearches table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0.7rem !important;
+}
+
+body#catalog_advsearch #advsearches table td {
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 0.8rem 1.1rem !important;
+    transition: all 0.18s ease !important;
+}
+
+body#catalog_advsearch #advsearches table td:hover {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 10px rgba(185, 28, 28, 0.08) !important;
+}
+
+body#catalog_advsearch #advsearches table td label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+    font-size: 0.93rem !important;
+    color: #1e293b !important;
+}
+
+body#catalog_advsearch #advsearches table td input[type="checkbox"] {
+    accent-color: var(--ftu-primary) !important;
+    width: 19px !important;
+    height: 19px !important;
+    cursor: pointer;
+}
+
+
+/* ── MODERN ITEM TYPE VECTOR ICONS ── */
+.itype-vector-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.15rem !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body#catalog_advsearch #advsearches table td:hover .itype-vector-icon {
+    transform: scale(1.15) !important;
+}
+
+.itype-vector-icon.itype-BK { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important; color: #b91c1c !important; box-shadow: 0 2px 6px rgba(185, 28, 28, 0.18) !important; }
+.itype-vector-icon.itype-CF { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%) !important; color: #0284c7 !important; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.18) !important; }
+.itype-vector-icon.itype-CR { background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%) !important; color: #059669 !important; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.18) !important; }
+.itype-vector-icon.itype-MP { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important; color: #d97706 !important; box-shadow: 0 2px 6px rgba(217, 119, 6, 0.18) !important; }
+.itype-vector-icon.itype-MU { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%) !important; color: #9333ea !important; box-shadow: 0 2px 6px rgba(147, 51, 234, 0.18) !important; }
+.itype-vector-icon.itype-MX { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important; color: #475569 !important; box-shadow: 0 2px 6px rgba(71, 85, 105, 0.18) !important; }
+.itype-vector-icon.itype-REF { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%) !important; color: #ea580c !important; box-shadow: 0 2px 6px rgba(234, 88, 12, 0.18) !important; }
+.itype-vector-icon.itype-VM { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%) !important; color: #db2777 !important; box-shadow: 0 2px 6px rgba(219, 39, 119, 0.18) !important; }
+
+/* Hide legacy 16px blurry PNGs completely */
+.itemtype-image,
+img[src*="itemtypeimg"] {
+    display: none !important;
+}
+
+/* ── SUBTYPES & AVAILABILITY ── */
+body#catalog_advsearch #availability,
+body#catalog_advsearch #sortby,
+body#catalog_advsearch #subtype {
+    background: #ffffff !important;
+    border: 1.5px solid var(--ftu-border) !important;
+    border-radius: 18px !important;
+    padding: 1.5rem 1.8rem !important;
+    margin-bottom: 1.5rem !important;
+    box-shadow: var(--ftu-shadow) !important;
+}
+
+body#catalog_advsearch #availability legend,
+body#catalog_advsearch #sortby legend,
+body#catalog_advsearch #subtype legend {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin-bottom: 1.1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.55rem !important;
+}
+
+body#catalog_advsearch select#branchloop,
+body#catalog_advsearch select#sort_by,
+body#catalog_advsearch select.subtype {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 44px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0 0.9rem !important;
+    font-size: 0.92rem !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+}
+
+body#catalog_advsearch #currently-avail {
+    background: #ecfdf5 !important;
+    border: 1.5px solid #a7f3d0 !important;
+    border-radius: 12px !important;
+    padding: 0.85rem 1.1rem !important;
+    margin-bottom: 1.1rem !important;
+}
+
+body#catalog_advsearch #currently-avail label {
+    color: #065f46 !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    font-size: 0.92rem !important;
+}
+
+body#catalog_advsearch #currently-avail input[type="checkbox"] {
+    accent-color: #059669 !important;
+    width: 19px !important;
+    height: 19px !important;
+}
+
+/* ── BOTTOM ACTION BAR ── */
+body#catalog_advsearch .search-action-bottom {
+    background: #ffffff !important;
+    border: 1.5px solid var(--ftu-border) !important;
+    border-radius: 18px !important;
+    padding: 1.4rem 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-shadow: var(--ftu-shadow-lg) !important;
+    margin-top: 2rem !important;
+    margin-bottom: 3.5rem !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-primary {
+    background: linear-gradient(135deg, var(--ftu-primary) 0%, var(--ftu-primary-dark) 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    padding: 0.8rem 2.2rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.35) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    transition: all 0.2s ease !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(185, 28, 28, 0.5) !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-link {
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    padding: 0.7rem 1.1rem !important;
+    border-radius: 10px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+}
+
+body#catalog_advsearch .search-action-bottom .btn-link:hover {
+    color: var(--ftu-primary) !important;
+    background: var(--ftu-primary-light) !important;
+    border-color: #fca5a5 !important;
+}
+</style>
+
+
 [%- BLOCK language_limit_select -%]
- <select name="limit" id="[% ln_id | html %]">
- <option value="">Không giới hạn</option>
- [% FOREACH ln_loo IN ln_loop %]
- [% IF ( ln_loo.selected or selected == ln_loo.iso639_2_code ) %]
- <option value="[% ln_index | html %],rtrn:[% ln_loo.iso639_2_code | html %]" selected="selected"> [% ln_loo.language_description | html %] </option>
- [% ELSE %]
- <option value="[% ln_index | html %],rtrn:[% ln_loo.iso639_2_code | html %]"> [% ln_loo.language_description | html %] </option>
- [% END %]
- [% END %]
- </select>
+    <select name="limit" id="[% ln_id | html %]">
+        <option value="">No limit</option>
+        [% FOREACH ln_loo IN ln_loop %]
+            [% IF ( ln_loo.selected or selected == ln_loo.iso639_2_code ) %]
+                <option value="[% ln_index | html %],rtrn:[% ln_loo.iso639_2_code | html %]" selected="selected"> [% ln_loo.language_description | html %] </option>
+            [% ELSE %]
+                <option value="[% ln_index | html %],rtrn:[% ln_loo.iso639_2_code | html %]"> [% ln_loo.language_description | html %] </option>
+            [% END %]
+        [% END %]
+    </select>
 [%- END -%]
 
 <body id="catalog_advsearch" class="catalog">
 [% WRAPPER 'header.inc' %]
- [% INCLUDE 'adv-search.inc' %]
+    [% INCLUDE 'adv-search.inc' %]
 [% END %]
 
 [% WRAPPER 'sub-header.inc' %]
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Tìm kiếm nâng cao</span>
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span><i class="fa fa-magnifying-glass"></i> Tra cứu danh mục</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
 [% WRAPPER 'main-container.inc' %]
- <form action="search.pl" method="get">
- <div id="advanced-search">
- [% PROCESS search_context_form_input %]
- [% PROCESS search_context_dialog %]
- [% IF edit_filter %]
- <div id="toolbar" class="btn-toolbar">
- <legend>Editing filter: [% edit_filter.name | html %]</legend>
- <div class="p-2">
- <label for="filter_edit_opac">Show in OPAC?</label>
- [% IF edit_filter.opac %]
- <input type="checkbox" id="show_filter_opac" name="show_filter_opac" checked="checked" />
- [% ELSE %]
- <input type="checkbox" id="show_filter_opac" name="show_filter_opac" />
- [% END %]
- <label for="filter_edit_staff_client">Show in staff interface?</label>
- [% IF edit_filter.staff_client %]
- <input type="checkbox" id="filter_edit_staff_client" name="filter_edit_staff_client" checked="checked" />
- [% ELSE %]
- <input type="checkbox" id="filter_edit_staff_client" name="filter_edit_staff_client" />
- [% END %]
- </div>
- <hr />
- <div class="btn-group">
- <button id="save_filter" class="btn btn-default"><i class="fa fa-save"></i> Save filter</button>
- <button class="btn btn-default" type="submit" accesskey="s"><i class="fa fa-search"></i> Search using filter</button>
- </div>
- <div class="btn-group">
- <a href="/cgi-bin/koha/catalogue/search.pl?do=Clear&expanded_options=[% expanded_options | uri %]" class="btn btn-link"><i class="fa fa-trash-can"></i> Hủy bỏ</a>
- </div>
- </div>
- [% ELSE %]
- <input type="hidden" name="advsearch" value="1" />
- <h1>Tìm kiếm nâng cao</h1>
+    <form action="search.pl" method="get">
+        <div id="advanced-search">
+            [% PROCESS search_context_form_input %]
+            [% PROCESS search_context_dialog %]
+            [% IF edit_filter %]
+                <div id="toolbar" class="btn-toolbar">
+                    <legend>Editing filter: [% edit_filter.name | html %]</legend>
+                    <div class="p-2">
+                        <label for="filter_edit_opac">Show in OPAC?</label>
+                        [% IF edit_filter.opac %]
+                            <input type="checkbox" id="show_filter_opac" name="show_filter_opac" checked="checked" />
+                        [% ELSE %]
+                            <input type="checkbox" id="show_filter_opac" name="show_filter_opac" />
+                        [% END %]
+                        <label for="filter_edit_staff_client">Show in staff interface?</label>
+                        [% IF edit_filter.staff_client %]
+                            <input type="checkbox" id="filter_edit_staff_client" name="filter_edit_staff_client" checked="checked" />
+                        [% ELSE %]
+                            <input type="checkbox" id="filter_edit_staff_client" name="filter_edit_staff_client" />
+                        [% END %]
+                    </div>
+                    <hr />
+                    <div class="btn-group">
+                        <button id="save_filter" class="btn btn-default"><i class="fa fa-save"></i> Save filter</button>
+                        <button class="btn btn-default" type="submit" accesskey="s"><i class="fa fa-search"></i> Search using filter</button>
+                    </div>
+                    <div class="btn-group">
+                        <a href="/cgi-bin/koha/catalogue/search.pl?do=Clear&expanded_options=[% expanded_options | uri %]" class="btn btn-link"><i class="fa fa-trash-can"></i> Cancel</a>
+                    </div>
+                </div>
+            [% ELSE %]
+                <input type="hidden" name="advsearch" value="1" />
+                <h1 class="ftu-clean-title"><i class="fa fa-magnifying-glass"></i> Tra cứu danh mục tài liệu</h1>
 
- <!-- SEARCH BUTTONS -->
- <div id="toolbar" class="btn-toolbar sticky">
- <div class="btn-group">
- <button class="btn btn-primary" type="submit" accesskey="s"><i class="fa fa-search"></i> Tìm kiếm</button>
- </div>
- <div class="btn-group">
- [% IF ( expanded_options ) %]
- <a href="/cgi-bin/koha/catalogue/search.pl?expanded_options=0" class="btn btn-link"><i class="fa fa-search-minus"></i> Ít tùy chọn hơn</a>
- [% ELSE %]
- <a href="/cgi-bin/koha/catalogue/search.pl?expanded_options=1" class="btn btn-link"><i class="fa fa-search-plus"></i> Thêm tùy chọn</a>
- [% END %]
- </div>
- <div class="btn-group">
- <a href="/cgi-bin/koha/catalogue/search.pl?do=Clear&expanded_options=[% expanded_options | uri %]" class="btn btn-link"><i class="fa fa-trash-can"></i> Clear fields</a>
- </div>
- <div class="btn-group">
- <a href="/cgi-bin/koha/catalogue/itemsearch.pl" class="btn btn-link"><i class="fa fa-search"></i> Go to item search</a>
- </div>
+                <!-- SEARCH BUTTONS -->
+                <div id="toolbar" class="btn-toolbar sticky">
+                    <div class="btn-group">
+                        <button class="btn btn-primary" type="submit" accesskey="s"><i class="fa fa-magnifying-glass"></i> Tìm kiếm danh mục</button>
+                    </div>
+                    <div class="btn-group">
+                        [% IF ( expanded_options ) %]
+                            <a href="/cgi-bin/koha/catalogue/search.pl?expanded_options=0" class="btn btn-link"><i class="fa fa-sliders"></i> Thu gọn tùy chọn</a>
+                        [% ELSE %]
+                            <a href="/cgi-bin/koha/catalogue/search.pl?expanded_options=1" class="btn btn-link"><i class="fa fa-sliders"></i> Thêm tùy chọn nâng cao</a>
+                        [% END %]
+                    </div>
+                    <div class="btn-group">
+                        <a href="/cgi-bin/koha/catalogue/search.pl?do=Clear&expanded_options=[% expanded_options | uri %]" class="btn btn-link"><i class="fa fa-rotate-left"></i> Xóa bộ lọc</a>
+                    </div>
+                    <div class="btn-group">
+                        <a href="/cgi-bin/koha/catalogue/itemsearch.pl" class="btn btn-link"><i class="fa fa-layer-group"></i> Tra cứu từng bản tài liệu</a>
+                    </div>
 
- [% IF Koha.Preference('EnableSearchHistory') %]
- <div class="btn-group">
- <a href="/cgi-bin/koha/catalogue/search-history.pl" class="btn btn-link"><i class="fa fa-history"></i> Lịch sử tìm kiếm</a>
- </div>
- [% END %]
- </div>
- <!-- /#toolbar -->
- <!-- /SEARCH BUTTONS -->
- [% END %]
+                    [% IF Koha.Preference('EnableSearchHistory') %]
+                        <div class="btn-group">
+                            <a href="/cgi-bin/koha/catalogue/search-history.pl" class="btn btn-link"><i class="fa fa-clock-rotate-left"></i> Lịch sử tra cứu</a>
+                        </div>
+                    [% END %]
+                </div>
+                <!-- /#toolbar -->
+                <!-- /SEARCH BUTTONS -->
+            [% END %]
 
- <!-- BOOLEAN SEARCH OPTIONS -->
- <fieldset id="searchterms">
- <legend>Thông tin tìm kiếm </legend>
- [% FOREACH query IN operands %]
- [% SET div_style = '' %]
- [% SET div_class = '' %]
- [% IF expanded_options %]
- [% div_class='search-term-row' %]
- [% END %]
- [% IF expanded_options && loop.first %]
- [% div_style = 'text-indent: 4.25em;' %]
- [% END %]
+            <!-- BOOLEAN SEARCH OPTIONS -->
+            <fieldset id="searchterms">
+                <legend><i class="fa fa-magnifying-glass text-danger"></i> Nhập thông tin &amp; Từ khóa tìm kiếm</legend>
+                [% FOREACH query IN operands %]
+                    [% SET div_style = '' %]
+                    [% SET div_class = 'search-term-row' %]
+                    [% IF expanded_options && loop.first %]
+                        [% div_style = 'text-indent: 4.25em;' %]
+                    [% END %]
 
- <div class="[% div_class | html %]" style="[% div_style | html %]">
- [% IF ( expanded_options ) %]
- [% IF !loop.first %]
- [% SET opindex = loop.index - 1 %]
- <select name="op">
- [% IF operators.$opindex == 'OR' %]
- <option value="AND">và</option>
- <option value="OR" selected="selected">hoặc</option>
- <option value="NOT">không</option>
- [% ELSIF operators.$opindex == 'NOT' %]
- <option value="AND">và</option>
- <option value="OR">hoặc</option>
- <option value="NOT" selected="selected">không</option>
- [% ELSE %]
- <option value="AND" selected="selected">và</option>
- <option value="OR">hoặc</option>
- <option value="NOT">không</option>
- [% END %]
- </select>
- [% END %]
- [% END %]
- [% SET preselect = 'ms_' _ indexes.${loop.index}.replace(',','comma') %]
- [% INCLUDE 'search_indexes.inc' ${preselect} = 1 index = loop.index %]
- <input name="q" size="30" title="Nhập từ khóa tìm kiếm" type="text" value="[% query | html %]" />
- [% IF ( expanded_options ) %]
- [% IF ( loop.last ) %]
- <a href="JavaScript:add_field();" id="ButtonPlus" title="Thêm trường khác">[+]</a>
- [% END %]
- [% IF ( loop.first ) %]
- <label for="scan">Scan indexes:</label> <input type="checkbox" name="scan" id="scan" value="1" />
- [% END %]
- [% END %]
- </div>
- [% END %]
- [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' %]
- [% IF ( expanded_options ) %]
- <p>
- [% IF Koha.Preference('ElasticsearchMARCFormat') == 'ARRAY' %]
- <label>
- [% IF whole_record %]
- <input type="checkbox" name="whole_record" checked="checked" />
- [% ELSE %]
- <input type="checkbox" name="whole_record" />
- [% END %]
- Search entire MARC record</label
+                    <div class="[% div_class | html %]" style="[% div_style | html %]">
+                        [% IF ( expanded_options ) %]
+                            [% IF !loop.first %]
+                                [% SET opindex = loop.index - 1 %]
+                                <select name="op">
+                                    [% IF operators.$opindex == 'OR' %]
+                                        <option value="AND">VÀ (AND)</option>
+                                        <option value="OR" selected="selected">HOẶC (OR)</option>
+                                        <option value="NOT">KHÔNG (NOT)</option>
+                                    [% ELSIF operators.$opindex == 'NOT' %]
+                                        <option value="AND">VÀ (AND)</option>
+                                        <option value="OR">HOẶC (OR)</option>
+                                        <option value="NOT" selected="selected">KHÔNG (NOT)</option>
+                                    [% ELSE %]
+                                        <option value="AND" selected="selected">VÀ (AND)</option>
+                                        <option value="OR">HOẶC (OR)</option>
+                                        <option value="NOT">KHÔNG (NOT)</option>
+                                    [% END %]
+                                </select>
+                            [% END %]
+                        [% END %]
+                        [% SET preselect = 'ms_' _ indexes.${loop.index}.replace(',','comma') %]
+                        [% INCLUDE 'search_indexes.inc' ${preselect} = 1 index = loop.index %]
+                        <input type="text" size="30" name="q" title="Enter search terms" value="[% query | html %]" placeholder="Nhập từ khóa, nhan đề sách, tác giả, ISBN, chủ đề, mã ngành..." />
+                        [% IF ( expanded_options ) %]
+                            [% IF ( loop.last ) %]
+                                <a href="JavaScript:add_field();" id="ButtonPlus" title="Thêm trường tìm kiếm" class="btn btn-sm btn-outline-danger btn-add-field"><i class="fa fa-plus-circle"></i> Thêm trường</a>
+                            [% END %]
+                            [% IF ( loop.first ) %]
+                                <label for="scan">Duyệt danh mục chỉ mục (Scan indexes):</label> <input type="checkbox" name="scan" id="scan" value="1" />
+                            [% END %]
+                        [% END %]
+                    </div>
+                [% END %]
+                [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' %]
+                    [% IF ( expanded_options ) %]
+                        <p>
+                            [% IF Koha.Preference('ElasticsearchMARCFormat') == 'ARRAY' %]
+                                <label>
+                                    [% IF whole_record %]
+                                        <input type="checkbox" name="whole_record" checked="checked" />
+                                    [% ELSE %]
+                                        <input type="checkbox" name="whole_record" />
+                                    [% END %]
+                                    Search entire MARC record</label
                                 >
- [% END %]
- <span id="weight_search">
- <input type="hidden" name="weight_search_submitted" value="1" />
- <label>
- [% IF weight_search_submitted && !weight_search %]
- <input type="checkbox" name="weight_search" />
- [% ELSE %]
- [%# enabled by default or when weight_search==true %]
- <input type="checkbox" name="weight_search" checked="checked" />
- [% END %]
- Apply field weights to search</label
+                            [% END %]
+                            <span id="weight_search">
+                                <input type="hidden" name="weight_search_submitted" value="1" />
+                                <label>
+                                    [% IF weight_search_submitted && !weight_search %]
+                                        <input type="checkbox" name="weight_search" />
+                                    [% ELSE %]
+                                        [%# enabled by default or when weight_search==true %]
+                                        <input type="checkbox" name="weight_search" checked="checked" />
+                                    [% END %]
+                                    Apply field weights to search</label
                                 >
- </span>
- </p>
- [% ELSE %]
- <input type="hidden" name="weight_search_submitted" value="1" />
- <input type="hidden" name="weight_search" value="1" />
- [% END %]
- [% END %]
- [% IF Koha.Preference('IncludeSeeFromInSearches') %]
- <div class="hint included-see-from-headings-info">
- <i class="fa fa-info-circle" aria-hidden="true"></i>
- Bao gồm các tiêu đề kiểm soát định danh dạng "Xem từ" (dạng không ưu tiên) </div>
- [% END %]
- </fieldset>
- <!-- /BOOLEAN SEARCH OPTIONS -->
+                            </span>
+                        </p>
+                    [% ELSE %]
+                        <input type="hidden" name="weight_search_submitted" value="1" />
+                        <input type="hidden" name="weight_search" value="1" />
+                    [% END %]
+                [% END %]
+                [% IF Koha.Preference('IncludeSeeFromInSearches') %]
+                    <div class="hint included-see-from-headings-info">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        See from (non-preferred form) headings are included
+                    </div>
+                [% END %]
+            </fieldset>
+            <!-- /BOOLEAN SEARCH OPTIONS -->
 
- <!-- MC-TYPE LIMITS -->
- [% WRAPPER tabs id= "advsearches" %]
- [% WRAPPER tabs_nav %]
- [% FOREACH advsearchloo IN advancedsearchesloop %]
- [% WRAPPER tab_item tabname= "advsearch-tab-${advsearchloo.advanced_search_type}" %]
- [% IF ( advsearchloo.advanced_search_type == 'itemtypes' ) %]
- <span>Kiểu tài liệu</span>
- [% ELSIF ( advsearchloo.advanced_search_type == 'ccode' ) %]
- <span>Bộ sưu tập</span>
- [% ELSIF ( advsearchloo.advanced_search_type == 'loc' ) %]
- <span>Kho tài liệu</span>
- [% ELSE %]
- <span>Thành phần khác</span>
- [% END %]
- [% END # /tab_item#advsearch-tab-... %]
- [% END # /FOREACH advsearchloo %]
- [% END # /WRAPPER tabs_nav %]
- <!-- prettier-ignore-start -->
- [% WRAPPER tab_panels %]
- [% FOREACH advsearchloo IN advancedsearchesloop %]
- [% WRAPPER tab_panel tabname="advsearch-tab-${advsearchloo.advanced_search_type}" %]
- <h4>Giới hạn theo bất kỳ điều kiện nào sau đây:</h4>
- <table>
- <tr>
- [% FOREACH itemtypeloo IN advsearchloo.code_loop %]
- <td>
- [% SET limit_key = 'mc-' _ itemtypeloo.ccl _ "_" _ itemtypeloo.code %]
- [% IF limits.$limit_key.defined %]
- [% limits.delete( limit_key ) %]
- <input type="checkbox" checked="checked" id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]" name="limit" value="mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %]"/>
- [% ELSE %]
- <input type="checkbox" id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]" name="limit" value="mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %]"/>
- [% END # /IF limits.$limit_key.defined %]
- <label for="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]">
- [% UNLESS ( Koha.Preference('noItemTypeImages') ) %]
- [% IF ( itemtypeloo.imageurl ) %]
- <img class="itemtype-image" src="[% itemtypeloo.imageurl | html %]" alt="" />
- [% END %]
- &nbsp;
- [% END %]
- <span class="itypetext">[% itemtypeloo.description | html %]</span>
- </label>
- </td>
- [% IF ( loop.last ) %]
- </tr>
- [% ELSE %]
- [% UNLESS ( loop.count % 5 ) %]
- </tr>
- <tr>
- [% END %]
- [% END # /IF ( loop.last ) %]
- [% END # /FOREACH itemtypeloo %]
- </table>
- [% END # tab_panel/#advsearch-... %]
- [% END # /FOREACH advsearchloo %]
- [% END # /WRAPPER tab_panels %]
- <!-- prettier-ignore-end -->
- [% END # /WRAPPER tabs %]
- <!-- /MC-TYPE LIMIT -->
+            <!-- MC-TYPE LIMITS -->
+            [% WRAPPER tabs id= "advsearches" %]
+                [% WRAPPER tabs_nav %]
+                    [% FOREACH advsearchloo IN advancedsearchesloop %]
+                        [% WRAPPER tab_item tabname= "advsearch-tab-${advsearchloo.advanced_search_type}" %]
+                            [% IF ( advsearchloo.advanced_search_type == 'itemtypes' ) %]
+                                <span><i class="fa fa-book-bookmark text-danger"></i> Loại tài liệu</span>
+                            [% ELSIF ( advsearchloo.advanced_search_type == 'ccode' ) %]
+                                <span><i class="fa fa-layer-group text-primary"></i> Bộ sưu tập</span>
+                            [% ELSIF ( advsearchloo.advanced_search_type == 'loc' ) %]
+                                <span><i class="fa fa-map-pin text-success"></i> Vị trí lưu kho</span>
+                            [% ELSE %]
+                                <span>Something else</span>
+                            [% END %]
+                        [% END # /tab_item#advsearch-tab-... %]
+                    [% END # /FOREACH advsearchloo %]
+                [% END # /WRAPPER tabs_nav %]
+                <!-- prettier-ignore-start -->
+                    [% WRAPPER tab_panels %]
+                        [% FOREACH advsearchloo IN advancedsearchesloop %]
+                            [% WRAPPER tab_panel tabname="advsearch-tab-${advsearchloo.advanced_search_type}" %]
+                                <h4><i class="fa fa-check-double text-danger"></i> Chọn một hoặc nhiều loại tài liệu cần tra cứu:</h4>
+                                <table>
+                                    <tr>
+                                        [% FOREACH itemtypeloo IN advsearchloo.code_loop %]
+                                            <td>
+                                                [% SET limit_key = 'mc-' _ itemtypeloo.ccl _ "_" _ itemtypeloo.code %]
+                                                [% IF limits.$limit_key.defined %]
+                                                    [% limits.delete( limit_key ) %]
+                                                    <input type="checkbox" checked="checked" id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]" name="limit" value="mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %]"/>
+                                                [% ELSE %]
+                                                    <input type="checkbox" id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]" name="limit" value="mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %]"/>
+                                                [% END # /IF limits.$limit_key.defined %]
+                                                <label for="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]" class="itype-card-label">
+                                                    <span class="itype-vector-icon itype-[% itemtypeloo.code | html %]">
+                                                        [% IF itemtypeloo.code == 'BK' %]<i class="fa fa-book-bookmark"></i>
+                                                        [% ELSIF itemtypeloo.code == 'CF' %]<i class="fa fa-laptop-code"></i>
+                                                        [% ELSIF itemtypeloo.code == 'CR' %]<i class="fa fa-newspaper"></i>
+                                                        [% ELSIF itemtypeloo.code == 'MP' %]<i class="fa fa-map-location-dot"></i>
+                                                        [% ELSIF itemtypeloo.code == 'MU' %]<i class="fa fa-headphones"></i>
+                                                        [% ELSIF itemtypeloo.code == 'MX' %]<i class="fa fa-box-archive"></i>
+                                                        [% ELSIF itemtypeloo.code == 'REF' %]<i class="fa fa-spell-check"></i>
+                                                        [% ELSIF itemtypeloo.code == 'VM' %]<i class="fa fa-film"></i>
+                                                        [% ELSE %]<i class="fa fa-file-lines"></i>[% END %]
+                                                    </span>
+                                                    <span class="itypetext">[% itemtypeloo.description | html %]</span>
+                                                </label>
+                                            </td>
+                                            [% IF ( loop.last ) %]
+                                                </tr>
+                                            [% ELSE %]
+                                                [% UNLESS ( loop.count % 5 ) %]
+                                                    </tr>
+                                                    <tr>
+                                                [% END %]
+                                            [% END # /IF ( loop.last ) %]
+                                        [% END # /FOREACH itemtypeloo %]
+                                </table>
+                            [% END # tab_panel/#advsearch-... %]
+                        [% END # /FOREACH advsearchloo %]
+                    [% END # /WRAPPER tab_panels %]
+                    <!-- prettier-ignore-end -->
+            [% END # /WRAPPER tabs %]
+            <!-- /MC-TYPE LIMIT -->
 
- [% IF ( expanded_options ) %]
- <!-- BASIC LIMITS -->
- <fieldset id="basiclimits">
- <legend>Giới hạn</legend>
- <fieldset id="pubrange">
- <!-- PUB / COPY YEAR LIMIT --><!-- FIXME: add publication,copyright,acquisition options -->
- <p>
- <label for="limit-yr">Năm xuất bản: </label>
- [% SET year_limit_key = 'yr,st-numeric' %]
- <input type="text" size="15" name="limit-yr" id="limit-yr" value="[% limits.$year_limit_key.0 | html %]" />&nbsp;&nbsp;(format: yyyy-yyyy)
- [% IF limits.$year_limit_key.defined %]
- [% limits.delete(year_limit_key) %]
- [% END %]
- </p>
- <!-- /PUB / COPY YEAR LIMIT -->
- </fieldset>
- <!-- /#pubrange -->
+            [% IF ( expanded_options ) %]
+                <!-- BASIC LIMITS -->
+                <fieldset id="basiclimits">
+                    <legend>Limits</legend>
+                    <fieldset id="pubrange">
+                        <!-- PUB / COPY YEAR LIMIT --><!-- FIXME: add publication,copyright,acquisition options -->
+                        <p>
+                            <label for="limit-yr">Year: </label>
+                            [% SET year_limit_key = 'yr,st-numeric' %]
+                            <input type="text" size="15" name="limit-yr" id="limit-yr" value="[% limits.$year_limit_key.0 | html %]" />&nbsp;&nbsp;(format: yyyy-yyyy)
+                            [% IF limits.$year_limit_key.defined %]
+                                [% limits.delete(year_limit_key) %]
+                            [% END %]
+                        </p>
+                        <!-- /PUB / COPY YEAR LIMIT -->
+                    </fieldset>
+                    <!-- /#pubrange -->
 
- <fieldset id="language">
- <!-- LANGUAGE LIMIT -->
- <p>
- <label for="language-limit">Ngôn ngữ: </label>
- [% PROCESS language_limit_select ln_loop=search_languages_loop ln_id='language-limit' ln_index='ln' selected = limits.${'ln,rtrn'}.0 %]
- [% limits.delete( 'ln,rtrn' ) %]
- <label for="language-original-limit">Language of original: </label>
- [% PROCESS language_limit_select ln_loop=search_languages_loop ln_id='language-original-limit' ln_index='language-original' selected = limits.${'language-original,rtrn'}.0 %]
- [% limits.delete( 'language-original,rtrn' ) %]
- </p>
- <!-- /LANGUAGE LIMIT -->
- </fieldset>
- <!-- /#language -->
- </fieldset>
- <!-- /#basiclimits -->
- <!-- /BASIC LIMITS -->
- [% END # /IF ( expanded_options ) %]
+                    <fieldset id="language">
+                        <!-- LANGUAGE LIMIT -->
+                        <p>
+                            <label for="language-limit">Language: </label>
+                            [% PROCESS language_limit_select ln_loop=search_languages_loop ln_id='language-limit' ln_index='ln' selected = limits.${'ln,rtrn'}.0 %]
+                            [% limits.delete( 'ln,rtrn' ) %]
+                            <label for="language-original-limit">Language of original: </label>
+                            [% PROCESS language_limit_select ln_loop=search_languages_loop ln_id='language-original-limit' ln_index='language-original' selected = limits.${'language-original,rtrn'}.0 %]
+                            [% limits.delete( 'language-original,rtrn' ) %]
+                        </p>
+                        <!-- /LANGUAGE LIMIT -->
+                    </fieldset>
+                    <!-- /#language -->
+                </fieldset>
+                <!-- /#basiclimits -->
+                <!-- /BASIC LIMITS -->
+            [% END # /IF ( expanded_options ) %]
 
- [% IF ( UNIMARC ) %]
- [% INCLUDE 'subtypes_unimarc.inc' %]
- [% ELSE %]
- [% PROCESS 'subtype_limits.inc' %]
- <!-- SUBTYPE LIMITS -->
- <fieldset id="subtype">
- <legend>Giới hạn chi tiết</legend><p> [% PROCESS subtype_dropdowns %] </p
+            [% IF ( UNIMARC ) %]
+                [% INCLUDE 'subtypes_unimarc.inc' %]
+            [% ELSE %]
+                [% PROCESS 'subtype_limits.inc' %]
+                <!-- SUBTYPE LIMITS -->
+                <fieldset id="subtype">
+                    <legend><i class="fa fa-sliders text-info"></i> Giới hạn phân loại &amp; Định dạng tài liệu</legend><p> [% PROCESS subtype_dropdowns %] </p
                     ><fieldset id="current_subtype_limits">
- <legend>Current subtype limits</legend>
- [% FOREACH subtype IN ['aud','fic','bio','ctype','l-format'] %]
- [% FOREACH limit IN limits.$subtype %]
- <span>
- <input name="limit" value="[% subtype | html %]:[% limit | html %]" type="hidden" />
- <label for="subtype_limit_[% loop.index() | html %]">[%# PROCESS subtype_limits_description subtype_limit = subtype _':' _ limit #%]</label>
- <input type="checkbox" class="toggle_limit" name="subtype_limit_[% loop.index() | html %]" checked="checked" />
- </span>
- [% END %]
- [% limits.delete( subtype ) %]
- [% END # /FOREACH subtype %]
- </fieldset>
- <!-- #current_subtype_limits -->
- </fieldset>
- <!-- /#subtype -->
- [% END # /IF ( UNIMARC ) %]
+                        <legend>Điều kiện phân loại đang chọn</legend>
+                        [% FOREACH subtype IN ['aud','fic','bio','ctype','l-format'] %]
+                            [% FOREACH limit IN limits.$subtype %]
+                                <span>
+                                    <input name="limit" value="[% subtype | html %]:[% limit | html %]" type="hidden" />
+                                    <label for="subtype_limit_[% loop.index() | html %]">[%# PROCESS subtype_limits_description subtype_limit = subtype _':' _ limit #%]</label>
+                                    <input type="checkbox" class="toggle_limit" name="subtype_limit_[% loop.index() | html %]" checked="checked" />
+                                </span>
+                            [% END %]
+                            [% limits.delete( subtype ) %]
+                        [% END # /FOREACH subtype %]
+                    </fieldset>
+                    <!-- #current_subtype_limits -->
+                </fieldset>
+                <!-- /#subtype -->
+            [% END # /IF ( UNIMARC ) %]
 
- <!-- AVAILABILITY LIMITS -->
- <fieldset id="availability">
- <legend>Giới hạn theo thư viện và trạng thái tài liệu</legend>
- <fieldset id="currently-avail">
- [% IF limit_available %]
- <p><label for="available-items">Only items currently available:</label> <input type="checkbox" id="available-items" name="limit" value="available" checked="checked" /></p>
- [% ELSE %]
- <p><label for="available-items">Only items currently available:</label> <input type="checkbox" id="available-items" name="limit" value="available" /></p>
- [% END %]
- </fieldset>
- <!-- /#currently-avail -->
+            <!-- AVAILABILITY LIMITS -->
+            <fieldset id="availability">
+                <legend><i class="fa fa-building-columns text-success"></i> Thư viện &amp; Tình trạng mượn trả</legend>
+                <fieldset id="currently-avail">
+                    [% IF limit_available %]
+                        <p><label for="available-items">Chỉ hiển thị tài liệu đang có sẵn trong kho (chưa có người mượn):</label> <input type="checkbox" id="available-items" name="limit" value="available" checked="checked" /></p>
+                    [% ELSE %]
+                        <p><label for="available-items">Chỉ hiển thị tài liệu đang có sẵn trong kho (chưa có người mượn):</label> <input type="checkbox" id="available-items" name="limit" value="available" /></p>
+                    [% END %]
+                </fieldset>
+                <!-- /#currently-avail -->
 
- <fieldset id="select-libs">
- <p>
- <label for="branchloop">Thư viện:</label>
- <select name="limit" id="branchloop">
- <option value="">Tất cả thư viện</option>
- [%# FIXME Should not we filter the libraries displayed? %]
- [% PROCESS options_for_libraries prefix => "branch:" libraries => Branches.all( unfiltered => 1, do_not_select_my_library => 1, selected => limits.branch.0 ) %]
- [% limits.delete('branch') %]
- </select>
- <!-- /#branchloop -->
- </p>
- [% IF search_groups %]
- <p>Hoặc</p>
- <p>
- <label for="categoryloop">Nhóm thư viện: </label>
- <select name="limit" id="categoryloop">
- <option value=""> -- Không -- </option>
- [% FOREACH sg IN search_groups %]
- [% UNLESS sg.branchcode %]
- [% IF limits.multibranchlimit.0 == sg.id %]
- <option selected="selected" value="multibranchlimit:[% sg.id | html %]">[% sg.title | html %]</option>
- [% ELSE %]
- <option value="multibranchlimit:[% sg.id | html %]">[% sg.title | html %]</option>
- [% END %]
- [% END %]
- [% END %]
- [% limits.delete('multibranchlimit') %]
- </select>
- <!-- /#categoryloop -->
- </p>
- [% END # /search_groups %]
- </fieldset>
- <!-- /#select-libs -->
- </fieldset>
- <!-- /#availability -->
- <!-- /AVAILABILITY LIMITS -->
+                <fieldset id="select-libs">
+                    <p>
+                        <label for="branchloop">Thư viện / Chi nhánh cơ sở:</label>
+                        <select name="limit" id="branchloop">
+                            <option value="">Tất cả các cơ sở / Thư viện FTU</option>
+                            [%# FIXME Should not we filter the libraries displayed? %]
+                            [% PROCESS options_for_libraries prefix => "branch:" libraries => Branches.all( unfiltered => 1, do_not_select_my_library => 1, selected => limits.branch.0 ) %]
+                            [% limits.delete('branch') %]
+                        </select>
+                        <!-- /#branchloop -->
+                    </p>
+                    [% IF search_groups %]
+                        <p>OR</p>
+                        <p>
+                            <label for="categoryloop">Nhóm thư viện: </label>
+                            <select name="limit" id="categoryloop">
+                                <option value=""> -- none -- </option>
+                                [% FOREACH sg IN search_groups %]
+                                    [% UNLESS sg.branchcode %]
+                                        [% IF limits.multibranchlimit.0 == sg.id %]
+                                            <option selected="selected" value="multibranchlimit:[% sg.id | html %]">[% sg.title | html %]</option>
+                                        [% ELSE %]
+                                            <option value="multibranchlimit:[% sg.id | html %]">[% sg.title | html %]</option>
+                                        [% END %]
+                                    [% END %]
+                                [% END %]
+                                [% limits.delete('multibranchlimit') %]
+                            </select>
+                            <!-- /#categoryloop -->
+                        </p>
+                    [% END # /search_groups %]
+                </fieldset>
+                <!-- /#select-libs -->
+            </fieldset>
+            <!-- /#availability -->
+            <!-- /AVAILABILITY LIMITS -->
 
- <!-- OTHER LIMITS (facets, etc.) -->
- [% IF limits.size %]
- <fieldset id="">
- <legend>Other limits</legend>
- <p>
- [% FOREACH key IN limits.keys %]
- [% FOREACH limit IN limits.$key %]
- <span>
- <input type="hidden" name="limit" value="[% key | html %]:[% limit | html %]" />
- <label for="other_[% key _ loop.index() | html %]">[% key | html %]:[% limit | html %]</label>
- <input type="checkbox" class="toggle_limit" name="other_[% key _ loop.index() | html %]" checked="checked" />
- </span>
- [% END %]
- [% END %]
- </p>
- </fieldset>
- [% END # /IF limits.size %]
- <!-- /OTHER LIMITS (facets, etc.) -->
+            <!-- OTHER LIMITS (facets, etc.) -->
+            [% IF limits.size %]
+                <fieldset id="">
+                    <legend>Other limits</legend>
+                    <p>
+                        [% FOREACH key IN limits.keys %]
+                            [% FOREACH limit IN limits.$key %]
+                                <span>
+                                    <input type="hidden" name="limit" value="[% key | html %]:[% limit | html %]" />
+                                    <label for="other_[% key _ loop.index() | html %]">[% key | html %]:[% limit | html %]</label>
+                                    <input type="checkbox" class="toggle_limit" name="other_[% key _ loop.index() | html %]" checked="checked" />
+                                </span>
+                            [% END %]
+                        [% END %]
+                    </p>
+                </fieldset>
+            [% END # /IF limits.size %]
+            <!-- /OTHER LIMITS (facets, etc.) -->
 
- <!-- RANK LIMITS -->
- <fieldset id="sortby">
- <legend>Sắp xếp kết quả tìm kiếm</legend>
- <p>
- <label for="sort_by">Sắp xếp theo: </label>
- <select id="sort_by" name="sort_by">
- [% INCLUDE 'resort_form.inc' sort_by = sort || sort_by %]
- </select>
- </p>
- </fieldset>
- <!-- /#sortby -->
- <!-- /RANK LIMITS -->
- </div>
- <!-- /#advanced-search -->
- </form>
+            <!-- RANK LIMITS -->
+            <fieldset id="sortby">
+                <legend><i class="fa fa-arrow-down-wide-short text-warning"></i> Sắp xếp kết quả tìm kiếm</legend>
+                <p>
+                    <label for="sort_by">Tiêu chí sắp xếp: </label>
+                    <select id="sort_by" name="sort_by">
+                        [% INCLUDE 'resort_form.inc' sort_by = sort || sort_by %]
+                    </select>
+                </p>
+            </fieldset>
+            <!-- /#sortby -->
+            <!-- /RANK LIMITS -->
+            <div class="search-action-bottom">
+                <button class="btn btn-primary" type="submit" accesskey="s"><i class="fa fa-magnifying-glass"></i> Bắt đầu tìm kiếm danh mục</button>
+                <a href="/cgi-bin/koha/catalogue/search.pl?do=Clear&expanded_options=[% expanded_options | uri %]" class="btn btn-link"><i class="fa fa-rotate-left"></i> Làm mới bộ lọc</a>
+            </div>
+        </div>
+        <!-- /#advanced-search -->
+    
+    <script nonce="[% Koha.CSPNonce | $raw %]">
+        function ftuQuickSearch(term) {
+            var qInput = document.querySelector('input[name="q"]');
+            if (qInput) {
+                qInput.value = term;
+                qInput.focus();
+                qInput.form.submit();
+            }
+        }
+    </script>
+
+</form>
 [% END %]
 
 [% MACRO jsinclude BLOCK %]
- [% Asset.js("js/browser.js") | $raw %]
- [% Asset.css("css/humanmsg.css") | $raw %]
- [% Asset.js("lib/jquery/plugins/humanmsg.js") | $raw %]
- <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+    [% Asset.js("js/browser.js") | $raw %]
+    [% Asset.css("css/humanmsg.css") | $raw %]
+    [% Asset.js("lib/jquery/plugins/humanmsg.js") | $raw %]
+    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
         const search_groups = [% search_groups ? 1 : 0 | html %];
         const searchid = "[% searchid | html %]";
         const edit_filter =  [% To.json(edit_filter.unblessed) || 0 | $raw %];
     </script>
- <script nonce="[% Koha.CSPNonce | $raw %]">
+    <script nonce="[% Koha.CSPNonce | $raw %]">
         /**
          *  Function add_field();
          *  This function allows to display a new field to search.

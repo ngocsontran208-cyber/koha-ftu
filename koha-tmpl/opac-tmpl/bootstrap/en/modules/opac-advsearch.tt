@@ -7,14 +7,14 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        [% t("Advanced search") | html %]
-        &rsaquo; [% PROCESS 'library_name_title' %]
-    [% END %]</title
+ [% t("Advanced search") | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
-    [% FILTER collapse %]
-        <style nonce="[% Koha.CSPNonce | $raw %]">
+ [% FILTER collapse %]
+ <style nonce="[% Koha.CSPNonce | $raw %]">
             .adv-search-grid {
                 display: grid;
                 gap: 0.5rem;
@@ -27,7 +27,7 @@
                 gap: 0.5rem;
             }
         </style>
-    [% END %]
+ [% END %]
 [% END %]
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='advsearch' bodyclass='scrollto' %]
@@ -35,497 +35,603 @@
 [% SET AllPublicBranches = Branches.all( selected => opac_name, search_params => { public => 1 }, unfiltered => 1 ) %]
 
 <form id="advsearch_form" action="/cgi-bin/koha/opac-search.pl" method="get">
-    <input type="hidden" name="advsearch" value="1" />
-    <main class="main">
-        [% WRAPPER breadcrumbs %]
-            [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>Advanced search</span>
-            [% END %]
-        [% END #/ WRAPPER breadcrumbs %]
+ <input type="hidden" name="advsearch" value="1" />
+ <main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Advanced search</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col order-first order-md-first order-lg-2">
-                    <!-- BOOLEAN SEARCH OPTIONS -->
-                    <div id="booleansearch" class="maincontent">
-                        <h1>Advanced search</h1>
-                        <fieldset>
-                            <legend>Search for:</legend>
-                            [% SET advsearch_class = expanded_options ? "advanced-search-terms extended" : "advanced-search-terms" %]
-                            <div class="[% advsearch_class | html %]">
-                                [% FOREACH search_box IN [ 1, 2, 3] %]
-                                    <div class="search-term-row">
-                                        <div class="search-term-input">
-                                            [% IF ( expanded_options ) %]
-                                                <select name="op" class="form-select">
-                                                    <option value="AND" selected="selected">and</option>
-                                                    <option value="OR">or</option>
-                                                    <option value="NOT">not</option>
-                                                </select>
-                                            [% ELSE %]
-                                                <label for="search-field_[% loop.index | html %]">
-                                                    [% IF loop.index == 0 %]
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                                    [% ELSE %]
-                                                        and
-                                                    [% END %]
-                                                </label>
-                                            [% END # /IF ( expanded_options ) %]
-                                        </div>
-                                        <!-- .search-term-input -->
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col order-first order-md-first order-lg-2">
+ <!-- BOOLEAN SEARCH OPTIONS -->
+ <!-- BOOLEAN SEARCH OPTIONS -->
+ <div id="booleansearch" class="maincontent">
+     <div class="ftu-advsearch-header">
+         <div class="ftu-advsearch-title-wrap">
+             <h1 class="ftu-advsearch-title">Advanced Search</h1>
+         </div>
+     </div>
+     <fieldset>
+         <div class="ftu-query-builder-header">
+             <div class="ftu-query-builder-title">
+                 <i class="fa fa-filter" aria-hidden="true"></i>
+                 <span>Multi-Field Query Builder</span>
+             </div>
+             <div class="ftu-query-builder-badge">Query Builder</div>
+         </div>
+         <legend class="visually-hidden">Search for:</legend>
+         [% SET advsearch_class = expanded_options ? "advanced-search-terms extended" : "advanced-search-terms" %]
+         <div class="[% advsearch_class | html %]">
+         [% FOREACH search_box IN [ 1, 2, 3] %]
+         <div class="search-term-row">
+             <div class="search-term-input term-op-cell">
+                 [% IF ( expanded_options ) %]
+                     <select name="op" class="form-select ftu-term-op-select">
+                         <option value="AND" selected="selected">and</option>
+                         <option value="OR">or</option>
+                         <option value="NOT">not</option>
+                     </select>
+                     [% IF loop.index == 0 %]
+                         <span class="ftu-term-badge ftu-term-first">Starts with</span>
+                     [% END %]
+                 [% ELSE %]
+                     [% IF loop.index == 0 %]
+                         <span class="ftu-term-badge ftu-term-first">Field 1</span>
+                     [% ELSE %]
+                         <span class="ftu-term-badge ftu-term-and">AND</span>
+                     [% END %]
+                     <input type="hidden" name="op" value="AND" />
+                 [% END # /IF ( expanded_options ) %]
+             </div>
+             <!-- .search-term-input -->
 
-                                        <div class="search-term-input">
-                                            <select class="form-select" name="idx" aria-label="Choose search type for field [% loop.index + 1 | html %]" id="search-field_[% loop.index | html %]">
-                                                <option value="kw" data-placeholder="Search by keyword">Keyword</option>
-                                                [% IF ( expanded_options ) %]
-                                                    <option value="kw,phr" data-placeholder="Search by keyword phrase">&nbsp;&nbsp;&nbsp;&nbsp; Keyword phrase</option>
-                                                [% END %]
-                                                <option value="su,wrdl" data-placeholder="Search by subject">Subject</option>
-                                                [% IF ( expanded_options ) %]
-                                                    <option value="su,phr" data-placeholder="Search by subject phrase">&nbsp;&nbsp;&nbsp;&nbsp; Subject phrase</option>
-                                                    <option value="su-br" data-placeholder="Search by subject (broader terms)">&nbsp;&nbsp;&nbsp;&nbsp; Subject and broader terms</option>
-                                                    <option value="su-na" data-placeholder="Search by subject (narrower terms)">&nbsp;&nbsp;&nbsp;&nbsp; Subject and narrower terms</option>
-                                                    <option value="su-rl" data-placeholder="Search by subject (related terms)">&nbsp;&nbsp;&nbsp;&nbsp; Subject and related terms</option>
-                                                [% END %]
-                                                <option value="ti" data-placeholder="Search by title">Title</option>
-                                                [% IF ( expanded_options ) %]
-                                                    <option value="ti,phr" data-placeholder="Search by title phrase">&nbsp;&nbsp;&nbsp;&nbsp; Title phrase</option>
-                                                    <option value="se,wrdl" data-placeholder="Search by series title">Series title</option>
-                                                    [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
-                                                        <option value="callnum,phr" data-placeholder="Search by call number">Call number</option>
-                                                    [% ELSE %]
-                                                        <option value="callnum" data-placeholder="Search by call number">Call number</option>
-                                                    [% END %]
-                                                [% END %]
-                                                <option value="au,wrdl" data-placeholder="Search by author">Author</option>
-                                                [% IF ( expanded_options ) %]
-                                                    <option value="au,phr" data-placeholder="Search by author phrase">&nbsp;&nbsp;&nbsp;&nbsp; Author phrase</option>
-                                                    <option value="cpn,wrdl" data-placeholder="Search by corporate name">&nbsp;&nbsp;&nbsp;&nbsp; Corporate name</option>
-                                                    <option value="cfn,wrdl" data-placeholder="Search by conference name">&nbsp;&nbsp;&nbsp;&nbsp; Conference name</option>
-                                                    <option value="cfn,phr" data-placeholder="Search by conference name phrase">&nbsp;&nbsp;&nbsp;&nbsp; Conference name phrase</option>
-                                                    <option value="pn,wrdl" data-placeholder="Search by personal name">&nbsp;&nbsp;&nbsp;&nbsp; Personal name</option>
-                                                    <option value="pn,phr" data-placeholder="Search by personal name phrase">&nbsp;&nbsp;&nbsp;&nbsp; Personal name phrase</option>
-                                                [% END %]
-                                                [% IF ( expanded_options ) %]
-                                                    <option value="nt" data-placeholder="Search notes or comments">Notes/Comments</option>
-                                                    [% IF (marcflavour != 'UNIMARC') %]
-                                                        <option value="curriculum" data-placeholder="Search curriculum">Curriculum</option>
-                                                    [% END %]
-                                                [% END %]
-                                                <option value="pb,wrdl" data-placeholder="Search by publisher">Publisher</option>
-                                                <option value="pl,wrdl" data-placeholder="Search by publisher location">Publisher location</option>
-                                                [% IF ( expanded_options ) %]
-                                                    [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
-                                                        <option value="ident,phr" data-placeholder="Search by standard number">Standard number</option>
-                                                    [% ELSE %]
-                                                        <option value="ident" data-placeholder="Search by standard number">Standard number</option>
-                                                    [% END %]
-                                                    <option value="nb" data-placeholder="Search by ISBN">&nbsp;&nbsp;&nbsp;&nbsp; ISBN</option>
-                                                    <option value="ns" data-placeholder="Search by ISSN">&nbsp;&nbsp;&nbsp;&nbsp; ISSN</option>
-                                                [% ELSE %]
-                                                    <option value="nb" data-placeholder="Search by ISBN">ISBN</option>
-                                                [% END %]
-                                                <option value="bc" data-placeholder="Search by barcode">Barcode</option>
-                                            </select>
-                                            <!-- /#search-field_[% loop.index | html %] -->
-                                        </div>
-                                        <!-- .search-term-input -->
-                                        <div class="search-term-input">
-                                            <input class="form-control" type="text" name="q" aria-label="Enter field [% loop.index + 1 | html %] search terms" value="" placeholder="" />
-                                        </div>
-                                        <!-- .search-term-input -->
-                                        [% IF ( expanded_options ) %]
-                                            <div class="search-term-input">
-                                                <a class="ButtonPlus" title="Add another field" href="#">
-                                                    <i class="fa fa-plus-square" aria-hidden="true"></i>
-                                                </a>
-                                                <a class="ButtonLess" title="Remove field" href="#">
-                                                    <i class="fa fa-minus-square" aria-hidden="true"></i>
-                                                </a>
-                                            </div>
-                                            <!-- .search-term-input -->
-                                        [% END %]
-                                    </div>
-                                    <!-- /.search-term-row -->
-                                [% END # FOREACH search_box %]
-                                [% IF ( expanded_options ) %]
-                                    [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' %]
-                                        <div id="weight_search">
-                                            <input type="hidden" name="weight_search_submitted" value="1" />
-                                            <label>
-                                                [% IF weight_search_submitted && !weight_search %]
-                                                    <input type="checkbox" name="weight_search" />
-                                                [% ELSE %]
-                                                    [%# enabled by default or when weight_search==true %]
-                                                    <input type="checkbox" name="weight_search" checked="checked" />
-                                                [% END %]
-                                                Apply field weights to search
-                                            </label>
-                                        </div>
-                                    [% END %]
-                                [% ELSE %]
-                                    <input type="hidden" name="weight_search_submitted" value="1" />
-                                    <input type="hidden" name="weight_search" value="1" />
-                                [% END %]
-                                [% IF Koha.Preference('IncludeSeeFromInSearches') %]
-                                    <div class="hint included-see-from-headings-info">
-                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                                        See from (non-preferred form) headings are included
-                                    </div>
-                                [% END %]
-                            </div>
-                            <!-- /.advanced-search-terms -->
-                        </fieldset>
-                    </div>
-                    <!-- /#booleansearch -->
-                </div>
-                <!-- / .col -->
-            </div>
-            <!-- / .row -->
+             <div class="search-term-input term-field-cell">
+                 <select aria-label="Choose search type for field [% loop.index + 1 | html %]" class="form-select ftu-term-idx-select" id="search-field_[% loop.index | html %]" name="idx">
+                     <option value="kw" data-placeholder="Search by keyword...">Keyword</option>
+                     [% IF ( expanded_options ) %]
+                         <option value="kw,phr" data-placeholder="Search by keyword phrase...">&nbsp;&nbsp;&nbsp;&nbsp; Keyword phrase</option>
+                     [% END %]
+                     <option value="ti" data-placeholder="Search by title...">Title</option>
+                     [% IF ( expanded_options ) %]
+                         <option value="ti,phr" data-placeholder="Search by title phrase...">&nbsp;&nbsp;&nbsp;&nbsp; Title phrase</option>
+                         <option value="se,wrdl" data-placeholder="Search by series title...">Series title</option>
+                         [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
+                             <option value="callnum,phr" data-placeholder="Search by call number...">Call number</option>
+                         [% ELSE %]
+                             <option value="callnum" data-placeholder="Search by call number...">Call number</option>
+                         [% END %]
+                     [% END %]
+                     <option value="au,wrdl" data-placeholder="Search by author...">Author</option>
+                     [% IF ( expanded_options ) %]
+                         <option value="au,phr" data-placeholder="Search by author phrase...">&nbsp;&nbsp;&nbsp;&nbsp; Author phrase</option>
+                         <option value="cpn,wrdl" data-placeholder="Search by corporate name...">Corporate name</option>
+                         <option value="cfn,wrdl" data-placeholder="Search by conference name...">Conference name</option>
+                         <option value="cfn,phr" data-placeholder="Search by conference name phrase...">&nbsp;&nbsp;&nbsp;&nbsp; Conference name phrase</option>
+                         <option value="pn,wrdl" data-placeholder="Search by personal name...">Personal name</option>
+                         <option value="pn,phr" data-placeholder="Search by personal name phrase...">&nbsp;&nbsp;&nbsp;&nbsp; Personal name phrase</option>
+                     [% END %]
+                     <option value="su,wrdl" data-placeholder="Search by subject...">Subject</option>
+                     [% IF ( expanded_options ) %]
+                         <option value="su,phr" data-placeholder="Search by subject phrase...">&nbsp;&nbsp;&nbsp;&nbsp; Subject phrase</option>
+                         <option value="su-br" data-placeholder="Search by broader terms...">&nbsp;&nbsp;&nbsp;&nbsp; Subject and broader terms</option>
+                         <option value="su-na" data-placeholder="Search by narrower terms...">&nbsp;&nbsp;&nbsp;&nbsp; Subject and narrower terms</option>
+                         <option value="su-rl" data-placeholder="Search by related terms...">&nbsp;&nbsp;&nbsp;&nbsp; Subject and related terms</option>
+                     [% END %]
+                     [% IF ( expanded_options ) %]
+                         <option value="nt" data-placeholder="Search notes or comments...">Notes/Comments</option>
+                         [% IF (marcflavour != 'UNIMARC') %]
+                             <option value="curriculum" data-placeholder="Search curriculum...">Curriculum</option>
+                         [% END %]
+                     [% END %]
+                     <option value="pb,wrdl" data-placeholder="Search by publisher...">Publisher</option>
+                     <option value="pl,wrdl" data-placeholder="Search by publisher location...">Publisher location</option>
+                     [% IF ( expanded_options ) %]
+                         [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
+                             <option value="ident,phr" data-placeholder="Search by standard number...">Standard number</option>
+                         [% ELSE %]
+                             <option value="ident" data-placeholder="Search by standard number...">Standard number</option>
+                         [% END %]
+                         <option value="nb" data-placeholder="Search by ISBN...">&nbsp;&nbsp;&nbsp;&nbsp; ISBN</option>
+                         <option value="ns" data-placeholder="Search by ISSN...">&nbsp;&nbsp;&nbsp;&nbsp; ISSN</option>
+                     [% ELSE %]
+                         <option value="nb" data-placeholder="Search by ISBN...">ISBN</option>
+                     [% END %]
+                     <option value="bc" data-placeholder="Search by barcode...">Barcode</option>
+                 </select>
+                 <!-- /#search-field_[% loop.index | html %] -->
+             </div>
+             <!-- .search-term-input -->
 
-            <div class="text-center">
-                <!-- SEARCH BUTTONS -->
-                <fieldset class="action"> [% PROCESS searchbuttons %] </fieldset>
-                <!-- /SEARCH BUTTONS -->
-            </div>
+             <div class="search-term-input term-query-cell">
+                 <input aria-label="Nhập từ khóa tìm kiếm cho trường [% loop.index + 1 | html %]" class="form-control ftu-term-query-input" name="q" placeholder="Search by keyword..." type="text" value="" autocomplete="off" />
+             </div>
+             <!-- .search-term-input -->
 
-            <div class="row">
-                [%# Following on one line for translatability %]
-                [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('itemtype').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('itemtype').size > 0 and expanded_options ) ) %]
-                    <div class="col order-first order-md-first order-lg-2">
-                        [% WRAPPER tabs id= "advsearches" %]
-                            [% WRAPPER tabs_nav %]
-                                [% FOREACH advsearchloo IN advancedsearchesloop %]
-                                    [% WRAPPER tab_item tabname= "advsearch-tab-${advsearchloo.advanced_search_type}" bt_active= "0" %]
-                                        [% IF ( advsearchloo.advanced_search_type == 'itemtypes' ) %]
-                                            <span>Item type</span>
-                                        [% ELSIF ( advsearchloo.advanced_search_type == 'ccode' ) %]
-                                            <span>Collection</span>
-                                        [% ELSIF ( advsearchloo.advanced_search_type == 'loc' ) %]
-                                            <span>Shelving location</span>
-                                        [% ELSE %]
-                                            <span>Something else</span>
-                                        [% END %]
-                                    [% END %]
-                                [% END %]
-                            [% END # /WRAPPER tabs_nav %]
-                            [% WRAPPER tab_panels id= "advsearches" %]
-                                [% FOREACH advsearchloo IN advancedsearchesloop %]
-                                    [% WRAPPER tab_panel tabname="advsearch-tab-${advsearchloo.advanced_search_type}" %]
-                                        <fieldset>
-                                            <legend>Limit to any of the following:</legend>
-                                            <div class="adv-search-grid">
-                                                [% FOREACH itemtypeloo IN advsearchloo.code_loop %]
-                                                    [% IF (advsearchloo.advanced_search_type != 'itemtypes') OR (((!itemtypeloo.searchcategory) AND (itemtypeloo.cat == 0)) OR (itemtypeloo.cat == 1)) %]
-                                                        <div class="adv-search-item">
-                                                            <div>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]"
-                                                                    name="[% IF ( itemtypeloo.cat == 1 ) %]searchcat[% ELSE %]limit[% END %]"
-                                                                    value="[% IF ( itemtypeloo.cat == 1 ) %][% itemtypeloo.code | html %][% ELSE %]mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %][% END %]"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                [% UNLESS ( Koha.Preference('OpacNoItemTypeImages')) %]
-                                                                    [% IF ( itemtypeloo.imageurl ) %]
-                                                                        <label for="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]">
-                                                                            <img class="itemtype-image" src="[% itemtypeloo.imageurl | html %]" alt="" aria-hidden="true" />
-                                                                        </label>
-                                                                    [% END %]
-                                                                    &nbsp;
-                                                                [% END %]
-                                                            </div>
-                                                            <div>
-                                                                <label for="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]">
-                                                                    <span class="itypetext">[% itemtypeloo.description | html %]</span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    [% END %]
-                                                [% END %]
-                                            </div>
-                                        </fieldset>
-                                    [% END # /tab_panel#advsearch-advsearchloo.advanced_search_type %]
-                                [% END # / FOREACH advancedsearchesloop %]
-                            [% END # /tab_panels %]
-                        [% END # /WRAPPER tabs#advsearches %]
-                    </div>
-                    <!-- / .col -->
-                [% END # /IF OpacAdvSearchOptions %]
-            </div>
-            <!-- /.row -->
+             [% IF ( expanded_options ) %]
+                 <div class="search-term-input term-actions-cell">
+                     <a class="ButtonPlus ftu-btn-term-action ftu-btn-add" href="#" title="Thêm tiêu chí tìm kiếm" aria-label="Thêm tiêu chí khác">
+                         <i class="fa fa-plus" aria-hidden="true"></i>
+                     </a>
+                     <a class="ButtonLess ftu-btn-term-action ftu-btn-remove" href="#" title="Xóa tiêu chí này" aria-label="Xóa trường">
+                         <i class="fa fa-times" aria-hidden="true"></i>
+                     </a>
+                 </div>
+                 <!-- .search-term-input -->
+             [% END %]
+         </div>
+         <!-- /.search-term-row -->
+         [% END # FOREACH search_box %]
 
-            <div id="advsearch_limits" class="row">
-                [%# Following on one line for translatability %]
-                [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('location').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('location').size > 0 and expanded_options ) ) %]
-                    [% IF ( singleBranchMode ) %]
-                        <div class="col-sm-6 col-lg-3">
-                            <!-- AVAILABILITY LIMITS -->
-                            <div id="location" class="advsearch_limit">
-                                <fieldset>
-                                    <legend>Availability: </legend>
-                                    <div style="margin-top:.4em">
-                                        <label for="available-items"><input type="checkbox" id="available-items" name="limit" value="available" /> Only items currently available for loan or reference</label>
-                                    </div>
-                                </fieldset>
-                            </div>
-                            <!-- / #location -->
-                            <!-- /AVAILABILITY LIMITS -->
-                        </div>
-                        <!-- / .col -->
-                    [% ELSE %]
-                        <div class="col-sm-6 col-lg-3">
-                            <!-- AVAILABILITY LIMITS -->
-                            <div id="location" class="advsearch_limit">
-                                <fieldset>
-                                    [% IF AllPublicBranches.size > 1 %]
-                                        <label for="branchloop">Location and availability:</label>
-                                    [% ELSE %]
-                                        <label for="branchloop">Availability:</label>
-                                    [% END %]
+         [% IF ( expanded_options ) %]
+             [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' %]
+                 <div id="weight_search" style="margin-top: 14px;">
+                     <input type="hidden" name="weight_search_submitted" value="1" />
+                     <label style="font-weight: 500; font-size: 0.88rem; color: #475569; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                         [% IF weight_search_submitted && !weight_search %]
+                             <input type="checkbox" name="weight_search" style="accent-color: var(--ftu-red);" />
+                         [% ELSE %]
+                             <input type="checkbox" name="weight_search" checked="checked" style="accent-color: var(--ftu-red);" />
+                         [% END %]
+                         <span>Áp dụng trọng số tìm kiếm theo trường (Field weights)</span>
+                     </label>
+                 </div>
+             [% END %]
+         [% ELSE %]
+             <input type="hidden" name="weight_search_submitted" value="1" />
+             <input type="hidden" name="weight_search" value="1" />
+         [% END %]
 
-                                    [% IF AllPublicBranches.size > 1 %]
-                                        <select class="form-select" name="limit" id="branchloop">
-                                            <option value="">All libraries</option>
-                                            [% FOREACH BranchesLoo IN AllPublicBranches %]
-                                                [% IF BranchesLoo.selected %]
-                                                    <option value="branch:[% BranchesLoo.branchcode | html %]" selected="selected">[% BranchesLoo.branchname | html %]</option>
-                                                [% ELSE %]
-                                                    <option value="branch:[% BranchesLoo.branchcode | html %]">[% BranchesLoo.branchname | html %]</option>
-                                                [% END %]
-                                            [% END %]
-                                        </select>
-                                        [% IF search_groups %]
-                                            <p>OR</p>
-                                            <label for="categoryloop">Groups of libraries</label>
-                                            <select class="form-select" name="limit" id="categoryloop">
-                                                <option value=""> -- none -- </option>
-                                                [% FOREACH sg IN search_groups %]
-                                                    <option value="multibranchlimit:[% sg.id | html %]">[% sg.title | html %]</option>
-                                                [% END %]
-                                            </select>
-                                        [% END %]
-                                    [% END %]
-                                    <div style="margin-top:.4em">
-                                        <label for="available-items"><input type="checkbox" id="available-items" name="limit" value="available" /> Only items currently available for loan or reference</label>
-                                    </div>
-                                </fieldset>
-                            </div>
-                            <!-- / #location -->
-                            <!-- /AVAILABILITY LIMITS -->
-                        </div>
-                        <!-- / .col -->
-                    [% END # / IF singleBranchMode %]
-                [% END %]
+         [% IF Koha.Preference('IncludeSeeFromInSearches') %]
+             <div class="hint included-see-from-headings-info" style="margin-top: 10px; font-size: 0.82rem; color: #64748b;">
+                 <i class="fa fa-info-circle" aria-hidden="true"></i>
+                 See from (non-preferred form) headings are included
+             </div>
+         [% END %]
+         </div>
+         <!-- /.advanced-search-terms -->
+     </fieldset>
+ </div>
+ <!-- /#booleansearch -->
+ </div>
+ <!-- / .col -->
+ </div>
+ <!-- / .row -->
 
-                [%# Following on one line for translatability %]
-                [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('sorting').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('sorting').size > 0 and expanded_options ) ) %]
-                    <div class="col-sm-6 col-lg-3">
-                        <!-- RANK LIMITS -->
-                        <div id="sortby" class="advsearch_limit">
-                            <fieldset>
-                                <label for="sort_by">Sort by:</label>
-                                <select class="form-select" id="sort_by" name="sort_by">
-                                    [% INCLUDE 'resort_form.inc' %]
-                                </select>
-                            </fieldset>
-                        </div>
-                        <!-- RANK LIMITS -->
-                    </div>
-                    <!-- / .col -->
-                [% END %]
+ <div class="text-center">
+     <!-- SEARCH BUTTONS -->
+     <fieldset class="action" style="margin: 0; padding: 0; border: none;"> [% PROCESS searchbuttons %] </fieldset>
+     <!-- /SEARCH BUTTONS -->
+ </div>
 
-                [%# Following on one line for translatability %]
-                [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('pubdate').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('pubdate').size > 0 and expanded_options ) ) %]
-                    <div class="col-sm-6 col-lg-3">
-                        <div id="pubrange" class="advsearch_limit">
-                            <!-- PUB RANGE OPTION -->
-                            <fieldset>
-                                <label for="limit-yr">Publication date range:</label>
-                                <input type="text" size="30" id="limit-yr" name="limit-yr" title="Enter search terms" value="" />
-                                <div class="hint">For example: 1999-2001. You could also use "-1987" for everything published in and before 1987 or "2008-" for everything published in 2008 and after.</div>
-                            </fieldset>
-                            <!-- /PUB RANGE OPTION -->
-                        </div>
-                    </div>
-                [% END %]
+ <div class="row">
+ [%# Following on one line for translatability %]
+ [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('itemtype').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('itemtype').size > 0 and expanded_options ) ) %]
+ <div class="col order-first order-md-first order-lg-2">
+ [% WRAPPER tabs id= "advsearches" %]
+ [% WRAPPER tabs_nav %]
+ [% FOREACH advsearchloo IN advancedsearchesloop %]
+ [% WRAPPER tab_item tabname= "advsearch-tab-${advsearchloo.advanced_search_type}" bt_active= "0" %]
+ [% IF ( advsearchloo.advanced_search_type == 'itemtypes' ) %]
+ <span><i class="fa fa-th-large" aria-hidden="true"></i> Item type</span>
+ [% ELSIF ( advsearchloo.advanced_search_type == 'ccode' ) %]
+ <span><i class="fa fa-folder-open-o" aria-hidden="true"></i> Collection</span>
+ [% ELSIF ( advsearchloo.advanced_search_type == 'loc' ) %]
+ <span><i class="fa fa-map-marker" aria-hidden="true"></i> Shelving location</span>
+ [% ELSE %]
+ <span><i class="fa fa-tag" aria-hidden="true"></i> Other filters</span>
+ [% END %]
+ [% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
+ [% WRAPPER tab_panels id= "advsearches" %]
+ [% FOREACH advsearchloo IN advancedsearchesloop %]
+ [% WRAPPER tab_panel tabname="advsearch-tab-${advsearchloo.advanced_search_type}" %]
+ <fieldset class="ftu-itypes-fieldset">
+ <div class="ftu-itypes-bar">
+     <legend class="ftu-itypes-legend">
+        <span>Limit to any of the following item types:</span>
+     </legend>
+     <div class="ftu-itypes-quick-actions">
+         <button type="button" class="btn-quick-toggle select-all-itypes" data-target="advsearch-tab-[% advsearchloo.advanced_search_type %]">
+             <i class="fa fa-check-square-o"></i> Select all
+         </button>
+         <button type="button" class="btn-quick-toggle deselect-all-itypes" data-target="advsearch-tab-[% advsearchloo.advanced_search_type %]">
+             <i class="fa fa-square-o"></i> Deselect all
+         </button>
+     </div>
+ </div>
+ <div class="adv-search-grid">
+ [% FOREACH itemtypeloo IN advsearchloo.code_loop %]
+ [% IF (advsearchloo.advanced_search_type != 'itemtypes') OR (((!itemtypeloo.searchcategory) AND (itemtypeloo.cat == 0)) OR (itemtypeloo.cat == 1)) %]
+ <label class="ftu-itype-card itype-code-[% itemtypeloo.code | lower | html %]" for="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]">
+     <div class="ftu-itype-checkbox-box">
+         <input
+             type="checkbox"
+             id="[% itemtypeloo.ccl FILTER remove(',') | html %]-[% itemtypeloo.number | html %]"
+             name="[% IF ( itemtypeloo.cat == 1 ) %]searchcat[% ELSE %]limit[% END %]"
+             value="[% IF ( itemtypeloo.cat == 1 ) %][% itemtypeloo.code | html %][% ELSE %]mc-[% itemtypeloo.ccl | html %]:[% itemtypeloo.code | html %][% END %]"
+             class="ftu-itype-checkbox"
+         />
+     </div>
+     <div class="ftu-itype-icon-badge">
+         [% IF itemtypeloo.code == 'BK' %]
+             <i class="fa fa-book" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'CF' %]
+             <i class="fa fa-laptop" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'CR' %]
+             <i class="fa fa-newspaper-o" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'MP' %]
+             <i class="fa fa-map" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'MU' %]
+             <i class="fa fa-headphones" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'MX' %]
+             <i class="fa fa-cubes" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'REF' %]
+             <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+         [% ELSIF itemtypeloo.code == 'VM' %]
+             <i class="fa fa-film" aria-hidden="true"></i>
+         [% ELSE %]
+             <i class="fa fa-file-text" aria-hidden="true"></i>
+         [% END %]
+     </div>
+     <div class="ftu-itype-info">
+         <span class="itypetext">[% itemtypeloo.description | html %]</span>
+     </div>
+ </label>
+ [% END %]
+ [% END %]
+ </div>
+ </fieldset>
+ [% END # /tab_panel#advsearch-advsearchloo.advanced_search_type %]
+ [% END # / FOREACH advancedsearchesloop %]
+ [% END # /tab_panels %]
+ [% END # /WRAPPER tabs#advsearches %]
+ </div>
+ <!-- / .col -->
+ [% END # /IF OpacAdvSearchOptions %]
+ </div>
+ <!-- /.row -->
 
-                [%# Following on one line for translatability %]
-                [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('language').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('language').size > 0 and expanded_options ) ) %]
-                    <div class="col-sm-6 col-lg-3">
-                        <div id="langfilter" class="advsearch_limit">
-                            <fieldset>
-                                <!-- LANGUAGE LIMIT -->
-                                <label for="language-limit">Language:</label>
-                                <select class="form-select" id="language-limit" name="limit">
-                                    <option value="">No limit</option>
-                                    [% FOREACH search_languages_loo IN search_languages_loop %]
-                                        [% IF ( search_languages_loo.selected ) %]
-                                            <option value="ln,rtrn:[% search_languages_loo.iso639_2_code | html %]" selected="selected">[% search_languages_loo.language_description | html %]</option>
-                                        [% ELSE %]
-                                            <option value="ln,rtrn:[% search_languages_loo.iso639_2_code | html %]">[% search_languages_loo.language_description | html %]</option>
-                                        [% END %]
-                                    [% END %]
-                                </select>
-                                <!-- /LANGUAGE LIMIT -->
-                            </fieldset>
-                        </div>
-                        <!-- / #langfilter -->
-                    </div>
-                    <!-- / .col -->
-                [% END %]
-            </div>
-            <!-- / .row -->
+ <div id="advsearch_limits" class="row">
+ [%# Following on one line for translatability %]
+ [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('location').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('location').size > 0 and expanded_options ) ) %]
+ [% IF ( singleBranchMode ) %]
+ <div class="col-sm-6 col-lg-3">
+ <!-- AVAILABILITY LIMITS -->
+ <div id="location" class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Location & Availability</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-checkbox-group">
+         <label for="available-items" class="ftu-toggle-label">
+             <input type="checkbox" id="available-items" name="limit" value="available" class="ftu-toggle-checkbox" />
+             <span class="ftu-toggle-text">Only items currently available for loan or reference</span>
+         </label>
+     </div>
+ </div>
+ </div>
+ <!-- / #location -->
+ <!-- /AVAILABILITY LIMITS -->
+ </div>
+ <!-- / .col -->
+ [% ELSE %]
+ <div class="col-sm-6 col-lg-3">
+ <!-- AVAILABILITY LIMITS -->
+ <div id="location" class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Location & Availability</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="branchloop" class="ftu-field-label">Library / Branch:</label>
+         <select class="form-select ftu-limit-select" name="limit" id="branchloop">
+             <option value="">All libraries</option>
+             [% FOREACH BranchesLoo IN AllPublicBranches %]
+             [% IF BranchesLoo.selected %]
+             <option value="branch:[% BranchesLoo.branchcode | html %]" selected="selected">[% BranchesLoo.branchname | html %]</option>
+             [% ELSE %]
+             <option value="branch:[% BranchesLoo.branchcode | html %]">[% BranchesLoo.branchname | html %]</option>
+             [% END %]
+             [% END %]
+         </select>
+     </div>
+     [% IF search_groups %]
+     <div class="ftu-field-group" style="margin-top: 8px;">
+         <label for="categoryloop" class="ftu-field-label">Groups of libraries:</label>
+         <select class="form-select ftu-limit-select" name="limit" id="categoryloop">
+             <option value=""> -- None -- </option>
+             [% FOREACH sg IN search_groups %]
+             <option value="multibranchlimit:[% sg.id | html %]">[% sg.title | html %]</option>
+             [% END %]
+         </select>
+     </div>
+     [% END %]
+     <div class="ftu-checkbox-group">
+         <label for="available-items" class="ftu-toggle-label">
+             <input type="checkbox" id="available-items" name="limit" value="available" class="ftu-toggle-checkbox" />
+             <span class="ftu-toggle-text">Only items currently available for loan or reference</span>
+         </label>
+     </div>
+ </div>
+ </div>
+ <!-- / #location -->
+ <!-- /AVAILABILITY LIMITS -->
+ </div>
+ <!-- / .col -->
+ [% END # / IF singleBranchMode %]
+ [% END %]
 
-            [%# Following on one line for translatability %]
-            [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('subtype').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('subtype').size > 0 and expanded_options ) ) %]
-                [% IF ( usmarc ) %]
-                    <div id="subtypes" class="row">
-                        <!-- SUBTYPE LIMITS -->
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="advsearch_limit">
-                                <fieldset>
-                                    <label for="subtype_audience">Audience:</label>
-                                    <select id="subtype_audience" name="limit" class="subtype form-select">
-                                        <option value="" selected="selected" class="menuheader">Any audience</option>
-                                        <option value="aud:a">Preschool</option>
-                                        <option value="aud:b">Primary</option>
-                                        <option value="aud:c">Pre-adolescent</option>
-                                        <option value="aud:d">Adolescent</option>
-                                        <option value="aud:e">Adult</option>
-                                        <option value="aud:f">Specialized</option>
-                                        <option value="aud:g">General</option>
-                                        <option value="aud:j">Juvenile</option>
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <!-- /.advsearch_limit -->
-                        </div>
-                        <!-- / .col-sm-6 col-lg-3 -->
+ [%# Following on one line for translatability %]
+ [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('sorting').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('sorting').size > 0 and expanded_options ) ) %]
+ <div class="col-sm-6 col-lg-3">
+ <!-- RANK LIMITS -->
+ <div id="sortby" class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Sort By</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="sort_by" class="ftu-field-label">Sort order:</label>
+         <select class="form-select ftu-limit-select" id="sort_by" name="sort_by">
+             [% INCLUDE 'resort_form.inc' %]
+         </select>
+     </div>
+     <div class="ftu-card-hint">
+         <i class="fa fa-info-circle"></i> Sort results according to preference
+     </div>
+ </div>
+ </div>
+ <!-- RANK LIMITS -->
+ </div>
+ <!-- / .col -->
+ [% END %]
 
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="advsearch_limit">
-                                <fieldset>
-                                    <label for="subtype_content">Content:</label>
-                                    <select id="subtype_content" name="limit" class="subtype form-select">
-                                        <option value="" selected="selected" class="menuheader">Any content</option>
-                                        <option value="fic:1">Fiction</option>
-                                        <option value="fic:0">Non-fiction</option>
-                                        <option value="bio:b">Biography</option>
-                                        <option value="mus:j">Musical recording</option>
-                                        <option value="mus:i">Non-musical recording</option>
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <!-- /.advsearch_limit -->
-                        </div>
+ [%# Following on one line for translatability %]
+ [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('pubdate').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('pubdate').size > 0 and expanded_options ) ) %]
+ <div class="col-sm-6 col-lg-3">
+ <div id="pubrange" class="advsearch_limit ftu-limit-card">
+ <!-- PUB RANGE OPTION -->
+ <div class="ftu-card-heading">
+    <span>Publication Date</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="limit-yr" class="ftu-field-label">Publication date range:</label>
+         <div class="ftu-input-icon-wrap">
+             <i class="fa fa-calendar-o input-lead-icon"></i>
+             <input id="limit-yr" name="limit-yr" class="form-control ftu-limit-input" placeholder="e.g. 2020-2026 or 2022-" title="Enter publication date range" type="text" value="" />
+         </div>
+     </div>
+     <div class="ftu-card-hint">
+         <strong>Syntax:</strong> <code>2020-2026</code>, <code>-2015</code> (before 2015), <code>2020-</code> (since 2020).
+     </div>
+ </div>
+ <!-- /PUB RANGE OPTION -->
+ </div>
+ </div>
+ [% END %]
 
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="advsearch_limit">
-                                <fieldset>
-                                    <label for="subtype_format">Format:</label>
-                                    <select id="subtype_format" name="limit" class="subtype form-select">
-                                        <option value="" selected="selected" class="menuheader">Any format</option>
-                                        <option value="l-format:ta">Regular print</option>
-                                        <option value="l-format:tb">Large print</option>
-                                        <option value="l-format:tc or l-format:fb">Braille</option>
-                                        <option value="">-----------</option>
-                                        <option value="l-format:sd">CD audio</option>
-                                        <option value="l-format:ss">Cassette recording</option>
-                                        <option value="l-format:vf">VHS tape / Videocassette</option>
-                                        <option value="l-format:vd">DVD video / Videodisc</option>
-                                        <option value="l-format:co">CD software</option>
-                                        <option value="l-format:cr">Website</option>
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <!-- /.advsearch_limit -->
-                        </div>
-                        <!-- / .col-sm-6 col-lg-3 -->
+ [%# Following on one line for translatability %]
+ [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('language').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('language').size > 0 and expanded_options ) ) %]
+ <div class="col-sm-6 col-lg-3">
+ <div id="langfilter" class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Language</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="language-limit" class="ftu-field-label">Select language:</label>
+         <select class="form-select ftu-limit-select" id="language-limit" name="limit">
+             <option value="">No limit (All)</option>
+             [% FOREACH search_languages_loo IN search_languages_loop %]
+             [% IF ( search_languages_loo.selected ) %]
+             <option value="ln,rtrn:[% search_languages_loo.iso639_2_code | html %]" selected="selected">[% search_languages_loo.language_description | html %]</option>
+             [% ELSE %]
+             <option value="ln,rtrn:[% search_languages_loo.iso639_2_code | html %]">[% search_languages_loo.language_description | html %]</option>
+             [% END %]
+             [% END %]
+         </select>
+     </div>
+     <div class="ftu-card-hint">
+         Filter documents by original publication language
+     </div>
+ </div>
+ </div>
+ <!-- / #langfilter -->
+ </div>
+ <!-- / .col -->
+ [% END %]
+ </div>
+ <!-- / .row -->
 
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="advsearch_limit">
-                                <fieldset>
-                                    <label for="subtype_additional">Additional content types for books/printed materials:</label>
-                                    <select id="subtype_additional" name="limit" class="subtype form-select">
-                                        <option value="">Any</option>
-                                        <option value="ctype:a">Abstracts/summaries</option>
-                                        <option value="ctype:b">Bibliographies</option>
-                                        <option value="ctype:c">Catalogs</option>
-                                        <option value="ctype:d">Dictionaries</option>
-                                        <option value="ctype:e">Encyclopedias </option>
-                                        <option value="ctype:f">Handbooks</option>
-                                        <option value="ctype:g">Legal articles</option>
-                                        <option value="ctype:i">Indexes</option>
-                                        <option value="ctype:j">Patent document</option>
-                                        <option value="ctype:k">Discographies</option>
-                                        <option value="ctype:l">Legislation</option>
-                                        <option value="ctype:m">Theses</option>
-                                        <option value="ctype:n">Surveys</option>
-                                        <option value="ctype:o">Reviews</option>
-                                        <option value="ctype:p">Programmed texts</option>
-                                        <option value="ctype:q">Filmographies</option>
-                                        <option value="ctype:r">Directories</option>
-                                        <option value="ctype:s">Statistics</option>
-                                        <option value="ctype:t">Technical reports</option>
-                                        <option value="ctype:v">Legal cases and case notes</option>
-                                        <option value="ctype:w">Law reports and digests</option>
-                                        <option value="ctype:z">Treaties </option>
-                                    </select>
-                                </fieldset>
-                            </div>
-                            <!-- /.advsearch_limit -->
-                        </div>
-                        <!-- / .col-sm-6 col-lg-3 -->
-                    </div>
-                    <!-- / #subtypes.row -->
-                    <!-- SUBTYPE LIMITS -->
-                [% END # / IF usmarc %]
+ [%# Following on one line for translatability %]
+ [% IF ( ( OpacAdvSearchOptions and OpacAdvSearchOptions.grep('subtype').size > 0 and not expanded_options ) or ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.grep('subtype').size > 0 and expanded_options ) ) %]
+ [% IF ( usmarc ) %]
+ <div id="subtypes" class="row">
+ <!-- SUBTYPE LIMITS -->
+ <div class="col-sm-6 col-lg-3">
+ <div class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Target Audience</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="subtype_audience" class="ftu-field-label">Audience level:</label>
+         <select id="subtype_audience" name="limit" class="subtype form-select ftu-limit-select">
+             <option value="" selected="selected" class="menuheader">Any audience</option>
+             <option value="aud:a">Preschool</option>
+             <option value="aud:b">Primary</option>
+             <option value="aud:c">Junior high</option>
+             <option value="aud:d">High school</option>
+             <option value="aud:e">Adult</option>
+             <option value="aud:f">Specialized</option>
+             <option value="aud:g">General</option>
+             <option value="aud:j">Juvenile</option>
+         </select>
+     </div>
+     <div class="ftu-card-hint">Limit by targeted reading audience level</div>
+ </div>
+ </div>
+ <!-- /.advsearch_limit -->
+ </div>
+ <!-- / .col-sm-6 col-lg-3 -->
 
-                [% IF ( UNIMARC ) %]
-                    <div id="subtypes_unimarc" class="row">
-                        <!-- SUBTYPE LIMITS -->
-                        [% INCLUDE 'subtypes_unimarc.inc' %]
-                    </div>
-                [% END %]
-            [% END # / IF expanded_options %]
+ <div class="col-sm-6 col-lg-3">
+ <div class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Content Type</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="subtype_content" class="ftu-field-label">Content nature:</label>
+         <select id="subtype_content" name="limit" class="subtype form-select ftu-limit-select">
+             <option value="" selected="selected" class="menuheader">Any content</option>
+             <option value="fic:1">Fiction</option>
+             <option value="fic:0">Non-fiction</option>
+             <option value="bio:b">Biography</option>
+             <option value="mus:j">Audio recording</option>
+             <option value="mus:i">Not audio recording</option>
+         </select>
+     </div>
+     <div class="ftu-card-hint">Filter by nature of content (fiction / non-fiction...)</div>
+ </div>
+ </div>
+ <!-- /.advsearch_limit -->
+ </div>
 
-            [% IF ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.size > 0 and expanded_options ) or ( OpacAdvSearchOptions and OpacAdvSearchOptions.size > 0 and not expanded_options ) %]
-                <div class="text-center">
-                    <fieldset class="action">
-                        <!-- SEARCH BUTTONS -->
-                        [% PROCESS searchbuttons %]
-                        <!-- /SEARCH BUTTONS -->
-                    </fieldset>
-                </div>
-            [% END %]
-        </div>
-        <!-- / .container-fluid -->
-    </main>
-    <!-- / .main -->
+ <div class="col-sm-6 col-lg-3">
+ <div class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Format / Medium</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="subtype_format" class="ftu-field-label">Physical format:</label>
+         <select id="subtype_format" name="limit" class="subtype form-select ftu-limit-select">
+             <option value="" selected="selected" class="menuheader">Any format</option>
+             <option value="l-format:ta">Regular print</option>
+             <option value="l-format:tb">Large print</option>
+             <option value="l-format:tc or l-format:fb">Braille</option>
+             <option value="">-----------</option>
+             <option value="l-format:sd">Audio CD</option>
+             <option value="l-format:ss">Băng Cassette</option>
+             <option value="l-format:vf">Băng VHS</option>
+             <option value="l-format:vd">Đĩa DVD</option>
+             <option value="l-format:co">CD phần mềm</option>
+             <option value="l-format:cr">Trang web</option>
+         </select>
+     </div>
+     <div class="ftu-card-hint">Lọc theo ấn bản vật lý hoặc điện tử</div>
+ </div>
+ </div>
+ <!-- /.advsearch_limit -->
+ </div>
+ <!-- / .col-sm-6 col-lg-3 -->
+
+ <div class="col-sm-6 col-lg-3">
+ <div class="advsearch_limit ftu-limit-card">
+ <div class="ftu-card-heading">
+    <span>Thể loại bổ sung</span>
+ </div>
+ <div class="ftu-card-content">
+     <div class="ftu-field-group">
+         <label for="subtype_additional" class="ftu-field-label">Dạng tài liệu xuất bản:</label>
+         <select id="subtype_additional" name="limit" class="subtype form-select ftu-limit-select">
+             <option value="">Bất kỳ</option>
+             <option value="ctype:a">Tóm tắt / Tổng quát</option>
+             <option value="ctype:b">Thư mục</option>
+             <option value="ctype:c">Danh mục</option>
+             <option value="ctype:d">Từ điển</option>
+             <option value="ctype:e">Encyclopedias </option>
+             <option value="ctype:f">Sổ tay</option>
+             <option value="ctype:g">Bài báo pháp lý</option>
+             <option value="ctype:i">Chỉ mục</option>
+             <option value="ctype:j">Tài liệu sáng chế</option>
+             <option value="ctype:k">Thư mục đĩa nhạc</option>
+             <option value="ctype:l">Legislation</option>
+             <option value="ctype:m">Luận án, luận văn</option>
+             <option value="ctype:n">Tài liệu khảo sát</option>
+             <option value="ctype:o">Bài phê bình</option>
+             <option value="ctype:p">Sách lập trình/Sách hướng dẫn</option>
+             <option value="ctype:q">Tài liệu điện ảnh</option>
+             <option value="ctype:r">Danh bạ điện thoại</option>
+             <option value="ctype:s">Thống kê</option>
+             <option value="ctype:t">Technical reports</option>
+             <option value="ctype:v">Các vụ án pháp lý và án lệ</option>
+             <option value="ctype:w">Báo cáo pháp luật và tập yếu án lệ</option>
+             <option value="ctype:z">Điều ước quốc tế </option>
+         </select>
+     </div>
+     <div class="ftu-card-hint">Dạng ấn phẩm như từ điển, luận án, thống kê...</div>
+ </div>
+ </div>
+ <!-- /.advsearch_limit -->
+ </div>
+ <!-- / .col-sm-6 col-lg-3 -->
+ </div>
+ <!-- / #subtypes.row -->
+ <!-- SUBTYPE LIMITS -->
+ [% END # / IF usmarc %]
+
+ [% IF ( UNIMARC ) %]
+ <div id="subtypes_unimarc" class="row">
+ <!-- SUBTYPE LIMITS -->
+ [% INCLUDE 'subtypes_unimarc.inc' %]
+ </div>
+ [% END %]
+ [% END # / IF expanded_options %]
+
+ [% IF ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.size > 0 and expanded_options ) or ( OpacAdvSearchOptions and OpacAdvSearchOptions.size > 0 and not expanded_options ) %]
+ <div class="text-center">
+ <fieldset class="action">
+ <!-- SEARCH BUTTONS -->
+ [% PROCESS searchbuttons %]
+ <!-- /SEARCH BUTTONS -->
+ </fieldset>
+ </div>
+ [% END %]
+ </div>
+ <!-- / .container-fluid -->
+ </main>
+ <!-- / .main -->
 </form>
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK searchbuttons %]
-    <p>
-        <input class="btn btn-primary" type="submit" accesskey="s" name="do" title="Search" value="Search" />
+<div class="ftu-advsearch-actions-bar">
+    <button accesskey="s" class="btn btn-ftu-primary btn-search-submit" name="do" title="Tìm kiếm" type="submit" value="Tìm kiếm">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        <span>Advanced search</span>
+    </button>
 
-        [% IF ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.size > 0 ) %]
-            [% IF expanded_options %]
-                <a href="/cgi-bin/koha/opac-search.pl?expanded_options=0" class="btn btn-default more-less-options">Fewer options</a>
-            [% ELSIF not expanded_options %]
-                <a href="/cgi-bin/koha/opac-search.pl?expanded_options=1" class="btn btn-default more-less-options">More options</a>
-            [% END %]
-        [% END %]
+    [% IF ( OpacAdvSearchMoreOptions and OpacAdvSearchMoreOptions.size > 0 ) %]
+    [% IF expanded_options %]
+    <a href="/cgi-bin/koha/opac-search.pl?expanded_options=0" class="btn btn-ftu-secondary more-less-options">
+        <i class="fa fa-compress" aria-hidden="true"></i>
+        <span>Ít tùy chọn hơn</span>
+    </a>
+    [% ELSIF not expanded_options %]
+    <a href="/cgi-bin/koha/opac-search.pl?expanded_options=1" class="btn btn-ftu-secondary more-less-options">
+        <i class="fa fa-sliders" aria-hidden="true"></i>
+        <span>More options</span>
+    </a>
+    [% END %]
+    [% END %]
 
-        <a href="/cgi-bin/koha/opac-search.pl?do=Clear" class="btn btn-default new-search">New search</a>
-    </p>
+    <a href="/cgi-bin/koha/opac-search.pl?do=Clear" class="btn btn-ftu-ghost new-search">
+        <i class="fa fa-refresh" aria-hidden="true"></i>
+        <span>New search</span>
+    </a>
+</div>
 [% END %]
 
 [% BLOCK jsinclude %]
-    [% Asset.js("lib/jquery/plugins/jquery.deserialize.min.js") | $raw %]
-    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+ [% Asset.js("lib/jquery/plugins/jquery.deserialize.min.js") | $raw %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
         window.addEventListener('pageshow', function( e ){
             $('.form-control:visible').prop('disabled' , false );
         });
@@ -554,6 +660,26 @@
             }
 
             $('.search-term-row .search-term-input select[name="op"]').first().prop("disabled",true).hide();
+
+            // Toggle item type checked state styling
+            $(document).on("change", ".ftu-itype-checkbox", function() {
+                $(this).closest(".ftu-itype-card").toggleClass("is-checked", this.checked);
+            });
+            $(".ftu-itype-checkbox").each(function() {
+                $(this).closest(".ftu-itype-card").toggleClass("is-checked", this.checked);
+            });
+
+            // Quick select / deselect all item types
+            $(document).on("click", ".select-all-itypes", function(e) {
+                e.preventDefault();
+                var tabId = $(this).data("target");
+                $("#" + tabId + " input[type='checkbox']").prop("checked", true).trigger("change");
+            });
+            $(document).on("click", ".deselect-all-itypes", function(e) {
+                e.preventDefault();
+                var tabId = $(this).data("target");
+                $("#" + tabId + " input[type='checkbox']").prop("checked", false).trigger("change");
+            });
 
             [% IF ( ReturnToSearch ) %]
                 if (form_serialized = JSON.parse( Cookies.get("form_serialized") ) ) {
@@ -617,6 +743,7 @@
                 var thisLine = $(this).parent().parent();
                 var newLine = thisLine.clone();
                 $(newLine).find('.search-term-input select[name="op"]').first().prop("disabled",false).show();
+                $(newLine).find('.ftu-term-first').remove();
                 newLine.find('input').val('');
                 thisLine.after(newLine);
             });

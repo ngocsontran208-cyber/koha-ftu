@@ -81,6 +81,8 @@
                     [% IF ( CAN_user_parameters_manage_auth_values ) %]
                         <dt><a href="/cgi-bin/koha/admin/authorised_values.pl">Giá trị được phép</a></dt>
                         <dd>Định nghĩa danh mục và các giá trị được phép</dd>
+                        <dt><a href="/cgi-bin/koha/admin/collections.pl">Quản lý Bộ sưu tập</a></dt>
+                        <dd>Quản lý các bộ sưu tập chuyên đề (CCODE), ảnh bìa, tóm tắt mô tả và chuyên đề nổi bật trên OPAC</dd>
                     [% END %]
                 </dl>
             [% END %]

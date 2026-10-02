@@ -12,6 +12,224 @@
  [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+/* ==========================================================================
+   FTU CATALOGING HOME REDESIGN - FULL WIDTH & MODERN SCIENTIFIC LAYOUT
+   ========================================================================== */
+body#cat_cataloging-home {
+    background-color: #f8fafc;
+}
+
+body#cat_cataloging-home .main.container-fluid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px 32px 48px 32px !important;
+    background-color: #f8fafc;
+    box-sizing: border-box;
+}
+
+body#cat_cataloging-home .main.container-fluid > .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+body#cat_cataloging-home .main.container-fluid > .row > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Header Banner & Toolbar */
+.ftu-cat-header-wrap {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.ftu-cat-title-group h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.ftu-cat-title-group .ftu-cat-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.ftu-cat-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ftu-btn-primary {
+    background: #8B1E1E !important;
+    color: #ffffff !important;
+    border: 1px solid #8B1E1E !important;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(139, 30, 30, 0.12);
+}
+.ftu-btn-primary:hover {
+    background: #731818 !important;
+    color: #ffffff !important;
+    border-color: #731818 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(139, 30, 30, 0.2);
+}
+
+.ftu-btn-secondary {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+.ftu-btn-secondary:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+/* Category Cards */
+.ftu-cat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ftu-cat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.ftu-cat-icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #8B1E1E;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.ftu-cat-card-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.ftu-cat-group-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin: 14px 0 8px 0;
+}
+.ftu-cat-group-title:first-child {
+    margin-top: 0;
+}
+
+.ftu-cat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ftu-cat-list li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ftu-cat-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.ftu-cat-link:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #8B1E1E;
+    text-decoration: none;
+    transform: translateX(3px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.ftu-cat-link i {
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+    color: #64748b;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.ftu-cat-link:hover i {
+    color: #8B1E1E;
+}
+</style>
 </head>
 
 <body id="cat_cataloging-home" class="cat">
@@ -27,208 +245,286 @@
  [% END #/ WRAPPER breadcrumbs %]
 [% END #/ WRAPPER sub-header.inc %]
 
-[% WRAPPER 'main-container.inc' %]
- [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
- <div id="toolbar" class="btn-toolbar">
- [% IF Koha.Preference( 'EnableAdvancedCatalogingEditor' ) == 1 && CAN_user_editcatalogue_advanced_editor %]
- <a id="useadvanced" href="/cgi-bin/koha/cataloguing/editor.pl" class="btn btn-default"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Trình biên tập nâng cao</a>
- [% END %]
- <div class="btn-group">
- <button class="btn btn-default" id="newRecord"><i class="fa fa-plus"></i> Tạo biểu ghi</button>
- <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
- <ul class="dropdown-menu dropdown-menu-end">
- <li><a class="dropdown-item" id="newRecordDefault" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=">Khung mẫu mặc định</a></li>
- [% FOREACH framework IN frameworks %]
- [% IF !framework.is_fast_add %]<li><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=[% framework.frameworkcode | uri %]">[% framework.frameworktext | html %]</a></li>[% END %]
- [% END %]
- [% FOREACH framework IN frameworks %]
- [% IF loop.first %]<li><h6 class="dropdown-header">Khung mẫu biên mục nhanh</h6></li>[% END %]
- [% IF framework.is_fast_add %]<li><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=[% framework.frameworkcode | uri %]">[% framework.frameworktext | html %]</a></li>[% END %]
- [% END %]
- </ul>
- </div>
- [% IF servers.count > 0 %]
- <div class="btn-group">
- <button class="btn btn-default" id="z3950search"><i class="fa fa-search"></i> Tạo từ máy chủ Z39.50/SRU</button>
- <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
- <ul class="dropdown-menu dropdown-menu-end">
- <li id="Default" class="z3950searchFw"><a class="dropdown-item" href="#">Khung mẫu mặc định</a></li>
- [% FOREACH framework IN frameworks %]
- [% IF !framework.is_fast_add %]<li id="[% framework.frameworkcode | html %]" class="z3950searchFw"><a class="dropdown-item" href="#">[% framework.frameworktext | html %]</a></li>[% END %]
- [% END %]
- [% FOREACH framework IN frameworks %]
- [% IF loop.first %]<li><h6 class="dropdown-header">Khung mẫu biên mục nhanh</h6></li>[% END %]
- [% IF framework.is_fast_add %]<li id="[% framework.frameworkcode | html %]" class="z3950searchFw"><a class="dropdown-item" href="#">[% framework.frameworktext | html %]</a></li>[% END %]
- [% END %]
- </ul>
- </div>
- [% END # /IF servers.count %]
- </div>
- <!-- /#toolbar -->
- [% END # /IF CAN_user_editcatalogue_edit_catalogue %]
+[% WRAPPER 'main-container.inc' wide_full => 1 %]
 
- <h1>Phân hệ biên mục</h1>
-
- <div class="row">
- <div class="col-sm-4 col-md-4">
- [% IF ( CAN_user_tools_stage_marc_import || CAN_user_tools_manage_staged_marc ) %]
- <h3>Nhập dữ liệu</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_tools_stage_marc_import ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/stage-marc-import.pl"><i class="fa fa-download"></i> Chuẩn bị biểu ghi nhập liệu</a>
- </li>
- [% END %]
-
- [% IF ( CAN_user_tools_manage_staged_marc ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/manage-marc-import.pl"><i class="fa fa-tasks"></i> Quản lý biểu ghi MARC được duyệt</a>
- </li>
- [% END %]
- </ul>
- [% END %]
-
- [% IF ( CAN_user_tools_export_catalog ) %]
- <h3>Xuất dữ liệu</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_tools_export_catalog ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/export.pl"><i class="fa fa-upload"></i> Xuất dữ liệu biên mục</a>
- </li>
- [% END %]
- </ul>
- [% END %]
-
- [% IF ( CAN_user_tools_inventory || ( ( Koha.Preference('OpacCatalogConcerns') || Koha.Preference('CatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) ) %]
- <h3>Báo cáo</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_tools_inventory ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/inventory.pl"><i class="fa-solid fa-clipboard-check"></i> Kiểm kê kho</a>
- </li>
- [% END %]
-
- [% IF ( ( Koha.Preference('OpacCatalogConcerns') || Koha.Preference('CatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/cataloguing/concerns.pl"><i class="fa fa-list-ul"></i> Báo cáo lỗi biên mục</a>
- </li>
- [% END %]
- </ul>
- [% END %]
- [% IF ( fast_cataloging && CAN_user_editcatalogue_fast_cataloging  ) %]
- <h3>Biên mục nhanh</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_editcatalogue_fast_cataloging ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA"><i class="fa fa-plus"></i> Biên mục nhanh</a>
- </li>
- [% END %]
- </ul>
- [% END %]
+ <!-- 1. HEADER BANNER & THANH THAO TÁC BIÊN MỤC -->
+ <div class="ftu-cat-header-wrap">
+     <div class="ftu-cat-title-group">
+         <h1>Phân hệ biên mục</h1>
+     </div>
+     [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
+     <div class="ftu-cat-toolbar" id="toolbar">
+         <a href="/cgi-bin/koha/cataloguing/records.pl" class="ftu-btn-primary">
+             <i class="fa fa-list-alt"></i> Quản lý biểu ghi &amp; ĐKCB
+         </a>
+         <div class="btn-group">
+             <button class="ftu-btn-secondary" id="newRecord"><i class="fa fa-plus text-danger"></i> Tạo biểu ghi</button>
+             <button class="ftu-btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"></button>
+             <ul class="dropdown-menu dropdown-menu-end shadow border">
+                 <li><a class="dropdown-item" id="newRecordDefault" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=">Khung mẫu mặc định</a></li>
+                 [% FOREACH framework IN frameworks %]
+                     [% IF !framework.is_fast_add %]<li><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=[% framework.frameworkcode | uri %]">[% framework.frameworktext | html %]</a></li>[% END %]
+                 [% END %]
+                 [% FOREACH framework IN frameworks %]
+                     [% IF loop.first %]<li><h6 class="dropdown-header">Khung mẫu biên mục nhanh</h6></li>[% END %]
+                     [% IF framework.is_fast_add %]<li><a class="dropdown-item" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=[% framework.frameworkcode | uri %]">[% framework.frameworktext | html %]</a></li>[% END %]
+                 [% END %]
+             </ul>
+         </div>
+         [% IF servers.count > 0 %]
+         <div class="btn-group">
+             <button class="ftu-btn-secondary" id="z3950search"><i class="fa fa-search text-primary"></i> Từ Z39.50/SRU</button>
+             <button class="ftu-btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"></button>
+             <ul class="dropdown-menu dropdown-menu-end shadow border">
+                 <li id="Default" class="z3950searchFw"><a class="dropdown-item" href="#">Khung mẫu mặc định</a></li>
+                 [% FOREACH framework IN frameworks %]
+                     [% IF !framework.is_fast_add %]<li id="[% framework.frameworkcode | html %]" class="z3950searchFw"><a class="dropdown-item" href="#">[% framework.frameworktext | html %]</a></li>[% END %]
+                 [% END %]
+             </ul>
+         </div>
+         [% END # /IF servers.count %]
+         [% IF Koha.Preference( 'EnableAdvancedCatalogingEditor' ) == 1 && CAN_user_editcatalogue_advanced_editor %]
+         <a id="useadvanced" href="/cgi-bin/koha/cataloguing/editor.pl" class="ftu-btn-secondary">
+             <i class="fa-solid fa-pencil text-warning"></i> Trình biên tập nâng cao
+         </a>
+         [% END %]
+     </div>
+     [% END # /IF CAN_user_editcatalogue_edit_catalogue %]
  </div>
 
- <div class="col-sm-4 col-md-4">
- [% IF ( CAN_user_tools_items_batchmod || CAN_user_tools_items_batchdel || CAN_user_tools_records_batchmod || CAN_user_tools_records_batchdel || CAN_user_editcatalogue_records_restore || CAN_user_tools_marc_modification_templates ) %]
- <h3>Chỉnh sửa hàng loạt</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_tools_items_batchmod ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/batchMod.pl"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Chỉnh sửa bản tài liệu theo lô</a>
- </li>
- [% END %]
- [% IF ( CAN_user_tools_items_batchdel ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/batchMod.pl?del=1"><i class="fa fa-trash-can"></i> Xóa bản tài liệu theo lô</a>
- </li>
- [% END %]
- [% IF CAN_user_tools_records_batchmod %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/batch_record_modification.pl"><i class="fa-solid fa-pencil" aria-hidden="true"></i> Chỉnh sửa biểu ghi theo lô</a>
- </li>
- [% END %]
- [% IF CAN_user_tools_records_batchdel %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/batch_delete_records.pl"><i class="fa fa-trash-can"></i> Xóa biểu ghi theo lô</a>
- </li>
- [% END %]
+ <!-- 2. LƯỚI 3 CỘT CHUYÊN MÔN RỘNG TOÀN MÀN HÌNH -->
+ <div class="row g-4">
+     <!-- CỘT 1: NHẬP, XUẤT & BÁO CÁO -->
+     <div class="col-12 col-lg-4 col-md-6">
+         <div class="ftu-cat-card">
+             <div class="ftu-cat-card-header">
+                 <h3>Nhập, Xuất &amp; Báo cáo</h3>
+             </div>
 
- [% IF ( CAN_user_tools_marc_modification_templates ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/marc_modification_templates.pl"><i class="fa fa-gear"></i> Mẫu chỉnh sửa biểu ghi MARC</a>
- </li>
- [% END %]
- [% IF ( CAN_user_editcatalogue_records_restore ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/restore-records.pl"><i class="fa fa-undo"></i> Khôi phục biểu ghi đã xóa</a>
- </li>
- [% END %]
- </ul>
- [% END %]
+             [% IF ( CAN_user_tools_stage_marc_import || CAN_user_tools_manage_staged_marc ) %]
+             <div class="ftu-cat-group-title">Nhập dữ liệu biểu ghi</div>
+             <ul class="ftu-cat-list">
+                 [% IF ( CAN_user_tools_stage_marc_import ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/stage-marc-import.pl">
+                         <i class="fa fa-download text-primary"></i>
+                         <span>Chuẩn bị biểu ghi nhập liệu</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( CAN_user_tools_manage_staged_marc ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/manage-marc-import.pl">
+                         <i class="fa fa-tasks text-info"></i>
+                         <span>Quản lý biểu ghi MARC được duyệt</span>
+                     </a>
+                 </li>
+                 [% END %]
+             </ul>
+             [% END %]
 
- [% IF ( CAN_user_tools_items_batchmod || ( CAN_user_stockrotation_manage_rotas && Koha.Preference('StockRotation') ) ) %]
- <h3>Tự động hoá</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_tools_items_batchmod ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/automatic_item_modification_by_age.pl"><i class="fa-solid fa-calendar-days"></i> Chỉnh sửa tự động theo thời gian</a>
- </li>
- [% END %]
- [% IF ( CAN_user_stockrotation_manage_rotas && Koha.Preference('StockRotation') ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/stockrotation.pl"><i class="fa-solid fa-rotate"></i> Luân chuyển kho</a>
- </li>
- [% END %]
- </ul>
- [% END %]
- </div>
+             [% IF ( CAN_user_tools_export_catalog ) %]
+             <div class="ftu-cat-group-title">Xuất dữ liệu biên mục</div>
+             <ul class="ftu-cat-list">
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/export.pl">
+                         <i class="fa fa-upload text-success"></i>
+                         <span>Xuất dữ liệu biên mục</span>
+                     </a>
+                 </li>
+             </ul>
+             [% END %]
 
- <div class="col-sm-4 col-md-4">
- [% IF ( CAN_user_tools_label_creator || CAN_user_tools_upload_local_cover_images ) %]
- <h3>Công cụ bổ trợ</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_tools_label_creator ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/labels/label-home.pl"><i class="fa fa-hashtag"></i> Tạo nhãn gáy</a>
- </li>
+             [% IF ( CAN_user_tools_inventory || ( ( Koha.Preference('OpacCatalogConcerns') || Koha.Preference('CatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) ) %]
+             <div class="ftu-cat-group-title">Báo cáo &amp; Kiểm kê kho</div>
+             <ul class="ftu-cat-list">
+                 [% IF ( CAN_user_tools_inventory ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/inventory.pl">
+                         <i class="fa-solid fa-clipboard-check text-warning"></i>
+                         <span>Kiểm kê kho</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( ( Koha.Preference('OpacCatalogConcerns') || Koha.Preference('CatalogConcerns') ) && CAN_user_editcatalogue_edit_catalogue ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/cataloguing/concerns.pl">
+                         <i class="fa fa-list-ul text-danger"></i>
+                         <span>Báo cáo lỗi biên mục</span>
+                     </a>
+                 </li>
+                 [% END %]
+             </ul>
+             [% END %]
 
- <li>
- <a class="circ-button" href="/cgi-bin/koha/labels/barcode-print.pl"><i class="fa fa-barcode"></i> Trình tạo mã vạch</a>
- </li>
+             [% IF ( fast_cataloging && CAN_user_editcatalogue_fast_cataloging ) %]
+             <div class="ftu-cat-group-title">Biên mục nhanh</div>
+             <ul class="ftu-cat-list">
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA">
+                         <i class="fa fa-plus-circle text-danger"></i>
+                         <span>Biên mục nhanh</span>
+                     </a>
+                 </li>
+             </ul>
+             [% END %]
+         </div>
+     </div>
 
- <li>
- <a class="circ-button" href="/cgi-bin/koha/labels/spinelabel-home.pl"><i class="fa fa-hashtag"></i> Tạo nhanh nhãn gáy</a>
- </li>
- [% END %]
+     <!-- CỘT 2: XỬ LÝ THEO LÔ & TỰ ĐỘNG HOÁ -->
+     <div class="col-12 col-lg-4 col-md-6">
+         <div class="ftu-cat-card">
+             <div class="ftu-cat-card-header">
+                 <h3>Xử lý theo lô &amp; Tự động hoá</h3>
+             </div>
 
- [% IF ( CAN_user_tools_upload_local_cover_images ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/tools/upload-cover-image.pl"><i class="fa fa-upload"></i> Thêm ảnh bìa cho biểu ghi</a>
- </li>
- [% END %]
- </ul>
- [% END %]
+             [% IF ( CAN_user_tools_items_batchmod || CAN_user_tools_items_batchdel || CAN_user_tools_records_batchmod || CAN_user_tools_records_batchdel || CAN_user_editcatalogue_records_restore || CAN_user_tools_marc_modification_templates ) %]
+             <div class="ftu-cat-group-title">Chỉnh sửa hàng loạt</div>
+             <ul class="ftu-cat-list">
+                 [% IF ( CAN_user_tools_items_batchmod ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/batchMod.pl">
+                         <i class="fa-solid fa-pencil text-primary"></i>
+                         <span>Chỉnh sửa bản tài liệu theo lô</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( CAN_user_tools_items_batchdel ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/batchMod.pl?del=1">
+                         <i class="fa-solid fa-trash-can text-danger"></i>
+                         <span>Xóa bản tài liệu theo lô</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF CAN_user_tools_records_batchmod %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/batch_record_modification.pl">
+                         <i class="fa-solid fa-file-pen text-info"></i>
+                         <span>Chỉnh sửa biểu ghi theo lô</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF CAN_user_tools_records_batchdel %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/batch_delete_records.pl">
+                         <i class="fa-solid fa-trash-can text-danger"></i>
+                         <span>Xóa biểu ghi theo lô</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( CAN_user_tools_marc_modification_templates ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/marc_modification_templates.pl">
+                         <i class="fa fa-gear text-secondary"></i>
+                         <span>Mẫu chỉnh sửa biểu ghi MARC</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( CAN_user_editcatalogue_records_restore ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/restore-records.pl">
+                         <i class="fa fa-undo text-success"></i>
+                         <span>Khôi phục biểu ghi đã xóa</span>
+                     </a>
+                 </li>
+                 [% END %]
+             </ul>
+             [% END %]
 
- [% IF ( CAN_user_parameters ) %]
- <h3>Quản trị hệ thống</h3>
- <ul class="buttons-list">
- [% IF ( CAN_user_parameters_manage_sysprefs ) %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/admin/preferences.pl?tab=cataloguing"><i class="fa fa-tasks"></i> Tuỳ chọn hệ thống</a>
- </li>
- [% END %]
- <li>
- <a class="circ-button" href="/cgi-bin/koha/admin/admin-home.pl"><i class="fa fa-cogs"></i> Cấu hình</a>
- </li>
- </ul>
- [% END %]
- </div>
+             [% IF ( CAN_user_tools_items_batchmod || ( CAN_user_stockrotation_manage_rotas && Koha.Preference('StockRotation') ) ) %]
+             <div class="ftu-cat-group-title">Tự động hoá &amp; Luân chuyển</div>
+             <ul class="ftu-cat-list">
+                 [% IF ( CAN_user_tools_items_batchmod ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/automatic_item_modification_by_age.pl">
+                         <i class="fa-solid fa-calendar-days text-warning"></i>
+                         <span>Chỉnh sửa tự động theo thời gian</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( CAN_user_stockrotation_manage_rotas && Koha.Preference('StockRotation') ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/stockrotation.pl">
+                         <i class="fa-solid fa-rotate text-success"></i>
+                         <span>Luân chuyển kho</span>
+                     </a>
+                 </li>
+                 [% END %]
+             </ul>
+             [% END %]
+         </div>
+     </div>
+
+     <!-- CỘT 3: CÔNG CỤ BỔ TRỢ & QUẢN TRỊ -->
+     <div class="col-12 col-lg-4 col-md-6">
+         <div class="ftu-cat-card">
+             <div class="ftu-cat-card-header">
+                 <h3>In ấn nhãn &amp; Quản trị</h3>
+             </div>
+
+             [% IF ( CAN_user_tools_label_creator || CAN_user_tools_upload_local_cover_images ) %]
+             <div class="ftu-cat-group-title">Công cụ in ấn &amp; Nhãn gáy</div>
+             <ul class="ftu-cat-list">
+                 [% IF ( CAN_user_tools_label_creator ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/labels/label-home.pl">
+                         <i class="fa fa-hashtag text-primary"></i>
+                         <span>Tạo nhãn gáy</span>
+                     </a>
+                 </li>
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/labels/barcode-print.pl">
+                         <i class="fa fa-barcode text-success"></i>
+                         <span>Trình tạo mã vạch</span>
+                     </a>
+                 </li>
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/labels/spinelabel-home.pl">
+                         <i class="fa fa-hashtag text-info"></i>
+                         <span>Tạo nhanh nhãn gáy</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 [% IF ( CAN_user_tools_upload_local_cover_images ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/tools/upload-cover-image.pl">
+                         <i class="fa fa-upload text-warning"></i>
+                         <span>Thêm ảnh bìa cho biểu ghi</span>
+                     </a>
+                 </li>
+                 [% END %]
+             </ul>
+             [% END %]
+
+             [% IF ( CAN_user_parameters ) %]
+             <div class="ftu-cat-group-title">Quản trị hệ thống biên mục</div>
+             <ul class="ftu-cat-list">
+                 [% IF ( CAN_user_parameters_manage_sysprefs ) %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/admin/preferences.pl?tab=cataloguing">
+                         <i class="fa fa-tasks text-danger"></i>
+                         <span>Tuỳ chọn hệ thống biên mục</span>
+                     </a>
+                 </li>
+                 [% END %]
+                 <li>
+                     <a class="ftu-cat-link circ-button" href="/cgi-bin/koha/admin/admin-home.pl">
+                         <i class="fa fa-cogs text-secondary"></i>
+                         <span>Cấu hình tham số hệ thống</span>
+                     </a>
+                 </li>
+             </ul>
+             [% END %]
+         </div>
+     </div>
  </div>
 
  [%- SET StaffCataloguingHome = AdditionalContents.get( location => "StaffCataloguingHome", lang => lang, library => Branches.GetLoggedInBranchcode ) -%]
  [%- FOREACH block IN StaffCataloguingHome.content -%]
- <div class="page-section"> [%- block.content | $raw -%] </div>
+ <div class="page-section mt-4"> [%- block.content | $raw -%] </div>
  [%- END -%]
-[% END %]
+[% END #/ WRAPPER 'main-container.inc' %]
 
 [% MACRO jsinclude BLOCK %]
  <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
@@ -269,6 +565,6 @@
             var strQuery="&frameworkcode=" + fw;
             return strQuery;
         }
-    </script>
+ </script>
 [% END %]
 [% INCLUDE 'intranet-bottom.inc' %]

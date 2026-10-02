@@ -5,6 +5,7 @@
 [% USE AuthClient %]
 [% USE AdditionalContents %]
 [% PROCESS 'i18n.inc' %]
+[% PROCESS 'ftu-brand-config.inc' %]
 [% PROCESS 'html_helpers.inc' %]
 [% IF Koha.Preference( 'CookieConsent' ) %]
  [% USE JSConsents %]
@@ -26,11 +27,11 @@
 <header id="header-region" class="noprint">
  <nav class="navbar navbar-expand">
     <div id="logo">
-        <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl" title="Thư viện Trường Đại học Ngoại thương">
-            <img src="/opac-tmpl/bootstrap/images/ftu-logo.png" alt="FTU Logo" class="ftu-logo-img">
+        <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl" title="[% FTU_BRAND.library_name %]">
+            <img src="[% FTU_BRAND.logo_url %]" alt="[% FTU_BRAND.logo_alt %]" class="ftu-logo-img">
             <div class="ftu-brand-title-wrap">
-                <span class="ftu-brand-main-title">Thư viện Đại học Ngoại thương</span>
-                <span class="ftu-brand-sub-title">Foreign Trade University Library</span>
+                <span class="ftu-brand-main-title">[% FTU_BRAND.library_name %]</span>
+                <span class="ftu-brand-sub-title">[% FTU_BRAND.library_sub_title %]</span>
             </div>
         </a>
     </div>
@@ -99,6 +100,18 @@
  <!-- / .nav-item.dropdown -->
  [% END # / IF opacuserlogin || some_public_shelves < 1 %]
  [% END # / IF virtualshelves %]
+ <li role="presentation" class="divider-vertical"></li>
+ <li class="nav-item" id="csdl-nav-item">
+     <a href="/cgi-bin/koha/opac-databases.pl" class="nav-link" title="Cơ sở dữ liệu (CSDL)" id="csdlmenulink" role="button">
+         <i id="csdlicon" class="fa fa-database fa-fw fa-icon-black" aria-hidden="true"></i> <span class="csdllabel">Cơ sở dữ liệu (CSDL)</span>
+     </a>
+ </li>
+ <li role="presentation" class="divider-vertical"></li>
+ <li class="nav-item" id="bst-nav-item">
+     <a href="/cgi-bin/koha/opac-collections.pl" class="nav-link" title="Bộ sưu tập" id="bstmenulink" role="button">
+         <i id="bsticon" class="fa fa-cubes fa-fw fa-icon-black" aria-hidden="true"></i> <span class="bstlabel">Bộ sưu tập</span>
+     </a>
+ </li>
  [% IF Koha.Preference( 'OpacTrustedCheckout' ) %]
  <li class="nav-item">
  <a class="nav-link" data-bs-target="#checkoutModal" data-bs-toggle="modal" href="#" id="comenulink" role="button" title="Tự mượn sách">
@@ -149,6 +162,7 @@
                                             data-borrowernumber="[% logged_in_user.borrowernumber | html %]"
                                             data-branchcode="[% logged_in_user.branchcode | html %]"
                                             data-categorycode="[% logged_in_user.categorycode | html %]"
+                                            data-userid="[% logged_in_user.userid || loggedinusername | html %]"
                                             >Tài khoản của bạn</span
                                         ></a
                                     >
@@ -354,6 +368,9 @@
  <ul class="nav" id="moresearches">
  <li class="nav-item">
  <a href="/cgi-bin/koha/opac-search.pl">Tìm kiếm nâng cao</a>
+ </li>
+ <li class="nav-item">
+ <a href="/cgi-bin/koha/opac-collections.pl">Bộ sưu tập</a>
  </li>
  [% IF ( Koha.Preference( 'UseCourseReserves' ) == 1 ) %]
  <li class="nav-item">

@@ -21,11 +21,11 @@
 <title
     >[% FILTER collapse %]
         [% IF( layout_id ) %]
-            [% tx("Edit label layout {layout_id}", { layout_id = layout_id }) | html %]
+            Chỉnh sửa bố cục nhãn [% layout_id | html %]
         [% ELSE %]
-            [% t("New label layout") | html %]
+            Tạo bố cục nhãn mới
         [% END %]
-        &rsaquo; [% t("Label layouts") | html %] &rsaquo; [% t("Label creator") | html %] &rsaquo; [% t("Cataloging") | html %] &rsaquo; [% t("Koha") | html %]
+        &rsaquo; Bố cục nhãn &rsaquo; Tạo nhãn gáy &amp; mã vạch &rsaquo; Biên mục &rsaquo; Koha
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -34,11 +34,11 @@
 [% BLOCK translate_justification_types %]
     [% SWITCH type %]
     [% CASE 'L' %]
-        <span>Left</span>
+        <span>Trái</span>
     [% CASE 'C' %]
-        <span>Center</span>
+        <span>Giữa</span>
     [% CASE 'R' %]
-        <span>Right</span>
+        <span>Phải</span>
     [% END %]
 [% END %]
 <body id="labels_label-edit-layout" class="tools labels">
@@ -49,19 +49,19 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Cataloging</a>
+            <a href="/cgi-bin/koha/cataloguing/cataloging-home.pl">Biên mục</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-home.pl">Label creator</a>
+            <a href="/cgi-bin/koha/labels/label-home.pl">Tạo nhãn gáy &amp; mã vạch</a>
         [% END %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=layout">Label layouts</a>
+            <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=layout">Bố cục nhãn</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             [% IF ( layout_id ) %]
-                <span>Edit label layout [% layout_id | html %]</span>
+                <span>Chỉnh sửa bố cục nhãn [% layout_id | html %]</span>
             [% ELSE %]
-                <span>New label layout</span>
+                <span>Tạo bố cục nhãn mới</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -71,9 +71,9 @@
     [% INCLUDE 'labels-toolbar.inc' %]
 
     [% IF ( layout_id ) %]
-        <h1>Edit label layout [% layout_id | html %]</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-object-group"></i> Chỉnh sửa bố cục nhãn [% layout_id | html %]</h1>
     [% ELSE %]
-        <h1>New label layout</h1>
+        <h1 class="ftu-clean-title"><i class="fa fa-object-group"></i> Tạo bố cục nhãn mới</h1>
     [% END %]
 
     <form name="input" action="/cgi-bin/koha/labels/label-edit-layout.pl" method="post">

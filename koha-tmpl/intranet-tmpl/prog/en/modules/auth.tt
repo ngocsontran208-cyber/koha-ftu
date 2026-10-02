@@ -8,6 +8,7 @@
 [% USE AuthClient %]
 [% USE AdditionalContents %]
 [% PROCESS 'i18n.inc' %]
+[% PROCESS 'ftu-brand-config.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title
@@ -47,7 +48,7 @@
             [% t("Đăng nhập") | html %]
             &rsaquo;
         [% END %]
-        [% t("Thư viện – Phân hiệu Trường Đại học Ngoại thương") | html %]
+        [% t("Quản trị") | html %] | [% FTU_BRAND.library_name | html %]
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -58,14 +59,16 @@
 <div class="main container-fluid">
     [% INCLUDE 'messages.inc' %]
     <div id="login">
-        <!-- FTU Branding Header -->
-        <div id="ftu-header">
-            <img id="ftu-logo-img" src="/intranet-tmpl/prog/img/ftu-logo.png" alt="Logo FTU" />
-            <div id="ftu-name-line1">Thư viện</div>
-            <div id="ftu-name-line2">Phân hiệu Trường Đại học Ngoại thương</div>
-        </div>
-        <div id="ftu-divider"></div>
-        <h1><a href="https://koha-community.org">Koha</a></h1>
+        <!-- Vạch màu đỏ trang trí ở cạnh trên -->
+        <div class="login-top-bar"></div>
+
+        <div class="login-card-inner">
+            <div class="ftu-header-block">
+                <!-- Logo FTU chính thức -->
+                <img src="/intranet-tmpl/prog/img/ftu-logo.png" alt="Logo FTU" class="ftu-real-logo" />
+                <h1 class="ftu-title">THƯ VIỆN</h1>
+                <p class="ftu-subtitle">PHÂN HIỆU TRƯỜNG ĐH NGOẠI THƯƠNG</p>
+            </div>
 
         [% SET StaffLoginInstructions = AdditionalContents.get( location => "StaffLoginInstructions", lang => lang ) %]
 
@@ -164,76 +167,63 @@
                 <p>If you do not have an external account, but do have a local account, you can still log in: </p>
             [% END # /IF  identity_providers.size %]
 
-            <form action="[% script_name | html %]" method="post" name="loginform" id="loginform" class="validated">
-                [% INCLUDE 'csrf-token.inc' %]
-                <input type="hidden" name="login_op" value="cud-login" />
-                <input type="hidden" name="koha_login_context" value="intranet" />
-                [% FOREACH INPUT IN INPUTS %]
-                    [% NEXT IF INPUT.name == "csrf_token" %]
-                    [% NEXT IF INPUT.name == "koha_login_context" %]
-                    [% NEXT IF INPUT.name == "branch" %]
-                    <input type="hidden" name="[% INPUT.name | html %]" value="[% INPUT.value | html %]" />
-                [% END %]
-                <p>
-                    <label for="userid">Username:</label>
-                    <input type="text" name="login_userid" id="userid" class="input focus" value="[% userid | html %]" size="20" tabindex="1" autocomplete="off" />
-                </p>
-                <p>
-                    <label for="password">Password:</label>
-                    <input type="password" name="login_password" id="password" class="input" value="" size="20" tabindex="2" autocomplete="off" />
-                </p>
+        <form action="[% script_name | html %]" method="post" name="loginform" id="loginform" class="validated space-y-6">
+            [% INCLUDE 'csrf-token.inc' %]
+            <input type="hidden" name="login_op" value="cud-login" />
+            <input type="hidden" name="koha_login_context" value="intranet" />
 
-                [% UNLESS IndependentBranches %]
-                    <p>
-                        [% IF Koha.Preference('ForceLibrarySelection') %]
-                            <label for="set-library-branch" class="required">Library:</label>
-                            <select name="branch" id="set-library-branch" class="input" tabindex="3" required="required">
-                                <option value=""></option>
-                                [% FOREACH l IN Branches.all( unfiltered => 1 ip_limit => 1 ) %]
-                                    <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
-                                [% END %]
-                                <span class="required">Required</span>
-                            </select>
-                        [% ELSE %]
-                            <label for="set-library-branch">Library:</label>
-                            <select name="branch" id="set-library-branch" class="input" tabindex="3">
-                                <option value="">My library</option>
-                                [% FOREACH l IN Branches.all( unfiltered => 1 ip_limit => 1 ) %]
-                                    <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
-                                [% END %]
-                            </select>
+
+            [% FOREACH INPUT IN INPUTS %]
+                [% NEXT IF INPUT.name == "csrf_token" %]
+                [% NEXT IF INPUT.name == "koha_login_context" %]
+                [% NEXT IF INPUT.name == "branch" %]
+                <input type="hidden" name="[% INPUT.name | html %]" value="[% INPUT.value | html %]" />
+            [% END %]
+
+            <!-- Ô Tên đăng nhập -->
+            <div class="form-field-group">
+                <label for="userid" class="form-field-label">Tên đăng nhập:</label>
+                <input type="text" id="userid" name="login_userid" required
+                    class="form-field-input"
+                    value="[% userid | html %]" placeholder="Nhập tên đăng nhập" tabindex="1" autocomplete="off" />
+            </div>
+
+            <!-- Ô Mật khẩu -->
+            <div class="form-field-group">
+                <label for="password" class="form-field-label">Mật khẩu:</label>
+                <input type="password" id="password" name="login_password" required
+                    class="form-field-input"
+                    placeholder="Nhập mật khẩu" tabindex="2" autocomplete="off" />
+            </div>
+
+            <!-- Tính năng Hiển thị mật khẩu -->
+            <div class="show-password-row">
+                <input type="checkbox" id="show-password" class="show-password-checkbox" />
+                <label for="show-password" class="show-password-label">
+                    Show password
+                </label>
+            </div>
+
+            [% UNLESS IndependentBranches %]
+                [% IF Koha.Preference('ForceLibrarySelection') %]
+                <div class="form-field-group">
+                    <label for="set-library-branch" class="form-field-label required">Thư viện:</label>
+                    <select name="branch" id="set-library-branch" class="form-field-input" tabindex="3" required="required">
+                        <option value=""></option>
+                        [% FOREACH l IN Branches.all( unfiltered => 1 ip_limit => 1 ) %]
+                            <option value="[% l.branchcode | html %]">[% l.branchname | html %]</option>
                         [% END %]
-
-                        [% IF Koha.Preference('StaffLoginLibraryBasedOnIP') %]
-                            <span class="warning">Note: Your selection may be overridden if your current IP matches a specified IP for a branch in Koha</span>
-                        [% END %]
-                    </p>
-
-                    [% IF Koha.Preference('UseCirculationDesks') && Desks.all %]
-                        <p>
-                            <label for="set-library-desk_id">Desk:</label>
-                            <select name="desk_id" id="set-library-desk_id" class="input" tabindex="3">
-                                <option id="nodesk" value="">---</option>
-                                [% FOREACH d IN Desks.all %]
-                                    <option class="[% d.branchcode | html %]" value="[% d.desk_id | html %]" disabled>[% d.desk_name | html %]</option>
-                                [% END %]
-                            </select>
-                        </p>
-                    [% END %]
-
-                    [% IF Koha.Preference('UseCashRegisters') && Registers.all().size %]
-                        <p>
-                            <label for="set-library-register_id">Cash register:</label>
-                            <select name="register_id" id="set-library-register_id" class="input" tabindex="4">
-                                <option id="noregister" value="" selected="selected">Library default</option>
-                                [% PROCESS options_for_registers registers => Registers.all() %]
-                            </select>
-                        </p>
-                    [% END %]
+                    </select>
+                </div>
                 [% END %]
+            [% END %]
 
-                <p class="submit"><input id="submit-button" type="submit" class="btn btn-primary" value="Log in" tabindex="4" /></p>
-            </form>
+            <div class="submit-btn-row">
+                <button type="submit" id="submit-button" class="btn-submit-ftu" tabindex="4">
+                    Đăng Nhập
+                </button>
+            </div>
+        </form>
 
             [% IF ( casAuthentication ) %]
                 <h4>CAS login</h4>
@@ -291,9 +281,11 @@
             <p><a id="previous_page" href="javascript:window.history.back()">[Previous page]</a> <a id="mainpage" href="/">[Main page]</a></p>
         [% END %]
         <!-- FTU Footer inside panel -->
-        <div id="ftu-footer">
-            <p>Hệ thống Quản lý Thư viện &bull; <a href="https://www.ftu.edu.vn" target="_blank">ftu.edu.vn</a></p>
+        <div class="ftu-login-footer">
+            <p>Hệ thống Quản lý Thư viện &bull; <a href="http://ftu.edu.vn" target="_blank">ftu.edu.vn</a></p>
         </div>
+    </div>
+    <!-- /.login-card-inner -->
     </div>
     <!-- /.login -->
 </div>
@@ -303,6 +295,9 @@
     [% Asset.js("js/show-password-toggle.js") | $raw %]
     <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready( function() {
+            $('#show-password').on('change', function() {
+                $('#password').attr('type', this.checked ? 'text' : 'password');
+            });
             if ( document.location.hash ) {
                 const input = $('<input name="auth_forwarded_hash" type="hidden">')
                 input.val(document.location.hash);

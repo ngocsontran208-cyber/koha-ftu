@@ -111,7 +111,16 @@
                         <div class="alert alert-info">
                             <strong>Password updated</strong>
                             <br />
-                            Your password has been changed
+                            Your password has been changed.
+                            [% IF ( sso_updated ) %]
+                            <div style="margin-top: 8px; color: #166534; font-weight: 500;">
+                                <i class="fa fa-check-circle" style="color: #16a34a;"></i> Password has been synchronized to the Central Authentication System (SSO / DSpace).
+                            </div>
+                            [% ELSIF ( sso_error ) %]
+                            <div style="margin-top: 8px; color: #9a3412;">
+                                <i class="fa fa-exclamation-triangle" style="color: #ea580c;"></i> Note: Could not sync to SSO server ([% sso_error | html %]). Please contact library staff if you need to login to external systems.
+                            </div>
+                            [% END %]
                         </div>
                         <a class="btn btn-primary" href="/cgi-bin/koha/opac-user.pl">Return to my account</a>
                     [% END # /IF password_updated %]
