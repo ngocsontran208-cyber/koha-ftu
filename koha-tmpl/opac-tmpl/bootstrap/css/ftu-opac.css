@@ -2753,5 +2753,12 @@ img.itemtype-image,
   padding-left: 34px !important;
 }
 
+/* Ẩn khối form đăng nhập sidebar mặc định của Koha ở trang chủ OPAC vì đã có nút đăng nhập Modal Popup trên thanh Header */
+#opac-main #notloggedin #login,
+#opac-main .col-12.col-lg-3 #login,
+#opac-main .order-md-2 #login {
+  display: none !important;
+}
+
 
 
