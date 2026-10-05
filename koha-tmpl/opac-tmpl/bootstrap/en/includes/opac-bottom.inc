@@ -82,8 +82,8 @@
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                 </path>
                             </svg>
-                            <a href="mailto:hoclieuso.hcmc@ftu.edu.vn"
-                                style="color: #4B5563; font-weight: 500; text-decoration: none;">hoclieuso.hcmc@ftu.edu.vn</a>
+                            <a href="mailto:tv.hcmc@ftu.edu.vn"
+                                style="color: #4B5563; font-weight: 500; text-decoration: none;">tv.hcmc@ftu.edu.vn</a>
                         </div>
                     </div>
                 </div>
