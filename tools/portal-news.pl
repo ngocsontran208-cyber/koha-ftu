@@ -329,8 +329,8 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         campus_hn_addr         => $cgi->param("campus_hn_addr") || "91 Phố Chùa Láng, P. Láng Thượng, Q. Đống Đa, TP. Hà Nội",
         campus_hn_phone        => $cgi->param("campus_hn_phone") || "(024) 3835 6800 (Ext: 532, 535)",
 
-        campus_hcm_title       => $cgi->param("campus_hcm_title") || "Cơ sở II – TP. Hồ Chí Minh",
-        campus_hcm_addr        => $cgi->param("campus_hcm_addr") || "Số 15 Đường D5, Phường 25, Q. Bình Thạnh, TP. Hồ Chí Minh",
+        campus_hcm_title       => $cgi->param("campus_hcm_title") || "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
+        campus_hcm_addr        => $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
         campus_hcm_phone       => $cgi->param("campus_hcm_phone") || "(028) 3512 7254 - 3512 7258",
 
         campus_qn_title        => $cgi->param("campus_qn_title") || "Cơ sở Quảng Ninh",

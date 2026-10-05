@@ -59,27 +59,24 @@
     hours_saturday         => "08:00 – 17:00 (Thứ 7)",
     hours_sunday           => "Nghỉ (Chủ nhật & Ngày Lễ)",
 
-    # ── 6. ĐỊA CHỈ & LIÊN HỆ CÁC CƠ SỞ ĐÀO TẠO FTU ──────────────────────────
-    # Trụ sở chính (Hà Nội)
-    campus_hn_title        => "Trụ sở chính Hà Nội",
-    campus_hn_title_en     => "Hanoi Main Campus",
-    campus_hn_addr         => "91 Phố Chùa Láng, P. Láng Thượng, Q. Đống Đa, TP. Hà Nội",
-    campus_hn_addr_en      => "91 Chua Lang St., Lang Thuong, Dong Da Dist., Hanoi",
-    campus_hn_phone        => "(024) 3835 6800 (Ext: 532, 535)",
-
-    # Cơ sở II (TP. Hồ Chí Minh)
-    campus_hcm_title       => "Phân hiệu tại TP. Hồ Chí Minh",
-    campus_hcm_title_en    => "Campus II – Ho Chi Minh City",
-    campus_hcm_addr        => "Số 15 Đường D5, Phường 25, Q. Bình Thạnh, TP. Hồ Chí Minh",
-    campus_hcm_addr_en     => "No. 15 D5 St., Ward 25, Binh Thanh Dist., Ho Chi Minh City",
+    # ── 6. ĐỊA CHỈ & LIÊN HỆ THƯ VIỆN PHÂN HIỆU FTU ──────────────────────────
+    campus_hcm_title       => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    campus_hcm_title_en    => "Library of Foreign Trade University – HCMC Campus",
+    campus_hcm_addr        => "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
+    campus_hcm_addr_en     => "No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City",
     campus_hcm_phone       => "(028) 3512 7254 - 3512 7258",
 
-    # Cơ sở Quảng Ninh
-    campus_qn_title        => "Cơ sở Quảng Ninh",
-    campus_qn_title_en     => "Quang Ninh Campus",
-    campus_qn_addr         => "Số 260 Bạch Đằng, P. Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh",
-    campus_qn_addr_en      => "No. 260 Bach Dang, Nam Khe, Uong Bi City, Quang Ninh",
-    campus_qn_phone        => "(0203) 3850 411",
+    campus_hn_title        => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    campus_hn_title_en     => "Library of Foreign Trade University – HCMC Campus",
+    campus_hn_addr         => "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
+    campus_hn_addr_en      => "No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City",
+    campus_hn_phone        => "(028) 3512 7254 - 3512 7258",
+
+    campus_qn_title        => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    campus_qn_title_en     => "Library of Foreign Trade University – HCMC Campus",
+    campus_qn_addr         => "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
+    campus_qn_addr_en      => "No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City",
+    campus_qn_phone        => "(028) 3512 7254 - 3512 7258",
 
     # ── 7. ĐƯỜNG DẪN CỔNG THÔNG TIN & HỆ THỐNG LIÊN THÔNG ───────────────────
     link_portal            => "http://ftu.edu.vn",
