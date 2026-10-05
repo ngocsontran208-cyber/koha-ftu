@@ -1824,17 +1824,17 @@ td.covercol .hint,
 }
 
 /* ==========================================================================
-   Master Library Footer (DSpace Elegant White Edition)
+   Master Library Footer (Modern Academic Edition)
    ========================================================================== */
 .ftu-footer-master {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  background: #ffffff !important;
-  color: #4b5563 !important;
-  font-family: var(--ftu-font, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
-  border-top: 1px solid #e2e8f0 !important;
-  box-shadow: none !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-family: var(--ftu-font, 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif) !important;
+  border-top: 3px solid #b91c1c !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03) !important;
   position: relative !important;
   overflow: visible !important;
   z-index: 10 !important;
@@ -1842,7 +1842,7 @@ td.covercol .hint,
   clear: both !important;
   margin-top: 4rem !important;
   padding-top: 3.5rem !important;
-  padding-bottom: 1.5rem !important;
+  padding-bottom: 2rem !important;
   flex-shrink: 0 !important;
   min-height: auto !important;
 }
@@ -1859,15 +1859,17 @@ td.covercol .hint,
 }
 
 .ftu-footer-master a {
-  color: #6b7280 !important;
+  color: #64748b !important;
   font-weight: 500 !important;
   text-decoration: none !important;
-  transition: color 0.15s ease-in-out !important;
+  transition: all 0.2s ease !important;
+  display: inline-block;
 }
 
 .ftu-footer-master a:hover {
-  color: #a31a24 !important;
+  color: #b91c1c !important;
   text-decoration: none !important;
+  transform: translateX(3px);
 }
 
 .ftu-footer-master .row {
@@ -1880,11 +1882,11 @@ td.covercol .hint,
 .ftu-footer-master h4 {
   font-family: inherit !important;
   font-weight: 700 !important;
-  color: #111827 !important;
+  color: #0f172a !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
-  font-size: 0.75rem !important;
-  margin-bottom: 1rem !important;
+  font-size: 0.8rem !important;
+  margin-bottom: 1.25rem !important;
 }
 
 .ftu-footer-master ul {
@@ -1894,11 +1896,11 @@ td.covercol .hint,
 }
 
 .ftu-footer-master li {
-  margin-bottom: 0.5rem !important;
+  margin-bottom: 0.65rem !important;
 }
 
 .ftu-footer-master p {
-  line-height: 1.5 !important;
+  line-height: 1.6 !important;
   margin-bottom: 0 !important;
 }
 
