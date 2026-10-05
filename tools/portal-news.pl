@@ -320,7 +320,7 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         hotline_hcmc           => $cgi->param("hotline_hcmc") || "(028) 3512 7254",
         hotline_hcmc_sub       => $cgi->param("hotline_hcmc_sub") || "(028) 3512 7258",
         hotline_quangninh      => $cgi->param("hotline_quangninh") || "(0203) 3850 411",
-        email_contact          => $cgi->param("email_contact") || 'thuvien@ftu.edu.vn',
+        email_contact          => $cgi->param("email_contact") || 'tv.hcmc@ftu.edu.vn',
         hours_status           => $cgi->param("hours_status") || "Đang mở cửa",
         hours_summary          => $cgi->param("hours_summary") || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 17:00",
 

@@ -22,7 +22,7 @@
     university_name_en     => "Foreign Trade University",
     university_short       => "FTU",
     campus_current         => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_current_short   => "Cơ sở II – TP. Hồ Chí Minh",
+    campus_current_short   => "Phân hiệu tại TP. Hồ Chí Minh",
     campus_current_en      => "Foreign Trade University - Ho Chi Minh City Branch",
 
     # ── 2. TÊN THƯ VIỆN & KHẨU HIỆU ─────────────────────────────────────────
@@ -42,8 +42,8 @@
     favicon_ico            => "/opac-tmpl/bootstrap/images/favicon.ico?v=ftu",
 
     # ── 4. EMAIL & HOTLINE HỖ TRỢ BẠN ĐỌC ──────────────────────────────────
-    email_contact          => "thuvien@ftu.edu.vn",
-    email_cs2              => "thuvien.cs2@ftu.edu.vn",
+    email_contact          => "tv.hcmc@ftu.edu.vn",
+    email_cs2              => "tv.hcmc@ftu.edu.vn",
     hotline_hanoi          => "(024) 3835 6800",
     hotline_hanoi_ext      => "Máy lẻ: 532 / 535",
     hotline_hcmc           => "(028) 3512 7254",
@@ -122,7 +122,7 @@
     [% FTU_BRAND.library_name         = FTU_BRAND.library_name_en || FTU_BRAND.library_name %]
     [% FTU_BRAND.library_name_short   = "FTU Library" %]
     [% FTU_BRAND.campus_current       = FTU_BRAND.campus_current_en || FTU_BRAND.campus_current %]
-    [% FTU_BRAND.campus_current_short = "Campus II – HCMC" %]
+    [% FTU_BRAND.campus_current_short = "Ho Chi Minh City Branch" %]
     [% FTU_BRAND.logo_alt             = "FTU Library Logo - Foreign Trade University" %]
     [% FTU_BRAND.hours_status         = FTU_BRAND.hours_status_en || FTU_BRAND.hours_status %]
     [% FTU_BRAND.hours_summary        = FTU_BRAND.hours_summary_en || FTU_BRAND.hours_summary %]
