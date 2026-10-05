@@ -177,6 +177,33 @@
                 font-size: 1.1rem;
             }
             .ftu-loading-books i { margin-right: 8px; color: var(--ftu-red); }
+
+            /* Khi không có sự kiện: Cột tin tức mở rộng 100% và danh sách tin chia thành 2 cột (mỗi cột 2 tin) */
+            .ftu-news-grid.no-events {
+                grid-template-columns: 1fr;
+            }
+            .ftu-news-grid.no-events .ftu-news-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.25rem;
+            }
+            .ftu-news-grid.no-events .ftu-news-item {
+                height: 100%;
+                margin: 0;
+            }
+            .ftu-news-grid.no-events .ftu-news-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .ftu-news-grid.no-events .ftu-news-content > div:last-child {
+                margin-top: auto;
+            }
+            @media (max-width: 900px) {
+                .ftu-news-grid.no-events .ftu-news-list {
+                    grid-template-columns: 1fr;
+                }
+            }
         </style>
 
         <div class="ftu-books-scroller-wrap">
@@ -530,42 +557,87 @@ $(document).ready(function() {
         });
     }
 
+        // Trạng thái tải dữ liệu Tin tức & Sự kiện
+        var newsLoaded = false;
+        var eventsLoaded = false;
+        var hasNews = false;
+        var hasEvents = false;
+
+        function checkNewsEventsDisplay() {
+            if (!newsLoaded || !eventsLoaded) return;
+
+            var $newsGrid = $('.ftu-news-grid');
+            var $newsList = $('#ftu-dynamic-news-list');
+            var $eventContainer = $('#ftu-dynamic-events-container');
+            var $newsCol = $newsList.closest('.ftu-news-grid > div');
+            var $eventCol = $eventContainer.closest('.ftu-news-grid > div');
+
+            if (!hasNews && !hasEvents) {
+                $('#news-section').hide();
+                return;
+            }
+
+            $('#news-section').show();
+
+            if (!hasEvents) {
+                // KHÔNG CÓ SỰ KIỆN: Ẩn cột sự kiện, mở rộng cột tin tức và chia thành 2 cột (mỗi cột 2 tin)
+                $eventCol.hide();
+                $newsCol.show();
+                $newsGrid.addClass('no-events');
+            } else if (!hasNews) {
+                // KHÔNG CÓ TIN TỨC: Ẩn cột tin tức, hiển thị sự kiện
+                $newsCol.hide();
+                $eventCol.show();
+                $newsGrid.removeClass('no-events');
+            } else {
+                // CÓ CẢ TIN TỨC VÀ SỰ KIỆN: Hiển thị 2 cột như ban đầu
+                $newsCol.show();
+                $eventCol.show();
+                $newsGrid.removeClass('no-events');
+            }
+        }
+
         // Load News from Portal CMS
         $.ajax({
             url: '/cgi-bin/koha/portal-posts.pl?type=news&limit=4&_t=' + Date.now(),
             method: 'GET',
             dataType: 'json',
             success: function(newsItems) {
+                newsLoaded = true;
                 var $newsList = $('#ftu-dynamic-news-list');
                 if (!newsItems || newsItems.length === 0) {
-                    $newsList.closest('.ftu-news-grid > div').hide();
-                    if ($('#ftu-dynamic-events-container').find('.ftu-event-card').length === 0 && !$('#ftu-dynamic-events-container').data('has-events')) {
-                        $('#news-section').hide();
-                    }
-                    return;
-                }
-                $('#news-section').show();
-                var newsHtml = '';
-                newsItems.forEach(function(item) {
-                    var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + item.id;
-                    newsHtml += `
-                        <a href="${link}" class="ftu-news-item">
-                            <div class="ftu-news-date">
-                                <span class="day">${item.created_day || '01'}</span>
-                                <span class="month">${item.created_month || 'Thg 9'}</span>
-                            </div>
-                            <div class="ftu-news-content">
-                                <h4>${item.title}</h4>
-                                <p>${item.excerpt || ''}</p>
-                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 6px; display: flex; align-items: center; gap: 12px;">
-                                    <span><i class="fa fa-eye" style="color: #0284c7;"></i> ${item.views_count || 0} lượt xem</span>
-                                    <span><i class="fa fa-user-edit" style="color: #64748b;"></i> ${item.author_name || 'Thư viện FTU'}</span>
+                    hasNews = false;
+                    $newsList.empty();
+                } else {
+                    hasNews = true;
+                    var newsHtml = '';
+                    newsItems.forEach(function(item) {
+                        var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + item.id;
+                        newsHtml += `
+                            <a href="${link}" class="ftu-news-item">
+                                <div class="ftu-news-date">
+                                    <span class="day">${item.created_day || '01'}</span>
+                                    <span class="month">${item.created_month || 'Thg 9'}</span>
                                 </div>
-                            </div>
-                        </a>
-                    `;
-                });
-                $newsList.html(newsHtml);
+                                <div class="ftu-news-content">
+                                    <h4>${item.title}</h4>
+                                    <p>${item.excerpt || ''}</p>
+                                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 6px; display: flex; align-items: center; gap: 12px;">
+                                        <span><i class="fa fa-eye" style="color: #0284c7;"></i> ${item.views_count || 0} lượt xem</span>
+                                        <span><i class="fa fa-user-edit" style="color: #64748b;"></i> ${item.author_name || 'Thư viện FTU'}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    $newsList.html(newsHtml);
+                }
+                checkNewsEventsDisplay();
+            },
+            error: function() {
+                newsLoaded = true;
+                hasNews = false;
+                checkNewsEventsDisplay();
             }
         });
 
@@ -575,35 +647,38 @@ $(document).ready(function() {
             method: 'GET',
             dataType: 'json',
             success: function(events) {
+                eventsLoaded = true;
                 var $eventContainer = $('#ftu-dynamic-events-container');
                 if (!events || events.length === 0) {
-                    $eventContainer.closest('.ftu-news-grid > div').hide();
-                    $eventContainer.data('has-events', false);
-                    if ($('#ftu-dynamic-news-list').find('.ftu-news-item').length === 0) {
-                        $('#news-section').hide();
-                    }
-                    return;
+                    hasEvents = false;
+                    $eventContainer.empty();
+                } else {
+                    hasEvents = true;
+                    var evt = events[0];
+                    var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + evt.id;
+                    var eventHtml = `
+                        <a href="${link}" class="ftu-event-card" style="display: block; text-decoration: none;">
+                            <div class="ftu-event-img">
+                                <img src="${evt.featured_image || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=600'}" alt="${evt.title}">
+                                <div class="ftu-event-tag">${evt.event_tag || 'Sắp diễn ra'}</div>
+                            </div>
+                            <div class="ftu-event-details">
+                                <h3>${evt.title}</h3>
+                                <p><i class="fa fa-calendar-alt"></i> ${evt.formatted_event_date || ''} • ${evt.event_time || ''}</p>
+                                <p><i class="fa fa-map-marker-alt"></i> ${evt.event_location || '[% FTU_BRAND.library_name_short %]'}</p>
+                                <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;"><i class="fa fa-eye" style="color: #0284c7;"></i> ${evt.views_count || 0} lượt xem</p>
+                                ${evt.event_reg_link ? `<div style="margin-top: 1rem;"><span class="btn btn-sm btn-outline-danger" style="border-radius: 20px; font-weight: 600;"><i class="fa fa-user-plus"></i> Đăng ký tham gia</span></div>` : ''}
+                            </div>
+                        </a>
+                    `;
+                    $eventContainer.html(eventHtml);
                 }
-                $eventContainer.data('has-events', true);
-                $('#news-section').show();
-                var evt = events[0];
-                var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + evt.id;
-                var eventHtml = `
-                    <a href="${link}" class="ftu-event-card" style="display: block; text-decoration: none;">
-                        <div class="ftu-event-img">
-                            <img src="${evt.featured_image || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=600'}" alt="${evt.title}">
-                            <div class="ftu-event-tag">${evt.event_tag || 'Sắp diễn ra'}</div>
-                        </div>
-                        <div class="ftu-event-details">
-                            <h3>${evt.title}</h3>
-                            <p><i class="fa fa-calendar-alt"></i> ${evt.formatted_event_date || ''} • ${evt.event_time || ''}</p>
-                            <p><i class="fa fa-map-marker-alt"></i> ${evt.event_location || '[% FTU_BRAND.library_name_short %]'}</p>
-                            <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;"><i class="fa fa-eye" style="color: #0284c7;"></i> ${evt.views_count || 0} lượt xem</p>
-                            ${evt.event_reg_link ? `<div style="margin-top: 1rem;"><span class="btn btn-sm btn-outline-danger" style="border-radius: 20px; font-weight: 600;"><i class="fa fa-user-plus"></i> Đăng ký tham gia</span></div>` : ''}
-                        </div>
-                    </a>
-                `;
-                $eventContainer.html(eventHtml);
+                checkNewsEventsDisplay();
+            },
+            error: function() {
+                eventsLoaded = true;
+                hasEvents = false;
+                checkNewsEventsDisplay();
             }
         });
         // Load & Initialize Hero Banners Carousel (Auto-Slider)

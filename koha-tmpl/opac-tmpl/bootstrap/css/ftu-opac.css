@@ -1399,8 +1399,35 @@ h2.ftu-banner-title,
   gap: 2.5rem;
 }
 
+/* Khi không có sự kiện: Cột tin tức mở rộng 100% và danh sách tin chia thành 2 cột (mỗi cột 2 tin) */
+.ftu-news-grid.no-events {
+  grid-template-columns: 1fr;
+}
+
+.ftu-news-grid.no-events .ftu-news-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.ftu-news-grid.no-events .ftu-news-item {
+  height: 100%;
+  margin: 0;
+}
+
+.ftu-news-grid.no-events .ftu-news-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ftu-news-grid.no-events .ftu-news-content > div:last-child {
+  margin-top: auto;
+}
+
 @media (max-width: 900px) {
   .ftu-news-grid { grid-template-columns: 1fr; }
+  .ftu-news-grid.no-events .ftu-news-list { grid-template-columns: 1fr; }
 }
 
 .ftu-news-list {
