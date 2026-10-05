@@ -80,7 +80,7 @@
 
     # ── 7. ĐƯỜNG DẪN CỔNG THÔNG TIN & HỆ THỐNG LIÊN THÔNG ───────────────────
     link_portal            => "http://ftu.edu.vn",
-    link_portal_cs2        => "http://cs2.ftu.edu.vn",
+    link_portal_cs2        => "https://hcmc.ftu.edu.vn/",
     link_dspace            => Koha.Preference('FTU_DSpaceBaseURL') || "http://localhost:4000",
     link_sso               => Koha.Preference('FTU_SSOBaseURL') || "http://localhost:8090",
     link_drm               => Koha.Preference('FTU_DRMBaseURL') || "http://localhost:8095",
