@@ -1932,7 +1932,8 @@
                                 </div>
                                 <div class="form-group" style="margin-bottom: 1rem;">
                                     <label style="font-weight: 600;">Tác giả / Ban biên tập:</label>
-                                    <input type="text" name="author_name" id="post-author" class="form-control" value="[% post.author_name | html %]" />
+                                    <input type="text" name="author_name" id="post-author" class="form-control" value="[% post.author_name || 'Thư viện Phân hiệu' | html %]" placeholder="VD: Thư viện Phân hiệu, Ban Thư viện..." />
+                                    <small class="text-muted">Tên tác giả hiển thị ngoài trang chủ (mặc định: Thư viện Phân hiệu).</small>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 1rem;">
                                     <label style="font-weight: 600;">Lượt xem bài viết:</label>
@@ -3273,7 +3274,7 @@ function insertDownloadBox() {
 
 function openLivePreviewModal() {
     var title = $('#post-title').val().trim() || "Tiêu đề bài viết";
-    var author = $('#post-author').val().trim() || "Thư viện ĐH Ngoại thương";
+    var author = $('#post-author').val().trim() || "Thư viện Phân hiệu";
     var thumb = $('#featured-image-input').val().trim();
     var postType = $('input[name="post_type"]:checked').val() || "news";
     

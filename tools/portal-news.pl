@@ -250,7 +250,7 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
     }
 
     my $featured_image      = $cgi->param("featured_image") || "";
-    my $author_name         = $cgi->param("author_name") || "Thư viện ĐH Ngoại thương";
+    my $author_name         = $cgi->param("author_name") || "Thư viện Phân hiệu";
     my $status              = $cgi->param("status") || "published";
     
     my $event_start  = $cgi->param("event_start");
@@ -420,7 +420,7 @@ if ($op eq "add_form") {
         $post->{status} = "published";
         if ($default_type eq "database" || $section eq "database") {
             $post->{post_type} = "database";
-            $post->{author_name} = "Thư viện ĐH Ngoại thương";
+            $post->{author_name} = "Thư viện Phân hiệu";
             $post->{event_tag} = "Nội bộ & Từ xa";
             $post->{classification} = "CSDL THƯƠNG MẠI";
             $post->{access_instructions} = "• Xác thực IP mạng trường hoặc đăng nhập tài khoản thư viện cấp";
@@ -429,7 +429,7 @@ if ($op eq "add_form") {
             $section = "database";
         } elsif ($default_type eq "banner" || $section eq "banner") {
             $post->{post_type} = "banner";
-            $post->{author_name} = "Thư viện ĐH Ngoại thương";
+            $post->{author_name} = "Thư viện Phân hiệu";
             $post->{event_tag} = "THƯ VIỆN FTU";
             $post->{classification} = "THƯ VIỆN FTU";
             my ($max_ord) = $dbh->selectrow_array("SELECT MAX(sort_order) FROM koha_portal_posts WHERE post_type = 'banner'");
@@ -437,7 +437,7 @@ if ($op eq "add_form") {
             $section = "banner";
         } else {
             $post->{post_type} = $default_type || "news";
-            $post->{author_name} = "Thư viện ĐH Ngoại thương";
+            $post->{author_name} = "Thư viện Phân hiệu";
             $post->{event_tag} = "Sắp diễn ra";
             $section = "news";
         }
