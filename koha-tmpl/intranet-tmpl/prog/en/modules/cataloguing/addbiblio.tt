@@ -937,6 +937,23 @@ body#cat_addbiblio h1:not(.ftu-clean-title) {
                     $(this).attr("title", ftu_marc_dict[title]);
                 }
             });
+
+            // Tự động điền mã cơ quan chuyển biên (040$c, 040$a) và ngôn ngữ (040$b)
+            $("input[id*='tag_040_subfield_c_']").each(function() {
+                if (!$(this).val() || $(this).val().trim() === "") {
+                    $(this).val("VnFTU-HCMC");
+                }
+            });
+            $("input[id*='tag_040_subfield_a_']").each(function() {
+                if (!$(this).val() || $(this).val().trim() === "") {
+                    $(this).val("VnFTU-HCMC");
+                }
+            });
+            $("input[id*='tag_040_subfield_b_']").each(function() {
+                if (!$(this).val() || $(this).val().trim() === "") {
+                    $(this).val("vie");
+                }
+            });
         }
         ftuTranslateMARC();
 
