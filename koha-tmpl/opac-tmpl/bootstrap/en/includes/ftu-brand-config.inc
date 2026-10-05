@@ -23,14 +23,14 @@
     university_short       => "FTU",
     campus_current         => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
     campus_current_short   => "Cơ sở II – TP. Hồ Chí Minh",
-    campus_current_en      => "Foreign Trade University – HCMC Campus",
+    campus_current_en      => "Foreign Trade University - Ho Chi Minh City Branch",
 
     # ── 2. TÊN THƯ VIỆN & KHẨU HIỆU ─────────────────────────────────────────
     library_name           => "Thư viện Phân hiệu Trường Đại học Ngoại thương",
     library_name_short     => "Thư viện FTU",
     library_name_full      => "Thư viện Trường Đại học Ngoại thương",
     library_name_en        => "Foreign Trade University Library",
-    library_sub_title      => "Foreign Trade University Library – HCMC Campus",
+    library_sub_title      => "Foreign Trade University Library - Ho Chi Minh City Branch",
     library_slogan         => "Không gian học tập & nghiên cứu hiện đại, kết nối cộng đồng giảng viên và sinh viên với kho tri thức toàn diện",
     library_description    => "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
     library_description_en => "A modern center for information and knowledge, connecting FTU faculty, researchers, and students with high-impact digital databases, comprehensive print collections, and world-class academic support.",
@@ -61,19 +61,19 @@
 
     # ── 6. ĐỊA CHỈ & LIÊN HỆ THƯ VIỆN PHÂN HIỆU FTU ──────────────────────────
     campus_hcm_title       => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hcm_title_en    => "Library of Foreign Trade University – HCMC Campus",
+    campus_hcm_title_en    => "Foreign Trade University - Ho Chi Minh City Branch",
     campus_hcm_addr        => "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
     campus_hcm_addr_en     => "No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City",
     campus_hcm_phone       => "(028) 3512 7254 - 3512 7258",
 
     campus_hn_title        => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hn_title_en     => "Library of Foreign Trade University – HCMC Campus",
+    campus_hn_title_en     => "Foreign Trade University - Ho Chi Minh City Branch",
     campus_hn_addr         => "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
     campus_hn_addr_en      => "No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City",
     campus_hn_phone        => "(028) 3512 7254 - 3512 7258",
 
     campus_qn_title        => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_qn_title_en     => "Library of Foreign Trade University – HCMC Campus",
+    campus_qn_title_en     => "Foreign Trade University - Ho Chi Minh City Branch",
     campus_qn_addr         => "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
     campus_qn_addr_en      => "No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City",
     campus_qn_phone        => "(028) 3512 7254 - 3512 7258",
