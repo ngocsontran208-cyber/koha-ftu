@@ -795,7 +795,12 @@ sub getlanguage {
         $language  = Koha::Language->get_requested_language();
     }
 
-    # HTTP_ACCEPT_LANGUAGE
+    # FTU Library: ensure vi-VN is default unless user explicitly chose otherwise (URL or Cookie)
+    if ( !$language && any { $_ eq 'vi-VN' } @languages ) {
+        $language = 'vi-VN';
+    }
+
+    # HTTP_ACCEPT_LANGUAGE (fallback only if still undef)
     if ( !$language && $ENV{HTTP_ACCEPT_LANGUAGE} ) {
         $language = accept_language(
             $ENV{HTTP_ACCEPT_LANGUAGE},

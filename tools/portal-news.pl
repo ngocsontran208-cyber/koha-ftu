@@ -77,6 +77,94 @@ if (($op eq "upload_image" || $op eq "cud-upload_image")) {
     exit;
 }
 
+if (($op eq "upload_pdf" || $op eq "cud-upload_pdf" || $op eq "upload_file" || $op eq "cud-upload_file")) {
+    use JSON;
+    use MIME::Base64;
+    my $json = JSON->new->utf8;
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+
+    my $target_dir = "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/images/portal_uploads";
+    mkdir $target_dir unless -d $target_dir;
+
+    my $upload_fh = $cgi->upload("pdf_file") || $cgi->upload("file");
+    if ($upload_fh) {
+        my $orig_name = $cgi->param("file_name") || $cgi->param("pdf_file") || $cgi->param("file") || "tailieu.pdf";
+        $orig_name =~ s/.*[\/\\]//; # strip path
+        my ($base_name) = $orig_name =~ /^(.*?)(?:\.[^.]+)?$/;
+        $base_name ||= "Tài liệu PDF";
+
+        my $safe_name = "doc_" . time() . "_" . int(rand(100000)) . ".pdf";
+        my $target_path = "$target_dir/$safe_name";
+
+        if (open(my $out, '>', $target_path)) {
+            binmode $out;
+            binmode $upload_fh;
+            my $buffer;
+            my $total_bytes = 0;
+            while (my $bytes = read($upload_fh, $buffer, 8192)) {
+                print $out $buffer;
+                $total_bytes += $bytes;
+            }
+            close $out;
+
+            my $size_str = sprintf("%.1f MB", $total_bytes / (1024 * 1024));
+            if ($total_bytes < 1024 * 1024) {
+                $size_str = sprintf("%.0f KB", $total_bytes / 1024);
+            }
+
+            print $json->encode({
+                success       => 1,
+                url           => "/opac-tmpl/bootstrap/images/portal_uploads/$safe_name",
+                filename      => $safe_name,
+                original_name => $orig_name,
+                title         => $base_name,
+                size_str      => $size_str,
+                bytes         => $total_bytes
+            });
+            exit;
+        }
+    }
+
+    my $base64_data = $cgi->param("base64_data") || "";
+    if ($base64_data =~ /data:(?:application\/pdf|application\/octet-stream);base64,(.+)$/s || ($base64_data && $base64_data !~ /[^A-Za-z0-9+\/=\s]/)) {
+        my $raw_b64 = $1 || $base64_data;
+        $raw_b64 =~ s/\s/+/g;
+        my $orig_name = $cgi->param("file_name") || "tailieu.pdf";
+        $orig_name =~ s/.*[\/\\]//;
+        my ($base_name) = $orig_name =~ /^(.*?)(?:\.[^.]+)?$/;
+        $base_name ||= "Tài liệu PDF";
+
+        my $safe_name = "doc_" . time() . "_" . int(rand(100000)) . ".pdf";
+        my $target_path = "$target_dir/$safe_name";
+        my $decoded = MIME::Base64::decode_base64($raw_b64);
+        if ($decoded && open(my $out, '>', $target_path)) {
+            binmode $out;
+            print $out $decoded;
+            close $out;
+
+            my $total_bytes = length($decoded);
+            my $size_str = sprintf("%.1f MB", $total_bytes / (1024 * 1024));
+            if ($total_bytes < 1024 * 1024) {
+                $size_str = sprintf("%.0f KB", $total_bytes / 1024);
+            }
+
+            print $json->encode({
+                success       => 1,
+                url           => "/opac-tmpl/bootstrap/images/portal_uploads/$safe_name",
+                filename      => $safe_name,
+                original_name => $orig_name,
+                title         => $base_name,
+                size_str      => $size_str,
+                bytes         => $total_bytes
+            });
+            exit;
+        }
+    }
+
+    print $json->encode({ success => 0, error => "Không thể tải lên file PDF. Vui lòng thử lại." });
+    exit;
+}
+
 if ($op eq "get_db" || $op eq "get_banner") {
     use JSON;
     my $id = int($cgi->param("id") || 0);

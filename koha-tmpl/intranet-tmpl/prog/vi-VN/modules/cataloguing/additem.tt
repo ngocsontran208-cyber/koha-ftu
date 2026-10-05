@@ -42,6 +42,273 @@
     .flatpickr_wrapper {
         flex-basis: 60%;
     }
+
+    /* FTU Smart Item Manager Styles */
+    .ftu-smart-card {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .ftu-smart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    .ftu-smart-title {
+        font-size: 1.12rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+    }
+    .ftu-smart-subtitle {
+        font-size: 0.84rem;
+        color: #64748b;
+        margin-top: 3px;
+    }
+    .ftu-mode-tabs {
+        display: inline-flex;
+        background: #f1f5f9;
+        border-radius: 6px;
+        padding: 3px;
+        border: 1px solid #e2e8f0;
+    }
+    .ftu-mode-btn {
+        border: none;
+        background: transparent;
+        padding: 6px 14px;
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: #64748b;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    .ftu-mode-btn.active {
+        background: #ffffff;
+        color: #0f172a;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+    .ftu-smart-section {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 16px 18px;
+        margin-bottom: 20px;
+    }
+    .ftu-batch-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    @media (max-width: 768px) {
+        .ftu-batch-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .ftu-form-group {
+        margin-bottom: 14px;
+    }
+    .ftu-label {
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+    .ftu-qty-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .ftu-qty-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #1e293b;
+        border-radius: 4px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        line-height: 1;
+        transition: all 0.15s ease;
+    }
+    .ftu-qty-btn:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+    .ftu-qty-btn:active {
+        background: #e2e8f0;
+        transform: translateY(1px);
+    }
+    .ftu-qty-input {
+        width: 70px !important;
+        height: 36px;
+        text-align: center;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+    }
+    .ftu-quick-pills {
+        display: flex;
+        gap: 5px;
+        margin-left: 6px;
+        flex-wrap: wrap;
+    }
+    .ftu-pill {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 3px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        display: inline-block;
+        transition: all 0.15s ease;
+    }
+    .ftu-pill:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+    .ftu-pill:active {
+        transform: translateY(1px);
+    }
+    .ftu-pill.active {
+        background: #0284c7;
+        border-color: #0284c7;
+        color: #ffffff;
+        font-weight: 700;
+    }
+    .ftu-hint {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
+    .ftu-preview-container {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid #e2e8f0;
+    }
+    .ftu-preview-header {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+    .ftu-chips-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        max-height: 110px;
+        overflow-y: auto;
+        padding: 8px 10px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+    }
+    .ftu-barcode-chip {
+        display: inline-flex;
+        align-items: center;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .ftu-meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+    @media (max-width: 768px) {
+        .ftu-meta-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .ftu-smart-actions {
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .ftu-btn-large {
+        background: #0284c7;
+        border-color: #0284c7;
+        color: #ffffff;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 9px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.15s ease;
+    }
+    .ftu-btn-large:hover, .ftu-btn-large:focus {
+        background: #0369a1;
+        border-color: #0369a1;
+        color: #ffffff;
+    }
+    .ftu-btn-large:active {
+        transform: translateY(1px);
+    }
+    .ftu-toggle-adv-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: #334155;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 8px 16px;
+        text-decoration: none;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        transition: all 0.15s ease;
+    }
+    .ftu-toggle-adv-btn:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+        color: #0f172a;
+        text-decoration: none;
+    }
+    .ftu-toggle-adv-btn:active {
+        background: #e2e8f0;
+        transform: translateY(1px);
+    }
 </style>
 </head>
 
@@ -288,6 +555,184 @@
  </div>
  [% END %]
 
+ <!-- FTU Smart Item Manager -->
+ <div id="ftu_smart_item_card" class="ftu-smart-card">
+ <div class="ftu-smart-header">
+ <div>
+ [% IF op != 'cud-saveitem' %]
+ <div class="ftu-smart-title">Bảng quản lý &amp; Nhập kho bản tài liệu</div>
+ <div class="ftu-smart-subtitle">Nhập số lượng, tự động sinh mã vạch và phân loại xếp giá thông minh</div>
+ [% ELSE %]
+ <div class="ftu-smart-title">Chỉnh sửa bản tài liệu #[% itemnumber | html %]</div>
+ <div class="ftu-smart-subtitle">Cập nhật thông tin mã vạch, kho lưu trữ và ký hiệu xếp giá</div>
+ [% END %]
+ </div>
+ [% IF op != 'cud-saveitem' %]
+ <div class="ftu-mode-tabs" role="tablist">
+ <button type="button" class="ftu-mode-btn active" id="ftu_tab_batch" data-mode="batch" onclick="ftuSwitchMode('batch')">
+ Tạo hàng loạt nhiều bản (Batch)
+ </button>
+ <button type="button" class="ftu-mode-btn" id="ftu_tab_single" data-mode="single" onclick="ftuSwitchMode('single')">
+ Tạo 1 bản lẻ
+ </button>
+ </div>
+ [% END %]
+ </div>
+
+ <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.83rem; color: #166534; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+ <div><strong>Biên mục MARC an toàn:</strong> Biểu ghi thư mục (nhan đề, tác giả, mô tả...) được lưu độc lập tại bảng Biblio. Tạo bản sách ở đây chỉ cấp ĐKCB/Mã vạch nhập kho và <strong>tuyệt đối KHÔNG làm đè hay mất dữ liệu MARC đã biên mục</strong>.</div>
+ <div style="font-size: 0.78rem; background: #dcfce7; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Dữ liệu MARC được bảo vệ an toàn &check;</div>
+ </div>
+
+ <!-- Section 1: Quantity & Barcode Generator -->
+ <div class="ftu-smart-section">
+ [% IF op != 'cud-saveitem' %]
+ <!-- BATCH MODE PANEL -->
+ <div id="ftu_batch_inputs_panel">
+ <div class="ftu-batch-grid">
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_qty_input">
+ Số lượng bản sách nhập kho <span style="color:#e11d48">*</span>
+ </label>
+ <div class="ftu-qty-control">
+ <button type="button" class="ftu-qty-btn" id="ftu_qty_minus" title="Giảm 1" onclick="ftuChangeQty(-1)">&minus;</button>
+ <input type="number" id="ftu_qty_input" class="ftu-qty-input" value="5" min="1" max="1000" oninput="ftuOnQtyInput(this.value)" />
+ <button type="button" class="ftu-qty-btn" id="ftu_qty_plus" title="Tăng 1" onclick="ftuChangeQty(1)">+</button>
+ <div class="ftu-quick-pills">
+ <span class="ftu-pill" data-qty="1" onclick="ftuSetQty(1)">1</span>
+ <span class="ftu-pill" data-qty="3" onclick="ftuSetQty(3)">3</span>
+ <span class="ftu-pill active" data-qty="5" onclick="ftuSetQty(5)">5</span>
+ <span class="ftu-pill" data-qty="10" onclick="ftuSetQty(10)">10</span>
+ <span class="ftu-pill" data-qty="20" onclick="ftuSetQty(20)">20</span>
+ <span class="ftu-pill" data-qty="50" onclick="ftuSetQty(50)">50</span>
+ </div>
+ </div>
+ <div class="ftu-hint">Số lượng cuốn sách thực tế bạn muốn cấp mã nhập vào kho thư viện.</div>
+ </div>
+
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_start_barcode">
+ Mã vạch / ĐKCB bắt đầu <span style="color:#e11d48">*</span>
+ </label>
+ <input type="text" id="ftu_start_barcode" class="form-control" style="font-family:monospace; font-weight:600; font-size:1rem;" value="[% suggested_barcode | html %]" placeholder="VD: FTU-BK-0001" oninput="ftuRenderPreview()" />
+ <div class="ftu-hint">Hệ thống tự động tăng dần số đuôi mã vạch cho từng bản tiếp theo.</div>
+ </div>
+ </div>
+
+ <!-- LIVE BARCODE PREVIEW -->
+ <div class="ftu-preview-container">
+ <div class="ftu-preview-header" id="ftu_preview_title">
+ Danh sách mã vạch dự kiến sinh ra (5 bản):
+ </div>
+ <div class="ftu-chips-wrapper" id="ftu_barcode_preview_chips">
+ <!-- Dynamically filled by JS -->
+ </div>
+ </div>
+ </div>
+
+ <!-- SINGLE MODE PANEL -->
+ <div id="ftu_single_inputs_panel" style="display:none;">
+ <div class="ftu-form-group" style="max-width: 480px;">
+ <label class="ftu-label" for="ftu_single_barcode">
+ Mã vạch / ĐKCB (Barcode) <span style="color:#e11d48">*</span>
+ </label>
+ <input type="text" id="ftu_single_barcode" class="form-control" style="font-family:monospace; font-weight:600; font-size:1rem;" value="[% suggested_barcode | html %]" placeholder="Quét hoặc nhập mã vạch cuốn sách" />
+ <div class="ftu-hint">Quét mã vạch từ máy quét hoặc nhập trực tiếp mã định danh của cuốn sách.</div>
+ </div>
+ </div>
+ [% ELSE %]
+ <!-- EDIT MODE PANEL -->
+ <div class="ftu-form-group" style="max-width: 480px;">
+ <label class="ftu-label" for="ftu_edit_barcode">
+ Mã vạch / ĐKCB (Barcode)
+ </label>
+ <input type="text" id="ftu_edit_barcode" class="form-control" style="font-family:monospace; font-weight:600; font-size:1rem;" value="[% barcode | html %]" />
+ </div>
+ [% END %]
+ </div>
+
+ <!-- Section 2: Metadata Grid (Essential 2 Columns) -->
+ <div class="ftu-meta-grid">
+ <!-- Col 1 -->
+ <div>
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_location">Kho lưu trữ tài liệu</label>
+ <select id="ftu_location" class="form-control" style="width:100%;">
+ <!-- Cloned from Koha items.location -->
+ </select>
+ <div class="ftu-hint">Vị trí thực tế nơi cuốn sách được xếp trên giá (Kho đọc, Kho mượn...)</div>
+ </div>
+
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_itemcallnumber">Ký hiệu xếp giá (Call number / DDC)</label>
+ <input type="text" id="ftu_itemcallnumber" class="form-control" value="[% suggested_callnumber | html %]" placeholder="VD: 658.4" />
+ <div class="ftu-hint">Số phân loại Dewey DDC được lấy tự động từ biểu ghi thư mục MARC.</div>
+ </div>
+
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_price">Giá mua / Giá bìa (VNĐ)</label>
+ <input type="text" id="ftu_price" class="form-control" value="[% suggested_price | html %]" placeholder="VD: 150000" />
+ <div class="ftu-hint">Tự động trích xuất từ MARC 020$c hoặc nhập giá thực tế cuốn sách.</div>
+ </div>
+ </div>
+
+ <!-- Col 2 -->
+ <div>
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_itype">Loại bản tài liệu</label>
+ <select id="ftu_itype" class="form-control" style="width:100%;">
+ <!-- Cloned from Koha items.itype -->
+ </select>
+ <div class="ftu-hint">Định dạng tài liệu (Sách in &amp; Giáo trình, Luận văn...)</div>
+ </div>
+
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_ccode">Bộ sưu tập</label>
+ <select id="ftu_ccode" class="form-control" style="width:100%;">
+ <!-- Cloned from Koha items.ccode -->
+ </select>
+ <div class="ftu-hint">Phân nhóm bộ sưu tập tài liệu số hoặc sách chuyên khảo FTU.</div>
+ </div>
+
+ <div class="ftu-form-group">
+ <label class="ftu-label" for="ftu_notforloan">Quy tắc lưu thông</label>
+ <select id="ftu_notforloan" class="form-control" style="width:100%;">
+ <option value="0" selected="selected">Cho mượn về nhà (Bình thường)</option>
+ <option value="1">Chỉ đọc tại chỗ (Không cho mượn về)</option>
+ </select>
+ <div class="ftu-hint">Cho phép bạn đọc mượn về nhà hoặc chỉ đọc tại chỗ trong phòng đọc.</div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Section 3: Action Buttons & Advanced Drawer Toggle -->
+ <div class="ftu-smart-actions">
+ <div>
+ [% IF op != 'cud-saveitem' %]
+ <button type="button" id="ftu_btn_create_items" class="btn btn-primary ftu-btn-large" onclick="ftuSubmitItem()">
+ Tạo ngay 5 bản tài liệu vào kho
+ </button>
+ [% ELSE %]
+ <button type="button" id="ftu_btn_create_items" class="btn btn-primary ftu-btn-large" onclick="ftuSubmitItem()">
+ Lưu thay đổi bản tài liệu
+ </button>
+ [% END %]
+ </div>
+
+ <div>
+ <button type="button" id="ftu_btn_toggle_advanced" class="ftu-toggle-adv-btn" onclick="ftuToggleAdvanced()">
+ Tùy chỉnh chi tiết nâng cao (MARC21 952 - 25 trường) &#9660;
+ </button>
+ </div>
+ </div>
+ </div>
+ <!-- /#ftu_smart_item_card -->
+
+ <!-- Advanced Collapsible MARC Drawer -->
+ <div id="ftu_advanced_marc_wrapper" style="display: none; margin-top: 18px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+ <div style="font-weight: 600; color: #475569; margin-bottom: 12px; font-size: 0.88rem;">
+ Cấu hình chi tiết trường con MARC 952 (Dành cho cán bộ biên mục chuyên sâu):
+ </div>
  <fieldset class="rows"> [% PROCESS subfields_for_item subfields => subfields %] </fieldset>
  [% IF op != 'cud-additem' %]
  <input type="hidden" name="itemnumber" value="[% itemnumber | html %]" />
@@ -329,8 +774,9 @@
  </ol>
  </fieldset>
  [% END %]
+ </div>
 
- <fieldset class="action">
+ <fieldset class="action" style="display: none;">
  [% IF op != 'cud-saveitem' %]
  <input type="submit" name="phony_submit" value="phony_submit" id="phony_submit" style="display:none;" onclick="return false;" />
  <!-- Note:
@@ -433,7 +879,358 @@
  <!-- /#cataloguing_additem_itemlist -->
 [% END %]
 
-[% MACRO jsinclude BLOCK %]
-[% END %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function(window) {
+    // 1. Helper: Increment any barcode format
+    function generateNextBarcode(baseBarcode, index) {
+        if (!baseBarcode) return '';
+        if (index === 0) return baseBarcode;
+        var match = baseBarcode.match(/^(.*?)(\d+)$/);
+        if (match) {
+            var prefix = match[1];
+            var numStr = match[2];
+            var numLen = numStr.length;
+            var nextNum = parseInt(numStr, 10) + index;
+            var nextNumStr = nextNum.toString();
+            while (nextNumStr.length < numLen) {
+                nextNumStr = '0' + nextNumStr;
+            }
+            return prefix + nextNumStr;
+        }
+        return baseBarcode + '-' + (index + 1);
+    }
+
+    // 2. Clone options from Koha's hidden MARC form into FTU Smart Manager
+    function syncDropdown(sourceName, targetId, isNotForLoan) {
+        var source = document.querySelector('select[name="' + sourceName + '"], select.' + sourceName.replace('.', '\\.'));
+        var target = document.getElementById(targetId);
+        if (!source || !target) return;
+        if (source.options && source.options.length > 0) {
+            var currentVal = target.value || source.value;
+            target.innerHTML = '';
+            for (var i = 0; i < source.options.length; i++) {
+                var opt = source.options[i];
+                var newOpt = document.createElement('option');
+                newOpt.value = opt.value;
+                var text = opt.text.trim();
+                if (isNotForLoan && (!opt.value || opt.value === '0')) {
+                    text = 'Cho mượn về nhà (Bình thường)';
+                }
+                newOpt.text = text;
+                if (opt.value === currentVal || opt.selected) {
+                    newOpt.selected = true;
+                }
+                target.appendChild(newOpt);
+            }
+            if (currentVal) target.value = currentVal;
+        }
+    }
+
+    function syncAllData() {
+        syncDropdown('items.location', 'ftu_location');
+        syncDropdown('items.itype', 'ftu_itype');
+        syncDropdown('items.ccode', 'ftu_ccode');
+        syncDropdown('items.notforloan', 'ftu_notforloan', true);
+
+        // Auto-select MARC values if available
+        var defaultItype = "[% suggested_itype | html %]";
+        var itypeEl = document.getElementById('ftu_itype');
+        if (defaultItype && itypeEl) {
+            for (var i = 0; i < itypeEl.options.length; i++) {
+                if (itypeEl.options[i].value === defaultItype) {
+                    itypeEl.value = defaultItype;
+                    break;
+                }
+            }
+        }
+
+        var defaultCcode = "[% suggested_ccode | html %]";
+        var ccodeEl = document.getElementById('ftu_ccode');
+        if (defaultCcode && ccodeEl) {
+            for (var j = 0; j < ccodeEl.options.length; j++) {
+                if (ccodeEl.options[j].value === defaultCcode) {
+                    ccodeEl.value = defaultCcode;
+                    break;
+                }
+            }
+        }
+
+        var defaultCallNumber = "[% suggested_callnumber | html %]";
+        var callEl = document.getElementById('ftu_itemcallnumber');
+        if (defaultCallNumber && callEl && !callEl.value) {
+            callEl.value = defaultCallNumber;
+        }
+
+        var defaultPrice = "[% suggested_price | html %]";
+        var priceEl = document.getElementById('ftu_price');
+        if (defaultPrice && priceEl && !priceEl.value) {
+            priceEl.value = defaultPrice;
+        }
+    }
+
+    // 3. Live Barcode Preview Renderer
+    function renderBarcodePreview() {
+        var qtyInput = document.getElementById('ftu_qty_input');
+        var qty = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
+        if (qty < 1) qty = 1;
+        if (qty > 1000) qty = 1000;
+
+        var startBcInput = document.getElementById('ftu_start_barcode');
+        var startBc = (startBcInput && startBcInput.value.trim()) ? startBcInput.value.trim() : 'FTU-BK-0001';
+
+        var titleEl = document.getElementById('ftu_preview_title');
+        if (titleEl) {
+            titleEl.textContent = 'Danh sách mã vạch dự kiến sinh ra (' + qty + ' bản):';
+        }
+
+        var tabBatch = document.getElementById('ftu_tab_batch');
+        var submitBtn = document.getElementById('ftu_btn_create_items');
+        if (tabBatch && tabBatch.classList.contains('active') && submitBtn) {
+            submitBtn.textContent = 'Tạo ngay ' + qty + ' bản tài liệu vào kho';
+        }
+
+        var chipsWrapper = document.getElementById('ftu_barcode_preview_chips');
+        if (chipsWrapper) {
+            var maxRender = Math.min(qty, 24);
+            var html = '';
+            for (var i = 0; i < maxRender; i++) {
+                var bc = generateNextBarcode(startBc, i);
+                html += '<span class="ftu-barcode-chip">Bản ' + (i + 1) + ': ' + bc + '</span>';
+            }
+            if (qty > maxRender) {
+                html += '<span style="font-size:0.8rem; color:#64748b; align-self:center; margin-left:6px; font-weight:500;">... và ' + (qty - maxRender) + ' bản tiếp theo</span>';
+            }
+            chipsWrapper.innerHTML = html;
+        }
+    }
+
+    // 4. Stepper & Pill Functions
+    function updatePills(val) {
+        var pills = document.querySelectorAll('.ftu-pill');
+        for (var i = 0; i < pills.length; i++) {
+            var q = parseInt(pills[i].getAttribute('data-qty'), 10);
+            if (q === val) {
+                pills[i].classList.add('active');
+            } else {
+                pills[i].classList.remove('active');
+            }
+        }
+    }
+
+    function changeQty(delta) {
+        var input = document.getElementById('ftu_qty_input');
+        if (!input) return;
+        var current = parseInt(input.value, 10) || 1;
+        var next = current + delta;
+        if (next < 1) next = 1;
+        if (next > 1000) next = 1000;
+        input.value = next;
+        updatePills(next);
+        renderBarcodePreview();
+    }
+
+    function setQty(val) {
+        var input = document.getElementById('ftu_qty_input');
+        if (!input) return;
+        var next = parseInt(val, 10) || 1;
+        if (next < 1) next = 1;
+        if (next > 1000) next = 1000;
+        input.value = next;
+        updatePills(next);
+        renderBarcodePreview();
+    }
+
+    function onQtyInput(val) {
+        var next = parseInt(val, 10) || 1;
+        updatePills(next);
+        renderBarcodePreview();
+    }
+
+    // 5. Mode Switcher
+    function switchMode(mode) {
+        var tabBatch = document.getElementById('ftu_tab_batch');
+        var tabSingle = document.getElementById('ftu_tab_single');
+        var panelBatch = document.getElementById('ftu_batch_inputs_panel');
+        var panelSingle = document.getElementById('ftu_single_inputs_panel');
+        var submitBtn = document.getElementById('ftu_btn_create_items');
+
+        if (mode === 'batch') {
+            if (tabBatch) tabBatch.classList.add('active');
+            if (tabSingle) tabSingle.classList.remove('active');
+            if (panelBatch) panelBatch.style.display = 'block';
+            if (panelSingle) panelSingle.style.display = 'none';
+            var q = parseInt(document.getElementById('ftu_qty_input')?.value, 10) || 1;
+            if (submitBtn) submitBtn.textContent = 'Tạo ngay ' + q + ' bản tài liệu vào kho';
+        } else {
+            if (tabBatch) tabBatch.classList.remove('active');
+            if (tabSingle) tabSingle.classList.add('active');
+            if (panelBatch) panelBatch.style.display = 'none';
+            if (panelSingle) panelSingle.style.display = 'block';
+            var singleInput = document.getElementById('ftu_single_barcode');
+            var startInput = document.getElementById('ftu_start_barcode');
+            if (singleInput && startInput && !singleInput.value) {
+                singleInput.value = startInput.value;
+            }
+            if (submitBtn) submitBtn.textContent = 'Tạo 1 bản tài liệu vào kho';
+        }
+    }
+
+    // 6. Advanced MARC Drawer Toggle
+    function toggleAdvanced() {
+        var drawer = document.getElementById('ftu_advanced_marc_wrapper');
+        var btn = document.getElementById('ftu_btn_toggle_advanced');
+        if (!drawer || !btn) return;
+        var isHidden = (drawer.style.display === 'none' || window.getComputedStyle(drawer).display === 'none');
+        if (isHidden) {
+            drawer.style.display = 'block';
+            btn.innerHTML = 'Thu gọn tùy chỉnh nâng cao (MARC21 952) &#9650;';
+        } else {
+            drawer.style.display = 'none';
+            btn.innerHTML = 'Tùy chỉnh chi tiết nâng cao (MARC21 952 - 25 trường) &#9660;';
+        }
+    }
+
+    // 7. Form Submission Handler
+    function submitItem() {
+        var isEdit = [% op == 'cud-saveitem' ? 1 : 0 %];
+        var tabBatch = document.getElementById('ftu_tab_batch');
+        var isBatch = tabBatch && tabBatch.classList.contains('active') && !isEdit;
+        var qty = 1;
+        var barcode = '';
+
+        if (isEdit) {
+            barcode = (document.getElementById('ftu_edit_barcode')?.value || '').trim();
+        } else if (isBatch) {
+            qty = parseInt(document.getElementById('ftu_qty_input')?.value, 10) || 1;
+            barcode = (document.getElementById('ftu_start_barcode')?.value || '').trim();
+            if (!barcode) {
+                alert('Vui lòng nhập mã vạch bắt đầu!');
+                document.getElementById('ftu_start_barcode')?.focus();
+                return false;
+            }
+        } else {
+            qty = 1;
+            barcode = (document.getElementById('ftu_single_barcode')?.value || '').trim();
+            if (!barcode) {
+                alert('Vui lòng quét hoặc nhập mã vạch!');
+                document.getElementById('ftu_single_barcode')?.focus();
+                return false;
+            }
+        }
+
+        // Sync values into Koha form inputs
+        var barcodeField = document.querySelector('input[name="items.barcode"], input.items.barcode');
+        if (barcodeField) barcodeField.value = barcode;
+
+        var callField = document.querySelector('input[name="items.itemcallnumber"], input.items.itemcallnumber');
+        var ftuCall = document.getElementById('ftu_itemcallnumber');
+        if (callField && ftuCall) callField.value = ftuCall.value.trim();
+
+        var locField = document.querySelector('select[name="items.location"], select.items.location');
+        var ftuLoc = document.getElementById('ftu_location');
+        if (locField && ftuLoc && ftuLoc.value) {
+            locField.value = ftuLoc.value;
+            locField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        var itypeField = document.querySelector('select[name="items.itype"], select.items.itype');
+        var ftuItype = document.getElementById('ftu_itype');
+        if (itypeField && ftuItype && ftuItype.value) {
+            itypeField.value = ftuItype.value;
+            itypeField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        var ccodeField = document.querySelector('select[name="items.ccode"], select.items.ccode');
+        var ftuCcode = document.getElementById('ftu_ccode');
+        if (ccodeField && ftuCcode && ftuCcode.value) {
+            ccodeField.value = ftuCcode.value;
+            ccodeField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        var ftuPrice = document.getElementById('ftu_price');
+        var priceVal = ftuPrice ? ftuPrice.value.trim() : '';
+        if (priceVal) {
+            var priceInputs = document.querySelectorAll('input[name="items.price"], input.items.price, input[name="items.replacementprice"], input.items.replacementprice');
+            for (var p = 0; p < priceInputs.length; p++) {
+                priceInputs[p].value = priceVal;
+            }
+        }
+
+        var nflField = document.querySelector('select[name="items.notforloan"], select.items.notforloan');
+        var ftuNfl = document.getElementById('ftu_notforloan');
+        if (nflField && ftuNfl && ftuNfl.value) {
+            nflField.value = ftuNfl.value;
+            nflField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // Trigger native submission button
+        if (isEdit) {
+            var saveBtn = document.querySelector('fieldset.action input[type="submit"][value*="Lưu"], fieldset.action input[value*="Save"]');
+            if (saveBtn) {
+                saveBtn.click();
+            } else {
+                document.getElementById('f')?.submit();
+            }
+        } else if (isBatch && qty > 1) {
+            var copiesInput = document.getElementById('number_of_copies');
+            if (copiesInput) copiesInput.value = qty;
+            var batchSubmit = document.getElementById('add_multiple_copies_submit');
+            if (batchSubmit) {
+                batchSubmit.click();
+            } else {
+                document.getElementById('f')?.submit();
+            }
+        } else {
+            var copiesInput = document.getElementById('number_of_copies');
+            if (copiesInput) copiesInput.value = '';
+            var singleSubmit = document.querySelector('input[name="add_submit"]');
+            if (singleSubmit) {
+                singleSubmit.click();
+            } else {
+                document.getElementById('f')?.submit();
+            }
+        }
+    }
+
+    // Expose functions to window for instant inline onclick support
+    window.ftuChangeQty = changeQty;
+    window.ftuSetQty = setQty;
+    window.ftuOnQtyInput = onQtyInput;
+    window.ftuSwitchMode = switchMode;
+    window.ftuToggleAdvanced = toggleAdvanced;
+    window.ftuSubmitItem = submitItem;
+    window.ftuRenderPreview = renderBarcodePreview;
+
+    // Initialize when DOM is ready
+    function init() {
+        syncAllData();
+        renderBarcodePreview();
+        setTimeout(syncAllData, 100);
+        setTimeout(syncAllData, 300);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    // Also support delegated click & input listeners
+    document.addEventListener('click', function(e) {
+        var t = e.target;
+        if (!t) return;
+        var pill = t.closest ? t.closest('.ftu-pill') : null;
+        if (pill) {
+            var q = parseInt(pill.getAttribute('data-qty'), 10);
+            if (q) setQty(q);
+        }
+        var modeBtn = t.closest ? t.closest('.ftu-mode-btn') : null;
+        if (modeBtn && modeBtn.getAttribute('data-mode')) {
+            switchMode(modeBtn.getAttribute('data-mode'));
+        }
+    });
+
+})(window);
+</script>
 
 [% INCLUDE 'intranet-bottom.inc' %]

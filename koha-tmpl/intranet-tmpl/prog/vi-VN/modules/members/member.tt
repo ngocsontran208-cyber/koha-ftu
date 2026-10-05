@@ -1512,11 +1512,28 @@ body#pat_member aside .patron_search_form {
         const ssoBaseUrl = (ssoPref && !ssoPref.includes('myDNSname')) ? ssoPref.replace(/\/+$/, '') : ('http://' + (window.location.hostname || 'localhost') + ':8090');
         $('#ftu-sso-portal-top-link').attr('href', ssoBaseUrl);
 
-        // Helper chuẩn hóa mọi request sang Cổng SSO kèm header định danh Thủ thư Koha Staff
+        // Helper chuẩn hóa mọi request sang Cổng SSO kèm định danh Thủ thư Koha Staff (Header + Query param song song)
         async function ssoFetch(url, options = {}) {
             options = Object.assign({}, options);
-            options.headers = Object.assign({}, options.headers, { 'x-koha-staff': '1' });
-            return fetch(url, options);
+            options.headers = Object.assign({
+                'Accept': 'application/json, text/plain, */*',
+                'x-koha-staff': '1',
+                'X-Requested-With': 'XMLHttpRequest'
+            }, options.headers);
+
+            // Tự động đính kèm token nếu trình duyệt đã có phiên SSO
+            try {
+                const ssoTok = sessionStorage.getItem('ftu_sso_token') || localStorage.getItem('ftu_sso_token');
+                if (ssoTok && !options.headers['x-session-token'] && !options.headers['Authorization']) {
+                    options.headers['x-session-token'] = ssoTok;
+                }
+            } catch (e) {}
+
+            // Đảm bảo luôn gắn koha_staff=1 vào URL để không bao giờ bị chặn bởi CORS preflight hay header stripping
+            const sep = url.includes('?') ? '&' : '?';
+            const finalUrl = (url.includes('koha_staff=') || url.includes('staff=')) ? url : (url + sep + 'koha_staff=1');
+
+            return fetch(finalUrl, options);
         }
 
         // Hàm chuẩn hóa chuỗi tiếng Việt (bỏ dấu) để tìm kiếm linh hoạt
@@ -1555,7 +1572,9 @@ body#pat_member aside .patron_search_form {
         }
 
         // 1. Tải danh sách người học từ Cổng SSO
-        async function loadSsoLearners() {
+        let ssoRetryCount = 0;
+        async function loadSsoLearners(isRetry = false) {
+            if (!isRetry) ssoRetryCount = 0;
             try {
                 $('#sso_learners_tbody').html(`
                     <tr>
@@ -1570,6 +1589,7 @@ body#pat_member aside .patron_search_form {
                 const json = await res.json();
 
                 if (json.success && Array.isArray(json.data)) {
+                    ssoRetryCount = 0;
                     allLearners = json.data.filter(u => u.role === 'STUDENT' || u.role === 'POSTGRAD');
 
                     const studentCount = allLearners.filter(u => u.role === 'STUDENT').length;
@@ -1601,11 +1621,19 @@ body#pat_member aside .patron_search_form {
 
                     applyFilters();
                 } else {
+                    if (ssoRetryCount < 1) {
+                        ssoRetryCount++;
+                        setTimeout(() => loadSsoLearners(true), 1200);
+                        return;
+                    }
                     $('#sso_learners_tbody').html(`
                         <tr>
                             <td colspan="9" class="text-center py-4 text-danger">
                                 <i class="fa fa-exclamation-triangle fa-2x mb-2"></i>
-                                <div>Không thể tải dữ liệu từ Cổng SSO (${json.error || 'Lỗi không xác định'})</div>
+                                <div class="fw-bold mb-1">Không thể tải dữ liệu từ Cổng SSO (${json.error || 'Lỗi không xác định'})</div>
+                                <button onclick="loadSsoLearners(false)" class="btn btn-sm btn-outline-danger mt-2">
+                                    <i class="fa fa-refresh"></i> Thử kết nối lại ngay
+                                </button>
                             </td>
                         </tr>
                     `);
@@ -1613,13 +1641,21 @@ body#pat_member aside .patron_search_form {
                     $('.ftu-status-dot').css('background', '#ef4444');
                 }
             } catch (err) {
+                if (ssoRetryCount < 1) {
+                    ssoRetryCount++;
+                    setTimeout(() => loadSsoLearners(true), 1200);
+                    return;
+                }
                 console.error('Lỗi nạp SSO:', err);
                 $('#sso_learners_tbody').html(`
                     <tr>
                         <td colspan="9" class="text-center py-4 text-muted">
                             <i class="fa fa-plug fa-2x mb-2" style="color: #94a3b8;"></i>
-                            <div>Cổng SSO chưa sẵn sàng hoặc không thể kết nối tới port 8090.</div>
-                            <div class="small mt-1 text-muted">${err.message}</div>
+                            <div class="fw-bold text-dark mb-1">Cổng SSO chưa sẵn sàng hoặc không thể kết nối tới port 8090.</div>
+                            <div class="small text-muted mb-2">${err.message}</div>
+                            <button onclick="loadSsoLearners(false)" class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-refresh"></i> Kết nối lại
+                            </button>
                         </td>
                     </tr>
                 `);

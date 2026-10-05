@@ -23,7 +23,7 @@ my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
 my $json = JSON->new->utf8;
 
-# Tự động đảm bảo bảng biblio_quantities luôn tồn tại
+# Tự động đảm bảo bảng biblio_quantities luôn tồn tại và đồng bộ số lượng
 eval {
     $dbh->do("
         CREATE TABLE IF NOT EXISTS biblio_quantities (
@@ -31,6 +31,13 @@ eval {
             quantity INT(11) NOT NULL DEFAULT 0,
             PRIMARY KEY (biblionumber)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+    $dbh->do("
+        UPDATE biblio_quantities bq
+        JOIN (SELECT biblionumber, COUNT(*) AS cnt FROM items GROUP BY biblionumber) i
+          ON bq.biblionumber = i.biblionumber
+        SET bq.quantity = i.cnt
+        WHERE bq.quantity < i.cnt
     ");
 };
 
@@ -117,7 +124,8 @@ if ( $op eq "get_record" ) {
             bi.cn_item,
             bi.cn_source,
             bi.pages,
-            bi.itemtype
+            bi.itemtype,
+            (SELECT COUNT(*) FROM items i WHERE i.biblionumber = b.biblionumber) AS total_items
         FROM biblio b
         LEFT JOIN biblioitems bi ON b.biblionumber = bi.biblionumber
         WHERE b.biblionumber = ?
@@ -172,7 +180,11 @@ if ( $op eq "get_record" ) {
         }
 
         my ($bq_qty) = $dbh->selectrow_array("SELECT quantity FROM biblio_quantities WHERE biblionumber = ?", undef, $biblionumber);
-        $rec->{book_quantity} = defined $bq_qty ? int($bq_qty) : int($rec->{total_items} || 0);
+        $rec->{total_items} = int($rec->{total_items} || 0);
+        $rec->{book_quantity} = defined $bq_qty ? int($bq_qty) : $rec->{total_items};
+        if ($rec->{total_items} > $rec->{book_quantity}) {
+            $rec->{book_quantity} = $rec->{total_items};
+        }
 
         print $json->encode({ success => 1, biblio => $rec });
     } else {
@@ -475,16 +487,25 @@ if ( $op eq "add_item" ) {
     );
     my $current_count = Koha::Items->search({ biblionumber => $biblionumber })->count;
 
-    if (defined $allowed_qty && $allowed_qty == 0) {
+    # Tự động đồng bộ nếu số lượng ĐKCB hiện có đã vượt allowed_qty
+    if (defined $allowed_qty && $allowed_qty < $current_count) {
+        $allowed_qty = $current_count;
+        $dbh->do(
+            "INSERT INTO biblio_quantities (biblionumber, quantity) VALUES (?, ?) ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)",
+            undef, $biblionumber, $current_count
+        );
+    }
+
+    if (defined $allowed_qty && $allowed_qty == 0 && $current_count == 0) {
         print $json->encode({
             success => 0,
             error   => "Biểu ghi chưa được thiết lập số lượng sách (hiện là 0 bản). Vui lòng bấm vào ô số lượng bản để cập nhật số lượng sách trước khi tạo ĐKCB!"
         });
         exit;
-    } elsif (defined $allowed_qty && $current_count >= $allowed_qty) {
+    } elsif (defined $allowed_qty && $allowed_qty > 0 && $current_count >= $allowed_qty) {
         print $json->encode({
             success => 0,
-            error   => "Số lượng đăng ký cá biệt ($current_count bản) đã đạt tối đa số lượng sách của biểu ghi ($allowed_qty cuốn). Không thể tạo thêm ĐKCB mới!"
+            error   => "Số lượng đăng ký cá biệt ($current_count bản) đã đạt tối đa số lượng sách của biểu ghi ($allowed_qty cuốn). Vui lòng bấm vào số lượng bản để tăng số lượng sách nếu muốn tạo thêm!"
         });
         exit;
     }
@@ -541,7 +562,7 @@ if ( $op eq "add_item" ) {
             success     => 1,
             message     => "Đã thêm bản sách ĐKCB thành công",
             total_items => $current_count + 1,
-            quantity    => defined $allowed_qty ? $allowed_qty : ($current_count + 1),
+            quantity    => (defined $allowed_qty && $allowed_qty >= ($current_count + 1)) ? int($allowed_qty) : ($current_count + 1),
             item        => {
                 itemnumber      => $item->itemnumber,
                 barcode         => $barcode,
@@ -1023,7 +1044,7 @@ my $list_sql = qq{
         (SELECT COUNT(*) FROM items i WHERE i.biblionumber = b.biblionumber) AS total_items,
         (SELECT COUNT(*) FROM items i WHERE i.biblionumber = b.biblionumber AND i.onloan IS NULL AND (i.notforloan = 0 OR i.notforloan IS NULL) AND (i.itemlost = 0 OR i.itemlost IS NULL) AND (i.withdrawn = 0 OR i.withdrawn IS NULL) AND (i.damaged = 0 OR i.damaged IS NULL)) AS available_items,
         (SELECT COUNT(*) FROM items i WHERE i.biblionumber = b.biblionumber AND i.onloan IS NOT NULL) AS onloan_items,
-        COALESCE(bq.quantity, (SELECT COUNT(*) FROM items i WHERE i.biblionumber = b.biblionumber), 0) AS book_quantity
+        GREATEST(COALESCE(bq.quantity, 0), (SELECT COUNT(*) FROM items i WHERE i.biblionumber = b.biblionumber)) AS book_quantity
     FROM biblio b
     LEFT JOIN biblioitems bi ON b.biblionumber = bi.biblionumber
     LEFT JOIN itemtypes it ON bi.itemtype = it.itemtype
@@ -1040,9 +1061,13 @@ my @page_biblionumbers;
 
 while (my $row = $sth_list->fetchrow_hashref) {
     $row->{items} = [];
-    $row->{total_items} ||= 0;
-    $row->{available_items} ||= 0;
-    $row->{onloan_items} ||= 0;
+    $row->{total_items}     = int($row->{total_items} || 0);
+    $row->{available_items} = int($row->{available_items} || 0);
+    $row->{onloan_items}    = int($row->{onloan_items} || 0);
+    $row->{book_quantity}   = int($row->{book_quantity} || 0);
+    if ($row->{total_items} > $row->{book_quantity}) {
+        $row->{book_quantity} = $row->{total_items};
+    }
     push @records, $row;
     push @page_biblionumbers, $row->{biblionumber};
 }

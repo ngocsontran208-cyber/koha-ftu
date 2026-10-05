@@ -57,11 +57,13 @@ sub pending_count {
     my @branchcodes;
     if ( $userenv and $userenv->{number} ) {
         my $logged_in_user = Koha::Patrons->find( $userenv->{number} );
-        if ($branchcode) {
-            return 0 unless $logged_in_user->can_see_patrons_from($branchcode);
-            @branchcodes = ($branchcode);
-        } else {
-            @branchcodes = $logged_in_user->libraries_where_can_see_patrons;
+        if ( $logged_in_user ) {
+            if ($branchcode) {
+                return 0 unless $logged_in_user->can_see_patrons_from($branchcode);
+                @branchcodes = ($branchcode);
+            } else {
+                @branchcodes = $logged_in_user->libraries_where_can_see_patrons;
+            }
         }
     }
     my @sql_params;
@@ -97,11 +99,13 @@ sub pending {
     my @branchcodes;
     if ($userenv) {
         my $logged_in_user = Koha::Patrons->find( $userenv->{number} );
-        if ($branchcode) {
-            return 0 unless $logged_in_user->can_see_patrons_from($branchcode);
-            @branchcodes = ($branchcode);
-        } else {
-            @branchcodes = $logged_in_user->libraries_where_can_see_patrons;
+        if ( $logged_in_user ) {
+            if ($branchcode) {
+                return 0 unless $logged_in_user->can_see_patrons_from($branchcode);
+                @branchcodes = ($branchcode);
+            } else {
+                @branchcodes = $logged_in_user->libraries_where_can_see_patrons;
+            }
         }
     }
     my @sql_params;

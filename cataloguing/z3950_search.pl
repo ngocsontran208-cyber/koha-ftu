@@ -36,6 +36,17 @@ my $title           = $input->param('title');
 my $author          = $input->param('author');
 my $isbn            = $input->param('isbn');
 my $issn            = $input->param('issn');
+
+if ( defined $isbn ) {
+    $isbn =~ s/^[iI][sS][bB][nN][: \t]*//;
+    $isbn =~ s/\s*\([^)]*\)//g;
+    $isbn =~ s/^\s+|\s+$//g;
+}
+if ( defined $issn ) {
+    $issn =~ s/^[iI][sS][sS][nN][: \t]*//;
+    $issn =~ s/\s*\([^)]*\)//g;
+    $issn =~ s/^\s+|\s+$//g;
+}
 my $lccn            = $input->param('lccn');
 my $lccall          = $input->param('lccall');
 my $subject         = $input->param('subject');
@@ -75,6 +86,11 @@ $template->param(
     publicationyear => $publicationyear,
 );
 
+my $autosearch = $input->param('autosearch') || 0;
+if ( $autosearch && ( $isbn || $title || $author || $issn || $srchany || $stdid || $controlnumber || $dewey || $lccall ) ) {
+    $op = "cud-do_search";
+}
+
 if ( $op ne "cud-do_search" ) {
     my $servers = Koha::Z3950Servers->search_with_library_limits(
         {
@@ -94,6 +110,19 @@ if ( $op ne "cud-do_search" ) {
 }
 
 my @id = $input->multi_param('id');
+if ( @id == 0 && $autosearch ) {
+    my $default_servers = Koha::Z3950Servers->search(
+        {
+            recordtype => 'biblio',
+            servertype => [ 'zed', 'sru' ],
+            checked    => 1,
+        },
+        {
+            order_by => [ 'rank', 'servername' ],
+        }
+    );
+    @id = map { $_->id } $default_servers->as_list;
+}
 if ( @id == 0 ) {
 
     # empty server list -> report and exit

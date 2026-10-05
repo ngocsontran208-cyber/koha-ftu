@@ -1016,6 +1016,7 @@ body#circ_circulation #circ_needsconfirm h3 {
 .mod-admin       { background: #475569; }
 .mod-about       { background: #9ca3af; }
 .mod-course      { background: #f43f5e; }
+.mod-warehouse   { background: #0284c7; }
 
 /* Font Awesome Fixes for missing FA4 outlines */
 .module-icon i { font-weight: 900 !important; }
@@ -1106,7 +1107,23 @@ body#catalog_results .main-container {
 }
 
 /* ── Tiêu đề trang (Page Header) ── */
-body#catalog_advsearch h1,
+body#catalog_advsearch h1 {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.02em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin: 0.5rem 0 1.25rem !important;
+    padding: 0.2rem 0 0.75rem 1.1rem !important;
+    padding-left: 1.1rem !important;
+    border-left: 4px solid var(--ftu-primary, #b91c1c) !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    position: relative;
+}
+
 body#catalog_results h1 {
     font-family: 'Be Vietnam Pro', sans-serif !important;
     font-size: 1.6rem !important;

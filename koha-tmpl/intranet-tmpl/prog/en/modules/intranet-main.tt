@@ -200,6 +200,14 @@
                 </a>
                 [% END %]
 
+                [% IF ( CAN_user_parameters || CAN_user_parameters_manage_circ_rules || CAN_user_parameters_manage_auth_values || CAN_user_circulate ) %]
+                <a class="ftu-module-card" href="/cgi-bin/koha/admin/warehouses.pl">
+                    <div class="module-icon mod-warehouse" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff;"><i class="fa fa-cubes"></i></div>
+                    <div class="module-name">Quản lý kho</div>
+                    <div class="module-desc">Kho tài liệu &bull; Quy tắc mượn</div>
+                </a>
+                [% END %]
+
                 [% IF ( CAN_user_catalogue ) %]
                 <a class="ftu-module-card" href="/cgi-bin/koha/catalogue/search.pl">
                     <div class="module-icon mod-search"><i class="fa fa-search"></i></div>

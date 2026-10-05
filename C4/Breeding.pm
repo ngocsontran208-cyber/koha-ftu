@@ -190,10 +190,11 @@ sub Z3950Search {
                         $i++
                         )
                     {
-                        if ( $oResult[$k]->record($i) ) {
+                        my $record_obj = eval { $oResult[$k]->record($i) };
+                        if ( $record_obj ) {
                             undef $error;
                             ( $res, $error ) = _handle_one_result(
-                                $oResult[$k]->record($i), $servers[$k], ++$imported, $biblionumber,
+                                $record_obj, $servers[$k], ++$imported, $biblionumber,
                                 $xslh
                             );    #ignores error in sequence numbering
                             push @breeding_loop, $res if $res;
@@ -263,8 +264,8 @@ sub _bib_build_query {
     my ($pars) = @_;
 
     my $qry_build = {
-        isbn            => '@attr 1=7 @attr 5=1 "#term" ',
-        issn            => '@attr 1=8 @attr 5=1 "#term" ',
+        isbn            => '@attr 1=7 "#term" ',
+        issn            => '@attr 1=8 "#term" ',
         title           => '@attr 1=4 "#term" ',
         author          => '@attr 1=1003 "#term" ',
         dewey           => '@attr 1=16 "#term" ',
@@ -279,6 +280,98 @@ sub _bib_build_query {
     return _build_query( $pars, $qry_build );
 }
 
+sub _build_isbn_query {
+    my ($val) = @_;
+    return unless defined $val;
+
+    my @raw_tokens = split /[,;]+/, $val;
+    my @all_unique;
+    my %seen;
+
+    for my $raw_token (@raw_tokens) {
+        my $clean_val = $raw_token;
+        $clean_val =~ s/^[iI][sS][bB][nN][: \t]*//;
+        $clean_val =~ s/\s*\([^)]*\)//g;
+        $clean_val =~ s/^\s+|\s+$//g;
+        next unless length($clean_val);
+
+        my @vars;
+        eval {
+            push @vars, C4::Koha::GetVariationsOfISBN($clean_val);
+        };
+
+        my $digits_only = $clean_val;
+        $digits_only =~ s/[^\dX]//gi;
+        push @vars, $digits_only if length($digits_only) >= 8;
+
+        my $no_hyphens = $clean_val;
+        $no_hyphens =~ s/-//g;
+        $no_hyphens =~ s/\s+//g;
+        push @vars, $no_hyphens if length($no_hyphens);
+        push @vars, $clean_val;
+
+        for my $v (@vars) {
+            next unless defined $v && length($v);
+            push @all_unique, $v unless $seen{$v}++;
+        }
+    }
+
+    return unless @all_unique;
+
+    my @terms = map { qq{\@attr 1=7 "$_"} } @all_unique;
+    my $z_isbn = join(' ', @terms) . ' ';
+    $z_isbn = "\@or " . $z_isbn for 2 .. scalar(@terms);
+
+    my $s_isbn = scalar(@all_unique) == 1
+        ? qq{[isbn]="$all_unique[0]"}
+        : '(' . join(' or ', map { qq{[isbn]="$_"} } @all_unique) . ')';
+
+    return ( $z_isbn, $s_isbn );
+}
+
+sub _build_issn_query {
+    my ($val) = @_;
+    return unless defined $val;
+
+    my @raw_tokens = split /[,;]+/, $val;
+    my @all_unique;
+    my %seen;
+
+    for my $raw_token (@raw_tokens) {
+        my $clean_val = $raw_token;
+        $clean_val =~ s/^[iI][sS][sS][nN][: \t]*//;
+        $clean_val =~ s/\s*\([^)]*\)//g;
+        $clean_val =~ s/^\s+|\s+$//g;
+        next unless length($clean_val);
+
+        my $digits_only = $clean_val;
+        $digits_only =~ s/[^\dX]//gi;
+
+        my @vars = ($clean_val);
+        if ( length($digits_only) == 8 ) {
+            push @vars, $digits_only;
+            push @vars, substr($digits_only, 0, 4) . '-' . substr($digits_only, 4, 4);
+        }
+
+        for my $v (@vars) {
+            next unless defined $v && length($v);
+            push @all_unique, $v unless $seen{$v}++;
+        }
+    }
+
+    return unless @all_unique;
+
+    my @terms = map { qq{\@attr 1=8 "$_"} } @all_unique;
+    my $z_issn = join(' ', @terms) . ' ';
+    $z_issn = "\@or " . $z_issn for 2 .. scalar(@terms);
+
+    my $s_issn = scalar(@all_unique) == 1
+        ? qq{[issn]="$all_unique[0]"}
+        : '(' . join(' or ', map { qq{[issn]="$_"} } @all_unique) . ')';
+
+    return ( $z_issn, $s_issn );
+}
+
 sub _build_query {
 
     my ( $pars, $qry_build ) = @_;
@@ -291,10 +384,27 @@ sub _build_query {
         #note that the sort keys forces an identical result under Perl 5.18
         #one of the unit tests is based on that assumption
         if ( ( my $val = $pars->{$k} ) && $qry_build->{$k} ) {
-            $qry_build->{$k} =~ s/#term/$val/g;
-            $zquery .= $qry_build->{$k};
-            $squery .= "[$k]=\"$val\" and ";
-            $nterms++;
+            if ( $k eq 'isbn' ) {
+                my ( $z_isbn, $s_isbn ) = _build_isbn_query($val);
+                if ($z_isbn) {
+                    $zquery .= $z_isbn;
+                    $squery .= "$s_isbn and ";
+                    $nterms++;
+                }
+            } elsif ( $k eq 'issn' ) {
+                my ( $z_issn, $s_issn ) = _build_issn_query($val);
+                if ($z_issn) {
+                    $zquery .= $z_issn;
+                    $squery .= "$s_issn and ";
+                    $nterms++;
+                }
+            } else {
+                my $tmpl = $qry_build->{$k};
+                $tmpl =~ s/#term/$val/g;
+                $zquery .= $tmpl;
+                $squery .= "[$k]=\"$val\" and ";
+                $nterms++;
+            }
         }
     }
     $zquery = "\@and " . $zquery for 2 .. $nterms;
@@ -438,8 +548,8 @@ sub _create_connection {
     my $option1 = ZOOM::Options->new();
     $option1->option( 'async' => 1 );
     $option1->option( 'elementSetName',        'F' );
-    $option1->option( 'preferredRecordSyntax', $server->{syntax} );
-    $option1->option( 'timeout',               $server->{timeout} ) if $server->{timeout};
+    my $timeout = $server->{timeout} || C4::Context->preference('Z3950SearchTimeout') || 10;
+    $option1->option( 'timeout', $timeout );
 
     if ( $server->{servertype} eq 'sru' ) {
         foreach ( split ',', $server->{sru_options} // '' ) {
@@ -454,6 +564,7 @@ sub _create_connection {
         $option1->option( 'databaseName', $server->{db} );
         $option1->option( 'user',         $server->{userid} )   if $server->{userid};
         $option1->option( 'password',     $server->{password} ) if $server->{password};
+        $option1->option( 'preferredRecordSyntax', $server->{syntax} ) if $server->{syntax};
     }
     my $obj = ZOOM::Connection->create($option1);
     if ( $server->{servertype} eq 'sru' ) {

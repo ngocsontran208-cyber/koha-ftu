@@ -17,8 +17,18 @@
 <body id="cat_z3950_search" class="cat">
 <div class="main container-fluid">
  [% IF ( opsearch ) %]
- <h1>Z39.50/SRU search</h1>
- <form method="post" action="z3950_search.pl" name="f" class="checkboxed">
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;">
+     <h1 style="margin: 0; font-size: 1.4rem; font-weight: 600; color: #1e293b;">
+         Tra cứu biểu ghi Z39.50 / SRU
+     </h1>
+     <div style="display: flex; gap: 10px;">
+         <button class="btn btn-primary" type="submit" style="font-weight: 500; padding: 7px 22px; font-size: 0.95rem; border-radius: 4px;">
+             Bắt đầu tìm kiếm
+         </button>
+         <button type="button" class="btn btn-default close" onclick="window.close();" style="border-radius: 4px;">Đóng</button>
+     </div>
+ </div>
+ <form method="post" action="z3950_search.pl" name="f" class="checkboxed" style="padding-bottom: 60px;">
  [% INCLUDE 'csrf-token.inc' %]
  <div class="row">
  <div class="col-6">
@@ -76,11 +86,23 @@
  </div>
  <!-- /.row -->
 
- <nav class="navbar navbar-default fixed-bottom">
- <div class="container-fluid">
- <fieldset class="action">
- <input class="btn btn-primary" id="submit_z3950_search" type="submit" value="Tìm kiếm" />
- <a class="btn btn-default close" href="#">Hủy bỏ</a>
+ <div style="margin-top: 20px; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+     <div style="color: #64748b; font-size: 0.85rem;">
+         Hệ thống sẽ tự động tra cứu trên các máy chủ được đánh dấu chọn.
+     </div>
+     <div style="display: flex; gap: 8px;">
+         <button class="btn btn-primary" type="submit" style="font-weight: 500; padding: 6px 20px; font-size: 0.95rem; border-radius: 4px;">
+             Bắt đầu tìm kiếm
+         </button>
+         <button type="button" class="btn btn-default close" onclick="window.close();" style="border-radius: 4px;">Hủy bỏ</button>
+     </div>
+ </div>
+
+ <nav class="navbar navbar-default fixed-bottom" style="background: #ffffff; border-top: 1px solid #cbd5e1; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); padding: 10px 20px; z-index: 1050;">
+ <div class="container-fluid" style="display: flex; justify-content: flex-end; gap: 10px;">
+ <fieldset class="action" style="margin: 0; padding: 0;">
+ <input class="btn btn-primary" id="submit_z3950_search" type="submit" value="Tìm kiếm" style="font-weight: 600; padding: 7px 24px; font-size: 0.95rem;" />
+ <a class="btn btn-default close" href="#" style="padding: 7px 18px;">Hủy bỏ</a>
  </fieldset>
  </div>
  </nav>

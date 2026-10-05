@@ -51,7 +51,8 @@ sub search_limited {
     my @restricted_branchcodes;
     if ( $userenv and $userenv->{number} ) {
         my $logged_in_user = Koha::Patrons->find( $userenv->{number} );
-        @restricted_branchcodes = $logged_in_user->libraries_where_can_see_patrons;
+        @restricted_branchcodes = $logged_in_user->libraries_where_can_see_patrons
+            if $logged_in_user;
     }
 
     # TODO This 'borrowernumber' relation name is confusing and needs to be renamed

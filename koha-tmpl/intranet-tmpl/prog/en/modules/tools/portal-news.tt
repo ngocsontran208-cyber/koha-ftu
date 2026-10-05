@@ -292,7 +292,7 @@
         gap: 6px;
         flex-wrap: wrap;
     }
-    .wp-media-btn, .wp-video-btn, .wp-file-btn, .wp-library-btn {
+    .wp-media-btn, .wp-video-btn, .wp-pdf-btn, .wp-file-btn, .wp-library-btn {
         background: #ffffff;
         color: #1e293b;
         font-weight: 600;
@@ -314,6 +314,11 @@
     .wp-video-btn:hover {
         background: #fef2f2;
         border-color: #ef4444;
+        color: #b91c1c !important;
+    }
+    .wp-pdf-btn:hover {
+        background: #fef2f2;
+        border-color: #b91c1c;
         color: #b91c1c !important;
     }
     .wp-file-btn:hover {
@@ -1325,12 +1330,9 @@
                         <!-- Header Bar Cấu hình -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #ffffff; padding: 18px 22px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 12px;">
                             <div>
-                                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fa fa-sliders text-danger"></i> Cấu hình Chân trang &amp; Thông tin Liên hệ OPAC
+                                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a;">
+                                    Cấu hình Chân trang &amp; Thông tin Liên hệ OPAC
                                 </h3>
-                                <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.88rem;">
-                                    Tùy biến các liên kết nhanh, hotline, email, địa chỉ 3 cơ sở và mạng xã hội hiển thị ở chân trang trên tất cả trang công khai.
-                                </p>
                             </div>
                             <div style="display: flex; gap: 10px;">
                                 <a href="[% Koha.Preference('OPACBaseURL') || '/cgi-bin/koha/opac-main.pl' %]" target="_blank" class="btn btn-default ftu-opac-link" style="font-weight: 600; border-radius: 6px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
@@ -1349,17 +1351,16 @@
                                 <!-- CARD 1: LIÊN KẾT NHANH (5 LIÊN KẾT THEO YÊU CẦU) -->
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-link text-primary"></i> 1. Danh Mục "Liên Kết Nhanh" (Footer Quick Links)
+                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
+                                            1. Danh Mục "Liên Kết Nhanh" (Footer Quick Links)
                                         </h4>
-                                        <small class="text-muted" style="font-size: 0.8rem;">5 liên kết quan trọng hiển thị ở cột 2 chân trang OPAC</small>
                                     </div>
                                     <div class="panel-body" style="padding: 18px 20px;">
                                         
                                         <!-- Link 1: Trang chủ Thư viện -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-home text-muted"></i> Liên kết 1: Trang chủ Thư viện
+                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
+                                                Liên kết 1: Trang chủ Thư viện
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-5">
@@ -1375,8 +1376,8 @@
 
                                         <!-- Link 2: Tìm kiếm tài liệu nâng cao -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-search text-muted"></i> Liên kết 2: Tìm kiếm tài liệu nâng cao
+                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
+                                                Liên kết 2: Tìm kiếm tài liệu nâng cao
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-5">
@@ -1392,8 +1393,8 @@
 
                                         <!-- Link 3: Cơ sở dữ liệu điện tử -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-database text-muted"></i> Liên kết 3: Cơ sở dữ liệu điện tử
+                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
+                                                Liên kết 3: Cơ sở dữ liệu điện tử
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-5">
@@ -1409,8 +1410,8 @@
 
                                         <!-- Link 4: Gia hạn sách trực tuyến -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-refresh text-muted"></i> Liên kết 4: Gia hạn sách trực tuyến
+                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
+                                                Liên kết 4: Gia hạn sách trực tuyến
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-5">
@@ -1426,8 +1427,8 @@
 
                                         <!-- Link 5: Hướng dẫn sử dụng OPAC -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 0;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-book text-muted"></i> Liên kết 5: Hướng dẫn sử dụng OPAC
+                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
+                                                Liên kết 5: Hướng dẫn sử dụng OPAC
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-5">
@@ -1444,36 +1445,35 @@
                                     </div>
                                 </div>
 
-                                <!-- CARD 2: MẠNG XÃ HỘI & KÊNH TRUYỀN THÔNG (ICONS) -->
+                                <!-- CARD 2: MẠNG XÃ HỘI & KÊNH TRUYỀN THÔNG -->
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-share-alt text-info"></i> 2. Mạng Xã Hội &amp; Biểu Tượng Truyền Thông (Icons)
+                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
+                                            2. Mạng Xã Hội &amp; Kênh Truyền Thông
                                         </h4>
-                                        <small class="text-muted" style="font-size: 0.8rem;">Các nút biểu tượng mạng xã hội (Facebook, YouTube, Email, Website) trên chân trang</small>
                                     </div>
                                     <div class="panel-body" style="padding: 18px 20px;">
                                         <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-facebook-square" style="color: #1877f2; font-size: 1.1rem;"></i> Link Facebook Fanpage:
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
+                                                Link Facebook Fanpage:
                                             </label>
                                             <input type="url" name="link_facebook" class="form-control" value="[% footer_cfg.link_facebook | html %]" placeholder="https://www.facebook.com/..." />
                                         </div>
                                         <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-youtube-play" style="color: #ff0000; font-size: 1.1rem;"></i> Link Kênh YouTube:
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
+                                                Link Kênh YouTube:
                                             </label>
                                             <input type="url" name="link_youtube" class="form-control" value="[% footer_cfg.link_youtube | html %]" placeholder="https://www.youtube.com/@..." />
                                         </div>
                                         <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-envelope" style="color: #ea4335; font-size: 1.1rem;"></i> Email liên hệ chính (nút icon email):
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
+                                                Email liên hệ chính:
                                             </label>
                                             <input type="email" name="email_contact" class="form-control" value="[% footer_cfg.email_contact | html %]" placeholder="thuvien@ftu.edu.vn" />
                                         </div>
                                         <div class="form-group" style="margin-bottom: 0;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fa fa-globe" style="color: #b91c1c; font-size: 1.1rem;"></i> Link Cổng thông tin Trường ĐH Ngoại thương:
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
+                                                Link Cổng thông tin Trường ĐH Ngoại thương:
                                             </label>
                                             <input type="url" name="link_portal" class="form-control" value="[% footer_cfg.link_portal | html %]" placeholder="http://ftu.edu.vn" />
                                         </div>
@@ -1483,8 +1483,8 @@
                                 <!-- CARD 3: THÔNG TIN THƯƠNG HIỆU & BẢN QUYỀN -->
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-shield text-warning"></i> 3. Tên Thư Viện &amp; Bản Quyền (Copyright)
+                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
+                                            3. Tên Thư Viện &amp; Bản Quyền (Copyright)
                                         </h4>
                                     </div>
                                     <div class="panel-body" style="padding: 18px 20px;">
@@ -1515,17 +1515,16 @@
                                 <!-- CARD 4: ĐỊA CHỈ 3 CƠ SỞ ĐÀO TẠO -->
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-map-marker text-danger"></i> 4. Địa Chỉ &amp; SĐT 3 Cơ Sở Đào Tạo FTU
+                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
+                                            4. Địa Chỉ &amp; SĐT 3 Cơ Sở Đào Tạo FTU
                                         </h4>
-                                        <small class="text-muted" style="font-size: 0.8rem;">Hiển thị trực quan ở Cột 4 chân trang OPAC</small>
                                     </div>
                                     <div class="panel-body" style="padding: 18px 20px;">
                                         
                                         <!-- Cơ sở 1: Hà Nội -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #b91c1c;">
                                             <div style="font-weight: 700; color: #b91c1c; margin-bottom: 8px; font-size: 0.9rem;">
-                                                <i class="fa fa-university"></i> Cơ sở 1: Trụ sở chính Hà Nội
+                                                Cơ sở 1: Trụ sở chính Hà Nội
                                             </div>
                                             <div class="form-group" style="margin-bottom: 8px;">
                                                 <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên cơ sở:</label>
@@ -1544,7 +1543,7 @@
                                         <!-- Cơ sở 2: TP. Hồ Chí Minh -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #0284c7;">
                                             <div style="font-weight: 700; color: #0284c7; margin-bottom: 8px; font-size: 0.9rem;">
-                                                <i class="fa fa-university"></i> Cơ sở 2: Cơ sở II – TP. Hồ Chí Minh
+                                                Cơ sở 2: Cơ sở II – TP. Hồ Chí Minh
                                             </div>
                                             <div class="form-group" style="margin-bottom: 8px;">
                                                 <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên cơ sở:</label>
@@ -1563,7 +1562,7 @@
                                         <!-- Cơ sở 3: Quảng Ninh -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 0; border-left: 4px solid #059669;">
                                             <div style="font-weight: 700; color: #059669; margin-bottom: 8px; font-size: 0.9rem;">
-                                                <i class="fa fa-university"></i> Cơ sở 3: Cơ sở Quảng Ninh
+                                                Cơ sở 3: Cơ sở Quảng Ninh
                                             </div>
                                             <div class="form-group" style="margin-bottom: 8px;">
                                                 <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên cơ sở:</label>
@@ -1585,10 +1584,9 @@
                                 <!-- CARD 5: ĐƯỜNG DÂY NÓNG TOPBAR & GIỜ MỞ CỬA -->
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-phone text-success"></i> 5. Đường Dây Nóng Ribbon &amp; Giờ Mở Cửa
+                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
+                                            5. Đường Dây Nóng Ribbon &amp; Giờ Mở Cửa
                                         </h4>
-                                        <small class="text-muted" style="font-size: 0.8rem;">Dải thông tin trợ giúp nhanh trên đỉnh Footer</small>
                                     </div>
                                     <div class="panel-body" style="padding: 18px 20px;">
                                         <div class="row">
@@ -1865,6 +1863,9 @@
                                         <button type="button" class="wp-video-btn" onclick="openYoutubeModal()">
                                             Chèn Video YouTube
                                         </button>
+                                        <button type="button" class="wp-pdf-btn" onclick="openPdfModal()" style="color: #b91c1c; border-color: #fca5a5; background: #fff5f5;">
+                                            Nhúng File PDF
+                                        </button>
                                         <button type="button" class="wp-file-btn" onclick="openFileDownloadModal()">
                                             Chèn Hộp Tải File
                                         </button>
@@ -1885,6 +1886,7 @@
                                 <!-- Mẫu nội dung dựng sẵn (Quick Content Blocks Pill Bar) -->
                                 <div class="wp-presets-bar">
                                     <span style="font-weight: 700; color: #475569; margin-right: 4px;">Mẫu dựng sẵn:</span>
+                                    <span class="wp-preset-pill" onclick="openPdfModal()" title="Nhúng khung đọc tài liệu PDF trực tiếp" style="color: #b91c1c; font-weight: 700; border-color: #fca5a5; background: #fff5f5;">Nhúng PDF</span>
                                     <span class="wp-preset-pill" onclick="insertPreset('alert-info')" title="Khung thông báo xanh">Thông báo</span>
                                     <span class="wp-preset-pill" onclick="insertPreset('alert-warning')" title="Khung lưu ý vàng">Lưu ý quan trọng</span>
                                     <span class="wp-preset-pill" onclick="insertPreset('steps')" title="Hướng dẫn các bước 1-2-3">Quy trình 3 bước</span>
@@ -2250,6 +2252,111 @@
                     </div>
                 </div>
 
+                <!-- ==================== MODAL: NHÚNG TÀI LIỆU PDF TRỰC TIẾP ==================== -->
+                <div class="modal fade" id="pdfEmbedModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content" style="border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+                            <div class="modal-header" style="background: #1e293b; color: #ffffff; padding: 14px 20px;">
+                                <h4 class="modal-title" id="pdfModalLabel" style="font-weight: 700; font-size: 1.05rem; margin: 0; color: #ffffff;">
+                                    Nhúng Tài Liệu PDF Vào Bài Viết
+                                </h4>
+                                <button type="button" class="wp-modal-close" onclick="closeModal('pdfEmbedModal')" aria-label="Đóng" style="color: #cbd5e1; background: transparent; border: none; font-size: 1.4rem; cursor: pointer; line-height: 1;">
+                                    &times;
+                                </button>
+                            </div>
+                            <div class="modal-body" style="padding: 20px;">
+                                
+                                <!-- Tab lựa chọn nguồn PDF: Tải lên từ máy hoặc Nhập link URL -->
+                                <div style="display: flex; gap: 10px; margin-bottom: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+                                    <button type="button" id="tab-btn-pdf-upload" class="btn btn-sm btn-primary" onclick="switchPdfTab('upload')" style="font-weight: 600; border-radius: 6px;">
+                                        Tải file PDF từ máy tính
+                                    </button>
+                                    <button type="button" id="tab-btn-pdf-url" class="btn btn-sm btn-default" onclick="switchPdfTab('url')" style="font-weight: 600; border-radius: 6px;">
+                                        Nhập liên kết PDF (URL)
+                                    </button>
+                                </div>
+
+                                <!-- Khu vực 1: Tải file từ máy tính -->
+                                <div id="pdf-tab-upload">
+                                    <input type="file" id="pdf-file-input" accept="application/pdf,.pdf" style="display: none;" onchange="handlePdfFileUpload(event)" />
+                                    
+                                    <div id="pdf-upload-dropzone" style="border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 8px; padding: 25px 20px; text-align: center; cursor: pointer; transition: all 0.2s;" onclick="document.getElementById('pdf-file-input').click()" ondragover="handlePdfDragOver(event)" ondragleave="handlePdfDragLeave(event)" ondrop="handlePdfDrop(event)">
+                                        <div style="font-size: 2rem; margin-bottom: 6px; color: #b91c1c;">📄</div>
+                                        <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 1rem;">Nhấp để chọn file PDF hoặc kéo thả file vào đây</p>
+                                        <p class="text-muted" style="margin: 4px 0 0 0; font-size: 0.84rem;">Hỗ trợ tài liệu định dạng .pdf (Thông báo, quy chế, biểu mẫu, giáo trình tóm tắt...)</p>
+                                    </div>
+
+                                    <!-- Progress / Upload Status -->
+                                    <div id="pdf-upload-status" style="display: none; margin-top: 12px; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; color: #1d4ed8; font-size: 0.88rem; font-weight: 600;">
+                                        <span id="pdf-upload-text">Đang tải tài liệu lên máy chủ...</span>
+                                    </div>
+                                </div>
+
+                                <!-- Khu vực 2: Nhập liên kết ngoài -->
+                                <div id="pdf-tab-url" style="display: none;">
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label style="font-weight: 600; font-size: 0.88rem; color: #1e293b;">Đường dẫn file PDF (URL):</label>
+                                        <input type="url" id="modal-pdf-url-manual" class="form-control" placeholder="https://.../document.pdf hoặc /opac-tmpl/..." oninput="syncPdfUrlFromManual()" />
+                                        <small class="text-muted">Dán đường dẫn trực tiếp tới file PDF bạn muốn nhúng.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Input lưu URL thật của PDF sau khi chọn hoặc tải -->
+                                <input type="hidden" id="modal-pdf-url" value="" />
+
+                                <!-- Các thông số cấu hình hiển thị -->
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-top: 16px;">
+                                    <div class="form-group" style="margin-bottom: 12px;">
+                                        <label style="font-weight: 600; font-size: 0.88rem; color: #1e293b;">Tiêu đề tài liệu PDF hiển thị:</label>
+                                        <input type="text" id="modal-pdf-title" class="form-control" placeholder="VD: Quy định mượn trả tài liệu & dịch vụ Thư viện FTU" oninput="updatePdfModalPreview()" />
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label style="font-weight: 600; font-size: 0.88rem; color: #1e293b;">Chiều cao khung đọc (Height):</label>
+                                                <select id="modal-pdf-height" class="form-control" onchange="updatePdfModalPreview()">
+                                                    <option value="500">500px - Vừa tầm</option>
+                                                    <option value="650" selected>650px - Tiêu chuẩn (Khuyên dùng)</option>
+                                                    <option value="800">800px - Rộng rãi dễ đọc</option>
+                                                    <option value="1000">1000px - Toàn màn hình dọc</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label style="font-weight: 600; font-size: 0.88rem; color: #1e293b;">Dung lượng ước tính:</label>
+                                                <input type="text" id="modal-pdf-size" class="form-control" placeholder="VD: 1.8 MB" value="" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Preview Box -->
+                                <div id="pdf-preview-container" style="display: none; margin-top: 16px;">
+                                    <label style="font-weight: 700; font-size: 0.85rem; color: #475569; margin-bottom: 6px;">Xem trước khung nhúng PDF:</label>
+                                    <div id="pdf-preview-box" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff;">
+                                        <div style="background: #1e293b; color: #fff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="font-weight: 600; font-size: 0.9rem;" id="pdf-preview-title">Tiêu đề tài liệu</div>
+                                            <span class="badge" style="background: #b91c1c; font-size: 0.72rem;">XEM TRƯỚC</span>
+                                        </div>
+                                        <div style="height: 280px; background: #525659; position: relative;">
+                                            <iframe id="pdf-preview-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 20px;">
+                                <button type="button" class="btn btn-default" onclick="closeModal('pdfEmbedModal')">Hủy bỏ</button>
+                                <button type="button" class="btn btn-primary" onclick="insertPdfEmbed()" style="background: #b91c1c; border-color: #b91c1c; font-weight: 700; padding: 7px 20px;">
+                                    Chèn PDF vào bài viết
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ==================== MODAL 3: CHÈN HỘP TẢI TÀI LIỆU ==================== -->
                 <div class="modal fade" id="fileDownloadModal" tabindex="-1" role="dialog" aria-labelledby="fileModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -2342,6 +2449,15 @@
                                             <p>Khối tải file chuẩn mực có định dạng, dung lượng và nút tải về nổi bật.</p>
                                         </div>
                                         <button type="button" class="btn btn-xs btn-outline-success btn-block">Chèn khối này</button>
+                                    </div>
+
+                                    <!-- Khối 3B: Nhúng tài liệu PDF trực tiếp -->
+                                    <div class="wp-block-card" onclick="openPdfModalFromLib()">
+                                        <div>
+                                            <h4>Khung Nhúng PDF Trực Quan</h4>
+                                            <p>Nhúng toàn bộ tài liệu PDF với khung đọc tương tác, xem lật trang trực tiếp và nút tải về.</p>
+                                        </div>
+                                        <button type="button" class="btn btn-xs btn-outline-danger btn-block">Nhúng PDF này</button>
                                     </div>
 
                                     <!-- Khối 4: Lộ trình 3 bước -->
@@ -2794,6 +2910,10 @@ function openYoutubeModal() {
     $('#youtubeModal').modal('show');
 }
 
+function openPdfModal() {
+    $('#pdfEmbedModal').modal('show');
+}
+
 function openFileDownloadModal() {
     $('#fileDownloadModal').modal('show');
 }
@@ -2810,6 +2930,210 @@ function insertAndCloseBlock(type) {
 function openFileDownloadModalFromLib() {
     closeModal('blockLibraryModal');
     openFileDownloadModal();
+}
+
+function openPdfModalFromLib() {
+    closeModal('blockLibraryModal');
+    openPdfModal();
+}
+
+/* ================= PDF EMBED HELPER FUNCTIONS ================= */
+function switchPdfTab(tab) {
+    if (tab === 'url') {
+        $('#tab-btn-pdf-url').removeClass('btn-default').addClass('btn-primary');
+        $('#tab-btn-pdf-upload').removeClass('btn-primary').addClass('btn-default');
+        $('#pdf-tab-upload').hide();
+        $('#pdf-tab-url').show();
+    } else {
+        $('#tab-btn-pdf-upload').removeClass('btn-default').addClass('btn-primary');
+        $('#tab-btn-pdf-url').removeClass('btn-primary').addClass('btn-default');
+        $('#pdf-tab-url').hide();
+        $('#pdf-tab-upload').show();
+    }
+}
+
+function handlePdfDragOver(e) {
+    e.preventDefault();
+    $('#pdf-upload-dropzone').css('background', '#eff6ff').css('border-color', '#3b82f6');
+}
+
+function handlePdfDragLeave(e) {
+    e.preventDefault();
+    $('#pdf-upload-dropzone').css('background', '#f8fafc').css('border-color', '#cbd5e1');
+}
+
+function handlePdfDrop(e) {
+    e.preventDefault();
+    $('#pdf-upload-dropzone').css('background', '#f8fafc').css('border-color', '#cbd5e1');
+    var files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+        processPdfFile(files[0]);
+    }
+}
+
+function handlePdfFileUpload(e) {
+    var files = e.target.files;
+    if (files && files.length > 0) {
+        processPdfFile(files[0]);
+    }
+}
+
+function processPdfFile(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+        alert('Vui lòng chọn file định dạng PDF (.pdf)!');
+        return;
+    }
+
+    var cleanName = file.name.replace(/\.[^/.]+$/, "");
+    if (!$('#modal-pdf-title').val().trim()) {
+        $('#modal-pdf-title').val(cleanName);
+    }
+    
+    var sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+    if (file.size < 1024 * 1024) {
+        sizeStr = Math.round(file.size / 1024) + ' KB';
+    }
+    $('#modal-pdf-size').val(sizeStr);
+
+    $('#pdf-upload-status').show();
+    $('#pdf-upload-text').html('<i class="fa fa-spinner fa-spin" style="margin-right: 6px;"></i>Đang tải lên: <strong>' + file.name + '</strong> (' + sizeStr + ')...');
+
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+        var base64 = evt.target.result;
+        var csrf = $('input[name="csrf_token"]').val() || $('meta[name="csrf-token"]').attr('content') || '';
+        $.ajax({
+            url: window.location.pathname || '/cgi-bin/koha/tools/portal-news.pl',
+            type: 'POST',
+            data: {
+                op: 'cud-upload_pdf',
+                csrf_token: csrf,
+                base64_data: base64,
+                file_name: file.name
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res && res.success && res.url) {
+                    $('#modal-pdf-url').val(res.url);
+                    $('#modal-pdf-url-manual').val(res.url);
+                    $('#pdf-upload-text').html('<i class="fa fa-check-circle" style="color: #16a34a; margin-right: 6px;"></i>Tải lên thành công: <strong>' + (res.filename || file.name) + '</strong> (' + (res.size_str || sizeStr) + ')');
+                    updatePdfModalPreview();
+                } else {
+                    $('#pdf-upload-text').html('<span style="color:#b91c1c;"><i class="fa fa-exclamation-triangle" style="margin-right: 6px;"></i>Lỗi: ' + (res.error || 'Không thể lưu PDF') + '</span>');
+                }
+            },
+            error: function() {
+                $('#pdf-upload-text').html('<span style="color:#b91c1c;"><i class="fa fa-exclamation-triangle" style="margin-right: 6px;"></i>Lỗi kết nối khi tải file PDF lên máy chủ.</span>');
+            }
+        });
+    };
+    reader.onerror = function() {
+        $('#pdf-upload-text').html('<span style="color:#b91c1c;"><i class="fa fa-exclamation-triangle" style="margin-right: 6px;"></i>Lỗi khi đọc file trên máy của bạn.</span>');
+    };
+    reader.readAsDataURL(file);
+}
+
+function uploadPdfBase64Fallback(file) {
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+        var base64 = evt.target.result;
+        var csrf = $('input[name="csrf_token"]').val() || $('meta[name="csrf-token"]').attr('content') || '';
+        $.ajax({
+            url: '/cgi-bin/koha/tools/portal-news.pl',
+            type: 'POST',
+            data: {
+                op: 'cud-upload_pdf',
+                csrf_token: csrf,
+                base64_data: base64,
+                file_name: file.name
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res && res.success && res.url) {
+                    $('#modal-pdf-url').val(res.url);
+                    $('#modal-pdf-url-manual').val(res.url);
+                    $('#pdf-upload-text').html('Tải lên thành công: <strong>' + (res.filename || file.name) + '</strong>');
+                    updatePdfModalPreview();
+                } else {
+                    $('#pdf-upload-text').html('<span style="color:#b91c1c;">Lỗi: ' + (res.error || 'Không thể lưu PDF') + '</span>');
+                }
+            },
+            error: function() {
+                $('#pdf-upload-text').html('<span style="color:#b91c1c;">Lỗi kết nối khi tải file PDF.</span>');
+            }
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+function syncPdfUrlFromManual() {
+    var u = $('#modal-pdf-url-manual').val().trim();
+    $('#modal-pdf-url').val(u);
+    updatePdfModalPreview();
+}
+
+function updatePdfModalPreview() {
+    var url = $('#modal-pdf-url').val().trim();
+    var title = $('#modal-pdf-title').val().trim() || 'Tài liệu PDF Thư viện FTU';
+    if (url) {
+        $('#pdf-preview-title').text(title);
+        $('#pdf-preview-iframe').attr('src', url + '#toolbar=0&navpanes=0');
+        $('#pdf-preview-container').show();
+    } else {
+        $('#pdf-preview-container').hide();
+    }
+}
+
+function insertPdfEmbed() {
+    var url = $('#modal-pdf-url').val().trim();
+    if (!url) {
+        alert('Vui lòng chọn file PDF để tải lên hoặc nhập đường dẫn URL của file PDF!');
+        return;
+    }
+    var title = $('#modal-pdf-title').val().trim() || 'Tài liệu PDF đính kèm';
+    var height = parseInt($('#modal-pdf-height').val() || 650);
+    var size = $('#modal-pdf-size').val().trim();
+
+    var sizeInfo = size ? ' • Dung lượng: ' + size : '';
+    var safeDownloadName = title.replace(/["'<>]/g, '');
+
+    var html = '<div class="ftu-pdf-embed-card" style="margin: 24px 0; border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06); background: #ffffff;">' +
+               '<div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">' +
+               '<div style="display: flex; align-items: center; gap: 10px; min-width: 240px; flex: 1;">' +
+               '<div style="width: 34px; height: 34px; border-radius: 6px; background: #b91c1c; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.78rem; color: #fff; flex-shrink: 0; box-shadow: 0 2px 4px rgba(185, 28, 28, 0.4);">PDF</div>' +
+               '<div><h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #f8fafc; line-height: 1.3;">' + title + '</h4>' +
+               '<div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">Tài liệu điện tử' + sizeInfo + '</div></div>' +
+               '</div>' +
+               '<div style="display: flex; gap: 8px; align-items: center;">' +
+               '<a href="' + url + '" target="_blank" rel="noopener noreferrer" style="background: rgba(255, 255, 255, 0.12); color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.2); transition: background 0.2s;">Mở toàn màn hình</a>' +
+               '<a href="' + url + '" download="' + safeDownloadName + '.pdf" style="background: #b91c1c; color: #ffffff; padding: 6px 16px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(185, 28, 28, 0.35); transition: background 0.2s;">Tải về máy</a>' +
+               '</div>' +
+               '</div>' +
+               '<div style="width: 100%; height: ' + height + 'px; background: #525659; position: relative;">' +
+               '<iframe src="' + url + '#toolbar=1&navpanes=1" width="100%" height="100%" style="border: none; display: block;" allowfullscreen title="' + title + '">' +
+               '<div style="padding: 30px; text-align: center; background: #f8fafc; color: #334155;">' +
+               '<p style="font-size: 1rem; font-weight: 600;">Trình duyệt của bạn không hỗ trợ hiển thị PDF trực tiếp trong trang.</p>' +
+               '<a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 10px; background: #b91c1c; color: #fff; padding: 8px 18px; border-radius: 6px; font-weight: 700; text-decoration: none;">Nhấp vào đây để tải và xem tài liệu PDF</a>' +
+               '</div>' +
+               '</iframe>' +
+               '</div>' +
+               '<div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 8px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #64748b;">' +
+               '<span>Thư viện Trường Đại học Ngoại thương • Tài liệu điện tử</span>' +
+               '<a href="' + url + '" target="_blank" style="color: #0284c7; text-decoration: none; font-weight: 600;">Xem toàn màn hình &rarr;</a>' +
+               '</div>' +
+               '</div><p></p>';
+
+    insertEditorHtml(html);
+    closeModal('pdfEmbedModal');
+
+    // Reset fields
+    $('#modal-pdf-url').val('');
+    $('#modal-pdf-url-manual').val('');
+    $('#modal-pdf-title').val('');
+    $('#modal-pdf-size').val('');
+    $('#pdf-preview-container').hide();
+    $('#pdf-upload-status').hide();
 }
 
 function switchMediaTab(tab) {

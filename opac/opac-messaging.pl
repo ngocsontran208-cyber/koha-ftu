@@ -27,6 +27,7 @@ use C4::Output qw( output_html_with_http_headers );
 use C4::Members::Messaging;
 use C4::Form::MessagingPreferences;
 use Koha::Patrons;
+use Koha::Patron::Messages;
 use Koha::SMS::Providers;
 
 my $query          = CGI->new();
@@ -79,7 +80,46 @@ if ( $op eq 'cud-modify' ) {
 C4::Form::MessagingPreferences::set_form_values( { borrowernumber => $patron->borrowernumber }, $template )
     if $opac_messaging;
 
+my $unread_messages = Koha::Patron::Messages->search(
+    {
+        borrowernumber   => $borrowernumber,
+        message_type     => 'B',
+        patron_read_date => undef,
+    },
+    { order_by => { -desc => 'message_date' } }
+);
+
+my $history_messages = Koha::Patron::Messages->search(
+    {
+        borrowernumber => $borrowernumber,
+        message_type   => 'B',
+    },
+    { order_by => { -desc => 'message_date' } }
+);
+
+my $unread_count  = $unread_messages->count;
+my $history_count = $history_messages->count;
+
+my $active_tab = $query->param('tab') || q{};
+unless ($active_tab) {
+    if ($op eq 'cud-modify') {
+        $active_tab = 'settings';
+    } elsif ($unread_count > 0) {
+        $active_tab = 'unread';
+    } elsif ($history_count > 0) {
+        $active_tab = 'history';
+    } else {
+        $active_tab = 'settings';
+    }
+}
+
 $template->param(
+    patron_messages       => $unread_messages,
+    unread_messages       => $unread_messages,
+    unread_count          => $unread_count,
+    history_messages      => $history_messages,
+    history_count         => $history_count,
+    active_tab            => $active_tab,
     messagingview         => 1,
     SMSnumber             => $patron->smsalertnumber,                    # FIXME This is already sent 2 lines above
     SMSSendDriver         => C4::Context->preference("SMSSendDriver"),

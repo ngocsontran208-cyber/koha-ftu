@@ -34,7 +34,7 @@ $(document).ready(function () {
         $(".checkboxed input:checkbox").prop("checked", false);
     });
 
-    $("#submit_z3950_search").on("click", function () {
+    $("#submit_z3950_search, button[type='submit']").on("click", function () {
         $("body").css("cursor", "wait");
     });
     $("[name='changepage_prev']").on("click", function () {
@@ -60,6 +60,16 @@ $(document).ready(function () {
             $("body").css("cursor", "default");
             return false;
         } else {
+            var $isbn = $("#isbn");
+            if ($isbn.length && $isbn.val()) {
+                var cleanIsbn = $isbn.val().replace(/^[iI][sS][bB][nN][: \t]*/, '').replace(/\s*\([^)]*\)/g, '').trim();
+                $isbn.val(cleanIsbn);
+            }
+            var $issn = $("#issn");
+            if ($issn.length && $issn.val()) {
+                var cleanIssn = $issn.val().replace(/^[iI][sS][sS][nN][: \t]*/, '').replace(/\s*\([^)]*\)/g, '').trim();
+                $issn.val(cleanIssn);
+            }
             return true;
         }
     });

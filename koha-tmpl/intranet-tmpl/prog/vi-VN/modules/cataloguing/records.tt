@@ -887,7 +887,7 @@
               <td>
                 <div class="items-badge-container">
                   <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-                    <button type="button" class="badge-items-count btn-update-qty [% IF r.book_quantity == 0 && r.total_items == 0 %]qty-empty[% ELSIF r.book_quantity > 0 && r.total_items >= r.book_quantity %]qty-full[% ELSIF r.book_quantity > 0 %]qty-partial[% END %]" 
+                    <button type="button" class="badge-items-count btn-update-qty [% IF r.total_items == 0 %]qty-empty[% ELSIF r.book_quantity > r.total_items %]qty-partial[% ELSE %]qty-full[% END %]" 
                       id="badge-total-[% r.biblionumber | html %]" 
                       data-biblionumber="[% r.biblionumber | html %]" 
                       data-title="[% r.title | html %]" 
@@ -895,7 +895,7 @@
                       data-quantity="[% r.book_quantity | html %]" 
                       title="Bấm để cập nhật số lượng sách cho biểu ghi">
                       <span id="badge-total-text-[% r.biblionumber | html %]">
-                        [% IF r.book_quantity > 0 %]
+                        [% IF r.book_quantity > r.total_items %]
                           [% r.total_items | html %]/[% r.book_quantity | html %] bản
                         [% ELSE %]
                           [% r.total_items | html %] bản
@@ -1387,8 +1387,6 @@
 
 [% MACRO jsinclude BLOCK %]
 <script nonce="[% Koha.CSPNonce | $raw %]">
-  let activeUploadBase64 = null;
-
   window.showToast = function(msg, isError = false) {
     const toast = document.getElementById('globalToast');
     const toastMsg = document.getElementById('toastMsg');
@@ -1589,21 +1587,25 @@
         const badgeEl = document.getElementById('badge-total-' + biblionumber);
         if (badgeEl) {
           const cur = parseInt(badgeEl.getAttribute('data-total'), 10) || 0;
-          const qty = parseInt(badgeEl.getAttribute('data-quantity'), 10) || res.quantity || 0;
+          const oldQty = parseInt(badgeEl.getAttribute('data-quantity'), 10) || 0;
           const newTotal = cur + 1;
+          const qty = Math.max(newTotal, oldQty, res.quantity || 0);
           badgeEl.setAttribute('data-total', newTotal);
           badgeEl.setAttribute('data-quantity', qty);
+          const displayTxt = qty > newTotal ? `${newTotal}/${qty} bản` : `${newTotal} bản`;
           const txtSpan = document.getElementById('badge-total-text-' + biblionumber);
           if (txtSpan) {
-            txtSpan.textContent = qty > 0 ? `${newTotal}/${qty} bản` : `${newTotal} bản`;
+            txtSpan.textContent = displayTxt;
           } else {
-            badgeEl.textContent = qty > 0 ? `${newTotal}/${qty} bản` : `${newTotal} bản`;
+            badgeEl.textContent = displayTxt;
           }
           badgeEl.classList.remove('qty-empty', 'qty-full', 'qty-partial');
-          if (newTotal >= qty && qty > 0) {
-            badgeEl.classList.add('qty-full');
-          } else {
+          if (newTotal === 0) {
+            badgeEl.classList.add('qty-empty');
+          } else if (qty > newTotal) {
             badgeEl.classList.add('qty-partial');
+          } else {
+            badgeEl.classList.add('qty-full');
           }
         }
       } else {
@@ -1689,6 +1691,7 @@
     document.getElementById('qty_current_items_badge').textContent = totalItems + ' bản';
     
     const input = document.getElementById('qty_input');
+    input.value = Math.max(totalItems, quantity || totalItems);
     input.min = totalItems;
     window.openModal('modalUpdateQuantity');
     setTimeout(() => { input.focus(); input.select(); }, 100);
@@ -1724,20 +1727,21 @@
           badge.setAttribute('data-quantity', res.quantity);
           badge.setAttribute('data-total', res.total_items);
           
+          const displayTxt = res.quantity > res.total_items ? `${res.total_items}/${res.quantity} bản` : `${res.total_items} bản`;
           const txt = document.getElementById('badge-total-text-' + biblionumber);
           if (txt) {
-            txt.textContent = res.quantity > 0 ? `${res.total_items}/${res.quantity} bản` : `${res.total_items} bản`;
+            txt.textContent = displayTxt;
           } else {
-            badge.textContent = res.quantity > 0 ? `${res.total_items}/${res.quantity} bản` : `${res.total_items} bản`;
+            badge.textContent = displayTxt;
           }
 
           badge.classList.remove('qty-empty', 'qty-full', 'qty-partial');
-          if (res.quantity === 0 && res.total_items === 0) {
+          if (res.total_items === 0) {
             badge.classList.add('qty-empty');
-          } else if (res.total_items >= res.quantity && res.quantity > 0) {
-            badge.classList.add('qty-full');
-          } else {
+          } else if (res.quantity > res.total_items) {
             badge.classList.add('qty-partial');
+          } else {
+            badge.classList.add('qty-full');
           }
         }
       } else {
@@ -1777,19 +1781,20 @@
           const qty = parseInt(badge.getAttribute('data-quantity'), 10) || 0;
           const newTotal = Math.max(0, cur - 1);
           badge.setAttribute('data-total', newTotal);
+          const displayTxt = qty > newTotal ? `${newTotal}/${qty} bản` : `${newTotal} bản`;
           const txtSpan = document.getElementById('badge-total-text-' + biblionumber);
           if (txtSpan) {
-            txtSpan.textContent = qty > 0 ? `${newTotal}/${qty} bản` : `${newTotal} bản`;
+            txtSpan.textContent = displayTxt;
           } else {
-            badge.textContent = qty > 0 ? `${newTotal}/${qty} bản` : `${newTotal} bản`;
+            badge.textContent = displayTxt;
           }
           badge.classList.remove('qty-empty', 'qty-full', 'qty-partial');
-          if (newTotal === 0 && qty === 0) {
+          if (newTotal === 0) {
             badge.classList.add('qty-empty');
-          } else if (newTotal >= qty && qty > 0) {
-            badge.classList.add('qty-full');
-          } else {
+          } else if (qty > newTotal) {
             badge.classList.add('qty-partial');
+          } else {
+            badge.classList.add('qty-full');
           }
         }
       } else {

@@ -441,12 +441,20 @@ if ($search_query) {
         -uri    => "/cgi-bin/koha/opac-search.pl?$search_query",
         -cookie => $cookie,
     );
+    exit;
 }
 
 # if not an empty string this indicates to return
 # back to the page we triggered the login from
 my $return = $query->param('return');
 if ($return) {
+    if ( $return =~ m{^/[^/\\]} ) {
+        print $query->redirect(
+            -uri    => $return,
+            -cookie => $cookie,
+        );
+        exit;
+    }
     my $uri_syspref = C4::Context->preference('OPACBaseURL');
     if ($uri_syspref) {
         my $uri = URI->new($uri_syspref);
@@ -458,6 +466,7 @@ if ($return) {
                 -uri    => "$return_uri",
                 -cookie => $cookie,
             );
+            exit;
         }
     }
 }

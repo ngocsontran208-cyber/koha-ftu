@@ -125,6 +125,25 @@ if ( $op eq 'edit_form' ) {
         $layout    = C4::Labels::Layout->new(@params);
         $layout_id = $layout->save();
     }
+
+    # Đồng bộ hoặc tạo mới Mẫu phôi kích thước tương ứng trong creator_templates nếu được chọn
+    if ($cgi->param('sync_template')) {
+        my $tmpl_code = scalar $cgi->param('layout_name');
+        my $custom_w  = scalar $cgi->param('custom_width_mm') || 38;
+        my $custom_h  = scalar $cgi->param('custom_height_mm') || 21;
+        my $dbh = C4::Context->dbh;
+        my $check_sth = $dbh->prepare("SELECT template_id FROM creator_templates WHERE template_code = ?");
+        $check_sth->execute($tmpl_code);
+        my ($existing_tmpl_id) = $check_sth->fetchrow_array;
+        if ($existing_tmpl_id) {
+            my $upd_sth = $dbh->prepare("UPDATE creator_templates SET label_width = ?, label_height = ?, units = 'MM' WHERE template_id = ?");
+            $upd_sth->execute($custom_w, $custom_h, $existing_tmpl_id);
+        } else {
+            my $ins_sth = $dbh->prepare("INSERT INTO creator_templates (template_code, template_desc, label_width, label_height, units, cols, `rows`, creator) VALUES (?, ?, ?, ?, 'MM', 1, 1, 'Labels')");
+            $ins_sth->execute($tmpl_code, "Mẫu phôi kích thước cho $tmpl_code", $custom_w, $custom_h);
+        }
+    }
+
     print $cgi->redirect(
         "label-manage.pl?label_element=layout" . ( $layout_id == -1 ? "&element_id=$layout_id&op=$op&error=1" : '' ) );
     exit;
@@ -138,6 +157,44 @@ my $font_types               = _set_selected( get_font_types(),               $l
 my $text_justification_types = _set_selected( get_text_justification_types(), $layout, 'text_justify' );
 my ( $select_text_fields, $select_text_fields_cnt ) = _select_format_string( $layout->get_attr('format_string') );
 
+my $dbh = C4::Context->dbh;
+my $templates_sth = $dbh->prepare(
+    "SELECT template_id, template_code, template_desc, label_width, label_height, units FROM creator_templates WHERE creator='Labels' ORDER BY template_id DESC"
+);
+$templates_sth->execute();
+my $templates = $templates_sth->fetchall_arrayref({});
+
+# Tự động lấy kích thước mặc định hoặc từ Template tương ứng
+my $custom_width_mm = 38;
+my $custom_height_mm = 21;
+if ($layout && $layout->get_attr('layout_name')) {
+    my $check_sth = $dbh->prepare("SELECT label_width, label_height, units FROM creator_templates WHERE template_code = ? LIMIT 1");
+    $check_sth->execute($layout->get_attr('layout_name'));
+    my ($lw, $lh, $lu) = $check_sth->fetchrow_array;
+    if ($lw && $lh) {
+        if ($lu eq 'POINT') {
+            $custom_width_mm = sprintf("%.1f", $lw * 0.352778);
+            $custom_height_mm = sprintf("%.1f", $lh * 0.352778);
+        } else {
+            $custom_width_mm = $lw;
+            $custom_height_mm = $lh;
+        }
+    }
+}
+
+my $sample_items_sth = $dbh->prepare(
+    "SELECT items.itemnumber, items.barcode, items.itemcallnumber, biblio.title, biblio.author,
+            COALESCE(NULLIF(biblioitems.publicationyear, ''), NULLIF(biblio.copyrightdate, ''), '2024') AS publicationyear
+     FROM items
+     JOIN biblio ON items.biblionumber = biblio.biblionumber
+     LEFT JOIN biblioitems ON items.biblioitemnumber = biblioitems.biblioitemnumber
+     WHERE items.itemcallnumber IS NOT NULL AND items.itemcallnumber != ''
+     ORDER BY items.itemnumber DESC
+     LIMIT 8"
+);
+$sample_items_sth->execute();
+my $sample_items = $sample_items_sth->fetchall_arrayref({});
+
 $template->param(
     barcode_types            => $barcode_types,
     label_types              => $label_types,
@@ -145,6 +202,10 @@ $template->param(
     text_justification_types => $text_justification_types,
     fields                   => $select_text_fields,
     field_count              => $select_text_fields_cnt,
+    templates                => $templates,
+    sample_items             => $sample_items,
+    custom_width_mm          => $custom_width_mm,
+    custom_height_mm         => $custom_height_mm,
     layout_id                => $layout->get_attr('layout_id') > -1 ? $layout->get_attr('layout_id') : '',
     layout_name              => $layout->get_attr('layout_name'),
     guidebox                 => $layout->get_attr('guidebox'),

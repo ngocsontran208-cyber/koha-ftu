@@ -165,6 +165,9 @@
                             <a href="/cgi-bin/koha/opac-user.pl" class="nav-link dropdown-toggle" id="user-menu" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i>
                                 <span class="userlabel">Welcome, [% INCLUDE 'patron-title.inc' patron = logged_in_user no_html = 1 %]</span>
+                                [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
+                                    <span class="badge rounded-pill bg-danger ms-1" style="font-size: 11px; padding: 2px 6px;" title="[% logged_in_user.checkouts.count %] active loans">[% logged_in_user.checkouts.count %]</span>
+                                [% END %]
                             </a>
                             <a tabindex="0" role="menuitem" class="logout js-hide" href="/cgi-bin/koha/opac-main.pl?logout.x=1"><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> Log out</a>
                         [% ELSE %]
@@ -174,11 +177,11 @@
                                     ><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Log in to your account</span></a
                                 >
                             [% ELSIF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
-                                <a href="/cgi-bin/koha/svc/auth/googleopenidconnect" class="nav-link login-link loginModal-trigger" aria-label="Log in to your account"
+                                <a href="/cgi-bin/koha/svc/auth/googleopenidconnect" class="nav-link login-link loginModal-trigger" data-return="true" aria-label="Log in to your account"
                                     ><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Log in to your account</span></a
                                 >
                             [% ELSE %]
-                                <a href="/cgi-bin/koha/opac-user.pl" class="nav-link login-link loginModal-trigger" aria-label="Log in to your account"
+                                <a href="/cgi-bin/koha/opac-user.pl" class="nav-link login-link loginModal-trigger" data-return="true" aria-label="Log in to your account"
                                     ><i class="fa fa-user fa-fw fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Log in to your account</span></a
                                 >
                             [% END %]
@@ -200,6 +203,13 @@
                                         ></a
                                     >
                                 </p>
+                                [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
+                                <p>
+                                    <a class="login-link" href="/cgi-bin/koha/opac-user.pl?tab=opac-user-checkouts">
+                                        <i class="fa fa-book" aria-hidden="true"></i> Current checkouts: <strong>[% logged_in_user.checkouts.count %]</strong>
+                                    </a>
+                                </p>
+                                [% END %]
                                 [% IF Koha.Preference( 'EnableOpacSearchHistory' ) %]
                                     <p>
                                         <a tabindex="0" role="menuitem" class="login-link" href="/cgi-bin/koha/opac-search-history.pl" title="View your search history">Search history</a>
@@ -499,6 +509,7 @@
                 <form action="/cgi-bin/koha/opac-user.pl" method="post" name="auth" id="modalAuth">
                     [% INCLUDE 'csrf-token.inc' %]
                     <input type="hidden" name="has-search-query" id="has-search-query" value="" />
+                    <input type="hidden" name="return" id="modal-return-url" value="" />
                     <div class="modal-body">
                         [% IF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
                             <a href="/cgi-bin/koha/svc/auth/googleopenidconnect" class="btn btn-light" id="openid_connect"><i class="fa-brands fa-google" aria-hidden="true"></i> Log in with Google</a>

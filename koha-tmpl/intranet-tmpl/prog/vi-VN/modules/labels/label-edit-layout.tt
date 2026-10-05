@@ -1,27 +1,27 @@
 [% USE raw %]
 [% USE Koha %]
+[% USE Asset %]
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [%- BLOCK translate_label_types -%]
     [%- SWITCH type -%]
-
     [%- CASE 'BIB' -%]
-        <span> Only the bibliographic data is printed</span>
+        <span>Chỉ in dữ liệu thư mục / ký hiệu gáy (Spine Only)</span>
     [%- CASE 'BARBIB' -%]
-        <span> Barcode precedes bibliographic data</span>
+        <span>Mã vạch trước, dữ liệu thư mục sau (Barcode + Spine)</span>
     [%- CASE 'BIBBAR' -%]
-        <span> Bibliographic data precedes barcode</span>
+        <span>Dữ liệu thư mục trước, mã vạch sau (Spine + Barcode)</span>
     [%- CASE 'ALT' -%]
-        <span> Barcode and bibliographic data are printed on alternating labels</span>
+        <span>In xen kẽ nhãn gáy và nhãn mã vạch (Alternating)</span>
     [%- CASE 'BAR' -%]
-        <span> Only the barcode is printed</span>
+        <span>Chỉ in mã vạch (Barcode Only)</span>
     [%- END -%]
 [%- END -%]
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
         [% IF( layout_id ) %]
-            Chỉnh sửa bố cục nhãn [% layout_id | html %]
+            Thiết kế bố cục nhãn [% layout_id | html %]
         [% ELSE %]
             Tạo bố cục nhãn mới
         [% END %]
@@ -29,18 +29,279 @@
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+    .ftu-studio-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-top: 15px;
+    }
+    .ftu-controls-col {
+        flex: 1 1 580px;
+        min-width: 320px;
+    }
+    .ftu-preview-col {
+        flex: 0 0 470px;
+        min-width: 360px;
+    }
+    .ftu-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .ftu-card-header {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 0;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .ftu-mode-tabs {
+        display: flex;
+        gap: 8px;
+        background: #f1f5f9;
+        padding: 4px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .ftu-mode-btn {
+        flex: 1;
+        padding: 10px 14px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+    .ftu-mode-btn:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+    .ftu-mode-btn.active {
+        background: #ffffff;
+        color: #0284c7;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .ftu-preset-badge {
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-right: 6px;
+        margin-bottom: 8px;
+    }
+    .ftu-preset-badge:hover, .ftu-preset-badge.active {
+        border-color: #0284c7;
+        background: #e0f2fe;
+        color: #0369a1;
+        box-shadow: 0 1px 3px rgba(2,132,199,0.15);
+    }
+    .ftu-field-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 10px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+    }
+    .ftu-field-item:hover {
+        border-color: #cbd5e1;
+    }
+    .ftu-field-item.is-hidden-field {
+        opacity: 0.55;
+        background: #f8fafc;
+        border-style: dashed;
+    }
+    .ftu-switch-wrap {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        gap: 10px;
+        margin: 0;
+        user-select: none;
+    }
+    .ftu-switch-wrap input {
+        display: none;
+    }
+    .ftu-switch-btn {
+        width: 44px;
+        height: 24px;
+        background: #cbd5e1;
+        border-radius: 20px;
+        position: relative;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+        display: inline-block;
+    }
+    .ftu-switch-btn::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: #ffffff;
+        border-radius: 50%;
+        transition: transform 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    .ftu-switch-wrap input:checked + .ftu-switch-btn {
+        background: #0284c7;
+    }
+    .ftu-switch-wrap input:checked + .ftu-switch-btn::after {
+        transform: translateX(20px);
+    }
+    .ftu-switch-badge {
+        display: inline-block;
+        min-width: 96px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .badge-visible {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+    .badge-hidden {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+    .btn-field-order {
+        padding: 2px 7px;
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+    .ftu-preview-sticky {
+        position: sticky;
+        top: 20px;
+    }
+    .ftu-preview-canvas-container {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 320px;
+        position: relative;
+        overflow: hidden;
+    }
+    .ftu-spine-label-box {
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        position: relative;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    .ftu-spine-label-box.has-guidebox {
+        border: 1px dashed #94a3b8;
+    }
+    .ftu-spine-label-box.no-guidebox {
+        border: 1px solid #cbd5e1;
+    }
+    .barcode-svg-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 4px;
+        width: 100%;
+    }
+    #preview-ddc-block {
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: #0f172a;
+    }
+    #preview-cutter-block {
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #0f172a;
+    }
+    .callnum-line {
+        line-height: 1.25;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .callnum-author-line {
+        font-weight: 600;
+    }
+    .callnum-year-line {
+        font-weight: 500;
+        color: #475569;
+    }
+    .ftu-overflow-warning {
+        display: none;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        margin-top: 12px;
+        width: 100%;
+    }
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #ftu-print-area, #ftu-print-area * {
+            visibility: visible;
+        }
+        #ftu-print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            margin: 0;
+            padding: 0;
+        }
+    }
+</style>
 </head>
 
 [% BLOCK translate_justification_types %]
     [% SWITCH type %]
-    [% CASE 'L' %]
-        <span>Trái</span>
-    [% CASE 'C' %]
-        <span>Giữa</span>
-    [% CASE 'R' %]
-        <span>Phải</span>
+    [% CASE 'L' %]<span>Trái</span>
+    [% CASE 'C' %]<span>Giữa</span>
+    [% CASE 'R' %]<span>Phải</span>
     [% END %]
 [% END %]
+
 <body id="labels_label-edit-layout" class="tools labels">
 [% WRAPPER 'header.inc' %]
     [% INCLUDE 'cat-search.inc' %]
@@ -59,7 +320,7 @@
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             [% IF ( layout_id ) %]
-                <span>Chỉnh sửa bố cục nhãn [% layout_id | html %]</span>
+                <span>Thiết kế nhãn gáy #[% layout_id | html %]</span>
             [% ELSE %]
                 <span>Tạo bố cục nhãn mới</span>
             [% END %]
@@ -70,161 +331,553 @@
 [% WRAPPER 'main-container.inc' aside='labels-menu' %]
     [% INCLUDE 'labels-toolbar.inc' %]
 
-    [% IF ( layout_id ) %]
-        <h1 class="ftu-clean-title"><i class="fa fa-object-group"></i> Chỉnh sửa bố cục nhãn [% layout_id | html %]</h1>
-    [% ELSE %]
-        <h1 class="ftu-clean-title"><i class="fa fa-object-group"></i> Tạo bố cục nhãn mới</h1>
-    [% END %]
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="ftu-clean-title mb-0" style="font-size: 1.55rem; font-weight: 700; color: #1e293b;">
+                [% IF ( layout_id ) %]
+                    Thiết Kế Nhãn Gáy &amp; Mã Vạch (Bố cục #[% layout_id | html %])
+                [% ELSE %]
+                    Thiết Kế Nhãn Gáy &amp; Mã Vạch Mới
+                [% END %]
+            </h1>
+        </div>
+    </div>
 
-    <form name="input" action="/cgi-bin/koha/labels/label-edit-layout.pl" method="post">
-        <fieldset class="rows">
-            <ol>
-                <li>
-                    <label for="layout_name">Layout name: </label>
-                    <input type="text" name="layout_name" id="layout_name" size="20" value="[% layout_name | html %]" />
-                </li>
-                <li>
-                    <label for="barcode_type">Choose barcode type (encoding): </label>
-                    <select name="barcode_type" id="barcode_type">
-                        [% FOREACH barcode_type IN barcode_types %]
-                            [% IF ( barcode_type.selected ) %]
-                                <option value="[% barcode_type.type | html %]" selected="selected">[% barcode_type.name | html %]</option>
-                            [% ELSE %]
-                                <option value="[% barcode_type.type | html %]">[% barcode_type.name | html %]</option>
-                            [% END %]
-                        [% END %]
-                    </select>
-                </li>
-                <li>
-                    <label for="printing_type">Choose layout type: </label>
-                    <select name="printing_type" id="printing_type">
-                        [% FOREACH label_type IN label_types %]
-                            [% IF ( label_type.selected ) %]
-                                <option value="[% label_type.type | html %]" selected="selected">[% PROCESS translate_label_types type=label_type.type %]</option>
-                            [% ELSE %]
-                                <option value="[% label_type.type | html %]">[% PROCESS translate_label_types type=label_type.type %]</option>
-                            [% END %]
-                        [% END %]
-                    </select>
-                </li>
-                <li>
-                    <fieldset>
-                        <legend>Bibliographic data to print</legend>
-                        <ol>
-                            <li class="radio"
-                                >[% IF ( layout_string ) %]
-                                    <input type="radio" name="layout_choice" id="layout_choice_order" value="layout_table" checked="checked" /><label for="layout_choice_order">Choose order of text fields to print</label>
-                                [% ELSE %]
-                                    <input type="radio" name="layout_choice" id="layout_choice_order" value="layout_table" /><label for="layout_choice_order">Choose order of text fields to print</label>
-                                [% END %]
-                                <div id="layout_table">
-                                    <p>
-                                        [% FOREACH text_field IN fields %]
-                                            <select name="[% text_field.field_name | html %]" id="[% text_field.field_name |url %]">
-                                                <option value=""></option>
-                                                [% FOREACH orde IN [1..field_count] %]
-                                                    [% IF ( orde == text_field.order ) %]
-                                                        <option value="[% orde | html %]" selected="1">[% orde | html %]</option>
-                                                    [% ELSE %]
-                                                        <option value="[% orde | html %]">[% orde | html %]</option>
-                                                    [% END %]
-                                                [% END %] </select
-                                            >&nbsp;<label for="[% text_field.field_name |url %]">[% text_field.field_label | html %]</label>
+    <!-- BỘ CHỌN 2 LOẠI NHÃN THƯ VIỆN & TÙY BIẾN TỰ DO -->
+    <div class="ftu-mode-tabs">
+        <button type="button" class="ftu-mode-btn active" id="btn-mode-spine" data-mode="spine">
+            Nhãn Thông Tin Sách (Nhãn gáy)
+        </button>
+        <button type="button" class="ftu-mode-btn" id="btn-mode-barcode" data-mode="barcode">
+            Nhãn Có Mã Vạch (Dán bìa / ĐKCB)
+        </button>
+        <button type="button" class="ftu-mode-btn" id="btn-mode-custom" data-mode="custom">
+            Tự Thiết Kế Tự Do
+        </button>
+    </div>
 
-                                            &nbsp;&nbsp;
-                                        [% END %]
-                                    </p>
+    <form name="input" id="label-layout-form" action="/cgi-bin/koha/labels/label-edit-layout.pl" method="post">
+        [% INCLUDE 'csrf-token.inc' %]
+        <input type="hidden" name="op" value="cud-save" />
+        <input type="hidden" name="layout_id" value="[% layout_id | html %]" />
+        <input type="hidden" name="layout_choice" value="layout_string" />
+
+        <div class="ftu-studio-wrapper">
+            <!-- CỘT TRÁI: BỘ CẤU HÌNH THÔNG MINH (CONTROLS) -->
+            <div class="ftu-controls-col">
+                <!-- CARD 1: KÍCH THƯỚC NHÃN TỰ ĐỊNH & THÔNG TIN BỐ CỤC -->
+                <div class="ftu-card">
+                    <h3 class="ftu-card-header">
+                        <span>1. Kích thước Nhãn Tự Định &amp; Bố Cục</span>
+                    </h3>
+
+                    <div class="form-group mb-3">
+                        <label for="layout_name" class="font-weight-bold">Tên bố cục nhãn (*):</label>
+                        <input type="text" name="layout_name" id="layout_name" class="form-control" style="max-width: 380px;" value="[% layout_name | html %]" required="required" placeholder="Ví dụ: Nhan_Gay_FTU_38x21" />
+                    </div>
+
+                    <!-- BỘ TỰ NHẬP KÍCH THƯỚC MM -->
+                    <div class="p-3 mb-3 bg-light rounded border">
+                        <label class="font-weight-bold d-block mb-2 text-dark">Kích thước nhãn tự định (Milimet):</label>
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div>
+                                <label for="custom_width_mm" class="text-muted small d-block mb-1">Chiều rộng nhãn:</label>
+                                <div class="input-group">
+                                    <input type="number" id="custom_width_mm" name="custom_width_mm" value="[% custom_width_mm || 38 %]" min="15" max="300" step="0.5" class="form-control font-weight-bold text-center" style="width: 95px;" />
+                                    <span class="input-group-text">mm</span>
                                 </div>
-                            </li>
-                            [% UNLESS ( layout_string ) %]
-                                <li class="radio"><input type="radio" id="layout_choice_list" name="layout_choice" value="layout_string" checked="checked" /> <label for="layout_choice_list">List fields</label></li>
-                            [% ELSE %]
-                                <li class="radio"><input type="radio" id="layout_choice_list" name="layout_choice" value="layout_string" /> <label for="layout_choice_list">List fields</label></li>
+                            </div>
+                            <div>
+                                <label for="custom_height_mm" class="text-muted small d-block mb-1">Chiều cao nhãn:</label>
+                                <div class="input-group">
+                                    <input type="number" id="custom_height_mm" name="custom_height_mm" value="[% custom_height_mm || 21 %]" min="10" max="300" step="0.5" class="form-control font-weight-bold text-center" style="width: 95px;" />
+                                    <span class="input-group-text">mm</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="custom_padding_mm" class="text-muted small d-block mb-1">Lề lọt lòng:</label>
+                                <div class="input-group">
+                                    <input type="number" id="custom_padding_mm" value="2" min="0" max="15" step="0.5" class="form-control text-center" style="width: 80px;" />
+                                    <span class="input-group-text">mm</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-muted mt-2" style="font-size: 0.8rem;">
+                            Bạn có thể tự do thay đổi chiều rộng và chiều cao bất kỳ. Khung xem trước bên phải sẽ co giãn đúng theo kích thước này.
+                        </div>
+                    </div>
+
+                    <!-- NÚT GỢI Ý MẪU PHÔI DECAL 1-CLICK -->
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold d-block">Gợi ý kích thước thông dụng (1-Click Presets):</label>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            <span class="ftu-preset-badge active" data-w="38" data-h="21" data-type="BIB" data-name="Tomy 145 (38x21mm)">
+                                <strong>Tomy 145</strong> (38 x 21 mm) - Nhãn gáy sách
+                            </span>
+                            <span class="ftu-preset-badge" data-w="67" data-h="38" data-type="BIBBAR" data-name="Tomy 144 (67x38mm)">
+                                <strong>Tomy 144</strong> (67 x 38 mm) - Nhãn gáy + Mã vạch
+                            </span>
+                            <span class="ftu-preset-badge" data-w="50" data-h="30" data-type="BARBIB" data-name="Cuộn nhiệt (50x30mm)">
+                                <strong>Cuộn Nhiệt</strong> (50 x 30 mm) - Máy in tem Xprinter/Zebra
+                            </span>
+                            <span class="ftu-preset-badge" data-w="35" data-h="22" data-type="BIB" data-name="Cuộn nhỏ (35x22mm)">
+                                <strong>Cuộn Nhỏ</strong> (35 x 22 mm) - Nhãn gáy mini
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="printing_type" class="font-weight-bold">Kiểu in nhãn (Printing Type):</label>
+                            <select name="printing_type" id="printing_type" class="form-select">
+                                [% FOREACH label_type IN label_types %]
+                                    [% IF ( label_type.selected ) %]
+                                        <option value="[% label_type.type | html %]" selected="selected">[% PROCESS translate_label_types type=label_type.type %]</option>
+                                    [% ELSE %]
+                                        <option value="[% label_type.type | html %]">[% PROCESS translate_label_types type=label_type.type %]</option>
+                                    [% END %]
+                                [% END %]
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="barcode_type" class="font-weight-bold">Chuẩn mã vạch (Barcode Encoding):</label>
+                            <select name="barcode_type" id="barcode_type" class="form-select">
+                                [% FOREACH b_type IN barcode_types %]
+                                    [% IF ( b_type.selected ) %]
+                                        <option value="[% b_type.type | html %]" selected="selected">[% b_type.name | html %]</option>
+                                    [% ELSE %]
+                                        <option value="[% b_type.type | html %]">[% b_type.name | html %]</option>
+                                    [% END %]
+                                [% END %]
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" name="sync_template" id="sync_template" value="1" checked="checked" />
+                        <label class="form-check-label font-weight-bold" for="sync_template">
+                            Tự động đồng bộ / tạo Mẫu phôi (Template) tương ứng trong Koha để in theo lô (Batch printing)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- CARD 2: GÁN CÁC TRƯỜNG & SẮP XẾP THỨ TỰ IN -->
+                <div class="ftu-card">
+                    <h3 class="ftu-card-header">
+                        <span>2. Gán các Trường Dữ Liệu &amp; Sắp Xếp Thứ Tự</span>
+                        <span class="text-muted font-weight-normal" style="font-size: 0.8rem;">Dùng nút ▲ / ▼ để đổi vị trí trường</span>
+                    </h3>
+
+                    <!-- HƯỚNG DẪN ẨN / HIỆN RÕ RÀNG -->
+                    <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between" style="font-size: 0.84rem; background: #f0f9ff; border-color: #bae6fd; color: #0369a1;">
+                        <span>Gạt công tắc để chuyển giữa <strong>[ Đang hiển thị ]</strong> và <strong>[ Đã ẩn ]</strong>. Trường nào bị ẩn sẽ không in lên tem.</span>
+                    </div>
+
+                    <div id="fields-sortable-container" class="mb-3">
+                        <!-- TRƯỜNG: TIÊU ĐỀ THƯ VIỆN -->
+                        <div class="ftu-field-item" data-field-id="header">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Tiêu đề đầu nhãn (Tên thư viện / Trường):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Hiển thị định danh thư viện ở đầu tem</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text" id="custom_header_text" class="form-control form-control-sm" style="width: 130px;" value="FTU - HCMC" />
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_header_check" checked="checked">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-visible">Đang hiển thị</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: SỐ PHÂN LOẠI DDC -->
+                        <div class="ftu-field-item" data-field-id="ddc">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Số phân loại (DDC):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Mã số môn loại Dewey (ví dụ: 657.450711)</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_ddc_check" data-field="ddc" checked="checked">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-visible">Đang hiển thị</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: MÃ TÁC GIẢ CUTTER -->
+                        <div class="ftu-field-item" data-field-id="cutter">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Mã tác giả (Cutter):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Ký hiệu định danh tác giả (ví dụ: H928)</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_cutter_check" data-field="cutter" checked="checked">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-visible">Đang hiển thị</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: MÃ VẠCH TÀI LIỆU -->
+                        <div class="ftu-field-item is-hidden-field" data-field-id="barcode">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Mã vạch tài liệu (Barcode &amp; ĐKCB):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Vạch mã vạch kèm số đăng ký cá biệt</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_barcode_check" data-field="barcode">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-hidden">Đã ẩn</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: NHAN ĐỀ SÁCH -->
+                        <div class="ftu-field-item" data-field-id="title">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Nhan đề tài liệu (Title):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Tên sách (tự động rút gọn vừa khung)</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_title_check" data-field="title" checked="checked">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-visible">Đang hiển thị</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: TÁC GIẢ -->
+                        <div class="ftu-field-item" data-field-id="author">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Tác giả tài liệu (Author):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Họ tên tác giả chính</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_author_check" data-field="author">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-hidden">Đã ẩn</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG MỚI: NĂM XUẤT BẢN (PUBLICATION YEAR) -->
+                        <div class="ftu-field-item is-hidden-field" data-field-id="publicationyear">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Năm xuất bản (Publication Year):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Năm xuất bản ấn phẩm (ví dụ: 2024)</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_publicationyear_check" data-field="publicationyear">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-hidden">Đã ẩn</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: VỊ TRÍ KHO -->
+                        <div class="ftu-field-item is-hidden-field" data-field-id="location">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Kho / Vị trí lưu trữ (Location):</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Ký hiệu kho sách tài liệu</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_location_check" data-field="location_description">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-hidden">Đã ẩn</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TRƯỜNG: VĂN BẢN GHI CHÚ TỰ DO -->
+                        <div class="ftu-field-item is-hidden-field" data-field-id="custom_note">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-order btn-field-up" title="Di chuyển lên">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-field-order btn-field-order btn-field-down" title="Di chuyển xuống">▼</button>
+                                </div>
+                                <div>
+                                    <strong>Ghi chú / Văn bản tự do:</strong>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Dòng ghi chú bổ sung (ví dụ: Tài liệu đọc tại chỗ)</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text" id="custom_note_text" class="form-control form-control-sm" style="width: 130px;" placeholder="Ghi chú thêm..." />
+                                <label class="ftu-switch-wrap" title="Bấm để bật hoặc ẩn">
+                                    <input class="field-toggle-check" type="checkbox" id="field_custom_note_check">
+                                    <span class="ftu-switch-btn"></span>
+                                    <span class="ftu-switch-badge badge-hidden">Đã ẩn</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ô dữ liệu format_string đồng bộ cho Koha Core -->
+                    <div class="form-group">
+                        <input type="hidden" name="callnum_split" id="callnum_split" value="1" />
+                        <label for="format_string" class="font-weight-bold" style="font-size: 0.85rem; color: #475569;">
+                            Chuỗi trường dữ liệu Koha (format_string):
+                        </label>
+                        <input type="text" name="format_string" id="format_string" class="form-control font-monospace" style="font-size: 0.85rem;" value="[% format_string | html %]" />
+                        <div class="text-muted mt-1" style="font-size: 0.78rem;">
+                            Tự động đồng bộ theo thứ tự các trường bạn gán ở trên. Có thể thêm trường MARC bất kỳ (ví dụ: <code>082a, 050a, 245a</code>).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: TYPOGRAPHY, CANH LỀ & ĐỊNH DẠNG -->
+                <div class="ftu-card">
+                    <h3 class="ftu-card-header">
+                        <span>3. Kiểu Dáng Chữ &amp; Trình Bày (Typography)</span>
+                    </h3>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label for="font" class="font-weight-bold">Phông chữ:</label>
+                            <select name="font" id="font" class="form-select">
+                                [% FOREACH f_type IN font_types %]
+                                    [% IF ( f_type.selected ) %]
+                                        <option value="[% f_type.type | html %]" selected="selected">[% f_type.name | html %]</option>
+                                    [% ELSE %]
+                                        <option value="[% f_type.type | html %]">[% f_type.name | html %]</option>
+                                    [% END %]
+                                [% END %]
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="font_size" class="font-weight-bold">Cỡ chữ (pt):</label>
+                            <div class="input-group">
+                                <input type="number" name="font_size" id="font_size" class="form-control" min="5" max="24" value="[% font_size || 9 | html %]" />
+                                <span class="input-group-text">pt</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="text_justify" class="font-weight-bold">Canh lề chữ:</label>
+                            <select name="text_justify" id="text_justify" class="form-select">
+                                [% FOREACH t_just IN text_justification_types %]
+                                    [% IF ( t_just.selected ) %]
+                                        <option value="[% t_just.type | html %]" selected="selected">[% PROCESS translate_justification_types type=t_just.type %]</option>
+                                    [% ELSE %]
+                                        <option value="[% t_just.type | html %]">[% PROCESS translate_justification_types type=t_just.type %]</option>
+                                    [% END %]
+                                [% END %]
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <div class="form-check mt-2">
+                                [% IF ( guidebox ) %]
+                                    <input class="form-check-input" type="checkbox" name="guidebox" id="guidebox" value="1" checked="checked" />
+                                [% ELSE %]
+                                    <input class="form-check-input" type="checkbox" name="guidebox" id="guidebox" value="1" />
+                                [% END %]
+                                <label class="form-check-label font-weight-bold" for="guidebox">
+                                    Vẽ đường viền khung nhãn (Guide box)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-2">
+                                [% IF ( oblique_title ) %]
+                                    <input class="form-check-input" type="checkbox" name="oblique_title" id="oblique_title" value="1" checked="checked" />
+                                [% ELSE %]
+                                    <input class="form-check-input" type="checkbox" name="oblique_title" id="oblique_title" value="1" />
+                                [% END %]
+                                <label class="form-check-label font-weight-bold" for="oblique_title">
+                                    In nghiêng Nhan đề (Oblique title)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="scale_width" id="scale_width" value="[% scale_width || 0.8 | html %]" />
+                    <input type="hidden" name="scale_height" id="scale_height" value="[% scale_height || 0.01 | html %]" />
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-4" style="font-weight: 600;">
+                        Lưu bố cục nhãn vào Koha
+                    </button>
+                    <a class="btn btn-outline-secondary btn-lg" href="/cgi-bin/koha/labels/label-manage.pl?label_element=layout">
+                        Hủy bỏ
+                    </a>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: TRÌNH XEM TRƯỚC THỜI GIAN THỰC (LIVE PREVIEW STUDIO) -->
+            <div class="ftu-preview-col">
+                <div class="ftu-card ftu-preview-sticky">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="ftu-card-header m-0 p-0 border-0">
+                            Xem Trước Trực Quan
+                        </h3>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary zoom-btn" data-zoom="1">100%</button>
+                            <button type="button" class="btn btn-outline-secondary zoom-btn active" data-zoom="1.4">140%</button>
+                            <button type="button" class="btn btn-outline-secondary zoom-btn" data-zoom="1.8">180%</button>
+                        </div>
+                    </div>
+
+                    <!-- CHỌN SÁCH MẪU THỬ NGHIỆM -->
+                    <div class="form-group mb-3">
+                        <label for="sample_book_select" style="font-size: 0.85rem; font-weight: 600; color: #475569;">
+                            Thử nghiệm với sách trong thư viện:
+                        </label>
+                        <select id="sample_book_select" class="form-select form-select-sm">
+                            [% FOREACH item IN sample_items %]
+                                <option value="[% item.itemnumber | html %]" 
+                                    data-callnum="[% item.itemcallnumber | html %]" 
+                                    data-barcode="[% item.barcode | html %]" 
+                                    data-title="[% item.title | html %]" 
+                                    data-author="[% item.author | html %]"
+                                    data-year="[% item.publicationyear | html %]">
+                                    [% item.title | html %] ([% item.itemcallnumber | html %])
+                                </option>
                             [% END %]
-                            <li>
-                                <fieldset id="layout_string" class="brief">
-                                    <label for="format_string">Data fields</label>
-                                    <input type="text" name="format_string" id="format_string" size="80" value="[% format_string | html %]" />
-                                    <div class="hint">
-                                        <p>Enter a comma separated list of fields to print. You may include any <em>Koha field</em> or MARC subfield.</p>
-                                        <p>See online help for advanced options</p>
-                                        <p>ex: barcode, itemcallnumber, title, "050a 050b", 300a </p>
-                                        <p>Fields homebranch_description, holdingbranch_description, ccode_description, location_description and permanent_location_description show description instead of code.</p>
+                            <option value="custom" data-callnum="337.09597 H407C 2024 T.1" data-barcode="FTU-BK-0001" data-title="Giáo trình Kinh tế quốc tế" data-author="Hoàng Văn Châu" data-year="2024">
+                                Sách kinh tế mẫu: 337.09597 H407C 2024 T.1
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- THÔNG SỐ KÍCH THƯỚC TEM HIỆN TẠI -->
+                    <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded" style="font-size: 0.82rem;">
+                        <span class="text-muted">Rộng: <strong id="lbl_width_disp">38</strong> mm</span>
+                        <span class="text-muted">Cao: <strong id="lbl_height_disp">21</strong> mm</span>
+                        <span class="text-muted">Lề: <strong id="lbl_pad_disp">2</strong> mm</span>
+                        <span class="text-muted"><span id="lbl_font_disp">9pt Arial</span></span>
+                    </div>
+
+                    <!-- KHUNG CANVAS MÔ PHỎNG NHÃN GÁY 1:1 -->
+                    <div class="ftu-preview-canvas-container">
+                        <div id="ftu-print-area">
+                            <div id="spine-label-preview-box" class="ftu-spine-label-box no-guidebox" style="width: 144px; height: 79px; padding: 2mm;">
+                                <!-- CÁC KHỐI SẼ ĐƯỢC JAVASCRIPT RENDER THEO THỨ TỰ SẮP XẾP -->
+                                <div id="preview-box-content" style="display: flex; flex-direction: column; width: 100%; height: 100%;">
+                                    <!-- Header -->
+                                    <div id="preview-header" class="preview-block" data-block="header" style="font-size: 7px; font-weight: 700; color: #1e293b; text-align: center; border-bottom: 0.5px solid #cbd5e1; padding-bottom: 1px; margin-bottom: 2px;">
+                                        FTU - HCMC
                                     </div>
-                                </fieldset></li
-                            >
-                        </ol>
-                    </fieldset>
-                </li>
-                <li>
-                    <label for="guidebox">Draw guide boxes: </label>
-                    [% IF ( guidebox ) %]
-                        <input type="checkbox" name="guidebox" id="guidebox" value="1" checked="checked" />
-                    [% ELSE %]
-                        <input type="checkbox" name="guidebox" id="guidebox" value="1" />
-                    [% END %]
-                </li>
-                <li>
-                    <label for="callnum_split">Split call numbers: </label>
-                    [% IF ( callnum_split ) %]
-                        <input type="checkbox" name="callnum_split" id="callnum_split" value="1" checked="checked" />
-                    [% ELSE %]
-                        <input type="checkbox" name="callnum_split" id="callnum_split" value="1" />
-                    [% END %]
-                </li>
-                <li>
-                    <label for="text_justify">Text justification: </label>
-                    <select name="text_justify" id="text_justify">
-                        [% FOREACH text_justification_type IN text_justification_types %]
-                            [% IF ( text_justification_type.selected ) %]
-                                <option value="[% text_justification_type.type | html %]" selected="selected">[% PROCESS translate_justification_types type=text_justification_type.type %]</option>
-                            [% ELSE %]
-                                <option value="[% text_justification_type.type | html %]">[% PROCESS translate_justification_types type=text_justification_type.type %]</option>
-                            [% END %]
-                        [% END %]
-                    </select>
-                </li>
-                <li>
-                    <label for="font">Font: </label>
-                    <select name="font" id="font">
-                        [% FOREACH font_type IN font_types %]
-                            [% IF ( font_type.selected ) %]
-                                <option value="[% font_type.type | html %]" selected="selected">[% font_type.name | html %]</option>
-                            [% ELSE %]
-                                <option value="[% font_type.type | html %]">[% font_type.name | html %]</option>
-                            [% END %]
-                        [% END %]
-                    </select>
-                </li>
-                <li>
-                    <label for="font_size">Font size: </label>
-                    <input type="text" name="font_size" id="font_size" size="2" value="[% font_size | html %]" />
-                </li>
-                <li>
-                    <label for="scale_width">Barcode width: </label>
-                    <input type="text" name="scale_width" id="scale_width" size="2" value="[% scale_width | html %]" />
-                </li>
-                <li>
-                    <label for="scale_height">Barcode height: </label>
-                    <input type="text" name="scale_height" id="scale_height" size="2" value="[% scale_height | html %]" />
-                </li>
-                <li>
-                    <label for="oblique_title">Oblique title: </label>
-                    [% IF ( oblique_title ) %]
-                        <input type="checkbox" name="oblique_title" id="oblique_title" value="1" checked="checked" />
-                    [% ELSE %]
-                        <input type="checkbox" name="oblique_title" id="oblique_title" value="1" />
-                    [% END %]
-                </li>
-            </ol>
-        </fieldset>
-        <fieldset class="action">
-            [% INCLUDE 'csrf-token.inc' %]
-            <input type="hidden" name="op" value="cud-save" />
-            <input type="hidden" name="layout_id" value="[% layout_id | html %]" />
-            <input type="submit" class="btn btn-primary" value="Save" />
-            <a class="cancel" href="/cgi-bin/koha/labels/label-manage.pl?label_element=layout">Cancel</a>
-        </fieldset>
+
+                                    <!-- Số phân loại DDC -->
+                                    <div id="preview-ddc-block" class="preview-block" data-block="ddc" style="text-align: center; font-size: 9px; font-weight: 700; line-height: 1.15; letter-spacing: 0.3px;">
+                                        657.450711
+                                    </div>
+
+                                    <!-- Mã tác giả Cutter -->
+                                    <div id="preview-cutter-block" class="preview-block" data-block="cutter" style="text-align: center; font-size: 9px; font-weight: 700; line-height: 1.15; letter-spacing: 0.5px;">
+                                        H928
+                                    </div>
+
+                                    <!-- Nhan đề -->
+                                    <div id="preview-title" class="preview-block" data-block="title" style="font-size: 7.5px; line-height: 1.1; margin-top: 2px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                        Giáo trình Kinh tế quốc tế
+                                    </div>
+
+                                    <!-- Tác giả -->
+                                    <div id="preview-author" class="preview-block" data-block="author" style="font-size: 7px; line-height: 1.1; margin-top: 2px; text-align: center; color: #475569; display: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                        Hoàng Văn Châu
+                                    </div>
+
+                                    <!-- Năm xuất bản -->
+                                    <div id="preview-pubyear" class="preview-block" data-block="publicationyear" style="font-size: 7px; line-height: 1.1; margin-top: 2px; text-align: center; color: #475569; display: none; font-weight: 600;">
+                                        2024
+                                    </div>
+
+                                    <!-- Vị trí kho -->
+                                    <div id="preview-location" class="preview-block" data-block="location" style="font-size: 6.5px; line-height: 1.1; margin-top: 2px; text-align: center; color: #64748b; display: none;">
+                                        Kho Mượn
+                                    </div>
+
+                                    <!-- Ghi chú tự do -->
+                                    <div id="preview-custom-note" class="preview-block" data-block="custom_note" style="font-size: 6.5px; line-height: 1.1; margin-top: 2px; text-align: center; color: #64748b; display: none;">
+                                    </div>
+
+                                    <!-- Mã vạch (Barcode) -->
+                                    <div id="preview-barcode-block" class="preview-block barcode-svg-container" data-block="barcode" style="margin-top: auto; display: none;">
+                                        <svg id="preview-barcode-svg" style="max-width: 100%; height: 16px;"></svg>
+                                        <div id="preview-barcode-text" style="font-family: monospace; font-size: 6.5px; letter-spacing: 0.5px; text-align: center; line-height: 1;">
+                                            FTU-BK-0001
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CẢNH BÁO TRÀN NỘI DUNG -->
+                        <div id="overflow-warning" class="ftu-overflow-warning">
+                            <strong>Cảnh báo:</strong> Nội dung có thể vượt quá chiều cao nhãn ([<span id="warn-diff"></span>]). Hãy giảm cỡ chữ, tăng chiều cao nhãn hoặc bỏ bớt trường hiển thị.
+                        </div>
+                    </div>
+
+                    <!-- THAO TÁC IN THỬ VÀ TRỢ GIÚP -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btn-quick-print">
+                            In thử nhãn mẫu
+                        </button>
+                        <span class="text-muted" style="font-size: 0.8rem;">
+                            Tỉ lệ 1:1 chuẩn mm
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
 [% END %]
 
@@ -233,32 +886,467 @@
     <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready(function () {
             $('.sidebar_menu a[href$="/cgi-bin/koha/labels/label-home.pl"]').addClass("current");
-            $("input[name='layout_choice']").change(function () {
-                layout_method();
+
+            // Kích thước mặc định của nhãn (mm)
+            var currentWidthMm = parseFloat($("#custom_width_mm").val()) || 38;
+            var currentHeightMm = parseFloat($("#custom_height_mm").val()) || 21;
+            var currentPaddingMm = parseFloat($("#custom_padding_mm").val()) || 2;
+            var currentZoom = 1.4;
+
+            // Cập nhật trạng thái hiển thị của switch (Giao diện trực quan)
+            function updateSwitchVisual(inputEl) {
+                var isChecked = $(inputEl).is(":checked");
+                var parentItem = $(inputEl).closest(".ftu-field-item");
+                var badgeEl = $(inputEl).closest(".ftu-switch-wrap").find(".ftu-switch-badge");
+
+                if (isChecked) {
+                    badgeEl.removeClass("badge-hidden").addClass("badge-visible").text("Đang hiển thị");
+                    parentItem.removeClass("is-hidden-field");
+                } else {
+                    badgeEl.removeClass("badge-visible").addClass("badge-hidden").text("Đã ẩn");
+                    parentItem.addClass("is-hidden-field");
+                }
+            }
+
+            // 1. Phân tích format_string khởi tạo
+            function parseFormatStringToToggles() {
+                var str = $("#format_string").val().toLowerCase();
+                var hasCallNum = str.indexOf("itemcallnumber") !== -1 || str.indexOf("callnumber") !== -1;
+                var hasDDC = str.indexOf("ddc") !== -1 || str.indexOf("082a") !== -1 || hasCallNum;
+                var hasCutter = str.indexOf("cutter") !== -1 || str.indexOf("082b") !== -1 || hasCallNum;
+
+                $("#field_ddc_check").prop("checked", hasDDC);
+                $("#field_cutter_check").prop("checked", hasCutter);
+                $("#field_barcode_check").prop("checked", str.indexOf("barcode") !== -1);
+                $("#field_title_check").prop("checked", str.indexOf("title") !== -1);
+                $("#field_author_check").prop("checked", str.indexOf("author") !== -1);
+                $("#field_publicationyear_check").prop("checked", str.indexOf("publicationyear") !== -1 || str.indexOf("year") !== -1 || str.indexOf("copyrightdate") !== -1 || str.indexOf("260c") !== -1);
+                $("#field_location_check").prop("checked", str.indexOf("location") !== -1);
+
+                $(".field-toggle-check").each(function() {
+                    updateSwitchVisual(this);
+                });
+
+                // Cập nhật chế độ tab tương ứng
+                if ($("#field_barcode_check").is(":checked") && ($("#field_ddc_check").is(":checked") || $("#field_cutter_check").is(":checked"))) {
+                    $(".ftu-mode-btn").removeClass("active");
+                    $("#btn-mode-barcode").addClass("active");
+                } else if (($("#field_ddc_check").is(":checked") || $("#field_cutter_check").is(":checked")) && !$("#field_barcode_check").is(":checked")) {
+                    $(".ftu-mode-btn").removeClass("active");
+                    $("#btn-mode-spine").addClass("active");
+                }
+            }
+
+            // 2. Đồng bộ danh sách trường theo đúng thứ tự DOM
+            function syncFieldsToFormatString() {
+                var fields = [];
+                $("#fields-sortable-container .ftu-field-item").each(function() {
+                    var fid = $(this).data("field-id");
+                    var isChecked = $(this).find(".field-toggle-check").is(":checked");
+                    if (isChecked) {
+                        if (fid === "ddc") fields.push("ddc");
+                        else if (fid === "cutter") fields.push("cutter");
+                        else if (fid === "barcode") fields.push("barcode");
+                        else if (fid === "title") fields.push("title");
+                        else if (fid === "author") fields.push("author");
+                        else if (fid === "publicationyear") fields.push("publicationyear");
+                        else if (fid === "location") fields.push("location_description");
+                    }
+                });
+
+                $("#format_string").val(fields.join(", "));
+                updateLivePreview();
+            }
+
+            // 3. Xử lý sắp xếp thứ tự trường (Di chuyển Lên / Xuống)
+            $(".btn-field-up").on("click", function(e) {
+                e.preventDefault();
+                var item = $(this).closest(".ftu-field-item");
+                var prev = item.prev(".ftu-field-item");
+                if (prev.length > 0) {
+                    item.insertBefore(prev);
+                    reorderPreviewBlocks();
+                    syncFieldsToFormatString();
+                }
             });
-            layout_method();
-            $("#font").on("change", function () {
-                checkOblique();
+
+            $(".btn-field-down").on("click", function(e) {
+                e.preventDefault();
+                var item = $(this).closest(".ftu-field-item");
+                var next = item.next(".ftu-field-item");
+                if (next.length > 0) {
+                    item.insertAfter(next);
+                    reorderPreviewBlocks();
+                    syncFieldsToFormatString();
+                }
             });
+
+            function reorderPreviewBlocks() {
+                var container = $("#preview-box-content");
+                $("#fields-sortable-container .ftu-field-item").each(function() {
+                    var fid = $(this).data("field-id");
+                    var block = container.find('.preview-block[data-block="' + fid + '"]');
+                    if (block.length > 0) {
+                        container.append(block);
+                    }
+                });
+            }
+
+            // 4. Bật / Tắt các trường (Ẩn hiện)
+            $(".field-toggle-check").on("change", function() {
+                updateSwitchVisual(this);
+                syncFieldsToFormatString();
+            });
+
+            $("#callnum_split").on("change", function() {
+                updateLivePreview();
+            });
+
+            $("#custom_header_text, #custom_note_text").on("input", function() {
+                updateLivePreview();
+            });
+
+            $("#format_string").on("input", function() {
+                parseFormatStringToToggles();
+                updateLivePreview();
+            });
+
+            // 5. Xử lý 3 Chế độ Nhãn chính
+            $(".ftu-mode-btn").on("click", function() {
+                $(".ftu-mode-btn").removeClass("active");
+                $(this).addClass("active");
+                var mode = $(this).data("mode");
+
+                if (mode === "spine") {
+                    // Chế độ: Nhãn thông tin sách (Nhãn gáy)
+                    $("#printing_type").val("BIB");
+                    $("#field_header_check").prop("checked", true);
+                    $("#field_ddc_check").prop("checked", true);
+                    $("#field_cutter_check").prop("checked", true);
+                    $("#callnum_split").val("1");
+                    $("#field_title_check").prop("checked", true);
+                    $("#field_author_check").prop("checked", true);
+                    $("#field_publicationyear_check").prop("checked", false);
+                    $("#field_barcode_check").prop("checked", false);
+                    $("#field_location_check").prop("checked", false);
+                    $("#field_custom_note_check").prop("checked", false);
+
+                    $("#custom_width_mm").val(38);
+                    $("#custom_height_mm").val(21);
+                    currentWidthMm = 38;
+                    currentHeightMm = 21;
+                    $("#font_size").val(8);
+
+                    $(".ftu-preset-badge").removeClass("active");
+                    $('.ftu-preset-badge[data-w="38"]').addClass("active");
+
+                } else if (mode === "barcode") {
+                    // Chế độ: Nhãn có mã vạch
+                    $("#printing_type").val("BARBIB");
+                    $("#field_header_check").prop("checked", true);
+                    $("#field_barcode_check").prop("checked", true);
+                    $("#field_title_check").prop("checked", true);
+                    $("#field_ddc_check").prop("checked", true);
+                    $("#field_cutter_check").prop("checked", true);
+                    $("#callnum_split").val("1");
+                    $("#field_author_check").prop("checked", false);
+                    $("#field_publicationyear_check").prop("checked", false);
+                    $("#field_location_check").prop("checked", false);
+
+                    $("#custom_width_mm").val(50);
+                    $("#custom_height_mm").val(30);
+                    currentWidthMm = 50;
+                    currentHeightMm = 30;
+                    $("#font_size").val(9);
+
+                    $(".ftu-preset-badge").removeClass("active");
+                    $('.ftu-preset-badge[data-w="50"]').addClass("active");
+                }
+
+                $(".field-toggle-check").each(function() {
+                    updateSwitchVisual(this);
+                });
+
+                syncFieldsToFormatString();
+            });
+
+            // 6. Xử lý người dùng tự gõ kích thước mm
+            $("#custom_width_mm, #custom_height_mm, #custom_padding_mm").on("input change", function() {
+                var w = parseFloat($("#custom_width_mm").val());
+                var h = parseFloat($("#custom_height_mm").val());
+                var p = parseFloat($("#custom_padding_mm").val());
+
+                if (!isNaN(w) && w >= 10) currentWidthMm = w;
+                if (!isNaN(h) && h >= 8) currentHeightMm = h;
+                if (!isNaN(p) && p >= 0) currentPaddingMm = p;
+
+                $(".ftu-preset-badge").removeClass("active");
+                updateLivePreview();
+            });
+
+            // 7. Xử lý nút Preset nhanh
+            $(".ftu-preset-badge").on("click", function() {
+                $(".ftu-preset-badge").removeClass("active");
+                $(this).addClass("active");
+
+                currentWidthMm = parseFloat($(this).data("w"));
+                currentHeightMm = parseFloat($(this).data("h"));
+
+                $("#custom_width_mm").val(currentWidthMm);
+                $("#custom_height_mm").val(currentHeightMm);
+
+                var recType = $(this).data("type");
+                if (recType) {
+                    $("#printing_type").val(recType);
+                }
+
+                if (currentHeightMm <= 22) {
+                    $("#font_size").val(8);
+                } else if (currentHeightMm <= 30) {
+                    $("#font_size").val(9);
+                } else {
+                    $("#font_size").val(10);
+                }
+
+                updateLivePreview();
+            });
+
+            // 8. Đổi sách mẫu thử nghiệm
+            $("#sample_book_select").on("change", function() {
+                updateLivePreview();
+            });
+
+            // 9. Cấu hình Typography & Canh lề
+            $("#font, #font_size, #text_justify, #guidebox, #oblique_title, #printing_type, #barcode_type").on("change input", function() {
+                updateLivePreview();
+            });
+
+            // 10. Zoom Preview
+            $(".zoom-btn").on("click", function() {
+                $(".zoom-btn").removeClass("active");
+                $(this).addClass("active");
+                currentZoom = parseFloat($(this).data("zoom"));
+                updateLivePreview();
+            });
+
+            // 11. Tách riêng Số phân loại (DDC) và Mã tác giả (Cutter) thông minh
+            function parseCallNumberComponents(rawCallNum) {
+                if (!rawCallNum) return { ddc: "657.450711", cutter: "H928", extra: "" };
+                var clean = rawCallNum.trim();
+                var m = clean.match(/^([A-Za-z\s\-]*)(\d{3,}(?:\.\d+)?)\s+([A-Za-z]\d+[A-Za-z\d]*)(.*)$/);
+                if (m) {
+                    var prefix = m[1].trim();
+                    var ddcNum = m[2].trim();
+                    var ddcFull = prefix ? (prefix + " " + ddcNum) : ddcNum;
+                    var cutter = m[3].trim();
+                    var rest = m[4].trim();
+                    return { ddc: ddcFull, cutter: cutter, extra: rest };
+                }
+                var parts = clean.split(/\s+/);
+                return { ddc: parts[0] || "", cutter: parts[1] || "", extra: parts.slice(2).join(" ") };
+            }
+
+            // 12. Vẽ mô phỏng mã vạch
+            function drawSimulatedBarcode(svgElement, barcodeText) {
+                var width = 120;
+                var height = 16;
+                var lines = "";
+                var hash = 0;
+                for (var i = 0; i < barcodeText.length; i++) {
+                    hash = (hash * 31 + barcodeText.charCodeAt(i)) % 1000;
+                }
+                var x = 4;
+                while (x < width - 6) {
+                    var barW = (x % 3 === 0 || x % 5 === 0) ? 2 : 1;
+                    lines += '<rect x="' + x + '" y="0" width="' + barW + '" height="' + height + '" fill="#1e293b" />';
+                    x += barW + ((x % 4 === 0) ? 2 : 1);
+                }
+                svgElement.setAttribute("viewBox", "0 0 " + width + " " + height);
+                svgElement.innerHTML = lines;
+            }
+
+            // 13. Cập nhật WYSIWYG Live Preview
+            function updateLivePreview() {
+                var pxPerMm = 3.78 * currentZoom;
+                var boxW = currentWidthMm * pxPerMm;
+                var boxH = currentHeightMm * pxPerMm;
+                var padPx = currentPaddingMm * pxPerMm;
+
+                var box = $("#spine-label-preview-box");
+                box.css({
+                    "width": boxW + "px",
+                    "height": boxH + "px",
+                    "min-width": boxW + "px",
+                    "min-height": boxH + "px",
+                    "max-width": boxW + "px",
+                    "max-height": boxH + "px",
+                    "padding": padPx + "px"
+                });
+
+                $("#lbl_width_disp").text(currentWidthMm);
+                $("#lbl_height_disp").text(currentHeightMm);
+                $("#lbl_pad_disp").text(currentPaddingMm);
+
+                // Font & Typography
+                var fontVal = $("#font").val();
+                var fontFamily = (fontVal === "TR") ? "'Times New Roman', Times, serif" : (fontVal === "CO") ? "'Courier New', Courier, monospace" : "Helvetica, Arial, sans-serif";
+                var baseFontSizePt = parseFloat($("#font_size").val()) || 9;
+                var scaledFontSize = (baseFontSizePt * currentZoom * 1.25);
+                box.css("font-family", fontFamily);
+
+                $("#lbl_font_disp").text(baseFontSizePt + "pt " + (fontVal === "TR" ? "Times" : fontVal === "CO" ? "Courier" : "Helvetica"));
+
+                // Canh lề
+                var justifyVal = $("#text_justify").val();
+                var textAlign = (justifyVal === "L") ? "left" : (justifyVal === "R") ? "right" : "center";
+                box.css("text-align", textAlign);
+
+                // Viền khung nhãn
+                if ($("#guidebox").is(":checked")) {
+                    box.removeClass("no-guidebox").addClass("has-guidebox");
+                } else {
+                    box.removeClass("has-guidebox").addClass("no-guidebox");
+                }
+
+                // Dữ liệu sách mẫu
+                var selBook = $("#sample_book_select option:selected");
+                var rawCallNum = selBook.data("callnum") || "657.450711 H928";
+                var barcodeVal = selBook.data("barcode") || "AD.000782";
+                var titleVal = selBook.data("title") || "Giáo trình Nguyên lý kiểm toán";
+                var authorVal = selBook.data("author") || "Phạm Thu Hương";
+                var yearVal = selBook.data("year") || "2025";
+
+                var printType = $("#printing_type").val();
+                var showBib = (printType !== "BAR");
+                var showBar = (printType !== "BIB");
+
+                // 1. Header
+                var headerText = $("#custom_header_text").val();
+                if ($("#field_header_check").is(":checked") && headerText && showBib) {
+                    $("#preview-header").text(headerText).css({
+                        "font-size": Math.max(7, scaledFontSize * 0.75) + "px",
+                        "display": "block",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-header").hide();
+                }
+
+                // Tách riêng số phân loại và số Cutter thông minh
+                var cnParts = parseCallNumberComponents(rawCallNum);
+
+                // 2a. Số phân loại (DDC)
+                if ($("#field_ddc_check").is(":checked") && showBib) {
+                    $("#preview-ddc-block").show().text(cnParts.ddc).css({
+                        "font-size": scaledFontSize + "px",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-ddc-block").hide();
+                }
+
+                // 2b. Mã tác giả (Cutter)
+                if ($("#field_cutter_check").is(":checked") && showBib) {
+                    var cutterText = cnParts.cutter;
+                    if (cnParts.extra && !$("#field_publicationyear_check").is(":checked")) {
+                        cutterText += " " + cnParts.extra;
+                    }
+                    $("#preview-cutter-block").show().text(cutterText).css({
+                        "font-size": scaledFontSize + "px",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-cutter-block").hide();
+                }
+
+                // 3. Nhan đề
+                if ($("#field_title_check").is(":checked") && showBib) {
+                    $("#preview-title").show().text(titleVal).css({
+                        "font-size": Math.max(7, scaledFontSize * 0.8) + "px",
+                        "text-align": textAlign,
+                        "font-style": $("#oblique_title").is(":checked") ? "italic" : "normal"
+                    });
+                } else {
+                    $("#preview-title").hide();
+                }
+
+                // 4. Tác giả
+                if ($("#field_author_check").is(":checked") && showBib) {
+                    $("#preview-author").show().text(authorVal).css({
+                        "font-size": Math.max(6.5, scaledFontSize * 0.75) + "px",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-author").hide();
+                }
+
+                // 5. Năm xuất bản (Publication Year)
+                if ($("#field_publicationyear_check").is(":checked") && showBib) {
+                    $("#preview-pubyear").show().text(yearVal).css({
+                        "font-size": Math.max(6.5, scaledFontSize * 0.75) + "px",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-pubyear").hide();
+                }
+
+                // 6. Vị trí kho
+                if ($("#field_location_check").is(":checked") && showBib) {
+                    $("#preview-location").show().text("Kho Mượn").css({
+                        "font-size": Math.max(6.5, scaledFontSize * 0.7) + "px",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-location").hide();
+                }
+
+                // 7. Ghi chú tự do
+                var noteText = $("#custom_note_text").val();
+                if ($("#field_custom_note_check").is(":checked") && noteText) {
+                    $("#preview-custom-note").show().text(noteText).css({
+                        "font-size": Math.max(6.5, scaledFontSize * 0.7) + "px",
+                        "text-align": textAlign
+                    });
+                } else {
+                    $("#preview-custom-note").hide();
+                }
+
+                // 8. Mã vạch
+                if ($("#field_barcode_check").is(":checked") && showBar) {
+                    $("#preview-barcode-block").show();
+                    $("#preview-barcode-text").text(barcodeVal).css("font-size", Math.max(6, scaledFontSize * 0.7) + "px");
+                    var svgEl = document.getElementById("preview-barcode-svg");
+                    if (svgEl) {
+                        drawSimulatedBarcode(svgEl, barcodeVal);
+                        $(svgEl).css("height", Math.max(12, 14 * currentZoom) + "px");
+                    }
+                } else {
+                    $("#preview-barcode-block").hide();
+                }
+
+                // Kiểm tra cảnh báo tràn nội dung (Overflow detection)
+                setTimeout(function() {
+                    var el = document.getElementById("spine-label-preview-box");
+                    if (el && el.scrollHeight > (el.clientHeight + 2)) {
+                        var diff = Math.round((el.scrollHeight - el.clientHeight) / pxPerMm);
+                        $("#warn-diff").text("vượt quá ~" + diff + "mm");
+                        $("#overflow-warning").slideDown(150);
+                    } else {
+                        $("#overflow-warning").slideUp(150);
+                    }
+                }, 50);
+            }
+
+            // In thử trực tiếp 1 nhãn
+            $("#btn-quick-print").on("click", function() {
+                window.print();
+            });
+
+            // Khởi tạo
+            reorderPreviewBlocks();
+            parseFormatStringToToggles();
+            updateLivePreview();
         });
-        function layout_method() {
-            if ($("input[name='layout_choice']:checked").val() == "layout_string") {
-                $("#layout_table").hide();
-                $("#layout_string").show();
-            } else {
-                $("#layout_table").show();
-                $("#layout_string").hide();
-            }
-        }
-        function checkOblique() {
-            var font = document.getElementById("font");
-            var selectedfont = font.options[font.selectedIndex].value;
-            if (selectedfont.match("I$") || selectedfont.match("O$")) {
-                document.getElementById("oblique_title").disabled = true;
-            } else {
-                document.getElementById("oblique_title").disabled = false;
-            }
-        }
     </script>
 [% END %]
 

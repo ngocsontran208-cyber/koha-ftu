@@ -37,23 +37,37 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 );
 
 my $logged_in_user = Koha::Patrons->find($borrowernumber);
-my $message_id     = $query->param('message_id');
-my $message        = $logged_in_user->messages->find($message_id);
+my $message_id     = $query->param('message_id') // q{};
+my $referer        = $query->param('referer') || $ENV{HTTP_REFERER} || '/cgi-bin/koha/opac-user.pl';
 
-unless ($message) {
-    print $query->redirect("/cgi-bin/koha/errors/404.pl");
-    exit;
+my $cgi_prefix = '/cgi-bin/koha/';
+if ( $referer =~ m{^(/cgi-bin/[^/]+/)} ) {
+    $cgi_prefix = $1;
+} elsif ( $ENV{SCRIPT_NAME} && $ENV{SCRIPT_NAME} =~ m{^(/cgi-bin/[^/]+/)} ) {
+    $cgi_prefix = $1;
 }
 
-unless ( $op =~ /^cud-/ && $message ) {
+my $target_url = ( $referer =~ /opac-messaging\.pl/ )
+    ? "${cgi_prefix}opac-messaging.pl?tab=history"
+    : "${cgi_prefix}opac-user.pl";
 
-    # exit early
-    print $query->redirect("/cgi-bin/koha/opac-user.pl");
-    exit;
+if ( $op =~ /^cud-/ ) {
+    if ( $message_id eq 'all' ) {
+        my $unread = $logged_in_user->messages->filter_by_unread;
+        while ( my $m = $unread->next ) {
+            $m->update( { patron_read_date => dt_from_string } );
+        }
+        print $query->redirect($target_url);
+        exit;
+    }
+
+    my $message = $logged_in_user->messages->find($message_id);
+    if ($message) {
+        $message->update( { patron_read_date => dt_from_string } );
+        print $query->redirect($target_url);
+        exit;
+    }
 }
 
-$message->update( { patron_read_date => dt_from_string } );
-
-print $query->redirect("/cgi-bin/koha/opac-user.pl");
-
-output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };
+print $query->redirect($target_url);
+exit;

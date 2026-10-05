@@ -198,9 +198,9 @@
  [% bor_notes = AuthorisedValues.Get( 'BOR_NOTES' ) %]
  [% IF bor_notes %]
  <li class="form-group form-row">
- <label for="select_patron_messages" class="col-form-label">Nội dung (Chọn theo mẫu hoặc nhập mới): </label>
+ <label for="select_patron_messages" class="col-form-label">Chọn tin nhắn mẫu có sẵn (tùy chọn): </label>
  <select name="type" id="select_patron_messages" class="form-select">
- <option value="">Chọn ghi chú</option>
+ <option value="">-- Chọn tin nhắn mẫu hoặc tự nhập nội dung bên dưới --</option>
  [% FOREACH bor_note IN bor_notes %]
  <option value="[% bor_note.lib | html %]">[% bor_note.lib | html %]</option>
  [% END %]
@@ -211,7 +211,7 @@
  [% patron_letters = NoticeTemplates.GetByModuleForLibrary( 'add_message' ) %]
  [% IF patron_letters %]
  <li class="form-group form-row">
- <label for="select_patron_notice" class="col-form-lable" style="display:none;">Thông báo bạn đọc: </label>
+ <label for="select_patron_notice" class="col-form-label" style="display:none;">Thông báo bạn đọc: </label>
  <select name="select_patron_notice" id="select_patron_notice" class="form-select" style="display:none;">
  <option value="">Chọn thông báo</option>
  [% FOREACH letter IN patron_letters %]
@@ -226,8 +226,8 @@
  <input type="text" size="60" name="borrower_subject" class="form-control" id="borrower_subject" />
  </li>
  <li class="form-group form-row">
- <label for="borrower_message" class="col-form-label" style="display: none;">Nội dung:</label>
- <textarea cols="65" rows="5" name="borrower_message" class="form-control" id="borrower_message"></textarea>
+ <label for="borrower_message" class="col-form-label" style="font-weight: 600;">Nội dung tin nhắn (*):</label>
+ <textarea cols="65" rows="4" name="borrower_message" class="form-control" id="borrower_message" required placeholder="Nhập nội dung tin nhắn gửi tới bạn đọc tại đây..."></textarea>
  </li>
  </ol>
  </fieldset>

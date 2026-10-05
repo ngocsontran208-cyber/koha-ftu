@@ -318,28 +318,40 @@ $(document).ready(function () {
         }
     });
 
+    function syncModalReturnUrl(tab) {
+        var return_url = window.location.pathname + window.location.search;
+        if (tab) {
+            return_url += (return_url.indexOf("?") > -1 ? "&" : "?") + "tab=" + encodeURIComponent(tab);
+        }
+        if (return_url && !return_url.includes("opac-user.pl") && !return_url.includes("opac-auth.pl")) {
+            var $modalAuth = $("#modalAuth");
+            var $retInput = $modalAuth.find("input[name='return']");
+            if ($retInput.length) {
+                $retInput.val(return_url);
+            } else {
+                $modalAuth.append(
+                    '<input type="hidden" name="return" value="' +
+                        return_url +
+                        '" />'
+                );
+            }
+        }
+    }
+
     $(".loginModal-trigger").on("click", function (e) {
         e.preventDefault();
         var button = $(this);
-        var context = button.data("return");
-        if (context) {
-            let return_url = window.location.pathname;
-            let params = window.location.search;
-            var tab = button.data("tab");
-            if (tab) {
-                params = params ? params + "&tab=" + tab : "?tab=" + tab;
-            }
-            return_url += params;
-            $("#modalAuth").append(
-                '<input type="hidden" name="return" value="' +
-                    return_url +
-                    '" />'
-            );
-        }
+        syncModalReturnUrl(button.data("tab"));
         $("#loginModal").modal("show");
+    });
+    $("#loginModal").on("show.bs.modal", function () {
+        syncModalReturnUrl();
     });
     $("#loginModal").on("shown.bs.modal", function () {
         $("#muserid").focus();
+    });
+    $("#modalAuth").on("submit", function () {
+        syncModalReturnUrl();
     });
 
     $("#scrolltocontent").click(function () {

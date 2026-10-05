@@ -113,7 +113,13 @@
                <div class="ftu-shortcut-icon"><i class="fa fa-id-card"></i></div>
                <div class="ftu-shortcut-info">
                    <span class="ftu-shortcut-title">My Account</span>
-                   <span class="ftu-shortcut-desc">Renewals & account info</span>
+                   [% IF loggedinusername && checkouts && checkouts > 0 %]
+                       <span class="ftu-shortcut-desc" style="color: var(--ftu-red); font-weight: 600;">[% checkouts | html %] active loan[% IF checkouts > 1 %]s[% END %]</span>
+                   [% ELSIF logged_in_user && logged_in_user.checkouts.count > 0 %]
+                       <span class="ftu-shortcut-desc" style="color: var(--ftu-red); font-weight: 600;">[% logged_in_user.checkouts.count | html %] active loan[% IF logged_in_user.checkouts.count > 1 %]s[% END %]</span>
+                   [% ELSE %]
+                       <span class="ftu-shortcut-desc">Renewals &amp; account info</span>
+                   [% END %]
                </div>
            </a>
            <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-shortcut-card">
@@ -181,7 +187,7 @@
     </div>
 
     <!-- TIN TỨC VÀ SỰ KIỆN (DYNAMIC CMS) -->
-    <div class="ftu-section-container" id="news-section">
+    <div class="ftu-section-container" id="news-section" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <h3 style="font-weight: 800; color: var(--ftu-red); margin: 0;">NEWS & EVENTS</h3>
             <a href="/cgi-bin/koha/opac-news-detail.pl?id=1" style="color: var(--ftu-red); font-weight: 600; text-decoration: none;">View all articles <i class="fa fa-arrow-right"></i></a>
@@ -211,6 +217,7 @@
     [% END %]
     <!-- ========================================================================= -->
 
+    [% UNLESS ( opac_name == 'opac-main' || !opac_name ) && !news_id && !advsearch %]
     [% IF loggedinusername || OpacNav || OpacNavBottom || OpacNavRight || OpacMainUserBlock || news_id || (koha_news && koha_news.size) %]
     [% SET container_id = "notloggedin" %]
     [% IF Koha.Preference( 'opacuserlogin' ) == 1 && loggedinusername %]
@@ -424,6 +431,7 @@
     </div>
     <!-- /.container-fluid -->
     [% END # /IF loggedinusername || OpacNav || OpacNavBottom || OpacNavRight || OpacMainUserBlock %]
+    [% END # /UNLESS custom homepage %]
 </main>
 <!-- /.main -->
 
@@ -528,9 +536,14 @@ $(document).ready(function() {
             success: function(newsItems) {
                 var $newsList = $('#ftu-dynamic-news-list');
                 if (!newsItems || newsItems.length === 0) {
-                    $newsList.html('<p class="text-muted">Chưa có tin tức mới.</p>');
+                    $newsList.closest('.ftu-news-grid > div').hide();
+                    // Ẩn toàn bộ section nếu cả events cũng trống
+                    if ($('#ftu-dynamic-events-container').find('.ftu-event-card').length === 0 && !$('#ftu-dynamic-events-container').data('has-events')) {
+                        $('#news-section').hide();
+                    }
                     return;
                 }
+                $('#news-section').show();
                 var newsHtml = '';
                 newsItems.forEach(function(item) {
                     var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + item.id;
@@ -563,9 +576,16 @@ $(document).ready(function() {
             success: function(events) {
                 var $eventContainer = $('#ftu-dynamic-events-container');
                 if (!events || events.length === 0) {
-                    $eventContainer.html('<p class="text-muted">No upcoming events.</p>');
+                    $eventContainer.closest('.ftu-news-grid > div').hide();
+                    $eventContainer.data('has-events', false);
+                    // Ẩn toàn bộ section nếu cả news cũng trống
+                    if ($('#ftu-dynamic-news-list').find('.ftu-news-item').length === 0) {
+                        $('#news-section').hide();
+                    }
                     return;
                 }
+                $eventContainer.data('has-events', true);
+                $('#news-section').show();
                 var evt = events[0];
                 var link = '/cgi-bin/koha/opac-news-detail.pl?id=' + evt.id;
                 var eventHtml = `

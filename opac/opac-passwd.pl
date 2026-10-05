@@ -137,7 +137,11 @@ sub _sync_password_to_sso {
 
     my $payload = encode_json({ newPassword => $new_password });
     my $http    = HTTP::Tiny->new( timeout => 5 );
-    my $headers = { 'Content-Type' => 'application/json' };
+    my $headers = {
+        'Content-Type'    => 'application/json',
+        'x-koha-staff'    => '1',
+        'x-koha-internal' => '1',
+    };
 
     # Lấy URL SSO từ cấu hình hệ thống FTU_SSOBaseURL
     my $sso_pref = C4::Context->preference('FTU_SSOBaseURL') || '';
@@ -146,12 +150,12 @@ sub _sync_password_to_sso {
     # Danh sách URL API SSO theo thứ tự ưu tiên: cấu hình hệ thống -> host.docker.internal -> localhost
     my @candidate_urls;
     if ($sso_pref && $sso_pref !~ /myDNSname/) {
-        push @candidate_urls, "$sso_pref/api/v1/sso/users/$uid/reset-password";
+        push @candidate_urls, "$sso_pref/api/v1/sso/users/$uid/reset-password?koha_staff=1";
     }
     push @candidate_urls, (
-        "http://host.docker.internal:8090/api/v1/sso/users/$uid/reset-password",
-        "http://localhost:8090/api/v1/sso/users/$uid/reset-password",
-        "http://127.0.0.1:8090/api/v1/sso/users/$uid/reset-password"
+        "http://host.docker.internal:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1",
+        "http://localhost:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1",
+        "http://127.0.0.1:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1"
     );
 
     my $synced   = 0;

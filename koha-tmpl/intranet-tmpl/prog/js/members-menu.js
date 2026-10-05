@@ -105,7 +105,7 @@ $(document).ready(function () {
             $("#select_patron_notice").val("");
         } else {
             $("#subject_form").hide();
-            $("label[for='borrower_message']").hide();
+            $("label[for='borrower_message']").show();
             $("label[for='select_patron_notice']").hide();
             $("#select_patron_notice").hide();
             $("label[for='select_patron_messages']").show();

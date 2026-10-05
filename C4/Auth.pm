@@ -1084,6 +1084,8 @@ sub checkauth {
             || $pki_field ne 'None'
             || $emailaddress )
         {
+            delete $info{timed_out};
+            delete $info{different_ip};
             my $password    = $query->param('login_password');
             my $shibSuccess = 0;
             my ( $return, $cardnumber );
@@ -1438,13 +1440,31 @@ sub checkauth {
             && $query->param('login_password')
             && $query->param('login_userid') )
         {
-            my $uri = URI->new( $query->url( -relative => 1, -query_string => 1 ) );
-            $uri->query_param_delete('login_userid');
-            $uri->query_param_delete('login_password');
-            $uri->query_param_delete('koha_login_context');
-            $uri->query_param_delete('login_op');
-            $uri->query_param_delete('op');
-            $uri->query_param_delete('csrf_token');
+            my $return_param = $query->param('return') || $query->param('return_url') || $query->param('destination');
+            my $uri;
+            if ( $return_param && $return_param !~ /opac-user\.pl/ && $return_param !~ /opac-auth\.pl/ ) {
+                if ( $return_param =~ m{^/[^/\\]} ) {
+                    $uri = URI->new($return_param);
+                } elsif ( $return_param =~ m{^https?://}i ) {
+                    my $cand = URI->new($return_param);
+                    my $cur_host = $query->virtual_host || $ENV{HTTP_HOST} || '';
+                    $cur_host =~ s/:\d+$//;
+                    if ( $cand->host eq $cur_host ) {
+                        $uri = $cand;
+                    }
+                }
+            }
+            if ( !$uri ) {
+                $uri = URI->new( $query->url( -relative => 1, -query_string => 1 ) );
+                $uri->query_param_delete('login_userid');
+                $uri->query_param_delete('login_password');
+                $uri->query_param_delete('koha_login_context');
+                $uri->query_param_delete('login_op');
+                $uri->query_param_delete('op');
+                $uri->query_param_delete('csrf_token');
+                $uri->query_param_delete('return');
+                $uri->query_param_delete('has-search-query') unless $uri->query_param('has-search-query');
+            }
             unless ( $params->{do_not_print} ) {
                 print $query->redirect( -uri => $uri->as_string, -cookie => $cookie, -status => '303 See other' );
                 safe_exit;

@@ -54,7 +54,14 @@
 
             [% IF ( EnhancedMessagingPreferences ) %]
                 [% IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) || Koha.Preference('TranslateNotices') %]
-                    <li [% IF messagingview %]class="active"[% END %]> <a href="/cgi-bin/koha/opac-messaging.pl">Messaging</a></li>
+                    <li [% IF messagingview %]class="active"[% END %]>
+                        <a href="/cgi-bin/koha/opac-messaging.pl">Notifications & Messages
+                        [% SET unread_cnt = logged_in_user.messages.search({ message_type => 'B' }).filter_by_unread.count %]
+                        [% IF unread_cnt > 0 %]
+                            <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem; margin-left: 4px;">[% unread_cnt | html %]</span>
+                        [% END %]
+                        </a>
+                    </li>
                 [% END %]
             [% END %]
 

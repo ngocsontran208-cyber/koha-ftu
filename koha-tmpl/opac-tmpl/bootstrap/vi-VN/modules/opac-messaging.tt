@@ -1,5 +1,7 @@
 [% USE raw %]
 [% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
 [% USE AdditionalContents %]
 [% PROCESS 'i18n.inc' %]
 [% PROCESS 'html_helpers.inc' %]
@@ -8,9 +10,9 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
- [% t("Your messaging settings") | html %]
- &rsaquo; [% PROCESS 'library_name_title' %]
- [% END %]</title
+        [% t("Tin nhắn & Thông báo") | html %]
+        &rsaquo; [% PROCESS 'library_name_title' %]
+    [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
@@ -20,36 +22,214 @@
 [% INCLUDE 'masthead.inc' %]
 
 <main class="main">
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
- [% END %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Cài đặt tin nhắn của bạn</span>
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Tin nhắn & Thông báo</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 
- <div class="container-fluid">
- <div class="row">
- <div class="col col-lg-2 order-2 order-lg-1">
- <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
- </div>
- <div class="col-md-12 col-lg-10 order-1">
- [% IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) || Koha.Preference('TranslateNotices') %]
- <div id="usermessaging" class="maincontent">
- <h1>Cài đặt tin nhắn của bạn</h1>
- [% IF ( settings_updated ) %]
- <div class="alert alert-success"
-                                ><p><strong>Đã cập nhật cài đặt</strong></p></div
-                            >
- [% END %]
- <form action="/cgi-bin/koha/opac-messaging.pl" method="post" name="opacmessaging">
- [% INCLUDE 'csrf-token.inc' %]
- <input type="hidden" name="op" value="cud-modify" />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col col-lg-2 order-2 order-lg-1">
+                <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+            </div>
+            <div class="col-md-12 col-lg-10 order-1">
+                [% IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) || Koha.Preference('TranslateNotices') %]
+                    <div id="usermessaging" class="maincontent">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                            <div>
+                                <h1 class="mb-0" style="font-size: 1.6rem; font-weight: 700; color: #1e293b;">
+                                    Tin nhắn & Thông báo bạn đọc
+                                </h1>
+                            </div>
+                            [% IF unread_count > 0 %]
+                                <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill shadow-sm">
+                                    <i class="fa fa-bell me-1"></i> [% unread_count | html %] tin nhắn mới
+                                </span>
+                            [% END %]
+                        </div>
 
- [% IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) %]
- <table class="table table-bordered table-condensed table-striped">
- <caption class="visually-hidden">Cài đặt tin nhắn của bạn</caption>
+                        <!-- Hệ thống điều hướng Tab -->
+                        <ul class="nav nav-tabs nav-fill mb-4" id="patronMessagingTabs" role="tablist" style="border-bottom: 2px solid #e2e8f0; font-weight: 600;">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link [% IF active_tab == 'unread' %]active[% END %]" id="tab-unread-btn" data-bs-toggle="tab" data-bs-target="#tab-unread" type="button" role="tab" aria-controls="tab-unread" aria-selected="[% IF active_tab == 'unread' %]true[% ELSE %]false[% END %]" style="padding: 12px 20px; font-size: 1rem;">
+                                    <i class="fa fa-envelope me-1"></i> Tin nhắn mới
+                                    [% IF unread_count > 0 %]
+                                        <span class="badge bg-danger rounded-pill ms-1">[% unread_count | html %]</span>
+                                    [% END %]
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link [% IF active_tab == 'history' %]active[% END %]" id="tab-history-btn" data-bs-toggle="tab" data-bs-target="#tab-history" type="button" role="tab" aria-controls="tab-history" aria-selected="[% IF active_tab == 'history' %]true[% ELSE %]false[% END %]" style="padding: 12px 20px; font-size: 1rem;">
+                                    <i class="fa fa-history me-1"></i> Lịch sử tin nhắn
+                                    <span class="badge bg-secondary rounded-pill ms-1">[% history_count | html %]</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link [% IF active_tab == 'settings' %]active[% END %]" id="tab-settings-btn" data-bs-toggle="tab" data-bs-target="#tab-settings" type="button" role="tab" aria-controls="tab-settings" aria-selected="[% IF active_tab == 'settings' %]true[% ELSE %]false[% END %]" style="padding: 12px 20px; font-size: 1rem;">
+                                    <i class="fa fa-cog me-1"></i> Cài đặt nhận thông báo
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="patronMessagingTabContent">
+                            <!-- TAB 1: TIN NHẮN MỚI (CHƯA ĐỌC) -->
+                            <div class="tab-pane fade [% IF active_tab == 'unread' %]show active[% END %]" id="tab-unread" role="tabpanel" aria-labelledby="tab-unread-btn">
+                                [% IF unread_count > 0 %]
+                                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded border">
+                                        <span class="text-primary font-weight-bold" style="font-weight: 600;">
+                                            <i class="fa fa-info-circle me-1"></i> Bạn có [% unread_count | html %] thông báo chưa đọc từ FTU - HCMC.
+                                        </span>
+                                        <form action="/cgi-bin/koha/opac-dismiss-message.pl" method="post" style="margin: 0;">
+                                            [% INCLUDE 'csrf-token.inc' %]
+                                            <input type="hidden" name="op" value="cud-update" />
+                                            <input type="hidden" name="message_id" value="all" />
+                                            <input type="hidden" name="referer" value="opac-messaging.pl" />
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa fa-check-double me-1"></i> Đánh dấu tất cả đã đọc
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <div class="unread-messages-list">
+                                        [% FOREACH msg IN unread_messages %]
+                                        <div class="card mb-3 border-0 shadow-sm" style="border-left: 5px solid #0056b3 !important; border-radius: 8px; background: #ffffff;">
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge border border-primary text-primary bg-white px-2 py-1" style="font-weight: 500;">[% Branches.GetName(msg.branchcode) | html %]</span>
+                                                        <span class="text-muted" style="font-size: 0.85rem;"><i class="fa fa-clock-o me-1"></i> [% msg.message_date | $KohaDates with_hours => 1 %]</span>
+                                                    </div>
+                                                    <form action="/cgi-bin/koha/opac-dismiss-message.pl" method="post" style="margin: 0;">
+                                                        [% INCLUDE 'csrf-token.inc' %]
+                                                        <input type="hidden" name="op" value="cud-update" />
+                                                        <input type="hidden" name="message_id" value="[% msg.message_id | html %]" />
+                                                        <input type="hidden" name="referer" value="opac-messaging.pl" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                                            <i class="fa fa-check me-1"></i> Đã đọc / Đóng
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                <div class="message-content text-dark" style="font-size: 1rem; line-height: 1.6; white-space: pre-wrap;">[% msg.message | html %]</div>
+                                            </div>
+                                        </div>
+                                        [% END %]
+                                    </div>
+                                [% ELSE %]
+                                    <div class="text-center py-5 bg-light rounded border my-2">
+                                        <i class="fa fa-envelope-open-o text-muted mb-3" style="font-size: 3.5rem; opacity: 0.6;"></i>
+                                        <h4 class="text-dark font-weight-bold">Không có tin nhắn mới nào</h4>
+                                        <p class="text-muted mb-3">Tất cả thông báo từ Thư viện đã được đọc. Bạn có thể xem lại trong Lịch sử tin nhắn bất cứ lúc nào.</p>
+                                        <button type="button" class="btn btn-primary btn-sm px-3 py-2" onclick="bootstrap.Tab.getOrCreateInstance(document.querySelector('#tab-history-btn')).show();">
+                                            <i class="fa fa-history me-1"></i> Xem Lịch sử tin nhắn ([% history_count | html %])
+                                        </button>
+                                    </div>
+                                [% END %]
+                            </div>
+
+                            <!-- TAB 2: LỊCH SỬ TIN NHẮN (PHÂN TRANG DATATABLES) -->
+                            <div class="tab-pane fade [% IF active_tab == 'history' %]show active[% END %]" id="tab-history" role="tabpanel" aria-labelledby="tab-history-btn">
+                                [% IF history_count > 0 %]
+                                    <div class="card border-0 shadow-sm mb-3">
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive p-3">
+                                                <table id="table-patron-messages-history" class="table table-striped table-hover align-middle w-100" style="border: 1px solid #dee2e6;">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th style="width: 50px;" class="text-center">STT</th>
+                                                            <th style="width: 170px;">Thời gian gửi</th>
+                                                            <th style="width: 180px;">Đơn vị gửi</th>
+                                                            <th>Nội dung thông báo / Tin nhắn</th>
+                                                            <th style="width: 160px;" class="text-center">Trạng thái</th>
+                                                            <th style="width: 110px;" class="text-center">Thao tác</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        [% FOREACH msg IN history_messages %]
+                                                        <tr>
+                                                            <td class="text-center font-monospace text-muted">[% loop.count %]</td>
+                                                            <td data-order="[% msg.message_date | html %]">
+                                                                <div style="font-size: 0.9rem; font-weight: 500;">
+                                                                    <i class="fa fa-calendar me-1 text-muted"></i> [% msg.message_date | $KohaDates %]
+                                                                </div>
+                                                                <div class="text-muted" style="font-size: 0.8rem;">
+                                                                    <i class="fa fa-clock-o me-1"></i> [% msg.message_date | $KohaDates with_hours => 1 %]
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge border border-primary text-primary bg-white px-2 py-1" style="font-weight: 500;">
+                                                                    [% Branches.GetName(msg.branchcode) | html %]
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <div style="font-size: 0.95rem; line-height: 1.5; color: #1e293b; max-width: 500px; white-space: pre-wrap;">[% msg.message | html %]</div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                [% IF msg.patron_read_date %]
+                                                                    <span class="badge px-2 py-1" style="font-size: 0.82rem; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;">
+                                                                        <i class="fa fa-check-circle me-1"></i> Đã đọc
+                                                                    </span>
+                                                                    <div class="text-muted mt-1" style="font-size: 0.75rem;" title="Thời gian đọc">
+                                                                        [% msg.patron_read_date | $KohaDates with_hours => 1 %]
+                                                                    </div>
+                                                                [% ELSE %]
+                                                                    <span class="badge px-2 py-1" style="font-size: 0.82rem; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;">
+                                                                        <i class="fa fa-envelope me-1"></i> Chưa đọc
+                                                                    </span>
+                                                                [% END %]
+                                                            </td>
+                                                            <td class="text-center">
+                                                                [% IF !msg.patron_read_date %]
+                                                                    <form action="/cgi-bin/koha/opac-dismiss-message.pl" method="post" style="margin: 0; display: inline;">
+                                                                        [% INCLUDE 'csrf-token.inc' %]
+                                                                        <input type="hidden" name="op" value="cud-update" />
+                                                                        <input type="hidden" name="message_id" value="[% msg.message_id | html %]" />
+                                                                        <input type="hidden" name="referer" value="opac-messaging.pl" />
+                                                                        <button type="submit" class="btn btn-outline-success btn-sm" title="Đánh dấu đã đọc">
+                                                                            <i class="fa fa-check"></i> Đã đọc
+                                                                        </button>
+                                                                    </form>
+                                                                [% ELSE %]
+                                                                    <span class="text-muted" style="font-size: 0.85rem;"><i class="fa fa-check-circle-o text-success me-1"></i> Đã lưu</span>
+                                                                [% END %]
+                                                            </td>
+                                                        </tr>
+                                                        [% END %]
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                [% ELSE %]
+                                    <div class="text-center py-5 bg-light rounded border my-2">
+                                        <i class="fa fa-history text-muted mb-3" style="font-size: 3.5rem; opacity: 0.6;"></i>
+                                        <h4 class="text-dark font-weight-bold">Chưa có lịch sử tin nhắn</h4>
+                                        <p class="text-muted">Bạn chưa nhận thông báo hay tin nhắn nào từ thư viện.</p>
+                                    </div>
+                                [% END %]
+                            </div>
+
+                            <!-- TAB 3: CÀI ĐẶT NHẬN THÔNG BÁO -->
+                            <div class="tab-pane fade [% IF active_tab == 'settings' %]show active[% END %]" id="tab-settings" role="tabpanel" aria-labelledby="tab-settings-btn">
+                                [% IF ( settings_updated ) %]
+                                    <div class="alert alert-success">
+                                        <p><strong><i class="fa fa-check-circle me-1"></i> Đã cập nhật thành công cài đặt nhận thông báo của bạn.</strong></p>
+                                    </div>
+                                [% END %]
+                                <div class="alert alert-light border mb-3">
+                                    <i class="fa fa-info-circle text-primary me-1"></i> Chọn phương thức nhận thông báo (Email, SMS) cho từng loại nghiệp vụ thư viện như: tài liệu đến hạn trả, đặt mượn đã có sẵn, bản tin tổng hợp hàng ngày.
+                                </div>
+                                <form action="/cgi-bin/koha/opac-messaging.pl" method="post" name="opacmessaging">
+                                    [% INCLUDE 'csrf-token.inc' %]
+                                    <input type="hidden" name="op" value="cud-modify" />
+                                    <input type="hidden" name="tab" value="settings" />
+
+                                    [% IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) %]
+                                        <table class="table table-bordered table-condensed table-striped" id="messaging-preferences-table">
+                                            <caption class="visually-hidden">Cài đặt tin nhắn của bạn</caption>
  <thead>
  <tr>
  <th>[% t('Message type') | html %]</th>
@@ -255,38 +435,74 @@
  </fieldset>
  [% END #/IF SMSSendDriver || Koha.Preference('TranslateNotices') %]
 
- <fieldset class="action">
- <legend class="sr-only">Submit or cancel changes</legend>
- <input class="btn btn-primary" type="submit" value="Gửi các thay đổi" />
- <a class="cancel" href="/cgi-bin/koha/opac-user.pl">Hủy bỏ</a>
- </fieldset>
- </form>
- </div>
- <!-- / #usermessaging -->
- [% ELSE %]
- <p><strong>Bạn không được phép truy cập trực tiếp trang này</strong></p>
- [% END # /IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) %]
- </div>
- <!-- / .col-lg-10 -->
- </div>
- <!-- / .row -->
- </div>
- <!-- / .container-fluid -->
+                                <fieldset class="action">
+                                    <legend class="sr-only">Submit or cancel changes</legend>
+                                    <input class="btn btn-primary" type="submit" value="Gửi các thay đổi" />
+                                    <a class="cancel" href="/cgi-bin/koha/opac-user.pl">Hủy bỏ</a>
+                                </fieldset>
+                            </form>
+                        </div> <!-- /#tab-settings -->
+                    </div> <!-- /#patronMessagingTabContent -->
+                </div>
+                <!-- / #usermessaging -->
+            [% ELSE %]
+                <p><strong>Bạn không được phép truy cập trực tiếp trang này</strong></p>
+            [% END # /IF Koha.Preference( 'EnhancedMessagingPreferencesOPAC' ) %]
+            </div>
+            <!-- / .col-lg-10 -->
+        </div>
+        <!-- / .row -->
+    </div>
+    <!-- / .container-fluid -->
 </main>
 <!-- / .main -->
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
- [% INCLUDE 'datatables.inc' %]
- <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+    [% INCLUDE 'datatables.inc' %]
+    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
         Koha.addPrefs({
             PhoneNotification: [% Koha.Preference('PhoneNotification') ? 1 : 0 | html %],
             TalkingTechItivaPhoneNotification: [% Koha.Preference('TalkingTechItivaPhoneNotification') ? 1 : 0 | html %],
             OPACTableColExpandedByDefault: [% Koha.Preference('OPACTableColExpandedByDefault') ? 1 : 0 | html %],
         });
     </script>
- <script nonce="[% Koha.CSPNonce | $raw %]">
+    <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready(function () {
+            // Khởi tạo DataTable cho Lịch sử tin nhắn
+            if ($("#table-patron-messages-history").length) {
+                var histTable = $("#table-patron-messages-history").DataTable({
+                    order: [[1, "desc"]],
+                    pageLength: 5,
+                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tất cả"]],
+                    language: {
+                        search: "Tìm kiếm tin nhắn:",
+                        searchPlaceholder: "Nhập nội dung cần tìm...",
+                        lengthMenu: "Hiển thị _MENU_ tin nhắn / trang",
+                        info: "Hiển thị _START_ - _END_ của _TOTAL_ tin nhắn",
+                        infoEmpty: "Không có tin nhắn nào",
+                        infoFiltered: "(lọc từ tổng _MAX_ tin nhắn)",
+                        zeroRecords: "Không tìm thấy tin nhắn phù hợp",
+                        paginate: {
+                            first: "Đầu",
+                            last: "Cuối",
+                            next: "Sau &rsaquo;",
+                            previous: "&lsaquo; Trước"
+                        }
+                    },
+                    responsive: true,
+                    columnDefs: [
+                        { orderable: false, targets: [0, 4, 5] }
+                    ]
+                });
+
+                $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    if (e.target.id === 'tab-history-btn') {
+                        histTable.columns.adjust().responsive.recalc();
+                    }
+                });
+            }
+
             function toggle_digest(id) {
                 let phone_checked = Koha.prefs.TalkingTechItivaPhoneNotification ? false : Koha.prefs.PhoneNotification ? $("#phone" + id).prop("checked") : false;
 
@@ -316,6 +532,21 @@
             $(".pmp_phone").click(function () {
                 toggle_digest(Number($(this).attr("id").replace("phone", "")));
             });
+
+            var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
+            $("#messaging-preferences-table").kohaTable({
+                searching: false,
+                paging: false,
+                info: false,
+                responsive: {
+                    details: {
+                        display: responsive_display,
+                        type: "column",
+                        target: -1,
+                    },
+                },
+                columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+            });
         });
 
         function normalizeSMS(value) {
@@ -340,20 +571,5 @@
                 }, 100);
             });
         }
-
-        var responsive_display = Koha.prefs.OPACTableColExpandedByDefault ? DataTable.Responsive.display.childRowImmediate : DataTable.Responsive.display.childRow;
-        $(".table").kohaTable({
-            searching: false,
-            paging: false,
-            info: false,
-            responsive: {
-                details: {
-                    display: responsive_display,
-                    type: "column",
-                    target: -1,
-                },
-            },
-            columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
-        });
     </script>
 [% END %]

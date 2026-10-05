@@ -1,0 +1,543 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE Categories %]
+[% USE ItemTypes %]
+[% USE AuthorisedValues %]
+[% USE CirculationRules %]
+[% USE Price %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>
+    [% FILTER collapse %]
+        [% IF op == 'add_warehouse_form' %]
+            Thêm mới kho lưu trữ &rsaquo; Quản lý Kho &amp; Quy tắc mượn
+        [% ELSIF op == 'edit_warehouse_form' %]
+            Chỉnh sửa kho: [% warehouse.lib | html %] &rsaquo; Quản lý Kho &amp; Quy tắc mượn
+        [% ELSIF op == 'add_rule_form' %]
+            Thêm mới quy tắc mượn trả &rsaquo; Quản lý Kho &amp; Quy tắc mượn
+        [% ELSIF op == 'edit_rule_form' %]
+            Chỉnh sửa quy tắc mượn trả &rsaquo; Quản lý Kho &amp; Quy tắc mượn
+        [% ELSE %]
+            Quản lý Kho lưu trữ &amp; Quy tắc mượn trả
+        [% END %]
+        &rsaquo; Quản trị hệ thống &rsaquo; Koha
+    [% END %]
+</title>
+[% INCLUDE 'doc-head-close.inc' %]
+
+<style>
+.badge-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.badge-all {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.nav-tabs .nav-link {
+    font-weight: 600;
+    color: #475569;
+}
+.nav-tabs .nav-link.active {
+    color: #0284c7;
+    border-bottom-color: #ffffff;
+}
+</style>
+</head>
+
+<body id="admin_warehouses" class="admin">
+[% WRAPPER 'header.inc' %]
+    [% INCLUDE 'prefs-admin-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
+        [% END %]
+
+        [% IF op == 'add_warehouse_form' %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/admin/warehouses.pl">Quản lý Kho &amp; Quy tắc mượn</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Thêm mới kho lưu trữ</span>
+            [% END %]
+        [% ELSIF op == 'edit_warehouse_form' %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/admin/warehouses.pl">Quản lý Kho &amp; Quy tắc mượn</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Chỉnh sửa kho: [% warehouse.lib | html %]</span>
+            [% END %]
+        [% ELSIF op == 'add_rule_form' %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Quản lý Kho &amp; Quy tắc mượn</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Thêm mới quy tắc mượn trả</span>
+            [% END %]
+        [% ELSIF op == 'edit_rule_form' %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Quản lý Kho &amp; Quy tắc mượn</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Chỉnh sửa quy tắc mượn trả</span>
+            [% END %]
+        [% ELSE %]
+            [% WRAPPER breadcrumb_item bc_active = 1 %]
+                <span>Quản lý Kho &amp; Quy tắc mượn</span>
+            [% END %]
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+[% WRAPPER 'main-container.inc' aside='admin-menu' %]
+
+    <!-- Thông báo hệ thống (Koha Alerts) -->
+    [% FOR m IN messages %]
+        <div class="alert alert-[% m.type | html %] alert-dismissible fade show" role="alert">
+            [% IF m.type == 'success' %]
+                <i class="fa fa-check-circle me-1"></i>
+            [% ELSE %]
+                <i class="fa fa-exclamation-triangle me-1"></i>
+            [% END %]
+            [% m.text | html %]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    [% END %]
+
+    <!-- ================================================================= -->
+    <!-- FORM 1: THÊM / SỬA KHO LƯU TRỮ (Koha::AuthorisedValues - LOC)   -->
+    <!-- ================================================================= -->
+    [% IF op == 'add_warehouse_form' || op == 'edit_warehouse_form' %]
+        <h1>
+            [% IF is_add %]
+                <span>Thêm mới kho lưu trữ (Vị trí xếp giá - LOC)</span>
+            [% ELSE %]
+                <span>Chỉnh sửa kho lưu trữ: [% warehouse.lib | html %]</span>
+            [% END %]
+        </h1>
+
+        <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" id="warehouse-form" class="validated">
+            [% INCLUDE 'csrf-token.inc' %]
+            <input type="hidden" name="op" value="cud-save_warehouse" />
+            [% IF !is_add %]
+                <input type="hidden" name="id" value="[% warehouse.id | html %]" />
+            [% END %]
+
+            <div class="page-section">
+                <fieldset class="rows">
+                    <legend>Thông tin kho lưu trữ</legend>
+                    <ol>
+                        <li>
+                            <label for="authorised_value" class="required">Mã kho lưu trữ (LOC): </label>
+                            [% IF is_add %]
+                                <input type="text" name="authorised_value" id="authorised_value" value="[% warehouse.authorised_value | html %]" maxlength="80" required="required" placeholder="VD: KHO_MUON" style="text-transform: uppercase;" />
+                                <span class="required">Bắt buộc</span>
+                                <div class="hint">Mã định danh viết hoa không dấu, tương ứng với trường MARC 952$c và items.location.</div>
+                            [% ELSE %]
+                                <input type="text" name="authorised_value" id="authorised_value" value="[% warehouse.authorised_value | html %]" readonly="readonly" class="readonly" />
+                                <span class="hint">Mã kho không thể thay đổi sau khi tạo để đảm bảo toàn vẹn dữ liệu bản sách.</span>
+                            [% END %]
+                        </li>
+                        <li>
+                            <label for="lib" class="required">Tên kho (Nội bộ thủ thư): </label>
+                            <input type="text" name="lib" id="lib" value="[% warehouse.lib | html %]" maxlength="200" required="required" placeholder="VD: Kho mượn về nhà" style="width: 50%;" />
+                            <span class="required">Bắt buộc</span>
+                        </li>
+                        <li>
+                            <label for="lib_opac">Tên hiển thị OPAC (Bạn đọc): </label>
+                            <input type="text" name="lib_opac" id="lib_opac" value="[% warehouse.lib_opac | html %]" maxlength="200" placeholder="VD: Kho Mượn - Tầng 2 Thư viện FTU" style="width: 50%;" />
+                            <div class="hint">Tên thân thiện xuất hiện trên cổng tra cứu tài liệu cho bạn đọc. Để trống sẽ dùng tên kho nội bộ.</div>
+                        </li>
+                        <li>
+                            <label for="branches">Giới hạn chi nhánh: </label>
+                            <select name="branches" id="branches" multiple="multiple" size="5" style="width: 50%;">
+                                [% FOREACH b IN Branches.all( unfiltered => 1 ) %]
+                                    [% SET selected = 0 %]
+                                    [% FOREACH sb IN selected_branches %]
+                                        [% IF sb.branchcode == b.branchcode %][% SET selected = 1 %][% END %]
+                                    [% END %]
+                                    <option value="[% b.branchcode | html %]" [% IF selected %]selected="selected"[% END %]>[% b.branchname | html %]</option>
+                                [% END %]
+                            </select>
+                            <div class="hint">Giữ phím Ctrl (hoặc Cmd) để chọn nhiều thư viện. Để trống nếu kho này áp dụng cho toàn bộ các chi nhánh.</div>
+                        </li>
+                    </ol>
+                </fieldset>
+
+                <fieldset class="action">
+                    <input type="submit" value="Lưu kho lưu trữ" class="btn btn-primary" />
+                    <a class="cancel" href="/cgi-bin/koha/admin/warehouses.pl">Hủy bỏ</a>
+                </fieldset>
+            </div>
+        </form>
+
+    <!-- ================================================================= -->
+    <!-- FORM 2: THÊM / SỬA QUY TẮC MƯỢN TRẢ (Koha::CirculationRules)   -->
+    <!-- ================================================================= -->
+    [% ELSIF op == 'add_rule_form' || op == 'edit_rule_form' %]
+        <h1>
+            [% IF op == 'add_rule_form' %]
+                <span>Thiết lập quy tắc mượn trả mới</span>
+            [% ELSE %]
+                <span>Chỉnh sửa quy tắc mượn trả</span>
+            [% END %]
+        </h1>
+
+        <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" id="rule-form" class="validated">
+            [% INCLUDE 'csrf-token.inc' %]
+            <input type="hidden" name="op" value="cud-save_rule" />
+
+            <div class="page-section">
+                <fieldset class="rows">
+                    <legend>Phạm vi áp dụng quy tắc lưu thông</legend>
+                    <ol>
+                        <li>
+                            <label for="branchcode">Thư viện / Chi nhánh: </label>
+                            <select name="branchcode" id="branchcode">
+                                <option value="*" [% IF branchcode == '*' %]selected="selected"[% END %]>* Tất cả thư viện</option>
+                                [% FOREACH b IN libraries %]
+                                    <option value="[% b.branchcode | html %]" [% IF b.branchcode == branchcode %]selected="selected"[% END %]>[% b.branchname | html %]</option>
+                                [% END %]
+                            </select>
+                        </li>
+                        <li>
+                            <label for="categorycode">Kiểu bạn đọc: </label>
+                            <select name="categorycode" id="categorycode">
+                                <option value="*" [% IF categorycode == '*' %]selected="selected"[% END %]>* Tất cả kiểu bạn đọc</option>
+                                [% FOREACH c IN patron_categories %]
+                                    <option value="[% c.categorycode | html %]" [% IF c.categorycode == categorycode %]selected="selected"[% END %]>[% c.description | html %] ([% c.categorycode | html %])</option>
+                                [% END %]
+                            </select>
+                        </li>
+                        <li>
+                            <label for="itemtype">Kiểu tài liệu: </label>
+                            <select name="itemtype" id="itemtype">
+                                <option value="*" [% IF itemtype == '*' %]selected="selected"[% END %]>* Tất cả kiểu tài liệu</option>
+                                [% FOREACH it IN itemtypes %]
+                                    <option value="[% it.itemtype | html %]" [% IF it.itemtype == itemtype %]selected="selected"[% END %]>[% it.description | html %] ([% it.itemtype | html %])</option>
+                                [% END %]
+                            </select>
+                        </li>
+                    </ol>
+                </fieldset>
+
+                <fieldset class="rows">
+                    <legend>Chính sách mượn trả và mức phạt (Circulation &amp; Fine Rules)</legend>
+                    <ol>
+                        <li>
+                            <label for="maxissueqty">Số tài liệu được mượn về nhà: </label>
+                            <input type="number" min="0" max="100" name="maxissueqty" id="maxissueqty" value="[% rule.maxissueqty || 5 | html %]" />
+                            <span class="hint">Số cuốn tối đa bạn đọc được giữ cùng lúc (0 = không cho mượn về nhà).</span>
+                        </li>
+                        <li>
+                            <label for="issuelength">Thời gian mượn: </label>
+                            <input type="number" min="1" max="365" name="issuelength" id="issuelength" value="[% rule.issuelength || 14 | html %]" />
+                            <select name="lengthunit" id="lengthunit">
+                                <option value="days" [% IF rule.lengthunit == 'days' || !rule.lengthunit %]selected="selected"[% END %]>Ngày (days)</option>
+                                <option value="hours" [% IF rule.lengthunit == 'hours' %]selected="selected"[% END %]>Giờ (hours)</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label for="renewalsallowed">Số lần được gia hạn: </label>
+                            <input type="number" min="0" max="10" name="renewalsallowed" id="renewalsallowed" value="[% rule.renewalsallowed || 2 | html %]" />
+                            <span class="hint">Số lần tối đa bạn đọc được bấm gia hạn sách.</span>
+                        </li>
+                        <li>
+                            <label for="renewalperiod">Thời gian gia hạn mỗi lần: </label>
+                            <input type="number" min="0" max="90" name="renewalperiod" id="renewalperiod" value="[% rule.renewalperiod || 7 | html %]" />
+                            <span class="hint">Số ngày cộng thêm mỗi lần gia hạn thành công.</span>
+                        </li>
+                        <li>
+                            <label for="maxonsiteissueqty">Mượn đọc tại chỗ tối đa: </label>
+                            <input type="number" min="0" max="50" name="maxonsiteissueqty" id="maxonsiteissueqty" value="[% rule.maxonsiteissueqty || 5 | html %]" />
+                            <span class="hint">Số cuốn đọc tại chỗ trong thư viện cùng lúc.</span>
+                        </li>
+                        <li>
+                            <label for="fine">Tiền phạt quá hạn mỗi ngày: </label>
+                            <input type="number" min="0" step="500" name="fine" id="fine" value="[% rule.fine || 0 | html %]" />
+                            <span class="hint">Số tiền phạt tính trên mỗi ngày trễ hạn (VNĐ).</span>
+                        </li>
+                        <li>
+                            <label for="reservesallowed">Số lượng được đặt mượn: </label>
+                            <input type="number" min="0" max="10" name="reservesallowed" id="reservesallowed" value="[% rule.reservesallowed || 2 | html %]" />
+                            <span class="hint">Số lượng bản sách được đặt trước tối đa.</span>
+                        </li>
+                        <li>
+                            <label for="note">Ghi chú chính sách: </label>
+                            <textarea name="note" id="note" rows="2" style="width: 50%;">[% rule.note | html %]</textarea>
+                        </li>
+                    </ol>
+                </fieldset>
+
+                <fieldset class="action">
+                    <input type="submit" value="Lưu quy tắc lưu thông" class="btn btn-primary" />
+                    <a class="cancel" href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Hủy bỏ</a>
+                </fieldset>
+            </div>
+        </form>
+
+    <!-- ================================================================= -->
+    <!-- DEFAULT: DANH SÁCH KHO LƯU TRỮ & QUY TẮC MƯỢN TRẢ (LIST)       -->
+    <!-- ================================================================= -->
+    [% ELSE %]
+        <h1>Quản lý Kho lưu trữ &amp; Quy tắc mượn trả</h1>
+
+        <!-- Toolbar chuẩn Koha -->
+        <div id="toolbar" class="btn-toolbar">
+            <a class="btn btn-default" id="new_warehouse" href="/cgi-bin/koha/admin/warehouses.pl?op=add_warehouse_form">
+                <i class="fa fa-plus"></i> Tạo kho lưu trữ mới
+            </a>
+            <a class="btn btn-default" id="new_rule" href="/cgi-bin/koha/admin/warehouses.pl?op=add_rule_form">
+                <i class="fa fa-plus"></i> Thêm quy tắc mượn mới
+            </a>
+            <a class="btn btn-default" href="/cgi-bin/koha/admin/smart-rules.pl">
+                <i class="fa fa-sliders"></i> Toàn bộ ma trận mượn trả &amp; phạt (Koha Core)
+            </a>
+            <a class="btn btn-default" href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=LOC">
+                <i class="fa fa-list"></i> Toàn bộ vị trí xếp giá (LOC)
+            </a>
+        </div>
+
+        <!-- Tabs chuyển đổi chuẩn Koha (Bootstrap 5) -->
+        <ul class="nav nav-tabs" id="warehouseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link [% IF active_tab != 'rules' %]active[% END %]" id="warehouses-tab" data-bs-toggle="tab" data-bs-target="#warehouses-pane" type="button" role="tab">
+                    <i class="fa fa-boxes"></i> Kho lưu trữ (Vị trí xếp giá - LOC) <span class="badge bg-secondary">[% total_warehouses | html %]</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link [% IF active_tab == 'rules' %]active[% END %]" id="rules-tab" data-bs-toggle="tab" data-bs-target="#rules-pane" type="button" role="tab">
+                    <i class="fa fa-sliders"></i> Quy tắc mượn trả &amp; Lưu thông <span class="badge bg-secondary">[% total_rules | html %]</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="warehouseTabsContent">
+            <!-- TAB 1: KHO LƯU TRỮ -->
+            <div class="tab-pane fade [% IF active_tab != 'rules' %]show active[% END %]" id="warehouses-pane" role="tabpanel">
+                <div class="page-section">
+                    <table id="table_warehouses" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mã kho (LOC)</th>
+                                <th>Tên kho (Nội bộ)</th>
+                                <th>Tên hiển thị OPAC</th>
+                                <th>Chi nhánh áp dụng</th>
+                                <th class="text-center">Tài liệu trên giá</th>
+                                <th class="no-export">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            [% FOREACH w IN warehouses %]
+                                <tr>
+                                    <td>
+                                        <span class="badge-code">[% w.authorised_value | html %]</span>
+                                    </td>
+                                    <td>
+                                        <strong>[% w.lib | html %]</strong>
+                                    </td>
+                                    <td>
+                                        [% IF w.lib_opac %]
+                                            [% w.lib_opac | html %]
+                                        [% ELSE %]
+                                            <span class="text-muted"><em>Giống tên nội bộ</em></span>
+                                        [% END %]
+                                    </td>
+                                    <td>
+                                        [% w.branches_display | html %]
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="/cgi-bin/koha/catalogue/search.pl?idx=loc&q=[% w.authorised_value | uri %]" title="Tra cứu các tài liệu đang xếp trong kho này">
+                                            <i class="fa fa-book"></i> [% w.items_count | html %] cuốn
+                                        </a>
+                                    </td>
+                                    <td class="actions">
+                                        <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/warehouses.pl?op=edit_warehouse_form&amp;id=[% w.id | uri %]">
+                                            <i class="fa fa-pencil"></i> Chỉnh sửa
+                                        </a>
+                                        <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa kho tài liệu \'[% w.lib | html %]\' ([% w.authorised_value | html %])?');">
+                                            [% INCLUDE 'csrf-token.inc' %]
+                                            <input type="hidden" name="op" value="cud-delete_warehouse" />
+                                            <input type="hidden" name="id" value="[% w.id | html %]" />
+                                            <button type="submit" class="btn btn-default btn-xs text-danger">
+                                                <i class="fa fa-trash"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            [% END %]
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: QUY TẮC MƯỢN TRẢ -->
+            <div class="tab-pane fade [% IF active_tab == 'rules' %]show active[% END %]" id="rules-pane" role="tabpanel">
+                <div class="page-section">
+                    <form method="get" action="/cgi-bin/koha/admin/warehouses.pl" class="mb-3" id="selectlibrary">
+                        <input type="hidden" name="tab" value="rules" />
+                        <label for="branch"><strong>Lọc theo chi nhánh:</strong> </label>
+                        <select name="branch" id="branch" onchange="this.form.submit()">
+                            <option value="*" [% IF current_branch == '*' %]selected="selected"[% END %]>* Tất cả chi nhánh</option>
+                            [% FOREACH b IN Branches.all( unfiltered => 1 ) %]
+                                <option value="[% b.branchcode | html %]" [% IF b.branchcode == current_branch %]selected="selected"[% END %]>[% b.branchname | html %]</option>
+                            [% END %]
+                        </select>
+                    </form>
+
+                    <table id="table_rules" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Chi nhánh</th>
+                                <th>Kiểu bạn đọc</th>
+                                <th>Kiểu tài liệu</th>
+                                <th class="text-center">Được mượn</th>
+                                <th class="text-center">Hạn mượn</th>
+                                <th class="text-center">Gia hạn</th>
+                                <th class="text-center">Tại chỗ</th>
+                                <th class="text-center">Phạt/ngày</th>
+                                <th class="text-center">Đặt mượn</th>
+                                <th>Ghi chú</th>
+                                <th class="no-export">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            [% FOREACH r IN circulation_rules %]
+                                <tr>
+                                    <td>
+                                        [% IF r.branchcode %]
+                                            [% Branches.GetName(r.branchcode) | html %]
+                                        [% ELSE %]
+                                            <span class="badge-all"><i class="fa fa-globe"></i> Tất cả chi nhánh</span>
+                                        [% END %]
+                                    </td>
+                                    <td>
+                                        [% IF r.categorycode %]
+                                            [% Categories.GetName(r.categorycode) | html %]
+                                        [% ELSE %]
+                                            <span class="badge-all"><i class="fa fa-users"></i> Tất cả bạn đọc</span>
+                                        [% END %]
+                                    </td>
+                                    <td>
+                                        [% IF r.itemtype %]
+                                            [% ItemTypes.GetDescription(r.itemtype, 1) | html %]
+                                        [% ELSE %]
+                                            <span class="badge-all"><i class="fa fa-layer-group"></i> Tất cả tài liệu</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="text-center">
+                                        [% IF r.maxissueqty.defined %]
+                                            <strong>[% r.maxissueqty | html %]</strong> cuốn
+                                        [% ELSE %]
+                                            <span class="text-muted">&mdash;</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="text-center">
+                                        [% IF r.issuelength.defined %]
+                                            [% r.issuelength | html %] [% r.lengthunit == 'hours' ? 'giờ' : 'ngày' %]
+                                        [% ELSE %]
+                                            <span class="text-muted">&mdash;</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="text-center">
+                                        [% IF r.renewalsallowed.defined %]
+                                            [% r.renewalsallowed | html %] lần ([% r.renewalperiod | html %] ngày)
+                                        [% ELSE %]
+                                            <span class="text-muted">&mdash;</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="text-center">
+                                        [% IF r.maxonsiteissueqty.defined %]
+                                            [% r.maxonsiteissueqty | html %] cuốn
+                                        [% ELSE %]
+                                            <span class="text-muted">&mdash;</span>
+                                        [% END %]
+                                    </td>
+                                    <td class="text-center">
+                                        [% IF r.fine.defined && r.fine > 0 %]
+                                            <strong class="text-danger">[% r.fine | $Price %]</strong>
+                                        [% ELSE %]
+                                            0
+                                        [% END %]
+                                    </td>
+                                    <td class="text-center">
+                                        [% r.reservesallowed.defined ? r.reservesallowed : '&mdash;' %]
+                                    </td>
+                                    <td>
+                                        [% r.note | html %]
+                                    </td>
+                                    <td class="actions">
+                                        <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/warehouses.pl?op=edit_rule_form&amp;branchcode=[% r.branchcode || '*' | uri %]&amp;categorycode=[% r.categorycode || '*' | uri %]&amp;itemtype=[% r.itemtype || '*' | uri %]">
+                                            <i class="fa fa-pencil"></i> Sửa
+                                        </a>
+                                        [% IF r.branchcode || r.categorycode || r.itemtype %]
+                                            <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa quy tắc lưu thông này?');">
+                                                [% INCLUDE 'csrf-token.inc' %]
+                                                <input type="hidden" name="op" value="cud-delete_rule" />
+                                                <input type="hidden" name="branchcode" value="[% r.branchcode | html %]" />
+                                                <input type="hidden" name="categorycode" value="[% r.categorycode | html %]" />
+                                                <input type="hidden" name="itemtype" value="[% r.itemtype | html %]" />
+                                                <button type="submit" class="btn btn-default btn-xs text-danger">
+                                                    <i class="fa fa-trash"></i> Xóa
+                                                </button>
+                                            </form>
+                                        [% END %]
+                                    </td>
+                                </tr>
+                            [% END %]
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    [% END %]
+
+[% END #/ WRAPPER main-container.inc %]
+
+[% MACRO jsinclude BLOCK %]
+[% Asset.js("js/admin-menu.js") | $raw %]
+[% INCLUDE 'datatables.inc' %]
+<script>
+$(document).ready(function() {
+    [% IF op == 'list' %]
+        $("#table_warehouses").kohaTable({
+            "order": [[ 0, "asc" ]],
+            "paging": true
+        });
+
+        $("#table_rules").kohaTable({
+            "order": [[ 0, "asc" ], [ 1, "asc" ]],
+            "paging": true
+        });
+
+        // Hỗ trợ lưu trữ trạng thái tab trên URL
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+            var target = $(e.target).attr("data-bs-target");
+            var tabName = target === '#rules-pane' ? 'rules' : 'warehouses';
+            var newUrl = window.location.pathname + '?tab=' + tabName;
+            history.replaceState(null, '', newUrl);
+        });
+    [% END %]
+});
+</script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]

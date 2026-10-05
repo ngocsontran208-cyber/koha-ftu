@@ -22,25 +22,63 @@ body#cat_addbiblio {
 }
 
 .ftu-clean-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
     font-size: 1.35rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0.75rem 0 1rem 0;
-    padding: 0.75rem 1.25rem;
-    background: #ffffff;
-    border-radius: 10px;
-    border-left: 5px solid #b91c1c;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.ftu-clean-title i {
-    color: #b91c1c;
-    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0.75rem 0 0.75rem 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 body#cat_addbiblio h1:not(.ftu-clean-title) {
     display: none !important;
+}
+
+/* ══ FTU Z39.50 Quick Bar Styling ══ */
+.ftu-z3950-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0 1rem 0;
+}
+.ftu-z3950-card .form-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 3px;
+}
+.ftu-z3950-results {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e2e8f0;
+}
+.ftu-z3950-table {
+    width: 100%;
+    margin-bottom: 0;
+    font-size: 0.84rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+.ftu-z3950-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-bottom: 1px solid #cbd5e1;
+}
+.ftu-z3950-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.ftu-z3950-status-msg {
+    font-size: 0.84rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 8px;
+    line-height: 1.5;
 }
 
 
@@ -1059,8 +1097,159 @@ body#cat_addbiblio h1:not(.ftu-clean-title) {
         return "<strong><em>" + string + "</em></strong>";
     }
 
+    function launchFtuZ3950Search(customIsbn, customTitle, customAuthor) {
+        var frameworkcode = document.getElementById("frameworkcode") ? document.getElementById("frameworkcode").value : '';
+        var isbnVal = customIsbn !== undefined ? customIsbn : ($("#ftu_z3950_isbn").val() || '');
+        var titleVal = customTitle !== undefined ? customTitle : ($("#ftu_z3950_title").val() || '');
+        var authorVal = customAuthor !== undefined ? customAuthor : ($("#ftu_z3950_author").val() || '');
+
+        if (!isbnVal && !titleVal && !authorVal && typeof z3950_mandatory_subfields !== 'undefined') {
+            z3950_mandatory_subfields.forEach(function(sf) {
+                var elem = document.getElementById(sf.id);
+                if (elem && elem.value) {
+                    var lbl = (sf.label || '').toLowerCase();
+                    if (lbl.indexOf('isbn') !== -1) isbnVal = elem.value;
+                    else if (lbl.indexOf('title') !== -1) titleVal = elem.value;
+                    else if (lbl.indexOf('author') !== -1) authorVal = elem.value;
+                }
+            });
+        }
+
+        if (isbnVal) {
+            isbnVal = isbnVal.replace(/^[iI][sS][bB][nN][: \t]*/, '').replace(/\s*\([^)]*\)/g, '').trim();
+        }
+        if (titleVal) titleVal = titleVal.trim();
+        if (authorVal) authorVal = authorVal.trim();
+
+        var $resArea = $("#ftu_z3950_results_area");
+
+        if (!isbnVal && !titleVal && !authorVal) {
+            $resArea.show().html('<div class="ftu-z3950-status-msg" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;">Please enter ISBN, Title or Author to search.</div>');
+            return;
+        }
+
+        var $btn = $("#ftu_btn_z3950_search");
+        var originalBtnText = $btn.text();
+        $btn.prop("disabled", true).text("Searching...");
+
+        $resArea.show().html('<div class="ftu-z3950-status-msg" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">Querying servers (National Library of Vietnam & Library of Congress)...</div>');
+
+        var currentPath = window.location.pathname;
+        var ajaxUrl = currentPath.replace(/addbiblio\.pl.*/, 'z3950_search_ajax.pl');
+        var addBiblioBaseUrl = currentPath.replace(/z3950_search_ajax\.pl.*/, 'addbiblio.pl');
+
+        $.ajax({
+            url: ajaxUrl,
+            type: "GET",
+            dataType: "json",
+            data: {
+                isbn: isbnVal,
+                title: titleVal,
+                author: authorVal,
+                frameworkcode: frameworkcode,
+                biblionumber: biblionumber
+            },
+            timeout: 25000,
+            success: function(data) {
+                $btn.prop("disabled", false).text(originalBtnText);
+
+                if (!data || !data.ok) {
+                    var errMsg = (data && data.message) ? data.message : "Search failed.";
+                    $resArea.html('<div class="ftu-z3950-status-msg" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;">' + errMsg + '</div>');
+                    return;
+                }
+
+                if (data.count === 1) {
+                    var r = data.results[0];
+                    $resArea.html('<div class="ftu-z3950-status-msg" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">Record found: <strong>' + (r.title || 'Record') + '</strong> (' + (r.server || 'Z39.50') + '). Loading into form...</div>');
+                    setTimeout(function() {
+                        var targetUrl = addBiblioBaseUrl + "?biblionumber=" + encodeURIComponent(biblionumber) + "&z3950=1&frameworkcode=" + encodeURIComponent(frameworkcode) + "&breedingid=" + encodeURIComponent(r.breedingid);
+                        window.location.href = targetUrl;
+                    }, 400);
+                    return;
+                }
+
+                if (data.count > 1) {
+                    var firstTitle = (data.results[0].title || '').toLowerCase().trim();
+                    var allSameTitle = data.results.every(function(r) {
+                        return (r.title || '').toLowerCase().trim() === firstTitle;
+                    });
+
+                    var headerNote = '';
+                    if (allSameTitle) {
+                        headerNote = 'Found ' + data.count + ' editions / reprints of this record (choose the edition you are cataloging):';
+                    } else {
+                        headerNote = 'Found ' + data.count + ' records matching this ISBN (due to multiple reprints or publisher-shared ISBN):';
+                    }
+
+                    var html = '<div class="ftu-z3950-results">';
+                    html += '<div style="font-size: 0.85rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">' + headerNote + '</div>';
+                    html += '<div class="table-responsive"><table class="ftu-z3950-table table table-sm table-hover">';
+                    html += '<thead><tr><th>Title & Edition</th><th>Author</th><th style="width: 80px;">Year</th><th style="width: 190px;">Server</th><th style="width: 140px; text-align: right;">Action</th></tr></thead>';
+                    html += '<tbody>';
+                    data.results.forEach(function(r) {
+                        html += '<tr>';
+                        html += '<td><strong>' + (r.title || 'No title') + '</strong>' + (r.editionstatement ? ' <span class="badge" style="background: #e2e8f0; color: #1e293b; font-weight: 500; font-size: 0.73rem; margin-left: 5px;">' + r.editionstatement + '</span>' : '') + '</td>';
+                        html += '<td>' + (r.author || '-') + '</td>';
+                        html += '<td>' + (r.date || '-') + '</td>';
+                        html += '<td><span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 500;">' + (r.server || 'Z39.50') + '</span></td>';
+                        html += '<td style="text-align: right;"><button type="button" class="btn btn-sm btn-primary ftu-btn-apply-record" data-breedingid="' + r.breedingid + '" style="font-size: 0.78rem; padding: 2px 8px;">Use Record</button></td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div></div>';
+
+                    $resArea.html(html);
+
+                    $(".ftu-btn-apply-record").on("click", function() {
+                        var bid = $(this).data("breedingid");
+                        $resArea.html('<div class="ftu-z3950-status-msg" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;">Loading record into editor...</div>');
+                        window.location.href = addBiblioBaseUrl + "?biblionumber=" + encodeURIComponent(biblionumber) + "&z3950=1&frameworkcode=" + encodeURIComponent(frameworkcode) + "&breedingid=" + encodeURIComponent(bid);
+                    });
+                    return;
+                }
+
+                // 0 results
+                var noResHtml = '<div class="ftu-z3950-status-msg" style="background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;">';
+                noResHtml += '<div>No records found matching the query on National Library of Vietnam and Z39.50 servers.</div>';
+                if (data.errors && data.errors.length > 0) {
+                    var otherErrs = data.errors.filter(function(e) { return e.server && e.server.indexOf('nlv.gov.vn') === -1; });
+                    if (otherErrs.length > 0) {
+                        noResHtml += '<div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Unreachable servers: ' + otherErrs.map(function(e) { return e.server; }).join(', ') + '</div>';
+                    }
+                }
+                noResHtml += '</div>';
+                $resArea.html(noResHtml);
+            },
+            error: function(xhr, status, error) {
+                $btn.prop("disabled", false).text(originalBtnText);
+                var errText = "Could not connect to Z39.50 search service.";
+                if (xhr.status === 403 || xhr.status === 401) {
+                    errText = "Session has expired. Please log in again.";
+                }
+                $resArea.html('<div class="ftu-z3950-status-msg" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;">' + errText + '</div>');
+            }
+        });
+    }
+
     $(document).ready(function () {
         $("body").on("click", ".expandfield", ExpandField);
+
+        $("#ftu_btn_z3950_search").on("click", function(e) {
+            e.preventDefault();
+            launchFtuZ3950Search();
+        });
+
+        $("#ftu_z3950_isbn, #ftu_z3950_title, #ftu_z3950_author").on("keypress", function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                launchFtuZ3950Search();
+            }
+        });
+
+        $("#ftu_btn_z3950_full").on("click", function(e) {
+            e.preventDefault();
+            PopupZ3950();
+        });
     });
 </script>
 [% Asset.css("css/addbiblio.css") | $raw %]
@@ -1120,17 +1309,62 @@ body#cat_addbiblio h1:not(.ftu-clean-title) {
     <div id="check_errors"></div>
 
     <h1 class="ftu-clean-title">
-        <i class="fa fa-book-bookmark"></i>
         [% IF ( biblionumber ) %]
-            Chỉnh sửa biểu ghi: [% title | html | $HtmlTags tag="em" %] (Số biểu ghi [% biblionumber | html %])
+            Edit record: [% title | html | $HtmlTags tag="em" %] (Record #[% biblionumber | html %])
         [% ELSE %]
             [% IF (circborrowernumber) %]
-                <span>Biên mục nhanh biểu ghi MARC 21 mới</span>
+                <span>Fast cataloging MARC 21 record</span>
             [% ELSE %]
-                <span>Biên mục biểu ghi MARC 21 mới</span>
+                <span>New MARC 21 record</span>
             [% END %]
         [% END %]
     </h1>
+
+    <!-- ══ FTU Z39.50 FAST IMPORT PANEL ══ -->
+    <div id="ftu-z3950-panel" class="ftu-z3950-card">
+        <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 10px;">
+            <div>
+                <strong style="font-size: 0.95rem; color: #1e293b;">
+                    Z39.50 Search
+                </strong>
+                <span class="text-muted" style="font-size: 0.82rem; margin-left: 8px;">
+                    National Library of Vietnam &middot; Library of Congress
+                </span>
+            </div>
+        </div>
+        <div class="ftu-z3950-body mt-2">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label for="ftu_z3950_isbn" class="form-label">
+                        ISBN / Barcode
+                    </label>
+                    <input type="text" id="ftu_z3950_isbn" class="form-control form-control-sm" placeholder="Enter ISBN..." autocomplete="off" />
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="ftu_z3950_title" class="form-label">
+                        Title
+                    </label>
+                    <input type="text" id="ftu_z3950_title" class="form-control form-control-sm" placeholder="Enter title..." autocomplete="off" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="ftu_z3950_author" class="form-label">
+                        Author
+                    </label>
+                    <input type="text" id="ftu_z3950_author" class="form-control form-control-sm" placeholder="Enter author..." autocomplete="off" />
+                </div>
+                <div class="col-12 col-md-2 d-flex" style="gap: 6px;">
+                    <button type="button" id="ftu_btn_z3950_search" class="btn btn-sm btn-primary flex-fill" style="height: 31px; font-weight: 500;">
+                        Search
+                    </button>
+                    <button type="button" id="ftu_btn_z3950_full" class="btn btn-sm btn-default" title="Full Z39.50 search options" style="height: 31px;">
+                        Advanced
+                    </button>
+                </div>
+            </div>
+            <!-- In-page Z39.50 search results container -->
+            <div id="ftu_z3950_results_area" style="display: none;"></div>
+        </div>
+    </div>
 
     [% UNLESS ( number ) %]
         <!-- show duplicate warning on tab 0 only -->
@@ -1210,39 +1444,39 @@ body#cat_addbiblio h1:not(.ftu-clean-title) {
                     [% IF CAN_user_editcatalogue_edit_items || ( CAN_user_editcatalogue_fast_cataloging && is_fast_add ) %]
                         [% IF (circborrowernumber) %][%# fast cataloging must lead to items %]
                             <!-- Action is under fast cataloging - Save button redirecting to items -->
-                            <div class="btn-group"><a href="#" id="saveanditems" class="btn btn-primary"><i class="fa fa-save"></i> Lưu</a></div>
+                            <div class="btn-group"><a href="#" id="saveanditems" class="btn btn-primary">Save</a></div>
                         [% ELSE %]
                             <!-- Not using fast cataloging - Display split menu -->
                             <div class="btn-group">
-                                <button class="btn btn-primary" id="saverecord"><i class="fa fa-save"></i> Lưu</button>
+                                <button class="btn btn-primary" id="saverecord">Save</button>
                                 <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
 
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" id="saveandview" href="#">Lưu và xem biểu ghi</a></li>
-                                    <li><a class="dropdown-item" id="saveanditems" href="#">Lưu và chỉnh sửa tài liệu</a></li>
-                                    <li><a class="dropdown-item" id="saveandcontinue" href="#">Lưu và tiếp tục chỉnh sửa</a></li>
+                                    <li><a class="dropdown-item" id="saveandview" href="#">Save and view record</a></li>
+                                    <li><a class="dropdown-item" id="saveanditems" href="#">Save and edit items</a></li>
+                                    <li><a class="dropdown-item" id="saveandcontinue" href="#">Save and continue editing</a></li>
                                 </ul>
                             </div>
                         [% END %]
                     [% ELSE %]
                         <!-- User cannot edit items - single button redirecting to view -->
-                        <div class="btn-group"><a href="#" id="saveandview" class="btn btn-default"><i class="fa fa-save"></i> Lưu</a></div>
+                        <div class="btn-group"><a href="#" id="saveandview" class="btn btn-default">Save</a></div>
                     [% END # /IF CAN_user_editcatalogue_edit_items %]
 
                     [% UNLESS (circborrowernumber) %][%# Hide in fast cataloging %]
                         [% IF biblionumber %]
-                            <div class="btn-group"><a class="btn btn-default" href="#" id="z3950search"><i class="fa fa-search"></i> Thay thế biểu ghi qua tìm kiếm Z39.50/SRU</a></div>
+                            <div class="btn-group"><a class="btn btn-default" href="#" id="z3950search">Replace via Z39.50</a></div>
                         [% ELSE %]
-                            <div class="btn-group"><a class="btn btn-default" href="#" id="z3950search"><i class="fa fa-search"></i> Tìm kiếm Z39.50/SRU</a></div>
+                            <div class="btn-group"><a class="btn btn-default" href="#" id="z3950search">Z39.50 Search</a></div>
                         [% END %]
                         [% IF ( CAN_user_editauthorities ) %]
-                            <div class="btn-group"><a class="btn btn-default" href="#" id="linkerbutton"><i class="fa-solid fa-rotate"></i> Liên kết tham chiếu thẩm quyền tự động</a></div>
+                            <div class="btn-group"><a class="btn btn-default" href="#" id="linkerbutton">Link authorities</a></div>
                         [% END %]
                     [% END %]
 
                     <div class="btn-group">
-                        <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-cog"></i> Cài đặt</button>
+                        <button class="btn btn-default dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Settings</button>
                         <ul id="settings-menu" class="dropdown-menu">
                             [% IF Koha.Preference( 'EnableAdvancedCatalogingEditor' ) == 1 && CAN_user_editcatalogue_advanced_editor %]
                                 <li><a class="dropdown-item" href="#" id="switcheditor">Chuyển sang trình soạn thảo nâng cao</a></li>

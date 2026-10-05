@@ -69,6 +69,9 @@
                 [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_parameters || CAN_user_editcatalogue_edit_catalogue ) %]
                 <a href="/cgi-bin/koha/admin/collections.pl"><i class="fa fa-layer-group"></i> Bộ sưu tập</a>
                 [% END %]
+                [% IF ( CAN_user_parameters || CAN_user_parameters_manage_circ_rules || CAN_user_parameters_manage_auth_values || CAN_user_circulate ) %]
+                <a href="/cgi-bin/koha/admin/warehouses.pl"><i class="fa fa-cubes"></i> Quản lý kho</a>
+                [% END %]
  [% IF ( CAN_user_parameters || CAN_user_plugins_admin ) %]
  <a href="/cgi-bin/koha/admin/admin-home.pl"><i class="fa fa-gears"></i> Quản trị</a>
  [% END %]

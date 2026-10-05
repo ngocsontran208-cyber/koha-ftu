@@ -124,6 +124,9 @@ sub _get_label_item {
     $data->{'permanent_location_description'} =
         C4::Biblio::GetAuthorisedValueDesc( '', '', $data->{'permanent_location'}, '', '', 'LOC', 1 )
         if $data->{'permanent_location'};
+    if ( ( !$data->{'publicationyear'} || $data->{'publicationyear'} eq '' ) && $data->{'copyrightdate'} ) {
+        $data->{'publicationyear'} = $data->{'copyrightdate'};
+    }
 
     $barcode_only ? return $data->{'barcode'} : return $data;
 }
@@ -161,6 +164,30 @@ FIELD_LIST:
 
             # single quotes indicate a static text string.
             $datastring .= $1;
+            $f = $';
+            next FIELD_LIST;
+        } elsif ( $f =~ /^ddc\b/i ) {
+            my $val = '';
+            if ($record && $record->field('082') && $record->field('082')->subfield('a')) {
+                $val = $record->field('082')->subfield('a');
+            } elsif ($item->{'itemcallnumber'}) {
+                require C4::ClassSplitRoutine::Dewey;
+                my @parts = C4::ClassSplitRoutine::Dewey::split_callnumber($item->{'itemcallnumber'});
+                $val = $parts[0] || '';
+            }
+            $datastring .= $val;
+            $f = $';
+            next FIELD_LIST;
+        } elsif ( $f =~ /^cutter\b/i ) {
+            my $val = '';
+            if ($record && $record->field('082') && $record->field('082')->subfield('b')) {
+                $val = $record->field('082')->subfield('b');
+            } elsif ($item->{'itemcallnumber'}) {
+                require C4::ClassSplitRoutine::Dewey;
+                my @parts = C4::ClassSplitRoutine::Dewey::split_callnumber($item->{'itemcallnumber'});
+                $val = $parts[1] || '';
+            }
+            $datastring .= $val;
             $f = $';
             next FIELD_LIST;
         } elsif ( $f =~ /^($match_kohatable).*/ ) {

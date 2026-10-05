@@ -119,13 +119,24 @@ my $itemnumber;
 if ( $input->param('itemnumber') && !$input->param('biblionumber') ) {
     $itemnumber = $input->param('itemnumber');
     my $item = Koha::Items->find($itemnumber);
-    $biblionumber = $item->biblionumber;
+    $biblionumber = $item ? $item->biblionumber : undef;
 } else {
     $biblionumber = $input->param('biblionumber');
     $itemnumber   = $input->param('itemnumber');
 }
 
-my $biblio = Koha::Biblios->find($biblionumber);
+if ( !$biblionumber ) {
+    my $referer = $ENV{HTTP_REFERER} || '';
+    if ( $referer =~ /biblionumber=(\d+)/ ) {
+        $biblionumber = $1;
+    }
+}
+
+my $biblio = $biblionumber ? Koha::Biblios->find($biblionumber) : undef;
+if ( !$biblio ) {
+    print $input->redirect("/cgi-bin/koha/cataloguing/cataloging-home.pl");
+    exit;
+}
 
 my $op             = $input->param('op') || q{};
 my $hostitemnumber = $input->param('hostitemnumber');
@@ -811,17 +822,53 @@ my @ig = Koha::Biblio::ItemGroups->search( { biblio_id => $biblionumber } )->as_
 #sort by display order
 my @sorted_ig = sort { $a->display_order <=> $b->display_order } @ig;
 
+# FTU Smart Item Manager helpers: suggested next barcode, call number & MARC metadata
+my $latest_item = Koha::Items->search(
+    { barcode => { '!=' => undef }, barcode => { '!=' => '' } },
+    { order_by => { -desc => 'itemnumber' }, rows => 1 }
+)->single;
+my $suggested_barcode = "FTU-BK-0001";
+if ($latest_item && $latest_item->barcode) {
+    my $bobj = C4::Barcodes->new;
+    $suggested_barcode = $bobj->next_value($latest_item->barcode) || "FTU-BK-0001";
+}
+my $suggested_callnumber = '';
+my $suggested_itype = '';
+my $suggested_ccode = '';
+my $suggested_price = '';
+if ($biblio && $biblio->metadata && $biblio->metadata->record) {
+    my $m = $biblio->metadata->record;
+    my $c_a = $m->subfield('082', 'a') || $m->subfield('090', 'a') || $m->subfield('050', 'a') || '';
+    my $c_b = $m->subfield('082', 'b') || $m->subfield('090', 'b') || $m->subfield('050', 'b') || '';
+    $suggested_callnumber = $c_a;
+    $suggested_callnumber .= ' ' . $c_b if $c_b;
+
+    $suggested_itype = $m->subfield('942', 'c') || '';
+    $suggested_ccode = $m->subfield('942', 'h') || '';
+
+    my $raw_price = $m->subfield('020', 'c') || $m->subfield('365', 'b') || '';
+    if ($raw_price && $raw_price =~ /(\d[\d\.\,]*)/) {
+        $suggested_price = $1;
+        $suggested_price =~ s/[^\d]//g;
+    }
+}
+
 # what's the next op ? it's what we are not in : an add if we're editing, otherwise, and edit.
 $template->param(
-    biblio           => $biblio,
-    items            => \@items,
-    item_groups      => \@sorted_ig,
-    item_header_loop => \@header_value_loop,
-    subfields        => $subfields,
-    itemnumber       => $itemnumber,
-    barcode          => $current_item->{barcode},
-    op               => $nextop,
-    popup            => scalar $input->param('popup') ? 1 : 0,
+    biblio               => $biblio,
+    items                => \@items,
+    item_groups          => \@sorted_ig,
+    item_header_loop     => \@header_value_loop,
+    subfields            => $subfields,
+    itemnumber           => $itemnumber,
+    barcode              => $current_item->{barcode},
+    suggested_barcode    => $suggested_barcode,
+    suggested_callnumber => $suggested_callnumber,
+    suggested_itype      => $suggested_itype,
+    suggested_ccode      => $suggested_ccode,
+    suggested_price      => $suggested_price,
+    op                   => $nextop,
+    popup                => scalar $input->param('popup') ? 1 : 0,
     C4::Search::enabled_staff_search_views,
 );
 $template->{'VARS'}->{'searchid'} = $searchid;
