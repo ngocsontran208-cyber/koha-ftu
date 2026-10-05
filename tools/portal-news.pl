@@ -344,10 +344,10 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         link_dspace            => $cgi->param("link_dspace") || "http://dspace.ftu.edu.vn",
 
         # 5. Thông tin Thư viện & Bản quyền
-        library_name_full      => $cgi->param("library_name_full") || "Thư viện Trường Đại học Ngoại thương",
+        library_name_full      => $cgi->param("library_name_full") || "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
         library_name_en        => $cgi->param("library_name_en") || "Foreign Trade University Library",
         library_description    => $cgi->param("library_description") || "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
-        copyright_text         => $cgi->param("copyright_text") || "© 2026 Thư viện Trường Đại học Ngoại thương (Foreign Trade University Library). Bảo lưu mọi quyền."
+        copyright_text         => $cgi->param("copyright_text") || "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
     );
 
     my @cfg_files = (

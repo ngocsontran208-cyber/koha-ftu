@@ -28,7 +28,7 @@
     # ── 2. TÊN THƯ VIỆN & KHẨU HIỆU ─────────────────────────────────────────
     library_name           => "Thư viện Phân hiệu Trường Đại học Ngoại thương",
     library_name_short     => "Thư viện FTU",
-    library_name_full      => "Thư viện Trường Đại học Ngoại thương",
+    library_name_full      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
     library_name_en        => "Foreign Trade University Library",
     library_sub_title      => "Foreign Trade University Library - Ho Chi Minh City Branch",
     library_slogan         => "Không gian học tập & nghiên cứu hiện đại, kết nối cộng đồng giảng viên và sinh viên với kho tri thức toàn diện",
@@ -113,8 +113,8 @@
     system_ils             => "Koha ILS 25.12",
     system_sso             => "FTU Single Sign-On",
     copyright_year         => "2026",
-    copyright_text         => "© 2026 Thư viện Trường Đại học Ngoại thương (Foreign Trade University Library). Bảo lưu mọi quyền.",
-    copyright_text_en      => "© 2026 Foreign Trade University Library. All rights reserved."
+    copyright_text         => "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền.",
+    copyright_text_en      => "© 2026 Library of Foreign Trade University - Ho Chi Minh City Branch. All rights reserved."
 } %]
 
 [%# ── TỰ ĐỘNG BẢN ĐỊA HÓA CHO GIAO DIỆN TIẾNG ANH (EN) ────────────────────── %]

@@ -129,7 +129,7 @@
             <!-- Dòng bản quyền cuối cùng -->
             <div class="pt-4 border-top d-flex flex-column flex-md-row justify-content-between align-items-center"
                 style="border-top: 1px solid #F1F5F9; font-size: 13px; color: #94A3B8; gap: 1rem;">
-                <p style="margin: 0;">© 2026 Trường Đại học Ngoại thương. Bảo lưu mọi quyền.</p>
+                <p style="margin: 0;">[% FTU_BRAND.copyright_text %]</p>
                 <div class="d-flex align-items-center" style="gap: 16px;">
                     <a href="/cgi-bin/koha/opac-oai.pl" target="_blank" style="color: #94A3B8; text-decoration: none;">OAI-PMH</a>
                     <span style="display: inline-block; width: 4px; height: 4px; background: #CBD5E1; border-radius: 50%;"></span>
