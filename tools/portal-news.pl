@@ -322,7 +322,7 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         hotline_quangninh      => $cgi->param("hotline_quangninh") || "(0203) 3850 411",
         email_contact          => $cgi->param("email_contact") || 'tv.hcmc@ftu.edu.vn',
         hours_status           => $cgi->param("hours_status") || "Đang mở cửa",
-        hours_summary          => $cgi->param("hours_summary") || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 17:00",
+        hours_summary          => $cgi->param("hours_summary") || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
 
         # 3. Địa chỉ 3 cơ sở
         campus_hn_title        => $cgi->param("campus_hn_title") || "Trụ sở chính Hà Nội",

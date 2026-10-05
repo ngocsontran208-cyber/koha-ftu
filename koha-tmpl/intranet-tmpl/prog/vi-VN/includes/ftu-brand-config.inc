@@ -53,10 +53,10 @@
     # ── 5. GIỜ PHỤC VỤ / LỊCH MỞ CỬA ────────────────────────────────────────
     hours_status           => "Đang mở cửa",
     hours_status_en        => "Open Now",
-    hours_summary          => "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 17:00",
-    hours_summary_en       => "Mon – Fri: 07:30 – 19:30 | Sat: 08:00 – 17:00",
+    hours_summary          => "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
+    hours_summary_en       => "Mon – Fri: 07:30 – 19:30 | Sat: 08:00 – 16:00",
     hours_weekdays         => "07:30 – 19:30 (Thứ 2 – Thứ 6)",
-    hours_saturday         => "08:00 – 17:00 (Thứ 7)",
+    hours_saturday         => "08:00 – 16:00 (Thứ 7)",
     hours_sunday           => "Nghỉ (Chủ nhật & Ngày Lễ)",
 
     # ── 6. ĐỊA CHỈ & LIÊN HỆ THƯ VIỆN PHÂN HIỆU FTU ──────────────────────────
