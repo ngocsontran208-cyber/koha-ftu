@@ -295,6 +295,32 @@
         line-height: 1.85;
         color: #1e293b;
         transition: font-size 0.2s ease;
+        display: flow-root !important;
+        clear: both !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+        word-break: break-word !important;
+    }
+    .ftu-article-body *,
+    .ftu-article-body [class*="td-"],
+    .ftu-article-body div,
+    .ftu-article-body p,
+    .ftu-article-body table {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .ftu-article-body [class*="td-main-content"],
+    .ftu-article-body [class*="td-container"],
+    .ftu-article-body [class*="td-pb-"],
+    .ftu-article-body [class*="td-ss-"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        float: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
     .ftu-article-body p {
         margin-bottom: 1.35rem;
@@ -335,52 +361,63 @@
 
     /* Bottom Post Navigation */
     .ftu-post-nav {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-top: 3rem;
-        padding-top: 2rem;
-        border-top: 1px solid #e2e8f0;
+        clear: both !important;
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 1.5rem !important;
+        margin-top: 3rem !important;
+        padding-top: 2rem !important;
+        border-top: 1px solid #e2e8f0 !important;
     }
     @media (max-width: 768px) {
-        .ftu-post-nav { grid-template-columns: 1fr; }
+        .ftu-post-nav { grid-template-columns: 1fr !important; gap: 1rem !important; }
     }
     .ftu-post-nav-card {
-        padding: 1rem 1.25rem;
+        min-width: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 1.25rem 1.5rem !important;
         background: #f8fafc;
-        border-radius: 8px;
+        border-radius: 10px;
         border: 1px solid #e2e8f0;
         text-decoration: none !important;
         color: inherit;
         display: flex;
         flex-direction: column;
-        transition: all 0.2s;
+        justify-content: center;
+        transition: all 0.25s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
     .ftu-post-nav-card:hover {
         background: #ffffff;
         border-color: #b91c1c;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 6px 16px rgba(185, 28, 28, 0.08);
         transform: translateY(-2px);
     }
     .ftu-post-nav-label {
-        font-size: 0.8rem;
+        font-size: 0.82rem;
         font-weight: 700;
         text-transform: uppercase;
         color: #94a3b8;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+    }
+    .ftu-post-nav-card:hover .ftu-post-nav-label {
+        color: #b91c1c;
     }
     .ftu-post-nav-title {
-        font-size: 0.95rem;
-        font-weight: 700;
+        font-size: 0.98rem;
+        font-weight: 600;
         color: #0f172a;
-        line-height: 1.4;
+        line-height: 1.5;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        word-break: break-word;
     }
     .ftu-post-nav-card:hover .ftu-post-nav-title {
         color: #b91c1c;
@@ -636,10 +673,10 @@
                             <span class="ftu-post-nav-title">[% prev_post.title | html %]</span>
                         </a>
                     [% ELSE %]
-                        <div class="ftu-post-nav-card" style="opacity: 0.6; cursor: default;">
-                            <span class="ftu-post-nav-label"><i class="fa fa-arrow-left"></i> Bài viết trước đó</span>
-                            <span class="ftu-post-nav-title text-muted">Không còn bài viết trước đó</span>
-                        </div>
+                        <a href="/#news-section" class="ftu-post-nav-card">
+                            <span class="ftu-post-nav-label"><i class="fa fa-th-large"></i> Bảng tin Thư viện</span>
+                            <span class="ftu-post-nav-title">Quay lại danh mục tin tức & sự kiện</span>
+                        </a>
                     [% END %]
 
                     [% IF next_post %]
@@ -648,10 +685,10 @@
                             <span class="ftu-post-nav-title">[% next_post.title | html %]</span>
                         </a>
                     [% ELSE %]
-                        <div class="ftu-post-nav-card" style="opacity: 0.6; cursor: default; text-align: right;">
-                            <span class="ftu-post-nav-label" style="justify-content: flex-end;">Bài viết tiếp theo <i class="fa fa-arrow-right"></i></span>
-                            <span class="ftu-post-nav-title text-muted">Đây là bài viết mới nhất</span>
-                        </div>
+                        <a href="/#news-section" class="ftu-post-nav-card" style="text-align: right;">
+                            <span class="ftu-post-nav-label" style="justify-content: flex-end;">Bảng tin Thư viện <i class="fa fa-th-large"></i></span>
+                            <span class="ftu-post-nav-title">Quay lại danh mục tin tức & sự kiện</span>
+                        </a>
                     [% END %]
                 </div>
 

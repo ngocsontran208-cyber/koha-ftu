@@ -66,13 +66,25 @@ while (my $row = $recent_sth->fetchrow_hashref) {
 }
 
 # Fetch previous and next posts for bottom navigation (loại trừ CSDL và Banner)
-my $prev_sth = $dbh->prepare("SELECT id, title FROM koha_portal_posts WHERE status = ? AND id < ? AND post_type NOT IN ('database', 'banner') ORDER BY id DESC LIMIT 1");
-$prev_sth->execute("published", $id);
-my $prev_post = $prev_sth->fetchrow_hashref;
+my $all_posts_sth = $dbh->prepare("SELECT id, title FROM koha_portal_posts WHERE status = ? AND post_type NOT IN ('database', 'banner') ORDER BY sort_order ASC, created_at DESC, id DESC");
+$all_posts_sth->execute("published");
+my @ordered_posts;
+my ($prev_post, $next_post);
+my $current_index = -1;
 
-my $next_sth = $dbh->prepare("SELECT id, title FROM koha_portal_posts WHERE status = ? AND id > ? AND post_type != 'database' ORDER BY id ASC LIMIT 1");
-$next_sth->execute("published", $id);
-my $next_post = $next_sth->fetchrow_hashref;
+while (my $p = $all_posts_sth->fetchrow_hashref) {
+    push @ordered_posts, $p;
+    if ($p->{id} == $id) {
+        $current_index = $#ordered_posts;
+    }
+}
+
+if ($current_index > 0) {
+    $prev_post = $ordered_posts[$current_index - 1];
+}
+if ($current_index >= 0 && $current_index < $#ordered_posts) {
+    $next_post = $ordered_posts[$current_index + 1];
+}
 
 $template->param(
     post         => $post,
