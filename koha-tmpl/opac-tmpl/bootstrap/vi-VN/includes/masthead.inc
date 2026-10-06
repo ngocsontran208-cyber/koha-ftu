@@ -27,7 +27,7 @@
 <header id="header-region" class="noprint">
  <nav class="navbar navbar-expand">
     <div id="logo">
-        <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl" title="[% FTU_BRAND.library_name %]">
+        <a class="navbar-brand" href="/opac/" title="[% FTU_BRAND.library_name %]">
             <img src="[% FTU_BRAND.logo_url %]" alt="[% FTU_BRAND.logo_alt %]" class="ftu-logo-img">
             <div class="ftu-brand-title-wrap">
                 <span class="ftu-brand-main-title">[% FTU_BRAND.library_name %]</span>
@@ -159,17 +159,17 @@
  <span class="badge rounded-pill bg-danger ms-1" style="font-size: 11px; padding: 2px 6px;" title="[% logged_in_user.checkouts.count %] tài liệu đang mượn">[% logged_in_user.checkouts.count %]</span>
  [% END %]
  </a>
- <a tabindex="0" role="menuitem" class="logout js-hide" href="/cgi-bin/koha/opac-main.pl?logout.x=1"><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> Đăng xuất</a>
+ <a tabindex="0" role="menuitem" class="logout js-hide" href="/opac/logout"><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> Đăng xuất</a>
  [% ELSE %]
  [% IF Koha.Preference('casAuthentication') %]
  [%# CAS authentication is too complicated for modal window %]
- <a aria-label="Đăng nhập" class="nav-link login-link" href="/cgi-bin/koha/opac-user.pl"><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
+ <a aria-label="Đăng nhập" class="nav-link login-link" href="/opac/login"><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
                                 >
  [% ELSIF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
  <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger" data-return="true" href="/cgi-bin/koha/svc/auth/googleopenidconnect"><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
                                 >
  [% ELSE %]
- <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger" data-return="true" href="/cgi-bin/koha/opac-user.pl"><i class="fa fa-user fa-fw fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
+ <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger" data-return="true" href="/opac/login"><i class="fa fa-user fa-fw fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
                                 >
  [% END %]
  [% END %]
@@ -205,7 +205,7 @@
                                         >
  </p>
  [% END %]
- <a tabindex="0" role="menuitem" class="logout" id="logout" href="/cgi-bin/koha/opac-main.pl?logout.x=1">Đăng xuất</a>
+ <a tabindex="0" role="menuitem" class="logout" id="logout" href="/opac/logout">Đăng xuất</a>
  </div>
  </div>
  [% END %]
@@ -613,3 +613,36 @@
  </div>
  <!-- /#cookieConsentModal -->
 [% END %]
+
+<!-- ========================================================================= -->
+<!-- FTU ADAPTIVE MOBILE BOTTOM DOCK (Thanh điều hướng nổi cho điện thoại)     -->
+<!-- ========================================================================= -->
+<nav class="ftu-mobile-bottom-dock noprint" id="ftuMobileBottomDock" aria-label="Điều hướng nhanh ứng dụng">
+    <a href="/opac/" class="ftu-dock-item" id="ftuDockHome" aria-label="Trang chủ">
+        <div class="ftu-dock-icon"><i class="fa fa-home" aria-hidden="true"></i></div>
+        <span class="ftu-dock-label">Trang chủ</span>
+    </a>
+    <a href="/cgi-bin/koha/opac-search.pl" class="ftu-dock-item" id="ftuDockSearch" aria-label="Tìm kiếm">
+        <div class="ftu-dock-icon"><i class="fa fa-search" aria-hidden="true"></i></div>
+        <span class="ftu-dock-label">Tìm kiếm</span>
+    </a>
+    <a href="/cgi-bin/koha/opac-databases.pl" class="ftu-dock-item" id="ftuDockDatabases" aria-label="CSDL số">
+        <div class="ftu-dock-icon"><i class="fa fa-database" aria-hidden="true"></i></div>
+        <span class="ftu-dock-label">CSDL số</span>
+    </a>
+    <a href="/cgi-bin/koha/opac-collections.pl" class="ftu-dock-item" id="ftuDockCollections" aria-label="Bộ sưu tập">
+        <div class="ftu-dock-icon"><i class="fa fa-cubes" aria-hidden="true"></i></div>
+        <span class="ftu-dock-label">Bộ sưu tập</span>
+    </a>
+    [% IF loggedinusername %]
+    <a href="/cgi-bin/koha/opac-user.pl" class="ftu-dock-item" id="ftuDockUser" aria-label="Tài khoản">
+        <div class="ftu-dock-icon"><i class="fa fa-user-circle" aria-hidden="true"></i></div>
+        <span class="ftu-dock-label">Tài khoản</span>
+    </a>
+    [% ELSE %]
+    <a href="/cgi-bin/koha/opac-user.pl" class="ftu-dock-item" id="ftuDockUser" data-bs-toggle="modal" data-bs-target="#modalAuth" aria-label="Đăng nhập">
+        <div class="ftu-dock-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
+        <span class="ftu-dock-label">Đăng nhập</span>
+    </a>
+    [% END %]
+</nav>

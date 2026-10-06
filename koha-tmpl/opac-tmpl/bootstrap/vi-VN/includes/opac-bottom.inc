@@ -347,13 +347,14 @@
     var kohaUser = '[% loggedinusername | html %]';
     if (!kohaUser) return;
 
-    var ssoHost = '[% FTU_BRAND.link_sso %]' || (window.location.protocol + '//' + (window.location.hostname || 'localhost') + ':8090');
+    var ssoHost = '[% FTU_BRAND.link_sso %]' || '/sso';
     ssoHost = ssoHost.replace(/\/+$/, '');
+    var ssoEndpoint = ssoHost.endsWith('/sso') ? (ssoHost + '/koha-to-dspace') : (ssoHost + '/sso/koha-to-dspace');
 
     // 1. Tự động đồng bộ trước phiên SSO DSpace chạy ngầm (Silent pre-auth)
     try {
         var ssoPreload = document.createElement('script');
-        ssoPreload.src = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&mode=json';
+        ssoPreload.src = ssoEndpoint + '?user=' + encodeURIComponent(kohaUser) + '&mode=json';
         document.head.appendChild(ssoPreload);
     } catch(e) {}
 
@@ -361,8 +362,8 @@
     function patchDspaceLinks() {
         $('a[href*=":4000/"], a[href*="/handle/"], a[href*="/items/"], .ftu-dspace-link').each(function() {
             var href = $(this).attr('href');
-            if (href && !href.includes('/sso/koha-to-dspace') && !href.startsWith('javascript:')) {
-                var ssoBridge = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
+            if (href && !href.includes('/koha-to-dspace') && !href.startsWith('javascript:')) {
+                var ssoBridge = ssoEndpoint + '?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
                 $(this).attr('href', ssoBridge);
                 $(this).attr('data-sso-bridged', 'true');
                 if (!$(this).attr('title')) {
@@ -381,9 +382,9 @@
     // Bắt sự kiện click để đảm bảo an toàn tuyệt đối
     $(document).on('click', 'a[href*=":4000/"], a[href*="/handle/"], a[href*="/items/"], .ftu-dspace-link', function(e) {
         var href = $(this).attr('href');
-        if (href && !href.includes('/sso/koha-to-dspace')) {
+        if (href && !href.includes('/koha-to-dspace')) {
             e.preventDefault();
-            var ssoBridge = ssoHost + '/sso/koha-to-dspace?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
+            var ssoBridge = ssoEndpoint + '?user=' + encodeURIComponent(kohaUser) + '&target=' + encodeURIComponent(href);
             var target = $(this).attr('target');
             if (target === '_blank') {
                 window.open(ssoBridge, '_blank');
@@ -399,16 +400,39 @@
 <script nonce="[% Koha.CSPNonce | $raw %]">
 (function() {
     var curHost = window.location.hostname;
+    var curPort = window.location.port;
+    var isGateway = !curPort || curPort === '80' || curPort === '443';
     if (curHost && curHost !== 'localhost' && curHost !== '127.0.0.1') {
-        $('a[href*="localhost:"], a[href*="127.0.0.1:"]').each(function() {
+        $('a[href*="localhost"], a[href*="127.0.0.1"]').each(function() {
             var href = $(this).attr('href');
-            if (href) {
-                $(this).attr('href', href.replace(/(localhost|127\.0\.0\.1)/g, curHost));
+            if (!href) return;
+            if (isGateway) {
+                href = href.replace(/https?:\/\/(localhost|127\.0\.0\.1):4000(\/elib)?/g, '/elib')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8090/g, '/sso')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8095\/reader/g, '/reader')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8095/g, '/drm')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8082/g, '')
+                           .replace(/(localhost|127\.0\.0\.1)/g, curHost);
+            } else {
+                href = href.replace(/(localhost|127\.0\.0\.1)/g, curHost);
             }
+            $(this).attr('href', href);
         });
     }
 })();
 </script>
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    if (window.history && window.history.replaceState && window.location.search && /[?&]logout(?:\.x|\.y)?=/.test(window.location.search)) {
+        var cleanSearch = window.location.search.replace(/([?&])logout(?:\.x|\.y)?=[^&]*(&|$)/g, '$1').replace(/[?&]$/, '');
+        var newUrl = window.location.pathname + cleanSearch + window.location.hash;
+        window.history.replaceState(null, document.title, newUrl);
+    }
+})();
+</script>
+
+<!-- FTU Adaptive Viewport & Mobile Controller Engine -->
+<script src="/opac-tmpl/bootstrap/js/ftu-adaptive-viewport.js?v=20261006_mobile_engine" nonce="[% Koha.CSPNonce | $raw %]"></script>
 </body>
 <!-- prettier-ignore-start -->
 </html>

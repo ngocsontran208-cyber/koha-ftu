@@ -1792,27 +1792,76 @@ td.covercol .hint,
   display: none !important;
 }
 
-/* Kích thước bìa trên trang chi tiết tài liệu (opac-detail) */
-#catalogue_detail_biblio .bookcover,
+/* Thanh chuyển đổi chế độ xem chi tiết tài liệu (Views Toolbar) */
+#catalogue_detail_biblio #views {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 0 !important;
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  width: 100% !important;
+  clear: both !important;
+}
+
+#catalogue_detail_biblio #views .view {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+#catalogue_detail_biblio #views .current-view {
+  background: #f1f5f9 !important;
+  color: #a31a24 !important;
+  font-weight: 600 !important;
+  font-size: 0.825rem !important;
+  padding: 6px 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+#catalogue_detail_biblio #views .btn-link {
+  color: #475569 !important;
+  font-weight: 500 !important;
+  font-size: 0.825rem !important;
+  padding: 6px 14px !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+#catalogue_detail_biblio #views .btn-link:hover {
+  background: #f8fafc !important;
+  color: #a31a24 !important;
+}
+
+/* Kích thước và vị trí bìa trên trang chi tiết tài liệu (opac-detail) */
+#catalogue_detail_biblio .bookcover {
+  float: left !important;
+  margin: 0 2rem 1.5rem 0 !important;
+  clear: left !important;
+  max-width: 220px !important;
+}
+
 #catalogue_detail_biblio .cover-slider,
 #catalogue_detail_biblio .cover-image {
   max-width: 220px !important;
-  margin-bottom: 1rem !important;
+  margin-bottom: 0 !important;
 }
 
 #catalogue_detail_biblio .cover-image img,
 #catalogue_detail_biblio .bookcover img {
-  width: 200px !important;
-  height: 285px !important;
-  min-width: 200px !important;
-  min-height: 285px !important;
-  max-width: 200px !important;
-  max-height: 285px !important;
+  width: 195px !important;
+  height: 275px !important;
+  min-width: 195px !important;
+  min-height: 275px !important;
+  max-width: 195px !important;
+  max-height: 275px !important;
   object-fit: cover !important;
   object-position: center top !important;
-  border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.14), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   background-color: #f8fafc !important;
   display: block !important;
   transition: transform 0.25s ease, box-shadow 0.25s ease !important;
@@ -1820,16 +1869,26 @@ td.covercol .hint,
 
 #catalogue_detail_biblio .cover-image img:hover {
   transform: translateY(-3px) scale(1.02) !important;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2) !important;
-  border-color: #b91c1c !important;
+  box-shadow: 0 16px 32px -5px rgba(163, 26, 36, 0.22) !important;
+  border-color: #a31a24 !important;
 }
 
-#catalogue_detail_biblio .hint {
-  display: block !important;
-  font-size: 0.75rem !important;
-  color: #64748b !important;
-  text-align: center !important;
-  margin-top: 6px !important;
+/* Tiêu đề căn bằng hàng trên cùng của ảnh bìa */
+#catalogue_detail_biblio h1.title,
+#catalogue_detail_biblio .title {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  font-size: 1.55rem !important;
+  line-height: 1.35 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Ẩn triệt để nhãn nguồn ảnh bìa (Ảnh bìa cục bộ, Amazon, Syndetics...) */
+#catalogue_detail_biblio .hint,
+.cover-image .hint,
+.bookcover .hint {
+  display: none !important;
 }
 
 @media (max-width: 768px) {
@@ -2794,6 +2853,536 @@ img.itemtype-image,
 #opac-main .col-12.col-lg-3 #login,
 #opac-main .order-md-2 #login {
   display: none !important;
+}
+
+/* =============================================================================
+   FTU ADAPTIVE MOBILE ENGINE & DESIGN SYSTEM
+   Tương thích đa màn hình theo thời gian thực (Viewport Adaptive Styling)
+   ============================================================================= */
+
+/* 1. Mặc định trên màn hình Desktop: Ẩn thanh dock và nút lọc nổi */
+.ftu-mobile-bottom-dock,
+.ftu-mobile-filter-btn,
+.ftu-facet-backdrop,
+.ftu-facet-header-mobile {
+  display: none !important;
+}
+
+/* 2. Giao diện Mobile & Tablet (<= 992px hoặc khi Engine kích hoạt chế độ di động) */
+@media (max-width: 992px), (hover: none) and (pointer: coarse) {
+  html.ftu-is-phone body,
+  html.ftu-is-tablet body,
+  body:has(#ftuMobileBottomDock) {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* THANH ĐIỀU HƯỚNG NỔI DƯỚI ĐÁY (MOBILE BOTTOM DOCK) */
+  .ftu-mobile-bottom-dock {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(62px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.85) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+    z-index: 9990 !important;
+    align-items: stretch !important;
+    justify-content: space-around !important;
+    margin: 0 !important;
+  }
+
+  .ftu-dock-item {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    color: #64748b !important;
+    font-size: 0.68rem !important;
+    font-weight: 500 !important;
+    padding: 6px 2px 4px 2px !important;
+    transition: color 0.15s ease, transform 0.15s ease !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    position: relative !important;
+  }
+
+  .ftu-dock-icon {
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    margin-bottom: 3px !important;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+
+  .ftu-dock-icon i {
+    color: inherit !important;
+  }
+
+  .ftu-dock-label {
+    letter-spacing: -0.01em !important;
+    white-space: nowrap !important;
+  }
+
+  .ftu-dock-item.active {
+    color: var(--ftu-red, #b91c1c) !important;
+    font-weight: 700 !important;
+  }
+
+  .ftu-dock-item.active .ftu-dock-icon {
+    transform: translateY(-2px) scale(1.1) !important;
+  }
+
+  .ftu-dock-item.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 3px;
+    background: var(--ftu-red, #b91c1c);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .ftu-dock-item:active {
+    transform: scale(0.92) !important;
+  }
+
+  /* Footer master margin bottom để không bị dock che */
+  .ftu-footer-master {
+    margin-bottom: 20px !important;
+  }
+}
+
+/* 3. TỐI ƯU HEADER TRÊN ĐIỆN THOẠI (<= 768px) */
+@media (max-width: 768px) {
+  #header-region .navbar {
+    padding: 0.5rem 0.85rem !important;
+    min-height: 54px !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Khắc phục lỗi min-width 250px gây vỡ layout mobile */
+  #logo,
+  #header-region #logo,
+  #header-region .navbar #logo,
+  #header-region .navbar:has(#cart-list-nav) #logo {
+    min-width: 0 !important;
+    max-width: calc(100vw - 120px) !important;
+    flex-shrink: 1 !important;
+  }
+
+  .ftu-logo-img,
+  #logo a img,
+  #logo .ftu-logo-img {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .ftu-brand-main-title,
+  #logo a .ftu-brand-main-title {
+    font-size: 0.84rem !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Ẩn bớt subtitle phụ để header luôn gọn gàng 1 dòng */
+  .ftu-brand-sub-title,
+  #logo a .ftu-brand-sub-title {
+    display: none !important;
+  }
+
+  /* Ẩn các nút CSDL, Bộ sưu tập trên Navbar Desktop vì đã có trên Mobile Bottom Dock */
+  #csdl-nav-item,
+  #bst-nav-item {
+    display: none !important;
+  }
+
+  #cart-list-nav .cartlabel,
+  #cart-list-nav .listslabel {
+    display: none !important;
+  }
+
+  #header_langmenu .nav-link {
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  #members .login-link {
+    padding: 0.3rem 0.65rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* 4. TỐI ƯU HERO CAROUSEL TRÊN ĐIỆN THOẠI (Loại bỏ vỡ giao diện 3D và tràn ngang) */
+@media (max-width: 768px) {
+  .ftu-banner-carousel-container {
+    height: 200px !important;
+    max-width: 100% !important;
+    margin-bottom: 1.25rem !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  .ftu-banner-slider-track {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .ftu-banner-slide {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: auto !important;
+    border-radius: 12px !important;
+  }
+
+  /* Trên mobile chỉ hiển thị duy nhất 1 slide ở trung tâm, ẩn hoàn toàn 2 slide lách 2 bên */
+  .ftu-banner-slide.slide-center {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .ftu-banner-slide.slide-left,
+  .ftu-banner-slide.slide-right {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Ẩn nút mũi tên to cồng kềnh, chuyển sang vuốt cảm ứng (Swipe) */
+  .ftu-banner-arrow {
+    display: none !important;
+  }
+
+  .ftu-banner-dots {
+    bottom: 8px !important;
+  }
+
+  .ftu-banner-dot {
+    width: 7px !important;
+    height: 7px !important;
+  }
+
+  .ftu-banner-dot.active {
+    width: 20px !important;
+  }
+
+  .ftu-banner-content {
+    padding: 0.85rem 1rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .ftu-banner-tag {
+    font-size: 0.65rem !important;
+    padding: 2px 7px !important;
+  }
+
+  .ftu-banner-title {
+    font-size: 0.95rem !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+  }
+
+  .ftu-banner-desc {
+    font-size: 0.75rem !important;
+    line-height: 1.35 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .ftu-banner-btn {
+    font-size: 0.72rem !important;
+    padding: 2px 8px !important;
+    margin-top: 2px !important;
+  }
+}
+
+/* 5. TỐI ƯU KHUNG TÌM KIẾM & CHIPS TRÊN DI ĐỘNG */
+@media (max-width: 768px) {
+  .ftu-hero-section {
+    padding: 0.85rem 0.75rem 1.5rem 0.75rem !important;
+  }
+
+  .ftu-search-card.ftu-search-simple {
+    padding: 0.35rem 0.45rem 0.35rem 0.95rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 28px !important;
+  }
+
+  .ftu-search-input-large {
+    font-size: 0.95rem !important;
+    padding: 0.45rem 0.35rem !important;
+  }
+
+  .ftu-search-btn-large {
+    font-size: 0.88rem !important;
+    padding: 0.55rem 1.15rem !important;
+    border-radius: 24px !important;
+  }
+
+  /* Thanh Chips trượt ngang mượt mà bằng ngón tay */
+  .ftu-search-chips {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+    padding: 0 4px 6px 4px !important;
+    margin-top: 0.85rem !important;
+    scrollbar-width: none !important;
+  }
+
+  .ftu-search-chips::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .ftu-chip {
+    flex-shrink: 0 !important;
+    font-size: 0.78rem !important;
+    padding: 0.35rem 0.8rem !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+}
+
+/* 6. LƯỚI PHÍM TẮT 2x2 CÔNG THÁI HỌC TRÊN ĐIỆN THOẠI (<= 640px) */
+@media (max-width: 640px) {
+  .ftu-section-container {
+    max-width: 100% !important;
+    padding: 1.25rem 0.85rem !important;
+  }
+
+  .ftu-shortcuts-section {
+    padding-top: 0.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .ftu-shortcuts-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+
+  .ftu-shortcut-card {
+    padding: 0.85rem 0.75rem !important;
+    border-radius: 12px !important;
+    gap: 0.65rem !important;
+  }
+
+  .ftu-shortcut-icon {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    font-size: 1.05rem !important;
+    border-radius: 10px !important;
+  }
+
+  .ftu-shortcut-title {
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .ftu-shortcut-desc {
+    font-size: 0.7rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+}
+
+/* 7. CUỘN SÁCH CẢM ỨNG (TOUCH-FLICK BOOK SCROLLER) */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  /* Tắt animation chạy tự động khi ở màn hình cảm ứng để người dùng dùng tay lướt */
+  .ftu-books-grid-dynamic.has-marquee {
+    animation: none !important;
+  }
+
+  .ftu-books-scroller-wrap {
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+    padding: 8px 4px !important;
+  }
+
+  .ftu-books-grid-dynamic {
+    gap: 0.85rem !important;
+  }
+
+  .ftu-books-grid-dynamic .ftu-book-card {
+    flex: 0 0 155px !important;
+    min-width: 155px !important;
+  }
+
+  .ftu-book-cover {
+    height: 215px !important;
+  }
+
+  .ftu-book-title {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* 8. NGĂN KÉO BỘ LỌC TÌM KIẾM THÔNG MINH TRÊN DI ĐỘNG (MOBILE FACET DRAWER) */
+@media (max-width: 992px) {
+  /* Nút bấm mở bộ lọc nổi góc phải dưới */
+  .ftu-mobile-filter-btn {
+    display: inline-flex !important;
+    position: fixed !important;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    background: var(--ftu-red, #b91c1c) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 9px 18px !important;
+    font-size: 0.86rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 18px rgba(185, 28, 28, 0.45) !important;
+    z-index: 9980 !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  .ftu-mobile-filter-btn:active {
+    transform: scale(0.95) !important;
+  }
+
+  /* Biến khối search-facets thành Sidebar Drawer trượt vào từ cạnh phải */
+  #search-facets {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 86vw !important;
+    max-width: 375px !important;
+    background: #ffffff !important;
+    z-index: 10000 !important;
+    box-shadow: -4px 0 30px rgba(0, 0, 0, 0.25) !important;
+    transform: translateX(105%) !important;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 1.25rem !important;
+    margin: 0 !important;
+  }
+
+  #search-facets.ftu-facet-open {
+    transform: translateX(0) !important;
+  }
+
+  .ftu-facet-header-mobile {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 1.5px solid #f1f5f9 !important;
+    padding-bottom: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .ftu-facet-header-mobile h5 {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    color: var(--ftu-red, #b91c1c) !important;
+    margin: 0 !important;
+  }
+
+  .ftu-facet-close-btn {
+    background: #f1f5f9 !important;
+    border: none !important;
+    color: #475569 !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    font-size: 1.35rem !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Backdrop đen mờ nền */
+  .ftu-facet-backdrop {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.55) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    z-index: 9999 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.25s ease !important;
+  }
+
+  .ftu-facet-backdrop.active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  body.ftu-no-scroll {
+    overflow: hidden !important;
+  }
+}
+
+/* 9. BẢNG BIỂU DỮ LIỆU LƯU THÔNG & BẢN SÁCH TỰ ĐỘNG CUỘN TRÊN MÀN HÌNH NHỎ */
+.ftu-table-scroller {
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  margin-bottom: 1.25rem !important;
+  scrollbar-width: thin !important;
+}
+
+.ftu-table-scroller table {
+  margin-bottom: 0 !important;
+  min-width: 580px !important;
+}
+
+/* 10. THIẾT BỊ MÀN HÌNH SIÊU NHỎ (<= 390px, VD iPhone SE, iPhone Mini) */
+html[data-ftu-screen="mobile-xs"] .ftu-shortcuts-grid {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.5rem !important;
+}
+
+html[data-ftu-screen="mobile-xs"] .ftu-shortcut-card {
+  padding: 0.65rem 0.5rem !important;
+}
+
+html[data-ftu-screen="mobile-xs"] .ftu-shortcut-icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  font-size: 0.95rem !important;
+}
+
+html[data-ftu-screen="mobile-xs"] .ftu-shortcut-title {
+  font-size: 0.76rem !important;
+}
+
+html[data-ftu-screen="mobile-xs"] .ftu-dock-label {
+  font-size: 0.62rem !important;
 }
 
 

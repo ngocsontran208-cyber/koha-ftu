@@ -93,4 +93,4 @@
 [% KohaPlugins.get_plugins_opac_head | $raw %]
 
 <!-- FTU Global Branding CSS -->
-<link rel="stylesheet" type="text/css" href="/opac-tmpl/bootstrap/css/ftu-opac.css?v=20261001_clean_marc" />
+<link rel="stylesheet" type="text/css" href="/opac-tmpl/bootstrap/css/ftu-opac.css?v=20261006_mobile_adaptive" />
