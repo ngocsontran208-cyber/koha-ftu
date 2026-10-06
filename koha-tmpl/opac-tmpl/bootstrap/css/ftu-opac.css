@@ -2215,6 +2215,44 @@ td.covercol .hint,
   .ftu-search-card {
     border-radius: var(--ftu-radius-lg);
   }
+
+  /* Tối ưu hóa trang chi tiết tài liệu trên di động (opac-detail) */
+  #catalogue_detail_biblio {
+    display: flex !important;
+    flex-direction: column !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    padding: 1.25rem 1rem !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+    margin-bottom: 1rem !important;
+  }
+  #catalogue_detail_biblio .bookcover {
+    float: none !important;
+    margin: 0 auto 1.25rem auto !important;
+    clear: both !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  #catalogue_detail_biblio .cover-slider,
+  #catalogue_detail_biblio .cover-image {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  #catalogue_detail_biblio .cover-image img,
+  #catalogue_detail_biblio .bookcover img {
+    width: 165px !important;
+    height: 233px !important;
+    min-width: 165px !important;
+    min-height: 233px !important;
+    max-width: 165px !important;
+    max-height: 233px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.22), 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+  }
 }
 
 /* ==========================================================================

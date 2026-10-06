@@ -56,6 +56,408 @@
         .component_part:nth-child(2n + 1) {
             background-color: #f3f4f4;
         }
+
+        /* ========================================================
+           THIẾT KẾ GIAO DIỆN DI ĐỘNG (MOBILE-FIRST OPAC DETAIL)
+           ======================================================== */
+        @media (max-width: 768px) {
+            /* 1. Header chi tiết tài liệu dạng thẻ phẳng sang trọng */
+            #catalogue_detail_biblio {
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 16px !important;
+                padding: 1.25rem 1rem !important;
+                box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+                margin-bottom: 1rem !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* Bìa sách căn giữa nổi bật, cân đối tỷ lệ vàng */
+            #catalogue_detail_biblio .bookcover {
+                float: none !important;
+                margin: 0 auto 1.25rem auto !important;
+                clear: both !important;
+                max-width: 100% !important;
+                display: flex !important;
+                justify-content: center !important;
+            }
+            #catalogue_detail_biblio .cover-slider,
+            #catalogue_detail_biblio .cover-image {
+                max-width: 100% !important;
+                margin: 0 auto !important;
+                display: flex !important;
+                justify-content: center !important;
+            }
+            #catalogue_detail_biblio .cover-image img,
+            #catalogue_detail_biblio .bookcover img {
+                width: 165px !important;
+                height: 233px !important;
+                min-width: 165px !important;
+                min-height: 233px !important;
+                max-width: 165px !important;
+                max-height: 233px !important;
+                border-radius: 12px !important;
+                box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.22), 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+                border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            }
+
+            /* Bộ chọn chế độ xem tinh giản */
+            #catalogue_detail_biblio #views {
+                display: flex !important;
+                justify-content: center !important;
+                flex-wrap: wrap !important;
+                gap: 0.35rem !important;
+                margin: 0.25rem 0 0.85rem 0 !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+            #views .view {
+                font-size: 0.78rem !important;
+                padding: 3px 8px !important;
+                background: #f1f5f9 !important;
+                border-radius: 6px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
+            #views .view.current-view {
+                background: #e2e8f0 !important;
+                font-weight: 600 !important;
+            }
+            #views a.btn-link {
+                padding: 0 !important;
+                font-size: 0.78rem !important;
+                color: #64748b !important;
+                text-decoration: none !important;
+            }
+
+            /* Tiêu đề & tác giả */
+            #catalogue_detail_biblio h1.title,
+            #catalogue_detail_biblio .title {
+                font-size: 1.35rem !important;
+                line-height: 1.35 !important;
+                text-align: center !important;
+                margin: 0.25rem 0 0.45rem 0 !important;
+                color: #0f172a !important;
+                font-weight: 800 !important;
+            }
+            #catalogue_detail_biblio .title_resp_stmt {
+                display: block !important;
+                font-size: 0.95rem !important;
+                color: #64748b !important;
+                font-weight: 500 !important;
+                margin-top: 0.25rem !important;
+            }
+            #catalogue_detail_biblio .results_summary.author {
+                text-align: center !important;
+                font-size: 1rem !important;
+                margin-bottom: 0.85rem !important;
+                display: block !important;
+            }
+            #catalogue_detail_biblio .results_summary.author .contributors {
+                color: #b91c1c !important;
+                font-weight: 700 !important;
+                text-decoration: none !important;
+            }
+
+            /* Khối trường siêu dữ liệu định dạng Thẻ Thông Tin (Metadata Cards) */
+            #catalogue_detail_biblio .record {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0.45rem !important;
+            }
+            #catalogue_detail_biblio .results_summary:not(.author) {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                align-items: baseline !important;
+                padding: 0.5rem 0.65rem !important;
+                background: #f8fafc !important;
+                border-radius: 8px !important;
+                font-size: 0.86rem !important;
+                line-height: 1.45 !important;
+                margin: 0 !important;
+                border: 1px solid #f1f5f9 !important;
+                gap: 0.35rem !important;
+            }
+            #catalogue_detail_biblio .results_summary:not(.author) .label {
+                font-weight: 600 !important;
+                color: #64748b !important;
+                font-size: 0.82rem !important;
+                min-width: 105px !important;
+                flex-shrink: 0 !important;
+            }
+            #catalogue_detail_biblio .results_summary ul.resource_list {
+                display: inline-flex !important;
+                flex-wrap: wrap !important;
+                gap: 0.35rem !important;
+                list-style: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            #catalogue_detail_biblio .results_summary .subject {
+                display: inline-block !important;
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                padding: 2px 8px !important;
+                border-radius: 14px !important;
+                font-size: 0.78rem !important;
+                color: #0284c7 !important;
+                text-decoration: none !important;
+            }
+
+            /* 2. Thanh thao tác nhanh (Quick Action Toolbar) */
+            #ulactioncontainer {
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 14px !important;
+                padding: 0.85rem !important;
+                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+                margin-bottom: 1.25rem !important;
+            }
+            #action {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.5rem !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                list-style: none !important;
+            }
+            #action li {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            /* Đặt mượn (Reserve) nổi bật toàn chiều rộng */
+            #action li:has(.reserve),
+            #action li:first-child {
+                grid-column: span 2 !important;
+            }
+            #action a.btn-link,
+            #action .dropdown-toggle {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.45rem !important;
+                width: 100% !important;
+                padding: 0.65rem 0.75rem !important;
+                font-size: 0.88rem !important;
+                font-weight: 600 !important;
+                border-radius: 8px !important;
+                border: 1px solid #e2e8f0 !important;
+                background: #f8fafc !important;
+                color: #334155 !important;
+                text-decoration: none !important;
+                min-height: 42px !important;
+                box-sizing: border-box !important;
+            }
+            #action a.reserve {
+                background: #b91c1c !important;
+                border-color: #b91c1c !important;
+                color: #ffffff !important;
+                font-size: 0.95rem !important;
+                font-weight: 700 !important;
+                box-shadow: 0 2px 8px rgba(185, 28, 28, 0.28) !important;
+            }
+            #action a.reserve:active {
+                transform: scale(0.98) !important;
+            }
+
+            /* 3. Bảng bản tài liệu lưu thông chuyển đổi thành Thẻ Di Động (Item Cards) */
+            .table-responsive.ftu-table-scroller {
+                overflow-x: visible !important;
+                border: none !important;
+            }
+            #holdingst,
+            #holdingst thead,
+            #holdingst tbody,
+            #holdingst th,
+            #holdingst td,
+            #holdingst tr {
+                display: block !important;
+            }
+            #holdingst thead {
+                display: none !important;
+            }
+            #holdingst tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0.85rem !important;
+                width: 100% !important;
+            }
+            #holdingst tbody tr {
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 14px !important;
+                padding: 1rem !important;
+                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0.45rem !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+            }
+            #holdingst tbody td:empty {
+                display: none !important;
+            }
+            #holdingst tbody td {
+                border: none !important;
+                padding: 0 !important;
+                font-size: 0.88rem !important;
+            }
+
+            /* Trạng thái sẵn sàng */
+            #holdingst tbody td.status {
+                order: 1 !important;
+                margin-bottom: 0.25rem !important;
+            }
+            #holdingst .item-status {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 0.35rem !important;
+                padding: 0.35rem 0.85rem !important;
+                border-radius: 20px !important;
+                font-size: 0.82rem !important;
+                font-weight: 700 !important;
+            }
+            #holdingst .item-status.available {
+                background: #f0fdf4 !important;
+                color: #166534 !important;
+                border: 1px solid #bbf7d0 !important;
+            }
+
+            /* Số phân loại */
+            #holdingst tbody td.call_no {
+                order: 2 !important;
+                font-size: 1rem !important;
+                font-weight: 700 !important;
+                color: #0f172a !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                flex-wrap: wrap !important;
+                gap: 0.5rem !important;
+                padding-bottom: 0.4rem !important;
+                border-bottom: 1px dashed #e2e8f0 !important;
+            }
+            #holdingst tbody td.call_no::before {
+                content: "Số phân loại:";
+                font-size: 0.8rem !important;
+                font-weight: 600 !important;
+                color: #64748b !important;
+            }
+
+            /* Mã ĐKCB Barcode */
+            #holdingst tbody td.barcode {
+                order: 3 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                padding-bottom: 0.25rem !important;
+            }
+            #holdingst tbody td.barcode::before {
+                content: "Mã ĐKCB:";
+                font-size: 0.8rem !important;
+                font-weight: 600 !important;
+                color: #64748b !important;
+            }
+            #holdingst .barcode-pill {
+                font-family: ui-monospace, SFMono-Regular, monospace !important;
+                background: #f1f5f9 !important;
+                padding: 2px 8px !important;
+                border-radius: 4px !important;
+                font-weight: 600 !important;
+                color: #1e293b !important;
+            }
+
+            /* Vị trí thư viện */
+            #holdingst tbody td.location {
+                order: 4 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0.25rem !important;
+                font-size: 0.85rem !important;
+                color: #475569 !important;
+                padding-top: 0.4rem !important;
+                border-top: 1px solid #f8fafc !important;
+            }
+            #holdingst tbody td.location a {
+                color: #0284c7 !important;
+                font-weight: 600 !important;
+                text-decoration: none !important;
+            }
+            #holdingst .shelvingloc-wrap {
+                display: inline-flex !important;
+            }
+            #holdingst .shelvingloc {
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                padding: 2px 8px !important;
+                border-radius: 4px !important;
+                font-size: 0.78rem !important;
+                color: #64748b !important;
+            }
+
+            /* Kiểu tài liệu */
+            #holdingst tbody td.itype {
+                order: 5 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 0.4rem !important;
+                font-size: 0.8rem !important;
+                color: #64748b !important;
+            }
+            #holdingst tbody td.itype img {
+                max-width: 16px !important;
+                max-height: 16px !important;
+            }
+
+            /* Nút Duyệt giá sách */
+            #holdingst .shelfbrowser-link {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 0.35rem !important;
+                font-size: 0.78rem !important;
+                font-weight: 600 !important;
+                color: #0284c7 !important;
+                background: #f0f9ff !important;
+                border: 1px solid #bae6fd !important;
+                padding: 3px 8px !important;
+                border-radius: 4px !important;
+                text-decoration: none !important;
+            }
+
+            /* 4. Tab điều hướng cuộn ngang mượt mà */
+            #bibliodescriptions .nav-tabs {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+                gap: 0.35rem !important;
+                margin-bottom: 1rem !important;
+                padding-bottom: 2px !important;
+            }
+            #bibliodescriptions .nav-tabs::-webkit-scrollbar {
+                display: none !important;
+            }
+            #bibliodescriptions .nav-tabs .nav-link {
+                white-space: nowrap !important;
+                padding: 0.55rem 0.9rem !important;
+                font-size: 0.88rem !important;
+                font-weight: 600 !important;
+                border-radius: 8px 8px 0 0 !important;
+                color: #64748b !important;
+            }
+            #bibliodescriptions .nav-tabs .nav-link.active {
+                border-color: #e2e8f0 #e2e8f0 #ffffff !important;
+                color: #b91c1c !important;
+            }
+
+            /* Khoảng đệm an toàn trên thanh Dock */
+            main.main {
+                padding-bottom: calc(var(--ftu-dock-height, 65px) + 2rem) !important;
+            }
+        }
     </style>
 [% END %]
 </head>
@@ -75,6 +477,15 @@
  <div class="row">
  <div class="col-lg-9">
  <div id="catalogue_detail_biblio" class="maincontent" data-biblionumber="[% biblio.biblionumber | html %]">
+ <div id="views">
+ <span class="view current-view"><span id="Normalview"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Chế độ xem thông thường</span></span>
+ <span class="view">
+ <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> Chế độ xem MARC</a>
+ </span>
+ [% IF ( ISBD ) %]
+ <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> Chế độ xem ISBD</a></span>
+ [% END %]
+ </div>
  <div class="bookcover">
  <div id="biblio-cover-slider" class="cover-slider cover-slides" data-isbn="[% normalized_isbn | html %]">
  [% IF ( OPACLocalCoverImages ) %]
@@ -84,7 +495,6 @@
  <a href="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" title="Ảnh bìa cục bộ">
  <img alt="Ảnh bìa cục bộ" data-link="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblionumber | uri %]&imagenumber=[% image.imagenumber | uri %]" src="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" />
  </a>
- <div class="hint">Ảnh bìa cục bộ</div>
  </div>
  [% END %]
  [% END %]
@@ -153,20 +563,6 @@
  [% IF ( ocoins ) # COinS / Openurl %]
  <span class="Z3988" title="[% ocoins | html %]"></span>
  [% END %]
-
- <div id="views">
- <span class="view current-view"
-                            ><span id="Normalview"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Chế độ xem thông thường</span></span
-                        >
- <span class="view">
- <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> Chế độ xem MARC</a>
- </span>
- [% IF ( ISBD ) %]
- <span class="view"
-                                ><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> Chế độ xem ISBD</a></span
-                            >
- [% END %]
- </div>
 
  [% XSLTBloc | $raw %]
 

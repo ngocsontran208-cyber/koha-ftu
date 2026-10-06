@@ -31,6 +31,7 @@
       this.setupMobileSearch();
       this.setupMobileFacets();
       this.enhanceHoldingsTables();
+      this.setupDetailMobileLayout();
     },
 
     /**
@@ -294,6 +295,31 @@
           }
         });
       });
+    },
+
+    /**
+     * 7. TỐI ƯU HÓA BỐ CỤC TRANG CHI TIẾT TÀI LIỆU TRÊN DI ĐỘNG (OPAC DETAIL)
+     */
+    setupDetailMobileLayout: function () {
+      function adjustDetailLayout() {
+        var isMobile = window.innerWidth <= 991;
+        var path = window.location.pathname;
+        if (path.indexOf('opac-detail') !== -1 || document.getElementById('catalogue_detail_biblio')) {
+          var $actions = $('#ulactioncontainer');
+          var $biblio = $('#catalogue_detail_biblio');
+          var $sidebarCol = $('.col-lg-3');
+          if ($actions.length && $biblio.length) {
+            if (isMobile && !$actions.data('mobile-repositioned')) {
+              $actions.insertAfter($biblio).data('mobile-repositioned', 'true');
+            } else if (!isMobile && $actions.data('mobile-repositioned') && $sidebarCol.length) {
+              $actions.prependTo($sidebarCol).data('mobile-repositioned', 'false');
+            }
+          }
+        }
+      }
+
+      $(document).ready(adjustDetailLayout);
+      $(window).on('resize orientationchange', adjustDetailLayout);
     }
   };
 
