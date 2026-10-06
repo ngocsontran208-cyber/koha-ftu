@@ -85,7 +85,7 @@
  [% END %]
  <li>Bạn có thể sử dụng menu và các liên kết ở đầu trang</li>
  <li>Bạn có thể tra cứu mục lục bằng ô tìm kiếm ở đầu trang.</li>
- <li><a href="/cgi-bin/koha/opac-main.pl">Quay lại trang chủ mục lục.</a></li>
+ <li><a href="/cgi-bin/ftu/opac-main.pl">Quay lại trang chủ mục lục.</a></li>
  </ul>
  <h2>Báo lỗi và liên kết hỏng</h2>
  <ul>

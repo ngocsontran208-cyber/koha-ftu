@@ -765,7 +765,7 @@ body#pat_member aside .patron_search_form {
                         <button type="button" class="ftu-btn-secondary" id="btn-sync-from-koha" title="Cập nhật trạng thái từ Koha về Cổng SSO">
                             ⇄ Nhận từ Koha
                         </button>
-                        <a href="[% Koha.Preference('FTU_SSOBaseURL') || 'http://localhost:8090' %]" id="ftu-sso-portal-top-link" target="_blank" class="ftu-btn-secondary" title="Mở trang Quản lý tập trung SSO Portal">
+                        <a href="[% Koha.Preference('FTU_SSOBaseURL') || '/sso' %]" id="ftu-sso-portal-top-link" target="_blank" class="ftu-btn-secondary" title="Mở trang Quản lý tập trung SSO Portal">
                             SSO Portal ↗
                         </a>
                     </div>
@@ -1509,7 +1509,10 @@ body#pat_member aside .patron_search_form {
         };
 
         const ssoPref = '[% Koha.Preference("FTU_SSOBaseURL") | html %]';
-        const ssoBaseUrl = (ssoPref && !ssoPref.includes('myDNSname')) ? ssoPref.replace(/\/+$/, '') : ('http://' + (window.location.hostname || 'localhost') + ':8090');
+        const isGateway = !window.location.port || window.location.port === '80' || window.location.port === '443';
+        const ssoBaseUrl = (ssoPref && !ssoPref.includes('myDNSname'))
+            ? ssoPref.replace(/\/+$/, '')
+            : (isGateway ? '/sso' : (window.location.protocol + '//' + (window.location.hostname || '10.2.0.226') + ':8090'));
         $('#ftu-sso-portal-top-link').attr('href', ssoBaseUrl);
 
         // Helper chuẩn hóa mọi request sang Cổng SSO kèm định danh Thủ thư Koha Staff (Header + Query param song song)

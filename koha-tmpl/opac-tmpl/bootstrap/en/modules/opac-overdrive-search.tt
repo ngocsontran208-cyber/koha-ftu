@@ -25,7 +25,7 @@
     <nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumbs">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="/cgi-bin/koha/opac-main.pl">Home</a>
+                <a href="/cgi-bin/ftu/opac-main.pl">Home</a>
             </li>
             <li class="breadcrumb-item">
                 <a class="previous-page" href="">Catalog search for '[% q | html %]'</a>

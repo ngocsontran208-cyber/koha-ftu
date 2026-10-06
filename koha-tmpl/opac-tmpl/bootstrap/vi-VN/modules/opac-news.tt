@@ -1,0 +1,304 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% PROCESS "html_helpers.inc" %]
+[% INCLUDE "doc-head-open.inc" %]
+<title>Tin tức &amp; Sự kiện - [% PROCESS "library_name_title" %]</title>
+[% INCLUDE "doc-head-close.inc" %]
+[% BLOCK cssinclude %]
+<style>
+    body#opac-news-list .main {
+        background: #f8fafc !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 0 4rem 0 !important;
+        box-shadow: none !important;
+    }
+    #moresearches,
+    .row:has(#moresearches) {
+        display: none !important;
+        height: 0 !important;
+    }
+    .ftu-news-container {
+        width: 95%;
+        max-width: 1400px;
+        margin: 1.5rem auto 0 auto;
+        padding: 0 1rem;
+        box-sizing: border-box;
+    }
+    .ftu-news-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .ftu-news-title-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+    }
+    .ftu-news-page-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+    .ftu-news-count-badge {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #a31a24;
+        background: #fef2f2;
+        border: 1px solid rgba(163, 26, 36, 0.15);
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+    .ftu-news-search-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .ftu-news-search-input {
+        width: 260px;
+        height: 40px;
+        padding: 0 14px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        outline: none;
+        background: #ffffff;
+        transition: border-color 0.2s;
+    }
+    .ftu-news-search-input:focus {
+        border-color: #a31a24;
+    }
+    .ftu-news-search-btn {
+        height: 40px;
+        padding: 0 18px;
+        background: #a31a24;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .ftu-news-search-btn:hover {
+        background: #88131b;
+    }
+    .ftu-news-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+        .ftu-news-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .ftu-news-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        gap: 1.25rem;
+        align-items: flex-start;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .ftu-news-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(163, 26, 36, 0.08);
+        border-color: rgba(163, 26, 36, 0.35);
+        text-decoration: none;
+        color: inherit;
+    }
+    .ftu-news-date-badge {
+        flex-shrink: 0;
+        width: 58px;
+        background: #fef2f2;
+        border: 1px solid rgba(163, 26, 36, 0.12);
+        border-radius: 8px;
+        padding: 8px 0;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .ftu-news-date-badge .day {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #a31a24;
+        line-height: 1.1;
+    }
+    .ftu-news-date-badge .month {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #a31a24;
+        text-transform: uppercase;
+        margin-top: 2px;
+    }
+    .ftu-news-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .ftu-news-item-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.45;
+        color: #0f172a;
+        margin: 0 0 8px 0;
+        transition: color 0.2s;
+    }
+    .ftu-news-card:hover .ftu-news-item-title {
+        color: #a31a24;
+    }
+    .ftu-news-item-excerpt {
+        font-size: 0.875rem;
+        line-height: 1.55;
+        color: #64748b;
+        margin: 0 0 12px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .ftu-news-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .ftu-news-meta span {
+        display: inline-flex;
+        align-items: center;
+    }
+    .ftu-news-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 2.5rem;
+    }
+    .ftu-news-page-btn {
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #475569;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        transition: all 0.2s;
+    }
+    .ftu-news-page-btn:hover {
+        background: #f8fafc;
+        border-color: #a31a24;
+        color: #a31a24;
+        text-decoration: none;
+    }
+    .ftu-news-page-btn.active {
+        background: #a31a24;
+        border-color: #a31a24;
+        color: #ffffff;
+    }
+    .ftu-news-empty {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 3.5rem 1.5rem;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+</style>
+[% END %]
+
+[% INCLUDE 'bodytag.inc' bodyid='opac-news-list' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+    <div class="ftu-news-container">
+        <nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumbs mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/cgi-bin/ftu/opac-main.pl">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="#">Tin tức &amp; Sự kiện</a></li>
+            </ol>
+        </nav>
+
+        <div class="ftu-news-header">
+            <div class="ftu-news-title-wrap">
+                <h1 class="ftu-news-page-title">Tin tức &amp; Sự kiện</h1>
+                <span class="ftu-news-count-badge">[% total_rows %] bài viết</span>
+            </div>
+            <form action="/cgi-bin/koha/opac-news.pl" method="GET" class="ftu-news-search-form">
+                <input type="text" name="q" value="[% search_query | html %]" placeholder="Tìm kiếm bài viết..." class="ftu-news-search-input">
+                <button type="submit" class="ftu-news-search-btn">Tìm kiếm</button>
+            </form>
+        </div>
+
+        [% IF posts.size > 0 %]
+        <div class="ftu-news-grid">
+            [% FOREACH p IN posts %]
+            <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% p.id %]" class="ftu-news-card">
+                <div class="ftu-news-date-badge">
+                    <span class="day">[% p.created_day %]</span>
+                    <span class="month">[% p.created_month %]</span>
+                </div>
+                <div class="ftu-news-content">
+                    <h2 class="ftu-news-item-title">[% p.title | html %]</h2>
+                    [% IF p.excerpt %]
+                    <p class="ftu-news-item-excerpt">[% p.excerpt | html %]</p>
+                    [% END %]
+                    <div class="ftu-news-meta">
+                        <span>[% p.author_name || 'Thư viện Phân hiệu' %]</span>
+                        <span>[% p.views_count %] lượt xem</span>
+                    </div>
+                </div>
+            </a>
+            [% END %]
+        </div>
+
+        [% IF total_pages > 1 %]
+        <div class="ftu-news-pagination">
+            [% IF has_prev %]
+            <a href="/cgi-bin/koha/opac-news.pl?page=[% prev_page %][% IF search_query %]&q=[% search_query | url %][% END %]" class="ftu-news-page-btn">&larr;</a>
+            [% END %]
+
+            [% FOREACH pg IN pages %]
+            <a href="/cgi-bin/koha/opac-news.pl?page=[% pg.number %][% IF search_query %]&q=[% search_query | url %][% END %]" class="ftu-news-page-btn[% IF pg.active %] active[% END %]">[% pg.number %]</a>
+            [% END %]
+
+            [% IF has_next %]
+            <a href="/cgi-bin/koha/opac-news.pl?page=[% next_page %][% IF search_query %]&q=[% search_query | url %][% END %]" class="ftu-news-page-btn">&rarr;</a>
+            [% END %]
+        </div>
+        [% END %]
+
+        [% ELSE %]
+        <div class="ftu-news-empty">
+            Không tìm thấy bài viết nào phù hợp.
+        </div>
+        [% END %]
+    </div>
+</div>
+
+[% INCLUDE "opac-bottom.inc" %]
+[% BLOCK jsinclude %][% END %]

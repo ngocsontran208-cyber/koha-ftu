@@ -153,8 +153,10 @@ sub _sync_password_to_sso {
         push @candidate_urls, "$sso_pref/api/v1/sso/users/$uid/reset-password?koha_staff=1";
     }
     push @candidate_urls, (
+        "http://ftu-sso-portal:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1",
+        "http://10.2.0.226/sso/api/v1/sso/users/$uid/reset-password?koha_staff=1",
+        "http://10.2.0.226:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1",
         "http://host.docker.internal:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1",
-        "http://localhost:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1",
         "http://127.0.0.1:8090/api/v1/sso/users/$uid/reset-password?koha_staff=1"
     );
 

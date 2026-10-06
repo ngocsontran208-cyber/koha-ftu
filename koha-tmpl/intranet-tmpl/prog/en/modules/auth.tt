@@ -88,8 +88,8 @@
                 <strong><i class="fa fa-shield"></i> Access Restriction:</strong><br />
                 Your account is a <strong>Patron / Student</strong> account. This is the <strong>Library Staff Interface</strong> reserved for librarians and administrative staff.
                 <div style="margin-top: 10px;">
-                    <a href="[% Koha.Preference('OPACBaseURL') || 'http://localhost:8082' %]/cgi-bin/koha/opac-user.pl" class="btn btn-primary btn-sm" style="font-weight: 600; text-decoration: none;">
-                        <i class="fa fa-external-link"></i> Go to OPAC Patron Portal (Port 8082)
+                    <a href="[% Koha.Preference('OPACBaseURL') || '' %]/cgi-bin/koha/opac-user.pl" class="btn btn-primary btn-sm" style="font-weight: 600; text-decoration: none;">
+                        <i class="fa fa-external-link"></i> Go to OPAC Patron Portal
                     </a>
                 </div>
             </div>

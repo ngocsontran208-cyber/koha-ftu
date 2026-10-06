@@ -65,7 +65,7 @@
                     <p
                         >Hello, [% INCLUDE 'patron-title.inc' patron = logged_in_user %]
                         <br />
-                        <a href="/cgi-bin/koha/opac-main.pl?logout.x=1" class="d-print-none">Click here if you're not [% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a></p
+                        <a href="/opac/logout" class="d-print-none">Click here if you're not [% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a></p
                     >
 
                     [% IF ( patronupdate ) %]<div class="alert alert-info"><h2>Thank you!</h2><p>Your corrections have been submitted to the library, and a staff member will update your record as soon as possible.</p></div>[% END %]

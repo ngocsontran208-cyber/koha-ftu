@@ -43,7 +43,7 @@
  <header id="header-region" class="noprint">
  <nav class="navbar navbar-expand">
  <div id="logo">
- <a class="navbar-brand" href="/cgi-bin/koha/opac-main.pl">
+ <a class="navbar-brand" href="/cgi-bin/ftu/opac-main.pl">
  [% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Danh mục trực tuyến Koha[% END %] </a>
  </div>
 

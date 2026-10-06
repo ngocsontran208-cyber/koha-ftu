@@ -448,6 +448,8 @@ if ($search_query) {
 # back to the page we triggered the login from
 my $return = $query->param('return');
 if ($return) {
+    $return =~ s/([?&])logout(?:\.x|\.y)?=[^&]*(&|$)/$1/g;
+    $return =~ s/[?&]$//;
     if ( $return =~ m{^/[^/\\]} ) {
         print $query->redirect(
             -uri    => $return,

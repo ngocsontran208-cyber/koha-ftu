@@ -85,7 +85,7 @@
                         [% END %]
                         <li>You can use the menu and links at the top of the page</li>
                         <li>You can search our catalog using the search form at the top of this page.</li>
-                        <li><a href="/cgi-bin/koha/opac-main.pl">Return to the catalog home page.</a></li>
+                        <li><a href="/cgi-bin/ftu/opac-main.pl">Return to the catalog home page.</a></li>
                     </ul>
                     <h2>Report issues and broken links</h2>
                     <ul>

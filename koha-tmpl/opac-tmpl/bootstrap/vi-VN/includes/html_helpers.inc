@@ -147,7 +147,7 @@
  [% END %]
  [% ELSE %]
  [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/opac-main.pl" title="Trang chủ">Trang chủ</a>
+ <a href="/opac/" title="Trang chủ">Trang chủ</a>
  [% END %]
  [% content | $raw %]
  [% END %]

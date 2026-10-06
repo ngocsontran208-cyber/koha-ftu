@@ -29,6 +29,8 @@ use Koha::Holds;
 use Koha::Patron::Messages;
 
 my $input = CGI->new;
+
+
 my $dbh   = C4::Context->dbh;
 
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
@@ -39,6 +41,15 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
     }
 );
+
+if ( $input->param('logout.x') || $input->param('logout.y') || $input->param('logout') ) {
+    print $input->redirect(
+        -uri    => '/cgi-bin/koha/opac-main.pl',
+        -cookie => $cookie,
+        -status => '303 See other',
+    );
+    exit;
+}
 
 my $casAuthentication = C4::Context->preference('casAuthentication');
 $template->param(

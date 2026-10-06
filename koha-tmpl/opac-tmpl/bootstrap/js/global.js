@@ -323,6 +323,9 @@ $(document).ready(function () {
         if (tab) {
             return_url += (return_url.indexOf("?") > -1 ? "&" : "?") + "tab=" + encodeURIComponent(tab);
         }
+        if (return_url) {
+            return_url = return_url.replace(/([?&])logout(\.x|\.y)?=[^&]*(&|$)/g, '$1').replace(/[?&]$/, '');
+        }
         if (return_url && !return_url.includes("opac-user.pl") && !return_url.includes("opac-auth.pl")) {
             var $modalAuth = $("#modalAuth");
             var $retInput = $modalAuth.find("input[name='return']");

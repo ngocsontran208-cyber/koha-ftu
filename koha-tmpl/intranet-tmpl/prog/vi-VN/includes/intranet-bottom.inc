@@ -103,8 +103,30 @@
  [% INCLUDE js_includes.inc %]
  [% jsinclude | $raw # Parse the page template's JavaScript block if necessary %]
 [% END %]
-[% KohaPlugins.get_plugins_intranet_js | $raw %]
-
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    var curHost = window.location.hostname;
+    var curPort = window.location.port;
+    var isGateway = !curPort || curPort === '80' || curPort === '443';
+    if (curHost && curHost !== 'localhost' && curHost !== '127.0.0.1') {
+        $('a[href*="localhost"], a[href*="127.0.0.1"]').each(function() {
+            var href = $(this).attr('href');
+            if (!href) return;
+            if (isGateway) {
+                href = href.replace(/https?:\/\/(localhost|127\.0\.0\.1):4000(\/elib)?/g, '/elib')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8090/g, '/sso')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8095\/reader/g, '/reader')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8095/g, '/drm')
+                           .replace(/https?:\/\/(localhost|127\.0\.0\.1):8082/g, '')
+                           .replace(/(localhost|127\.0\.0\.1)/g, curHost);
+            } else {
+                href = href.replace(/(localhost|127\.0\.0\.1)/g, curHost);
+            }
+            $(this).attr('href', href);
+        });
+    }
+})();
+</script>
 </body>
 <!-- prettier-ignore-start -->
 </html>

@@ -2571,14 +2571,15 @@ var draftStorageKey = 'koha_portal_draft_new';
 $(document).ready(function() {
     // Tự động điều chỉnh host xem trước OPAC theo IP/domain đang truy cập
     var curHost = window.location.hostname;
-    if (curHost && curHost !== 'localhost' && curHost !== '127.0.0.1') {
-        $('.ftu-opac-link').each(function() {
-            var h = $(this).attr('href');
-            if (h && (h.includes('localhost') || h.includes('127.0.0.1') || h.includes('myDNSname'))) {
-                $(this).attr('href', window.location.protocol + '//' + curHost + ':8082');
-            }
-        });
-    }
+    var curPort = window.location.port;
+    var isGateway = !curPort || curPort === '80' || curPort === '443';
+    var opacTarget = isGateway ? '/opac' : (window.location.protocol + '//' + (curHost || '10.2.0.226') + ':8082');
+    $('.ftu-opac-link').each(function() {
+        var h = $(this).attr('href');
+        if (h && (h.includes('localhost') || h.includes('127.0.0.1') || h.includes('myDNSname') || h.includes(':8082'))) {
+            $(this).attr('href', opacTarget);
+        }
+    });
 
     currentPostId = $('#post-id').val() || 'new';
     draftStorageKey = 'koha_portal_draft_' + currentPostId;

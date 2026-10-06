@@ -115,7 +115,7 @@
  </a>
  [% END %]
  <hr class="ftu-menu-divider" />
- <a href="/cgi-bin/koha/mainpage.pl?logout.x=1" class="ftu-logout">
+ <a href="/staff/logout" class="ftu-logout">
  <i class="fa fa-sign-out"></i> Đăng xuất
  </a>
  </div>
@@ -426,7 +426,7 @@
  </li>
  [% END %]
  <li class="nav-item">
- <a id="logout" class="toplinks dropdown-item" href="/cgi-bin/koha/mainpage.pl?logout.x=1">Đăng xuất</a>
+ <a id="logout" class="toplinks dropdown-item" href="/staff/logout">Đăng xuất</a>
  </li>
  </ul>
  </li>

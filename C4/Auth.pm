@@ -1443,6 +1443,8 @@ sub checkauth {
             my $return_param = $query->param('return') || $query->param('return_url') || $query->param('destination');
             my $uri;
             if ( $return_param && $return_param !~ /opac-user\.pl/ && $return_param !~ /opac-auth\.pl/ ) {
+                $return_param =~ s/([?&])logout(?:\.x|\.y)?=[^&]*(&|$)/$1/g;
+                $return_param =~ s/[?&]$//;
                 if ( $return_param =~ m{^/[^/\\]} ) {
                     $uri = URI->new($return_param);
                 } elsif ( $return_param =~ m{^https?://}i ) {
@@ -1465,6 +1467,9 @@ sub checkauth {
                 $uri->query_param_delete('return');
                 $uri->query_param_delete('has-search-query') unless $uri->query_param('has-search-query');
             }
+            $uri->query_param_delete('logout.x');
+            $uri->query_param_delete('logout.y');
+            $uri->query_param_delete('logout');
             unless ( $params->{do_not_print} ) {
                 print $query->redirect( -uri => $uri->as_string, -cookie => $cookie, -status => '303 See other' );
                 safe_exit;

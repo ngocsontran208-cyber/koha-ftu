@@ -147,7 +147,7 @@
                 [% END %]
             [% ELSE %]
                 [% WRAPPER breadcrumb_item %]
-                    <a href="/cgi-bin/koha/opac-main.pl" title="Home">Home</a>
+                    <a href="/opac/" title="Home">Home</a>
                 [% END %]
                 [% content | $raw %]
             [% END %]

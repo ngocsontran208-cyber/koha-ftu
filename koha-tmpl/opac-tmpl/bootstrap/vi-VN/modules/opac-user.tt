@@ -64,7 +64,7 @@
 
  <p
                         >Xin chào, [% INCLUDE 'patron-title.inc' patron = logged_in_user %] <br />
- <a href="/cgi-bin/koha/opac-main.pl?logout.x=1" class="d-print-none">Bấm vào đây nếu bạn không phải là [% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a></p
+ <a href="/opac/logout" class="d-print-none">Bấm vào đây nếu bạn không phải là [% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a></p
                     >
 
  [% IF ( patronupdate ) %]<div class="alert alert-info"><h2>XIN CẢM ƠN!</h2><p>Thông tin chỉnh sửa của bạn đã được gửi đến thư viện, cán bộ thư viện sẽ xem xét và cập nhật sớm nhất có thể.</p></div>[% END %]

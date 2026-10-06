@@ -17,7 +17,7 @@
  <nav aria-label="Đường dẫn điều hướng" class="breadcrumbs" id="breadcrumbs">
  <ol class="breadcrumb">
  <li class="breadcrumb-item">
- <a href="/cgi-bin/koha/opac-main.pl">Trang chủ</a>
+ <a href="/cgi-bin/ftu/opac-main.pl">Trang chủ</a>
  </li>
  <li class="breadcrumb-item">
  <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>

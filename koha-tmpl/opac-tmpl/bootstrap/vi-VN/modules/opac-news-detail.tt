@@ -444,34 +444,65 @@
     }
     .ftu-sidebar-post {
         display: flex;
+        align-items: flex-start;
         gap: 12px;
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
+        padding-bottom: 0.875rem;
+        margin-bottom: 0.875rem;
         border-bottom: 1px solid #f1f5f9;
         text-decoration: none !important;
         color: inherit;
+        transition: transform 0.15s ease;
+    }
+    .ftu-sidebar-post:hover {
+        transform: translateX(2px);
     }
     .ftu-sidebar-post:last-child {
         border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
     }
-    .ftu-sidebar-post img {
-        width: 70px;
-        height: 70px;
-        border-radius: 6px;
+    .ftu-sidebar-thumb,
+    .ftu-sidebar-post img,
+    .ftu-sidebar-thumb-icon {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        max-width: 54px;
+        min-height: 54px;
+        max-height: 54px;
+        flex: 0 0 54px;
+        border-radius: 8px;
         object-fit: cover;
+        box-sizing: border-box;
+    }
+    .ftu-sidebar-thumb-icon {
+        background: #fee2e2;
+        color: #b91c1c;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .ftu-sidebar-post:hover .ftu-sidebar-thumb-icon {
+        background: #fecaca;
+        transform: scale(1.04);
+    }
+    .ftu-sidebar-post-body {
+        flex: 1;
+        min-width: 0;
     }
     .ftu-sidebar-post h5 {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         font-weight: 700;
         color: #1e293b;
-        margin: 0 0 5px 0;
-        line-height: 1.3;
+        margin: 0 0 4px 0;
+        line-height: 1.35;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        transition: color 0.15s ease;
     }
     .ftu-sidebar-post:hover h5 {
         color: #b91c1c;
@@ -479,6 +510,10 @@
     .ftu-sidebar-date {
         font-size: 0.75rem;
         color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
     }
 
     /* Toast notification */
@@ -706,13 +741,13 @@
                         [% NEXT IF r.post_type == 'database' %]
                         <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% r.id %]" class="ftu-sidebar-post">
                             [% IF r.featured_image %]
-                                <img src="[% r.featured_image | html %]" alt="[% r.title | html %]" />
+                                <img src="[% r.featured_image | html %]" alt="[% r.title | html %]" class="ftu-sidebar-thumb" />
                             [% ELSE %]
-                                <div style="width: 70px; height: 70px; background: #fee2e2; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #b91c1c;">
-                                    <i class="fa fa-newspaper fa-lg"></i>
+                                <div class="ftu-sidebar-thumb-icon">
+                                    <i class="fa fa-newspaper"></i>
                                 </div>
                             [% END %]
-                            <div>
+                            <div class="ftu-sidebar-post-body">
                                 <h5>[% r.title | html %]</h5>
                                 <div class="ftu-sidebar-date"><i class="fa fa-calendar-alt"></i> [% r.formatted_date %] &nbsp;&bull;&nbsp; <i class="fa fa-eye" style="color: #0284c7;"></i> [% r.views_count || 0 %] lượt xem</div>
                             </div>
