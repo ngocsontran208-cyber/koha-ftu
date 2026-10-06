@@ -495,18 +495,20 @@ $(document).ready(function() {
 
                 var title = (item.title || 'Chưa có tiêu đề').replace(/\s*[\/:]\s*$/, '').trim();
                 var author = (item.author || '[% FTU_BRAND.library_name_short %]').replace(/\s*[\/,]\s*$/, '').trim();
+                var safeTitle = (title || '').replace(/"/g, '&quot;');
+                var safeAuthor = (author || '').replace(/"/g, '&quot;');
                 var link = item.link || ('/cgi-bin/koha/opac-detail.pl?biblionumber=' + bibNum);
                 var coverUrl = '/cgi-bin/koha/opac-image.pl?biblionumber=' + bibNum + '&v=' + (item.cover_ts || '1');
                 
                 htmlContent += `
                     <a href="${link}" class="ftu-book-card">
                         <div class="ftu-book-cover">
-                            <img src="${coverUrl}" alt="${title}" onload="if(this.naturalWidth<=1){this.src='${fallbackSvg}';}" onerror="this.onerror=null;this.src='${fallbackSvg}';" />
+                            <img src="${coverUrl}" alt="${safeTitle}" class="ftu-book-cover-img" />
                             <span class="ftu-book-badge">${bibNum == 445 ? 'DIGITAL' : 'MỚI'}</span>
                         </div>
                         <div class="ftu-book-details">
-                            <h4 class="ftu-book-title" title="${title}">${title}</h4>
-                            <p class="ftu-book-author">${author}</p>
+                            <h4 class="ftu-book-title" title="${safeTitle}">${safeTitle}</h4>
+                            <p class="ftu-book-author">${safeAuthor}</p>
                             <div class="ftu-book-meta"><i class="fa fa-check-circle" style="margin-right: 4px;"></i> Sẵn sàng</div>
                         </div>
                     </a>
@@ -521,6 +523,14 @@ $(document).ready(function() {
                     $grid.removeClass('has-marquee');
                 }
                 $grid.html(htmlContent);
+                $grid.find('.ftu-book-cover-img').on('error', function() {
+                    this.onerror = null;
+                    this.src = fallbackSvg;
+                }).on('load', function() {
+                    if (this.naturalWidth <= 1) {
+                        this.src = fallbackSvg;
+                    }
+                });
             } else {
                 $grid.html('<div class="ftu-loading-books">Chưa có tài liệu mới.</div>');
             }

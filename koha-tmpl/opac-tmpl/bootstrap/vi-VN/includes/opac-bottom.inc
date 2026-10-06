@@ -353,9 +353,12 @@
 
     // 1. Tự động đồng bộ trước phiên SSO DSpace chạy ngầm (Silent pre-auth)
     try {
-        var ssoPreload = document.createElement('script');
-        ssoPreload.src = ssoEndpoint + '?user=' + encodeURIComponent(kohaUser) + '&mode=json';
-        document.head.appendChild(ssoPreload);
+        if (window.fetch) {
+            fetch(ssoEndpoint + '?user=' + encodeURIComponent(kohaUser) + '&mode=json', {
+                method: 'GET',
+                credentials: 'include'
+            }).catch(function() {});
+        }
     } catch(e) {}
 
     // 2. Chuyển đổi toàn bộ link trỏ đến DSpace sang Cổng chuyển giao phiên Seamless SSO
