@@ -143,7 +143,8 @@ legend {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 1.5rem !important;
+  gap: 1rem !important;
+  flex-wrap: nowrap !important;
 }
 
 /* FTU Brand Logo - Overrides Koha Green Leaf & Height:0 clip */
@@ -154,13 +155,12 @@ legend {
   background: none !important;
   background-image: none !important;
   width: auto !important;
-  min-width: 250px !important;
+  min-width: 0 !important;
   height: auto !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
-  flex-grow: 0 !important;
-  flex-shrink: 0 !important;
+  flex: 0 1 auto !important;
   margin: 0 !important;
   padding: 0 !important;
   order: 1 !important;
@@ -176,7 +176,7 @@ legend {
   width: auto !important;
   height: auto !important;
   min-height: 44px !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   padding: 0 !important;
   margin: 0 !important;
   display: inline-flex !important;
@@ -184,6 +184,7 @@ legend {
   gap: 0.75rem !important;
   text-decoration: none !important;
   cursor: pointer !important;
+  max-width: 100% !important;
 }
 
 .ftu-logo-img,
@@ -199,6 +200,7 @@ legend {
   box-shadow: 0 2px 6px rgba(185, 28, 28, 0.12) !important;
   display: block !important;
   transition: transform 0.2s ease;
+  flex-shrink: 0 !important;
 }
 
 .ftu-logo-img:hover {
@@ -210,6 +212,16 @@ legend {
   display: inline-flex !important;
   flex-direction: column !important;
   line-height: 1.25 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.brand-title-desktop {
+  display: inline !important;
+}
+
+.brand-title-mobile {
+  display: none !important;
 }
 
 .ftu-brand-main-title,
@@ -221,6 +233,9 @@ legend {
   text-transform: uppercase !important;
   display: block !important;
   margin-bottom: 0.2rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .ftu-brand-sub-title,
@@ -231,14 +246,27 @@ legend {
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
   display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
-#header-region .navbar:has(#cart-list-nav) #cart-list-nav {
-  flex-grow: 0 !important;
-}
-
-#cart-list-nav {
+/* Right Header Actions Wrapper - Zero Clutter / Zero Overlap */
+.ftu-header-actions-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
   order: 2 !important;
+}
+
+#header-region .navbar:has(#cart-list-nav) #cart-list-nav,
+#cart-list-nav {
+  order: 1 !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Database (CSDL) Tab in Navbar */
@@ -273,10 +301,11 @@ legend {
 
 /* Language Selector in Navbar */
 #header_langmenu {
-  order: 3 !important;
-  margin-left: auto !important;
+  order: 2 !important;
+  margin-left: 0 !important;
   display: flex !important;
   align-items: center !important;
+  flex-shrink: 0 !important;
 }
 
 #header_langmenu .nav-link {
@@ -340,8 +369,11 @@ legend {
 }
 
 #members {
-  order: 4 !important;
-  margin-left: 0.5rem !important;
+  order: 3 !important;
+  margin-left: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
 }
 
 /* Hide Koha clumsy moresearches and opacheader rows on home page */
@@ -885,7 +917,283 @@ h2.ftu-banner-title,
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Modern Pill Search Box */
+/* ==========================================================================
+   FTU Modern Unified Search Bar (Premium, Centered Pill)
+   ========================================================================== */
+.ftu-search-container-modern {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto 1.5rem auto;
+  position: relative;
+  z-index: 10;
+}
+
+.ftu-unified-search-bar {
+  display: flex !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 9999px !important;
+  padding: 5px 6px 5px 18px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.ftu-unified-search-bar:focus-within {
+  border-color: var(--ftu-red, #b91c1c) !important;
+  box-shadow: 0 12px 36px rgba(185, 28, 28, 0.14), 0 0 0 3px rgba(185, 28, 28, 0.08) !important;
+}
+
+.ftu-search-input-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.ftu-search-lens {
+  font-size: 1.05rem !important;
+  color: #94a3b8 !important;
+  flex-shrink: 0 !important;
+  transition: color 0.2s ease !important;
+}
+
+.ftu-unified-search-bar:focus-within .ftu-search-lens {
+  color: var(--ftu-red, #b91c1c) !important;
+}
+
+.ftu-unified-search-input {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  font-size: 0.96rem !important;
+  color: #0f172a !important;
+  font-family: inherit !important;
+  padding: 8px 4px !important;
+  line-height: 1.4 !important;
+}
+
+.ftu-unified-search-input::placeholder {
+  color: #94a3b8 !important;
+  font-size: 0.92rem !important;
+}
+
+.ftu-unified-search-btn {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 9999px !important;
+  padding: 9px 20px !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 8px rgba(185, 28, 28, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.ftu-unified-search-btn:hover {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.4) !important;
+}
+
+.ftu-unified-search-btn:active {
+  transform: translateY(1px) scale(0.98) !important;
+}
+
+.ftu-btn-icon {
+  font-size: 0.85rem !important;
+  transition: transform 0.2s ease !important;
+}
+
+.ftu-unified-search-btn:hover .ftu-btn-icon {
+  transform: translateX(3px) !important;
+}
+
+.ftu-search-chips-scroll {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.ftu-search-chips-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+
+.ftu-chip-modern {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: 9999px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.ftu-chip-modern:hover {
+  background: #fef2f2 !important;
+  color: var(--ftu-red, #b91c1c) !important;
+  border-color: #fca5a5 !important;
+  transform: translateY(-1px) !important;
+}
+
+.ftu-chip-modern.ftu-chip-accent {
+  background: #fff1f2 !important;
+  color: var(--ftu-red, #b91c1c) !important;
+  border-color: #fecdd3 !important;
+}
+
+/* ==========================================================================
+   FTU App Shortcuts (4 Squircle Icons - Apple / Modern Fintech Style)
+   ========================================================================== */
+.ftu-shortcuts-section {
+  padding-top: 1rem !important;
+  padding-bottom: 2rem !important;
+}
+
+.ftu-app-shortcuts-bar {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 1.25rem !important;
+  max-width: 680px !important;
+  margin: 0 auto !important;
+}
+
+.ftu-app-shortcut-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-decoration: none !important;
+  text-align: center !important;
+  transition: transform 0.2s ease !important;
+}
+
+.ftu-app-shortcut-item:active {
+  transform: scale(0.94) !important;
+}
+
+.ftu-app-squircle {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.35rem !important;
+  position: relative !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.ftu-app-shortcut-item:hover .ftu-app-squircle {
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ftu-app-squircle.icon-rose {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%) !important;
+  color: #e11d48 !important;
+  border: 1px solid #fecdd3 !important;
+}
+
+.ftu-app-squircle.icon-emerald {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+  color: #059669 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+.ftu-app-squircle.icon-amber {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  color: #d97706 !important;
+  border: 1px solid #fde68a !important;
+}
+
+.ftu-app-squircle.icon-blue {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+  color: #2563eb !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+.ftu-squircle-badge {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  padding: 1px 6px !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4) !important;
+  line-height: 1.2 !important;
+}
+
+.ftu-squircle-count {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  background: #d97706 !important;
+  color: #ffffff !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid #ffffff !important;
+  line-height: 1 !important;
+}
+
+.ftu-app-label {
+  margin-top: 8px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  letter-spacing: -0.01em !important;
+  white-space: nowrap !important;
+  transition: color 0.2s ease !important;
+}
+
+.ftu-app-shortcut-item:hover .ftu-app-label {
+  color: var(--ftu-red, #b91c1c) !important;
+}
+
+/* Section Header & Accent Pill */
+.ftu-section-title-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.ftu-title-accent-pill {
+  width: 4px !important;
+  height: 20px !important;
+  background: linear-gradient(180deg, #b91c1c 0%, #ef4444 100%) !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+
+/* Modern Pill Search Box (Fallback) */
 .ftu-search-card.ftu-search-simple {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -2962,34 +3270,53 @@ img.itemtype-image,
 /* 3. TỐI ƯU HEADER TRÊN ĐIỆN THOẠI (<= 768px) */
 @media (max-width: 768px) {
   #header-region .navbar {
-    padding: 0.5rem 0.85rem !important;
-    min-height: 54px !important;
+    padding: 0.45rem 0.85rem !important;
+    min-height: 52px !important;
     gap: 0.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
 
-  /* Khắc phục lỗi min-width 250px gây vỡ layout mobile */
+  /* Khắc phục lỗi min-width 250px và văn bản dài gây vỡ layout mobile */
   #logo,
   #header-region #logo,
   #header-region .navbar #logo,
   #header-region .navbar:has(#cart-list-nav) #logo {
     min-width: 0 !important;
     max-width: calc(100vw - 120px) !important;
-    flex-shrink: 1 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
   }
 
   .ftu-logo-img,
   #logo a img,
   #logo .ftu-logo-img {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    min-height: 38px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  .brand-title-desktop {
+    display: none !important;
+  }
+
+  .brand-title-mobile {
+    display: inline-block !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    color: var(--ftu-red, #b91c1c) !important;
+    letter-spacing: 0.02em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .ftu-brand-main-title,
   #logo a .ftu-brand-main-title {
-    font-size: 0.84rem !important;
-    line-height: 1.15 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.2 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -3000,6 +3327,12 @@ img.itemtype-image,
   .ftu-brand-sub-title,
   #logo a .ftu-brand-sub-title {
     display: none !important;
+  }
+
+  .ftu-header-actions-wrap {
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
   }
 
   /* Ẩn các nút CSDL, Bộ sưu tập trên Navbar Desktop vì đã có trên Mobile Bottom Dock */
@@ -3013,14 +3346,28 @@ img.itemtype-image,
     display: none !important;
   }
 
+  #cart-list-nav .nav-link {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  #header_langmenu .langlabel {
+    display: none !important;
+  }
+
   #header_langmenu .nav-link {
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.76rem !important;
+    gap: 0.25rem !important;
+  }
+
+  #members .login-link {
     padding: 0.25rem 0.55rem !important;
     font-size: 0.78rem !important;
   }
 
-  #members .login-link {
-    padding: 0.3rem 0.65rem !important;
-    font-size: 0.8rem !important;
+  #members .login-label {
+    display: none !important;
   }
 }
 
@@ -3116,7 +3463,42 @@ img.itemtype-image,
 /* 5. TỐI ƯU KHUNG TÌM KIẾM & CHIPS TRÊN DI ĐỘNG */
 @media (max-width: 768px) {
   .ftu-hero-section {
-    padding: 0.85rem 0.75rem 1.5rem 0.75rem !important;
+    padding: 0.75rem 0.65rem 1.25rem 0.65rem !important;
+  }
+
+  .ftu-search-container-modern {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .ftu-unified-search-bar {
+    padding: 4px 5px 4px 14px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .ftu-search-lens {
+    font-size: 0.95rem !important;
+  }
+
+  .ftu-unified-search-input {
+    font-size: 0.88rem !important;
+    padding: 6px 2px !important;
+  }
+
+  .ftu-unified-search-btn {
+    padding: 7px 14px !important;
+    font-size: 0.82rem !important;
+  }
+
+  .ftu-search-chips-scroll {
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    padding: 2px 2px 6px 2px !important;
+    margin-top: 8px !important;
+  }
+
+  .ftu-chip-modern {
+    font-size: 0.76rem !important;
+    padding: 5px 10px !important;
   }
 
   .ftu-search-card.ftu-search-simple {
@@ -3162,16 +3544,50 @@ img.itemtype-image,
   }
 }
 
-/* 6. LƯỚI PHÍM TẮT 2x2 CÔNG THÁI HỌC TRÊN ĐIỆN THOẠI (<= 640px) */
+@media (max-width: 480px) {
+  .ftu-btn-text {
+    display: none !important;
+  }
+
+  .ftu-unified-search-btn {
+    padding: 8px 12px !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+  }
+
+  .ftu-unified-search-btn .ftu-btn-icon {
+    margin: 0 !important;
+  }
+}
+
+/* 6. PHÍM TẮT TRÊN DI ĐỘNG (<= 640px) */
 @media (max-width: 640px) {
   .ftu-section-container {
     max-width: 100% !important;
-    padding: 1.25rem 0.85rem !important;
+    padding: 1rem 0.85rem !important;
   }
 
   .ftu-shortcuts-section {
-    padding-top: 0.5rem !important;
-    padding-bottom: 1.5rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 1.25rem !important;
+  }
+
+  .ftu-app-shortcuts-bar {
+    gap: 0.5rem !important;
+  }
+
+  .ftu-app-squircle {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 1.15rem !important;
+  }
+
+  .ftu-app-label {
+    font-size: 0.72rem !important;
+    margin-top: 5px !important;
   }
 
   .ftu-shortcuts-grid {

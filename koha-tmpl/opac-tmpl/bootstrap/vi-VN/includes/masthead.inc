@@ -30,11 +30,17 @@
         <a class="navbar-brand" href="/opac/" title="[% FTU_BRAND.library_name %]">
             <img src="[% FTU_BRAND.logo_url %]" alt="[% FTU_BRAND.logo_alt %]" class="ftu-logo-img">
             <div class="ftu-brand-title-wrap">
-                <span class="ftu-brand-main-title">[% FTU_BRAND.library_name %]</span>
+                <span class="ftu-brand-main-title">
+                    <span class="brand-title-desktop">[% FTU_BRAND.library_name %]</span>
+                    <span class="brand-title-mobile">THƯ VIỆN FTU HCMC</span>
+                </span>
                 <span class="ftu-brand-sub-title">[% FTU_BRAND.library_sub_title %]</span>
             </div>
         </a>
     </div>
+
+    <!-- Right Header Actions Container (Cart, Language, User) -->
+    <div class="ftu-header-actions-wrap">
  [% IF ( OpacPublic ) %]
  [% IF ( Koha.Preference( 'opacbookbag' ) == 1 ) %]
  <div id="cartDetails" class="cart-message">Giỏ tài liệu trống.</div>
@@ -42,8 +48,8 @@
  <ul id="cart-list-nav" class="navbar-nav">
  [% IF ( Koha.Preference( 'opacbookbag' ) == 1 ) %]
  <li class="nav-item js-show">
- <a aria-label="Giỏ tài liệu" class="nav-link" href="#" id="cartmenulink" role="button" title="Lưu lại những tài liệu bạn quan tâm">
- <i id="carticon" class="fa fa-shopping-cart fa-fw fa-icon-black" aria-hidden="true"></i> <span class="cartlabel">Giỏ tài liệu</span> <span id="basketcount"></span>
+ <a aria-label="Giỏ tài liệu" class="nav-link ftu-nav-cart-btn" href="#" id="cartmenulink" role="button" title="Lưu lại những tài liệu bạn quan tâm">
+ <i id="carticon" class="fa fa-shopping-cart fa-fw" aria-hidden="true"></i> <span class="cartlabel">Giỏ tài liệu</span> <span id="basketcount" class="ftu-cart-badge"></span>
  </a>
  </li>
  [% END %]
@@ -132,12 +138,12 @@
  <div id="header_langmenu" class="langmenu">
      <ul class="navbar-nav">
          <li class="nav-item dropdown">
-             <a href="#" title="Chuyển ngôn ngữ / Switch languages" class="nav-link dropdown-toggle" id="langmenu_fb_vi" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                 <i class="fa fa-flag fa-fw fa-icon-header" aria-hidden="true"></i> <span class="langlabel">Ngôn ngữ</span> <b class="caret"></b>
+             <a href="#" title="Chuyển ngôn ngữ / Switch languages" class="nav-link dropdown-toggle ftu-nav-lang-btn" id="langmenu_fb_vi" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                 <i class="fa fa-globe fa-fw" aria-hidden="true"></i> <span class="langlabel">Ngôn ngữ</span> <span class="ftu-lang-tag">VI</span>
              </a>
              <div aria-labelledby="langmenu_fb_vi" role="menu" class="dropdown-menu dropdown-menu-end">
                  <a class="dropdown-item" href="/cgi-bin/koha/opac-changelanguage.pl?language=vi-VN" tabindex="-1" role="menuitem">
-                     Tiếng Việt <i class="fa fa-check" aria-hidden="true"></i>
+                     Tiếng Việt <i class="fa fa-check text-danger" aria-hidden="true"></i>
                  </a>
                  <a class="dropdown-item" href="/cgi-bin/koha/opac-changelanguage.pl?language=en" tabindex="-1" role="menuitem">
                      English
@@ -152,8 +158,8 @@
  <li class="nav-item dropdown dropdown-menu-end">
  [% IF ( Koha.Preference( 'opacuserlogin' ) == 1 ) %]
  [% IF ( loggedinusername ) %]
- <a href="/cgi-bin/koha/opac-user.pl" class="nav-link dropdown-toggle" id="user-menu" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
- <i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i>
+ <a href="/cgi-bin/koha/opac-user.pl" class="nav-link dropdown-toggle ftu-nav-user-btn" id="user-menu" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+ <i class="fa fa-user-circle fa-fw" aria-hidden="true"></i>
  <span class="userlabel">Xin chào, [% INCLUDE 'patron-title.inc' patron = logged_in_user no_html = 1 %]</span>
  [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
  <span class="badge rounded-pill bg-danger ms-1" style="font-size: 11px; padding: 2px 6px;" title="[% logged_in_user.checkouts.count %] tài liệu đang mượn">[% logged_in_user.checkouts.count %]</span>
@@ -163,13 +169,13 @@
  [% ELSE %]
  [% IF Koha.Preference('casAuthentication') %]
  [%# CAS authentication is too complicated for modal window %]
- <a aria-label="Đăng nhập" class="nav-link login-link" href="/opac/login"><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
+ <a aria-label="Đăng nhập" class="nav-link login-link ftu-login-btn" href="/opac/login"><i class="fa fa-user fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
                                 >
  [% ELSIF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
- <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger" data-return="true" href="/cgi-bin/koha/svc/auth/googleopenidconnect"><i class="fa fa-user fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
+ <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger ftu-login-btn" data-return="true" href="/cgi-bin/koha/svc/auth/googleopenidconnect"><i class="fa fa-user fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
                                 >
  [% ELSE %]
- <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger" data-return="true" href="/opac/login"><i class="fa fa-user fa-fw fa-icon-black fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
+ <a aria-label="Đăng nhập" class="nav-link login-link loginModal-trigger ftu-login-btn" data-return="true" href="/opac/login"><i class="fa fa-user fa-fw" aria-hidden="true"></i> <span class="userlabel">Đăng nhập</span></a
                                 >
  [% END %]
  [% END %]
@@ -233,6 +239,7 @@
  [% END %]
  </ul>
  [% END # IF opacuserlogin || EnableOpacSearchHistory || opaclanguagesdisplay %]
+    </div> <!-- /.ftu-header-actions-wrap -->
  </nav>
  <!-- /navbar -->
 

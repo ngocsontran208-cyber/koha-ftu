@@ -76,67 +76,71 @@
                 </div>
             </div>
             
-            <div class="ftu-search-card ftu-search-simple">
-                <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform" role="search" class="ftu-search-form">
-                    <i class="fa fa-search ftu-search-icon-left"></i>
-                    <input type="text" name="q" class="ftu-search-input-large" placeholder="Search by title, author, subject, keyword..." />
-                    <input type="hidden" name="idx" value="kw" />
-                    <button type="submit" class="ftu-search-btn-large">Search</button>
+            <!-- Modern Integrated Search Bar & Quick Filter Chips -->
+            <div class="ftu-search-container-modern">
+                <form name="searchform" method="get" action="/cgi-bin/koha/opac-search.pl" id="searchform" role="search" class="ftu-unified-search-bar">
+                    <div class="ftu-search-input-wrap">
+                        <i class="fa fa-search ftu-search-lens" aria-hidden="true"></i>
+                        <input type="text" name="q" class="ftu-unified-search-input" placeholder="Search by title, author, subject, ISBN..." autocomplete="off" />
+                        <input type="hidden" name="idx" value="kw" />
+                    </div>
+                    <button type="submit" class="ftu-unified-search-btn" aria-label="Search">
+                        <span class="ftu-btn-text">Search</span>
+                        <i class="fa fa-arrow-right ftu-btn-icon" aria-hidden="true"></i>
+                    </button>
                 </form>
-            </div>
-            
-            <div class="ftu-search-chips">
-                <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip ftu-chip-primary"><i class="fa fa-sliders"></i> Advanced search</a>
-                <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip"><i class="fa fa-graduation-cap"></i> Course reserves</a>
-                <a href="/cgi-bin/koha/opac-authorities-home.pl" class="ftu-chip"><i class="fa fa-tags"></i> Authority search</a>
+
+                <div class="ftu-search-chips-scroll">
+                    <a href="/cgi-bin/koha/opac-search.pl" class="ftu-chip-modern ftu-chip-accent"><i class="fa fa-sliders"></i> Advanced search</a>
+                    <a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-chip-modern"><i class="fa fa-graduation-cap"></i> Course reserves</a>
+                    <a href="/cgi-bin/koha/opac-databases.pl" class="ftu-chip-modern"><i class="fa fa-database"></i> Databases</a>
+                    <a href="/cgi-bin/koha/opac-collections.pl" class="ftu-chip-modern"><i class="fa fa-cubes"></i> Collections</a>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- MODERN APP-STYLE QUICK SHORTCUTS -->
     <div class="ftu-section-container ftu-shortcuts-section">
-       <div class="ftu-shortcuts-grid">
-           <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-shortcut-card">
-               <div class="ftu-shortcut-icon"><i class="fa fa-book-open"></i></div>
-               <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">New Arrivals <span class="ftu-badge-open">New</span></span>
-                   <span class="ftu-shortcut-desc">Browse newly added books</span>
+       <div class="ftu-app-shortcuts-bar">
+           <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-app-shortcut-item">
+               <div class="ftu-app-squircle icon-rose">
+                   <i class="fa fa-book-open"></i>
+                   <span class="ftu-squircle-badge">New</span>
                </div>
+               <span class="ftu-app-label">New Books</span>
            </a>
-           <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-shortcut-card">
-               <div class="ftu-shortcut-icon ftu-icon-green"><i class="fa fa-history"></i></div>
-               <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">Reading History</span>
-                   <span class="ftu-shortcut-desc">View your borrowed books</span>
+           <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-app-shortcut-item">
+               <div class="ftu-app-squircle icon-emerald">
+                   <i class="fa fa-history"></i>
                </div>
+               <span class="ftu-app-label">History</span>
            </a>
-           <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
-               <div class="ftu-shortcut-icon"><i class="fa fa-id-card"></i></div>
-               <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">My Account</span>
-                   [% IF loggedinusername && checkouts && checkouts > 0 %]
-                       <span class="ftu-shortcut-desc" style="color: var(--ftu-red); font-weight: 600;">[% checkouts | html %] active loan[% IF checkouts > 1 %]s[% END %]</span>
-                   [% ELSIF logged_in_user && logged_in_user.checkouts.count > 0 %]
-                       <span class="ftu-shortcut-desc" style="color: var(--ftu-red); font-weight: 600;">[% logged_in_user.checkouts.count | html %] active loan[% IF logged_in_user.checkouts.count > 1 %]s[% END %]</span>
-                   [% ELSE %]
-                       <span class="ftu-shortcut-desc">Renewals &amp; account info</span>
+           <a href="/cgi-bin/koha/opac-user.pl" class="ftu-app-shortcut-item">
+               <div class="ftu-app-squircle icon-amber">
+                   <i class="fa fa-id-card"></i>
+                   [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
+                   <span class="ftu-squircle-count">[% logged_in_user.checkouts.count %]</span>
                    [% END %]
                </div>
+               <span class="ftu-app-label">Account</span>
            </a>
-           <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-shortcut-card">
-               <div class="ftu-shortcut-icon"><i class="fa fa-bookmark"></i></div>
-               <div class="ftu-shortcut-info">
-                   <span class="ftu-shortcut-title">My Lists / Shelves</span>
-                   <span class="ftu-shortcut-desc">Manage your reading lists</span>
+           <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-app-shortcut-item">
+               <div class="ftu-app-squircle icon-blue">
+                   <i class="fa fa-bookmark"></i>
                </div>
+               <span class="ftu-app-label">My Lists</span>
            </a>
        </div>
     </div>
 
-    <!-- DANH MỤC SÁCH MỚI -->
     <!-- DANH MỤC SÁCH MỚI (Real Data & Auto-Scroll) -->
     <div class="ftu-section-container ftu-new-arrivals-section">
         <div class="ftu-section-header">
-            <h3 class="ftu-section-title">NEW ARRIVALS</h3>
+            <div class="ftu-section-title-wrap">
+                <span class="ftu-title-accent-pill"></span>
+                <h3 class="ftu-section-title">NEW ARRIVALS</h3>
+            </div>
             <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-view-all">View all <i class="fa fa-arrow-right"></i></a>
         </div>
         
@@ -217,7 +221,7 @@
     <div class="ftu-section-container" id="news-section" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <h3 style="font-weight: 800; color: var(--ftu-red); margin: 0;">NEWS & EVENTS</h3>
-            <a href="/cgi-bin/koha/opac-news-detail.pl?id=1" style="color: var(--ftu-red); font-weight: 600; text-decoration: none;">View all articles <i class="fa fa-arrow-right"></i></a>
+            <a href="/cgi-bin/koha/opac-news.pl" style="color: var(--ftu-red); font-weight: 600; text-decoration: none;">View all articles &rarr;</a>
         </div>
         <div class="ftu-news-grid">
             <!-- Cột Tin tức -->
@@ -275,7 +279,7 @@
 
                 [% IF Koha.Preference( 'OpacNewsLibrarySelect' ) && AllPublicBranches.size > 1 %]
                     [% UNLESS news_id %]
-                        <form id="news-branch-select" class="form-inline" name="news-branch-select" method="get" action="/cgi-bin/koha/opac-main.pl">
+                        <form id="news-branch-select" class="form-inline" name="news-branch-select" method="get" action="/cgi-bin/ftu/opac-main.pl">
                             <legend class="visually-hidden">News</legend>
                             <label for="news-branch">Display news for: </label>
                             <select id="news-branch" name="branch">
@@ -304,7 +308,7 @@
                                     [% IF ( news_item ) %]
                                         [% koha_new.title | html %]
                                     [% ELSE %]
-                                        <a id="newsitem[% koha_new.additional_content.id | html %]" href="/cgi-bin/koha/opac-main.pl?news_id=[% koha_new.additional_content.id | uri %]">[% koha_new.title | html %]</a>
+                                        <a id="newsitem[% koha_new.additional_content.id | html %]" href="/cgi-bin/ftu/opac-main.pl?news_id=[% koha_new.additional_content.id | uri %]">[% koha_new.title | html %]</a>
                                     [% END %]
                                 </h2>
                                 <div class="newsbody">[% koha_new.content | $raw %]</div>
@@ -314,7 +318,7 @@
                                         by <span class="newsauthor">[% INCLUDE 'patron-title.inc' patron=koha_new.author %]</span>
                                     [% END %]
                                     [% IF ( news_id ) %]
-                                        &bull; <a href="/cgi-bin/koha/opac-main.pl">Show all news</a>
+                                        &bull; <a href="/cgi-bin/ftu/opac-main.pl">Show all news</a>
                                     [% END %]
                                 </div>
                             </div>

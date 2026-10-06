@@ -30,11 +30,16 @@
             <a class="navbar-brand" href="/opac/" title="[% FTU_BRAND.library_name %]">
                 <img class="ftu-logo-img" src="[% FTU_BRAND.logo_url %]" alt="[% FTU_BRAND.logo_alt %]" />
                 <span class="ftu-brand-title-wrap">
-                    <span class="ftu-brand-main-title">[% FTU_BRAND.library_name %]</span>
+                    <span class="ftu-brand-main-title">
+                        <span class="brand-title-desktop">[% FTU_BRAND.library_name %]</span>
+                        <span class="brand-title-mobile">THƯ VIỆN FTU HCMC</span>
+                    </span>
                     <span class="ftu-brand-sub-title">[% FTU_BRAND.library_sub_title %]</span>
                 </span>
             </a>
         </div>
+        <!-- Right Header Actions Container -->
+        <div class="ftu-header-actions-wrap">
         [% IF ( OpacPublic ) %]
             [% IF ( Koha.Preference( 'opacbookbag' ) == 1 ) %]
                 <div id="cartDetails" class="cart-message">Your cart is empty.</div>
@@ -254,6 +259,7 @@
                 [% END %]
             </ul>
         [% END # IF opacuserlogin || EnableOpacSearchHistory || opaclanguagesdisplay %]
+        </div> <!-- /.ftu-header-actions-wrap -->
     </nav>
     <!-- /navbar -->
 

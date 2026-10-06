@@ -45,6 +45,11 @@
 [% IF ( opac_css_override ) %]
     <link rel="stylesheet" type="text/css" href="[% interface | url %]/[% theme | url %]/css/[% opac_css_override | url %]" />
 [% END %]
+    <!-- FTU Library Custom Font & Design System -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/opac-tmpl/bootstrap/css/ftu-opac.css?v=20261006_modern_v2" />
 [% IF ( bidi ) %]
     [% Asset.css("css/print-rtl.css", { media = "print" }) | $raw %]
 [% ELSE %]
