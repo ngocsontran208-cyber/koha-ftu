@@ -445,6 +445,22 @@ var reportCategories = {
             { id: 'digital_docs_by_collection', title: 'Danh mục tài liệu theo bộ sưu tập' },
             { id: 'digital_cataloging_stats', title: 'Thống kê biên mục tài liệu số' }
         ]
+    },
+    inventory: {
+        title: 'BÁO CÁO KHO',
+        defaultReport: 'inv_dkcb',
+        defaultTitle: 'Sổ ĐKCB',
+        reports: [
+            { id: 'inv_dkcb', title: 'Sổ ĐKCB' },
+            { id: 'inv_by_location', title: 'Báo cáo thống kê tài liệu theo kho' },
+            { id: 'inv_detail_items', title: 'Danh mục chi tiết tài liệu' },
+            { id: 'inv_by_language', title: 'Danh mục tài liệu theo nhóm ngôn ngữ' },
+            { id: 'inv_by_itemtype', title: 'Danh mục tài liệu theo nhóm loại tài liệu' },
+            { id: 'inv_by_status_group', title: 'Danh mục tài liệu theo nhóm trạng thái' },
+            { id: 'inv_status_list', title: 'Danh mục trạng thái tài liệu' },
+            { id: 'inv_withdrawn', title: 'Danh mục tài liệu thanh lý' },
+            { id: 'inv_lost', title: 'Danh mục tài liệu mất' }
+        ]
     }
 };
 
@@ -1346,6 +1362,352 @@ function renderTable(res) {
                 + '<td class="text-center">' + stBadge + '</td>'
                 + '</tr>';
         });
+    }
+
+    // =========================================================================
+    // 4. NHÓM BÁO CÁO KHO (INVENTORY REPORTS - 9 LOẠI BÁO CÁO CHUẨN THƯ VIỆN FTU)
+    // =========================================================================
+
+    // 4.1 Sổ ĐKCB
+    else if (currentReportId === 'inv_dkcb') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Số ĐKCB (Mã vạch)</th>'
+            + '<th class="text-center">Ngày vào sổ</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Nhan đề sách</th>'
+            + '<th>Nơi XB / Nhà xuất bản</th>'
+            + '<th class="text-center">Năm XB</th>'
+            + '<th>Ký hiệu xếp giá</th>'
+            + '<th>Kho tài liệu</th>'
+            + '<th class="text-end">Đơn giá (VNĐ)</th>'
+            + '<th>Ghi chú</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td class="text-center">' + (r.date_accessioned || '') + '</td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.publisher || '') + '</td>'
+                + '<td class="text-center">' + (r.pub_year || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
+                + '<td>' + (r.location || '') + '</td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.price_formatted || '0 đ') + '</td>'
+                + '<td><small class="text-muted">' + (r.notes || '') + '</small></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="9" class="text-end"><strong>TỔNG SỐ ' + rows.length + ' BẢN SÁCH VÀO SỔ ĐKCB:</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // 4.2 Báo cáo thống kê tài liệu theo kho
+    else if (currentReportId === 'inv_by_location') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã kho</th>'
+            + '<th>Tên kho tài liệu (FTU2)</th>'
+            + '<th class="text-end">Số đầu sách (Nhan đề)</th>'
+            + '<th class="text-end">Số bản sách (Item)</th>'
+            + '<th class="text-end">Tổng giá trị (VNĐ)</th>'
+            + '<th class="text-end">Đang cho mượn</th>'
+            + '<th class="text-end">Sẵn sàng phục vụ</th>'
+            + '<th class="text-end">Tỷ lệ cơ cấu</th>'
+            + '</tr>';
+
+        var sumTitles = 0, sumItems = 0, sumLoaned = 0, sumAvail = 0;
+        rows.forEach(function(r) {
+            sumTitles += (r.titles || 0);
+            sumItems += (r.items || 0);
+            sumLoaned += (r.loaned || 0);
+            sumAvail += (r.available || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.code || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold">' + (r.titles || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold" style="font-size: 14.5px;">' + (r.items || 0).toLocaleString('vi-VN') + ' bản</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.total_val_formatted || '0 đ') + '</td>'
+                + '<td class="text-end text-warning font-weight-bold">' + (r.loaned || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-info font-weight-bold">' + (r.available || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end font-weight-bold">' + (r.ratio || '0%') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG TOÀN HỆ THỐNG KHO:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumTitles.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumItems.toLocaleString('vi-VN') + ' bản</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td class="text-end text-warning font-weight-bold"><strong>' + sumLoaned.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-info font-weight-bold"><strong>' + sumAvail.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '</tr>';
+    }
+
+    // 4.3 Danh mục chi tiết tài liệu
+    else if (currentReportId === 'inv_detail_items') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Số ĐKCB (Barcode)</th>'
+            + '<th>Nhan đề tài liệu</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Ký hiệu xếp giá</th>'
+            + '<th>Loại tài liệu</th>'
+            + '<th>Kho quản lý</th>'
+            + '<th class="text-center">Năm XB</th>'
+            + '<th class="text-end">Đơn giá (VNĐ)</th>'
+            + '<th class="text-center">Trạng thái</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            var stBadge = r.status_text === 'Sẵn sàng phục vụ' ? '<span class="badge bg-success">Sẵn sàng phục vụ</span>' :
+                          r.status_text === 'Đang cho mượn' ? '<span class="badge bg-warning text-dark">Đang cho mượn</span>' :
+                          r.status_text === 'Đã thanh lý' ? '<span class="badge bg-secondary">Đã thanh lý</span>' :
+                          '<span class="badge bg-danger">' + r.status_text + '</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
+                + '<td><span class="badge bg-info text-white">' + (r.itemtype_name || 'Sách in') + '</span></td>'
+                + '<td>' + (r.location || '') + '</td>'
+                + '<td class="text-center">' + (r.pub_year || '') + '</td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.price_formatted || '0 đ') + '</td>'
+                + '<td class="text-center">' + stBadge + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="8" class="text-end"><strong>TỔNG SỐ ' + rows.length + ' TÀI LIỆU CHI TIẾT:</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // 4.4 Danh mục tài liệu theo nhóm ngôn ngữ
+    else if (currentReportId === 'inv_by_language') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã ngôn ngữ</th>'
+            + '<th>Nhóm ngôn ngữ</th>'
+            + '<th class="text-end">Số đầu sách (Nhan đề)</th>'
+            + '<th class="text-end">Số bản sách (Item)</th>'
+            + '<th class="text-end">Tổng giá trị (VNĐ)</th>'
+            + '<th class="text-end">Tỷ lệ cơ cấu (%)</th>'
+            + '</tr>';
+
+        var sumT = 0, sumI = 0;
+        rows.forEach(function(r) {
+            sumT += (r.titles || 0);
+            sumI += (r.items || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.code || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold">' + (r.titles || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold" style="font-size: 14.5px;">' + (r.items || 0).toLocaleString('vi-VN') + ' bản</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.val_formatted || '0 đ') + '</td>'
+                + '<td class="text-end font-weight-bold">' + (r.ratio || '0%') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumT.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumI.toLocaleString('vi-VN') + ' bản</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '</tr>';
+    }
+
+    // 4.5 Danh mục tài liệu theo nhóm loại tài liệu
+    else if (currentReportId === 'inv_by_itemtype') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã loại hình</th>'
+            + '<th>Tên loại tài liệu</th>'
+            + '<th class="text-end">Số đầu sách (Nhan đề)</th>'
+            + '<th class="text-end">Số bản sách (Item)</th>'
+            + '<th class="text-end">Tổng giá trị (VNĐ)</th>'
+            + '<th class="text-end">Tỷ lệ cơ cấu (%)</th>'
+            + '</tr>';
+
+        var sumT = 0, sumI = 0;
+        rows.forEach(function(r) {
+            sumT += (r.titles || 0);
+            sumI += (r.items || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.code || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold">' + (r.titles || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold" style="font-size: 14.5px;">' + (r.items || 0).toLocaleString('vi-VN') + ' bản</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.total_val_formatted || '0 đ') + '</td>'
+                + '<td class="text-end font-weight-bold">' + (r.ratio || '0%') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG CÁC LOẠI HÌNH:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumT.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumI.toLocaleString('vi-VN') + ' bản</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '</tr>';
+    }
+
+    // 4.6 Danh mục tài liệu theo nhóm trạng thái
+    else if (currentReportId === 'inv_by_status_group') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã nhóm</th>'
+            + '<th>Nhóm trạng thái tài liệu</th>'
+            + '<th>Mô tả phạm vi phục vụ</th>'
+            + '<th class="text-end">Số đầu sách</th>'
+            + '<th class="text-end">Số bản sách</th>'
+            + '<th class="text-end">Tỷ lệ cơ cấu (%)</th>'
+            + '</tr>';
+
+        var sumT = 0, sumI = 0;
+        rows.forEach(function(r) {
+            sumT += (r.titles || 0);
+            sumI += (r.items || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.code || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.name || '') + '</strong></td>'
+                + '<td><small class="text-muted">' + (r.desc || '') + '</small></td>'
+                + '<td class="text-end font-weight-bold">' + (r.titles || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold" style="font-size: 14.5px;">' + (r.items || 0).toLocaleString('vi-VN') + ' bản</td>'
+                + '<td class="text-end font-weight-bold">' + (r.ratio || '0%') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="4" class="text-end"><strong>TỔNG CỘNG:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumT.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumI.toLocaleString('vi-VN') + ' bản</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '</tr>';
+    }
+
+    // 4.7 Danh mục trạng thái tài liệu
+    else if (currentReportId === 'inv_status_list') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã vạch (Barcode)</th>'
+            + '<th>Nhan đề tài liệu</th>'
+            + '<th>Ký hiệu xếp giá</th>'
+            + '<th>Kho hiện tại</th>'
+            + '<th class="text-center">Trạng thái chi tiết</th>'
+            + '<th class="text-center">Ngày cập nhật</th>'
+            + '<th>Ghi chú nghiệp vụ</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            var badgeCls = r.status_badge || 'badge-secondary';
+            var stBadge = '<span class="badge ' + (badgeCls === 'badge-success' ? 'bg-success' : badgeCls === 'badge-warning' ? 'bg-warning text-dark' : 'bg-secondary') + '">' + r.status_label + '</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
+                + '<td>' + (r.location || '') + '</td>'
+                + '<td class="text-center">' + stBadge + '</td>'
+                + '<td class="text-center text-muted"><small>' + (r.last_update || '') + '</small></td>'
+                + '<td><small class="text-muted">' + (r.note || '') + '</small></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="8" class="text-end"><strong>TỔNG SỐ ' + rows.length + ' BẢN GHI TRẠNG THÁI TÀI LIỆU</strong></td>'
+            + '</tr>';
+    }
+
+    // 4.8 Danh mục tài liệu thanh lý
+    else if (currentReportId === 'inv_withdrawn') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Số ĐKCB (Barcode)</th>'
+            + '<th>Nhan đề sách thanh lý</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Ký hiệu xếp giá</th>'
+            + '<th>Kho xuất thanh lý</th>'
+            + '<th class="text-end">Đơn giá (VNĐ)</th>'
+            + '<th class="text-center">Ngày thanh lý</th>'
+            + '<th>Lý do xét duyệt</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong class="text-danger">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
+                + '<td>' + (r.location || '') + '</td>'
+                + '<td class="text-end font-weight-bold text-muted">' + (r.price_formatted || '0 đ') + '</td>'
+                + '<td class="text-center font-weight-bold text-danger">' + (r.withdrawn_date || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.reason || '') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="6" class="text-end"><strong>TỔNG CỘNG ' + rows.length + ' BẢN SÁCH ĐÃ THANH LÝ:</strong></td>'
+            + '<td class="text-end text-danger font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td colspan="2"></td>'
+            + '</tr>';
+    }
+
+    // 4.9 Danh mục tài liệu mất
+    else if (currentReportId === 'inv_lost') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Số ĐKCB (Barcode)</th>'
+            + '<th>Nhan đề tài liệu</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Ký hiệu xếp giá</th>'
+            + '<th>Kho quản lý</th>'
+            + '<th class="text-end">Đơn giá đền bù (VNĐ)</th>'
+            + '<th class="text-center">Ngày báo mất</th>'
+            + '<th>Lý do ghi nhận</th>'
+            + '<th class="text-center">Tình trạng bồi hoàn</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
+                + '<td>' + (r.location || '') + '</td>'
+                + '<td class="text-end font-weight-bold text-danger">' + (r.price_formatted || '0 đ') + '</td>'
+                + '<td class="text-center text-muted">' + (r.lost_date || '') + '</td>'
+                + '<td>' + (r.note || '') + '</td>'
+                + '<td class="text-center"><span class="badge bg-info text-white">' + (r.resolution || 'Chờ xử lý') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="6" class="text-end"><strong>TỔNG CỘNG ' + rows.length + ' TÀI LIỆU BÁO MẤT:</strong></td>'
+            + '<td class="text-end text-danger font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td colspan="3"></td>'
+            + '</tr>';
     }
 }
 
