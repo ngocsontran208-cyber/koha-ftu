@@ -2673,6 +2673,24 @@ td.covercol .hint,
   transform: translateX(3px) !important;
 }
 
+/* Triệt để xóa bỏ tam giác marker mặc định của thẻ summary trên mọi trình duyệt */
+.ftu-footer-accordion summary,
+.ftu-footer-summary {
+  list-style: none !important;
+  list-style-type: none !important;
+}
+
+.ftu-footer-accordion summary::-webkit-details-marker,
+.ftu-footer-summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.ftu-footer-accordion summary::marker,
+.ftu-footer-summary::marker {
+  display: none !important;
+  content: "" !important;
+}
+
 @media (min-width: 992px) {
   .ftu-footer-accordion {
     display: block !important;
@@ -2681,10 +2699,15 @@ td.covercol .hint,
     pointer-events: none !important;
     cursor: default !important;
     list-style: none !important;
+    list-style-type: none !important;
     margin-bottom: 1.25rem !important;
   }
   .ftu-footer-accordion summary::-webkit-details-marker {
     display: none !important;
+  }
+  .ftu-footer-accordion summary::marker {
+    display: none !important;
+    content: "" !important;
   }
   .ftu-footer-chevron {
     display: none !important;

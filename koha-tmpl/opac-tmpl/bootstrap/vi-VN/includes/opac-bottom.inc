@@ -85,9 +85,9 @@
                     </div>
                 </div>
 
-                <!-- Cột 2: Khám phá tài nguyên (3/12) - Dạng Accordion trên Mobile -->
+                <!-- Cột 2: Khám phá tài nguyên (3/12) - Mở sẵn trên máy tính, Accordion trên Mobile -->
                 <div class="col-12 col-md-6 col-lg-3 mb-2 mb-lg-0">
-                    <details class="ftu-footer-accordion">
+                    <details class="ftu-footer-accordion" open>
                         <summary class="ftu-footer-summary">
                             <h4 class="ftu-footer-heading">
                                 <span class="ftu-footer-heading-bar"></span>
@@ -105,9 +105,9 @@
                     </details>
                 </div>
 
-                <!-- Cột 3: Hỗ trợ & Dịch vụ (4/12) - Dạng Accordion trên Mobile -->
+                <!-- Cột 3: Hỗ trợ & Dịch vụ (4/12) - Mở sẵn trên máy tính, Accordion trên Mobile -->
                 <div class="col-12 col-md-6 col-lg-4 mb-2 mb-lg-0">
-                    <details class="ftu-footer-accordion">
+                    <details class="ftu-footer-accordion" open>
                         <summary class="ftu-footer-summary">
                             <h4 class="ftu-footer-heading">
                                 <span class="ftu-footer-heading-bar"></span>
@@ -137,6 +137,80 @@
                 </div>
             </div>
         </div>
+
+        <style>
+            .ftu-footer-accordion summary,
+            .ftu-footer-summary {
+                list-style: none !important;
+                list-style-type: none !important;
+            }
+            .ftu-footer-accordion summary::-webkit-details-marker,
+            .ftu-footer-summary::-webkit-details-marker {
+                display: none !important;
+            }
+            .ftu-footer-accordion summary::marker,
+            .ftu-footer-summary::marker {
+                display: none !important;
+                content: "" !important;
+            }
+            @media (min-width: 992px) {
+                .ftu-footer-accordion {
+                    display: block !important;
+                }
+                .ftu-footer-accordion summary {
+                    pointer-events: none !important;
+                    cursor: default !important;
+                    list-style: none !important;
+                    list-style-type: none !important;
+                    margin-bottom: 1.25rem !important;
+                }
+                .ftu-footer-chevron {
+                    display: none !important;
+                }
+                .ftu-footer-list {
+                    display: block !important;
+                }
+            }
+        </style>
+        <script>
+            (function() {
+                function syncFtuFooter() {
+                    var isDesktop = window.innerWidth >= 992;
+                    var accordions = document.querySelectorAll('.ftu-footer-accordion');
+                    accordions.forEach(function(acc) {
+                        if (isDesktop) {
+                            acc.setAttribute('open', '');
+                        } else {
+                            if (!acc.dataset.userInteracted) {
+                                acc.removeAttribute('open');
+                            }
+                        }
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', syncFtuFooter);
+                } else {
+                    syncFtuFooter();
+                }
+                window.addEventListener('resize', syncFtuFooter);
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    var summaries = document.querySelectorAll('.ftu-footer-summary');
+                    summaries.forEach(function(s) {
+                        s.addEventListener('click', function(e) {
+                            if (window.innerWidth >= 992) {
+                                e.preventDefault();
+                                return false;
+                            }
+                            var parentAcc = this.closest('.ftu-footer-accordion');
+                            if (parentAcc) {
+                                parentAcc.dataset.userInteracted = 'true';
+                            }
+                        });
+                    });
+                });
+            })();
+        </script>
     </footer>
 
  [% IF ( Koha.Preference('OPACReportProblem') && Koha.Preference('KohaAdminEmailAddress') ) || Koha.Preference( 'CookieConsent' ) || OpacKohaUrl || ( ( opaclanguagesdisplay ) && ( ! one_language_enabled ) && ( languages_loop ) && ( OpacLangSelectorMode == 'both' || OpacLangSelectorMode == 'footer') ) %]
