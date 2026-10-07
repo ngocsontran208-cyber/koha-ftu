@@ -75,6 +75,7 @@
 
             /* Bìa sách căn giữa nổi bật, cân đối tỷ lệ vàng */
             #catalogue_detail_biblio .bookcover {
+                order: 1 !important;
                 float: none !important;
                 margin: 0 auto 1.25rem auto !important;
                 clear: both !important;
@@ -102,38 +103,10 @@
                 border: 1px solid rgba(0, 0, 0, 0.08) !important;
             }
 
-            /* Bộ chọn chế độ xem tinh giản */
-            #catalogue_detail_biblio #views {
-                display: flex !important;
-                justify-content: center !important;
-                flex-wrap: wrap !important;
-                gap: 0.35rem !important;
-                margin: 0.25rem 0 0.85rem 0 !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-            #views .view {
-                font-size: 0.78rem !important;
-                padding: 3px 8px !important;
-                background: #f1f5f9 !important;
-                border-radius: 6px !important;
-                display: inline-flex !important;
-                align-items: center !important;
-            }
-            #views .view.current-view {
-                background: #e2e8f0 !important;
-                font-weight: 600 !important;
-            }
-            #views a.btn-link {
-                padding: 0 !important;
-                font-size: 0.78rem !important;
-                color: #64748b !important;
-                text-decoration: none !important;
-            }
-
             /* Tiêu đề & tác giả */
             #catalogue_detail_biblio h1.title,
             #catalogue_detail_biblio .title {
+                order: 2 !important;
                 font-size: 1.35rem !important;
                 line-height: 1.35 !important;
                 text-align: center !important;
@@ -149,6 +122,7 @@
                 margin-top: 0.25rem !important;
             }
             #catalogue_detail_biblio .results_summary.author {
+                order: 3 !important;
                 text-align: center !important;
                 font-size: 1rem !important;
                 margin-bottom: 0.85rem !important;
@@ -160,8 +134,77 @@
                 text-decoration: none !important;
             }
 
+            /* Bộ chọn chế độ xem tinh giản dạng Segmented Control */
+            #catalogue_detail_biblio #views {
+                order: 4 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: #f1f5f9 !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                padding: 4px !important;
+                gap: 4px !important;
+                margin: 0.25rem auto 1.25rem auto !important;
+                max-width: 480px !important;
+                width: 100% !important;
+                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            }
+            #catalogue_detail_biblio #views .view {
+                flex: 1 1 0% !important;
+                min-width: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 0.8rem !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: transparent !important;
+                border: none !important;
+            }
+            #catalogue_detail_biblio #views .view.current-view {
+                background: #ffffff !important;
+                color: #990000 !important;
+                font-weight: 700 !important;
+                padding: 6px 8px !important;
+                border-radius: 8px !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+                border: 1px solid rgba(0, 0, 0, 0.04) !important;
+                white-space: nowrap !important;
+                width: 100% !important;
+            }
+            #catalogue_detail_biblio #views .view.current-view span {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.35rem !important;
+                width: 100% !important;
+            }
+            #catalogue_detail_biblio #views a.btn-link {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.35rem !important;
+                padding: 6px 8px !important;
+                font-size: 0.8rem !important;
+                font-weight: 500 !important;
+                color: #64748b !important;
+                border-radius: 8px !important;
+                text-decoration: none !important;
+                border: none !important;
+                background: transparent !important;
+                white-space: nowrap !important;
+                width: 100% !important;
+                transition: all 0.15s ease !important;
+            }
+            #catalogue_detail_biblio #views a.btn-link:hover {
+                background: rgba(255, 255, 255, 0.7) !important;
+                color: #990000 !important;
+            }
+
             /* Khối trường siêu dữ liệu định dạng Thẻ Thông Tin (Metadata Cards) */
             #catalogue_detail_biblio .record {
+                order: 5 !important;
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 0.45rem !important;
@@ -469,7 +512,7 @@
 <main class="main">
  [% WRAPPER breadcrumbs %]
  [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Chi tiết về: </span>[% INCLUDE 'biblio-title.inc' %]
+ <span class="d-none d-sm-inline">Chi tiết về: </span>[% INCLUDE 'biblio-title.inc' %]
  [% END %]
  [% END #/ WRAPPER breadcrumbs %]
 
@@ -478,12 +521,12 @@
  <div class="col-lg-9">
  <div id="catalogue_detail_biblio" class="maincontent" data-biblionumber="[% biblio.biblionumber | html %]">
  <div id="views">
- <span class="view current-view"><span id="Normalview"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Chế độ xem thông thường</span></span>
+ <span class="view current-view"><span id="Normalview"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> <span class="d-none d-sm-inline">Chế độ xem </span>Thông thường</span></span>
  <span class="view">
- <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> Chế độ xem MARC</a>
+ <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> <span class="d-none d-sm-inline">Chế độ xem </span>MARC</a>
  </span>
  [% IF ( ISBD ) %]
- <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> Chế độ xem ISBD</a></span>
+ <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> <span class="d-none d-sm-inline">Chế độ xem </span>ISBD</a></span>
  [% END %]
  </div>
  <div class="bookcover">

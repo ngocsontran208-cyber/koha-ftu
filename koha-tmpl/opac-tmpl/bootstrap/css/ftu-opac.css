@@ -2100,47 +2100,210 @@ td.covercol .hint,
   display: none !important;
 }
 
-/* Thanh chuyển đổi chế độ xem chi tiết tài liệu (Views Toolbar) */
-#catalogue_detail_biblio #views {
+/* ==========================================================================
+   Thanh chuyển đổi chế độ xem chi tiết tài liệu (Segmented Control Views)
+   ========================================================================== */
+#catalogue_detail_biblio #views,
+#opac-detail #views,
+#views {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  margin-top: 0 !important;
-  margin-bottom: 1.5rem !important;
-  padding-bottom: 0.75rem !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  justify-content: center !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  margin: 0.5rem auto 1.25rem auto !important;
+  max-width: 480px !important;
   width: 100% !important;
   clear: both !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
 }
 
-#catalogue_detail_biblio #views .view {
+#catalogue_detail_biblio #views .view,
+#opac-detail #views .view,
+#views .view {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+#catalogue_detail_biblio #views .view.current-view,
+#opac-detail #views .view.current-view,
+#views .view.current-view {
+  background: #ffffff !important;
+  color: #990000 !important;
+  font-weight: 700 !important;
+  font-size: 0.815rem !important;
+  padding: 6px 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+#catalogue_detail_biblio #views .view.current-view span,
+#opac-detail #views .view.current-view span,
+#views .view.current-view span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  width: 100% !important;
+}
+
+#catalogue_detail_biblio #views .btn-link,
+#opac-detail #views .btn-link,
+#views .btn-link,
+#views a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  font-size: 0.815rem !important;
+  padding: 6px 8px !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease !important;
+  width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+#catalogue_detail_biblio #views .btn-link:hover,
+#opac-detail #views .btn-link:hover,
+#views .btn-link:hover,
+#views a:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+  color: #990000 !important;
+}
+
+/* ==========================================================================
+   Thanh liên kết mở rộng tìm kiếm (#moresearches) - Dạng Pill Chips Hiện Đại
+   ========================================================================== */
+#moresearches {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 0.45rem !important;
+  margin: 0.5rem auto 1rem auto !important;
+  padding: 0 15px !important;
+  list-style: none !important;
+  border: none !important;
+}
+
+#moresearches li,
+#moresearches .nav-item {
+  display: inline-flex !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#moresearches li::before,
+#moresearches li::after,
+#moresearches .nav-item::before,
+#moresearches .nav-item::after {
+  content: none !important;
+  display: none !important;
+}
+
+#moresearches .nav-item a,
+#moresearches a {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  padding: 0.35rem 0.85rem !important;
+  font-size: 0.815rem !important;
+  font-weight: 500 !important;
+  color: #475569 !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 9999px !important;
+  text-decoration: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  white-space: nowrap !important;
+  line-height: 1.35 !important;
+}
+
+#moresearches .nav-item a:hover,
+#moresearches a:hover {
+  background: #fff1f2 !important;
+  color: #990000 !important;
+  border-color: #fca5a5 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(153, 0, 0, 0.08) !important;
+}
+
+/* ==========================================================================
+   Thanh điều hướng phân cấp (Breadcrumbs)
+   ========================================================================== */
+.breadcrumbs,
+#breadcrumbs {
+  margin: 0.5rem 0 1rem 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.breadcrumbs .breadcrumb,
+#breadcrumbs .breadcrumb {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  background: transparent !important;
+  padding: 0.25rem 0 !important;
+  margin: 0 !important;
+  font-size: 0.825rem !important;
+  color: #64748b !important;
+  border: none !important;
+}
+
+.breadcrumbs .breadcrumb-item,
+#breadcrumbs .breadcrumb-item {
   display: inline-flex !important;
   align-items: center !important;
 }
 
-#catalogue_detail_biblio #views .current-view {
-  background: #f1f5f9 !important;
-  color: #a31a24 !important;
-  font-weight: 600 !important;
-  font-size: 0.825rem !important;
-  padding: 6px 14px !important;
-  border-radius: 8px !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-#catalogue_detail_biblio #views .btn-link {
+.breadcrumbs .breadcrumb-item a,
+#breadcrumbs .breadcrumb-item a {
   color: #475569 !important;
-  font-weight: 500 !important;
-  font-size: 0.825rem !important;
-  padding: 6px 14px !important;
-  border-radius: 8px !important;
   text-decoration: none !important;
-  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+  transition: color 0.15s ease !important;
 }
 
-#catalogue_detail_biblio #views .btn-link:hover {
-  background: #f8fafc !important;
-  color: #a31a24 !important;
+.breadcrumbs .breadcrumb-item a:hover,
+#breadcrumbs .breadcrumb-item a:hover {
+  color: #990000 !important;
+}
+
+.breadcrumbs .breadcrumb-item + .breadcrumb-item::before,
+#breadcrumbs .breadcrumb-item + .breadcrumb-item::before {
+  content: "›" !important;
+  font-size: 1.1rem !important;
+  line-height: 1 !important;
+  color: #94a3b8 !important;
+  padding: 0 0.5rem !important;
+}
+
+.breadcrumbs .breadcrumb-item.active,
+#breadcrumbs .breadcrumb-item.active {
+  color: #0f172a !important;
+  font-weight: 600 !important;
 }
 
 /* Kích thước và vị trí bìa trên trang chi tiết tài liệu (opac-detail) */
@@ -2216,6 +2379,49 @@ td.covercol .hint,
     border-radius: var(--ftu-radius-lg);
   }
 
+  /* Tối ưu hóa thanh tìm kiếm mở rộng trên di động (Pill Scroller) */
+  #moresearches {
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding: 0.35rem 1rem 0.65rem 1rem !important;
+    margin: 0.25rem -15px 0.75rem -15px !important;
+    gap: 0.4rem !important;
+  }
+  #moresearches::-webkit-scrollbar {
+    display: none !important;
+  }
+  #moresearches .nav-item a,
+  #moresearches a {
+    padding: 0.3rem 0.75rem !important;
+    font-size: 0.775rem !important;
+  }
+
+  /* Tối ưu hóa breadcrumbs trên di động */
+  .breadcrumbs,
+  #breadcrumbs {
+    margin: 0.25rem 0 0.75rem 0 !important;
+  }
+  .breadcrumbs .breadcrumb,
+  #breadcrumbs .breadcrumb {
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.775rem !important;
+  }
+  .breadcrumbs .breadcrumb-item.active,
+  #breadcrumbs .breadcrumb-item.active {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 65vw !important;
+    display: inline-block !important;
+    vertical-align: bottom !important;
+  }
+
   /* Tối ưu hóa trang chi tiết tài liệu trên di động (opac-detail) */
   #catalogue_detail_biblio {
     display: flex !important;
@@ -2228,12 +2434,46 @@ td.covercol .hint,
     margin-bottom: 1rem !important;
   }
   #catalogue_detail_biblio .bookcover {
+    order: 1 !important;
     float: none !important;
     margin: 0 auto 1.25rem auto !important;
     clear: both !important;
     max-width: 100% !important;
     display: flex !important;
     justify-content: center !important;
+  }
+  #catalogue_detail_biblio .title,
+  #catalogue_detail_biblio h1.title {
+    order: 2 !important;
+  }
+  #catalogue_detail_biblio .title_resp_stmt,
+  #catalogue_detail_biblio .results_summary.author {
+    order: 3 !important;
+  }
+  #catalogue_detail_biblio #views,
+  #opac-detail #views,
+  #views {
+    order: 4 !important;
+    max-width: 100% !important;
+    padding: 3px !important;
+    gap: 3px !important;
+    margin: 0.25rem auto 1rem auto !important;
+  }
+  #catalogue_detail_biblio #views .view.current-view,
+  #opac-detail #views .view.current-view,
+  #views .view.current-view,
+  #catalogue_detail_biblio #views .btn-link,
+  #opac-detail #views .btn-link,
+  #views .btn-link,
+  #views a {
+    font-size: 0.75rem !important;
+    padding: 6px 4px !important;
+  }
+  #catalogue_detail_biblio .record {
+    order: 5 !important;
+  }
+  #catalogue_detail_biblio #ulactioncontainer {
+    order: 6 !important;
   }
   #catalogue_detail_biblio .cover-slider,
   #catalogue_detail_biblio .cover-image {

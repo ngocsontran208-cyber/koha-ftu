@@ -434,52 +434,55 @@
         <div class="row">
             <ul class="nav" id="moresearches">
                 <li class="nav-item">
-                    <a href="/cgi-bin/koha/opac-search.pl">Advanced search</a>
+                    <a href="/cgi-bin/koha/opac-search.pl"><i class="fa-solid fa-sliders fa-fw" aria-hidden="true"></i> <span>Advanced search</span></a>
+                </li>
+                <li class="nav-item">
+                    <a href="/cgi-bin/koha/opac-collections.pl"><i class="fa-solid fa-layer-group fa-fw" aria-hidden="true"></i> <span>Collections</span></a>
                 </li>
                 [% IF ( Koha.Preference( 'UseCourseReserves' ) == 1 ) %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-course-reserves.pl">Course reserves</a>
+                        <a href="/cgi-bin/koha/opac-course-reserves.pl"><i class="fa-solid fa-graduation-cap fa-fw" aria-hidden="true"></i> <span>Course reserves</span></a>
                     </li>
                 [% END %]
                 [% IF Koha.Preference( 'OpacBrowser' ) == 1 %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-browser.pl">Browse by hierarchy</a>
+                        <a href="/cgi-bin/koha/opac-browser.pl"><i class="fa-solid fa-sitemap fa-fw" aria-hidden="true"></i> <span>Browse by hierarchy</span></a>
                     </li>
                 [% END %]
                 [% IF Koha.Preference( 'OpacAuthorities' ) == 1 %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-authorities-home.pl">Authority search</a>
+                        <a href="/cgi-bin/koha/opac-authorities-home.pl"><i class="fa-solid fa-id-card-clip fa-fw" aria-hidden="true"></i> <span>Authority search</span></a>
                     </li>
                 [% END %]
                 [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'OPACComments' ) == 1 ) && ( Koha.Preference( 'OpacShowRecentComments' ) == 1 ) ) %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-showreviews.pl">Recent comments</a>
+                        <a href="/cgi-bin/koha/opac-showreviews.pl"><i class="fa-solid fa-comments fa-fw" aria-hidden="true"></i> <span>Recent comments</span></a>
                     </li>
                 [% END %]
                 [% IF Koha.Preference( 'TagsEnabled' ) == 1 %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-tags.pl">Tag cloud</a>
+                        <a href="/cgi-bin/koha/opac-tags.pl"><i class="fa-solid fa-tags fa-fw" aria-hidden="true"></i> <span>Tag cloud</span></a>
                     </li>
                 [% END %]
                 [% IF Koha.Preference( 'OpacCloud' ) == 1 %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-tags_subject.pl">Subject cloud</a>
+                        <a href="/cgi-bin/koha/opac-tags_subject.pl"><i class="fa-solid fa-tag fa-fw" aria-hidden="true"></i> <span>Subject cloud</span></a>
                     </li>
                 [% END %]
                 [% IF Koha.Preference( 'OpacTopissue' ) == 1 %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-topissues.pl">Most popular</a>
+                        <a href="/cgi-bin/koha/opac-topissues.pl"><i class="fa-solid fa-fire fa-fw" aria-hidden="true"></i> <span>Most popular</span></a>
                     </li>
                 [% END %]
                 [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' && Koha.Preference( 'OpacBrowseSearch' ) == 1 %]
                     <li class="nav-item">
-                        <a href="/cgi-bin/koha/opac-browse.pl">Browse search</a>
+                        <a href="/cgi-bin/koha/opac-browse.pl"><i class="fa-solid fa-compass fa-fw" aria-hidden="true"></i> <span>Browse search</span></a>
                     </li>
                 [% END %]
                 [% IF suggestion %]
                     [% IF Koha.Preference( 'AnonSuggestions' ) == 1 || Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
                         <li class="nav-item">
-                            <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1">Purchase suggestions</a>
+                            <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1"><i class="fa-solid fa-lightbulb fa-fw" aria-hidden="true"></i> <span>Purchase suggestions</span></a>
                         </li>
                     [% END %]
                 [% END %]
@@ -487,9 +490,9 @@
                     <li class="nav-item">
                         <a id="library_page" href="/cgi-bin/koha/opac-library.pl">
                             [% IF ( singleBranchMode || AllPublicBranches.size == 1 ) %]
-                                <span>Contact</span>
+                                <i class="fa-solid fa-phone fa-fw" aria-hidden="true"></i> <span>Contact</span>
                             [% ELSE %]
-                                <span>Libraries</span>
+                                <i class="fa-solid fa-building-columns fa-fw" aria-hidden="true"></i> <span>Libraries</span>
                             [% END %]
                         </a>
                     </li>

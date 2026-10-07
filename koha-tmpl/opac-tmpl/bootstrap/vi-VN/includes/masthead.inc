@@ -404,55 +404,55 @@
  <div class="row">
  <ul class="nav" id="moresearches">
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-search.pl">Tìm kiếm nâng cao</a>
+ <a href="/cgi-bin/koha/opac-search.pl"><i class="fa-solid fa-sliders fa-fw" aria-hidden="true"></i> <span>Tìm kiếm nâng cao</span></a>
  </li>
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-collections.pl">Bộ sưu tập</a>
+ <a href="/cgi-bin/koha/opac-collections.pl"><i class="fa-solid fa-layer-group fa-fw" aria-hidden="true"></i> <span>Bộ sưu tập</span></a>
  </li>
  [% IF ( Koha.Preference( 'UseCourseReserves' ) == 1 ) %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-course-reserves.pl">Tài liệu học phần</a>
+ <a href="/cgi-bin/koha/opac-course-reserves.pl"><i class="fa-solid fa-graduation-cap fa-fw" aria-hidden="true"></i> <span>Tài liệu học phần</span></a>
  </li>
  [% END %]
  [% IF Koha.Preference( 'OpacBrowser' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-browser.pl">Duyệt theo phân cấp</a>
+ <a href="/cgi-bin/koha/opac-browser.pl"><i class="fa-solid fa-sitemap fa-fw" aria-hidden="true"></i> <span>Duyệt theo phân cấp</span></a>
  </li>
  [% END %]
  [% IF Koha.Preference( 'OpacAuthorities' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-authorities-home.pl">Tìm kiếm dữ liệu kiểm soát</a>
+ <a href="/cgi-bin/koha/opac-authorities-home.pl"><i class="fa-solid fa-id-card-clip fa-fw" aria-hidden="true"></i> <span>Tìm kiếm dữ liệu kiểm soát</span></a>
  </li>
  [% END %]
  [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'OPACComments' ) == 1 ) && ( Koha.Preference( 'OpacShowRecentComments' ) == 1 ) ) %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-showreviews.pl">Bình luận mới nhất</a>
+ <a href="/cgi-bin/koha/opac-showreviews.pl"><i class="fa-solid fa-comments fa-fw" aria-hidden="true"></i> <span>Bình luận mới nhất</span></a>
  </li>
  [% END %]
  [% IF Koha.Preference( 'TagsEnabled' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-tags.pl">Đám mây thẻ</a>
+ <a href="/cgi-bin/koha/opac-tags.pl"><i class="fa-solid fa-tags fa-fw" aria-hidden="true"></i> <span>Đám mây thẻ</span></a>
  </li>
  [% END %]
  [% IF Koha.Preference( 'OpacCloud' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-tags_subject.pl">Đám mây chủ đề</a>
+ <a href="/cgi-bin/koha/opac-tags_subject.pl"><i class="fa-solid fa-tag fa-fw" aria-hidden="true"></i> <span>Đám mây chủ đề</span></a>
  </li>
  [% END %]
  [% IF Koha.Preference( 'OpacTopissue' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-topissues.pl">Tài liệu phổ biến</a>
+ <a href="/cgi-bin/koha/opac-topissues.pl"><i class="fa-solid fa-fire fa-fw" aria-hidden="true"></i> <span>Tài liệu phổ biến</span></a>
  </li>
  [% END %]
  [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' && Koha.Preference( 'OpacBrowseSearch' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-browse.pl">Tìm kiếm duyệt</a>
+ <a href="/cgi-bin/koha/opac-browse.pl"><i class="fa-solid fa-compass fa-fw" aria-hidden="true"></i> <span>Tìm kiếm duyệt</span></a>
  </li>
  [% END %]
  [% IF suggestion %]
  [% IF Koha.Preference( 'AnonSuggestions' ) == 1 || Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
  <li class="nav-item">
- <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1">Đề xuất mua tài liệu</a>
+ <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1"><i class="fa-solid fa-lightbulb fa-fw" aria-hidden="true"></i> <span>Đề xuất mua tài liệu</span></a>
  </li>
  [% END %]
  [% END %]
@@ -460,9 +460,9 @@
  <li class="nav-item">
  <a id="library_page" href="/cgi-bin/koha/opac-library.pl">
  [% IF ( singleBranchMode || AllPublicBranches.size == 1 ) %]
- <span>Contact</span>
+ <i class="fa-solid fa-phone fa-fw" aria-hidden="true"></i> <span>Liên hệ</span>
  [% ELSE %]
- <span>Thư viện</span>
+ <i class="fa-solid fa-building-columns fa-fw" aria-hidden="true"></i> <span>Thư viện</span>
  [% END %]
  </a>
  </li>
