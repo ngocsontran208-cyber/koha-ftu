@@ -271,7 +271,8 @@
                 </div>
             `;
             document.getElementById('ftuBtnReadNow').onclick = function() {
-                var ssoPortalUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
+                var ssoHost = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
+                var ssoBase = ssoHost.endsWith('/sso') ? ssoHost : (ssoHost + '/sso');
                 var readerTarget = '/bitstreams/' + encodeURIComponent(doc.bitstreamUuid);
                 if (originalParams && originalParams.handle) {
                     readerTarget = '/elib/handle/' + encodeURIComponent(originalParams.handle.replace(/^handle\//i, ''));
@@ -280,10 +281,14 @@
                 } else if (doc.itemUuid) {
                     readerTarget = '/elib/items/' + encodeURIComponent(doc.itemUuid);
                 }
-                var readerUrl = ssoPortalUrl + '/sso/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget);
-                window.open(readerUrl, '_blank');
-                var modal = bootstrap.Modal.getInstance(document.getElementById('ftuDigitalLendingModal'));
-                if (modal) modal.hide();
+                var readerUrl = ssoBase + '/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget);
+                var win = window.open(readerUrl, '_blank');
+                if (!win || win.closed || typeof win.closed === 'undefined') {
+                    window.location.href = readerUrl;
+                } else {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('ftuDigitalLendingModal'));
+                    if (modal) modal.hide();
+                }
             };
             return;
         }
@@ -341,7 +346,16 @@
         document.getElementById('ftuBtnDoBorrow').onclick = function() {
             var btn = this;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Đang kích hoạt mượn...';
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Activating digital loan...';
+
+            // 1. Mở sẵn tab mới trực tiếp trong luồng click của người dùng để tránh bị Popup Blocker chặn
+            var readerWin = null;
+            try {
+                readerWin = window.open('about:blank', '_blank');
+                if (readerWin) {
+                    readerWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Opening FTU Digital Document...</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0F172A;color:white;text-align:center;}.card{padding:2.2rem 2rem;border-radius:1rem;background:rgba(30,41,59,0.85);border:1px solid rgba(255,255,255,0.1);max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.5);}.spinner{width:42px;height:42px;border:3px solid rgba(225,29,72,0.2);border-top-color:#E11D48;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.25rem;}@keyframes spin{to{transform:rotate(360deg);}}h3{margin:0 0 8px;font-size:1.15rem;font-weight:700;}p{margin:0;font-size:0.875rem;color:#94A3B8;line-height:1.5;}</style></head><body><div class="card"><div class="spinner"></div><h3>Connecting to Secure Reader...</h3><p>Authorizing DRM reading session and opening digital document...</p></div></body></html>');
+                }
+            } catch (_) {}
 
             var drmBase = getDrmApiBase();
             fetch(drmBase + '/lending/borrow', {
@@ -362,12 +376,31 @@
             .then(function(res) { return res.json(); })
             .then(function(borrowRes) {
                 if (!borrowRes.success) {
-                    throw new Error(borrowRes.error || 'Mượn tài liệu số thất bại');
+                    if (readerWin && !readerWin.closed) {
+                        try { readerWin.close(); } catch(_) {}
+                    }
+                    throw new Error(borrowRes.error || 'Borrowing digital document failed');
                 }
-                
-                // Mở trình đọc tài liệu số trong tab mới
-                if (borrowRes.readerUrl) {
-                    window.open(borrowRes.readerUrl, '_blank');
+
+                // Xây dựng link reader an toàn
+                var ssoHost = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
+                var ssoBase = ssoHost.endsWith('/sso') ? ssoHost : (ssoHost + '/sso');
+                var readerTarget = '/bitstreams/' + encodeURIComponent(borrowRes.bitstreamUuid || doc.bitstreamUuid);
+                if (originalParams && originalParams.handle) {
+                    readerTarget = '/elib/handle/' + encodeURIComponent(originalParams.handle.replace(/^handle\//i, ''));
+                } else if (originalParams && originalParams.fallbackUrl) {
+                    readerTarget = originalParams.fallbackUrl;
+                } else if (doc.itemUuid) {
+                    readerTarget = '/elib/items/' + encodeURIComponent(doc.itemUuid);
+                }
+                var targetUrl = borrowRes.readerUrl || (ssoBase + '/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget));
+
+                var winNavigated = false;
+                if (readerWin && !readerWin.closed) {
+                    try {
+                        readerWin.location.href = targetUrl;
+                        winNavigated = true;
+                    } catch (_) {}
                 }
 
                 // Cập nhật lại danh sách mượn nếu đang ở trang opac-user.pl
@@ -375,13 +408,48 @@
                     window.ftuReloadDigitalLoans();
                 }
 
-                var modal = bootstrap.Modal.getInstance(document.getElementById('ftuDigitalLendingModal'));
-                if (modal) modal.hide();
+                // Chuyển Modal sang trạng thái thành công + cung cấp nút bấm trực tiếp nếu trình duyệt chặn popup
+                bodyEl.innerHTML = `
+                    <div class="p-3 bg-light rounded-3 mb-3 border border-success">
+                        <div class="d-flex align-items-start" style="gap: 14px;">
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: #D1FAE5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+                                <i class="fa fa-check-circle"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="badge bg-success mb-1">Borrowed successfully</span>
+                                <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
+                                <div class="text-muted small mb-2"><i class="fa fa-user me-1"></i> Author: <strong>${doc.author || 'Foreign Trade University'}</strong></div>
+                                <div class="d-inline-flex align-items-center gap-2 px-2.5 py-1 bg-white border rounded text-success small fw-semibold">
+                                    <i class="fa fa-clock"></i> Loan Period: 14 days (until ${new Date(borrowRes.dueTime || (Date.now() + 14*86400000)).toLocaleDateString('vi-VN')})
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center py-2 mb-2">
+                        <p class="text-muted small mb-3">The document is opening in a new tab. You can also click the button below to read immediately:</p>
+                        <a href="${targetUrl}" target="_blank" class="btn btn-success btn-lg fw-bold px-4 py-2" id="ftuModalDirectReadBtn" style="background: #059669; border-color: #059669; border-radius: 10px; font-size: 1rem;">
+                            <i class="fa fa-book-open me-2"></i> Open Digital Document Now
+                        </a>
+                    </div>
+                    <div class="d-flex justify-content-end align-items-center gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Close</button>
+                    </div>
+                `;
+
+                if (!winNavigated) {
+                    var directBtn = document.getElementById('ftuModalDirectReadBtn');
+                    if (directBtn) {
+                        directBtn.focus();
+                    }
+                }
             })
             .catch(function(err) {
-                alert('Lỗi mượn tài liệu: ' + err.message);
+                if (readerWin && !readerWin.closed) {
+                    try { readerWin.close(); } catch(_) {}
+                }
+                alert('Error borrowing document: ' + err.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-check me-1"></i> Đồng ý mượn &amp; Mở đọc';
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Borrow &amp; Read Online';
             });
         };
     }
@@ -481,8 +549,8 @@
                 biblionumber = a.closest('[data-biblionumber]').getAttribute('data-biblionumber');
             }
 
-            var recordEl = a.closest('.record') || a.closest('.searchresults') || document.querySelector('.record');
-            var titleEl = recordEl ? recordEl.querySelector('h1.title, .title') : document.querySelector('h1.title, .biblio-title');
+            var recordEl = a.closest('.record') || a.closest('tr[data-biblionumber]') || a.closest('tr') || a.closest('li') || document.querySelector('.record');
+            var titleEl = recordEl ? recordEl.querySelector('h1.title, a.title, .title') : document.querySelector('h1.title, .biblio-title');
             var authorEl = recordEl ? recordEl.querySelector('.author, .byauthor, .byAuthor') : document.querySelector('.author, .byauthor');
 
             var title = '';
