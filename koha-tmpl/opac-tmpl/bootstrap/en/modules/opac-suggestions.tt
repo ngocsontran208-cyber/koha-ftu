@@ -26,104 +26,171 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
 <style>
-    .ftu-sugg-wrapper { max-width: 1100px; margin: 0 auto; }
-    .ftu-sugg-hero {
-        background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 65%, #F8FAFC 100%);
-        border: 1px solid #F1F5F9;
-        border-radius: 20px;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.03);
+    /* ==========================================================================
+       FTU OPAC Suggestions - Clean, Minimalist & Modern Typography
+       ========================================================================== */
+    .ftu-sugg-wrapper,
+    .ftu-sugg-wrapper * {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
-    .ftu-card {
-        border: 1px solid #E2E8F0;
-        border-radius: 18px;
-        background: #ffffff;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-        overflow: hidden;
+    .ftu-sugg-wrapper {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding-bottom: 2.5rem;
+    }
+
+    /* Page Header */
+    .ftu-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
         margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .ftu-page-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.2rem 0;
+        line-height: 1.3;
+    }
+    .ftu-page-subtitle {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Cards */
+    .ftu-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
     }
     .ftu-card-header {
-        background: #F8FAFC;
-        border-bottom: 1px solid #E2E8F0;
-        padding: 1rem 1.4rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.85rem 1.25rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
+    .ftu-card-header h2,
     .ftu-card-header h3 {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 700;
-        color: #1E293B;
+        color: #1e293b;
         margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
     .ftu-card-body {
-        padding: 1.5rem;
+        padding: 1.25rem 1.35rem;
     }
+
+    /* Form Labels & Controls */
     .ftu-form-label {
-        font-size: 0.85rem;
-        font-weight: 700;
+        font-size: 0.84rem;
+        font-weight: 600;
         color: #334155;
-        margin-bottom: 0.4rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        margin-bottom: 0.35rem;
+        display: block;
     }
     .ftu-form-label .required-star {
         color: #dc2626;
-        font-weight: bold;
+        margin-left: 2px;
     }
     .ftu-input-group-text {
-        background-color: #F8FAFC;
-        border-color: #CBD5E1;
-        color: #64748B;
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        color: #64748b;
+        font-size: 0.88rem;
     }
     .ftu-form-control, .ftu-form-select {
-        border-radius: 10px;
-        border: 1.5px solid #CBD5E1;
-        padding: 0.65rem 0.9rem;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.9rem;
+        color: #0f172a;
+        background-color: #ffffff;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .ftu-form-control:focus, .ftu-form-select:focus {
-        border-color: #A31A24;
-        box-shadow: 0 0 0 3px rgba(163, 26, 36, 0.12);
+        border-color: #b91c1c;
+        box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.08);
+        outline: none;
     }
+
+    /* Reason Chips */
     .ftu-chip-reason {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        background: #F1F5F9;
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        background: #f1f5f9;
         color: #475569;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #e2e8f0;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         user-select: none;
     }
     .ftu-chip-reason:hover {
-        background: #FEE2E2;
-        border-color: #FECACA;
-        color: #A31A24;
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
     }
+
     .ftu-word-badge {
-        font-size: 0.78rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+
+    /* Table Styles */
+    #suggestt {
+        margin-bottom: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    #suggestt th {
+        font-size: 0.8rem;
         font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #475569;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+    }
+    #suggestt td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
     }
     .ftu-status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
+        display: inline-block;
         font-weight: 600;
-        font-size: 0.82rem;
-        padding: 5px 10px;
-        border-radius: 8px;
+        font-size: 0.75rem;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-align: center;
+        white-space: nowrap;
     }
+    .ftu-status-badge.status-asked { background: #fef3c7; color: #92400e; }
+    .ftu-status-badge.status-checked { background: #e0f2fe; color: #0369a1; }
+    .ftu-status-badge.status-accepted { background: #dcfce7; color: #15803d; }
+    .ftu-status-badge.status-ordered { background: #ede9fe; color: #6d28d9; }
+    .ftu-status-badge.status-rejected { background: #fee2e2; color: #b91c1c; }
+    .ftu-status-badge.status-available { background: #ecfdf5; color: #047857; }
 </style>
 [% END %]
 </head>
@@ -159,58 +226,43 @@
             <div class="col-md-12 col-lg-10 order-1">
                 <div id="usersuggestions" class="maincontent ftu-sugg-wrapper">
 
-                    <!-- Header Hero Card -->
-                    <div class="ftu-sugg-hero p-4 p-md-5 mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(163, 26, 36, 0.08); border: 1px solid rgba(163, 26, 36, 0.2);">
-                                    <i class="fa fa-book-medical text-danger" style="font-size: 0.85rem;"></i>
-                                    <span class="fw-bold text-danger text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Collection Development • FTU Library</span>
-                                </div>
-                                <h1 class="display-6 fw-bold text-dark mb-2" style="letter-spacing: -0.02em;">
+                    <!-- Minimal Page Header -->
+                    <div class="ftu-page-header">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h1 class="ftu-page-title">
                                     [% IF ( op_add_form ) %]
-                                        Library Purchase Suggestions
+                                        Purchase Suggestions
                                     [% ELSE %]
                                         Your Purchase Suggestions
                                     [% END %]
                                 </h1>
-                                <p class="text-secondary mb-0 fs-6" style="line-height: 1.6;">
-                                    Looking for learning materials, textbooks, or research publications that aren't available yet in the FTU Library? Submit your request below for evaluation and purchase.
+                                <p class="ftu-page-subtitle">
+                                    Submit suggestions for textbooks, academic references, or research publications to FTU Library.
                                 </p>
                             </div>
-                            <div class="col-lg-4 d-none d-lg-flex justify-content-end">
-                                <div class="p-3 rounded-4 bg-white border" style="box-shadow: 0 10px 25px rgba(0,0,0,0.04); width: 280px;">
-                                    <div class="d-flex align-items-center gap-3 mb-2">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; background: #A31A24;">
-                                            <i class="fa fa-bell"></i>
-                                        </div>
-                                        <div>
-                                            <div class="small fw-bold text-dark">Prompt Evaluation</div>
-                                            <div class="text-muted" style="font-size: 0.75rem;">Status updates sent via email</div>
-                                        </div>
+                            [% IF ( op_else ) %]
+                                [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
+                                    <div>
+                                        <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form">
+                                            + New Suggestion
+                                        </a>
                                     </div>
-                                    <hr class="my-2 text-muted" />
-                                    <div class="small text-muted" style="font-size: 0.8rem; line-height: 1.4;">
-                                        <i class="fa fa-check-circle text-success me-1"></i> Academic &amp; course references
-                                    </div>
-                                    <div class="small text-muted" style="font-size: 0.8rem; line-height: 1.4; margin-top: 4px;">
-                                        <i class="fa fa-check-circle text-success me-1"></i> Reference links appreciated
-                                    </div>
-                                </div>
-                            </div>
+                                [% END %]
+                            [% END %]
                         </div>
                     </div>
 
                     [% IF ( op_add_form ) %]
                         [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
-                            <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4">
-                                <h4 class="alert-heading fw-bold"><i class="fa fa-exclamation-triangle me-2"></i>Suggestion Limit Reached</h4>
-                                <p class="mb-0">You may only submit up to [% Koha.Preference('MaxTotalSuggestions') | html %] suggestions in [% Koha.Preference('NumberOfSuggestionDays') | html %] days.</p>
+                            <div class="alert alert-warning rounded-3 p-3 mb-4">
+                                <h5 class="alert-heading fw-bold mb-1">Suggestion Limit Reached</h5>
+                                <p class="mb-0 small">You may only submit up to [% Koha.Preference('MaxTotalSuggestions') | html %] suggestions in [% Koha.Preference('NumberOfSuggestionDays') | html %] days.</p>
                             </div>
                         [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
-                            <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4">
-                                <h4 class="alert-heading fw-bold"><i class="fa fa-clock me-2"></i>Pending Suggestions Limit Reached</h4>
-                                <p class="mb-0">You have reached your limit for open suggestions ([% Koha.Preference('MaxOpenSuggestions') | html %]). Once the library processes those suggestions, you can submit more.</p>
+                            <div class="alert alert-warning rounded-3 p-3 mb-4">
+                                <h5 class="alert-heading fw-bold mb-1">Pending Suggestions Limit Reached</h5>
+                                <p class="mb-0 small">You have reached your limit for open suggestions ([% Koha.Preference('MaxOpenSuggestions') | html %]). Please wait for library review before submitting more.</p>
                             </div>
                         [% ELSE %]
 
@@ -219,16 +271,13 @@
                             [% END %]
 
                             [% FOR m IN messages %]
-                                <div class="alert alert-[% m.type | html %] rounded-3 mb-4 shadow-sm">
+                                <div class="alert alert-[% m.type | html %] rounded-3 mb-4">
                                     [% SWITCH m.code %]
                                         [% CASE 'biblio_exists' %]
-                                            <div class="d-flex align-items-center">
-                                                <i class="fa fa-info-circle fa-2x text-warning me-3"></i>
-                                                <div>
-                                                    <strong>A similar title already exists in the catalog:</strong>
-                                                    <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]" class="fw-bold text-primary">[% m.title | html %]</a>.
-                                                    Click "Confirm submission" below if you still wish to submit this suggestion.
-                                                </div>
+                                            <div>
+                                                <strong>A similar title already exists in the catalog:</strong>
+                                                <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]" class="fw-bold text-danger">[% m.title | html %]</a>.
+                                                Click "Submit suggestion" below if you still wish to request additional copies.
                                             </div>
                                         [% CASE %]
                                             <span>[% m.code | html %]</span>
@@ -239,47 +288,43 @@
                             <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="add_suggestion_form" onsubmit="return validateFtuSuggestionForm();">
                                 [% INCLUDE 'csrf-token.inc' %]
 
-                                <!-- Card 1: Bibliographical Info -->
+                                <!-- Card 1: Document Information -->
                                 <div class="ftu-card">
-                                    <div class="ftu-card-header">
-                                        <h3><i class="fa fa-book text-danger"></i> 1. Document / Bibliographical Information</h3>
-                                        <span class="badge bg-light text-secondary border">Fields marked with <span class="text-danger fw-bold">*</span> are required</span>
+                                    <div class="ftu-card-header d-flex justify-content-between align-items-center">
+                                        <h3 class="mb-0">1. Document Information</h3>
+                                        <span class="small text-muted">Fields marked with <span class="required-star">*</span> are required</span>
                                     </div>
                                     <div class="ftu-card-body">
                                         [% IF Koha.Preference( 'OPACSuggestionAutoFill' ) %]
                                             <div class="mb-3 p-3 rounded-3" style="background: #F8FAFC; border: 1px dashed #CBD5E1;">
-                                                <label for="isbn" class="ftu-form-label"><i class="fa fa-barcode text-primary"></i> Fast lookup via ISBN / ISSN:</label>
+                                                <label for="isbn" class="ftu-form-label">Automatic lookup via ISBN / ISSN:</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text ftu-input-group-text"><i class="fa fa-search"></i></span>
-                                                    <input type="text" id="isbn" name="isbn" maxlength="80" class="form-control ftu-form-control" placeholder="Enter ISBN (e.g. 9786041215481) to automatically fill details" />
+                                                    <input type="text" id="isbn" name="isbn" maxlength="80" class="form-control ftu-form-control" placeholder="Enter ISBN (e.g. 9786041215481) to auto-fill" />
                                                 </div>
-                                                <small class="text-muted mt-1 d-block"><i class="fa fa-magic me-1"></i>Automatic bibliographic metadata lookup from Google Books API.</small>
                                             </div>
                                         [% END %]
 
                                         <!-- Title -->
                                         <div class="mb-3">
                                             <label for="title" class="ftu-form-label">
-                                                <i class="fa fa-heading text-danger"></i> Title <span class="required-star">*</span>
+                                                Title <span class="required-star">*</span>
                                             </label>
                                             [% IF biblionumber %]
-                                                <div class="p-2 px-3 bg-light rounded-3 border fw-bold text-dark fs-6">
+                                                <div class="p-2 px-3 bg-light rounded-3 border fw-semibold text-dark">
                                                     <a id="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | uri %]" target="_blank" class="text-danger text-decoration-none">
-                                                        <i class="fa fa-book-open me-2"></i>[% title | html %]
+                                                        [% title | html %]
                                                     </a>
                                                     <input type="hidden" name="title" value="[% title | html %]" />
                                                 </div>
                                             [% ELSE %]
-                                                <input type="text" id="title" name="title" class="form-control ftu-form-control fs-6" maxlength="255" value="[% title | html %]" placeholder="Enter full or approximate book or document title" required="required" />
+                                                <input type="text" id="title" name="title" class="form-control ftu-form-control" maxlength="255" value="[% title | html %]" placeholder="Enter title of the book, journal, or resource" required="required" />
                                             [% END %]
                                         </div>
 
                                         <div class="row g-3">
                                             <!-- Author -->
                                             <div class="col-md-6">
-                                                <label for="author" class="ftu-form-label">
-                                                    <i class="fa fa-user-edit text-secondary"></i> Author / Editor:
-                                                </label>
+                                                <label for="author" class="ftu-form-label">Author / Editor:</label>
                                                 [% IF biblionumber %]
                                                     <input type="text" id="author" name="author" class="form-control ftu-form-control bg-light" value="[% author | html %]" readonly="readonly" />
                                                 [% ELSE %]
@@ -290,7 +335,7 @@
                                             <!-- ISBN / ISSN (if autofill not enabled) -->
                                             [% UNLESS ( isbn_hidden or Koha.Preference('OPACSuggestionAutoFill') ) %]
                                                 <div class="col-md-6">
-                                                    <label for="isbn" class="ftu-form-label"><i class="fa fa-barcode text-secondary"></i> ISBN / ISSN:</label>
+                                                    <label for="isbn" class="ftu-form-label">ISBN / ISSN:</label>
                                                     <input type="text" id="isbn" name="isbn" class="form-control ftu-form-control" maxlength="80" value="[% isbn | html %]" placeholder="e.g. 978-0-..." />
                                                 </div>
                                             [% END %]
@@ -298,7 +343,7 @@
                                             <!-- Publisher -->
                                             [% UNLESS ( publishercode_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="publishercode" class="ftu-form-label"><i class="fa fa-building text-secondary"></i> Publisher:</label>
+                                                    <label for="publishercode" class="ftu-form-label">Publisher:</label>
                                                     <input type="text" id="publishercode" name="publishercode" class="form-control ftu-form-control" maxlength="80" value="[% publishercode | html %]" placeholder="Publisher name" />
                                                 </div>
                                             [% END %]
@@ -306,7 +351,7 @@
                                             <!-- Publication year -->
                                             [% UNLESS ( copyrightdate_hidden ) %]
                                                 <div class="col-md-3">
-                                                    <label for="copyrightdate" class="ftu-form-label"><i class="fa fa-calendar-alt text-secondary"></i> Publication year:</label>
+                                                    <label for="copyrightdate" class="ftu-form-label">Publication year:</label>
                                                     <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="10" maxlength="4" class="form-control ftu-form-control" value="[% copyrightdate | html %]" placeholder="e.g. 2024" />
                                                 </div>
                                             [% END %]
@@ -314,7 +359,7 @@
                                             <!-- Quantity -->
                                             [% UNLESS ( quantity_hidden ) %]
                                                 <div class="col-md-3">
-                                                    <label for="quantity" class="ftu-form-label"><i class="fa fa-layer-group text-secondary"></i> Quantity:</label>
+                                                    <label for="quantity" class="ftu-form-label">Quantity:</label>
                                                     <input type="number" id="quantity" name="quantity" min="1" max="50" class="form-control ftu-form-control" value="[% quantity || 1 | html %]" />
                                                 </div>
                                             [% END %]
@@ -322,23 +367,23 @@
                                             <!-- Publication place -->
                                             [% UNLESS ( place_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="place" class="ftu-form-label"><i class="fa fa-map-marker-alt text-secondary"></i> Publication place:</label>
-                                                    <input type="text" id="place" name="place" class="form-control ftu-form-control" maxlength="80" value="[% place | html %]" placeholder="e.g. Hanoi, Ho Chi Minh City, London, New York..." />
+                                                    <label for="place" class="ftu-form-label">Publication place:</label>
+                                                    <input type="text" id="place" name="place" class="form-control ftu-form-control" maxlength="80" value="[% place | html %]" placeholder="e.g. Hanoi, London, New York..." />
                                                 </div>
                                             [% END %]
 
                                             <!-- Collection title -->
                                             [% UNLESS ( collectiontitle_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="collectiontitle" class="ftu-form-label"><i class="fa fa-folder-open text-secondary"></i> Collection / Series title:</label>
-                                                    <input type="text" id="collectiontitle" name="collectiontitle" class="form-control ftu-form-control" maxlength="80" value="[% collectiontitle | html %]" placeholder="Series name if multi-volume" />
+                                                    <label for="collectiontitle" class="ftu-form-label">Series / Collection:</label>
+                                                    <input type="text" id="collectiontitle" name="collectiontitle" class="form-control ftu-form-control" maxlength="80" value="[% collectiontitle | html %]" placeholder="Series name (if applicable)" />
                                                 </div>
                                             [% END %]
 
                                             <!-- Document format -->
                                             [% UNLESS ( itemtype_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="itemtype" class="ftu-form-label"><i class="fa fa-file-lines text-secondary"></i> Document type / Format:</label>
+                                                    <label for="itemtype" class="ftu-form-label">Document type:</label>
                                                     [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size=20, default=itemtype, class="form-select ftu-form-select", empty=1 %]
                                                 </div>
                                             [% END %]
@@ -346,7 +391,7 @@
                                             <!-- Library branch -->
                                             [% UNLESS ( branchcode_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="branch" class="ftu-form-label"><i class="fa fa-university text-secondary"></i> Campus library:</label>
+                                                    <label for="branch" class="ftu-form-label">Campus library:</label>
                                                     <select name="branchcode" id="branch" class="form-select ftu-form-select">
                                                         [% PROCESS options_for_libraries libraries => AllPublicBranches %]
                                                     </select>
@@ -356,34 +401,31 @@
                                     </div>
                                 </div>
 
-                                <!-- Card 2: Suggestion Details & Link -->
+                                <!-- Card 2: Suggestion Rationale & Link -->
                                 <div class="ftu-card">
                                     <div class="ftu-card-header">
-                                        <h3><i class="fa fa-clipboard-check text-danger"></i> 2. Suggestion Rationale &amp; Details</h3>
-                                        <span class="badge bg-light text-secondary border">Review Support Info</span>
+                                        <h3 class="mb-0">2. Rationale &amp; Reference Link</h3>
                                     </div>
                                     <div class="ftu-card-body">
 
-                                        <!-- New Field: Document Reference Link -->
+                                        <!-- Document Reference Link -->
                                         <div class="mb-4">
                                             <label for="document_url" class="ftu-form-label">
-                                                <i class="fa fa-link text-primary"></i> Reference Link / Document URL:
+                                                Reference Link (Purchase URL / Book info):
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text ftu-input-group-text"><i class="fa fa-globe"></i></span>
-                                                <input type="url" name="document_url" id="document_url" class="form-control ftu-form-control" maxlength="500" value="[% document_url | html %]" placeholder="Paste link from Amazon, publisher site, book retailer, or journal..." oninput="updateLinkTestBtn(this.value);" />
-                                                <button type="button" class="btn btn-outline-secondary" id="btnTestDocLink" onclick="testDocumentUrl();" title="Test open link in new tab" disabled="disabled">
-                                                    <i class="fa fa-external-link me-1"></i> Preview Link
+                                                <input type="url" name="document_url" id="document_url" class="form-control ftu-form-control" maxlength="500" value="[% document_url | html %]" placeholder="https://..." oninput="updateLinkTestBtn(this.value);" />
+                                                <button type="button" class="btn btn-outline-secondary" id="btnTestDocLink" onclick="testDocumentUrl();" title="Preview link" disabled="disabled">
+                                                    Preview Link
                                                 </button>
                                             </div>
-                                            <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle me-1"></i>Helps acquisition librarians verify current edition, availability, and pricing.</small>
                                         </div>
 
                                         <!-- Custom Reason with Word Limit -->
                                         <div class="mb-4">
                                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                                                 <label for="patronreason" class="ftu-form-label mb-0">
-                                                    <i class="fa fa-comment-dots text-danger"></i> Reason for Suggestion:
+                                                    Reason for suggestion:
                                                 </label>
                                                 <span id="patronreason_counter_badge" class="ftu-word-badge bg-light text-secondary border">
                                                     Word count: <b id="reason_word_count">0</b> / 100 words
@@ -392,16 +434,16 @@
 
                                             <!-- Quick suggestion chips -->
                                             <div class="d-flex flex-wrap gap-2 mb-2">
-                                                <span class="small text-muted align-self-center me-1"><i class="fa fa-lightbulb text-warning me-1"></i>Quick fill:</span>
-                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Required reading for coursework and academic curriculum.');">Coursework</span>
-                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Essential reference for academic research &amp; graduation thesis.');">Research &amp; Thesis</span>
-                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Newly published professional monograph in economics and business.');">New Release</span>
-                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Highly recommended reference book currently missing in FTU library.');">Missing Reference</span>
+                                                <span class="small text-muted align-self-center me-1">Quick select:</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Required reading for coursework and curriculum.');">Coursework</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Essential reference for academic research &amp; thesis.');">Research &amp; Thesis</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Newly published professional monograph.');">New Release</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Key reference book currently not in FTU library.');">Missing Reference</span>
                                             </div>
 
-                                            <textarea name="patronreason" id="patronreason" rows="3" class="form-control ftu-form-control" placeholder="Provide your rationale or academic need (max 100 words) to help library staff prioritize this purchase..." oninput="handleReasonWordCount(this);">[% patronreason | html %]</textarea>
+                                            <textarea name="patronreason" id="patronreason" rows="3" class="form-control ftu-form-control" placeholder="Enter reason or academic need (max 100 words)..." oninput="handleReasonWordCount(this);">[% patronreason | html %]</textarea>
                                             <div id="reason_word_warning" class="text-danger small mt-1" style="display: none;">
-                                                <i class="fa fa-exclamation-circle me-1"></i> Word count exceeds the 100-word limit. Please shorten your text.
+                                                Word count exceeds the 100-word limit. Please shorten your text.
                                             </div>
                                         </div>
 
@@ -409,9 +451,9 @@
                                         [% UNLESS ( note_hidden ) %]
                                             <div class="mb-2">
                                                 <label for="note" class="ftu-form-label">
-                                                    <i class="fa fa-sticky-note text-secondary"></i> Additional Notes for Library Staff:
+                                                    Additional Notes:
                                                 </label>
-                                                <textarea name="note" id="note" rows="2" class="form-control ftu-form-control" placeholder="Any special instructions (e.g. required before specific date, prefer hardcover, etc.)">[% note | html %]</textarea>
+                                                <textarea name="note" id="note" rows="2" class="form-control ftu-form-control" placeholder="Any additional notes for library staff (optional)">[% note | html %]</textarea>
                                             </div>
                                         [% END %]
 
@@ -427,23 +469,23 @@
                                     <input type="hidden" name="suggested_by_anyone" value="[% suggested_by_anyone | html %]" />
                                     [% IF need_confirm %]
                                         <input type="hidden" name="op" value="cud-add_confirm" />
-                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                            <i class="fa fa-check me-2"></i> Confirm Purchase Suggestion
+                                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                                            Confirm Suggestion
                                         </button>
                                     [% ELSIF biblionumber %]
                                         <input type="hidden" name="op" value="cud-add_confirm" />
                                         <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
-                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                            <i class="fa fa-paper-plane me-2"></i> Submit Suggestion
+                                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                                            Submit Suggestion
                                         </button>
                                     [% ELSE %]
                                         <input type="hidden" name="op" value="cud-add_validate" />
-                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                            <i class="fa fa-paper-plane me-2"></i> Submit Suggestion
+                                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                                            Submit Suggestion
                                         </button>
                                     [% END %]
-                                    <a href="/cgi-bin/koha/opac-suggestions.pl" class="btn btn-outline-secondary btn-lg px-4 py-2">
-                                        <i class="fa fa-times me-2"></i> Cancel
+                                    <a href="/cgi-bin/koha/opac-suggestions.pl" class="btn btn-outline-secondary px-4 py-2">
+                                        Cancel
                                     </a>
                                 </div>
                             </form>
@@ -475,15 +517,15 @@
                         [% END %]
 
                         [% IF ( deleted ) %]
-                            <div class="alert alert-info rounded-3 mb-4"><i class="fa fa-check me-2"></i>Selected suggestions have been deleted.</div>
+                            <div class="alert alert-info rounded-3 mb-4">Selected suggestions have been deleted successfully.</div>
                         [% END %]
 
                         <!-- Toolbar & Search -->
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 bg-white border rounded-4 shadow-sm">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 bg-white border rounded-3">
                             <div>
                                 [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
-                                    <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3 shadow-sm" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                        <i class="fa fa-plus me-1"></i> New Purchase Suggestion
+                                    <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form">
+                                        + New Purchase Suggestion
                                     </a>
                                 [% END %]
                             </div>
@@ -491,7 +533,7 @@
                             <form action="/cgi-bin/koha/opac-suggestions.pl" class="d-flex flex-wrap align-items-center gap-2 m-0" id="search_suggestions_form" method="get">
                                 <div class="input-group input-group-sm" style="width: 280px;">
                                     <input type="text" name="title_filter" id="title_filter" value="[% title_filter | html %]" class="form-control" placeholder="Filter by title..." />
-                                    <button type="submit" class="btn btn-danger"><i class="fa fa-search"></i> Filter</button>
+                                    <button type="submit" class="btn btn-secondary">Filter</button>
                                 </div>
                                 [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) && loggedinusername %]
                                     <select class="form-select form-select-sm" name="suggested_by_anyone" id="suggested_by_anyone" onchange="this.form.submit();" style="width: auto;">
@@ -515,7 +557,7 @@
                                 <div class="ftu-card">
                                     <div class="table-responsive">
                                         <table id="suggestt" class="table table-hover align-middle mb-0">
-                                            <thead class="table-light">
+                                            <thead>
                                                 <tr>
                                                     [% IF ( loggedinusername ) %]
                                                         <th style="width: 40px;" class="text-center"><span class="visually-hidden">Select</span></th>
@@ -523,8 +565,8 @@
                                                     <th>Document Information</th>
                                                     <th style="width: 130px;" class="text-center">Date</th>
                                                     <th>Reason &amp; Reference Link</th>
-                                                    <th style="width: 160px;" class="text-center">Status</th>
-                                                    <th style="width: 40px;"></th>
+                                                    <th style="width: 150px;" class="text-center">Status</th>
+                                                    <th style="width: 20px;"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -539,17 +581,17 @@
                                                             </td>
                                                         [% END %]
                                                         <td>
-                                                            <div class="fw-bold text-dark fs-6 mb-1">
+                                                            <div class="fw-semibold text-dark mb-1">
                                                                 [% IF suggestion.biblionumber %]
                                                                     <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% suggestion.biblionumber | uri %]" class="text-danger text-decoration-none">
-                                                                        <i class="fa fa-book-open me-1"></i>[% suggestion.title | html %]
+                                                                        [% suggestion.title | html %]
                                                                     </a>
                                                                 [% ELSE %]
-                                                                    <i class="fa fa-book text-secondary me-1"></i>[% suggestion.title | html %]
+                                                                    [% suggestion.title | html %]
                                                                 [% END %]
                                                             </div>
                                                             <div class="small text-muted">
-                                                                [% IF ( suggestion.author ) %]<span><i class="fa fa-user me-1"></i>[% suggestion.author | html %]</span> &bull; [% END %]
+                                                                [% IF ( suggestion.author ) %]<span>[% suggestion.author | html %]</span> &bull; [% END %]
                                                                 [% IF ( suggestion.copyrightdate ) %]<span>Year: [% suggestion.copyrightdate | html %]</span> &bull; [% END %]
                                                                 [% IF ( suggestion.publishercode ) %]<span>Publisher: [% suggestion.publishercode | html %]</span>[% END %]
                                                                 [% IF ( suggestion.isbn ) %] &bull; <span>ISBN: [% suggestion.isbn | html %]</span>[% END %]
@@ -567,7 +609,7 @@
                                                             [% IF ( suggestion.document_url ) %]
                                                                 <div class="mt-1">
                                                                     <a href="[% suggestion.document_url | url %]" target="_blank" rel="noopener noreferrer" class="badge bg-light text-primary border text-decoration-none px-2 py-1">
-                                                                        <i class="fa fa-external-link me-1"></i> Reference Link
+                                                                        Reference Link &rarr;
                                                                     </a>
                                                                 </div>
                                                             [% END %]
@@ -579,19 +621,19 @@
                                                         </td>
                                                         <td class="text-center">
                                                             [% IF ( suggestion.STATUS == 'ASKED' ) %]
-                                                                <span class="ftu-status-badge bg-warning text-dark"><i class="fa fa-clock"></i> Pending review</span>
+                                                                <span class="ftu-status-badge status-asked">Pending review</span>
                                                             [% ELSIF ( suggestion.STATUS == 'CHECKED' ) %]
-                                                                <span class="ftu-status-badge bg-info text-dark"><i class="fa fa-search"></i> Under evaluation</span>
+                                                                <span class="ftu-status-badge status-checked">Under evaluation</span>
                                                             [% ELSIF ( suggestion.STATUS == 'ACCEPTED' ) %]
-                                                                <span class="ftu-status-badge bg-success text-white"><i class="fa fa-check"></i> Accepted</span>
+                                                                <span class="ftu-status-badge status-accepted">Accepted</span>
                                                             [% ELSIF ( suggestion.STATUS == 'ORDERED' ) %]
-                                                                <span class="ftu-status-badge bg-primary text-white"><i class="fa fa-shopping-cart"></i> Ordered</span>
+                                                                <span class="ftu-status-badge status-ordered">Ordered</span>
                                                             [% ELSIF ( suggestion.STATUS == 'REJECTED' ) %]
-                                                                <span class="ftu-status-badge bg-danger text-white"><i class="fa fa-ban"></i> Declined</span>
+                                                                <span class="ftu-status-badge status-rejected">Declined</span>
                                                             [% ELSIF ( suggestion.STATUS == 'AVAILABLE' ) %]
-                                                                <span class="ftu-status-badge bg-success text-white"><i class="fa fa-book-bookmark"></i> Available in Library</span>
+                                                                <span class="ftu-status-badge status-available">Available in Library</span>
                                                             [% ELSE %]
-                                                                <span class="ftu-status-badge bg-secondary text-white">[% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS, 1 ) | html %]</span>
+                                                                <span class="ftu-status-badge bg-light text-secondary border">[% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS, 1 ) | html %]</span>
                                                             [% END %]
                                                             [% IF ( suggestion.reason ) %]
                                                                 <div class="small text-muted mt-1" style="font-size: 0.75rem;">([% suggestion.reason | html %])</div>
@@ -608,7 +650,7 @@
                                 [% IF ( loggedinusername && can_delete_suggestion ) %]
                                     <div class="d-flex align-items-center gap-3 mt-3">
                                         <button type="submit" class="btn btn-outline-danger btn-sm px-3 removeitems">
-                                            <i class="fa fa-trash-can me-1"></i> Delete selected suggestions
+                                            Delete selected suggestions
                                         </button>
                                         <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btnSelectAll">Select all</button>
                                         <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btnUnselectAll">Deselect all</button>
@@ -617,14 +659,11 @@
                             </form>
                         [% ELSE %]
                             <div class="ftu-card p-5 text-center">
-                                <div class="mb-3 text-muted">
-                                    <i class="fa fa-folder-open fa-3x" style="color: #CBD5E1;"></i>
-                                </div>
-                                <h5 class="fw-bold text-dark">No purchase suggestions found</h5>
-                                <p class="text-secondary small mb-4">You have not submitted any purchase suggestions or none match your filter criteria.</p>
+                                <h5 class="fw-semibold text-dark mb-2">No purchase suggestions found</h5>
+                                <p class="text-secondary small mb-3">You have not submitted any purchase suggestions or none match your filter criteria.</p>
                                 <div>
-                                    <a href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" class="btn btn-danger fw-semibold px-4 py-2 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                        <i class="fa fa-plus me-1"></i> Create purchase suggestion now
+                                    <a href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" class="btn btn-danger fw-semibold px-4 py-2 rounded-3">
+                                        + Create Purchase Suggestion
                                     </a>
                                 </div>
                             </div>

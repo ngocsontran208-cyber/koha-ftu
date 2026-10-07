@@ -26,104 +26,171 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
 <style>
-    .ftu-sugg-wrapper { max-width: 1100px; margin: 0 auto; }
-    .ftu-sugg-hero {
-        background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 65%, #F8FAFC 100%);
-        border: 1px solid #F1F5F9;
-        border-radius: 20px;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.03);
+    /* ==========================================================================
+       FTU OPAC Suggestions - Clean, Minimalist & Modern Typography
+       ========================================================================== */
+    .ftu-sugg-wrapper,
+    .ftu-sugg-wrapper * {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
-    .ftu-card {
-        border: 1px solid #E2E8F0;
-        border-radius: 18px;
-        background: #ffffff;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-        overflow: hidden;
+    .ftu-sugg-wrapper {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding-bottom: 2.5rem;
+    }
+
+    /* Page Header */
+    .ftu-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
         margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .ftu-page-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.2rem 0;
+        line-height: 1.3;
+    }
+    .ftu-page-subtitle {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Cards */
+    .ftu-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
     }
     .ftu-card-header {
-        background: #F8FAFC;
-        border-bottom: 1px solid #E2E8F0;
-        padding: 1rem 1.4rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.85rem 1.25rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
+    .ftu-card-header h2,
     .ftu-card-header h3 {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 700;
-        color: #1E293B;
+        color: #1e293b;
         margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
     .ftu-card-body {
-        padding: 1.5rem;
+        padding: 1.25rem 1.35rem;
     }
+
+    /* Form Labels & Controls */
     .ftu-form-label {
-        font-size: 0.85rem;
-        font-weight: 700;
+        font-size: 0.84rem;
+        font-weight: 600;
         color: #334155;
-        margin-bottom: 0.4rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        margin-bottom: 0.35rem;
+        display: block;
     }
     .ftu-form-label .required-star {
         color: #dc2626;
-        font-weight: bold;
+        margin-left: 2px;
     }
     .ftu-input-group-text {
-        background-color: #F8FAFC;
-        border-color: #CBD5E1;
-        color: #64748B;
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        color: #64748b;
+        font-size: 0.88rem;
     }
     .ftu-form-control, .ftu-form-select {
-        border-radius: 10px;
-        border: 1.5px solid #CBD5E1;
-        padding: 0.65rem 0.9rem;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.9rem;
+        color: #0f172a;
+        background-color: #ffffff;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .ftu-form-control:focus, .ftu-form-select:focus {
-        border-color: #A31A24;
-        box-shadow: 0 0 0 3px rgba(163, 26, 36, 0.12);
+        border-color: #b91c1c;
+        box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.08);
+        outline: none;
     }
+
+    /* Reason Chips */
     .ftu-chip-reason {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        background: #F1F5F9;
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        background: #f1f5f9;
         color: #475569;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #e2e8f0;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         user-select: none;
     }
     .ftu-chip-reason:hover {
-        background: #FEE2E2;
-        border-color: #FECACA;
-        color: #A31A24;
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
     }
+
     .ftu-word-badge {
-        font-size: 0.78rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+
+    /* Table Styles */
+    #suggestt {
+        margin-bottom: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    #suggestt th {
+        font-size: 0.8rem;
         font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #475569;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+    }
+    #suggestt td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
     }
     .ftu-status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
+        display: inline-block;
         font-weight: 600;
-        font-size: 0.82rem;
-        padding: 5px 10px;
-        border-radius: 8px;
+        font-size: 0.75rem;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-align: center;
+        white-space: nowrap;
     }
+    .ftu-status-badge.status-asked { background: #fef3c7; color: #92400e; }
+    .ftu-status-badge.status-checked { background: #e0f2fe; color: #0369a1; }
+    .ftu-status-badge.status-accepted { background: #dcfce7; color: #15803d; }
+    .ftu-status-badge.status-ordered { background: #ede9fe; color: #6d28d9; }
+    .ftu-status-badge.status-rejected { background: #fee2e2; color: #b91c1c; }
+    .ftu-status-badge.status-available { background: #ecfdf5; color: #047857; }
 </style>
 [% END %]
 </head>
@@ -159,58 +226,43 @@
             <div class="col-md-12 col-lg-10 order-1">
                 <div id="usersuggestions" class="maincontent ftu-sugg-wrapper">
 
-                    <!-- Header Hero Card -->
-                    <div class="ftu-sugg-hero p-4 p-md-5 mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(163, 26, 36, 0.08); border: 1px solid rgba(163, 26, 36, 0.2);">
-                                    <i class="fa fa-book-medical text-danger" style="font-size: 0.85rem;"></i>
-                                    <span class="fw-bold text-danger text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Học liệu &amp; Bổ sung sách mới • Thư viện FTU</span>
-                                </div>
-                                <h1 class="display-6 fw-bold text-dark mb-2" style="letter-spacing: -0.02em;">
+                    <!-- Page Header tối giản, sạch sẽ -->
+                    <div class="ftu-page-header">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h1 class="ftu-page-title">
                                     [% IF ( op_add_form ) %]
-                                        Đề xuất Bổ sung Tài liệu Thư viện
+                                        Đề xuất mua tài liệu
                                     [% ELSE %]
-                                        Danh sách Đề xuất Mua Tài liệu
+                                        Danh sách đề xuất mua tài liệu
                                     [% END %]
                                 </h1>
-                                <p class="text-secondary mb-0 fs-6" style="line-height: 1.6;">
-                                    Bạn cần tài liệu phục vụ giảng dạy, học tập hoặc nghiên cứu nhưng Thư viện chưa có? Hãy gửi đề xuất chi tiết để Ban quản trị Thư viện Đại học Ngoại thương xem xét và tiến hành đặt mua.
+                                <p class="ftu-page-subtitle">
+                                    Gửi yêu cầu bổ sung giáo trình, sách chuyên khảo hoặc tài liệu học tập vào Thư viện FTU.
                                 </p>
                             </div>
-                            <div class="col-lg-4 d-none d-lg-flex justify-content-end">
-                                <div class="p-3 rounded-4 bg-white border" style="box-shadow: 0 10px 25px rgba(0,0,0,0.04); width: 280px;">
-                                    <div class="d-flex align-items-center gap-3 mb-2">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; background: #A31A24;">
-                                            <i class="fa fa-bell"></i>
-                                        </div>
-                                        <div>
-                                            <div class="small fw-bold text-dark">Tiếp nhận nhanh</div>
-                                            <div class="text-muted" style="font-size: 0.75rem;">Phản hồi qua email độc giả</div>
-                                        </div>
+                            [% IF ( op_else ) %]
+                                [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
+                                    <div>
+                                        <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form">
+                                            + Tạo đề xuất mới
+                                        </a>
                                     </div>
-                                    <hr class="my-2 text-muted" />
-                                    <div class="small text-muted" style="font-size: 0.8rem; line-height: 1.4;">
-                                        <i class="fa fa-check-circle text-success me-1"></i> Ưu tiên tài liệu chuyên ngành
-                                    </div>
-                                    <div class="small text-muted" style="font-size: 0.8rem; line-height: 1.4; margin-top: 4px;">
-                                        <i class="fa fa-check-circle text-success me-1"></i> Có kèm link tham khảo/giá bìa
-                                    </div>
-                                </div>
-                            </div>
+                                [% END %]
+                            [% END %]
                         </div>
                     </div>
 
                     [% IF ( op_add_form ) %]
                         [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
-                            <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4">
-                                <h4 class="alert-heading fw-bold"><i class="fa fa-exclamation-triangle me-2"></i>Đã đạt giới hạn gửi đề xuất</h4>
-                                <p class="mb-0">Bạn chỉ có thể gửi tối đa [% Koha.Preference('MaxTotalSuggestions') | html %] đề xuất trong vòng [% Koha.Preference('NumberOfSuggestionDays') | html %] ngày.</p>
+                            <div class="alert alert-warning rounded-3 p-3 mb-4">
+                                <h5 class="alert-heading fw-bold mb-1">Đã đạt giới hạn gửi đề xuất</h5>
+                                <p class="mb-0 small">Bạn chỉ có thể gửi tối đa [% Koha.Preference('MaxTotalSuggestions') | html %] đề xuất trong vòng [% Koha.Preference('NumberOfSuggestionDays') | html %] ngày.</p>
                             </div>
                         [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
-                            <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4">
-                                <h4 class="alert-heading fw-bold"><i class="fa fa-clock me-2"></i>Đang có nhiều đề xuất chờ xử lý</h4>
-                                <p class="mb-0">Bạn đã đạt số lượng đề xuất đang mở tối đa ([% Koha.Preference('MaxOpenSuggestions') | html %]). Sau khi Thư viện xử lý xong các đề xuất hiện tại, bạn sẽ có thể tiếp tục tạo đề xuất mới.</p>
+                            <div class="alert alert-warning rounded-3 p-3 mb-4">
+                                <h5 class="alert-heading fw-bold mb-1">Đang có đề xuất chờ xử lý</h5>
+                                <p class="mb-0 small">Bạn đã đạt số lượng đề xuất đang mở tối đa ([% Koha.Preference('MaxOpenSuggestions') | html %]). Vui lòng chờ Thư viện xử lý các đề xuất hiện tại.</p>
                             </div>
                         [% ELSE %]
 
@@ -219,16 +271,13 @@
                             [% END %]
 
                             [% FOR m IN messages %]
-                                <div class="alert alert-[% m.type | html %] rounded-3 mb-4 shadow-sm">
+                                <div class="alert alert-[% m.type | html %] rounded-3 mb-4">
                                     [% SWITCH m.code %]
                                         [% CASE 'biblio_exists' %]
-                                            <div class="d-flex align-items-center">
-                                                <i class="fa fa-info-circle fa-2x text-warning me-3"></i>
-                                                <div>
-                                                    <strong>Tài liệu tương tự đã có trong Thư viện:</strong>
-                                                    <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]" class="fw-bold text-primary">[% m.title | html %]</a>.
-                                                    Bấm "Xác nhận gửi đề xuất" bên dưới nếu bạn vẫn muốn đề xuất bổ sung thêm.
-                                                </div>
+                                            <div>
+                                                <strong>Tài liệu tương tự đã có trong Thư viện:</strong>
+                                                <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]" class="fw-bold text-danger">[% m.title | html %]</a>.
+                                                Bấm "Gửi đề xuất" bên dưới nếu bạn vẫn muốn đề xuất bổ sung thêm bản sách.
                                             </div>
                                         [% CASE %]
                                             <span>[% m.code | html %]</span>
@@ -239,58 +288,54 @@
                             <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="add_suggestion_form" onsubmit="return validateFtuSuggestionForm();">
                                 [% INCLUDE 'csrf-token.inc' %]
 
-                                <!-- Thẻ 1: Thông tin ấn phẩm đề xuất -->
+                                <!-- Thẻ 1: Thông tin tài liệu đề xuất -->
                                 <div class="ftu-card">
-                                    <div class="ftu-card-header">
-                                        <h3><i class="fa fa-book text-danger"></i> 1. Thông tin Ấn phẩm / Tài liệu đề xuất</h3>
-                                        <span class="badge bg-light text-secondary border">Các mục gắn dấu <span class="text-danger fw-bold">*</span> là bắt buộc</span>
+                                    <div class="ftu-card-header d-flex justify-content-between align-items-center">
+                                        <h3 class="mb-0">1. Thông tin tài liệu</h3>
+                                        <span class="small text-muted">Mục gắn dấu <span class="required-star">*</span> là bắt buộc</span>
                                     </div>
                                     <div class="ftu-card-body">
                                         [% IF Koha.Preference( 'OPACSuggestionAutoFill' ) %]
                                             <div class="mb-3 p-3 rounded-3" style="background: #F8FAFC; border: 1px dashed #CBD5E1;">
-                                                <label for="isbn" class="ftu-form-label"><i class="fa fa-barcode text-primary"></i> Tra nhanh qua mã ISBN/ISSN:</label>
+                                                <label for="isbn" class="ftu-form-label">Tra cứu tự động qua mã ISBN/ISSN:</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text ftu-input-group-text"><i class="fa fa-search"></i></span>
-                                                    <input type="text" id="isbn" name="isbn" maxlength="80" class="form-control ftu-form-control" placeholder="Nhập mã ISBN (ví dụ: 9786041215481) để tự động điền thông tin" />
+                                                    <input type="text" id="isbn" name="isbn" maxlength="80" class="form-control ftu-form-control" placeholder="Nhập mã ISBN (ví dụ: 9786041215481) để tự động điền" />
                                                 </div>
-                                                <small class="text-muted mt-1 d-block"><i class="fa fa-magic me-1"></i>Hệ thống sẽ tự động tìm kiếm thông tin nhan đề, tác giả và nhà xuất bản từ Google Books API.</small>
                                             </div>
                                         [% END %]
 
                                         <!-- Nhan đề tài liệu -->
                                         <div class="mb-3">
                                             <label for="title" class="ftu-form-label">
-                                                <i class="fa fa-heading text-danger"></i> Nhan đề tài liệu / Tên sách <span class="required-star">*</span>
+                                                Nhan đề / Tên tài liệu <span class="required-star">*</span>
                                             </label>
                                             [% IF biblionumber %]
-                                                <div class="p-2 px-3 bg-light rounded-3 border fw-bold text-dark fs-6">
+                                                <div class="p-2 px-3 bg-light rounded-3 border fw-semibold text-dark">
                                                     <a id="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | uri %]" target="_blank" class="text-danger text-decoration-none">
-                                                        <i class="fa fa-book-open me-2"></i>[% title | html %]
+                                                        [% title | html %]
                                                     </a>
                                                     <input type="hidden" name="title" value="[% title | html %]" />
                                                 </div>
                                             [% ELSE %]
-                                                <input type="text" id="title" name="title" class="form-control ftu-form-control fs-6" maxlength="255" value="[% title | html %]" placeholder="Nhập chính xác hoặc gần đúng tên cuốn sách, giáo trình hoặc tài liệu" required="required" />
+                                                <input type="text" id="title" name="title" class="form-control ftu-form-control" maxlength="255" value="[% title | html %]" placeholder="Tên cuốn sách, giáo trình hoặc tài liệu cần đề xuất" required="required" />
                                             [% END %]
                                         </div>
 
                                         <div class="row g-3">
                                             <!-- Tác giả -->
                                             <div class="col-md-6">
-                                                <label for="author" class="ftu-form-label">
-                                                    <i class="fa fa-user-edit text-secondary"></i> Tác giả / Người biên soạn:
-                                                </label>
+                                                <label for="author" class="ftu-form-label">Tác giả / Chủ biên:</label>
                                                 [% IF biblionumber %]
                                                     <input type="text" id="author" name="author" class="form-control ftu-form-control bg-light" value="[% author | html %]" readonly="readonly" />
                                                 [% ELSE %]
-                                                    <input type="text" id="author" name="author" class="form-control ftu-form-control" maxlength="80" value="[% author | html %]" placeholder="Tên tác giả, dịch giả hoặc chủ biên" />
+                                                    <input type="text" id="author" name="author" class="form-control ftu-form-control" maxlength="80" value="[% author | html %]" placeholder="Tên tác giả, dịch giả" />
                                                 [% END %]
                                             </div>
 
                                             <!-- Mã ISBN / ISSN (nếu chưa có autofill) -->
                                             [% UNLESS ( isbn_hidden or Koha.Preference('OPACSuggestionAutoFill') ) %]
                                                 <div class="col-md-6">
-                                                    <label for="isbn" class="ftu-form-label"><i class="fa fa-barcode text-secondary"></i> Số ISBN / ISSN:</label>
+                                                    <label for="isbn" class="ftu-form-label">Số ISBN / ISSN:</label>
                                                     <input type="text" id="isbn" name="isbn" class="form-control ftu-form-control" maxlength="80" value="[% isbn | html %]" placeholder="Ví dụ: 978-604-..." />
                                                 </div>
                                             [% END %]
@@ -298,15 +343,15 @@
                                             <!-- Nhà xuất bản -->
                                             [% UNLESS ( publishercode_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="publishercode" class="ftu-form-label"><i class="fa fa-building text-secondary"></i> Nhà xuất bản:</label>
-                                                    <input type="text" id="publishercode" name="publishercode" class="form-control ftu-form-control" maxlength="80" value="[% publishercode | html %]" placeholder="Ví dụ: Nxb. Trẻ, Nxb. Tài chính, NXB ĐHQG..." />
+                                                    <label for="publishercode" class="ftu-form-label">Nhà xuất bản:</label>
+                                                    <input type="text" id="publishercode" name="publishercode" class="form-control ftu-form-control" maxlength="80" value="[% publishercode | html %]" placeholder="Ví dụ: NXB Kinh tế Quốc dân, NXB Trẻ..." />
                                                 </div>
                                             [% END %]
 
                                             <!-- Năm xuất bản -->
                                             [% UNLESS ( copyrightdate_hidden ) %]
                                                 <div class="col-md-3">
-                                                    <label for="copyrightdate" class="ftu-form-label"><i class="fa fa-calendar-alt text-secondary"></i> Năm xuất bản:</label>
+                                                    <label for="copyrightdate" class="ftu-form-label">Năm xuất bản:</label>
                                                     <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="10" maxlength="4" class="form-control ftu-form-control" value="[% copyrightdate | html %]" placeholder="Ví dụ: 2024" />
                                                 </div>
                                             [% END %]
@@ -314,7 +359,7 @@
                                             <!-- Số lượng đề xuất -->
                                             [% UNLESS ( quantity_hidden ) %]
                                                 <div class="col-md-3">
-                                                    <label for="quantity" class="ftu-form-label"><i class="fa fa-layer-group text-secondary"></i> Số lượng:</label>
+                                                    <label for="quantity" class="ftu-form-label">Số lượng:</label>
                                                     <input type="number" id="quantity" name="quantity" min="1" max="50" class="form-control ftu-form-control" value="[% quantity || 1 | html %]" />
                                                 </div>
                                             [% END %]
@@ -322,23 +367,23 @@
                                             <!-- Nơi xuất bản -->
                                             [% UNLESS ( place_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="place" class="ftu-form-label"><i class="fa fa-map-marker-alt text-secondary"></i> Nơi xuất bản:</label>
-                                                    <input type="text" id="place" name="place" class="form-control ftu-form-control" maxlength="80" value="[% place | html %]" placeholder="Ví dụ: Hà Nội, Tp. Hồ Chí Minh, New York..." />
+                                                    <label for="place" class="ftu-form-label">Nơi xuất bản:</label>
+                                                    <input type="text" id="place" name="place" class="form-control ftu-form-control" maxlength="80" value="[% place | html %]" placeholder="Ví dụ: Hà Nội, TP.HCM..." />
                                                 </div>
                                             [% END %]
 
                                             <!-- Nhan đề bộ sưu tập / Tùng thư -->
                                             [% UNLESS ( collectiontitle_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="collectiontitle" class="ftu-form-label"><i class="fa fa-folder-open text-secondary"></i> Nhan đề bộ sưu tập / Tùng thư:</label>
-                                                    <input type="text" id="collectiontitle" name="collectiontitle" class="form-control ftu-form-control" maxlength="80" value="[% collectiontitle | html %]" placeholder="Nếu thuộc tùng thư hoặc bộ sách nhiều tập" />
+                                                    <label for="collectiontitle" class="ftu-form-label">Tùng thư / Bộ sách:</label>
+                                                    <input type="text" id="collectiontitle" name="collectiontitle" class="form-control ftu-form-control" maxlength="80" value="[% collectiontitle | html %]" placeholder="Tên bộ sách (nếu có)" />
                                                 </div>
                                             [% END %]
 
                                             <!-- Kiểu tài liệu / Loại hình -->
                                             [% UNLESS ( itemtype_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="itemtype" class="ftu-form-label"><i class="fa fa-file-lines text-secondary"></i> Loại hình tài liệu:</label>
+                                                    <label for="itemtype" class="ftu-form-label">Loại hình tài liệu:</label>
                                                     [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size=20, default=itemtype, class="form-select ftu-form-select", empty=1 %]
                                                 </div>
                                             [% END %]
@@ -346,7 +391,7 @@
                                             <!-- Thư viện cơ sở -->
                                             [% UNLESS ( branchcode_hidden ) %]
                                                 <div class="col-md-6">
-                                                    <label for="branch" class="ftu-form-label"><i class="fa fa-university text-secondary"></i> Tiếp nhận tại cơ sở:</label>
+                                                    <label for="branch" class="ftu-form-label">Cơ sở tiếp nhận:</label>
                                                     <select name="branchcode" id="branch" class="form-select ftu-form-select">
                                                         [% PROCESS options_for_libraries libraries => AllPublicBranches %]
                                                     </select>
@@ -359,31 +404,28 @@
                                 <!-- Thẻ 2: Căn cứ & Chi tiết đề xuất -->
                                 <div class="ftu-card">
                                     <div class="ftu-card-header">
-                                        <h3><i class="fa fa-clipboard-check text-danger"></i> 2. Nhu cầu &amp; Chi tiết Đề xuất</h3>
-                                        <span class="badge bg-light text-secondary border">Thông tin hỗ trợ duyệt mua</span>
+                                        <h3 class="mb-0">2. Nhu cầu &amp; Chi tiết đề xuất</h3>
                                     </div>
                                     <div class="ftu-card-body">
 
-                                        <!-- Trường dữ liệu mới: Link tài liệu -->
+                                        <!-- Link tài liệu -->
                                         <div class="mb-4">
                                             <label for="document_url" class="ftu-form-label">
-                                                <i class="fa fa-link text-primary"></i> Link tài liệu tham khảo (URL mua / giới thiệu):
+                                                Link tài liệu tham khảo (URL mua / thông tin sách):
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text ftu-input-group-text"><i class="fa fa-globe"></i></span>
-                                                <input type="url" name="document_url" id="document_url" class="form-control ftu-form-control" maxlength="500" value="[% document_url | html %]" placeholder="Dán link từ Tiki, Fahasa, Amazon, Google Books, NXB hoặc bài báo trực tuyến..." oninput="updateLinkTestBtn(this.value);" />
-                                                <button type="button" class="btn btn-outline-secondary" id="btnTestDocLink" onclick="testDocumentUrl();" title="Mở kiểm tra đường dẫn" disabled="disabled">
-                                                    <i class="fa fa-external-link me-1"></i> Xem thử
+                                                <input type="url" name="document_url" id="document_url" class="form-control ftu-form-control" maxlength="500" value="[% document_url | html %]" placeholder="https://..." oninput="updateLinkTestBtn(this.value);" />
+                                                <button type="button" class="btn btn-outline-secondary" id="btnTestDocLink" onclick="testDocumentUrl();" title="Mở thử liên kết" disabled="disabled">
+                                                    Xem thử link
                                                 </button>
                                             </div>
-                                            <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle me-1"></i>Giúp cán bộ thư viện nhanh chóng kiểm tra giá bìa, đơn vị phát hành và tình trạng còn sách trên thị trường.</small>
                                         </div>
 
                                         <!-- Lý do đề xuất: Người dùng tự do nhập + Giới hạn số từ -->
                                         <div class="mb-4">
                                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                                                 <label for="patronreason" class="ftu-form-label mb-0">
-                                                    <i class="fa fa-comment-dots text-danger"></i> Lý do đề xuất mua tài liệu:
+                                                    Lý do đề xuất:
                                                 </label>
                                                 <span id="patronreason_counter_badge" class="ftu-word-badge bg-light text-secondary border">
                                                     Đã nhập: <b id="reason_word_count">0</b> / 100 từ
@@ -392,16 +434,16 @@
 
                                             <!-- Gợi ý nhanh lý do -->
                                             <div class="d-flex flex-wrap gap-2 mb-2">
-                                                <span class="small text-muted align-self-center me-1"><i class="fa fa-lightbulb text-warning me-1"></i>Chọn nhanh:</span>
+                                                <span class="small text-muted align-self-center me-1">Chọn nhanh:</span>
                                                 <span class="ftu-chip-reason" onclick="applyReasonSnippet('Phục vụ nghiên cứu luận văn &amp; đề tài khoa học.');">Nghiên cứu khoa học</span>
-                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Tài liệu học tập bắt buộc cho học phần chuyên ngành.');">Tài liệu học phần</span>
-                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Tài liệu chuyên ngành kinh tế &amp; thương mại mới xuất bản.');">Chuyên ngành mới</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Tài liệu học tập bắt buộc cho học phần.');">Tài liệu học phần</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Tài liệu chuyên ngành mới xuất bản.');">Chuyên ngành mới</span>
                                                 <span class="ftu-chip-reason" onclick="applyReasonSnippet('Sách chuyên khảo có giá trị cao, Thư viện chưa có.');">Thư viện chưa có</span>
                                             </div>
 
-                                            <textarea name="patronreason" id="patronreason" rows="3" class="form-control ftu-form-control" placeholder="Vui lòng nhập lý do hoặc nhu cầu sử dụng (tối đa 100 từ) để Ban quản trị Thư viện xem xét mức độ ưu tiên bổ sung..." oninput="handleReasonWordCount(this);">[% patronreason | html %]</textarea>
+                                            <textarea name="patronreason" id="patronreason" rows="3" class="form-control ftu-form-control" placeholder="Nhập lý do hoặc nhu cầu sử dụng (tối đa 100 từ)..." oninput="handleReasonWordCount(this);">[% patronreason | html %]</textarea>
                                             <div id="reason_word_warning" class="text-danger small mt-1" style="display: none;">
-                                                <i class="fa fa-exclamation-circle me-1"></i> Nội dung lý do đã vượt quá giới hạn 100 từ. Vui lòng rút gọn lại.
+                                                Nội dung lý do đã vượt quá giới hạn 100 từ. Vui lòng rút gọn lại.
                                             </div>
                                         </div>
 
@@ -409,9 +451,9 @@
                                         [% UNLESS ( note_hidden ) %]
                                             <div class="mb-2">
                                                 <label for="note" class="ftu-form-label">
-                                                    <i class="fa fa-sticky-note text-secondary"></i> Ghi chú thêm cho Cán bộ Thư viện:
+                                                    Ghi chú thêm:
                                                 </label>
-                                                <textarea name="note" id="note" rows="2" class="form-control ftu-form-control" placeholder="Bất kỳ ghi chú bổ sung nào khác (ví dụ: cần tài liệu gấp trước ngày..., đề xuất bản in bìa cứng,...)">[% note | html %]</textarea>
+                                                <textarea name="note" id="note" rows="2" class="form-control ftu-form-control" placeholder="Ghi chú thêm cho cán bộ thư viện (nếu có)">[% note | html %]</textarea>
                                             </div>
                                         [% END %]
 
@@ -427,23 +469,23 @@
                                     <input type="hidden" name="suggested_by_anyone" value="[% suggested_by_anyone | html %]" />
                                     [% IF need_confirm %]
                                         <input type="hidden" name="op" value="cud-add_confirm" />
-                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                            <i class="fa fa-check me-2"></i> Xác nhận gửi đề xuất mua
+                                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                                            Xác nhận gửi đề xuất
                                         </button>
                                     [% ELSIF biblionumber %]
                                         <input type="hidden" name="op" value="cud-add_confirm" />
                                         <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
-                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                            <i class="fa fa-paper-plane me-2"></i> Gửi đề xuất mua
+                                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                                            Gửi đề xuất mua
                                         </button>
                                     [% ELSE %]
                                         <input type="hidden" name="op" value="cud-add_validate" />
-                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                            <i class="fa fa-paper-plane me-2"></i> Gửi đề xuất mua
+                                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                                            Gửi đề xuất mua
                                         </button>
                                     [% END %]
-                                    <a href="/cgi-bin/koha/opac-suggestions.pl" class="btn btn-outline-secondary btn-lg px-4 py-2">
-                                        <i class="fa fa-times me-2"></i> Hủy bỏ
+                                    <a href="/cgi-bin/koha/opac-suggestions.pl" class="btn btn-outline-secondary px-4 py-2">
+                                        Hủy bỏ
                                     </a>
                                 </div>
                             </form>
@@ -475,15 +517,15 @@
                         [% END %]
 
                         [% IF ( deleted ) %]
-                            <div class="alert alert-info rounded-3 mb-4"><i class="fa fa-check me-2"></i>Bạn đã xóa các đề xuất mua được chọn thành công.</div>
+                            <div class="alert alert-info rounded-3 mb-4">Đã xóa các đề xuất mua được chọn thành công.</div>
                         [% END %]
 
                         <!-- Toolbar & Tìm kiếm -->
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 bg-white border rounded-4 shadow-sm">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 bg-white border rounded-3">
                             <div>
                                 [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
-                                    <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3 shadow-sm" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                        <i class="fa fa-plus me-1"></i> Tạo đề xuất mua mới
+                                    <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form">
+                                        + Tạo đề xuất mua mới
                                     </a>
                                 [% END %]
                             </div>
@@ -491,7 +533,7 @@
                             <form action="/cgi-bin/koha/opac-suggestions.pl" class="d-flex flex-wrap align-items-center gap-2 m-0" id="search_suggestions_form" method="get">
                                 <div class="input-group input-group-sm" style="width: 280px;">
                                     <input type="text" name="title_filter" id="title_filter" value="[% title_filter | html %]" class="form-control" placeholder="Lọc theo nhan đề tài liệu..." />
-                                    <button type="submit" class="btn btn-danger"><i class="fa fa-search"></i> Lọc</button>
+                                    <button type="submit" class="btn btn-secondary">Lọc</button>
                                 </div>
                                 [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) && loggedinusername %]
                                     <select class="form-select form-select-sm" name="suggested_by_anyone" id="suggested_by_anyone" onchange="this.form.submit();" style="width: auto;">
@@ -515,16 +557,16 @@
                                 <div class="ftu-card">
                                     <div class="table-responsive">
                                         <table id="suggestt" class="table table-hover align-middle mb-0">
-                                            <thead class="table-light">
+                                            <thead>
                                                 <tr>
                                                     [% IF ( loggedinusername ) %]
                                                         <th style="width: 40px;" class="text-center"><span class="visually-hidden">Chọn</span></th>
                                                     [% END %]
-                                                    <th>Thông tin Tài liệu Đề xuất</th>
+                                                    <th>Thông tin tài liệu đề xuất</th>
                                                     <th style="width: 130px;" class="text-center">Ngày gửi</th>
-                                                    <th>Lý do &amp; Link tài liệu</th>
-                                                    <th style="width: 160px;" class="text-center">Trạng thái</th>
-                                                    <th style="width: 40px;"></th>
+                                                    <th>Lý do &amp; Link tham khảo</th>
+                                                    <th style="width: 150px;" class="text-center">Trạng thái</th>
+                                                    <th style="width: 20px;"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -539,17 +581,17 @@
                                                             </td>
                                                         [% END %]
                                                         <td>
-                                                            <div class="fw-bold text-dark fs-6 mb-1">
+                                                            <div class="fw-semibold text-dark mb-1">
                                                                 [% IF suggestion.biblionumber %]
                                                                     <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% suggestion.biblionumber | uri %]" class="text-danger text-decoration-none">
-                                                                        <i class="fa fa-book-open me-1"></i>[% suggestion.title | html %]
+                                                                        [% suggestion.title | html %]
                                                                     </a>
                                                                 [% ELSE %]
-                                                                    <i class="fa fa-book text-secondary me-1"></i>[% suggestion.title | html %]
+                                                                    [% suggestion.title | html %]
                                                                 [% END %]
                                                             </div>
                                                             <div class="small text-muted">
-                                                                [% IF ( suggestion.author ) %]<span><i class="fa fa-user me-1"></i>[% suggestion.author | html %]</span> &bull; [% END %]
+                                                                [% IF ( suggestion.author ) %]<span>[% suggestion.author | html %]</span> &bull; [% END %]
                                                                 [% IF ( suggestion.copyrightdate ) %]<span>Năm: [% suggestion.copyrightdate | html %]</span> &bull; [% END %]
                                                                 [% IF ( suggestion.publishercode ) %]<span>NXB: [% suggestion.publishercode | html %]</span>[% END %]
                                                                 [% IF ( suggestion.isbn ) %] &bull; <span>ISBN: [% suggestion.isbn | html %]</span>[% END %]
@@ -567,7 +609,7 @@
                                                             [% IF ( suggestion.document_url ) %]
                                                                 <div class="mt-1">
                                                                     <a href="[% suggestion.document_url | url %]" target="_blank" rel="noopener noreferrer" class="badge bg-light text-primary border text-decoration-none px-2 py-1">
-                                                                        <i class="fa fa-external-link me-1"></i> Link tài liệu tham khảo
+                                                                        Link tham khảo &rarr;
                                                                     </a>
                                                                 </div>
                                                             [% END %]
@@ -579,19 +621,19 @@
                                                         </td>
                                                         <td class="text-center">
                                                             [% IF ( suggestion.STATUS == 'ASKED' ) %]
-                                                                <span class="ftu-status-badge bg-warning text-dark"><i class="fa fa-clock"></i> Đang chờ duyệt</span>
+                                                                <span class="ftu-status-badge status-asked">Chờ duyệt</span>
                                                             [% ELSIF ( suggestion.STATUS == 'CHECKED' ) %]
-                                                                <span class="ftu-status-badge bg-info text-dark"><i class="fa fa-search"></i> Đã kiểm tra</span>
+                                                                <span class="ftu-status-badge status-checked">Đã kiểm tra</span>
                                                             [% ELSIF ( suggestion.STATUS == 'ACCEPTED' ) %]
-                                                                <span class="ftu-status-badge bg-success text-white"><i class="fa fa-check"></i> Được chấp nhận</span>
+                                                                <span class="ftu-status-badge status-accepted">Đã chấp nhận</span>
                                                             [% ELSIF ( suggestion.STATUS == 'ORDERED' ) %]
-                                                                <span class="ftu-status-badge bg-primary text-white"><i class="fa fa-shopping-cart"></i> Đang đặt mua</span>
+                                                                <span class="ftu-status-badge status-ordered">Đang đặt mua</span>
                                                             [% ELSIF ( suggestion.STATUS == 'REJECTED' ) %]
-                                                                <span class="ftu-status-badge bg-danger text-white"><i class="fa fa-ban"></i> Bị từ chối</span>
+                                                                <span class="ftu-status-badge status-rejected">Bị từ chối</span>
                                                             [% ELSIF ( suggestion.STATUS == 'AVAILABLE' ) %]
-                                                                <span class="ftu-status-badge bg-success text-white"><i class="fa fa-book-bookmark"></i> Sách đã về thư viện</span>
+                                                                <span class="ftu-status-badge status-available">Đã về thư viện</span>
                                                             [% ELSE %]
-                                                                <span class="ftu-status-badge bg-secondary text-white">[% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS, 1 ) | html %]</span>
+                                                                <span class="ftu-status-badge bg-light text-secondary border">[% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS, 1 ) | html %]</span>
                                                             [% END %]
                                                             [% IF ( suggestion.reason ) %]
                                                                 <div class="small text-muted mt-1" style="font-size: 0.75rem;">([% suggestion.reason | html %])</div>
@@ -608,7 +650,7 @@
                                 [% IF ( loggedinusername && can_delete_suggestion ) %]
                                     <div class="d-flex align-items-center gap-3 mt-3">
                                         <button type="submit" class="btn btn-outline-danger btn-sm px-3 removeitems">
-                                            <i class="fa fa-trash-can me-1"></i> Xóa các đề xuất đã chọn
+                                            Xóa các đề xuất đã chọn
                                         </button>
                                         <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btnSelectAll">Chọn tất cả</button>
                                         <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btnUnselectAll">Bỏ chọn</button>
@@ -617,14 +659,11 @@
                             </form>
                         [% ELSE %]
                             <div class="ftu-card p-5 text-center">
-                                <div class="mb-3 text-muted">
-                                    <i class="fa fa-folder-open fa-3x" style="color: #CBD5E1;"></i>
-                                </div>
-                                <h5 class="fw-bold text-dark">Chưa có đề xuất mua tài liệu nào</h5>
-                                <p class="text-secondary small mb-4">Bạn chưa gửi đề xuất mua tài liệu nào hoặc không có đề xuất phù hợp với bộ lọc tìm kiếm.</p>
+                                <h5 class="fw-semibold text-dark mb-2">Chưa có đề xuất mua tài liệu nào</h5>
+                                <p class="text-secondary small mb-3">Bạn chưa gửi đề xuất mua tài liệu nào hoặc không tìm thấy đề xuất phù hợp.</p>
                                 <div>
-                                    <a href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" class="btn btn-danger fw-semibold px-4 py-2 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
-                                        <i class="fa fa-plus me-1"></i> Tạo đề xuất mua tài liệu ngay
+                                    <a href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" class="btn btn-danger fw-semibold px-4 py-2 rounded-3">
+                                        + Tạo đề xuất mua tài liệu
                                     </a>
                                 </div>
                             </div>
