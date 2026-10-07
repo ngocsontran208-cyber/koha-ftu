@@ -521,15 +521,7 @@
                         [% END %]
 
                         <!-- Toolbar & Search -->
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 bg-white border rounded-3">
-                            <div>
-                                [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
-                                    <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form">
-                                        + New Purchase Suggestion
-                                    </a>
-                                [% END %]
-                            </div>
-
+                        <div class="mb-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
                             <form action="/cgi-bin/koha/opac-suggestions.pl" class="d-flex flex-wrap align-items-center gap-2 m-0" id="search_suggestions_form" method="get">
                                 <div class="input-group input-group-sm" style="width: 280px;">
                                     <input type="text" name="title_filter" id="title_filter" value="[% title_filter | html %]" class="form-control" placeholder="Filter by title..." />
