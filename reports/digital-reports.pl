@@ -783,12 +783,13 @@ sub fetch_report_data {
                     i.barcode,
                     b.title,
                     COALESCE(b.author, 'FTU') as author,
-                    COALESCE(NULLIF(TRIM(b.publishercode), ''), 'Chưa cập nhật') as publisher,
+                    COALESCE(NULLIF(TRIM(bi.publishercode), ''), 'Chưa cập nhật') as publisher,
                     COALESCE(i.itemcallnumber, 'Chưa xếp giá') as class,
                     COALESCE(i.issues, 0) + (SELECT COUNT(*) FROM issues iss_cnt WHERE iss_cnt.itemnumber = i.itemnumber) as loans,
                     DATE_FORMAT(COALESCE((SELECT MAX(issuedate) FROM issues iss_dt WHERE iss_dt.itemnumber = i.itemnumber), i.datelastborrowed, i.dateaccessioned, NOW()), '%Y-%m-%d') as last_issue
                 FROM items i
                 JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN biblioitems bi ON b.biblionumber = bi.biblionumber
                 ORDER BY loans DESC, b.biblionumber ASC
                 LIMIT 20
             };
@@ -856,7 +857,7 @@ sub fetch_report_data {
                 FROM items i
                 LEFT JOIN issues iss ON i.itemnumber = iss.itemnumber
                 LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
-                GROUP BY location
+                GROUP BY i.location, av.lib
                 ORDER BY stock DESC
             };
             my $sth = $koha_dbh->prepare($sql);
@@ -889,6 +890,8 @@ sub fetch_report_data {
                 FROM borrowers br
                 LEFT JOIN issues iss ON br.borrowernumber = iss.borrowernumber
                 LEFT JOIN categories cat ON br.categorycode = cat.categorycode
+                WHERE (TRIM(br.surname) != '' OR TRIM(br.firstname) != '')
+                  AND br.categorycode NOT IN ('IL', 'HB')
                 GROUP BY br.borrowernumber, br.cardnumber, br.surname, br.firstname, cat.description, br.categorycode, br.branchcode
                 ORDER BY total_loans DESC, active_loans DESC
             };
