@@ -326,9 +326,9 @@ $(document).ready(function () {
         if (return_url) {
             return_url = return_url.replace(/([?&])logout(\.x|\.y)?=[^&]*(&|$)/g, '$1').replace(/[?&]$/, '');
         }
-        if (return_url && !return_url.includes("opac-user.pl") && !return_url.includes("opac-auth.pl")) {
-            var $modalAuth = $("#modalAuth");
-            var $retInput = $modalAuth.find("input[name='return']");
+        var $modalAuth = $("#modalAuth");
+        var $retInput = $modalAuth.find("input[name='return']");
+        if (return_url && !return_url.includes("opac-user.pl") && !return_url.includes("opac-auth.pl") && !return_url.includes("logout")) {
             if ($retInput.length) {
                 $retInput.val(return_url);
             } else {
@@ -336,6 +336,14 @@ $(document).ready(function () {
                     '<input type="hidden" name="return" value="' +
                         return_url +
                         '" />'
+                );
+            }
+        } else {
+            if ($retInput.length) {
+                $retInput.val("/opac/");
+            } else {
+                $modalAuth.append(
+                    '<input type="hidden" name="return" value="/opac/" />'
                 );
             }
         }

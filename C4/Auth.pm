@@ -1442,7 +1442,7 @@ sub checkauth {
         {
             my $return_param = $query->param('return') || $query->param('return_url') || $query->param('destination');
             my $uri;
-            if ( $return_param && $return_param !~ /opac-user\.pl/ && $return_param !~ /opac-auth\.pl/ ) {
+            if ( $return_param && $return_param !~ /opac-user\.pl/ && $return_param !~ /opac-auth\.pl/ && $return_param !~ /logout/i ) {
                 $return_param =~ s/([?&])logout(?:\.x|\.y)?=[^&]*(&|$)/$1/g;
                 $return_param =~ s/[?&]$//;
                 if ( $return_param =~ m{^/[^/\\]} ) {
@@ -1456,7 +1456,7 @@ sub checkauth {
                     }
                 }
             }
-            if ( !$uri ) {
+            if ( !$uri || $uri->as_string =~ /logout/i ) {
                 $uri = URI->new( $query->url( -relative => 1, -query_string => 1 ) );
                 $uri->query_param_delete('login_userid');
                 $uri->query_param_delete('login_password');
@@ -1470,6 +1470,9 @@ sub checkauth {
             $uri->query_param_delete('logout.x');
             $uri->query_param_delete('logout.y');
             $uri->query_param_delete('logout');
+            if ( !$uri || $uri->as_string =~ /logout/i ) {
+                $uri = URI->new('/opac/');
+            }
             unless ( $params->{do_not_print} ) {
                 print $query->redirect( -uri => $uri->as_string, -cookie => $cookie, -status => '303 See other' );
                 safe_exit;

@@ -44,7 +44,7 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 
 if ( $input->param('logout.x') || $input->param('logout.y') || $input->param('logout') ) {
     print $input->redirect(
-        -uri    => '/cgi-bin/koha/opac-main.pl',
+        -uri    => '/opac/',
         -cookie => $cookie,
         -status => '303 See other',
     );

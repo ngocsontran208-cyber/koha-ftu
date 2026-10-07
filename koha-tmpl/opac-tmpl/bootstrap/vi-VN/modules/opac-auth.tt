@@ -246,6 +246,7 @@
  [% NEXT IF INPUT.name == "op" %]
  [% NEXT IF INPUT.name == "csrf_token" %]
  [% NEXT IF INPUT.name == "koha_login_context" %]
+ [% NEXT IF (INPUT.name == "return" || INPUT.name == "return_url" || INPUT.name == "destination") && INPUT.value.search('logout') %]
  <input type="hidden" name="[% INPUT.name | html %]" value="[% INPUT.value | html %]" />
  [% END %]
  <div class="form-group">
