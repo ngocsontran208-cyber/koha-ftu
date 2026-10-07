@@ -827,7 +827,7 @@ function renderTable(res) {
     else if (currentReportId === 'collection_usage') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
-            + '<th>Tên Bộ sưu tập tài liệu số FTU</th>'
+            + '<th>Tên Bộ sưu tập số (DSpace 7)</th>'
             + '<th class="text-end">Tổng số tài liệu trong BST</th>'
             + '<th class="text-end">Lượt mượn tài liệu số</th>'
             + '<th class="text-end">Lượt đọc trực tuyến</th>'
@@ -845,17 +845,17 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><strong><i class="fa fa-folder-open text-warning me-1"></i> ' + (r.name || '') + '</strong></td>'
-                + '<td class="text-end">' + (r.total_items || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end font-weight-bold">' + (r.total_items || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.loans || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-info font-weight-bold">' + (r.reads || 0).toLocaleString('vi-VN') + '</td>'
-                + '<td class="text-end">' + (r.readers || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end font-weight-bold">' + (r.readers || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-primary font-weight-bold">' + (r.usage_ratio || '0%') + '</td>'
                 + '</tr>';
         });
 
         tfoot.innerHTML = '<tr>'
-            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG 7 BỘ SƯU TẬP SỐ:</strong></td>'
-            + '<td class="text-end"><strong>' + sumItems.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG CÁC BỘ SƯU TẬP DSPACE:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumItems.toLocaleString('vi-VN') + '</strong></td>'
             + '<td class="text-end text-success"><strong>' + sumLoans.toLocaleString('vi-VN') + '</strong></td>'
             + '<td class="text-end text-info"><strong>' + sumReads.toLocaleString('vi-VN') + '</strong></td>'
             + '<td class="text-end"><strong>' + sumReaders.toLocaleString('vi-VN') + '</strong></td>'

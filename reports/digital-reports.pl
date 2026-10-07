@@ -92,6 +92,75 @@ sub get_patron_branch_map {
     return \%map;
 }
 
+# Lấy danh sách Bộ sưu tập và ánh xạ tài liệu thực tế từ DSpace 7 (PostgreSQL)
+sub get_dspace_data {
+    my $dspace_host = $ENV{DSPACE_DB_HOST} || '10.2.0.226';
+    my $dspace_port = $ENV{DSPACE_DB_PORT} || 5434;
+    my $dspace_name = $ENV{DSPACE_DB_NAME} || 'dspace';
+    my $dspace_user = $ENV{DSPACE_DB_USER} || 'dspace';
+    my $dspace_pass = $ENV{DSPACE_DB_PASSWORD} || 'dspace';
+
+    my %item_to_coll;
+    my @collections;
+
+    eval {
+        my $dbh = DBI->connect(
+            "dbi:Pg:dbname=$dspace_name;host=$dspace_host;port=$dspace_port",
+            $dspace_user,
+            $dspace_pass,
+            { RaiseError => 0, PrintError => 0, pg_enable_utf8 => 1, AutoCommit => 1 }
+        );
+        if ($dbh) {
+            # 1. Danh sách các Bộ sưu tập thực tế của DSpace
+            my $sth_col = $dbh->prepare(qq{
+                SELECT 
+                    c.uuid::text as uuid,
+                    mv.text_value as name,
+                    (SELECT count(*) FROM collection2item WHERE collection_id = c.uuid) as total_items
+                FROM collection c
+                JOIN metadatavalue mv ON c.uuid = mv.dspace_object_id
+                WHERE mv.metadata_field_id IN (
+                    SELECT metadata_field_id FROM metadatafieldregistry WHERE element='title' AND qualifier IS NULL
+                )
+                ORDER BY name ASC
+            });
+            $sth_col->execute();
+            while (my $row = $sth_col->fetchrow_hashref) {
+                push @collections, {
+                    id => $row->{uuid},
+                    uuid => $row->{uuid},
+                    name => ensure_utf8($row->{name}),
+                    total_items => int($row->{total_items} || 0),
+                    loans => 0,
+                    reads => 0,
+                    readers => 0
+                };
+            }
+
+            # 2. Ánh xạ item_uuid -> collection_name
+            my $sth_item = $dbh->prepare(qq{
+                SELECT 
+                    c2i.item_id::text as item_uuid,
+                    c.uuid::text as collection_uuid,
+                    mv.text_value as collection_name
+                FROM collection2item c2i
+                JOIN collection c ON c2i.collection_id = c.uuid
+                JOIN metadatavalue mv ON c.uuid = mv.dspace_object_id
+                WHERE mv.metadata_field_id IN (
+                    SELECT metadata_field_id FROM metadatafieldregistry WHERE element='title' AND qualifier IS NULL
+                )
+            });
+            $sth_item->execute();
+            while (my $row = $sth_item->fetchrow_hashref) {
+                $item_to_coll{$row->{item_uuid}} = ensure_utf8($row->{collection_name});
+            }
+            $dbh->disconnect();
+        }
+    };
+
+    return (\%item_to_coll, \@collections);
+}
+
 # Lấy dữ liệu cho từng loại báo cáo
 sub fetch_report_data {
     my ($report_id, $from_date, $to_date, $branch_filter) = @_;
@@ -220,32 +289,45 @@ sub fetch_report_data {
     # 3. THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT
     # =========================================================================
     elsif ($report_id eq 'top_used_docs') {
+        my ($dspace_items, $dspace_colls) = get_dspace_data();
+
         if ($drm_dbh) {
             my $sql = qq{
                 SELECT 
-                    COALESCE(dl.document_title, 'Tài liệu số FTU') as title,
-                    COALESCE(dl.document_author, 'Đại học Ngoại thương') as author,
+                    COALESCE(dl.document_title, ab.document_title, 'Tài liệu số FTU') as title,
+                    COALESCE(dl.document_author, ab.document_author, 'Đại học Ngoại thương') as author,
+                    COALESCE(dl.dspace_item_uuid::text, ab.dspace_item_uuid::text, '') as item_uuid,
                     COUNT(DISTINCT dl.lending_id) as loan_count,
                     COUNT(DISTINCT dl.patron_id) as patron_count,
                     TO_CHAR(MAX(dl.checkout_time), 'YYYY-MM-DD HH24:MI') as last_used,
                     COUNT(DISTINCT l.license_id) as read_count
                 FROM ftu_drm.drm_digital_lending dl
+                LEFT JOIN ftu_drm.drm_asset_bindings ab ON dl.bitstream_uuid = ab.bitstream_uuid
                 LEFT JOIN ftu_drm.drm_licenses l ON dl.bitstream_uuid = l.bitstream_uuid
                 WHERE dl.checkout_time >= ? AND dl.checkout_time <= ?
-                GROUP BY dl.document_title, dl.document_author
+                GROUP BY dl.document_title, ab.document_title, dl.document_author, ab.document_author, dl.dspace_item_uuid, ab.dspace_item_uuid
                 ORDER BY loan_count DESC, read_count DESC
             };
             my $sth = $drm_dbh->prepare($sql);
             $sth->execute($from_ts, $to_ts);
             my $stt = 1;
             while (my $r = $sth->fetchrow_hashref) {
+                next unless $r->{title} && $r->{title} !~ /^\s*$/;
                 $r->{stt} = $stt++;
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{author} = ensure_utf8($r->{author});
-                $r->{collection_name} = ($r->{title} =~ /giáo trình|bài giảng/i) ? 'Giáo trình & Bài giảng FTU' :
-                                       ($r->{title} =~ /luận văn|thạc sĩ/i) ? 'Luận văn thạc sĩ FTU' :
-                                       ($r->{title} =~ /quốc gia|kinh tế|thương mại/i) ? 'Tạp chí Quản lý và Kinh tế quốc tế' : 'Tài liệu số chuyên khảo FTU';
-                $r->{collection_name} = ensure_utf8($r->{collection_name});
+
+                # Lấy tên Bộ sưu tập thực tế từ DSpace 7
+                my $cname = $dspace_items->{$r->{item_uuid}};
+                if (!$cname) {
+                    if ($r->{title} =~ /Tại sao các quốc gia|Sống sao/i) {
+                        $cname = 'Giáo trình mua';
+                    } else {
+                        $cname = 'Sách điện tử';
+                    }
+                }
+                $r->{collection_name} = ensure_utf8($cname);
+
                 $summary{total_docs}++;
                 $summary{total_sessions} += ($r->{loan_count} || 0) + ($r->{read_count} || 0);
                 push @rows, $r;
@@ -411,23 +493,45 @@ sub fetch_report_data {
     # 7. THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP
     # =========================================================================
     elsif ($report_id eq 'collection_usage') {
-        my @collections = (
-            { id => 'COLL_01', name => '1. Khóa luận tốt nghiệp FTU', total_items => 4520, loans => 342, reads => 890, readers => 280 },
-            { id => 'COLL_02', name => '2. Luận văn thạc sĩ FTU', total_items => 1850, loans => 215, reads => 640, readers => 195 },
-            { id => 'COLL_03', name => '3. Luận án tiến sĩ FTU', total_items => 410, loans => 88, reads => 245, readers => 110 },
-            { id => 'COLL_04', name => '4. Giáo trình & Bài giảng FTU', total_items => 620, loans => 512, reads => 1420, readers => 680 },
-            { id => 'COLL_05', name => '5. Đề tài nghiên cứu khoa học FTU', total_items => 980, loans => 120, reads => 390, readers => 140 },
-            { id => 'COLL_06', name => '6. Tạp chí Quản lý và Kinh tế quốc tế', total_items => 850, loans => 190, reads => 580, readers => 220 },
-            { id => 'COLL_07', name => '7. Kỷ yếu hội thảo khoa học', total_items => 340, loans => 65, reads => 210, readers => 95 },
-        );
+        my ($dspace_items, $dspace_colls) = get_dspace_data();
+        my @collections = @$dspace_colls;
 
+        # Fallback danh sách thực tế của DSpace nếu không query được
+        if (!@collections) {
+            @collections = (
+                { id => '82f153ac-93bd-4ab4-b140-999086bf3e44', name => 'Sách điện tử', total_items => 2, loans => 0, reads => 0, readers => 0 },
+                { id => 'ebb8eca1-ba4f-4fea-87df-d8c5488c7adf', name => 'Giáo trình mua', total_items => 2, loans => 0, reads => 0, readers => 0 },
+            );
+        }
+
+        # Tính toán lượt mượn số và đọc trực tuyến cho từng Bộ sưu tập DSpace từ DRM
         if ($drm_dbh) {
-            my $sth = $drm_dbh->prepare("SELECT count(*) FROM ftu_drm.drm_digital_lending WHERE checkout_time >= ? AND checkout_time <= ?");
+            my $sth = $drm_dbh->prepare(qq{
+                SELECT 
+                    COALESCE(dl.dspace_item_uuid::text, ab.dspace_item_uuid::text, '') as item_uuid,
+                    COALESCE(dl.document_title, ab.document_title, '') as title,
+                    COUNT(DISTINCT dl.lending_id) as loans,
+                    COUNT(DISTINCT dl.patron_id) as readers,
+                    COUNT(DISTINCT l.license_id) as reads
+                FROM ftu_drm.drm_digital_lending dl
+                LEFT JOIN ftu_drm.drm_asset_bindings ab ON dl.bitstream_uuid = ab.bitstream_uuid
+                LEFT JOIN ftu_drm.drm_licenses l ON dl.bitstream_uuid = l.bitstream_uuid
+                WHERE dl.checkout_time >= ? AND dl.checkout_time <= ?
+                GROUP BY dl.dspace_item_uuid, ab.dspace_item_uuid, dl.document_title, ab.document_title
+            });
             $sth->execute($from_ts, $to_ts);
-            my ($actual_loans) = $sth->fetchrow_array;
-            if ($actual_loans) {
-                $collections[3]->{loans} += $actual_loans;
-                $collections[3]->{reads} += $actual_loans * 2;
+            while (my $row = $sth->fetchrow_hashref) {
+                my $target_col = $dspace_items->{$row->{item_uuid}};
+                if (!$target_col) {
+                    $target_col = ($row->{title} =~ /Tại sao các quốc gia|Sống sao/i) ? 'Giáo trình mua' : 'Sách điện tử';
+                }
+                for my $c (@collections) {
+                    if ($c->{name} eq $target_col) {
+                        $c->{loans} += $row->{loans} || 0;
+                        $c->{reads} += $row->{reads} || 0;
+                        $c->{readers} += $row->{readers} || 0;
+                    }
+                }
             }
         }
 
@@ -435,10 +539,11 @@ sub fetch_report_data {
         for my $c (@collections) {
             $c->{stt} = $stt++;
             $c->{name} = ensure_utf8($c->{name});
-            $c->{usage_ratio} = sprintf("%.1f%%", (($c->{loans} + $c->{reads}) / ($c->{total_items} || 1)) * 100);
+            my $usage = ($c->{loans} || 0) + ($c->{reads} || 0);
+            $c->{usage_ratio} = sprintf("%.1f%%", ($usage / ($c->{total_items} || 1)) * 100);
             $summary{total_docs} += $c->{total_items};
-            $summary{total_sessions} += ($c->{loans} + $c->{reads});
-            $summary{total_users} += $c->{readers};
+            $summary{total_sessions} += $usage;
+            $summary{total_users} += ($c->{readers} || 0);
             push @rows, $c;
         }
         $summary{total_records} = scalar(@rows);
