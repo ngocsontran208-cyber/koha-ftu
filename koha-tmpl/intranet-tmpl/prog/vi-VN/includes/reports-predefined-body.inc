@@ -409,14 +409,58 @@
 </div>
 
 <script nonce="[% Koha.CSPNonce | $raw %]">
+var reportCategories = {
+    digital_access: {
+        title: 'BÁO CÁO THỐNG KÊ TRUY CẬP TÀI LIỆU SỐ',
+        defaultReport: 'opac_visits_ftu2',
+        defaultTitle: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2',
+        reports: [
+            { id: 'online_users', title: 'Thống kê truy cập chi tiết các user đang đăng nhập' },
+            { id: 'access_over_time', title: 'Báo cáo tổng lượt truy cập tài liệu số theo thời gian' },
+            { id: 'top_used_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT' },
+            { id: 'top_interactive_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT' },
+            { id: 'opac_visits_ftu2', title: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2' },
+            { id: 'top_patrons', title: 'THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT' },
+            { id: 'collection_usage', title: 'THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP' }
+        ]
+    },
+    circ: {
+        title: 'BÁO CÁO LƯU THÔNG',
+        defaultReport: 'circ_by_class',
+        defaultTitle: 'Thống kê tài liệu đang mượn theo môn loại',
+        reports: [
+            { id: 'circ_by_class', title: 'Thống kê tài liệu đang mượn theo môn loại' },
+            { id: 'circ_flow_by_class', title: 'Thống kê tài liệu mượn trả theo môn loại' },
+            { id: 'circ_unused_docs', title: 'Thống kê tài liệu không có người mượn' },
+            { id: 'circ_total_docs', title: 'Thống kê tổng số tài liệu' },
+            { id: 'circ_overdue_docs', title: 'Thống kê tài liệu đang mượn quá hạn' },
+            { id: 'circ_popular_docs', title: 'Thống kê tài liệu được yêu thích' },
+            { id: 'circ_popular_authors', title: 'Thống kê tác giả được yêu thích' },
+            { id: 'circ_shelving_cart', title: 'Thống kê tài liệu mượn, trả vào kho' },
+            { id: 'circ_patron_loans', title: 'Thống kê mượn tài liệu của bạn đọc' },
+            { id: 'circ_doc_history', title: 'Thống kê lịch sử mượn - trả của tài liệu' }
+        ]
+    },
+    digital_docs: {
+        title: 'BÁO CÁO TÀI LIỆU SỐ',
+        defaultReport: 'top_used_docs',
+        defaultTitle: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT',
+        reports: [
+            { id: 'top_used_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT' },
+            { id: 'top_interactive_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT' },
+            { id: 'collection_usage', title: 'THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP' }
+        ]
+    }
+};
+
+var currentCategory = 'digital_access';
 var currentReportId = 'opac_visits_ftu2';
 var currentReportTitle = 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2';
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Khởi tạo hiển thị báo cáo mặc định
+    renderDropdownOptions(currentCategory);
     selectReport(currentReportId, currentReportTitle);
 
-    // Đóng dropdown khi click ngoài
     document.addEventListener('click', function(e) {
         var container = document.querySelector('.ftu-dropdown-container');
         if (container && !container.contains(e.target)) {
@@ -424,6 +468,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function renderDropdownOptions(catKey) {
+    var cat = reportCategories[catKey];
+    if (!cat) return;
+
+    var list = document.getElementById('options_list');
+    list.innerHTML = '<li class="ftu-dropdown-option" data-id="" onclick="selectReport(\'\', \'--- Chọn ---\')">--- Chọn ---</li>';
+
+    cat.reports.forEach(function(r) {
+        var isSel = (r.id === currentReportId) ? ' selected' : '';
+        var li = document.createElement('li');
+        li.className = 'ftu-dropdown-option' + isSel;
+        li.setAttribute('data-id', r.id);
+        li.textContent = r.title;
+        li.onclick = function() { selectReport(r.id, r.title); };
+        list.appendChild(li);
+    });
+}
 
 function toggleDropdown() {
     var menu = document.getElementById('dropdown_menu');
@@ -466,7 +528,6 @@ function selectReport(reportId, reportTitle) {
     currentReportTitle = reportTitle;
     document.getElementById('selected_label').textContent = reportTitle;
 
-    // Highlight item
     var items = document.querySelectorAll('.ftu-dropdown-option');
     items.forEach(function(item) {
         if (item.getAttribute('data-id') === reportId) {
@@ -492,21 +553,25 @@ function switchCategory(cat) {
     var items = document.querySelectorAll('.ftu-tree-item');
     items.forEach(function(i) { i.classList.remove('active'); });
 
-    if (cat === 'digital_access') {
-        event.currentTarget.closest('.ftu-tree-item').classList.add('active');
-        document.getElementById('category_title').textContent = 'Báo cáo thống kê truy cập tài liệu số';
-        selectReport('opac_visits_ftu2', 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2');
-    } else if (cat === 'digital_docs') {
-        event.currentTarget.closest('.ftu-tree-item').classList.add('active');
-        document.getElementById('category_title').textContent = 'Báo cáo tài liệu số';
-        selectReport('top_used_docs', 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT');
+    if (reportCategories[cat]) {
+        if (event && event.currentTarget) {
+            event.currentTarget.closest('.ftu-tree-item').classList.add('active');
+        }
+        currentCategory = cat;
+        var catData = reportCategories[cat];
+        document.getElementById('category_title').textContent = catData.title;
+        renderDropdownOptions(cat);
+        selectReport(catData.defaultReport, catData.defaultTitle);
     } else {
-        event.currentTarget.closest('.ftu-tree-item').classList.add('active');
-        var catName = event.currentTarget.textContent.trim();
+        if (event && event.currentTarget) {
+            event.currentTarget.closest('.ftu-tree-item').classList.add('active');
+        }
+        var catName = (event && event.currentTarget) ? event.currentTarget.textContent.trim() : cat;
         document.getElementById('category_title').textContent = catName;
         document.getElementById('selected_label').textContent = '--- Chọn ---';
+        document.getElementById('options_list').innerHTML = '<li class="ftu-dropdown-option" data-id="" onclick="selectReport(\'\', \'--- Chọn ---\')">--- Chọn ---</li>';
         document.getElementById('report_table_head').innerHTML = '';
-        document.getElementById('report_table_body').innerHTML = '<tr><td class="text-center py-4 text-muted"><i class="fa fa-info-circle text-primary"></i> Danh mục <strong>' + catName + '</strong> đang được tổng hợp. Xin vui lòng chuyển sang <strong>Báo cáo thống kê truy cập tài liệu số</strong> hoặc liên hệ quản trị hệ thống.</td></tr>';
+        document.getElementById('report_table_body').innerHTML = '<tr><td class="text-center py-4 text-muted"><i class="fa fa-info-circle text-primary"></i> Danh mục <strong>' + catName + '</strong> đang được kết nối dữ liệu. Vui lòng chuyển sang <strong>Báo cáo lưu thông</strong> hoặc <strong>Báo cáo thống kê truy cập tài liệu số</strong>.</td></tr>';
         document.getElementById('report_table_foot').innerHTML = '';
     }
 }
@@ -546,7 +611,6 @@ function renderTable(res) {
     var rows = res.rows || [];
     var summary = res.summary || {};
 
-    // Cập nhật tiêu đề in
     document.getElementById('print_report_title').textContent = currentReportTitle;
     document.getElementById('print_report_subtitle').textContent = 'Từ ngày: ' + document.getElementById('filter_from_date').value + ' - Đến ngày: ' + document.getElementById('filter_to_date').value;
 
@@ -562,7 +626,11 @@ function renderTable(res) {
         return;
     }
 
-    // 1. Thống kê truy cập chi tiết các user đang đăng nhập
+    // =========================================================================
+    // 1. NHÓM BÁO CÁO TRUY CẬP TÀI LIỆU SỐ
+    // =========================================================================
+
+    // 1.1 Thống kê truy cập chi tiết các user đang đăng nhập
     if (currentReportId === 'online_users') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
@@ -597,12 +665,12 @@ function renderTable(res) {
         });
 
         tfoot.innerHTML = '<tr>'
-            + '<td colspan="9" class="text-end"><strong>TỔNG SỐ PHIÊN HOẠT ĐỘNG:</strong></td>'
+            + '<td colspan="9" class="text-end"><strong>TỔNG SỐ BẢN GHI:</strong></td>'
             + '<td class="text-center text-success"><strong>' + rows.length + '</strong></td>'
             + '</tr>';
     }
 
-    // 2. Báo cáo tổng lượt truy cập tài liệu số theo thời gian
+    // 1.2 Báo cáo tổng lượt truy cập tài liệu số theo thời gian
     else if (currentReportId === 'access_over_time') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
@@ -640,7 +708,7 @@ function renderTable(res) {
             + '</tr>';
     }
 
-    // 3. THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT
+    // 1.3 THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT
     else if (currentReportId === 'top_used_docs') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">Top</th>'
@@ -667,7 +735,7 @@ function renderTable(res) {
         });
     }
 
-    // 4. THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT
+    // 1.4 THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT
     else if (currentReportId === 'top_interactive_docs') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">Top</th>'
@@ -675,7 +743,7 @@ function renderTable(res) {
             + '<th>Tác giả</th>'
             + '<th class="text-end">Tổng phiên tương tác</th>'
             + '<th class="text-end">Số bạn đọc</th>'
-            + '<th class="text-end">Thời lượng đọc TB (phút)</th>'
+            + '<th class="text-end">Thời lượng đọc TB</th>'
             + '<th class="text-end">Lượt xem trang</th>'
             + '<th>Tương tác cuối</th>'
             + '</tr>';
@@ -694,7 +762,7 @@ function renderTable(res) {
         });
     }
 
-    // 5. TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2
+    // 1.5 TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2
     else if (currentReportId === 'opac_visits_ftu2') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
@@ -737,7 +805,7 @@ function renderTable(res) {
             + '</tr>';
     }
 
-    // 6. THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT
+    // 1.6 THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT
     else if (currentReportId === 'top_patrons') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">Top</th>'
@@ -766,7 +834,7 @@ function renderTable(res) {
         });
     }
 
-    // 7. THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP
+    // 1.7 THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP
     else if (currentReportId === 'collection_usage') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
@@ -804,6 +872,315 @@ function renderTable(res) {
             + '<td class="text-end"><strong>' + sumReaders.toLocaleString('vi-VN') + '</strong></td>'
             + '<td></td>'
             + '</tr>';
+    }
+
+    // =========================================================================
+    // 2. NHÓM BÁO CÁO LƯU THÔNG (CIRCULATION REPORTS - 10 LOẠI BÁO CÁO)
+    // =========================================================================
+
+    // 2.1 Thống kê tài liệu đang mượn theo môn loại
+    else if (currentReportId === 'circ_by_class') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã môn loại (DDC)</th>'
+            + '<th>Tên môn loại chuyên ngành</th>'
+            + '<th class="text-end">Số đầu sách đang mượn</th>'
+            + '<th class="text-end">Số bản sách đang mượn</th>'
+            + '<th class="text-end">Tỷ lệ (%)</th>'
+            + '</tr>';
+
+        var totalTitles = 0, totalItems = 0;
+        rows.forEach(function(r) {
+            totalTitles += (r.title_count || 0);
+            totalItems += (r.item_count || 0);
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.code || '') + '</code></td>'
+                + '<td><strong><i class="fa fa-bookmark text-primary me-1"></i> ' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end">' + (r.title_count || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.item_count || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold">' + (r.ratio || '') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG:</strong></td>'
+            + '<td class="text-end text-primary"><strong>' + totalTitles.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-success"><strong>' + totalItems.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '</tr>';
+    }
+
+    // 2.2 Thống kê tài liệu mượn trả theo môn loại
+    else if (currentReportId === 'circ_flow_by_class') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã môn loại (DDC)</th>'
+            + '<th>Tên môn loại chuyên ngành</th>'
+            + '<th class="text-end">Lượt mượn ra</th>'
+            + '<th class="text-end">Lượt trả về</th>'
+            + '<th class="text-end">Tổng lượt lưu thông</th>'
+            + '<th class="text-end">Tỷ lệ hoàn trả</th>'
+            + '</tr>';
+
+        var sumLoans = 0, sumReturns = 0, sumTotal = 0;
+        rows.forEach(function(r) {
+            sumLoans += (r.loans || 0);
+            sumReturns += (r.returns || 0);
+            sumTotal += (r.total || 0);
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.code || '') + '</code></td>'
+                + '<td><strong>' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.loans || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-info font-weight-bold">' + (r.returns || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold" style="font-size: 14.5px;">' + (r.total || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-muted">' + (r.ratio || '') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG:</strong></td>'
+            + '<td class="text-end text-success"><strong>' + sumLoans.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-info"><strong>' + sumReturns.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-primary"><strong>' + sumTotal.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // 2.3 Thống kê tài liệu không có người mượn
+    else if (currentReportId === 'circ_unused_docs') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã vạch (Barcode)</th>'
+            + '<th>Ký hiệu phân loại</th>'
+            + '<th>Nhan đề tài liệu</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Năm XB</th>'
+            + '<th>Vị trí kho xếp giá</th>'
+            + '<th class="text-center">Thời gian chưa lưu thông</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
+                + '<td><strong class="text-primary"><i class="fa fa-book me-1"></i> ' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td class="text-center">' + (r.year || '') + '</td>'
+                + '<td>' + (r.location || '') + '</td>'
+                + '<td class="text-center"><span class="badge bg-warning text-dark"><i class="fa fa-clock me-1"></i> ' + (r.unused_days || 0) + ' ngày</span></td>'
+                + '</tr>';
+        });
+    }
+
+    // 2.4 Thống kê tổng số tài liệu
+    else if (currentReportId === 'circ_total_docs') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Kho lưu trữ tài liệu Phân hiệu FTU2</th>'
+            + '<th class="text-end">Tổng số đầu sách (Nhan đề)</th>'
+            + '<th class="text-end">Tổng số bản sách (Bản in)</th>'
+            + '<th class="text-end">Đang cho mượn</th>'
+            + '<th class="text-end">Sẵn sàng phục vụ</th>'
+            + '<th class="text-end">Tỷ lệ khả dụng</th>'
+            + '</tr>';
+
+        var sumTitles = 0, sumItems = 0, sumLoaned = 0, sumAvail = 0;
+        rows.forEach(function(r) {
+            sumTitles += (r.titles || 0);
+            sumItems += (r.items || 0);
+            sumLoaned += (r.loaned || 0);
+            sumAvail += (r.available || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong><i class="fa fa-archive text-primary me-1"></i> ' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold">' + (r.titles || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end font-weight-bold text-primary">' + (r.items || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-warning font-weight-bold">' + (r.loaned || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.available || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-info font-weight-bold">' + (r.ratio || '') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG TOÀN PHÂN HIỆU:</strong></td>'
+            + '<td class="text-end font-weight-bold text-primary"><strong>' + sumTitles.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end font-weight-bold text-primary"><strong>' + sumItems.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-warning"><strong>' + sumLoaned.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-success"><strong>' + sumAvail.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // 2.5 Thống kê tài liệu đang mượn quá hạn
+    else if (currentReportId === 'circ_overdue_docs') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Số thẻ bạn đọc</th>'
+            + '<th>Họ và tên</th>'
+            + '<th>Đối tượng</th>'
+            + '<th>Mã vạch sách</th>'
+            + '<th>Nhan đề tài liệu</th>'
+            + '<th>Ngày mượn</th>'
+            + '<th>Hạn trả</th>'
+            + '<th class="text-center">Số ngày quá hạn</th>'
+            + '<th class="text-end">Tiền phạt ước tính (VNĐ)</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.cardnumber || '') + '</code></td>'
+                + '<td><strong><i class="fa fa-user-graduate text-danger me-1"></i> ' + (r.patron_name || '') + '</strong></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.role || '') + '</span></td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong>' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.issue_date || '') + '</td>'
+                + '<td><span class="text-danger font-weight-bold">' + (r.due_date || '') + '</span></td>'
+                + '<td class="text-center"><span class="badge bg-danger"><i class="fa fa-exclamation-circle me-1"></i> ' + (r.overdue_days || 0) + ' ngày</span></td>'
+                + '<td class="text-end font-weight-bold text-danger">' + (r.fine || '0') + ' đ</td>'
+                + '</tr>';
+        });
+    }
+
+    // 2.6 Thống kê tài liệu được yêu thích
+    else if (currentReportId === 'circ_popular_docs') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">Top</th>'
+            + '<th>Mã vạch</th>'
+            + '<th>Nhan đề sách in</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Nhà xuất bản</th>'
+            + '<th>Môn loại DDC</th>'
+            + '<th class="text-end">Tổng lượt mượn</th>'
+            + '<th>Lần mượn gần nhất</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center"><span class="badge bg-primary">' + r.stt + '</span></td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong class="text-primary"><i class="fa fa-heart text-danger me-1"></i> ' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td>' + (r.publisher || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.class || '') + '</span></td>'
+                + '<td class="text-end font-weight-bold text-success" style="font-size: 14.5px;">' + (r.loans || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td><small class="text-muted">' + (r.last_issue || '') + '</small></td>'
+                + '</tr>';
+        });
+    }
+
+    // 2.7 Thống kê tác giả được yêu thích
+    else if (currentReportId === 'circ_popular_authors') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">Top</th>'
+            + '<th>Tên tác giả</th>'
+            + '<th>Khoa / Đơn vị công tác</th>'
+            + '<th class="text-end">Số đầu sách tại thư viện</th>'
+            + '<th class="text-end">Tổng lượt mượn</th>'
+            + '<th class="text-end">Số bạn đọc tiếp cận</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center"><span class="badge bg-info text-dark">' + r.stt + '</span></td>'
+                + '<td><strong><i class="fa fa-user-edit text-primary me-1"></i> ' + (r.author || '') + '</strong></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.dept || '') + '</span></td>'
+                + '<td class="text-end font-weight-bold">' + (r.title_count || 0) + '</td>'
+                + '<td class="text-end text-success font-weight-bold" style="font-size: 14.5px;">' + (r.loans || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold">' + (r.reader_count || 0).toLocaleString('vi-VN') + '</td>'
+                + '</tr>';
+        });
+    }
+
+    // 2.8 Thống kê tài liệu mượn, trả vào kho
+    else if (currentReportId === 'circ_shelving_cart') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Ngày ghi nhận</th>'
+            + '<th>Kho xếp giá lưu trữ</th>'
+            + '<th class="text-end">Lượt mượn ra</th>'
+            + '<th class="text-end">Lượt trả về kho</th>'
+            + '<th class="text-end">Chờ xếp giá</th>'
+            + '<th class="text-end">Tồn kho khả dụng</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong><i class="fa fa-calendar-day text-muted me-1"></i> ' + (r.date || '') + '</strong></td>'
+                + '<td><strong><i class="fa fa-warehouse text-warning me-1"></i> ' + (r.location || '') + '</strong></td>'
+                + '<td class="text-end text-primary font-weight-bold">' + (r.checkouts || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.checkins || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-warning font-weight-bold">' + (r.shelving || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-info font-weight-bold">' + (r.stock || 0).toLocaleString('vi-VN') + '</td>'
+                + '</tr>';
+        });
+    }
+
+    // 2.9 Thống kê mượn tài liệu của bạn đọc
+    else if (currentReportId === 'circ_patron_loans') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">Top</th>'
+            + '<th>Mã bạn đọc / MSSV</th>'
+            + '<th>Họ và tên bạn đọc</th>'
+            + '<th>Đối tượng</th>'
+            + '<th>Khoa / Khóa học</th>'
+            + '<th class="text-end">Tổng lượt mượn</th>'
+            + '<th class="text-end">Sách đang mượn</th>'
+            + '<th class="text-end">Sách đã trả</th>'
+            + '<th>Lần mượn gần nhất</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
+                + '<td><code>' + (r.patron_id || '') + '</code></td>'
+                + '<td><strong><i class="fa fa-user-graduate text-primary me-1"></i> ' + (r.patron_name || '') + '</strong></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.role || '') + '</span></td>'
+                + '<td>' + (r.faculty || '') + '</td>'
+                + '<td class="text-end font-weight-bold text-primary" style="font-size: 14.5px;">' + (r.total_loans || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-warning font-weight-bold">' + (r.active_loans || 0) + '</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.return_count || 0) + '</td>'
+                + '<td><small class="text-muted">' + (r.last_loan || '') + '</small></td>'
+                + '</tr>';
+        });
+    }
+
+    // 2.10 Thống kê lịch sử mượn - trả của tài liệu
+    else if (currentReportId === 'circ_doc_history') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Mã vạch sách</th>'
+            + '<th>Nhan đề tài liệu</th>'
+            + '<th>Bạn đọc mượn</th>'
+            + '<th>Ngày mượn</th>'
+            + '<th>Hạn trả</th>'
+            + '<th>Ngày trả thực tế</th>'
+            + '<th>Thủ thư thực hiện</th>'
+            + '<th class="text-center">Trạng thái</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            var stBadge = r.status === 'Đã trả đúng hạn' ? '<span class="badge bg-success"><i class="fa fa-check-circle"></i> Đã trả</span>' :
+                          r.status === 'Quá hạn' ? '<span class="badge bg-danger"><i class="fa fa-exclamation-triangle"></i> Quá hạn</span>' :
+                          '<span class="badge bg-primary"><i class="fa fa-book-reader"></i> Đang mượn</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><code>' + (r.barcode || '') + '</code></td>'
+                + '<td><strong>' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.patron || '') + '</td>'
+                + '<td>' + (r.issue_date || '') + '</td>'
+                + '<td>' + (r.due_date || '') + '</td>'
+                + '<td>' + (r.ret_date || '') + '</td>'
+                + '<td><small class="text-muted">' + (r.staff || '') + '</small></td>'
+                + '<td class="text-center">' + stBadge + '</td>'
+                + '</tr>';
+        });
     }
 }
 
