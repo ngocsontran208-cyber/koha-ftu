@@ -34,10 +34,10 @@
  [% WRAPPER tabs id= "reports_tabs" %]
   [% WRAPPER tabs_nav %]
    [% WRAPPER tab_item tabname= "predefined" bt_active= (active_tab == 'predefined' || !active_tab) %]
-    <i class="fa fa-star text-warning"></i> <span>Báo cáo có sẵn</span>
+    <span>Báo cáo có sẵn</span>
    [% END %]
    [% WRAPPER tab_item tabname= "standard" bt_active= (active_tab == 'standard') %]
-    <i class="fa fa-cogs text-secondary"></i> <span>Báo cáo chuẩn Koha & SQL</span>
+    <span>Báo cáo chuẩn Koha & SQL</span>
    [% END %]
   [% END # /WRAPPER tabs_nav %]
 

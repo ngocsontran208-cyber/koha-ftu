@@ -40,13 +40,13 @@
  <div class="d-flex justify-content-between align-items-center mb-3">
      <div>
          <h1 class="h2 mb-1" style="font-weight: 700; color: #1e293b;">
-             <i class="fa fa-chart-line text-primary"></i> Phân hệ Báo cáo Thư viện FTU
+             Phân hệ Báo cáo Thư viện FTU
          </h1>
          <span class="text-muted">Hệ thống báo cáo tự động tích hợp Koha ILS & DRM Service</span>
      </div>
      <div>
          <a href="/cgi-bin/koha/reports/reports-home.pl?tab=standard" class="btn btn-outline-secondary btn-sm">
-             <i class="fa fa-cogs"></i> Chuyển sang Báo cáo chuẩn Koha & SQL
+             Chuyển sang Báo cáo chuẩn Koha & SQL
          </a>
      </div>
  </div>

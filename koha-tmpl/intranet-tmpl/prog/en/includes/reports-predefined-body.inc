@@ -234,7 +234,7 @@
     <div class="col-md-3 col-lg-3 mb-3">
         <div class="ftu-report-tree-card">
             <div class="ftu-tree-root">
-                <i class="fa fa-star"></i> Báo cáo
+                Báo cáo
             </div>
             <ul class="ftu-tree-list">
                 <li class="ftu-tree-item active">
@@ -276,7 +276,7 @@
                     Báo cáo thống kê truy cập tài liệu số
                 </h4>
                 <span class="badge bg-light text-dark border">
-                    <i class="fa fa-calendar-alt text-muted"></i> Ngày: [% today | html %]
+                    Ngày: [% today | html %]
                 </span>
             </div>
 
@@ -335,13 +335,13 @@
                     <input type="hidden" id="filter_branch" value="CPL" />
                     <div class="col-md-6 text-end">
                         <button type="button" class="btn btn-primary btn-sm" onclick="loadReportData()">
-                            <i class="fa fa-search"></i> Xem báo cáo
+                            Xem báo cáo
                         </button>
                         <button type="button" class="btn btn-success btn-sm ms-1" onclick="exportExcel()">
-                            <i class="fa fa-file-excel"></i> Xuất Excel
+                            Xuất Excel
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm ms-1" onclick="printReport()">
-                            <i class="fa fa-print"></i> In
+                            In
                         </button>
                     </div>
                 </div>
@@ -566,7 +566,7 @@ function switchCategory(cat) {
         document.getElementById('selected_label').textContent = '--- Chọn ---';
         document.getElementById('options_list').innerHTML = '<li class="ftu-dropdown-option" data-id="" onclick="selectReport(\'\', \'--- Chọn ---\')">--- Chọn ---</li>';
         document.getElementById('report_table_head').innerHTML = '';
-        document.getElementById('report_table_body').innerHTML = '<tr><td class="text-center py-4 text-muted"><i class="fa fa-info-circle text-primary"></i> Danh mục <strong>' + catName + '</strong> đang được kết nối dữ liệu. Vui lòng chuyển sang <strong>Báo cáo lưu thông</strong> hoặc <strong>Báo cáo thống kê truy cập tài liệu số</strong>.</td></tr>';
+        document.getElementById('report_table_body').innerHTML = '<tr><td class="text-center py-4 text-muted">Danh mục <strong>' + catName + '</strong> đang được kết nối dữ liệu. Vui lòng chuyển sang <strong>Báo cáo lưu thông</strong> hoặc <strong>Báo cáo thống kê truy cập tài liệu số</strong>.</td></tr>';
         document.getElementById('report_table_foot').innerHTML = '';
     }
 }
@@ -598,7 +598,7 @@ function loadReportData() {
             document.getElementById('loading_indicator').classList.add('d-none');
             document.getElementById('report_table').classList.remove('opacity-50');
             console.error('Error fetching report:', err);
-            document.getElementById('report_table_body').innerHTML = '<tr><td colspan="10" class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle"></i> Lỗi nạp số liệu: ' + err.message + '</td></tr>';
+            document.getElementById('report_table_body').innerHTML = '<tr><td colspan="10" class="text-center text-danger py-4">Lỗi nạp số liệu: ' + err.message + '</td></tr>';
         });
 }
 
@@ -617,7 +617,7 @@ function renderTable(res) {
     tfoot.innerHTML = '';
 
     if (rows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted"><i class="fa fa-info-circle"></i> Không tìm thấy bản ghi nào phù hợp với bộ lọc trong khoảng thời gian đã chọn.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">Không tìm thấy bản ghi nào phù hợp với bộ lọc trong khoảng thời gian đã chọn.</td></tr>';
         return;
     }
 
@@ -640,16 +640,16 @@ function renderTable(res) {
             + '</tr>';
 
         rows.forEach(function(r) {
-            var statusBadge = r.status_text === 'Đang hoạt động' ? '<span class="badge-active"><i class="fa fa-check-circle"></i> Đang hoạt động</span>' :
-                              r.status_text === 'Đã hết phiên' ? '<span class="badge-expired"><i class="fa fa-clock"></i> Hết hạn</span>' :
-                              '<span class="badge-revoked"><i class="fa fa-ban"></i> Thu hồi</span>';
+            var statusBadge = r.status_text === 'Đang hoạt động' ? '<span class="badge-active">Đang hoạt động</span>' :
+                              r.status_text === 'Đã hết phiên' ? '<span class="badge-expired">Hết hạn</span>' :
+                              '<span class="badge-revoked">Thu hồi</span>';
 
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><code>' + (r.patron_id || '') + '</code></td>'
                 + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role_label || '') + '</span></td>'
-                + '<td><i class="fa fa-book text-muted me-1"></i> ' + (r.document_title || '') + '</td>'
+                + '<td>' + (r.document_title || '') + '</td>'
                 + '<td><small class="text-muted">' + (r.client_ip || '') + '</small></td>'
                 + '<td>' + (r.issued_at || '') + '</td>'
                 + '<td>' + (r.last_heartbeat || '') + '</td>'
@@ -683,7 +683,7 @@ function renderTable(res) {
 
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><strong><i class="fa fa-calendar-day text-primary me-1"></i> ' + (r.access_date || '') + '</strong></td>'
+                + '<td><strong>' + (r.access_date || '') + '</strong></td>'
                 + '<td class="text-end font-weight-bold">' + (r.total_sessions || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-primary">' + (r.total_loans || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end">' + (r.unique_users || 0).toLocaleString('vi-VN') + '</td>'
@@ -717,7 +717,7 @@ function renderTable(res) {
         rows.forEach(function(r) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
-                + '<td><strong class="text-primary"><i class="fa fa-file-pdf text-danger me-1"></i> ' + (r.title || '') + '</strong></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
                 + '<td>' + (r.author || '') + '</td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.collection_name || '') + '</span></td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.loan_count || 0) + '</td>'
@@ -744,7 +744,7 @@ function renderTable(res) {
         rows.forEach(function(r) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-primary">' + r.stt + '</span></td>'
-                + '<td><strong><i class="fa fa-book-reader text-primary me-1"></i> ' + (r.title || '') + '</strong></td>'
+                + '<td><strong>' + (r.title || '') + '</strong></td>'
                 + '<td>' + (r.author || '') + '</td>'
                 + '<td class="text-end text-primary font-weight-bold">' + (r.session_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end">' + (r.reader_count || 0) + '</td>'
@@ -777,7 +777,7 @@ function renderTable(res) {
 
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><strong><i class="fa fa-calendar-alt text-primary me-1"></i> ' + (r.visit_date || '') + '</strong></td>'
+                + '<td><strong>' + (r.visit_date || '') + '</strong></td>'
                 + '<td class="text-end text-success">' + (r.login_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-info">' + (r.search_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-secondary">' + (r.detail_views || 0).toLocaleString('vi-VN') + '</td>'
@@ -813,7 +813,7 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
                 + '<td><code>' + (r.patron_id || '') + '</code></td>'
-                + '<td><strong><i class="fa fa-user-graduate text-muted me-1"></i> ' + (r.patron_name || '') + '</strong></td>'
+                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role_label || '') + '</span></td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.loan_count || 0) + '</td>'
                 + '<td class="text-end text-info font-weight-bold">' + (r.session_count || 0) + '</td>'
@@ -844,7 +844,7 @@ function renderTable(res) {
 
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><strong><i class="fa fa-folder-open text-warning me-1"></i> ' + (r.name || '') + '</strong></td>'
+                + '<td><strong>' + (r.name || '') + '</strong></td>'
                 + '<td class="text-end font-weight-bold">' + (r.total_items || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.loans || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-info font-weight-bold">' + (r.reads || 0).toLocaleString('vi-VN') + '</td>'
@@ -885,7 +885,7 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><code>' + (r.code || '') + '</code></td>'
-                + '<td><strong><i class="fa fa-bookmark text-primary me-1"></i> ' + (r.name || '') + '</strong></td>'
+                + '<td><strong>' + (r.name || '') + '</strong></td>'
                 + '<td class="text-end">' + (r.title_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end font-weight-bold text-success">' + (r.item_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-primary font-weight-bold">' + (r.ratio || '') + '</td>'
@@ -955,11 +955,11 @@ function renderTable(res) {
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><code>' + (r.barcode || '') + '</code></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.callnumber || '') + '</span></td>'
-                + '<td><strong class="text-primary"><i class="fa fa-book me-1"></i> ' + (r.title || '') + '</strong></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
                 + '<td>' + (r.author || '') + '</td>'
                 + '<td class="text-center">' + (r.year || '') + '</td>'
                 + '<td>' + (r.location || '') + '</td>'
-                + '<td class="text-center"><span class="badge bg-warning text-dark"><i class="fa fa-clock me-1"></i> ' + (r.unused_days || 0) + ' ngày</span></td>'
+                + '<td class="text-center"><span class="badge bg-warning text-dark">' + (r.unused_days || 0) + ' ngày</span></td>'
                 + '</tr>';
         });
     }
@@ -985,7 +985,7 @@ function renderTable(res) {
 
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><strong><i class="fa fa-archive text-primary me-1"></i> ' + (r.name || '') + '</strong></td>'
+                + '<td><strong>' + (r.name || '') + '</strong></td>'
                 + '<td class="text-end font-weight-bold">' + (r.titles || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end font-weight-bold text-primary">' + (r.items || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-warning font-weight-bold">' + (r.loaned || 0).toLocaleString('vi-VN') + '</td>'
@@ -1023,13 +1023,13 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><code>' + (r.cardnumber || '') + '</code></td>'
-                + '<td><strong><i class="fa fa-user-graduate text-danger me-1"></i> ' + (r.patron_name || '') + '</strong></td>'
+                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role || '') + '</span></td>'
                 + '<td><code>' + (r.barcode || '') + '</code></td>'
                 + '<td><strong>' + (r.title || '') + '</strong></td>'
                 + '<td>' + (r.issue_date || '') + '</td>'
                 + '<td><span class="text-danger font-weight-bold">' + (r.due_date || '') + '</span></td>'
-                + '<td class="text-center"><span class="badge bg-danger"><i class="fa fa-exclamation-circle me-1"></i> ' + (r.overdue_days || 0) + ' ngày</span></td>'
+                + '<td class="text-center"><span class="badge bg-danger">' + (r.overdue_days || 0) + ' ngày</span></td>'
                 + '<td class="text-end font-weight-bold text-danger">' + (r.fine || '0') + ' đ</td>'
                 + '</tr>';
         });
@@ -1052,7 +1052,7 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-primary">' + r.stt + '</span></td>'
                 + '<td><code>' + (r.barcode || '') + '</code></td>'
-                + '<td><strong class="text-primary"><i class="fa fa-heart text-danger me-1"></i> ' + (r.title || '') + '</strong></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
                 + '<td>' + (r.author || '') + '</td>'
                 + '<td>' + (r.publisher || '') + '</td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.class || '') + '</span></td>'
@@ -1076,7 +1076,7 @@ function renderTable(res) {
         rows.forEach(function(r) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-info text-dark">' + r.stt + '</span></td>'
-                + '<td><strong><i class="fa fa-user-edit text-primary me-1"></i> ' + (r.author || '') + '</strong></td>'
+                + '<td><strong>' + (r.author || '') + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.dept || '') + '</span></td>'
                 + '<td class="text-end font-weight-bold">' + (r.title_count || 0) + '</td>'
                 + '<td class="text-end text-success font-weight-bold" style="font-size: 14.5px;">' + (r.loans || 0).toLocaleString('vi-VN') + '</td>'
@@ -1100,8 +1100,8 @@ function renderTable(res) {
         rows.forEach(function(r) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><strong><i class="fa fa-calendar-day text-muted me-1"></i> ' + (r.date || '') + '</strong></td>'
-                + '<td><strong><i class="fa fa-warehouse text-warning me-1"></i> ' + (r.location || '') + '</strong></td>'
+                + '<td><strong>' + (r.date || '') + '</strong></td>'
+                + '<td><strong>' + (r.location || '') + '</strong></td>'
                 + '<td class="text-end text-primary font-weight-bold">' + (r.checkouts || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.checkins || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-warning font-weight-bold">' + (r.shelving || 0).toLocaleString('vi-VN') + '</td>'
@@ -1128,7 +1128,7 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
                 + '<td><code>' + (r.patron_id || '') + '</code></td>'
-                + '<td><strong><i class="fa fa-user-graduate text-primary me-1"></i> ' + (r.patron_name || '') + '</strong></td>'
+                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role || '') + '</span></td>'
                 + '<td>' + (r.faculty || '') + '</td>'
                 + '<td class="text-end font-weight-bold text-primary" style="font-size: 14.5px;">' + (r.total_loans || 0).toLocaleString('vi-VN') + '</td>'
@@ -1154,9 +1154,9 @@ function renderTable(res) {
             + '</tr>';
 
         rows.forEach(function(r) {
-            var stBadge = r.status === 'Đã trả đúng hạn' ? '<span class="badge bg-success"><i class="fa fa-check-circle"></i> Đã trả</span>' :
-                          r.status === 'Quá hạn' ? '<span class="badge bg-danger"><i class="fa fa-exclamation-triangle"></i> Quá hạn</span>' :
-                          '<span class="badge bg-primary"><i class="fa fa-book-reader"></i> Đang mượn</span>';
+            var stBadge = r.status === 'Đã trả đúng hạn' ? '<span class="badge bg-success">Đã trả</span>' :
+                          r.status === 'Quá hạn' ? '<span class="badge bg-danger">Quá hạn</span>' :
+                          '<span class="badge bg-primary">Đang mượn</span>';
 
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
