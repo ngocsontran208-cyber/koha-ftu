@@ -181,41 +181,6 @@
     border: 1px solid #e2e8f0;
     border-radius: 5px;
     padding: 12px 16px;
-    margin-bottom: 16px;
-}
-
-.ftu-stat-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.ftu-stat-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #1a73e8;
-    border-radius: 4px;
-    padding: 10px 14px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-}
-
-.ftu-stat-card.green { border-left-color: #10b981; }
-.ftu-stat-card.amber { border-left-color: #f59e0b; }
-.ftu-stat-card.purple { border-left-color: #8b5cf6; }
-
-.ftu-stat-title {
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.ftu-stat-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-top: 3px;
 }
 
 .table-ftu-report {
@@ -405,26 +370,6 @@
                     </p>
                 </div>
 
-                <!-- THẺ TỔNG HỢP NHANH (METRIC CARDS) -->
-                <div class="ftu-stat-cards no-print" id="metric_cards_area">
-                    <div class="ftu-stat-card">
-                        <div class="ftu-stat-title">Tổng số bản ghi</div>
-                        <div class="ftu-stat-value" id="card_total_records">0</div>
-                    </div>
-                    <div class="ftu-stat-card green">
-                        <div class="ftu-stat-title" id="card_title_sessions">Tổng lượt / Phiên</div>
-                        <div class="ftu-stat-value" id="card_total_sessions">0</div>
-                    </div>
-                    <div class="ftu-stat-card amber">
-                        <div class="ftu-stat-title">Bạn đọc tiếp cận</div>
-                        <div class="ftu-stat-value" id="card_total_users">0</div>
-                    </div>
-                    <div class="ftu-stat-card purple">
-                        <div class="ftu-stat-title">Tài liệu số / BST</div>
-                        <div class="ftu-stat-value" id="card_total_docs">0</div>
-                    </div>
-                </div>
-
                 <!-- BẢNG DỮ LIỆU BÁO CÁO -->
                 <div class="table-responsive">
                     <div id="loading_indicator" class="text-center py-4 d-none">
@@ -603,12 +548,6 @@ function loadReportData() {
 function renderTable(res) {
     var rows = res.rows || [];
     var summary = res.summary || {};
-
-    // Cập nhật Cards
-    document.getElementById('card_total_records').textContent = rows.length;
-    document.getElementById('card_total_sessions').textContent = (summary.total_sessions || 0).toLocaleString('vi-VN');
-    document.getElementById('card_total_users').textContent = (summary.total_users || 0).toLocaleString('vi-VN');
-    document.getElementById('card_total_docs').textContent = (summary.total_docs || 0).toLocaleString('vi-VN');
 
     // Cập nhật tiêu đề in
     document.getElementById('print_report_title').textContent = currentReportTitle;
