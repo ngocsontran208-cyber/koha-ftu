@@ -1,5 +1,14 @@
 [% USE Koha %]
 <div id="reports-menu" class="sidebar_menu">
+ <h5><i class="fa fa-star text-warning"></i> Báo cáo có sẵn</h5>
+ <ul>
+ <li><a href="/cgi-bin/koha/reports/digital-reports.pl"><strong>Báo cáo thống kê truy cập tài liệu số</strong></a></li>
+ <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=circ">Báo cáo lưu thông</a></li>
+ <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=digital_docs">Báo cáo tài liệu số</a></li>
+ <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=inventory">Báo cáo kho</a></li>
+ <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=serials">Báo cáo báo tạp chí</a></li>
+ </ul>
+
  <h5>Hướng dẫn tạo báo cáo</h5>
  <ul>
  <li><a href="/cgi-bin/koha/reports/guided_reports.pl">Hướng dẫn tạo báo cáo</a></li>

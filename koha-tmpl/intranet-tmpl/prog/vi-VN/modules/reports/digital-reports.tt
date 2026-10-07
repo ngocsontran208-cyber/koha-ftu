@@ -1,0 +1,60 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Branches %]
+[% PROCESS 'i18n.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ [% t("Báo cáo tài liệu số - Báo cáo có sẵn") | html %]
+ &rsaquo; [% t("Báo cáo") | html %]
+ &rsaquo; [% t("Koha") | html %]
+ [% END %]</title
+>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body id="rep_digital_reports" class="rep">
+[% WRAPPER 'header.inc' %]
+ [% INCLUDE 'circ-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/reports-home.pl">Báo cáo</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/reports/reports-home.pl?tab=predefined">Báo cáo có sẵn</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Báo cáo tài liệu số</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
+
+<div class="main container-fluid">
+ <div class="row">
+ <div class="col-12">
+ [% INCLUDE 'messages.inc' %]
+
+ <!-- Tiêu đề phân hệ & Tab chuyển đổi -->
+ <div class="d-flex justify-content-between align-items-center mb-3">
+     <div>
+         <h1 class="h2 mb-1" style="font-weight: 700; color: #1e293b;">
+             <i class="fa fa-chart-line text-primary"></i> Phân hệ Báo cáo Thư viện FTU
+         </h1>
+         <span class="text-muted">Hệ thống báo cáo tự động tích hợp Koha ILS & DRM Service</span>
+     </div>
+     <div>
+         <a href="/cgi-bin/koha/reports/reports-home.pl?tab=standard" class="btn btn-outline-secondary btn-sm">
+             <i class="fa fa-cogs"></i> Chuyển sang Báo cáo chuẩn Koha & SQL
+         </a>
+     </div>
+ </div>
+
+ [% PROCESS 'reports-predefined-body.inc' %]
+
+ </div>
+ </div>
+</div>
+
+[% INCLUDE 'intranet-bottom.inc' %]

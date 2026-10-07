@@ -22,6 +22,8 @@ use CGI        qw ( -utf8 );
 use C4::Auth   qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 
+use POSIX qw( strftime );
+
 my $query = CGI->new;
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -31,4 +33,17 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         flagsrequired => { reports => '*' },
     }
 );
+
+my $tab = $query->param('tab') || 'predefined';
+my $today = POSIX::strftime("%d/%m/%Y", localtime);
+my $from_date = '2026-09-01';
+my $to_date   = POSIX::strftime("%Y-%m-%d", localtime);
+
+$template->param(
+    active_tab => $tab,
+    today      => $today,
+    from_date  => $from_date,
+    to_date    => $to_date,
+);
+
 output_html_with_http_headers $query, $cookie, $template->output;
