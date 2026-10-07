@@ -163,6 +163,201 @@
     -webkit-backdrop-filter: blur(10px) !important;
 }
 
+/* ==========================================================================
+   Modern Balanced Service Cards (4 Ô Tiện Ích Hiện Đại & Cân Đối)
+   ========================================================================== */
+.ftu-shortcuts-section {
+    padding-top: 0.75rem !important;
+    padding-bottom: 2rem !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.ftu-shortcuts-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 1.25rem !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+}
+
+.ftu-shortcut-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 1.15rem 1.35rem !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.85) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    text-decoration: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.ftu-shortcut-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 4px !important;
+    height: 100% !important;
+    background: transparent !important;
+    transition: background 0.25s ease !important;
+}
+
+.ftu-shortcut-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 28px rgba(185, 28, 28, 0.09), 0 4px 10px rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(244, 63, 94, 0.35) !important;
+    background: #ffffff !important;
+}
+
+.ftu-shortcut-card:hover::before {
+    background: #b91c1c !important;
+}
+
+.ftu-shortcut-icon-box {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.35rem !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    transition: all 0.25s ease !important;
+}
+
+.ftu-shortcut-card:hover .ftu-shortcut-icon-box {
+    transform: scale(1.08) !important;
+}
+
+.ftu-shortcut-icon-box.icon-rose {
+    background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%) !important;
+    color: #e11d48 !important;
+    border: 1px solid #fecdd3 !important;
+}
+
+.ftu-shortcut-icon-box.icon-emerald {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    color: #059669 !important;
+    border: 1px solid #a7f3d0 !important;
+}
+
+.ftu-shortcut-icon-box.icon-amber {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    color: #d97706 !important;
+    border: 1px solid #fde68a !important;
+}
+
+.ftu-shortcut-icon-box.icon-blue {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    color: #2563eb !important;
+    border: 1px solid #bfdbfe !important;
+}
+
+.ftu-card-badge {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 9999px !important;
+    line-height: 1 !important;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45) !important;
+}
+
+.ftu-card-count {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    background: #d97706 !important;
+    color: #ffffff !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    min-width: 19px !important;
+    height: 19px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 2px solid #ffffff !important;
+}
+
+.ftu-shortcut-text {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    min-width: 0 !important;
+}
+
+.ftu-shortcut-heading {
+    font-size: 0.96rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    letter-spacing: -0.015em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    transition: color 0.2s ease !important;
+}
+
+.ftu-shortcut-card:hover .ftu-shortcut-heading {
+    color: #b91c1c !important;
+}
+
+.ftu-shortcut-sub {
+    font-size: 0.78rem !important;
+    color: #64748b !important;
+    margin-top: 3px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.35 !important;
+}
+
+.ftu-shortcut-arrow {
+    font-size: 0.85rem !important;
+    color: #cbd5e1 !important;
+    flex-shrink: 0 !important;
+    transition: all 0.25s ease !important;
+}
+
+.ftu-shortcut-card:hover .ftu-shortcut-arrow {
+    color: #b91c1c !important;
+    transform: translateX(4px) !important;
+}
+
+@media (max-width: 1100px) {
+    .ftu-shortcuts-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .ftu-shortcuts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    .ftu-shortcut-card {
+        padding: 0.95rem 1.15rem !important;
+    }
+    .ftu-shortcut-icon-box {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1.2rem !important;
+    }
+}
+
 /* Subtle Motion Keyframes */
 @keyframes ftuOrbFloat1 {
     0% { transform: translate(0, 0) scale(1); }
@@ -371,36 +566,52 @@
         </div>
     </section>
 
-    <!-- MODERN APP-STYLE QUICK SHORTCUTS (Cực kỳ tinh gọn, thẩm mỹ cao cấp) -->
+    <!-- MODERN BALANCED SHORTCUT SERVICES CARDS (4 ô cân đối, hiện đại, bố cục tràn đều) -->
     <div class="ftu-section-container ftu-shortcuts-section">
-       <div class="ftu-app-shortcuts-bar">
-           <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-app-shortcut-item">
-               <div class="ftu-app-squircle icon-rose">
+       <div class="ftu-shortcuts-grid">
+           <a href="/cgi-bin/koha/opac-search.pl?q=*" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon-box icon-rose">
                    <i class="fa fa-book-open"></i>
-                   <span class="ftu-squircle-badge">Mới</span>
+                   <span class="ftu-card-badge">Mới</span>
                </div>
-               <span class="ftu-app-label">Sách mới</span>
+               <div class="ftu-shortcut-text">
+                   <span class="ftu-shortcut-heading">Sách mới cập nhật</span>
+                   <span class="ftu-shortcut-sub">Tài liệu số & sách in mới</span>
+               </div>
+               <i class="fa fa-arrow-right ftu-shortcut-arrow"></i>
            </a>
-           <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-app-shortcut-item">
-               <div class="ftu-app-squircle icon-emerald">
+           <a href="/cgi-bin/koha/opac-readingrecord.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon-box icon-emerald">
                    <i class="fa fa-history"></i>
                </div>
-               <span class="ftu-app-label">Lịch sử</span>
+               <div class="ftu-shortcut-text">
+                   <span class="ftu-shortcut-heading">Lịch sử mượn trả</span>
+                   <span class="ftu-shortcut-sub">Nhật ký đọc & lưu thông</span>
+               </div>
+               <i class="fa fa-arrow-right ftu-shortcut-arrow"></i>
            </a>
-           <a href="/cgi-bin/koha/opac-user.pl" class="ftu-app-shortcut-item">
-               <div class="ftu-app-squircle icon-amber">
+           <a href="/cgi-bin/koha/opac-user.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon-box icon-amber">
                    <i class="fa fa-id-card"></i>
                    [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
-                   <span class="ftu-squircle-count">[% logged_in_user.checkouts.count %]</span>
+                   <span class="ftu-card-count">[% logged_in_user.checkouts.count %]</span>
                    [% END %]
                </div>
-               <span class="ftu-app-label">Tài khoản</span>
+               <div class="ftu-shortcut-text">
+                   <span class="ftu-shortcut-heading">Tài khoản bạn đọc</span>
+                   <span class="ftu-shortcut-sub">Hạn mượn & gia hạn sách</span>
+               </div>
+               <i class="fa fa-arrow-right ftu-shortcut-arrow"></i>
            </a>
-           <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-app-shortcut-item">
-               <div class="ftu-app-squircle icon-blue">
+           <a href="/cgi-bin/koha/opac-shelves.pl" class="ftu-shortcut-card">
+               <div class="ftu-shortcut-icon-box icon-blue">
                    <i class="fa fa-bookmark"></i>
                </div>
-               <span class="ftu-app-label">Giá sách</span>
+               <div class="ftu-shortcut-text">
+                   <span class="ftu-shortcut-heading">Giá sách cá nhân</span>
+                   <span class="ftu-shortcut-sub">Bộ sưu tập & mục yêu thích</span>
+               </div>
+               <i class="fa fa-arrow-right ftu-shortcut-arrow"></i>
            </a>
        </div>
     </div>
