@@ -1445,37 +1445,61 @@
                                     </div>
                                 </div>
 
-                                <!-- CARD 2: MẠNG XÃ HỘI & KÊNH TRUYỀN THÔNG -->
+                                <!-- CARD 2: MẠNG XÃ HỘI & KÊNH TRUYỀN THÔNG (HIỂN THỊ CHÂN TRANG) -->
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
-                                            2. Mạng Xã Hội &amp; Kênh Truyền Thông
+                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                            <i class="fa fa-share-alt text-primary"></i> 2. Social Media &amp; Channels (Footer Icons)
                                         </h4>
+                                        <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 600;">FB, YouTube, Web Icons</span>
                                     </div>
                                     <div class="panel-body" style="padding: 18px 20px;">
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
-                                                Link Facebook Fanpage:
+                                        
+                                        <!-- Facebook -->
+                                        <div class="form-group" style="margin-bottom: 14px;">
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1877f2; color: #fff; font-size: 12px;">
+                                                    <i class="fa-brands fa-facebook-f fa fa-facebook-f"></i>
+                                                </span>
+                                                Facebook Fanpage Link:
                                             </label>
-                                            <input type="url" name="link_facebook" class="form-control" value="[% footer_cfg.link_facebook | html %]" placeholder="https://www.facebook.com/..." />
+                                            <input type="url" name="link_facebook" class="form-control" value="[% footer_cfg.link_facebook || 'https://www.facebook.com/ftu2.hcmc' | html %]" placeholder="https://www.facebook.com/ftu2.hcmc" />
+                                            <small class="text-muted" style="display: block; margin-top: 3px;">Displays circular blue Facebook icon button in the footer</small>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
-                                                Link Kênh YouTube:
+
+                                        <!-- YouTube -->
+                                        <div class="form-group" style="margin-bottom: 14px;">
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #ef4444; color: #fff; font-size: 12px;">
+                                                    <i class="fa-brands fa-youtube fa fa-youtube-play"></i>
+                                                </span>
+                                                YouTube Channel Link:
                                             </label>
-                                            <input type="url" name="link_youtube" class="form-control" value="[% footer_cfg.link_youtube | html %]" placeholder="https://www.youtube.com/@..." />
+                                            <input type="url" name="link_youtube" class="form-control" value="[% footer_cfg.link_youtube || 'https://www.youtube.com/@FTUChannel' | html %]" placeholder="https://www.youtube.com/@FTUChannel" />
+                                            <small class="text-muted" style="display: block; margin-top: 3px;">Displays circular red YouTube icon button in the footer</small>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
-                                                Email liên hệ chính:
+
+                                        <!-- Cổng thông tin Website FTU -->
+                                        <div class="form-group" style="margin-bottom: 14px;">
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #0284c7; color: #fff; font-size: 12px;">
+                                                    <i class="fa-solid fa-globe fa fa-globe"></i>
+                                                </span>
+                                                FTU Campus Portal Website Link:
                                             </label>
-                                            <input type="email" name="email_contact" class="form-control" value="[% footer_cfg.email_contact | html %]" placeholder="thuvien@ftu.edu.vn" />
+                                            <input type="url" name="link_portal" class="form-control" value="[% footer_cfg.link_portal || 'https://hcmc.ftu.edu.vn' | html %]" placeholder="https://hcmc.ftu.edu.vn" />
+                                            <small class="text-muted" style="display: block; margin-top: 3px;">Displays circular globe Web icon button in the footer</small>
                                         </div>
+
+                                        <!-- Email -->
                                         <div class="form-group" style="margin-bottom: 0;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
-                                                Link Cổng thông tin Trường ĐH Ngoại thương:
+                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #b91c1c; color: #fff; font-size: 12px;">
+                                                    <i class="fa fa-envelope"></i>
+                                                </span>
+                                                Primary Contact Email:
                                             </label>
-                                            <input type="url" name="link_portal" class="form-control" value="[% footer_cfg.link_portal | html %]" placeholder="https://hcmc.ftu.edu.vn" />
+                                            <input type="email" name="email_contact" class="form-control" value="[% footer_cfg.email_contact || 'tv.hcmc@ftu.edu.vn' | html %]" placeholder="tv.hcmc@ftu.edu.vn" />
                                         </div>
                                     </div>
                                 </div>

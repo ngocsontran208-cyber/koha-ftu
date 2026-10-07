@@ -84,17 +84,24 @@
                         </div>
 
                         <!-- Mạng xã hội & Kênh kết nối: FB, YouTube, Web -->
-                        <div class="d-flex align-items-center ftu-social-row mt-2 pt-1" style="gap: 10px;">
-                            <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b; margin-right: 4px;">Kênh kết nối:</span>
-                            <a href="[% FTU_BRAND.link_facebook || 'https://www.facebook.com/ftu2.hcmc' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-btn ftu-social-fb" title="Facebook Thư viện FTU" aria-label="Facebook">
-                                <i class="fa-brands fa-facebook-f fa fa-facebook-f" aria-hidden="true"></i>
-                            </a>
-                            <a href="[% FTU_BRAND.link_youtube || 'https://www.youtube.com/@FTUChannel' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-btn ftu-social-yt" title="Kênh YouTube FTU" aria-label="YouTube">
-                                <i class="fa-brands fa-youtube fa fa-youtube-play" aria-hidden="true"></i>
-                            </a>
-                            <a href="[% FTU_BRAND.link_portal || 'https://hcmc.ftu.edu.vn' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-btn ftu-social-web" title="Cổng thông tin Website Trường ĐH Ngoại thương" aria-label="Website">
-                                <i class="fa-solid fa-globe fa fa-globe" aria-hidden="true"></i>
-                            </a>
+                        <div class="ftu-social-connect-wrap mt-2 pt-2" style="border-top: 1px dashed #cbd5e1;">
+                            <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+                                <span class="ftu-social-heading" style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px;">
+                                    <i class="fa fa-share-alt" style="color: #b91c1c; font-size: 11px; margin-right: 3px;" aria-hidden="true"></i> Kết nối:
+                                </span>
+                                <a href="[% FTU_BRAND.link_facebook || 'https://www.facebook.com/ftu2.hcmc' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-fb" title="Fanpage Facebook Thư viện Cơ sở II FTU" aria-label="Facebook">
+                                    <span class="ftu-social-icon-box"><i class="fa-brands fa-facebook-f fa fa-facebook-f" style="color: #ffffff !important;" aria-hidden="true"></i></span>
+                                    <span class="ftu-social-text">Facebook</span>
+                                </a>
+                                <a href="[% FTU_BRAND.link_youtube || 'https://www.youtube.com/@FTUChannel' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-yt" title="Kênh YouTube FTU Official" aria-label="YouTube">
+                                    <span class="ftu-social-icon-box"><i class="fa-brands fa-youtube fa fa-youtube-play" style="color: #ffffff !important;" aria-hidden="true"></i></span>
+                                    <span class="ftu-social-text">YouTube</span>
+                                </a>
+                                <a href="[% FTU_BRAND.link_portal || 'https://hcmc.ftu.edu.vn' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-web" title="Cổng thông tin điện tử FTU Cơ sở II" aria-label="Website">
+                                    <span class="ftu-social-icon-box"><i class="fa-solid fa-globe fa fa-globe" style="color: #ffffff !important;" aria-hidden="true"></i></span>
+                                    <span class="ftu-social-text">Website</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -153,29 +160,103 @@
         </div>
 
         <style>
-            /* Icon mạng xã hội & liên kết chân trang */
-            .ftu-social-btn {
+            /* Kênh kết nối & Mạng xã hội chân trang - Thiết kế Pill Badge cao cấp */
+            .ftu-social-pill {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                padding: 4px 11px 4px 5px !important;
+                border-radius: 20px !important;
+                text-decoration: none !important;
+                font-size: 0.78rem !important;
+                font-weight: 600 !important;
+                transition: all 0.22s ease-in-out !important;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+                line-height: 1 !important;
+            }
+            .ftu-social-icon-box {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 32px !important;
-                height: 32px !important;
+                width: 24px !important;
+                height: 24px !important;
                 border-radius: 50% !important;
-                color: #ffffff !important;
-                text-decoration: none !important;
-                transition: all 0.2s ease-in-out !important;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
-                font-size: 14px !important;
+                flex-shrink: 0 !important;
             }
-            .ftu-social-btn:hover {
-                transform: translateY(-2px) scale(1.08) !important;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.22) !important;
+            .ftu-social-icon-box i,
+            .ftu-social-icon-box .fa,
+            .ftu-social-icon-box .fa-brands,
+            .ftu-social-icon-box .fa-solid {
                 color: #ffffff !important;
-                filter: brightness(1.1) !important;
+                font-size: 12px !important;
+                line-height: 1 !important;
             }
-            .ftu-social-fb { background: #1877f2 !important; }
-            .ftu-social-yt { background: #ef4444 !important; }
-            .ftu-social-web { background: #0284c7 !important; }
+            /* Facebook Pill */
+            .ftu-pill-fb {
+                background: #eff6ff !important;
+                border: 1px solid #bfdbfe !important;
+                color: #1d4ed8 !important;
+            }
+            .ftu-pill-fb .ftu-social-icon-box {
+                background: #1877f2 !important;
+            }
+            .ftu-pill-fb:hover {
+                background: #1877f2 !important;
+                border-color: #1877f2 !important;
+                color: #ffffff !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 10px rgba(24, 119, 242, 0.35) !important;
+            }
+            .ftu-pill-fb:hover .ftu-social-icon-box {
+                background: rgba(255, 255, 255, 0.25) !important;
+            }
+            .ftu-pill-fb:hover .ftu-social-text {
+                color: #ffffff !important;
+            }
+            /* YouTube Pill */
+            .ftu-pill-yt {
+                background: #fef2f2 !important;
+                border: 1px solid #fecaca !important;
+                color: #b91c1c !important;
+            }
+            .ftu-pill-yt .ftu-social-icon-box {
+                background: #ef4444 !important;
+            }
+            .ftu-pill-yt:hover {
+                background: #ef4444 !important;
+                border-color: #ef4444 !important;
+                color: #ffffff !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35) !important;
+            }
+            .ftu-pill-yt:hover .ftu-social-icon-box {
+                background: rgba(255, 255, 255, 0.25) !important;
+            }
+            .ftu-pill-yt:hover .ftu-social-text {
+                color: #ffffff !important;
+            }
+            /* Website Pill */
+            .ftu-pill-web {
+                background: #f0f9ff !important;
+                border: 1px solid #bae6fd !important;
+                color: #0369a1 !important;
+            }
+            .ftu-pill-web .ftu-social-icon-box {
+                background: #0284c7 !important;
+            }
+            .ftu-pill-web:hover {
+                background: #0284c7 !important;
+                border-color: #0284c7 !important;
+                color: #ffffff !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35) !important;
+            }
+            .ftu-pill-web:hover .ftu-social-icon-box {
+                background: rgba(255, 255, 255, 0.25) !important;
+            }
+            .ftu-pill-web:hover .ftu-social-text {
+                color: #ffffff !important;
+            }
 
             .ftu-footer-accordion summary,
             .ftu-footer-summary {
