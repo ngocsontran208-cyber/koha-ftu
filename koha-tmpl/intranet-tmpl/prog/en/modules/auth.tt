@@ -83,18 +83,6 @@
             <!-- /#StaffLoginInstructions -->
         [% END # /IF StaffLoginInstructions %]
 
-        [% IF ( nopermission ) %]
-            <div id="login_error" class="alert alert-warning" style="border-left: 4px solid #d9534f; background: #fff5f5; color: #a94442; padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5;">
-                <strong><i class="fa fa-shield"></i> Access Restriction:</strong><br />
-                Your account is a <strong>Patron / Student</strong> account. This is the <strong>Library Staff Interface</strong> reserved for librarians and administrative staff.
-                <div style="margin-top: 10px;">
-                    <a href="[% Koha.Preference('OPACBaseURL') || '' %]/cgi-bin/koha/opac-user.pl" class="btn btn-primary btn-sm" style="font-weight: 600; text-decoration: none;">
-                        <i class="fa fa-external-link"></i> Go to OPAC Patron Portal
-                    </a>
-                </div>
-            </div>
-            <p><strong>Or log in with another staff account:</strong></p>
-        [% END %]
 
         [% IF ( timed_out && !nopermission ) %]
             <div id="login_error"
@@ -282,12 +270,9 @@
             [% PROCESS registration_form %]
         [% END %]
 
-        [% IF ( nopermission ) %]
-            <p><a id="previous_page" href="javascript:window.history.back()">[Previous page]</a> <a id="mainpage" href="/">[Main page]</a></p>
-        [% END %]
         <!-- FTU Footer inside panel -->
         <div class="ftu-login-footer">
-            <p>Hệ thống Quản lý Thư viện &bull; <a href="http://ftu.edu.vn" target="_blank">ftu.edu.vn</a></p>
+            <p>Hệ thống Quản lý Thư viện &bull; <a href="https://hcmc.ftu.edu.vn" target="_blank">hcmc.ftu.edu.vn</a></p>
         </div>
     </div>
     <!-- /.login-card-inner -->

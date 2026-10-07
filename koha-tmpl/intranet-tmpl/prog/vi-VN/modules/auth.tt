@@ -83,18 +83,6 @@
  <!-- /#StaffLoginInstructions -->
  [% END # /IF StaffLoginInstructions %]
 
- [% IF ( nopermission ) %]
- <div id="login_error" class="alert alert-warning" style="border-left: 4px solid #d9534f; background: #fff5f5; color: #a94442; padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5;">
- <strong><i class="fa fa-shield"></i> Thông báo phân quyền truy cập:</strong><br />
- Tài khoản của bạn là tài khoản <strong>Người học / Sinh viên</strong>. Giao diện này là <strong>Cổng Quản trị Thư viện</strong> chỉ dành riêng cho Cán bộ & Thủ thư.
- <div style="margin-top: 10px;">
-     <a href="[% Koha.Preference('OPACBaseURL') || '' %]/cgi-bin/koha/opac-user.pl" class="btn btn-primary btn-sm" style="font-weight: 600; text-decoration: none;">
-         <i class="fa fa-external-link"></i> Đến Cổng Tra cứu Bạn đọc OPAC
-     </a>
- </div>
- </div>
- <p><strong>Hoặc đăng nhập bằng tài khoản Thủ thư khác:</strong></p>
- [% END %]
 
  [% IF ( timed_out && !nopermission ) %]
  <div id="login_error"
@@ -280,12 +268,9 @@
  [% PROCESS registration_form %]
  [% END %]
 
- [% IF ( nopermission ) %]
- <p><a id="previous_page" href="javascript:window.history.back()">[Previous page]</a> <a id="mainpage" href="/">[Main page]</a></p>
- [% END %]
         <!-- FTU Footer inside panel -->
         <div class="ftu-login-footer">
-            <p>Hệ thống Quản lý Thư viện &bull; <a href="http://ftu.edu.vn" target="_blank">ftu.edu.vn</a></p>
+            <p>Hệ thống Quản lý Thư viện &bull; <a href="https://hcmc.ftu.edu.vn" target="_blank">hcmc.ftu.edu.vn</a></p>
         </div>
     </div>
     <!-- /.login-card-inner -->

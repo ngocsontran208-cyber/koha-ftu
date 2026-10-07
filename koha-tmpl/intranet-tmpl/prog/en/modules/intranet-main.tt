@@ -294,7 +294,7 @@
 
     <!-- Footer -->
     <div id="ftu-dash-footer">
-        <span>&copy; Thư viện Phân hiệu Trường Đại học Ngoại thương &mdash; <a href="https://www.ftu.edu.vn" target="_blank">ftu.edu.vn</a></span>
+        <span>&copy; Thư viện Phân hiệu Trường Đại học Ngoại thương &mdash; <a href="https://hcmc.ftu.edu.vn" target="_blank">hcmc.ftu.edu.vn</a></span>
         <span><a href="/cgi-bin/koha/about.pl">Koha [% Koha.Version.maintenance | html %]</a></span>
     </div>
 

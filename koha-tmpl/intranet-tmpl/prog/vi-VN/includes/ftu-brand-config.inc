@@ -79,7 +79,7 @@
     campus_qn_phone        => "(028) 3512 7254 - 3512 7258",
 
     # ── 7. ĐƯỜNG DẪN CỔNG THÔNG TIN & HỆ THỐNG LIÊN THÔNG ───────────────────
-    link_portal            => "http://ftu.edu.vn",
+    link_portal            => "https://hcmc.ftu.edu.vn",
     link_portal_cs2        => "https://hcmc.ftu.edu.vn/",
     link_dspace            => Koha.Preference('FTU_DSpaceBaseURL') || "/elib",
     link_sso               => Koha.Preference('FTU_SSOBaseURL') || "/sso",

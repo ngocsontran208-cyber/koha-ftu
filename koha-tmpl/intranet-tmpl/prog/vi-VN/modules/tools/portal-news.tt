@@ -1475,7 +1475,7 @@
                                             <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">
                                                 Link Cổng thông tin Trường ĐH Ngoại thương:
                                             </label>
-                                            <input type="url" name="link_portal" class="form-control" value="[% footer_cfg.link_portal | html %]" placeholder="http://ftu.edu.vn" />
+                                            <input type="url" name="link_portal" class="form-control" value="[% footer_cfg.link_portal | html %]" placeholder="https://hcmc.ftu.edu.vn" />
                                         </div>
                                     </div>
                                 </div>
