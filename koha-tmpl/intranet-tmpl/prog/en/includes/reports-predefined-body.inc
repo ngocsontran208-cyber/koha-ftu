@@ -438,12 +438,12 @@ var reportCategories = {
     },
     digital_docs: {
         title: 'BÁO CÁO TÀI LIỆU SỐ',
-        defaultReport: 'top_used_docs',
-        defaultTitle: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT',
+        defaultReport: 'digital_page_count',
+        defaultTitle: 'Thống kê số trang tài liệu',
         reports: [
-            { id: 'top_used_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT' },
-            { id: 'top_interactive_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT' },
-            { id: 'collection_usage', title: 'THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP' }
+            { id: 'digital_page_count', title: 'Thống kê số trang tài liệu' },
+            { id: 'digital_docs_by_collection', title: 'Danh mục tài liệu theo bộ sưu tập' },
+            { id: 'digital_cataloging_stats', title: 'Thống kê biên mục tài liệu số' }
         ]
     }
 };
@@ -453,6 +453,35 @@ var currentReportId = 'opac_visits_ftu2';
 var currentReportTitle = 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2';
 
 document.addEventListener('DOMContentLoaded', function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var urlCat = urlParams.get('cat');
+    var urlRep = urlParams.get('report_id');
+    if (urlCat && reportCategories[urlCat]) {
+        currentCategory = urlCat;
+        currentReportId = reportCategories[urlCat].defaultReport;
+        currentReportTitle = reportCategories[urlCat].defaultTitle;
+        var items = document.querySelectorAll('.ftu-tree-item');
+        items.forEach(function(i) { i.classList.remove('active'); });
+        var targetLink = document.querySelector('.ftu-tree-link[onclick*="' + urlCat + '"]');
+        if (targetLink) targetLink.closest('.ftu-tree-item').classList.add('active');
+        document.getElementById('category_title').textContent = reportCategories[urlCat].title;
+    }
+    if (urlRep) {
+        for (var c in reportCategories) {
+            var found = reportCategories[c].reports.find(function(r) { return r.id === urlRep; });
+            if (found) {
+                currentCategory = c;
+                currentReportId = found.id;
+                currentReportTitle = found.title;
+                var items = document.querySelectorAll('.ftu-tree-item');
+                items.forEach(function(i) { i.classList.remove('active'); });
+                var targetLink = document.querySelector('.ftu-tree-link[onclick*="' + c + '"]');
+                if (targetLink) targetLink.closest('.ftu-tree-item').classList.add('active');
+                document.getElementById('category_title').textContent = reportCategories[c].title;
+                break;
+            }
+        }
+    }
     renderDropdownOptions(currentCategory);
     selectReport(currentReportId, currentReportTitle);
 
@@ -864,7 +893,154 @@ function renderTable(res) {
     }
 
     // =========================================================================
-    // 2. NHÓM BÁO CÁO LƯU THÔNG (CIRCULATION REPORTS - 10 LOẠI BÁO CÁO)
+    // 2. NHÓM BÁO CÁO TÀI LIỆU SỐ (3 LOẠI BÁO CÁO CHUẨN DSPACE & DRM)
+    // =========================================================================
+
+    // 2.1 Thống kê số trang tài liệu
+    else if (currentReportId === 'digital_page_count') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Nhan đề tài liệu số</th>'
+            + '<th>Tác giả</th>'
+            + '<th>Bộ sưu tập số</th>'
+            + '<th class="text-center">Định dạng</th>'
+            + '<th class="text-end">Dung lượng (MB)</th>'
+            + '<th class="text-end">Số trang</th>'
+            + '<th>Chính sách bảo mật DRM</th>'
+            + '<th class="text-center">Biểu ghi Koha</th>'
+            + '<th class="text-center">Ngày cập nhật</th>'
+            + '</tr>';
+
+        var sumPages = 0, sumSize = 0;
+        rows.forEach(function(r) {
+            sumPages += (r.page_count || 0);
+            sumSize += parseFloat(r.size_mb || 0);
+
+            var kohaLink = r.koha_biblionumber 
+                ? '<a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=' + r.koha_biblionumber + '" target="_blank" class="badge bg-light text-primary border">#' + r.koha_biblionumber + '</a>'
+                : '<span class="text-muted">Chưa gán</span>';
+
+            var drmBadge = r.security_level_code === 'SEC-3' 
+                ? '<span class="badge bg-danger text-white">Mức 3 - DRM Chống tải &amp; In ấn</span>'
+                : '<span class="badge bg-primary text-white">Mức 2 - Watermark động FTU</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.collection_name || '') + '</span></td>'
+                + '<td class="text-center"><span class="badge bg-secondary text-white">PDF</span></td>'
+                + '<td class="text-end font-weight-bold">' + (r.size_mb || '0') + ' MB</td>'
+                + '<td class="text-end text-success font-weight-bold" style="font-size: 14.5px;">' + (r.page_count || 0).toLocaleString('vi-VN') + ' trang</td>'
+                + '<td>' + drmBadge + '</td>'
+                + '<td class="text-center">' + kohaLink + '</td>'
+                + '<td class="text-center text-muted"><small>' + (r.created_date || '') + '</small></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="4" class="text-end"><strong>TỔNG CỘNG: ' + rows.length + ' TÀI LIỆU SỐ</strong></td>'
+            + '<td></td>'
+            + '<td class="text-end text-primary"><strong>' + sumSize.toFixed(2) + ' MB</strong></td>'
+            + '<td class="text-end text-success"><strong>' + sumPages.toLocaleString('vi-VN') + ' trang</strong></td>'
+            + '<td colspan="3"></td>'
+            + '</tr>';
+    }
+
+    // 2.2 Danh mục tài liệu theo bộ sưu tập
+    else if (currentReportId === 'digital_docs_by_collection') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Bộ sưu tập</th>'
+            + '<th>Nhan đề tài liệu số</th>'
+            + '<th>Tác giả</th>'
+            + '<th class="text-center">Năm XB</th>'
+            + '<th class="text-end">Số trang</th>'
+            + '<th class="text-end">Dung lượng</th>'
+            + '<th>Tập tin số (Bitstream)</th>'
+            + '<th class="text-center">Biểu ghi Koha</th>'
+            + '<th class="text-center">Ngày nhập</th>'
+            + '</tr>';
+
+        var sumPages = 0, sumSize = 0;
+        rows.forEach(function(r) {
+            sumPages += (r.page_count || 0);
+            sumSize += parseFloat(r.size_mb || 0);
+
+            var kohaLink = r.koha_biblionumber 
+                ? '<a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=' + r.koha_biblionumber + '" target="_blank" class="badge bg-light text-primary border">#' + r.koha_biblionumber + '</a>'
+                : '<span class="text-muted">Chưa gán</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><span class="badge bg-light text-dark border font-weight-bold">' + (r.collection_name || '') + '</span></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td class="text-center">' + (r.year || '') + '</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.page_count || 0).toLocaleString('vi-VN') + ' trang</td>'
+                + '<td class="text-end">' + (r.size_mb || '0') + ' MB</td>'
+                + '<td><small class="text-muted font-monospace">' + (r.file_name || '') + '</small></td>'
+                + '<td class="text-center">' + kohaLink + '</td>'
+                + '<td class="text-center text-muted"><small>' + (r.modified_date || '') + '</small></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="5" class="text-end"><strong>TỔNG CỘNG: ' + rows.length + ' TÀI LIỆU SỐ</strong></td>'
+            + '<td class="text-end text-success"><strong>' + sumPages.toLocaleString('vi-VN') + ' trang</strong></td>'
+            + '<td class="text-end text-primary"><strong>' + sumSize.toFixed(2) + ' MB</strong></td>'
+            + '<td colspan="3"></td>'
+            + '</tr>';
+    }
+
+    // 2.3 Thống kê biên mục tài liệu số
+    else if (currentReportId === 'digital_cataloging_stats') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Tên Bộ sưu tập số (DSpace 7)</th>'
+            + '<th class="text-end">Số đầu mục (Titles)</th>'
+            + '<th class="text-end">Số tập tin số (Bitstreams)</th>'
+            + '<th class="text-end">Tổng số trang</th>'
+            + '<th class="text-end">Tổng dung lượng</th>'
+            + '<th class="text-center">Đã liên kết Koha ILS</th>'
+            + '<th class="text-center">Hoàn thiện siêu dữ liệu DC</th>'
+            + '<th class="text-center">Cập nhật mới nhất</th>'
+            + '</tr>';
+
+        var sumItems = 0, sumBits = 0, sumPages = 0, sumSize = 0;
+        rows.forEach(function(r) {
+            sumItems += (r.item_count || 0);
+            sumBits += (r.bitstream_count || 0);
+            sumPages += (r.page_count || 0);
+            sumSize += parseFloat(r.total_size_mb || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary">' + (r.collection_name || '') + '</strong></td>'
+                + '<td class="text-end text-primary font-weight-bold" style="font-size: 14.5px;">' + (r.item_count || 0).toLocaleString('vi-VN') + ' đầu mục</td>'
+                + '<td class="text-end font-weight-bold">' + (r.bitstream_count || 0).toLocaleString('vi-VN') + ' tệp</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.page_count || 0).toLocaleString('vi-VN') + ' trang</td>'
+                + '<td class="text-end">' + (r.total_size_mb || '0') + ' MB</td>'
+                + '<td class="text-center"><span class="badge bg-success text-white">' + (r.item_count || 0) + '/' + (r.item_count || 0) + ' (100%)</span></td>'
+                + '<td class="text-center"><span class="badge bg-info text-white">100% Hoàn tất</span></td>'
+                + '<td class="text-center text-muted"><small>' + (r.latest_update || '') + '</small></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG: ' + rows.length + ' BỘ SƯU TẬP</strong></td>'
+            + '<td class="text-end text-primary"><strong>' + sumItems.toLocaleString('vi-VN') + ' đầu mục</strong></td>'
+            + '<td class="text-end"><strong>' + sumBits.toLocaleString('vi-VN') + ' tệp</strong></td>'
+            + '<td class="text-end text-success"><strong>' + sumPages.toLocaleString('vi-VN') + ' trang</strong></td>'
+            + '<td class="text-end text-primary"><strong>' + sumSize.toFixed(2) + ' MB</strong></td>'
+            + '<td class="text-center text-success"><strong>100%</strong></td>'
+            + '<td class="text-center text-info"><strong>100%</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // =========================================================================
+    // 3. NHÓM BÁO CÁO LƯU THÔNG (CIRCULATION REPORTS - 10 LOẠI BÁO CÁO)
     // =========================================================================
 
     // 2.1 Thống kê tài liệu đang mượn theo môn loại
