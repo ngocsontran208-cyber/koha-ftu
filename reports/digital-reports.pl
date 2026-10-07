@@ -5,6 +5,7 @@
 # Tích hợp Koha ILS & DRM Service
 
 use Modern::Perl;
+use utf8;
 use CGI qw( -utf8 );
 use JSON qw( encode_json decode_json );
 use DBI;
@@ -15,7 +16,15 @@ use C4::Auth qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
 
-binmode(STDOUT, ":utf8");
+# Hàm đảm bảo chuỗi là chuỗi ký tự Unicode chuẩn (Perl internal decoded string)
+sub ensure_utf8 {
+    my ($str) = @_;
+    return '' unless defined $str;
+    if (!Encode::is_utf8($str)) {
+        eval { $str = Encode::decode('UTF-8', $str); };
+    }
+    return $str;
+}
 
 my $query = CGI->new;
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -65,7 +74,9 @@ sub get_patron_branch_map {
         while (my $row = $sth->fetchrow_hashref) {
             my $branch = $row->{branchcode} || '';
             my $branch_label = ($branch eq 'CPL' || $branch =~ /FTU2|CS2/i) ? 'Cơ sở II (FTU2 - TP.HCM)' : 'Trụ sở chính Hà Nội';
-            my $fullname = ($row->{surname} || '') . ' ' . ($row->{firstname} || '');
+            my $surname = ensure_utf8($row->{surname} || '');
+            my $firstname = ensure_utf8($row->{firstname} || '');
+            my $fullname = "$surname $firstname";
             $fullname =~ s/^\s+|\s+$//g;
 
             my $info = {
@@ -153,10 +164,13 @@ sub fetch_report_data {
                 }
 
                 $r->{stt} = $stt++;
-                $r->{branch_name} = $branch_name;
-                $r->{patron_name} = $pinfo->{fullname} if $pinfo->{fullname} && $r->{patron_name} eq 'Bạn đọc FTU';
+                $r->{patron_id} = ensure_utf8($r->{patron_id});
+                $r->{patron_name} = ($pinfo->{fullname} && $r->{patron_name} eq 'Bạn đọc FTU') ? $pinfo->{fullname} : ensure_utf8($r->{patron_name});
+                $r->{document_title} = ensure_utf8($r->{document_title});
+                $r->{branch_name} = ensure_utf8($branch_name);
                 $r->{role_label} = ($r->{patron_role} =~ /ADMIN/i) ? 'Quản trị viên' :
                                    ($r->{patron_role} =~ /FACULTY/i) ? 'Giảng viên' : 'Sinh viên FTU';
+                $r->{status_text} = ensure_utf8($r->{status_text});
 
                 $seen_patrons{$r->{patron_id}} = 1;
                 push @rows, $r;
@@ -191,6 +205,7 @@ sub fetch_report_data {
             my $stt = 1;
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
+                $r->{access_date} = ensure_utf8($r->{access_date});
                 $r->{pageviews_est} = ($r->{total_sessions} || 0) * 12 + int(rand(8));
                 $summary{total_sessions} += $r->{total_sessions} || 0;
                 $summary{total_users} += $r->{unique_users} || 0;
@@ -225,9 +240,12 @@ sub fetch_report_data {
             my $stt = 1;
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
                 $r->{collection_name} = ($r->{title} =~ /giáo trình|bài giảng/i) ? 'Giáo trình & Bài giảng FTU' :
                                        ($r->{title} =~ /luận văn|thạc sĩ/i) ? 'Luận văn thạc sĩ FTU' :
                                        ($r->{title} =~ /quốc gia|kinh tế|thương mại/i) ? 'Tạp chí Quản lý và Kinh tế quốc tế' : 'Tài liệu số chuyên khảo FTU';
+                $r->{collection_name} = ensure_utf8($r->{collection_name});
                 $summary{total_docs}++;
                 $summary{total_sessions} += ($r->{loan_count} || 0) + ($r->{read_count} || 0);
                 push @rows, $r;
@@ -257,7 +275,7 @@ sub fetch_report_data {
                     GROUP BY bitstream_uuid
                 ) dl ON l.bitstream_uuid = dl.bitstream_uuid
                 WHERE l.issued_at >= ? AND l.issued_at <= ?
-                GROUP BY title, author
+                GROUP BY dl.document_title, ab.document_title, dl.document_author, ab.document_author
                 ORDER BY session_count DESC
             };
             my $sth = $drm_dbh->prepare($sql);
@@ -265,6 +283,8 @@ sub fetch_report_data {
             my $stt = 1;
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
                 $r->{avg_duration} ||= 15.5;
                 $r->{pageviews} = ($r->{session_count} || 0) * 8 + int(rand(10));
                 $summary{total_sessions} += $r->{session_count} || 0;
@@ -278,9 +298,7 @@ sub fetch_report_data {
     # 5. TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2
     # =========================================================================
     elsif ($report_id eq 'opac_visits_ftu2') {
-        # Thống kê phân hệ OPAC dành riêng cho Cơ sở II TP.HCM (FTU2)
         my %date_stats;
-        # Lấy từ DRM licenses cho các bạn đọc FTU2 (chi nhánh CPL)
         if ($drm_dbh) {
             my $sql = qq{
                 SELECT 
@@ -296,7 +314,6 @@ sub fetch_report_data {
             while (my $r = $sth->fetchrow_hashref) {
                 my $pinfo = $patron_map->{$r->{patron_id}} || {};
                 my $bcode = $pinfo->{branchcode} || 'CPL';
-                # Ưu tiên tính bạn đọc FTU2 hoặc toàn trường nếu không lọc
                 if (!$branch_filter || $branch_filter eq 'ALL' || $bcode eq 'CPL' || $branch_filter eq 'CPL') {
                     my $dt = $r->{visit_date};
                     $date_stats{$dt} ||= {
@@ -315,7 +332,6 @@ sub fetch_report_data {
             }
         }
 
-        # Nếu khoảng thời gian có ít ngày trong dev, tạo thêm bản ghi các ngày gần đây để số liệu rõ ràng
         my @dates = sort { $b cmp $a } keys %date_stats;
         if (scalar(@dates) < 3) {
             for my $i (0 .. 4) {
@@ -336,6 +352,7 @@ sub fetch_report_data {
         for my $dt (sort { $b cmp $a } keys %date_stats) {
             my $item = $date_stats{$dt};
             $item->{stt} = $stt++;
+            $item->{branch_name} = ensure_utf8($item->{branch_name});
             $item->{total_interactions} = $item->{login_count} + $item->{search_count} + $item->{detail_views} + $item->{digital_reads};
             $summary{total_sessions} += $item->{total_interactions};
             push @rows, $item;
@@ -374,10 +391,12 @@ sub fetch_report_data {
                 }
 
                 $r->{stt} = $stt++;
-                $r->{branch_name} = $pinfo->{branch_name} || 'Cơ sở II (FTU2 - TP.HCM)';
-                $r->{patron_name} = $pinfo->{fullname} if $pinfo->{fullname} && $r->{patron_name} eq 'Bạn đọc FTU';
+                $r->{patron_id} = ensure_utf8($r->{patron_id});
+                $r->{patron_name} = ($pinfo->{fullname} && $r->{patron_name} eq 'Bạn đọc FTU') ? $pinfo->{fullname} : ensure_utf8($r->{patron_name});
+                $r->{branch_name} = ensure_utf8($pinfo->{branch_name} || 'Cơ sở II (FTU2 - TP.HCM)');
                 $r->{role_label} = ($r->{patron_role} =~ /ADMIN/i) ? 'Quản trị viên' :
                                    ($r->{patron_role} =~ /FACULTY/i) ? 'Giảng viên' : 'Sinh viên FTU';
+                $r->{role_label} = ensure_utf8($r->{role_label});
                 $r->{total_usage} = ($r->{loan_count} || 0) + ($r->{session_count} || 0);
 
                 $summary{total_users}++;
@@ -402,7 +421,6 @@ sub fetch_report_data {
             { id => 'COLL_07', name => '7. Kỷ yếu hội thảo khoa học', total_items => 340, loans => 65, reads => 210, readers => 95 },
         );
 
-        # Bổ sung số liệu thực tế từ DRM nếu có
         if ($drm_dbh) {
             my $sth = $drm_dbh->prepare("SELECT count(*) FROM ftu_drm.drm_digital_lending WHERE checkout_time >= ? AND checkout_time <= ?");
             $sth->execute($from_ts, $to_ts);
@@ -416,6 +434,7 @@ sub fetch_report_data {
         my $stt = 1;
         for my $c (@collections) {
             $c->{stt} = $stt++;
+            $c->{name} = ensure_utf8($c->{name});
             $c->{usage_ratio} = sprintf("%.1f%%", (($c->{loans} + $c->{reads}) / ($c->{total_items} || 1)) * 100);
             $summary{total_docs} += $c->{total_items};
             $summary{total_sessions} += ($c->{loans} + $c->{reads});
@@ -432,7 +451,7 @@ sub fetch_report_data {
 # XỬ LÝ THEO REQUEST
 # =============================================================================
 
-# 1. API Trả dữ liệu JSON
+# 1. API Trả dữ liệu JSON (Chuẩn hóa UTF-8 bytes qua binary mode)
 if ($op eq 'api_data') {
     my $report_id    = $query->param('report_id') || 'online_users';
     my $from_date    = $query->param('from_date') || '';
@@ -441,17 +460,17 @@ if ($op eq 'api_data') {
 
     my ($rows, $summary) = fetch_report_data($report_id, $from_date, $to_date, $branch_code);
 
-    print $query->header(
-        -type => 'application/json',
-        -charset => 'utf-8',
-        -Access_Control_Allow_Origin => '*',
-    );
-    print encode_json({
+    my $json_bytes = encode_json({
         success => 1,
         report_id => $report_id,
         summary => $summary,
         rows => $rows,
     });
+
+    binmode(STDOUT, ":raw");
+    print "Content-Type: application/json; charset=utf-8\r\n";
+    print "Access-Control-Allow-Origin: *\r\n\r\n";
+    print $json_bytes;
     exit 0;
 }
 
@@ -465,77 +484,60 @@ elsif ($op eq 'export_csv') {
     my ($rows, $summary) = fetch_report_data($report_id, $from_date, $to_date, $branch_code);
 
     my $filename = "Bao_cao_tai_lieu_so_${report_id}_${to_date}.csv";
-    print $query->header(
-        -type => 'text/csv; charset=utf-8',
-        -attachment => $filename,
-    );
+
+    binmode(STDOUT, ":raw");
+    print "Content-Type: text/csv; charset=utf-8\r\n";
+    print "Content-Disposition: attachment; filename=\"$filename\"\r\n\r\n";
 
     # Ghi UTF-8 BOM để Excel hiển thị đúng dấu tiếng Việt
-    print "\x{EF}\x{BB}\x{BF}";
+    print "\xEF\xBB\xBF";
+
+    # Helper xuất dòng CSV đã mã hóa UTF-8
+    my $print_csv_line = sub {
+        my @fields = @_;
+        my $line = join(',', map {
+            my $v = $_ // '';
+            $v =~ s/"/""/g;
+            qq{"$v"}
+        } @fields) . "\r\n";
+        print encode('UTF-8', $line);
+    };
 
     # Header theo từng loại báo cáo
     if ($report_id eq 'online_users') {
-        print "STT,Mã bạn đọc,Họ và tên,Cơ sở / Phân hiệu,Đối tượng,Tài liệu đang đọc,Địa chỉ IP,Thời gian cấp phiên,Tương tác cuối,Trạng thái\n";
+        $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Cơ sở / Phân hiệu', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label},
-                $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text}
-            );
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
         }
     } elsif ($report_id eq 'access_over_time') {
-        print "STT,Thời gian,Tổng số phiên truy cập,Lượt mượn tài liệu số,Số bạn đọc tiếp cận,Số tài liệu số được đọc,Lượt xem trang ước tính\n";
+        $print_csv_line->('STT', 'Thời gian', 'Tổng số phiên truy cập', 'Lượt mượn tài liệu số', 'Số bạn đọc tiếp cận', 'Số tài liệu số được đọc', 'Lượt xem trang ước tính');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{access_date}, $r->{total_sessions}, $r->{total_loans},
-                $r->{unique_users}, $r->{unique_docs}, $r->{pageviews_est}
-            );
+            $print_csv_line->($r->{stt}, $r->{access_date}, $r->{total_sessions}, $r->{total_loans}, $r->{unique_users}, $r->{unique_docs}, $r->{pageviews_est});
         }
     } elsif ($report_id eq 'top_used_docs') {
-        print "STT,Nhan đề tài liệu số,Tác giả / NXB,Bộ sưu tập số,Số lượt mượn,Số phiên đọc trực tuyến,Số bạn đọc tiếp cận,Lần sử dụng gần nhất\n";
+        $print_csv_line->('STT', 'Nhan đề tài liệu số', 'Tác giả / NXB', 'Bộ sưu tập số', 'Số lượt mượn', 'Số phiên đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Lần sử dụng gần nhất');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{title}, $r->{author}, $r->{collection_name},
-                $r->{loan_count}, $r->{read_count}, $r->{patron_count}, $r->{last_used}
-            );
+            $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{collection_name}, $r->{loan_count}, $r->{read_count}, $r->{patron_count}, $r->{last_used});
         }
     } elsif ($report_id eq 'top_interactive_docs') {
-        print "STT,Nhan đề tài liệu số,Tác giả,Tổng số phiên tương tác,Số bạn đọc tham gia,Thời lượng đọc TB (phút),Lượt xem trang tương tác,Thời điểm tương tác cuối\n";
+        $print_csv_line->('STT', 'Nhan đề tài liệu số', 'Tác giả', 'Tổng số phiên tương tác', 'Số bạn đọc tham gia', 'Thời lượng đọc TB (phút)', 'Lượt xem trang tương tác', 'Thời điểm tương tác cuối');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{title}, $r->{author}, $r->{session_count},
-                $r->{reader_count}, $r->{avg_duration}, $r->{pageviews}, $r->{last_interaction}
-            );
+            $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{session_count}, $r->{reader_count}, $r->{avg_duration}, $r->{pageviews}, $r->{last_interaction});
         }
     } elsif ($report_id eq 'opac_visits_ftu2') {
-        print "STT,Ngày ghi nhận,Phân hiệu / Cơ sở,Lượt đăng nhập OPAC,Lượt tra cứu biểu ghi,Lượt xem chi tiết tài liệu số,Lượt mượn / đọc tài liệu số tại FTU2,Tổng số tương tác\n";
+        $print_csv_line->('STT', 'Ngày ghi nhận', 'Phân hiệu / Cơ sở', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại FTU2', 'Tổng số tương tác');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{visit_date}, $r->{branch_name}, $r->{login_count},
-                $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions}
-            );
+            $print_csv_line->($r->{stt}, $r->{visit_date}, $r->{branch_name}, $r->{login_count}, $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions});
         }
     } elsif ($report_id eq 'top_patrons') {
-        print "STT,Mã bạn đọc / Số thẻ,Họ và tên bạn đọc,Phân hiệu / Cơ sở,Đối tượng / Nhóm,Số lượt mượn tài liệu số,Số phiên đọc trực tuyến,Tổng lượt sử dụng,Lần hoạt động gần nhất\n";
+        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Phân hiệu / Cơ sở', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name},
-                $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active}
-            );
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
         }
     } elsif ($report_id eq 'collection_usage') {
-        print "STT,Tên Bộ sưu tập tài liệu số FTU,Tổng số tài liệu trong BST,Lượt mượn tài liệu số,Lượt đọc trực tuyến,Số bạn đọc tiếp cận,Tỷ lệ khai thác\n";
+        $print_csv_line->('STT', 'Tên Bộ sưu tập tài liệu số FTU', 'Tổng số tài liệu trong BST', 'Lượt mượn tài liệu số', 'Lượt đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Tỷ lệ khai thác');
         for my $r (@$rows) {
-            print sprintf(
-                qq{"%s","%s","%s","%s","%s","%s","%s"\n},
-                $r->{stt}, $r->{name}, $r->{total_items}, $r->{loans},
-                $r->{reads}, $r->{readers}, $r->{usage_ratio}
-            );
+            $print_csv_line->($r->{stt}, $r->{name}, $r->{total_items}, $r->{loans}, $r->{reads}, $r->{readers}, $r->{usage_ratio});
         }
     }
     exit 0;
