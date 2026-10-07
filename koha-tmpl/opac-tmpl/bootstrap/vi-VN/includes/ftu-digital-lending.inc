@@ -122,21 +122,50 @@
     }
 
     // 2. Lấy thông tin tài khoản bạn đọc Koha đang đăng nhập
+    var tplPatronId = ('[% logged_in_user.userid || loggedinusername | html %]').trim();
+    var tplPatronName = ('[% logged_in_user.firstname | html %] [% logged_in_user.surname | html %]').trim() || tplPatronId;
+    var tplBorrowernumber = ('[% logged_in_user.borrowernumber | html %]').trim();
+    var tplCategory = ('[% logged_in_user.categorycode | html %]').trim();
+    var tplBranch = ('[% logged_in_user.branchcode | html %]').trim();
+
     function getLoggedInPatron() {
+        if (tplPatronId && tplPatronId.length > 0) {
+            return {
+                patronId: tplPatronId,
+                borrowernumber: tplBorrowernumber,
+                categorycode: tplCategory,
+                branchcode: tplBranch,
+                name: tplPatronName || tplPatronId
+            };
+        }
         var el = document.querySelector('.loggedinusername');
-        if (!el) return null;
-        var userid = el.getAttribute('data-userid');
-        var borrowernumber = el.getAttribute('data-borrowernumber');
-        var branchcode = el.getAttribute('data-branchcode');
-        var categorycode = el.getAttribute('data-categorycode');
-        var patronId = (userid && userid.trim()) ? userid.trim() : (borrowernumber ? borrowernumber.trim() : null);
-        return {
-            patronId: patronId,
-            borrowernumber: borrowernumber,
-            categorycode: categorycode,
-            branchcode: branchcode,
-            name: el.textContent ? el.textContent.trim() : patronId
-        };
+        if (el) {
+            var userid = el.getAttribute('data-userid');
+            var borrowernumber = el.getAttribute('data-borrowernumber');
+            var branchcode = el.getAttribute('data-branchcode');
+            var categorycode = el.getAttribute('data-categorycode');
+            var patronId = (userid && userid.trim()) ? userid.trim() : (borrowernumber ? borrowernumber.trim() : null);
+            if (!patronId && el.textContent) patronId = el.textContent.trim();
+            if (patronId) {
+                return {
+                    patronId: patronId,
+                    borrowernumber: borrowernumber,
+                    categorycode: categorycode,
+                    branchcode: branchcode,
+                    name: el.textContent ? el.textContent.trim() : patronId
+                };
+            }
+        }
+        // Kiểm tra thêm tham số user từ SSO hoặc URL nếu có
+        var urlParams = new URLSearchParams(window.location.search);
+        var qUser = urlParams.get('user');
+        if (qUser && qUser.trim()) {
+            return {
+                patronId: qUser.trim(),
+                name: qUser.trim()
+            };
+        }
+        return null;
     }
 
     var activeCheckDoc = null;
@@ -144,6 +173,7 @@
 
     // 3. Hàm kích hoạt Modal mượn tài liệu số
     window.ftuOpenDigitalLendingModal = function(params) {
+        params = params || {};
         var patron = getLoggedInPatron();
         var modalEl = document.getElementById('ftuDigitalLendingModal');
         if (!modalEl) return;
@@ -184,6 +214,10 @@
         if (params.itemUuid) queryArgs += '&itemUuid=' + encodeURIComponent(params.itemUuid);
         if (params.bitstreamUuid) queryArgs += '&bitstreamUuid=' + encodeURIComponent(params.bitstreamUuid);
         if (params.biblionumber) queryArgs += '&biblionumber=' + encodeURIComponent(params.biblionumber);
+        if (params.handle) queryArgs += '&handle=' + encodeURIComponent(params.handle);
+        if (params.title) queryArgs += '&title=' + encodeURIComponent(params.title);
+        if (params.author) queryArgs += '&author=' + encodeURIComponent(params.author);
+        if (params.fallbackUrl) queryArgs += '&fallbackUrl=' + encodeURIComponent(params.fallbackUrl);
 
         fetch(drmBase + '/lending/precheck?' + queryArgs)
             .then(function(res) { return res.json(); })
@@ -251,7 +285,15 @@
             `;
             document.getElementById('ftuBtnReadNow').onclick = function() {
                 var ssoPortalUrl = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
-                var readerUrl = ssoPortalUrl + '/sso/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=/bitstreams/' + encodeURIComponent(doc.bitstreamUuid);
+                var readerTarget = '/bitstreams/' + encodeURIComponent(doc.bitstreamUuid);
+                if (originalParams && originalParams.handle) {
+                    readerTarget = '/elib/handle/' + encodeURIComponent(originalParams.handle.replace(/^handle\//i, ''));
+                } else if (originalParams && originalParams.fallbackUrl) {
+                    readerTarget = originalParams.fallbackUrl;
+                } else if (doc.itemUuid) {
+                    readerTarget = '/elib/items/' + encodeURIComponent(doc.itemUuid);
+                }
+                var readerUrl = ssoPortalUrl + '/sso/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget);
                 window.open(readerUrl, '_blank');
                 var modal = bootstrap.Modal.getInstance(document.getElementById('ftuDigitalLendingModal'));
                 if (modal) modal.hide();
@@ -360,6 +402,11 @@
                     patronId: quota.patronId,
                     bitstreamUuid: doc.bitstreamUuid,
                     itemUuid: doc.itemUuid,
+                    biblionumber: (originalParams && originalParams.biblionumber) ? originalParams.biblionumber : doc.biblionumber,
+                    handle: originalParams ? originalParams.handle : undefined,
+                    title: doc.title,
+                    author: doc.author,
+                    fallbackUrl: originalParams ? originalParams.fallbackUrl : undefined,
                     patronName: quota.patronName
                 })
             })
@@ -394,42 +441,118 @@
     document.addEventListener('click', function(e) {
         var a = e.target.closest('a');
         if (!a) return;
-        var href = a.getAttribute('href') || '';
+
+        // Bỏ qua các nút thao tác bên trong modal hoặc danh mục quản lý mượn
+        if (
+            a.closest('#ftuDigitalLendingModal') ||
+            a.closest('#ftuDigitalReturnModal') ||
+            a.closest('#opac-user-digital-checkouts_panel') ||
+            a.closest('#opac-user-digital-checkouts-panel-container') ||
+            a.classList.contains('btn-return-digital') ||
+            a.id === 'ftuBtnReadNow' ||
+            a.id === 'ftuBtnDoBorrow'
+        ) {
+            return;
+        }
+
+        var rawHref = a.getAttribute('href') || '';
+        if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) {
+            return;
+        }
+
+        var href = rawHref;
+        try { href = decodeURIComponent(rawHref); } catch(_) {}
         var text = (a.textContent || '').trim().toLowerCase();
 
         var isFullTextLink = false;
-        var itemUuid = null;
-        var bitstreamUuid = null;
-
-        if (text.includes('truy cập toàn văn') || text.includes('toàn văn số') || text.includes('đọc trực tuyến') || a.getAttribute('property') === 'url') {
-            if (href.includes('/items/') || href.includes('/bitstreams/') || href.includes('/handle/') || href.includes('/elib/')) {
-                isFullTextLink = true;
-            }
-        } else if (href.includes('/items/') || href.includes('/bitstreams/')) {
+        if (
+            a.getAttribute('property') === 'url' ||
+            a.closest('.online_resources') ||
+            a.closest('.ftu-opac-digital-badge') ||
+            a.classList.contains('ftu-dspace-link')
+        ) {
+            isFullTextLink = true;
+        } else if (
+            text.includes('truy cập toàn văn') ||
+            text.includes('toàn văn số') ||
+            text.includes('đọc trực tuyến') ||
+            text.includes('xem toàn văn') ||
+            text.includes('tài liệu số') ||
+            text.includes('full text') ||
+            text.includes('read online')
+        ) {
+            isFullTextLink = true;
+        } else if (
+            href.includes('/handle/') ||
+            href.includes('/items/') ||
+            href.includes('/bitstreams/') ||
+            href.includes('/koha-to-dspace') ||
+            href.includes('/elib/') ||
+            rawHref.includes('/koha-to-dspace') ||
+            rawHref.includes('handle%2F') ||
+            rawHref.includes('items%2F')
+        ) {
             isFullTextLink = true;
         }
 
         if (isFullTextLink) {
             e.preventDefault();
             e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function') {
+                e.stopImmediatePropagation();
+            }
 
-            // Phân giải itemUuid hoặc bitstreamUuid từ href
+            var itemUuid = null;
+            var bitstreamUuid = null;
+            var handle = null;
+
             var itemMatch = href.match(/\/items\/([a-f0-9\-]{36})/i);
             if (itemMatch) itemUuid = itemMatch[1];
 
             var bsMatch = href.match(/\/bitstreams\/([a-f0-9\-]{36})/i);
             if (bsMatch) bitstreamUuid = bsMatch[1];
 
-            // Nếu không khớp regex UUID (ví dụ handle), lấy biblionumber từ trang chi tiết nếu có
+            var handleMatch = href.match(/handle\/([0-9]+\/[0-9]+)/i) || rawHref.match(/handle(?:%2F|\/)([0-9]+(?:%2F|\/)[0-9]+)/i);
+            if (handleMatch) {
+                handle = decodeURIComponent(handleMatch[1]).replace(/%2F/i, '/');
+            }
+
             var biblionumber = null;
-            var bibInput = document.querySelector('input[name="biblionumber"], input#biblionumber');
-            if (bibInput) biblionumber = bibInput.value;
+            var bibContainer = document.querySelector('#catalogue_detail_biblio[data-biblionumber]');
+            if (bibContainer) biblionumber = bibContainer.getAttribute('data-biblionumber');
+            if (!biblionumber) {
+                var urlParams = new URLSearchParams(window.location.search);
+                biblionumber = urlParams.get('biblionumber');
+            }
+            if (!biblionumber) {
+                var bibInput = document.querySelector('input[name="biblionumber"], input#biblionumber');
+                if (bibInput) biblionumber = bibInput.value;
+            }
+            if (!biblionumber && a.closest('[data-biblionumber]')) {
+                biblionumber = a.closest('[data-biblionumber]').getAttribute('data-biblionumber');
+            }
+
+            var recordEl = a.closest('.record') || a.closest('.searchresults') || document.querySelector('.record');
+            var titleEl = recordEl ? recordEl.querySelector('h1.title, .title') : document.querySelector('h1.title, .biblio-title');
+            var authorEl = recordEl ? recordEl.querySelector('.author, .byauthor, .byAuthor') : document.querySelector('.author, .byauthor');
+
+            var title = '';
+            if (titleEl) {
+                var clone = titleEl.cloneNode(true);
+                var respStmt = clone.querySelector('.title_resp_stmt');
+                if (respStmt) respStmt.remove();
+                title = clone.textContent.trim().replace(/\s+/g, ' ');
+            }
+            var author = authorEl ? authorEl.textContent.trim().replace(/^Liệt kê theo:\s*/i, '').replace(/^Contributor\(s\):\s*/i, '').replace(/\s+/g, ' ') : '';
 
             window.ftuOpenDigitalLendingModal({
                 itemUuid: itemUuid,
                 bitstreamUuid: bitstreamUuid,
                 biblionumber: biblionumber,
-                fallbackUrl: href
+                handle: handle,
+                title: title,
+                author: author,
+                fallbackUrl: rawHref
             });
             return false;
         }
@@ -440,9 +563,9 @@
         var patron = getLoggedInPatron();
         if (!patron || !patron.patronId) return;
 
-        var panelEl = document.getElementById('opac-user-digital-checkouts_panel');
+        var panelEl = document.getElementById('opac-user-digital-checkouts-panel-container') || document.getElementById('opac-user-digital-checkouts_panel');
         var badgeEl = document.getElementById('digital-loans-count-badge');
-        if (!panelEl) return;
+        if (!panelEl && !badgeEl) return;
 
         var drmBase = getDrmApiBase();
         fetch(drmBase + '/lending/patron/' + encodeURIComponent(patron.patronId))
@@ -458,7 +581,9 @@
                 }
 
                 // Cập nhật giao diện bên trong tab panel
-                renderDigitalLoansPanel(panelEl, loans, quota);
+                if (panelEl) {
+                    renderDigitalLoansPanel(panelEl, loans, quota);
+                }
             })
             .catch(function(err) {
                 console.warn('[FTU-DIGITAL-LENDING] Lỗi tải tài liệu số:', err);
@@ -672,8 +797,8 @@
             }, 200);
         }
 
-        // Tải danh sách mượn số ban đầu
-        if (document.getElementById('opac-user-digital-checkouts_panel')) {
+        // Tải danh sách mượn số ban đầu và cập nhật badge
+        if (document.getElementById('opac-user-digital-checkouts_panel') || document.getElementById('digital-loans-count-badge') || document.getElementById('opac-user-digital-checkouts-panel-container')) {
             window.ftuReloadDigitalLoans();
         }
     });
