@@ -118,7 +118,7 @@ sub fetch_report_data {
                     TO_CHAR(l.expires_at, 'YYYY-MM-DD HH24:MI:SS') as expires_at,
                     TO_CHAR(COALESCE(l.last_heartbeat, l.issued_at), 'YYYY-MM-DD HH24:MI:SS') as last_heartbeat,
                     l.is_revoked,
-                    COALESCE(dl.document_title, ab.title, 'Tài liệu số FTU') as document_title,
+                    COALESCE(dl.document_title, ab.document_title, 'Tài liệu số FTU') as document_title,
                     CASE 
                         WHEN l.is_revoked THEN 'Đã thu hồi'
                         WHEN l.expires_at < NOW() THEN 'Đã hết phiên'
@@ -243,8 +243,8 @@ sub fetch_report_data {
         if ($drm_dbh) {
             my $sql = qq{
                 SELECT 
-                    COALESCE(dl.document_title, ab.title, 'Tài liệu số FTU') as title,
-                    COALESCE(dl.document_author, 'Tác giả FTU') as author,
+                    COALESCE(dl.document_title, ab.document_title, 'Tài liệu số FTU') as title,
+                    COALESCE(dl.document_author, ab.document_author, 'Tác giả FTU') as author,
                     COUNT(l.license_id) as session_count,
                     COUNT(DISTINCT l.patron_id) as reader_count,
                     ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(l.last_heartbeat, l.issued_at) - l.issued_at))/60)::numeric, 1) as avg_duration,
