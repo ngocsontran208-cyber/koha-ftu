@@ -1145,6 +1145,8 @@ sub fetch_report_data {
             my $stt = 1;
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
+                $r->{cardnumber} = ensure_utf8($r->{cardnumber});
+                $r->{patron_id} = $r->{cardnumber};
                 $r->{patron_name} = ensure_utf8($r->{patron_name});
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{role} = ensure_utf8($r->{role});
@@ -1304,7 +1306,9 @@ sub fetch_report_data {
                 SELECT 
                     i.barcode,
                     b.title,
-                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron,
+                    br.cardnumber as patron_id,
+                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron_name,
+                    CONCAT(TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))), IF(br.cardnumber IS NOT NULL AND br.cardnumber != '', CONCAT(' (', br.cardnumber, ')'), '')) as patron,
                     DATE_FORMAT(iss.issuedate, '%Y-%m-%d') as issue_date,
                     DATE_FORMAT(iss.date_due, '%Y-%m-%d') as due_date,
                     NULL as ret_date,
@@ -1318,7 +1322,9 @@ sub fetch_report_data {
                 SELECT 
                     i.barcode,
                     b.title,
-                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron,
+                    br.cardnumber as patron_id,
+                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron_name,
+                    CONCAT(TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))), IF(br.cardnumber IS NOT NULL AND br.cardnumber != '', CONCAT(' (', br.cardnumber, ')'), '')) as patron,
                     DATE_FORMAT(oi.issuedate, '%Y-%m-%d') as issue_date,
                     DATE_FORMAT(oi.date_due, '%Y-%m-%d') as due_date,
                     DATE_FORMAT(oi.returndate, '%Y-%m-%d') as ret_date,
@@ -1336,6 +1342,8 @@ sub fetch_report_data {
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
                 $r->{title} = ensure_utf8($r->{title});
+                $r->{patron_id} = ensure_utf8($r->{patron_id});
+                $r->{patron_name} = ensure_utf8($r->{patron_name});
                 $r->{patron} = ensure_utf8($r->{patron});
                 $r->{status} = ensure_utf8($r->{status});
                 push @rows, $r;
@@ -2473,7 +2481,8 @@ elsif ($op eq 'export_csv') {
     } elsif ($report_id eq 'digital_access_by_patron' || $report_id eq 'top_patrons') {
         $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
+            my $pname = $r->{patron_name} . ($r->{patron_id} && $r->{patron_name} !~ /\Q$r->{patron_id}\E/ ? " ($r->{patron_id})" : "");
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $pname, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
         }
     } elsif ($report_id eq 'digital_access_by_collection' || $report_id eq 'collection_usage') {
         $print_csv_line->('STT', 'Tên Bộ sưu tập tài liệu số FTU', 'Tổng số tài liệu trong BST', 'Lượt mượn tài liệu số', 'Lượt đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Tỷ lệ khai thác');
@@ -2503,7 +2512,8 @@ elsif ($op eq 'export_csv') {
     } elsif ($report_id eq 'online_users') {
         $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
+            my $pname = $r->{patron_name} . ($r->{patron_id} && $r->{patron_name} !~ /\Q$r->{patron_id}\E/ ? " ($r->{patron_id})" : "");
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $pname, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
         }
     } elsif ($report_id eq 'access_over_time') {
         $print_csv_line->('STT', 'Thời gian', 'Tổng số phiên truy cập', 'Lượt mượn tài liệu số', 'Số bạn đọc tiếp cận', 'Số tài liệu số được đọc', 'Lượt xem trang');
@@ -2615,7 +2625,9 @@ elsif ($op eq 'export_csv') {
     } elsif ($report_id eq 'circ_overdue_docs') {
         $print_csv_line->('STT', 'Số thẻ bạn đọc', 'Họ và tên', 'Đối tượng', 'Mã vạch sách', 'Nhan đề tài liệu', 'Ngày mượn', 'Hạn trả', 'Số ngày quá hạn', 'Tiền phạt ước tính (VNĐ)');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{cardnumber}, $r->{patron_name}, $r->{role}, $r->{barcode}, $r->{title}, $r->{issue_date}, $r->{due_date}, $r->{overdue_days}, $r->{fine});
+            my $pcode = $r->{cardnumber} || $r->{patron_id} || '';
+            my $pname = $r->{patron_name} . ($pcode && $r->{patron_name} !~ /\Q$pcode\E/ ? " ($pcode)" : "");
+            $print_csv_line->($r->{stt}, $pcode, $pname, $r->{role}, $r->{barcode}, $r->{title}, $r->{issue_date}, $r->{due_date}, $r->{overdue_days}, $r->{fine});
         }
     } elsif ($report_id eq 'circ_popular_docs') {
         $print_csv_line->('Top', 'Mã vạch', 'Nhan đề sách in', 'Tác giả', 'Nhà xuất bản', 'Môn loại DDC', 'Tổng lượt mượn', 'Lần mượn gần nhất');
@@ -2635,7 +2647,9 @@ elsif ($op eq 'export_csv') {
     } elsif ($report_id eq 'circ_patron_loans') {
         $print_csv_line->('Top', 'Mã bạn đọc / MSSV', 'Họ và tên bạn đọc', 'Đối tượng', 'Khoa / Khóa học', 'Tổng lượt mượn', 'Sách đang mượn', 'Sách đã trả', 'Lần mượn gần nhất');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role}, $r->{faculty}, $r->{total_loans}, $r->{active_loans}, $r->{return_count}, $r->{last_loan});
+            my $pcode = $r->{patron_id} || $r->{cardnumber} || '';
+            my $pname = $r->{patron_name} . ($pcode && $r->{patron_name} !~ /\Q$pcode\E/ ? " ($pcode)" : "");
+            $print_csv_line->($r->{stt}, $pcode, $pname, $r->{role}, $r->{faculty}, $r->{total_loans}, $r->{active_loans}, $r->{return_count}, $r->{last_loan});
         }
     } elsif ($report_id eq 'circ_doc_history') {
         $print_csv_line->('STT', 'Mã vạch sách', 'Nhan đề tài liệu', 'Bạn đọc mượn', 'Ngày mượn', 'Hạn trả', 'Ngày trả thực tế', 'Thủ thư thực hiện', 'Trạng thái lưu thông');

@@ -720,10 +720,13 @@ function renderTable(res) {
                               r.status_text === 'Đã hết phiên' ? '<span class="badge-expired">Hết hạn</span>' :
                               '<span class="badge-revoked">Thu hồi</span>';
 
+            var pCode = r.patron_id || '';
+            var pName = (r.patron_name || '') + (pCode ? ' <span class="text-muted small">(' + pCode + ')</span>' : '');
+
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><code>' + (r.patron_id || '') + '</code></td>'
-                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
+                + '<td><code>' + pCode + '</code></td>'
+                + '<td><strong>' + pName + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role_label || '') + '</span></td>'
                 + '<td>' + (r.document_title || '') + '</td>'
                 + '<td><small class="text-muted">' + (r.client_ip || '') + '</small></td>'
@@ -886,10 +889,13 @@ function renderTable(res) {
             + '</tr>';
 
         rows.forEach(function(r) {
+            var pCode = r.patron_id || '';
+            var pName = (r.patron_name || '') + (pCode ? ' <span class="text-muted small">(' + pCode + ')</span>' : '');
+
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
-                + '<td><code>' + (r.patron_id || '') + '</code></td>'
-                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
+                + '<td><code>' + pCode + '</code></td>'
+                + '<td><strong>' + pName + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role_label || '') + '</span></td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.loan_count || 0) + '</td>'
                 + '<td class="text-end text-info font-weight-bold">' + (r.session_count || 0) + '</td>'
@@ -1243,10 +1249,13 @@ function renderTable(res) {
             + '</tr>';
 
         rows.forEach(function(r) {
+            var pCode = r.cardnumber || r.patron_id || '';
+            var pName = (r.patron_name || '') + (pCode ? ' <span class="text-muted small">(' + pCode + ')</span>' : '');
+
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
-                + '<td><code>' + (r.cardnumber || '') + '</code></td>'
-                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
+                + '<td><code>' + pCode + '</code></td>'
+                + '<td><strong>' + pName + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role || '') + '</span></td>'
                 + '<td><code>' + (r.barcode || '') + '</code></td>'
                 + '<td><strong>' + (r.title || '') + '</strong></td>'
@@ -1348,10 +1357,13 @@ function renderTable(res) {
             + '</tr>';
 
         rows.forEach(function(r) {
+            var pCode = r.patron_id || r.cardnumber || '';
+            var pName = (r.patron_name || '') + (pCode ? ' <span class="text-muted small">(' + pCode + ')</span>' : '');
+
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
-                + '<td><code>' + (r.patron_id || '') + '</code></td>'
-                + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
+                + '<td><code>' + pCode + '</code></td>'
+                + '<td><strong>' + pName + '</strong></td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role || '') + '</span></td>'
                 + '<td>' + (r.faculty || '') + '</td>'
                 + '<td class="text-end font-weight-bold text-primary" style="font-size: 14.5px;">' + (r.total_loans || 0).toLocaleString('vi-VN') + '</td>'
@@ -1368,7 +1380,7 @@ function renderTable(res) {
             + '<th style="width: 45px;" class="text-center">STT</th>'
             + '<th>Mã vạch sách</th>'
             + '<th>Nhan đề tài liệu</th>'
-            + '<th>Bạn đọc mượn</th>'
+            + '<th>Bạn đọc mượn (Kèm mã thẻ)</th>'
             + '<th>Ngày mượn</th>'
             + '<th>Hạn trả</th>'
             + '<th>Ngày trả thực tế</th>'
@@ -1381,11 +1393,19 @@ function renderTable(res) {
                           r.status === 'Quá hạn' ? '<span class="badge bg-danger">Quá hạn</span>' :
                           '<span class="badge bg-primary">Đang mượn</span>';
 
+            var pText = r.patron || '';
+            var pCode = r.patron_id || '';
+            if (!pText && r.patron_name) {
+                pText = r.patron_name + (pCode ? ' <span class="text-muted small">(' + pCode + ')</span>' : '');
+            } else if (pCode && !pText.includes(pCode)) {
+                pText = pText + ' <span class="text-muted small">(' + pCode + ')</span>';
+            }
+
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><code>' + (r.barcode || '') + '</code></td>'
                 + '<td><strong>' + (r.title || '') + '</strong></td>'
-                + '<td>' + (r.patron || '') + '</td>'
+                + '<td><strong>' + pText + '</strong></td>'
                 + '<td>' + (r.issue_date || '') + '</td>'
                 + '<td>' + (r.due_date || '') + '</td>'
                 + '<td>' + (r.ret_date || '') + '</td>'
