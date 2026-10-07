@@ -743,7 +743,7 @@ sub fetch_report_data {
             my $sql = qq{
                 SELECT 
                     br.cardnumber,
-                    CONCAT(br.surname, ' ', br.firstname) as patron_name,
+                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron_name,
                     COALESCE(cat.description, br.categorycode, 'Bạn đọc FTU') as role,
                     i.barcode,
                     b.title,
@@ -880,7 +880,7 @@ sub fetch_report_data {
             my $sql = qq{
                 SELECT 
                     br.cardnumber as patron_id,
-                    CONCAT(br.surname, ' ', br.firstname) as patron_name,
+                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron_name,
                     COALESCE(cat.description, br.categorycode, 'Bạn đọc') as role,
                     COALESCE(br.branchcode, 'CPL') as faculty,
                     (COUNT(iss.issue_id) + (SELECT COUNT(*) FROM old_issues oi WHERE oi.borrowernumber = br.borrowernumber)) as total_loans,
@@ -890,8 +890,12 @@ sub fetch_report_data {
                 FROM borrowers br
                 LEFT JOIN issues iss ON br.borrowernumber = iss.borrowernumber
                 LEFT JOIN categories cat ON br.categorycode = cat.categorycode
-                WHERE (TRIM(br.surname) != '' OR TRIM(br.firstname) != '')
-                  AND br.categorycode NOT IN ('IL', 'HB')
+                WHERE br.categorycode NOT IN ('IL', 'HB')
+                  AND (
+                      br.categorycode != 'S' 
+                      OR (SELECT COUNT(*) FROM issues iss_c WHERE iss_c.borrowernumber = br.borrowernumber) > 0
+                      OR (SELECT COUNT(*) FROM old_issues oi_c WHERE oi_c.borrowernumber = br.borrowernumber) > 0
+                  )
                 GROUP BY br.borrowernumber, br.cardnumber, br.surname, br.firstname, cat.description, br.categorycode, br.branchcode
                 ORDER BY total_loans DESC, active_loans DESC
             };
@@ -918,7 +922,7 @@ sub fetch_report_data {
                 SELECT 
                     i.barcode,
                     b.title,
-                    CONCAT(br.surname, ' ', br.firstname) as patron,
+                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron,
                     DATE_FORMAT(iss.issuedate, '%Y-%m-%d') as issue_date,
                     DATE_FORMAT(iss.date_due, '%Y-%m-%d') as due_date,
                     NULL as ret_date,
@@ -932,7 +936,7 @@ sub fetch_report_data {
                 SELECT 
                     i.barcode,
                     b.title,
-                    CONCAT(br.surname, ' ', br.firstname) as patron,
+                    TRIM(CONCAT(COALESCE(br.surname, ''), ' ', COALESCE(br.firstname, ''))) as patron,
                     DATE_FORMAT(oi.issuedate, '%Y-%m-%d') as issue_date,
                     DATE_FORMAT(oi.date_due, '%Y-%m-%d') as due_date,
                     DATE_FORMAT(oi.returndate, '%Y-%m-%d') as ret_date,
