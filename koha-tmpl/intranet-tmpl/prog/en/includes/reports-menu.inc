@@ -6,6 +6,7 @@
         <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=circ">Báo cáo lưu thông</a></li>
         <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=digital_docs">Báo cáo tài liệu số</a></li>
         <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=inventory">Báo cáo kho</a></li>
+        <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=public_pages">Báo cáo các trang công khai</a></li>
         <li><a href="/cgi-bin/koha/reports/digital-reports.pl?cat=serials">Báo cáo báo tạp chí</a></li>
     </ul>
 

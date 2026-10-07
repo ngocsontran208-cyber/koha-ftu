@@ -258,6 +258,11 @@
                     </a>
                 </li>
                 <li class="ftu-tree-item">
+                    <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('public_pages')">
+                        Báo cáo các trang công khai
+                    </a>
+                </li>
+                <li class="ftu-tree-item">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('serials')">
                         Báo cáo báo tạp chí
                     </a>
@@ -460,6 +465,21 @@ var reportCategories = {
             { id: 'inv_status_list', title: 'Danh mục trạng thái tài liệu' },
             { id: 'inv_withdrawn', title: 'Danh mục tài liệu thanh lý' },
             { id: 'inv_lost', title: 'Danh mục tài liệu mất' }
+        ]
+    },
+    public_pages: {
+        title: 'BÁO CÁO CÁC TRANG CÔNG KHAI',
+        defaultReport: 'pub_article_views',
+        defaultTitle: 'Thống kê lượt xem bài viết & tin tức',
+        reports: [
+            { id: 'pub_article_views', title: 'Thống kê lượt xem bài viết & tin tức' },
+            { id: 'pub_page_traffic', title: 'Thống kê lưu lượng truy cập theo từng trang công khai' },
+            { id: 'pub_top_searches', title: 'Thống kê từ khóa tìm kiếm phổ biến' },
+            { id: 'pub_zero_hit_searches', title: 'Báo cáo tìm kiếm không có kết quả (Nhu cầu bổ sung)' },
+            { id: 'pub_interactions', title: 'Báo cáo tương tác & dịch vụ trực tuyến công khai' },
+            { id: 'pub_device_stats', title: 'Thống kê thiết bị & nền tảng truy cập' },
+            { id: 'pub_hourly_traffic', title: 'Thống kê lưu lượng truy cập theo khung giờ & ngày trong tuần' },
+            { id: 'pub_open_resources', title: 'Thống kê khám phá tài nguyên số công khai & bộ sưu tập mở' }
         ]
     }
 };
@@ -1707,6 +1727,326 @@ function renderTable(res) {
             + '<td colspan="6" class="text-end"><strong>TỔNG CỘNG ' + rows.length + ' TÀI LIỆU BÁO MẤT:</strong></td>'
             + '<td class="text-end text-danger font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
             + '<td colspan="3"></td>'
+            + '</tr>';
+    }
+
+    // =========================================================================
+    // 5. NHÓM BÁO CÁO CÁC TRANG CÔNG KHAI (PUBLIC OPAC & PORTAL REPORTS)
+    // =========================================================================
+
+    // 5.1 Thống kê lượt xem bài viết & tin tức
+    else if (currentReportId === 'pub_article_views') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th style="width: 80px;" class="text-center">Mã tin</th>'
+            + '<th>Tiêu đề bài viết / Thông báo</th>'
+            + '<th>Chuyên mục</th>'
+            + '<th>Vị trí hiển thị</th>'
+            + '<th class="text-center">Ngày đăng</th>'
+            + '<th class="text-end">Lượt xem (Views)</th>'
+            + '<th class="text-end">Bạn đọc duy nhất</th>'
+            + '<th class="text-center">Trạng thái</th>'
+            + '</tr>';
+
+        var totalViews = 0;
+        var totalUnique = 0;
+
+        rows.forEach(function(r) {
+            totalViews += (r.views || 0);
+            totalUnique += (r.unique_readers || 0);
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td class="text-center"><span class="badge bg-light text-dark border">#' + r.id + '</span></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td><span class="badge bg-info text-white">' + (r.cat_name || '') + '</span></td>'
+                + '<td><small class="text-muted">' + (r.location || '') + '</small></td>'
+                + '<td class="text-center text-muted"><small>' + (r.pub_date || '') + '</small></td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.views || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary">' + (r.unique_readers || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-center"><span class="badge bg-success">' + (r.status || 'Đang hiển thị') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="6" class="text-end"><strong>TỔNG CỘNG ' + rows.length + ' BÀI VIẾT / THÔNG BÁO CÔNG KHAI:</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + totalViews.toLocaleString('vi-VN') + ' lượt</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + totalUnique.toLocaleString('vi-VN') + ' bạn đọc</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // 5.2 Thống kê lưu lượng truy cập theo từng trang công khai
+    else if (currentReportId === 'pub_page_traffic') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Tên trang công khai</th>'
+            + '<th>Đường dẫn (URL / Tuyến đường)</th>'
+            + '<th class="text-end">Lượt xem trang (Pageviews)</th>'
+            + '<th class="text-end">Số phiên truy cập</th>'
+            + '<th class="text-center">Thời gian dừng TB</th>'
+            + '<th class="text-center">Tỷ lệ thoát (Bounce)</th>'
+            + '<th class="text-end">Tỷ trọng lưu lượng</th>'
+            + '</tr>';
+
+        var sumPv = 0;
+        var sumSess = 0;
+
+        rows.forEach(function(r) {
+            sumPv += (r.pageviews || 0);
+            sumSess += (r.sessions || 0);
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary">' + (r.name || '') + '</strong></td>'
+                + '<td><code>' + (r.route || '') + '</code></td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.pageviews || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold">' + (r.sessions || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-center">' + (r.avg_time || '') + '</td>'
+                + '<td class="text-center text-muted">' + (r.bounce || '') + '</td>'
+                + '<td class="text-end"><span class="badge bg-light text-dark border">' + (r.ratio || '') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG LƯU LƯỢNG TRUY CẬP:</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + sumPv.toLocaleString('vi-VN') + ' lượt xem</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumSess.toLocaleString('vi-VN') + ' phiên</strong></td>'
+            + '<td colspan="2"></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '</tr>';
+    }
+
+    // 5.3 Thống kê từ khóa tìm kiếm phổ biến
+    else if (currentReportId === 'pub_top_searches') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 50px;" class="text-center">Top</th>'
+            + '<th>Từ khóa tìm kiếm phổ biến</th>'
+            + '<th>Lĩnh vực / Chuyên ngành FTU</th>'
+            + '<th class="text-end">Số lượt tìm kiếm</th>'
+            + '<th class="text-center">Kết quả TB / lượt</th>'
+            + '<th class="text-center">Tỷ lệ tương tác (CTR)</th>'
+            + '<th class="text-center">Xu hướng quan tâm</th>'
+            + '</tr>';
+
+        var sumSearches = 0;
+
+        rows.forEach(function(r) {
+            sumSearches += (r.count || 0);
+            var trendBadge = r.trend.indexOf('Tăng') !== -1
+                ? '<span class="badge bg-success">' + r.trend + '</span>'
+                : r.trend.indexOf('Mới') !== -1
+                ? '<span class="badge bg-warning text-dark">' + r.trend + '</span>'
+                : '<span class="badge bg-secondary">' + r.trend + '</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center font-weight-bold"><span class="badge bg-primary rounded-pill">' + r.stt + '</span></td>'
+                + '<td><strong class="text-dark"><i class="fa fa-search text-muted me-1"></i> "' + (r.query || '') + '"</strong></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.domain || '') + '</span></td>'
+                + '<td class="text-end font-weight-bold text-primary">' + (r.count || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-center text-muted">' + (r.avg_results || 0) + ' tài liệu</td>'
+                + '<td class="text-center text-success font-weight-bold">' + (r.ctr || '') + '</td>'
+                + '<td class="text-center">' + trendBadge + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG LƯỢT TÌM KIẾM TRONG TOP:</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumSearches.toLocaleString('vi-VN') + ' lượt</strong></td>'
+            + '<td colspan="3"></td>'
+            + '</tr>';
+    }
+
+    // 5.4 Báo cáo tìm kiếm không có kết quả (Nhu cầu bổ sung)
+    else if (currentReportId === 'pub_zero_hit_searches') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Từ khóa tìm kiếm không có kết quả</th>'
+            + '<th>Nhóm bạn đọc quan tâm</th>'
+            + '<th class="text-end">Lượt tra cứu thất bại</th>'
+            + '<th class="text-center">Lần tra cứu gần nhất</th>'
+            + '<th>Hành động đề xuất (Bổ sung tài liệu)</th>'
+            + '<th class="text-center">Tình trạng xử lý</th>'
+            + '</tr>';
+
+        var sumZeroHits = 0;
+
+        rows.forEach(function(r) {
+            sumZeroHits += (r.count || 0);
+            var stBadge = r.status.indexOf('Đã') !== -1
+                ? '<span class="badge bg-success">' + r.status + '</span>'
+                : '<span class="badge bg-warning text-dark">' + r.status + '</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-danger"><i class="fa fa-exclamation-circle text-danger me-1"></i> "' + (r.query || '') + '"</strong></td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.audience || '') + '</span></td>'
+                + '<td class="text-end font-weight-bold text-danger">' + (r.count || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-center text-muted"><small>' + (r.last_time || '') + '</small></td>'
+                + '<td><strong class="text-primary">' + (r.rec_action || '') + '</strong></td>'
+                + '<td class="text-center">' + stBadge + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="3" class="text-end"><strong>TỔNG SỐ LƯỢT TÌM KIẾM THẤT BẠI CẦN BỔ SUNG:</strong></td>'
+            + '<td class="text-end text-danger font-weight-bold"><strong>' + sumZeroHits.toLocaleString('vi-VN') + ' lượt</strong></td>'
+            + '<td colspan="3"></td>'
+            + '</tr>';
+    }
+
+    // 5.5 Báo cáo tương tác & dịch vụ trực tuyến công khai
+    else if (currentReportId === 'pub_interactions') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Loại hình tương tác & Dịch vụ trực tuyến</th>'
+            + '<th class="text-end">Số yêu cầu tiếp nhận</th>'
+            + '<th class="text-end">Đã xử lý & Phê duyệt</th>'
+            + '<th class="text-end">Đang xử lý / Chờ</th>'
+            + '<th class="text-center">Thời gian phản hồi TB</th>'
+            + '<th class="text-center">Mức độ hài lòng</th>'
+            + '</tr>';
+
+        var sumRec = 0;
+        var sumApp = 0;
+        var sumPend = 0;
+
+        rows.forEach(function(r) {
+            sumRec += (r.received || 0);
+            sumApp += (r.approved || 0);
+            sumPend += (r.pending || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary">' + (r.service || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold">' + (r.received || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.approved || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-danger font-weight-bold">' + (r.pending || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-center text-muted">' + (r.avg_res || '') + '</td>'
+                + '<td class="text-center"><span class="badge bg-success">' + (r.satisfaction || '') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG TOÀN BỘ CÁC DỊCH VỤ TRỰC TUYẾN:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumRec.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + sumApp.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-danger font-weight-bold"><strong>' + sumPend.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td colspan="2"></td>'
+            + '</tr>';
+    }
+
+    // 5.6 Thống kê thiết bị & nền tảng truy cập
+    else if (currentReportId === 'pub_device_stats') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Loại thiết bị truy cập</th>'
+            + '<th>Hệ điều hành phổ biến</th>'
+            + '<th>Trình duyệt Web chủ yếu</th>'
+            + '<th class="text-end">Lượt truy cập (Visits)</th>'
+            + '<th class="text-end">Tỷ lệ cơ cấu (%)</th>'
+            + '<th class="text-center">Thời gian lưu lại TB</th>'
+            + '</tr>';
+
+        var sumVis = 0;
+
+        rows.forEach(function(r) {
+            sumVis += (r.visits || 0);
+            var icon = r.type.indexOf('Máy tính') !== -1 ? 'fa-laptop' : r.type.indexOf('Điện thoại') !== -1 ? 'fa-mobile-alt' : 'fa-tablet-alt';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary"><i class="fa ' + icon + ' me-1"></i> ' + (r.type || '') + '</strong></td>'
+                + '<td>' + (r.os || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.browser || '') + '</span></td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.visits || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end"><span class="badge bg-primary">' + (r.ratio || '') + '</span></td>'
+                + '<td class="text-center text-muted">' + (r.avg_time || '') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="4" class="text-end"><strong>TỔNG LƯỢT TRUY CẬP THEO THIẾT BỊ:</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + sumVis.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
+            + '<td></td>'
+            + '</tr>';
+    }
+
+    // 5.7 Thống kê lưu lượng truy cập theo khung giờ & ngày trong tuần
+    else if (currentReportId === 'pub_hourly_traffic') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Khung giờ trong ngày</th>'
+            + '<th class="text-center">Mức độ tải hệ thống</th>'
+            + '<th class="text-end">Lượt xem trang / Giờ</th>'
+            + '<th class="text-end">Bạn đọc trực tuyến TB</th>'
+            + '<th>Hành vi tra cứu chủ yếu</th>'
+            + '<th>Đề xuất phân công thủ thư trực</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            var levelBadge = r.level.indexOf('Cao điểm') !== -1
+                ? '<span class="badge bg-danger">' + r.level + '</span>'
+                : r.level.indexOf('Bình thường') !== -1
+                ? '<span class="badge bg-info text-white">' + r.level + '</span>'
+                : '<span class="badge bg-secondary">' + r.level + '</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong><i class="fa fa-clock-o text-muted me-1"></i> ' + (r.period || '') + '</strong></td>'
+                + '<td class="text-center">' + levelBadge + '</td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.pv_hour || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold">' + (r.online_users || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td>' + (r.top_action || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.staff_rec || '') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="7" class="text-end"><strong>BÁO CÁO PHÂN BỔ TẢI 24/7 PHỤC VỤ ĐIỀU PHỐI NHÂN LỰC THƯ VIỆN</strong></td>'
+            + '</tr>';
+    }
+
+    // 5.8 Thống kê khám phá tài nguyên số công khai & bộ sưu tập mở
+    else if (currentReportId === 'pub_open_resources') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Bộ sưu tập số & Khám phá mở FTU</th>'
+            + '<th class="text-end">Số tài liệu</th>'
+            + '<th class="text-end">Lượt tra cứu trên OPAC</th>'
+            + '<th class="text-end">Lượt đọc toàn văn trực tuyến</th>'
+            + '<th class="text-end">Lượt tải về / Xuất trích dẫn</th>'
+            + '<th class="text-end">Tỷ lệ quan tâm (%)</th>'
+            + '</tr>';
+
+        var sumItems = 0;
+        var sumOpac = 0;
+        var sumFulltext = 0;
+        var sumDl = 0;
+
+        rows.forEach(function(r) {
+            sumItems += (r.items || 0);
+            sumOpac += (r.opac_views || 0);
+            sumFulltext += (r.fulltext_reads || 0);
+            sumDl += (r.downloads || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary"><i class="fa fa-folder-open text-warning me-1"></i> ' + (r.name || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold">' + (r.items || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary font-weight-bold">' + (r.opac_views || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-success font-weight-bold">' + (r.fulltext_reads || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-info font-weight-bold">' + (r.downloads || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end"><span class="badge bg-light text-dark border">' + (r.ratio || '') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG TOÀN BỘ BỘ SƯU TẬP:</strong></td>'
+            + '<td class="text-end font-weight-bold"><strong>' + sumItems.toLocaleString('vi-VN') + ' tài liệu</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumOpac.toLocaleString('vi-VN') + ' lượt</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + sumFulltext.toLocaleString('vi-VN') + ' lượt</strong></td>'
+            + '<td class="text-end text-info font-weight-bold"><strong>' + sumDl.toLocaleString('vi-VN') + ' lượt</strong></td>'
+            + '<td class="text-end"><strong>100%</strong></td>'
             + '</tr>';
     }
 }
