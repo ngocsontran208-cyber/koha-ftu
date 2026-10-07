@@ -772,9 +772,9 @@ elsif ($op eq 'export_csv') {
 
     # Header theo từng loại báo cáo
     if ($report_id eq 'online_users') {
-        $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Phân hiệu', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
+        $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
         }
     } elsif ($report_id eq 'access_over_time') {
         $print_csv_line->('STT', 'Thời gian', 'Tổng số phiên truy cập', 'Lượt mượn tài liệu số', 'Số bạn đọc tiếp cận', 'Số tài liệu số được đọc', 'Lượt xem trang ước tính');
@@ -792,14 +792,14 @@ elsif ($op eq 'export_csv') {
             $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{session_count}, $r->{reader_count}, $r->{avg_duration}, $r->{pageviews}, $r->{last_interaction});
         }
     } elsif ($report_id eq 'opac_visits_ftu2') {
-        $print_csv_line->('STT', 'Ngày ghi nhận', 'Phân hiệu', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại FTU2', 'Tổng số tương tác');
+        $print_csv_line->('STT', 'Ngày ghi nhận', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại FTU2', 'Tổng số tương tác');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{visit_date}, $r->{branch_name}, $r->{login_count}, $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions});
+            $print_csv_line->($r->{stt}, $r->{visit_date}, $r->{login_count}, $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions});
         }
     } elsif ($report_id eq 'top_patrons') {
-        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Phân hiệu', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
+        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
         for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
         }
     } elsif ($report_id eq 'collection_usage') {
         $print_csv_line->('STT', 'Tên Bộ sưu tập tài liệu số FTU', 'Tổng số tài liệu trong BST', 'Lượt mượn tài liệu số', 'Lượt đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Tỷ lệ khai thác');

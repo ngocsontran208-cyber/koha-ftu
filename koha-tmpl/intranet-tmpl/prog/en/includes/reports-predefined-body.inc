@@ -321,7 +321,7 @@
                 </div>
             </div>
 
-            <!-- BỘ LỌC THỜI GIAN & CHI NHÁNH CƠ SỞ -->
+            <!-- BỘ LỌC THỜI GIAN -->
             <div class="ftu-filter-panel no-print">
                 <div class="row align-items-end g-2">
                     <div class="col-md-3">
@@ -332,13 +332,8 @@
                         <label class="form-label mb-1" style="font-size: 13px; font-weight: 600;">Đến ngày:</label>
                         <input type="date" id="filter_to_date" class="form-control form-control-sm" value="[% to_date || '2026-10-07' | html %]" />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label mb-1" style="font-size: 13px; font-weight: 600;">Phân hiệu:</label>
-                        <select id="filter_branch" class="form-select form-select-sm">
-                            <option value="CPL" selected>Cơ sở II - TP. Hồ Chí Minh (FTU2)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 text-end">
+                    <input type="hidden" id="filter_branch" value="CPL" />
+                    <div class="col-md-6 text-end">
                         <button type="button" class="btn btn-primary btn-sm" onclick="loadReportData()">
                             <i class="fa fa-search"></i> Xem báo cáo
                         </button>
@@ -636,7 +631,6 @@ function renderTable(res) {
             + '<th style="width: 45px;" class="text-center">STT</th>'
             + '<th>Mã bạn đọc</th>'
             + '<th>Họ và tên</th>'
-            + '<th>Phân hiệu</th>'
             + '<th>Đối tượng</th>'
             + '<th>Tài liệu đang đọc</th>'
             + '<th>Địa chỉ IP</th>'
@@ -654,7 +648,6 @@ function renderTable(res) {
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><code>' + (r.patron_id || '') + '</code></td>'
                 + '<td><strong>' + (r.patron_name || '') + '</strong></td>'
-                + '<td>' + (r.branch_name || '') + '</td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role_label || '') + '</span></td>'
                 + '<td><i class="fa fa-book text-muted me-1"></i> ' + (r.document_title || '') + '</td>'
                 + '<td><small class="text-muted">' + (r.client_ip || '') + '</small></td>'
@@ -665,7 +658,7 @@ function renderTable(res) {
         });
 
         tfoot.innerHTML = '<tr>'
-            + '<td colspan="9" class="text-end"><strong>TỔNG SỐ BẢN GHI:</strong></td>'
+            + '<td colspan="8" class="text-end"><strong>TỔNG SỐ BẢN GHI:</strong></td>'
             + '<td class="text-center text-success"><strong>' + rows.length + '</strong></td>'
             + '</tr>';
     }
@@ -767,7 +760,6 @@ function renderTable(res) {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
             + '<th>Ngày ghi nhận</th>'
-            + '<th>Phân hiệu</th>'
             + '<th class="text-end">Lượt đăng nhập OPAC</th>'
             + '<th class="text-end">Lượt tra cứu (Search)</th>'
             + '<th class="text-end">Xem chi tiết biểu ghi</th>'
@@ -786,7 +778,6 @@ function renderTable(res) {
             tbody.innerHTML += '<tr>'
                 + '<td class="text-center">' + r.stt + '</td>'
                 + '<td><strong><i class="fa fa-calendar-alt text-primary me-1"></i> ' + (r.visit_date || '') + '</strong></td>'
-                + '<td><span class="badge bg-light text-primary border"><i class="fa fa-university me-1"></i> ' + (r.branch_name || '') + '</span></td>'
                 + '<td class="text-end text-success">' + (r.login_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-info">' + (r.search_count || 0).toLocaleString('vi-VN') + '</td>'
                 + '<td class="text-end text-secondary">' + (r.detail_views || 0).toLocaleString('vi-VN') + '</td>'
@@ -796,7 +787,7 @@ function renderTable(res) {
         });
 
         tfoot.innerHTML = '<tr>'
-            + '<td colspan="3" class="text-end"><strong>TỔNG CỘNG FTU2:</strong></td>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG:</strong></td>'
             + '<td class="text-end text-success"><strong>' + sumLogins.toLocaleString('vi-VN') + '</strong></td>'
             + '<td class="text-end text-info"><strong>' + sumSearches.toLocaleString('vi-VN') + '</strong></td>'
             + '<td class="text-end text-secondary"><strong>' + sumViews.toLocaleString('vi-VN') + '</strong></td>'
@@ -811,7 +802,6 @@ function renderTable(res) {
             + '<th style="width: 45px;" class="text-center">Top</th>'
             + '<th>Mã bạn đọc / Số thẻ</th>'
             + '<th>Họ và tên bạn đọc</th>'
-            + '<th>Phân hiệu</th>'
             + '<th>Đối tượng / Nhóm</th>'
             + '<th class="text-end">Lượt mượn tài liệu số</th>'
             + '<th class="text-end">Số phiên đọc trực tuyến</th>'
@@ -824,7 +814,6 @@ function renderTable(res) {
                 + '<td class="text-center"><span class="badge bg-secondary">' + r.stt + '</span></td>'
                 + '<td><code>' + (r.patron_id || '') + '</code></td>'
                 + '<td><strong><i class="fa fa-user-graduate text-muted me-1"></i> ' + (r.patron_name || '') + '</strong></td>'
-                + '<td>' + (r.branch_name || '') + '</td>'
                 + '<td><span class="badge bg-light text-dark border">' + (r.role_label || '') + '</span></td>'
                 + '<td class="text-end text-success font-weight-bold">' + (r.loan_count || 0) + '</td>'
                 + '<td class="text-end text-info font-weight-bold">' + (r.session_count || 0) + '</td>'
