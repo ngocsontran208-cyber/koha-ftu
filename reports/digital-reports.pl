@@ -73,7 +73,7 @@ sub get_patron_branch_map {
         $sth->execute();
         while (my $row = $sth->fetchrow_hashref) {
             my $branch = $row->{branchcode} || '';
-            my $branch_label = ($branch eq 'CPL' || $branch =~ /FTU2|CS2/i) ? 'Cơ sở II (FTU2 - TP.HCM)' : 'Trụ sở chính Hà Nội';
+            my $branch_label = 'Cơ sở II (FTU2 - TP.HCM)';
             my $surname = ensure_utf8($row->{surname} || '');
             my $firstname = ensure_utf8($row->{firstname} || '');
             my $fullname = "$surname $firstname";
@@ -505,7 +505,7 @@ elsif ($op eq 'export_csv') {
 
     # Header theo từng loại báo cáo
     if ($report_id eq 'online_users') {
-        $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Cơ sở / Phân hiệu', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
+        $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Phân hiệu', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
         }
@@ -525,12 +525,12 @@ elsif ($op eq 'export_csv') {
             $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{session_count}, $r->{reader_count}, $r->{avg_duration}, $r->{pageviews}, $r->{last_interaction});
         }
     } elsif ($report_id eq 'opac_visits_ftu2') {
-        $print_csv_line->('STT', 'Ngày ghi nhận', 'Phân hiệu / Cơ sở', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại FTU2', 'Tổng số tương tác');
+        $print_csv_line->('STT', 'Ngày ghi nhận', 'Phân hiệu', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại FTU2', 'Tổng số tương tác');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{visit_date}, $r->{branch_name}, $r->{login_count}, $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions});
         }
     } elsif ($report_id eq 'top_patrons') {
-        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Phân hiệu / Cơ sở', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
+        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Phân hiệu', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{branch_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
         }

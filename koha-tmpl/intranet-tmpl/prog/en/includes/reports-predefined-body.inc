@@ -333,12 +333,9 @@
                         <input type="date" id="filter_to_date" class="form-control form-control-sm" value="[% to_date || '2026-10-07' | html %]" />
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label mb-1" style="font-size: 13px; font-weight: 600;">Cơ sở / Phân hiệu:</label>
+                        <label class="form-label mb-1" style="font-size: 13px; font-weight: 600;">Phân hiệu:</label>
                         <select id="filter_branch" class="form-select form-select-sm">
-                            <option value="ALL">-- Tất cả cơ sở --</option>
                             <option value="CPL" selected>Cơ sở II - TP. Hồ Chí Minh (FTU2)</option>
-                            <option value="FTU1">Trụ sở chính Hà Nội</option>
-                            <option value="QN">Cơ sở Quảng Ninh</option>
                         </select>
                     </div>
                     <div class="col-md-3 text-end">
@@ -571,7 +568,7 @@ function renderTable(res) {
             + '<th style="width: 45px;" class="text-center">STT</th>'
             + '<th>Mã bạn đọc</th>'
             + '<th>Họ và tên</th>'
-            + '<th>Cơ sở / Phân hiệu</th>'
+            + '<th>Phân hiệu</th>'
             + '<th>Đối tượng</th>'
             + '<th>Tài liệu đang đọc</th>'
             + '<th>Địa chỉ IP</th>'
@@ -702,7 +699,7 @@ function renderTable(res) {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
             + '<th>Ngày ghi nhận</th>'
-            + '<th>Phân hiệu / Cơ sở</th>'
+            + '<th>Phân hiệu</th>'
             + '<th class="text-end">Lượt đăng nhập OPAC</th>'
             + '<th class="text-end">Lượt tra cứu (Search)</th>'
             + '<th class="text-end">Xem chi tiết biểu ghi</th>'
@@ -746,7 +743,7 @@ function renderTable(res) {
             + '<th style="width: 45px;" class="text-center">Top</th>'
             + '<th>Mã bạn đọc / Số thẻ</th>'
             + '<th>Họ và tên bạn đọc</th>'
-            + '<th>Phân hiệu / Cơ sở</th>'
+            + '<th>Phân hiệu</th>'
             + '<th>Đối tượng / Nhóm</th>'
             + '<th class="text-end">Lượt mượn tài liệu số</th>'
             + '<th class="text-end">Số phiên đọc trực tuyến</th>'
