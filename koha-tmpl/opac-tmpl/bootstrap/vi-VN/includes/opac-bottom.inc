@@ -51,7 +51,7 @@
                             <i class="fa fa-location-dot" style="color: #b91c1c; font-size: 15px; margin-top: 3px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
                                 <strong style="color: #1E293B;">Địa chỉ:</strong>
-                                <span> Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. Hồ Chí Minh</span>
+                                <span> [% FTU_BRAND.campus_hcm_addr || 'Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh' %]</span>
                             </div>
                         </div>
 
@@ -61,7 +61,7 @@
                                 <i class="fa fa-phone" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
                                 <div>
                                     <strong style="color: #1E293B;">Hotline:</strong>
-                                    <a href="tel:02835127254" style="color: #475569; font-weight: 600; text-decoration: none;">(028) 3512 7254</a>
+                                    <a href="tel:02835127254" style="color: #475569; font-weight: 600; text-decoration: none;">[% FTU_BRAND.hotline_hcmc || '(028) 3512 7254' %]</a>
                                 </div>
                             </div>
 
@@ -69,7 +69,7 @@
                                 <i class="fa fa-envelope" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
                                 <div>
                                     <strong style="color: #1E293B;">Email:</strong>
-                                    <a href="mailto:[% FTU_BRAND.email_contact %]" style="color: #b91c1c; font-weight: 600; text-decoration: none;">[% FTU_BRAND.email_contact %]</a>
+                                    <a href="mailto:[% FTU_BRAND.email_contact || 'tv.hcmc@ftu.edu.vn' %]" style="color: #b91c1c; font-weight: 600; text-decoration: none;">[% FTU_BRAND.email_contact || 'tv.hcmc@ftu.edu.vn' %]</a>
                                 </div>
                             </div>
                         </div>
@@ -79,8 +79,22 @@
                             <i class="fa fa-clock" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
                                 <strong style="color: #1E293B;">Giờ phục vụ:</strong>
-                                <span> [% FTU_BRAND.hours_summary %]</span>
+                                <span> [% FTU_BRAND.hours_summary || 'Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00' %]</span>
                             </div>
+                        </div>
+
+                        <!-- Mạng xã hội & Kênh kết nối: FB, YouTube, Web -->
+                        <div class="d-flex align-items-center ftu-social-row mt-2 pt-1" style="gap: 10px;">
+                            <span style="font-size: 0.82rem; font-weight: 700; color: #1e293b; margin-right: 4px;">Kênh kết nối:</span>
+                            <a href="[% FTU_BRAND.link_facebook || 'https://www.facebook.com/ftu2.hcmc' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-btn ftu-social-fb" title="Facebook Thư viện FTU" aria-label="Facebook">
+                                <i class="fa-brands fa-facebook-f fa fa-facebook-f" aria-hidden="true"></i>
+                            </a>
+                            <a href="[% FTU_BRAND.link_youtube || 'https://www.youtube.com/@FTUChannel' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-btn ftu-social-yt" title="Kênh YouTube FTU" aria-label="YouTube">
+                                <i class="fa-brands fa-youtube fa fa-youtube-play" aria-hidden="true"></i>
+                            </a>
+                            <a href="[% FTU_BRAND.link_portal || 'https://hcmc.ftu.edu.vn' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-btn ftu-social-web" title="Cổng thông tin Website Trường ĐH Ngoại thương" aria-label="Website">
+                                <i class="fa-solid fa-globe fa fa-globe" aria-hidden="true"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -139,6 +153,30 @@
         </div>
 
         <style>
+            /* Icon mạng xã hội & liên kết chân trang */
+            .ftu-social-btn {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 50% !important;
+                color: #ffffff !important;
+                text-decoration: none !important;
+                transition: all 0.2s ease-in-out !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+                font-size: 14px !important;
+            }
+            .ftu-social-btn:hover {
+                transform: translateY(-2px) scale(1.08) !important;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.22) !important;
+                color: #ffffff !important;
+                filter: brightness(1.1) !important;
+            }
+            .ftu-social-fb { background: #1877f2 !important; }
+            .ftu-social-yt { background: #ef4444 !important; }
+            .ftu-social-web { background: #0284c7 !important; }
+
             .ftu-footer-accordion summary,
             .ftu-footer-summary {
                 list-style: none !important;

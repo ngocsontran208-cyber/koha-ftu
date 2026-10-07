@@ -326,26 +326,26 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
 
         # 3. Địa chỉ 3 cơ sở
         campus_hn_title        => $cgi->param("campus_hn_title") || "Trụ sở chính Hà Nội",
-        campus_hn_addr         => $cgi->param("campus_hn_addr") || "91 Phố Chùa Láng, P. Láng Thượng, Q. Đống Đa, TP. Hà Nội",
+        campus_hn_addr         => $cgi->param("campus_hn_addr") || "91 Phố Chùa Láng, Phường Láng Thượng, Quận Đống Đa, TP. Hà Nội",
         campus_hn_phone        => $cgi->param("campus_hn_phone") || "(024) 3835 6800 (Ext: 532, 535)",
 
         campus_hcm_title       => $cgi->param("campus_hcm_title") || "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
-        campus_hcm_addr        => $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM",
+        campus_hcm_addr        => $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
         campus_hcm_phone       => $cgi->param("campus_hcm_phone") || "(028) 3512 7254 - 3512 7258",
 
         campus_qn_title        => $cgi->param("campus_qn_title") || "Cơ sở Quảng Ninh",
-        campus_qn_addr         => $cgi->param("campus_qn_addr") || "Số 260 Bạch Đằng, P. Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh",
+        campus_qn_addr         => $cgi->param("campus_qn_addr") || "Số 260 Bạch Đằng, Phường Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh",
         campus_qn_phone        => $cgi->param("campus_qn_phone") || "(0203) 3850 411",
 
         # 4. Kênh Mạng xã hội & Truyền thông
-        link_facebook          => $cgi->param("link_facebook") || "https://www.facebook.com/thuvienftuhanoi",
+        link_facebook          => $cgi->param("link_facebook") || "https://www.facebook.com/ftu2.hcmc",
         link_youtube           => $cgi->param("link_youtube") || 'https://www.youtube.com/@FTUChannel',
-        link_portal            => $cgi->param("link_portal") || "http://ftu.edu.vn",
-        link_dspace            => $cgi->param("link_dspace") || "http://dspace.ftu.edu.vn",
+        link_portal            => $cgi->param("link_portal") || "https://hcmc.ftu.edu.vn",
+        link_dspace            => $cgi->param("link_dspace") || "/elib",
 
         # 5. Thông tin Thư viện & Bản quyền
         library_name_full      => $cgi->param("library_name_full") || "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-        library_name_en        => $cgi->param("library_name_en") || "Foreign Trade University Library",
+        library_name_en        => $cgi->param("library_name_en") || "Library of Foreign Trade University - Ho Chi Minh City Branch",
         library_description    => $cgi->param("library_description") || "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
         copyright_text         => $cgi->param("copyright_text") || "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
     );
@@ -603,6 +603,49 @@ if (open(my $fh, "<:encoding(UTF-8)", $cfg_file)) {
         $v =~ s/\\"/\"/g;
         $v =~ s/\\\\/\\/g;
         $footer_cfg->{$k} = $v;
+    }
+}
+
+# Đảm bảo toàn bộ các trường luôn có dữ liệu thực tế chuẩn xác
+my %default_footer_vals = (
+    title_home             => "Trang chủ Thư viện",
+    link_home              => "/cgi-bin/ftu/opac-main.pl",
+    title_advsearch        => "Tìm kiếm tài liệu nâng cao",
+    link_advsearch         => "/cgi-bin/ftu/opac-search.pl",
+    title_databases        => "Cơ sở dữ liệu điện tử",
+    link_databases         => "/cgi-bin/ftu/opac-databases.pl",
+    title_renew            => "Gia hạn sách trực tuyến",
+    link_renew             => "/cgi-bin/ftu/opac-user.pl#opac-user-checkouts",
+    title_guide            => "Hướng dẫn sử dụng OPAC",
+    link_guide             => "/cgi-bin/ftu/opac-news-detail.pl?id=1",
+    hotline_hanoi          => "(024) 3835 6800",
+    hotline_hanoi_ext      => "Máy lẻ: 532 / 535",
+    hotline_hcmc           => "(028) 3512 7254",
+    hotline_hcmc_sub       => "(028) 3512 7258",
+    hotline_quangninh      => "(0203) 3850 411",
+    email_contact          => 'tv.hcmc@ftu.edu.vn',
+    hours_status           => "Đang mở cửa",
+    hours_summary          => "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
+    campus_hn_title        => "Trụ sở chính Hà Nội",
+    campus_hn_addr         => "91 Phố Chùa Láng, Phường Láng Thượng, Quận Đống Đa, TP. Hà Nội",
+    campus_hn_phone        => "(024) 3835 6800 (Ext: 532, 535)",
+    campus_hcm_title       => "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
+    campus_hcm_addr        => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
+    campus_hcm_phone       => "(028) 3512 7254 - 3512 7258",
+    campus_qn_title        => "Cơ sở Quảng Ninh",
+    campus_qn_addr         => "Số 260 Bạch Đằng, Phường Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh",
+    campus_qn_phone        => "(0203) 3850 411",
+    link_facebook          => "https://www.facebook.com/ftu2.hcmc",
+    link_youtube           => "https://www.youtube.com/@FTUChannel",
+    link_portal            => "https://hcmc.ftu.edu.vn",
+    library_name_full      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    library_name_en        => "Library of Foreign Trade University - Ho Chi Minh City Branch",
+    library_description    => "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
+    copyright_text         => "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
+);
+for my $k (keys %default_footer_vals) {
+    if (!defined $footer_cfg->{$k} || $footer_cfg->{$k} eq '') {
+        $footer_cfg->{$k} = $default_footer_vals{$k};
     }
 }
 
