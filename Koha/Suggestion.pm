@@ -295,6 +295,7 @@ sub to_api_mapping {
         lastmodificationby   => 'last_status_change_by',
         STATUS               => 'status',
         note                 => 'note',
+        document_url         => 'document_url',
         staff_note           => 'staff_note',
         author               => 'author',
         title                => 'title',

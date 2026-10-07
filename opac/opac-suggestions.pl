@@ -60,7 +60,21 @@ my $suggestion = {
     branchcode      => scalar $input->param('branchcode'),
     patronreason    => scalar $input->param('patronreason'),
     note            => scalar $input->param('note'),
+    document_url    => scalar $input->param('document_url'),
 };
+
+if ($suggestion->{patronreason}) {
+    my @words = split(/\s+/, $suggestion->{patronreason});
+    if (scalar @words > 100) {
+        $suggestion->{patronreason} = join(' ', @words[0..99]);
+    }
+}
+if ($suggestion->{document_url}) {
+    $suggestion->{document_url} =~ s/^\s+|\s+$//g;
+    if ($suggestion->{document_url} !~ m{^https?://}i && $suggestion->{document_url} =~ m{\.}) {
+        $suggestion->{document_url} = 'https://' . $suggestion->{document_url};
+    }
+}
 
 # If a spambot accidentally populates the 'negcap' field in the suggestions form, then silently skip and return.
 if ($negcaptcha) {

@@ -10,678 +10,772 @@
 [% SET opacsuggestion = AdditionalContents.get( location => "OpacSuggestioninstructions", lang => lang, library => logged_in_user.branchcode || default_branch ) %]
 [% SET OpacNav = AdditionalContents.get( location => "OpacNav", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
 [% SET OpacNavBottom = AdditionalContents.get( location => "OpacNavBottom", lang => lang, library => logged_in_user.branchcode || default_branch, blocktitle => 0 ) %]
-[% SET AllPublicBranches = Branches.all(  search_params => { public => 1 }, selected => logged_in_user.branchcode ) %]
+[% SET AllPublicBranches = Branches.all( search_params => { public => 1 }, selected => logged_in_user.branchcode ) %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
  [% IF ( op_add_form ) %]
- [% t("New purchase suggestion") | html %]
+ Tạo đề xuất mua tài liệu
  [% END %]
  [% IF ( op_else ) %]
- [% t("Purchase suggestions") | html %]
+ Quản lý đề xuất mua tài liệu
  [% END %]
  &rsaquo; [% PROCESS 'library_name_title' %]
  [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
+<style>
+    .ftu-sugg-wrapper { max-width: 1100px; margin: 0 auto; }
+    .ftu-sugg-hero {
+        background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 65%, #F8FAFC 100%);
+        border: 1px solid #F1F5F9;
+        border-radius: 20px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.03);
+    }
+    .ftu-card {
+        border: 1px solid #E2E8F0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .ftu-card-header {
+        background: #F8FAFC;
+        border-bottom: 1px solid #E2E8F0;
+        padding: 1rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .ftu-card-header h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ftu-card-body {
+        padding: 1.5rem;
+    }
+    .ftu-form-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ftu-form-label .required-star {
+        color: #dc2626;
+        font-weight: bold;
+    }
+    .ftu-input-group-text {
+        background-color: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #64748B;
+    }
+    .ftu-form-control, .ftu-form-select {
+        border-radius: 10px;
+        border: 1.5px solid #CBD5E1;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .ftu-form-control:focus, .ftu-form-select:focus {
+        border-color: #A31A24;
+        box-shadow: 0 0 0 3px rgba(163, 26, 36, 0.12);
+    }
+    .ftu-chip-reason {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: #F1F5F9;
+        color: #475569;
+        border: 1px solid #E2E8F0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    .ftu-chip-reason:hover {
+        background: #FEE2E2;
+        border-color: #FECACA;
+        color: #A31A24;
+    }
+    .ftu-word-badge {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+    .ftu-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        padding: 5px 10px;
+        border-radius: 8px;
+    }
+</style>
 [% END %]
 </head>
 [% IF ( loggedinusername ) %][% INCLUDE 'bodytag.inc' bodyid='opac-usersuggestions' bodyclass='scrollto' %][% ELSE %][% INCLUDE 'bodytag.inc' bodyid='opac-suggestions' bodyclass='scrollto' %][% END %]
 [% INCLUDE 'masthead.inc' %]
 
 <main class="main">
- [% WRAPPER breadcrumbs %]
- [% IF ( logged_in_user ) %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
- [% END %]
- [% END %]
- [% IF ( op_add_form ) %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/opac-suggestions.pl">Đề xuất mua tài liệu</a>
- [% END %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Tạo đề xuất mua</span>
- [% END %]
- [% ELSE %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Đề xuất mua tài liệu</span>
- [% END %]
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% IF ( logged_in_user ) %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/opac-user.pl">[% INCLUDE 'patron-title.inc' patron = logged_in_user %]</a>
+            [% END %]
+        [% END %]
+        [% IF ( op_add_form ) %]
+            [% WRAPPER breadcrumb_item %]
+                <a href="/cgi-bin/koha/opac-suggestions.pl">Đề xuất mua tài liệu</a>
+            [% END %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Tạo đề xuất mua</span>
+            [% END %]
+        [% ELSE %]
+            [% WRAPPER breadcrumb_item bc_active= 1 %]
+                <span>Đề xuất mua tài liệu</span>
+            [% END %]
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 
- <div class="container-fluid">
- <div class="row">
- <div class="col col-lg-2 order-2 order-lg-1">
- <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
- </div>
- <div class="col-md-12 col-lg-10 order-1">
- <div id="usersuggestions" class="maincontent">
- [% IF ( op_add_form ) %]
- <h1>Your purchase suggestions</h1>
- [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
- <h2 class="TooManySuggestions">You cannot place any more suggestions</h2>
- <p class="TooManySuggestionsText">You may only add up to [% Koha.Preference('MaxTotalSuggestions') | html %] suggestions in [% Koha.Preference('NumberOfSuggestionDays') | html %] days.</p>
- [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
- <h2 class="TooManySuggestions">You cannot place any more suggestions</h2>
- <p class="TooManySuggestionsText"
-                                >You have reached your limit for suggestions you can place at this time ([% Koha.Preference('MaxOpenSuggestions') | html %]). Once the library has processed those suggestions you will be able to place
- more.</p
-                            >
- [% ELSE %]
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col col-lg-2 order-2 order-lg-1">
+                <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
+            </div>
+            <div class="col-md-12 col-lg-10 order-1">
+                <div id="usersuggestions" class="maincontent ftu-sugg-wrapper">
 
- [% IF ( opacsuggestion ) %]
- [% PROCESS koha_news_block news => opacsuggestion %]
- [% ELSE %]
- <p>Please fill out this form to make a purchase suggestion. You will receive an email when the library processes your suggestion.</p>
- <p
-                                    >Only certain fields (marked in red) are required, but the more information you enter the easier it will be for the librarians to find the title you're requesting. The "Notes" field can be used to provide
- any additional information.</p
-                                >
- [% END %]
- [% FOR m IN messages %]
- <div class="alert alert-[% m.type | html %]">
- [% SWITCH m.code %]
- [% CASE 'biblio_exists' %]
- <span
-                                            >A similar document already exists: <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]">[% m.title | html %]</a>. Click on "Confirm your suggestion" to ignore this message.</span
-                                        >
- [% CASE %]
- <span>[% m.code | html %]</span>
- [% END %]
- </div>
- [% END %]
+                    <!-- Header Hero Card -->
+                    <div class="ftu-sugg-hero p-4 p-md-5 mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(163, 26, 36, 0.08); border: 1px solid rgba(163, 26, 36, 0.2);">
+                                    <i class="fa fa-book-medical text-danger" style="font-size: 0.85rem;"></i>
+                                    <span class="fw-bold text-danger text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Học liệu &amp; Bổ sung sách mới • Thư viện FTU</span>
+                                </div>
+                                <h1 class="display-6 fw-bold text-dark mb-2" style="letter-spacing: -0.02em;">
+                                    [% IF ( op_add_form ) %]
+                                        Đề xuất Bổ sung Tài liệu Thư viện
+                                    [% ELSE %]
+                                        Danh sách Đề xuất Mua Tài liệu
+                                    [% END %]
+                                </h1>
+                                <p class="text-secondary mb-0 fs-6" style="line-height: 1.6;">
+                                    Bạn cần tài liệu phục vụ giảng dạy, học tập hoặc nghiên cứu nhưng Thư viện chưa có? Hãy gửi đề xuất chi tiết để Ban quản trị Thư viện Đại học Ngoại thương xem xét và tiến hành đặt mua.
+                                </p>
+                            </div>
+                            <div class="col-lg-4 d-none d-lg-flex justify-content-end">
+                                <div class="p-3 rounded-4 bg-white border" style="box-shadow: 0 10px 25px rgba(0,0,0,0.04); width: 280px;">
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; background: #A31A24;">
+                                            <i class="fa fa-bell"></i>
+                                        </div>
+                                        <div>
+                                            <div class="small fw-bold text-dark">Tiếp nhận nhanh</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">Phản hồi qua email độc giả</div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-2 text-muted" />
+                                    <div class="small text-muted" style="font-size: 0.8rem; line-height: 1.4;">
+                                        <i class="fa fa-check-circle text-success me-1"></i> Ưu tiên tài liệu chuyên ngành
+                                    </div>
+                                    <div class="small text-muted" style="font-size: 0.8rem; line-height: 1.4; margin-top: 4px;">
+                                        <i class="fa fa-check-circle text-success me-1"></i> Có kèm link tham khảo/giá bìa
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
- <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="add_suggestion_form">
- [% INCLUDE 'csrf-token.inc' %]
- <fieldset class="rows">
- <legend>Tạo đề xuất mua</legend>
- <ol>
- [% IF Koha.Preference( 'OPACSuggestionAutoFill' ) %]
- <li>
- <label for="isbn">Số ISBN, ISSN:</label>
- <input type="text" id="isbn" name="isbn" maxlength="80" style="margin-right:10px;margin-top:10px;" size="15" />
- </li>
- [% END %]
- <li>
- [% IF biblionumber %]
- <label>Nhan đề:</label>
- <a id="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | uri %]">[% title | html %]</a>
- [% ELSIF ( title_required ) %]
- <label for="title" class="required">Nhan đề:</label>
- <input type="text" id="title" name="title" class="span6" maxlength="255" value="[% title | html %]" required="required" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="title">Nhan đề:</label>
- <input type="text" id="title" name="title" class="span6" maxlength="255" value="[% title | html %]" />
- [% END %]
- </li>
- [% UNLESS ( author_hidden ) %]
- <li>
- [% IF biblionumber %]
- <label>Tác giả:</label>
- <span id="author">[% author | html %]</span>
- [% ELSIF ( author_required ) %]
- <label for="author" class="required">Tác giả:</label>
- <input type="text" id="author" name="author" class="span6" maxlength="80" value="[% author | html %]" required="required" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="author">Tác giả:</label>
- <input type="text" id="author" name="author" class="span6" maxlength="80" value="[% author | html %]" />
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( copyrightdate_hidden ) %]
- <li>
- <div title="Copyright or publication year, for example: 2022">
- [% IF biblionumber %]
- <label>Publication year:</label>
- <span id="copyrightdate">[% copyrightdate | html %]</span>
- [% ELSIF ( copyrightdate_required ) %]
- <label for="copyrightdate" class="required">Publication year:</label>
- <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="10" maxlength="4" value="[% copyrightdate | html %]" required="required" />
- <div class="required_label required">Bắt buộc</div>
- <span class="hint">Copyright or publication year, for example: 2022</span>
- [% ELSE %]
- <label for="copyrightdate">Publication year:</label>
- <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="10" maxlength="4" value="[% copyrightdate | html %]" />
- <span class="hint">Copyright or publication year, for example: 2022</span>
- [% END %]
- </div>
- </li>
- [% END %]
- [% UNLESS ( isbn_hidden or Koha.Preference('OPACSuggestionAutoFill') ) %]
- <li>
- [% IF biblionumber %]
- <label>Số ISBN, ISSN:</label>
- <span id="isbn">[% isbn | html %]</span>
- [% ELSIF ( isbn_required ) %]
- <label for="isbn" class="required">Số ISBN, ISSN:</label>
- <input type="text" id="isbn" name="isbn" maxlength="80" value="[% isbn | html %]" required="required" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="isbn">Số ISBN, ISSN:</label>
- <input type="text" id="isbn" name="isbn" maxlength="80" value="[% isbn | html %]" />
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( publishercode_hidden ) %]
- <li>
- [% IF biblionumber %]
- <label>Nhà xuất bản:</label>
- <span id="publishercode">[% publishercode | html %]</span>
- [% ELSIF ( publishercode_required ) %]
- <label for="publishercode" class="required">Nhà xuất bản:</label>
- <input type="text" id="publishercode" name="publishercode" class="span6" maxlength="80" value="[% publishercode | html %]" required="required" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="publishercode">Nhà xuất bản:</label>
- <input type="text" id="publishercode" name="publishercode" class="span6" maxlength="80" value="[% publishercode | html %]" />
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( collectiontitle_hidden ) %]
- <li>
- [% IF biblionumber %]
- <label for="collectiontitle" class="required">Nhan đề bộ sưu tập:</label>
- <span id="collectiontitle">[% collectiontitle | html %]</span>
- [% ELSIF ( collectiontitle_required ) %]
- <label for="collectiontitle" class="required">Nhan đề bộ sưu tập:</label>
- <input type="text" id="collectiontitle" name="collectiontitle" class="span6" maxlength="80" value="[% collectiontitle | html %]" required="required" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="collectiontitle">Nhan đề bộ sưu tập:</label>
- <input type="text" id="collectiontitle" name="collectiontitle" class="span6" maxlength="80" value="[% collectiontitle | html %]" />
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( place_hidden ) %]
- <li>
- [% IF biblionumber %]
- <label for="place" class="required">Nơi xuất bản:</label>
- <span id="place">[% place | html %]</span>
- [% ELSIF ( place_required ) %]
- <label for="place" class="required">Nơi xuất bản:</label>
- <input type="text" id="place" name="place" required="required" maxlength="80" value="[% place | html %]" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="place">Nơi xuất bản:</label>
- <input type="text" id="place" name="place" maxlength="80" value="[% place | html %]" />
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( quantity_hidden ) %]
- <li id="opac-suggestion-quantity">
- [% IF ( quantity_required ) %]
- <label for="quantity" class="required">Quantity:</label>
- <input type="text" id="quantity" name="quantity" required="required" maxlength="4" size="4" value="[% quantity | html %]" />
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="quantity">Quantity:</label>
- <input type="text" id="quantity" name="quantity" maxlength="4" size="4" value="[% quantity | html %]" />
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( itemtype_hidden ) %]
- <li>
- [% IF ( itemtype_required ) %]
- <label for="itemtype" class="required">Kiểu tài liệu:</label>
- [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size = 20, required = 1, blank = 1, default=itemtype %]
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="itemtype">Kiểu tài liệu:</label>
- [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size = 20, blank = 1, default=itemtype %]
- [% END %]
- </li>
- [% END %]
- [% UNLESS ( branchcode_hidden || AllPublicBranches.size < 2 ) %]
- <li>
- [% IF ( branchcode_required ) %]
- <label for="branch" class="required">Thư viện:</label>
- <select name="branchcode" id="branch" required="required">
- <option value=""></option>
- [% PROCESS options_for_libraries libraries => AllPublicBranches %]
- </select>
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="branch">Thư viện:</label>
- <select name="branchcode" id="branch">
- [% PROCESS options_for_libraries libraries => AllPublicBranches %]
- </select>
- [% END %]
- </li>
- [% END %]
- [% IF ( patron_reason_loop ) %]
- [% UNLESS ( patronreason_hidden ) %]
- <li>
- [% IF ( patronreason_required ) %]
- <label for="patronreason" class="required">Lý do đề xuất: </label>
- <select name="patronreason" id="patronreason" required="required">
- <option value="">-- Choose --</option>
- [% FOREACH patron_reason_loo IN patron_reason_loop %]
- [% IF patron_reason_loo.authorised_value == patronreason %]
- <option value="[% patron_reason_loo.authorised_value | html %]" selected="selected">[% patron_reason_loo.lib | html %]</option>
- [% ELSE %]
- <option value="[% patron_reason_loo.authorised_value | html %]">[% patron_reason_loo.lib | html %]</option>
- [% END %]
- [% END %]
- </select>
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="patronreason">Lý do đề xuất: </label>
- <select name="patronreason" id="patronreason">
- <option value="">-- Choose --</option>
- [% FOREACH patron_reason_loo IN patron_reason_loop %]
- [% IF patron_reason_loo.authorised_value == patronreason %]
- <option value="[% patron_reason_loo.authorised_value | html %]" selected="selected">[% patron_reason_loo.lib | html %]</option>
- [% ELSE %]
- <option value="[% patron_reason_loo.authorised_value | html %]">[% patron_reason_loo.lib | html %]</option>
- [% END %]
- [% END %]
- </select>
- [% END %]
- </li>
- [% END %]
- [% END %]
- [% UNLESS ( note_hidden ) %]
- <li>
- [% IF ( note_required ) %]
- <label for="note" class="required">Ghi chú:</label>
- <textarea name="note" id="note" rows="5" cols="40" required="required">[% note | html %]</textarea>
- <div class="required_label required">Bắt buộc</div>
- [% ELSE %]
- <label for="note">Ghi chú:</label>
- <textarea name="note" id="note" rows="5" cols="40">[% note | html %]</textarea>
- [% END %]
- </li>
- [% END %]
+                    [% IF ( op_add_form ) %]
+                        [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
+                            <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4">
+                                <h4 class="alert-heading fw-bold"><i class="fa fa-exclamation-triangle me-2"></i>Đã đạt giới hạn gửi đề xuất</h4>
+                                <p class="mb-0">Bạn chỉ có thể gửi tối đa [% Koha.Preference('MaxTotalSuggestions') | html %] đề xuất trong vòng [% Koha.Preference('NumberOfSuggestionDays') | html %] ngày.</p>
+                            </div>
+                        [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
+                            <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4">
+                                <h4 class="alert-heading fw-bold"><i class="fa fa-clock me-2"></i>Đang có nhiều đề xuất chờ xử lý</h4>
+                                <p class="mb-0">Bạn đã đạt số lượng đề xuất đang mở tối đa ([% Koha.Preference('MaxOpenSuggestions') | html %]). Sau khi Thư viện xử lý xong các đề xuất hiện tại, bạn sẽ có thể tiếp tục tạo đề xuất mới.</p>
+                            </div>
+                        [% ELSE %]
 
- <!-- Add a hidden 'negcap' field -->
- <li id="negcap" style="position: absolute; left: -2000px;"> negcap <input type="text" name="negcap" /> </li>
- </ol>
- </fieldset>
- <fieldset class="action">
- <input type="hidden" name="suggested_by_anyone" value="[% suggested_by_anyone | html %]" />
- [% IF need_confirm # Confirm that we want a duplicate %]
- <input type="hidden" name="op" value="cud-add_confirm" />
- <input type="submit" class="btn btn-primary" value="Confirm your suggestion" />
- [% ELSIF biblionumber # Create from an existing title %]
- <input type="hidden" name="op" value="cud-add_confirm" />
- <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
- <input class="btn btn-primary" type="submit" value="Gửi đề xuất mua" />
- [% ELSE # Not created from an existing title, search for possible duplicate %]
- <input type="hidden" name="op" value="cud-add_validate" />
- <input class="btn btn-primary" type="submit" value="Gửi đề xuất mua" />
- [% END %]
- <a class="action" href="/cgi-bin/koha/opac-suggestions.pl">Hủy bỏ</a>
- </fieldset>
- </form>
- [% END %]
- [% END #  IF op_add_form %]
+                            [% IF ( opacsuggestion ) %]
+                                [% PROCESS koha_news_block news => opacsuggestion %]
+                            [% END %]
 
- [% IF ( op_else ) %]
- <h1>
- [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
- <span>Đề xuất mua tài liệu</span>
- [% ELSE %]
- [% IF ( loggedinusername ) %]
- <span>Your purchase suggestions</span>
- [% ELSE %]
- <span>Đề xuất mua tài liệu</span>
- [% END %]
- [% END %]
- </h1>
- [% FOR m IN messages %]
- <div class="alert alert-[% m.type | html %]">
- [% SWITCH m.code %]
- [% CASE 'total_suggestions' %]
- <span
-                                        >The suggestion has not been added. You have reached your limit for suggestions you can place at this time ([% Koha.Preference('MaxTotalSuggestions') | html %] in
- [% Koha.Preference('NumberOfSuggestionDays') | html %] days).</span
-                                    >
- [% CASE 'too_many' %]
- <span
-                                        >The suggestion has not been added. You have reached your limit for suggestions you can place at this time ([% Koha.Preference('MaxOpenSuggestions') | html %]). Once the library has processed those
- suggestions you will be able to place more.</span
-                                    >
- [% CASE 'already_exists' %]
- <span>The suggestion has not been added. A suggestion with this title already exists.</span>
- [% CASE 'success_on_inserted' %]
- <span>Your suggestion has been submitted.</span>
- [% CASE %]
- <span>[% m.code | html %]</span>
- [% END %]
- </div>
- [% END %]
+                            [% FOR m IN messages %]
+                                <div class="alert alert-[% m.type | html %] rounded-3 mb-4 shadow-sm">
+                                    [% SWITCH m.code %]
+                                        [% CASE 'biblio_exists' %]
+                                            <div class="d-flex align-items-center">
+                                                <i class="fa fa-info-circle fa-2x text-warning me-3"></i>
+                                                <div>
+                                                    <strong>Tài liệu tương tự đã có trong Thư viện:</strong>
+                                                    <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% m.id | uri %]" class="fw-bold text-primary">[% m.title | html %]</a>.
+                                                    Bấm "Xác nhận gửi đề xuất" bên dưới nếu bạn vẫn muốn đề xuất bổ sung thêm.
+                                                </div>
+                                            </div>
+                                        [% CASE %]
+                                            <span>[% m.code | html %]</span>
+                                    [% END %]
+                                </div>
+                            [% END %]
 
- [% IF ( deleted ) %]<div class="alert alert-info">Bạn đã xóa các đề xuất mua được chọn.</div>[% END %]
+                            <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="add_suggestion_form" onsubmit="return validateFtuSuggestionForm();">
+                                [% INCLUDE 'csrf-token.inc' %]
 
- [% IF (Koha.Preference( 'OPACViewOthersSuggestions' ) || loggedinusername) && (suggestions.size > 0 OR title_filter) %]
- [% SET can_delete_suggestion = 0 %]
- <form action="/cgi-bin/koha/opac-suggestions.pl" class="row" id="search_suggestions_form" method="get">
- <div class="col-auto gx-2 ms-2 my-1">
- <label for="title_filter">Tìm kiếm:</label>
- </div>
- <div class="col-auto gx-2 my-1">
- <input type="text" name="title_filter" id="title_filter" value="[% title_filter | html %]" size="30" class="form-control form-control-sm" />
- </div>
- [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) %]
- [% IF loggedinusername %]
- <div class="col-auto gx-2 my-1">
- <label class="visually-hidden" for="suggested_by_anyone">Người đề xuất:</label>
- <select class="form-select form-select-sm" name="suggested_by_anyone" id="suggested_by_anyone">
- [% IF suggested_by_anyone %]
- <option value="0">Suggested by me</option>
- <option value="1" selected="selected">Suggested by anyone</option>
- [% ELSE %]
- <option value="0" selected="selected">Suggested by me</option>
- <option value="1">Suggested by anyone</option>
- [% END %]
- </select>
- </div>
- [% END %]
- [% END %]
- <div class="col-auto gx-2 my-1">
- <button type="submit" class="btn btn-sm btn-primary">Đi đến</button>
- </div>
- </form>
- [% END %]
- [% IF suggestions.size > 0 %]
- [% SET can_delete_suggestion = 0 %]
- <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="delete_suggestions">
- [% INCLUDE 'csrf-token.inc' %]
- <input type="hidden" name="op" value="cud-delete" />
- [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
- <div id="toolbar" class="toolbar clearfix">
- [% IF ( Koha.Preference('MaxTotalSuggestions') != '' && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
- <p class="TooManySuggestionsText">You may only add up to [% Koha.Preference('MaxTotalSuggestions') | html %] suggestions in [% Koha.Preference('NumberOfSuggestionDays') | html %] days.</p>
- [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != '' && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
- <p class="TooManySuggestionsText">You have reached your limit for suggestions you can place at this time ([% Koha.Preference('MaxOpenSuggestions') | html %]).</p>
- <p>Once the library has processed those suggestions you will be able to place more.</p>
- [% ELSE %]
- <a class="btn btn-link new" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form"><i class="fa fa-plus" aria-hidden="true"></i> Tạo đề xuất mua</a>
- [% END %]
- </div>
- [% END %]
+                                <!-- Thẻ 1: Thông tin ấn phẩm đề xuất -->
+                                <div class="ftu-card">
+                                    <div class="ftu-card-header">
+                                        <h3><i class="fa fa-book text-danger"></i> 1. Thông tin Ấn phẩm / Tài liệu đề xuất</h3>
+                                        <span class="badge bg-light text-secondary border">Các mục gắn dấu <span class="text-danger fw-bold">*</span> là bắt buộc</span>
+                                    </div>
+                                    <div class="ftu-card-body">
+                                        [% IF Koha.Preference( 'OPACSuggestionAutoFill' ) %]
+                                            <div class="mb-3 p-3 rounded-3" style="background: #F8FAFC; border: 1px dashed #CBD5E1;">
+                                                <label for="isbn" class="ftu-form-label"><i class="fa fa-barcode text-primary"></i> Tra nhanh qua mã ISBN/ISSN:</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text ftu-input-group-text"><i class="fa fa-search"></i></span>
+                                                    <input type="text" id="isbn" name="isbn" maxlength="80" class="form-control ftu-form-control" placeholder="Nhập mã ISBN (ví dụ: 9786041215481) để tự động điền thông tin" />
+                                                </div>
+                                                <small class="text-muted mt-1 d-block"><i class="fa fa-magic me-1"></i>Hệ thống sẽ tự động tìm kiếm thông tin nhan đề, tác giả và nhà xuất bản từ Google Books API.</small>
+                                            </div>
+                                        [% END %]
 
- [% IF ( loggedinusername ) %]
- <div class="selections-toolbar toolbar">
- <div class="check_control"> <span class="checkall"></span> <span class="clearall"></span> </div>
- <div class="links">
- <span class="selections">Chọn đề xuất mua để: </span>
- <span id="removeitems">
- <a href="#" class="btn btn-link removeitems tag_hides disabled"><i class="fa fa-trash-can" aria-hidden="true"></i> Xóa</a>
- </span>
- </div>
- </div>
- [% END %]
+                                        <!-- Nhan đề tài liệu -->
+                                        <div class="mb-3">
+                                            <label for="title" class="ftu-form-label">
+                                                <i class="fa fa-heading text-danger"></i> Nhan đề tài liệu / Tên sách <span class="required-star">*</span>
+                                            </label>
+                                            [% IF biblionumber %]
+                                                <div class="p-2 px-3 bg-light rounded-3 border fw-bold text-dark fs-6">
+                                                    <a id="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | uri %]" target="_blank" class="text-danger text-decoration-none">
+                                                        <i class="fa fa-book-open me-2"></i>[% title | html %]
+                                                    </a>
+                                                    <input type="hidden" name="title" value="[% title | html %]" />
+                                                </div>
+                                            [% ELSE %]
+                                                <input type="text" id="title" name="title" class="form-control ftu-form-control fs-6" maxlength="255" value="[% title | html %]" placeholder="Nhập chính xác hoặc gần đúng tên cuốn sách, giáo trình hoặc tài liệu" required="required" />
+                                            [% END %]
+                                        </div>
 
- [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 || loggedinusername %]
- <table id="suggestt" class="table table-bordered tabled">
- <caption class="visually-hidden">Your purchase suggestions</caption>
- <thead>
- <tr>
- [% IF ( loggedinusername ) %]
- <th>
- <span class="visually-hidden">Select purchase suggestions for deletion</span>
- <i data-bs-toggle="tooltip" title="Check the boxes in this column to select purchase suggestions for deletion" data-bs-placement="right" class="fa fa-info-circle" tabindex="0"></i>
- </th>
- [% END %]
- <th class="all">Tóm tắt</th>
- <th>Suggested on</th>
- <th>Ghi chú</th>
- [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]<th>Đề xuất mua</th>[% END %]
- [% IF Koha.Preference( 'OpacSuggestionManagedBy' ) %]<th>Người quản lý</th>[% END %]
- <th>Trạng thái</th>
- <th></th>
- </tr>
- </thead>
- <tbody>
- [% FOREACH suggestion IN suggestions %]
- <tr>
- [% IF logged_in_user %]
- <td class="selectcol">
- [% IF logged_in_user.borrowernumber == suggestion.suggester.borrowernumber %]
- [% SET can_delete_suggestion = 1 %]
- <input
-                                                                    type="checkbox"
-                                                                    class="cb"
-                                                                    id="id[% suggestion.suggestionid | html %]"
-                                                                    name="delete_field"
-                                                                    data-title="[% suggestion.title | html %]"
-                                                                    value="[% suggestion.suggestionid | html %]"
-                                                                />
- [% END %]
- </td>
- [% END %]
- <td>
- <p>
- <label for="id[% suggestion.suggestionid | html %]">
- [% IF suggestion.biblionumber %]
- <strong><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% suggestion.biblionumber | uri %]">[% suggestion.title | html %]</a></strong>
- [% ELSE %]
- <strong>[% suggestion.title | html %]</strong>
- [% END %]
- </label>
- </p>
- <p
-                                                            >[% IF ( suggestion.author ) %][% suggestion.author | html %],[% END %]
- [% IF ( suggestion.copyrightdate ) %]- [% suggestion.copyrightdate | html %],[% END %]
- [% IF ( suggestion.publishercode ) %]- [% suggestion.publishercode | html %][% END %]
- [% IF ( suggestion.place ) %]([% suggestion.place | html %])[% END %]
- [% IF ( suggestion.collectiontitle ) %], [% suggestion.collectiontitle | html %][% END %]
- [% IF ( suggestion.itemtype ) %]- [% AuthorisedValues.GetByCode( 'SUGGEST_FORMAT', suggestion.itemtype, 1 ) | html %][% END %]
- </p>
- </td>
- <td data-order="[% suggestion.suggesteddate | html %]"> [% IF ( suggestion.suggesteddate ) %][% suggestion.suggesteddate |$KohaDates %][% END %] </td>
- <td>
- [% IF ( suggestion.note ) %]
- [% suggestion.note | html %]
- [% END %]
- </td>
- [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) == 1 %]
- <td>
- [% IF suggestion.suggestedby %]
- [% Branches.GetName(suggestion.branchcode) | html %]
- [% END %]
- </td>
- [% END %]
- [% IF Koha.Preference( 'OpacSuggestionManagedBy' ) %]
- <td>
- [% IF suggestion.managedby %]
- [% INCLUDE 'patron-title.inc' patron = suggestion.manager %]
- [% IF ( suggestion.manageddate ) %]- [% suggestion.manageddate | $KohaDates %][% END %]
- [% END %]
- </td>
- [% END %]
- <td>
- [% IF ( suggestion.STATUS == 'ASKED' ) %]
- <span>Đã yêu cầu</span>
- [% ELSIF ( suggestion.STATUS == 'CHECKED' ) %]
- <span>Checked by the library</span>
- [% ELSIF ( suggestion.STATUS == 'ACCEPTED' ) %]
- <span>Accepted by the library</span>
- [% ELSIF ( suggestion.STATUS == 'ORDERED' ) %]
- <span>Ordered by the library</span>
- [% ELSIF ( suggestion.STATUS == 'REJECTED' ) %]
- <span>Suggestion declined</span>
- [% ELSIF ( suggestion.STATUS == 'AVAILABLE' ) %]
- <span>Available in the library</span>
- [% ELSE %]
- [% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS, 1 ) | html %]
- [% END %]
- [% IF ( suggestion.reason ) %]([% suggestion.reason | html %])[% END %]
- </td>
- <td></td>
- </tr>
- [% END # / FOREACH suggestions %]
- </tbody>
- </table>
- [% END %]
+                                        <div class="row g-3">
+                                            <!-- Tác giả -->
+                                            <div class="col-md-6">
+                                                <label for="author" class="ftu-form-label">
+                                                    <i class="fa fa-user-edit text-secondary"></i> Tác giả / Người biên soạn:
+                                                </label>
+                                                [% IF biblionumber %]
+                                                    <input type="text" id="author" name="author" class="form-control ftu-form-control bg-light" value="[% author | html %]" readonly="readonly" />
+                                                [% ELSE %]
+                                                    <input type="text" id="author" name="author" class="form-control ftu-form-control" maxlength="80" value="[% author | html %]" placeholder="Tên tác giả, dịch giả hoặc chủ biên" />
+                                                [% END %]
+                                            </div>
 
- [% IF ( loggedinusername && can_delete_suggestion ) %]
- <fieldset class="action">
- <input class="btn btn-danger removeitems" type="submit" value="Xóa đề xuất mua" />
- </fieldset>
- [% END %]
- </form>
- [% ELSE %]
- [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) %]
- [% IF title_filter %]
- <div class="alert alert-info" role="alert">There are no pending purchase suggestions matching your search.</div>
- [% ELSIF loggedinusername AND NOT suggested_by_anyone %]
- <div class="alert alert-info" role="alert">You have no pending purchase suggestions. <a href="/cgi-bin/koha/opac-suggestions.pl?suggested_by_anyone=1">View all suggestions</a></div>
- [% ELSE %]
- <div class="alert alert-info" role="alert">Không có đề xuất mua đang chờ duyệt.</div>
- [% END %]
- [% ELSE %]
- [% IF ( loggedinusername ) %]
- [% IF title_filter %]
- <div class="alert alert-info" role="alert">There are no pending purchase suggestions matching your search.</div>
- [% ELSE %]
- <div class="alert alert-info" role="alert">You have no pending purchase suggestions.</div>
- [% END %]
- [% ELSE %]
- <div class="alert alert-warning" role="alert">You are not authorized to see pending purchase suggestions.</div>
- [% END %]
- [% END %]
- [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
- [% IF ( Koha.Preference('MaxTotalSuggestions') != ''  && patrons_total_suggestions_count >= Koha.Preference('MaxTotalSuggestions') ) %]
- <p class="TooManySuggestionsText">You may only add up to [% Koha.Preference('MaxTotalSuggestions') | html %] suggestions in [% Koha.Preference('NumberOfSuggestionDays') | html %] days.</p>
- [% ELSIF ( Koha.Preference('MaxOpenSuggestions') != ''  && patrons_pending_suggestions_count >= Koha.Preference('MaxOpenSuggestions') ) %]
- <p class="TooManySuggestionsText">You have reached your limit for suggestions you can place at this time.</p>
- <p>Once the library has processed those suggestions you will be able to place more.</p>
- [% ELSE %]
- <p
-                                        ><a class="btn btn-link new" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form"><i class="fa fa-plus" aria-hidden="true"></i> Tạo đề xuất mua</a></p
-                                    >
- [% END %]
- [% END %]
- [% END # / IF suggestions.size %]
- [% END # IF op_else %]
- </div>
- <!-- / #usersuggestions -->
- </div>
- <!-- / .col-lg-10 -->
- </div>
- <!-- / .row -->
- </div>
- <!-- / .container-fluid -->
+                                            <!-- Mã ISBN / ISSN (nếu chưa có autofill) -->
+                                            [% UNLESS ( isbn_hidden or Koha.Preference('OPACSuggestionAutoFill') ) %]
+                                                <div class="col-md-6">
+                                                    <label for="isbn" class="ftu-form-label"><i class="fa fa-barcode text-secondary"></i> Số ISBN / ISSN:</label>
+                                                    <input type="text" id="isbn" name="isbn" class="form-control ftu-form-control" maxlength="80" value="[% isbn | html %]" placeholder="Ví dụ: 978-604-..." />
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Nhà xuất bản -->
+                                            [% UNLESS ( publishercode_hidden ) %]
+                                                <div class="col-md-6">
+                                                    <label for="publishercode" class="ftu-form-label"><i class="fa fa-building text-secondary"></i> Nhà xuất bản:</label>
+                                                    <input type="text" id="publishercode" name="publishercode" class="form-control ftu-form-control" maxlength="80" value="[% publishercode | html %]" placeholder="Ví dụ: Nxb. Trẻ, Nxb. Tài chính, NXB ĐHQG..." />
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Năm xuất bản -->
+                                            [% UNLESS ( copyrightdate_hidden ) %]
+                                                <div class="col-md-3">
+                                                    <label for="copyrightdate" class="ftu-form-label"><i class="fa fa-calendar-alt text-secondary"></i> Năm xuất bản:</label>
+                                                    <input type="text" id="copyrightdate" name="copyrightdate" pattern="[12]\d{3}" size="10" maxlength="4" class="form-control ftu-form-control" value="[% copyrightdate | html %]" placeholder="Ví dụ: 2024" />
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Số lượng đề xuất -->
+                                            [% UNLESS ( quantity_hidden ) %]
+                                                <div class="col-md-3">
+                                                    <label for="quantity" class="ftu-form-label"><i class="fa fa-layer-group text-secondary"></i> Số lượng:</label>
+                                                    <input type="number" id="quantity" name="quantity" min="1" max="50" class="form-control ftu-form-control" value="[% quantity || 1 | html %]" />
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Nơi xuất bản -->
+                                            [% UNLESS ( place_hidden ) %]
+                                                <div class="col-md-6">
+                                                    <label for="place" class="ftu-form-label"><i class="fa fa-map-marker-alt text-secondary"></i> Nơi xuất bản:</label>
+                                                    <input type="text" id="place" name="place" class="form-control ftu-form-control" maxlength="80" value="[% place | html %]" placeholder="Ví dụ: Hà Nội, Tp. Hồ Chí Minh, New York..." />
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Nhan đề bộ sưu tập / Tùng thư -->
+                                            [% UNLESS ( collectiontitle_hidden ) %]
+                                                <div class="col-md-6">
+                                                    <label for="collectiontitle" class="ftu-form-label"><i class="fa fa-folder-open text-secondary"></i> Nhan đề bộ sưu tập / Tùng thư:</label>
+                                                    <input type="text" id="collectiontitle" name="collectiontitle" class="form-control ftu-form-control" maxlength="80" value="[% collectiontitle | html %]" placeholder="Nếu thuộc tùng thư hoặc bộ sách nhiều tập" />
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Kiểu tài liệu / Loại hình -->
+                                            [% UNLESS ( itemtype_hidden ) %]
+                                                <div class="col-md-6">
+                                                    <label for="itemtype" class="ftu-form-label"><i class="fa fa-file-lines text-secondary"></i> Loại hình tài liệu:</label>
+                                                    [% PROCESS 'av-build-dropbox.inc' name="itemtype", category="SUGGEST_FORMAT", size=20, default=itemtype, class="form-select ftu-form-select", empty=1 %]
+                                                </div>
+                                            [% END %]
+
+                                            <!-- Thư viện cơ sở -->
+                                            [% UNLESS ( branchcode_hidden ) %]
+                                                <div class="col-md-6">
+                                                    <label for="branch" class="ftu-form-label"><i class="fa fa-university text-secondary"></i> Tiếp nhận tại cơ sở:</label>
+                                                    <select name="branchcode" id="branch" class="form-select ftu-form-select">
+                                                        [% PROCESS options_for_libraries libraries => AllPublicBranches %]
+                                                    </select>
+                                                </div>
+                                            [% END %]
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thẻ 2: Căn cứ & Chi tiết đề xuất -->
+                                <div class="ftu-card">
+                                    <div class="ftu-card-header">
+                                        <h3><i class="fa fa-clipboard-check text-danger"></i> 2. Nhu cầu &amp; Chi tiết Đề xuất</h3>
+                                        <span class="badge bg-light text-secondary border">Thông tin hỗ trợ duyệt mua</span>
+                                    </div>
+                                    <div class="ftu-card-body">
+
+                                        <!-- Trường dữ liệu mới: Link tài liệu -->
+                                        <div class="mb-4">
+                                            <label for="document_url" class="ftu-form-label">
+                                                <i class="fa fa-link text-primary"></i> Link tài liệu tham khảo (URL mua / giới thiệu):
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text ftu-input-group-text"><i class="fa fa-globe"></i></span>
+                                                <input type="url" name="document_url" id="document_url" class="form-control ftu-form-control" maxlength="500" value="[% document_url | html %]" placeholder="Dán link từ Tiki, Fahasa, Amazon, Google Books, NXB hoặc bài báo trực tuyến..." oninput="updateLinkTestBtn(this.value);" />
+                                                <button type="button" class="btn btn-outline-secondary" id="btnTestDocLink" onclick="testDocumentUrl();" title="Mở kiểm tra đường dẫn" disabled="disabled">
+                                                    <i class="fa fa-external-link me-1"></i> Xem thử
+                                                </button>
+                                            </div>
+                                            <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle me-1"></i>Giúp cán bộ thư viện nhanh chóng kiểm tra giá bìa, đơn vị phát hành và tình trạng còn sách trên thị trường.</small>
+                                        </div>
+
+                                        <!-- Lý do đề xuất: Người dùng tự do nhập + Giới hạn số từ -->
+                                        <div class="mb-4">
+                                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                                                <label for="patronreason" class="ftu-form-label mb-0">
+                                                    <i class="fa fa-comment-dots text-danger"></i> Lý do đề xuất mua tài liệu:
+                                                </label>
+                                                <span id="patronreason_counter_badge" class="ftu-word-badge bg-light text-secondary border">
+                                                    Đã nhập: <b id="reason_word_count">0</b> / 100 từ
+                                                </span>
+                                            </div>
+
+                                            <!-- Gợi ý nhanh lý do -->
+                                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                                <span class="small text-muted align-self-center me-1"><i class="fa fa-lightbulb text-warning me-1"></i>Chọn nhanh:</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Phục vụ nghiên cứu luận văn &amp; đề tài khoa học.');">Nghiên cứu khoa học</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Tài liệu học tập bắt buộc cho học phần chuyên ngành.');">Tài liệu học phần</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Tài liệu chuyên ngành kinh tế &amp; thương mại mới xuất bản.');">Chuyên ngành mới</span>
+                                                <span class="ftu-chip-reason" onclick="applyReasonSnippet('Sách chuyên khảo có giá trị cao, Thư viện chưa có.');">Thư viện chưa có</span>
+                                            </div>
+
+                                            <textarea name="patronreason" id="patronreason" rows="3" class="form-control ftu-form-control" placeholder="Vui lòng nhập lý do hoặc nhu cầu sử dụng (tối đa 100 từ) để Ban quản trị Thư viện xem xét mức độ ưu tiên bổ sung..." oninput="handleReasonWordCount(this);">[% patronreason | html %]</textarea>
+                                            <div id="reason_word_warning" class="text-danger small mt-1" style="display: none;">
+                                                <i class="fa fa-exclamation-circle me-1"></i> Nội dung lý do đã vượt quá giới hạn 100 từ. Vui lòng rút gọn lại.
+                                            </div>
+                                        </div>
+
+                                        <!-- Ghi chú bổ sung -->
+                                        [% UNLESS ( note_hidden ) %]
+                                            <div class="mb-2">
+                                                <label for="note" class="ftu-form-label">
+                                                    <i class="fa fa-sticky-note text-secondary"></i> Ghi chú thêm cho Cán bộ Thư viện:
+                                                </label>
+                                                <textarea name="note" id="note" rows="2" class="form-control ftu-form-control" placeholder="Bất kỳ ghi chú bổ sung nào khác (ví dụ: cần tài liệu gấp trước ngày..., đề xuất bản in bìa cứng,...)">[% note | html %]</textarea>
+                                            </div>
+                                        [% END %]
+
+                                        <!-- Hidden negcap field for bot protection -->
+                                        <div style="display:none !important;" aria-hidden="true">
+                                            <input type="text" name="negcap" tabindex="-1" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex flex-wrap gap-3 align-items-center mb-5">
+                                    <input type="hidden" name="suggested_by_anyone" value="[% suggested_by_anyone | html %]" />
+                                    [% IF need_confirm %]
+                                        <input type="hidden" name="op" value="cud-add_confirm" />
+                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
+                                            <i class="fa fa-check me-2"></i> Xác nhận gửi đề xuất mua
+                                        </button>
+                                    [% ELSIF biblionumber %]
+                                        <input type="hidden" name="op" value="cud-add_confirm" />
+                                        <input type="hidden" name="biblionumber" value="[% biblionumber | html %]" />
+                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
+                                            <i class="fa fa-paper-plane me-2"></i> Gửi đề xuất mua
+                                        </button>
+                                    [% ELSE %]
+                                        <input type="hidden" name="op" value="cud-add_validate" />
+                                        <button type="submit" class="btn btn-danger btn-lg px-4 py-2 fw-bold shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
+                                            <i class="fa fa-paper-plane me-2"></i> Gửi đề xuất mua
+                                        </button>
+                                    [% END %]
+                                    <a href="/cgi-bin/koha/opac-suggestions.pl" class="btn btn-outline-secondary btn-lg px-4 py-2">
+                                        <i class="fa fa-times me-2"></i> Hủy bỏ
+                                    </a>
+                                </div>
+                            </form>
+                        [% END %]
+                    [% END # /IF op_add_form %]
+
+                    [% IF ( op_else ) %]
+                        [% FOR m IN messages %]
+                            <div class="alert alert-[% m.type | html %] rounded-3 mb-4 shadow-sm">
+                                [% SWITCH m.code %]
+                                    [% CASE 'total_suggestions' %]
+                                        <span>Đề xuất chưa được thêm: Bạn đã đạt giới hạn tối đa ([% Koha.Preference('MaxTotalSuggestions') | html %] đề xuất trong [% Koha.Preference('NumberOfSuggestionDays') | html %] ngày).</span>
+                                    [% CASE 'too_many' %]
+                                        <span>Đề xuất chưa được thêm: Bạn đã đạt số lượng đề xuất mở tối đa ([% Koha.Preference('MaxOpenSuggestions') | html %]). Vui lòng chờ Thư viện xử lý.</span>
+                                    [% CASE 'already_exists' %]
+                                        <span>Đề xuất chưa được thêm: Đã có đề xuất cho tài liệu có nhan đề này.</span>
+                                    [% CASE 'success_on_inserted' %]
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa fa-check-circle fa-2x text-success me-3"></i>
+                                            <div>
+                                                <h5 class="alert-heading fw-bold mb-1">Gửi đề xuất thành công!</h5>
+                                                <span>Yêu cầu đề xuất mua tài liệu của bạn đã được chuyển tới Ban quản trị Thư viện FTU để xem xét.</span>
+                                            </div>
+                                        </div>
+                                    [% CASE %]
+                                        <span>[% m.code | html %]</span>
+                                [% END %]
+                            </div>
+                        [% END %]
+
+                        [% IF ( deleted ) %]
+                            <div class="alert alert-info rounded-3 mb-4"><i class="fa fa-check me-2"></i>Bạn đã xóa các đề xuất mua được chọn thành công.</div>
+                        [% END %]
+
+                        <!-- Toolbar & Tìm kiếm -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 bg-white border rounded-4 shadow-sm">
+                            <div>
+                                [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
+                                    <a class="btn btn-danger fw-semibold px-3 py-2 rounded-3 shadow-sm" href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
+                                        <i class="fa fa-plus me-1"></i> Tạo đề xuất mua mới
+                                    </a>
+                                [% END %]
+                            </div>
+
+                            <form action="/cgi-bin/koha/opac-suggestions.pl" class="d-flex flex-wrap align-items-center gap-2 m-0" id="search_suggestions_form" method="get">
+                                <div class="input-group input-group-sm" style="width: 280px;">
+                                    <input type="text" name="title_filter" id="title_filter" value="[% title_filter | html %]" class="form-control" placeholder="Lọc theo nhan đề tài liệu..." />
+                                    <button type="submit" class="btn btn-danger"><i class="fa fa-search"></i> Lọc</button>
+                                </div>
+                                [% IF Koha.Preference( 'OPACViewOthersSuggestions' ) && loggedinusername %]
+                                    <select class="form-select form-select-sm" name="suggested_by_anyone" id="suggested_by_anyone" onchange="this.form.submit();" style="width: auto;">
+                                        [% IF suggested_by_anyone %]
+                                            <option value="0">Chỉ đề xuất của tôi</option>
+                                            <option value="1" selected="selected">Đề xuất của toàn trường</option>
+                                        [% ELSE %]
+                                            <option value="0" selected="selected">Chỉ đề xuất của tôi</option>
+                                            <option value="1">Đề xuất của toàn trường</option>
+                                        [% END %]
+                                    </select>
+                                [% END %]
+                            </form>
+                        </div>
+
+                        [% IF suggestions.size > 0 %]
+                            <form action="/cgi-bin/koha/opac-suggestions.pl" method="post" id="delete_suggestions">
+                                [% INCLUDE 'csrf-token.inc' %]
+                                <input type="hidden" name="op" value="cud-delete" />
+
+                                <div class="ftu-card">
+                                    <div class="table-responsive">
+                                        <table id="suggestt" class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    [% IF ( loggedinusername ) %]
+                                                        <th style="width: 40px;" class="text-center"><span class="visually-hidden">Chọn</span></th>
+                                                    [% END %]
+                                                    <th>Thông tin Tài liệu Đề xuất</th>
+                                                    <th style="width: 130px;" class="text-center">Ngày gửi</th>
+                                                    <th>Lý do &amp; Link tài liệu</th>
+                                                    <th style="width: 160px;" class="text-center">Trạng thái</th>
+                                                    <th style="width: 40px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                [% FOREACH suggestion IN suggestions %]
+                                                    <tr>
+                                                        [% IF logged_in_user %]
+                                                            <td class="text-center selectcol">
+                                                                [% IF logged_in_user.borrowernumber == suggestion.suggester.borrowernumber %]
+                                                                    [% SET can_delete_suggestion = 1 %]
+                                                                    <input type="checkbox" class="cb form-check-input" id="id[% suggestion.suggestionid | html %]" name="delete_field" data-title="[% suggestion.title | html %]" value="[% suggestion.suggestionid | html %]" />
+                                                                [% END %]
+                                                            </td>
+                                                        [% END %]
+                                                        <td>
+                                                            <div class="fw-bold text-dark fs-6 mb-1">
+                                                                [% IF suggestion.biblionumber %]
+                                                                    <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% suggestion.biblionumber | uri %]" class="text-danger text-decoration-none">
+                                                                        <i class="fa fa-book-open me-1"></i>[% suggestion.title | html %]
+                                                                    </a>
+                                                                [% ELSE %]
+                                                                    <i class="fa fa-book text-secondary me-1"></i>[% suggestion.title | html %]
+                                                                [% END %]
+                                                            </div>
+                                                            <div class="small text-muted">
+                                                                [% IF ( suggestion.author ) %]<span><i class="fa fa-user me-1"></i>[% suggestion.author | html %]</span> &bull; [% END %]
+                                                                [% IF ( suggestion.copyrightdate ) %]<span>Năm: [% suggestion.copyrightdate | html %]</span> &bull; [% END %]
+                                                                [% IF ( suggestion.publishercode ) %]<span>NXB: [% suggestion.publishercode | html %]</span>[% END %]
+                                                                [% IF ( suggestion.isbn ) %] &bull; <span>ISBN: [% suggestion.isbn | html %]</span>[% END %]
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center small text-muted" data-order="[% suggestion.suggesteddate | html %]">
+                                                            [% IF ( suggestion.suggesteddate ) %][% suggestion.suggesteddate | $KohaDates %][% END %]
+                                                        </td>
+                                                        <td>
+                                                            [% IF ( suggestion.patronreason ) %]
+                                                                <div class="small text-dark mb-1">
+                                                                    <strong>Lý do:</strong> [% suggestion.patronreason | html %]
+                                                                </div>
+                                                            [% END %]
+                                                            [% IF ( suggestion.document_url ) %]
+                                                                <div class="mt-1">
+                                                                    <a href="[% suggestion.document_url | url %]" target="_blank" rel="noopener noreferrer" class="badge bg-light text-primary border text-decoration-none px-2 py-1">
+                                                                        <i class="fa fa-external-link me-1"></i> Link tài liệu tham khảo
+                                                                    </a>
+                                                                </div>
+                                                            [% END %]
+                                                            [% IF ( suggestion.note ) %]
+                                                                <div class="small text-muted mt-1 fst-italic">
+                                                                    Ghi chú: [% suggestion.note | html %]
+                                                                </div>
+                                                            [% END %]
+                                                        </td>
+                                                        <td class="text-center">
+                                                            [% IF ( suggestion.STATUS == 'ASKED' ) %]
+                                                                <span class="ftu-status-badge bg-warning text-dark"><i class="fa fa-clock"></i> Đang chờ duyệt</span>
+                                                            [% ELSIF ( suggestion.STATUS == 'CHECKED' ) %]
+                                                                <span class="ftu-status-badge bg-info text-dark"><i class="fa fa-search"></i> Đã kiểm tra</span>
+                                                            [% ELSIF ( suggestion.STATUS == 'ACCEPTED' ) %]
+                                                                <span class="ftu-status-badge bg-success text-white"><i class="fa fa-check"></i> Được chấp nhận</span>
+                                                            [% ELSIF ( suggestion.STATUS == 'ORDERED' ) %]
+                                                                <span class="ftu-status-badge bg-primary text-white"><i class="fa fa-shopping-cart"></i> Đang đặt mua</span>
+                                                            [% ELSIF ( suggestion.STATUS == 'REJECTED' ) %]
+                                                                <span class="ftu-status-badge bg-danger text-white"><i class="fa fa-ban"></i> Bị từ chối</span>
+                                                            [% ELSIF ( suggestion.STATUS == 'AVAILABLE' ) %]
+                                                                <span class="ftu-status-badge bg-success text-white"><i class="fa fa-book-bookmark"></i> Sách đã về thư viện</span>
+                                                            [% ELSE %]
+                                                                <span class="ftu-status-badge bg-secondary text-white">[% AuthorisedValues.GetByCode( 'SUGGEST_STATUS', suggestion.STATUS, 1 ) | html %]</span>
+                                                            [% END %]
+                                                            [% IF ( suggestion.reason ) %]
+                                                                <div class="small text-muted mt-1" style="font-size: 0.75rem;">([% suggestion.reason | html %])</div>
+                                                            [% END %]
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                [% END # / FOREACH suggestions %]
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                [% IF ( loggedinusername && can_delete_suggestion ) %]
+                                    <div class="d-flex align-items-center gap-3 mt-3">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm px-3 removeitems">
+                                            <i class="fa fa-trash-can me-1"></i> Xóa các đề xuất đã chọn
+                                        </button>
+                                        <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btnSelectAll">Chọn tất cả</button>
+                                        <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none" id="btnUnselectAll">Bỏ chọn</button>
+                                    </div>
+                                [% END %]
+                            </form>
+                        [% ELSE %]
+                            <div class="ftu-card p-5 text-center">
+                                <div class="mb-3 text-muted">
+                                    <i class="fa fa-folder-open fa-3x" style="color: #CBD5E1;"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark">Chưa có đề xuất mua tài liệu nào</h5>
+                                <p class="text-secondary small mb-4">Bạn chưa gửi đề xuất mua tài liệu nào hoặc không có đề xuất phù hợp với bộ lọc tìm kiếm.</p>
+                                <div>
+                                    <a href="/cgi-bin/koha/opac-suggestions.pl?op=add_form" class="btn btn-danger fw-semibold px-4 py-2 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border: none;">
+                                        <i class="fa fa-plus me-1"></i> Tạo đề xuất mua tài liệu ngay
+                                    </a>
+                                </div>
+                            </div>
+                        [% END %]
+                    [% END # /IF op_else %]
+
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
-<!-- / .main -->
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
- [% IF Koha.Preference("OPACSuggestionAutoFill") %]
- [% Asset.js("js/autofill.js") | $raw %]
- [% END %]
- [% INCLUDE 'datatables.inc' %]
- <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
-        const loggedinusername = [% ( loggedinusername ) ? 1 : 0 | html %];
-    </script>
- [% IF ( loggedinusername ) %]
- <script nonce="[% Koha.CSPNonce | $raw %]">
-            function enableCheckboxActions() {
-                // Enable/disable controls if checkboxes are checked
-                var checkedBoxes = $(".cb:checked");
-                if ($(checkedBoxes).size()) {
-                    $(".selections").html(_("With selected suggestions: "));
-                    $(".selections-toolbar .links a").removeClass("disabled");
-                } else {
-                    $(".selections").html(_("Chọn đề xuất mua để: "));
-                    $(".selections-toolbar .links a").addClass("disabled");
+    [% IF Koha.Preference("OPACSuggestionAutoFill") %]
+        [% Asset.js("js/autofill.js") | $raw %]
+    [% END %]
+    [% INCLUDE 'datatables.inc' %]
+    <script nonce="[% Koha.CSPNonce | $raw %]">
+        // Đếm từ và giới hạn số từ cho lý do đề xuất (tối đa 100 từ)
+        function countWords(str) {
+            if (!str) return 0;
+            var words = str.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+            return words.length;
+        }
+
+        function handleReasonWordCount(textarea) {
+            var maxWords = 100;
+            var text = textarea.value;
+            var words = text.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+            var wordCount = words.length;
+
+            var counterEl = document.getElementById('reason_word_count');
+            var badgeEl = document.getElementById('patronreason_counter_badge');
+            var warningEl = document.getElementById('reason_word_warning');
+
+            if (counterEl) counterEl.textContent = wordCount;
+
+            if (wordCount > maxWords) {
+                if (badgeEl) {
+                    badgeEl.className = 'ftu-word-badge bg-danger text-white border-0';
+                }
+                if (warningEl) warningEl.style.display = 'block';
+            } else if (wordCount >= 85) {
+                if (badgeEl) {
+                    badgeEl.className = 'ftu-word-badge bg-warning text-dark border-0';
+                }
+                if (warningEl) warningEl.style.display = 'none';
+            } else {
+                if (badgeEl) {
+                    badgeEl.className = 'ftu-word-badge bg-light text-secondary border';
+                }
+                if (warningEl) warningEl.style.display = 'none';
+            }
+        }
+
+        function applyReasonSnippet(snippet) {
+            var textarea = document.getElementById('patronreason');
+            if (!textarea) return;
+            var currentVal = textarea.value.trim();
+            if (currentVal.length > 0) {
+                textarea.value = currentVal + ' ' + snippet;
+            } else {
+                textarea.value = snippet;
+            }
+            handleReasonWordCount(textarea);
+            textarea.focus();
+        }
+
+        function updateLinkTestBtn(url) {
+            var btn = document.getElementById('btnTestDocLink');
+            if (!btn) return;
+            if (url && url.trim().length > 4) {
+                btn.removeAttribute('disabled');
+            } else {
+                btn.setAttribute('disabled', 'disabled');
+            }
+        }
+
+        function testDocumentUrl() {
+            var input = document.getElementById('document_url');
+            if (!input) return;
+            var val = input.value.trim();
+            if (!val) return;
+            if (!/^https?:\/\//i.test(val)) {
+                val = 'https://' + val;
+            }
+            window.open(val, '_blank', 'noopener,noreferrer');
+        }
+
+        function validateFtuSuggestionForm() {
+            var title = document.getElementById('title');
+            if (title && !title.value.trim()) {
+                alert('Vui lòng nhập Nhan đề tài liệu / Tên sách đề xuất.');
+                title.focus();
+                return false;
+            }
+
+            var textarea = document.getElementById('patronreason');
+            if (textarea) {
+                var words = textarea.value.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+                if (words.length > 100) {
+                    alert('Lý do đề xuất của bạn có ' + words.length + ' từ, đã vượt quá giới hạn 100 từ. Vui lòng rút gọn lại trước khi gửi.');
+                    textarea.focus();
+                    return false;
                 }
             }
-        </script>
- [% END %]
 
- [% IF Koha.Preference( 'OPACSuggestionAutoFill' ) %]
- <script nonce="[% Koha.CSPNonce | $raw %]">
-            $(function () {
-                $("#isbn").autofill({
-                    "volumeInfo.title": { target: "title", effect: "flash" },
-                    "volumeInfo.authors": { target: "author", effect: "flash" },
-                    "volumeInfo.publisher": { target: "publishercode", effect: "flash" },
-                    "volumeInfo.publishedDate": { target: "copyrightdate", effect: "flash" },
-                    /* google books api seem to only have books, so if we got a result
-                     * item, type will be a book, so set to BK (book). */
-                    kind: {
-                        target: "itemtype",
-                        handle: function (t, v) {
-                            t.val("BK");
-                        },
-                    },
-                });
-            });
-        </script>
- [% END %]
- <script nonce="[% Koha.CSPNonce | $raw %]">
-        $(function () {
-            $("#suggestt").kohaTable({
-                order: [[1, "asc"]],
-                columnDefs: [...(loggedinusername ? [{ targets: [0], orderable: false, searchable: false }] : []), { className: "dtr-control", orderable: false, targets: -1 }, { responsivePriority: 1, targets: 1 }],
-                responsive: {
-                    details: {
-                        type: "column",
-                        target: -1,
-                    },
-                },
-            });
-            if (loggedinusername) {
-                $("span.clearall").html('<a id="CheckNone" class="btn btn-link btn-sm" href="#">' + _("Bỏ tất cả") + "<\/a>");
-                $("span.checkall").html('<a id="CheckAll" class="btn btn-link btn-sm" href="#">' + _("Chọn tất cả") + "<\/a>");
-                $("#CheckAll").on("click", function (e) {
-                    e.preventDefault();
-                    $(".cb").prop("checked", true);
-                    enableCheckboxActions();
-                });
-                $("#CheckNone").on("click", function (e) {
-                    e.preventDefault();
-                    $(".cb").prop("checked", false);
-                    enableCheckboxActions();
-                });
-                $(".cb").click(function () {
-                    enableCheckboxActions();
-                });
+            var docUrl = document.getElementById('document_url');
+            if (docUrl && docUrl.value.trim()) {
+                var url = docUrl.value.trim();
+                if (!/^https?:\/\//i.test(url) && url.indexOf('.') > -1) {
+                    docUrl.value = 'https://' + url;
+                }
+            }
 
-                enableCheckboxActions();
+            return true;
+        }
 
-                $(".removeitems").on("click", function (e) {
-                    e.preventDefault();
-                    var selected_titles = $("input:checked");
-                    var title;
-                    var yes_label;
-                    var no_label;
-                    var message = "";
-                    if (selected_titles.size() < 1) {
-                        alert(_("No suggestion was selected"));
-                        return false;
-                    } else {
-                        if (selected_titles.size() > 1) {
-                            message = $("<ul></ul>");
-                            title = _("Are you sure you want to delete these suggestions?");
-                            yes_label = _("Yes, delete suggestions");
-                            no_label = _("No, do not delete suggestions");
-                            selected_titles.each(function () {
-                                message.append("<li>" + $(this).data("title") + "</li>");
-                            });
-                        } else {
-                            title = _("Bạn chắc chắn muốn xóa đề xuất mua này?");
-                            yes_label = _("Yes, delete suggestion");
-                            no_label = _("No, do not delete suggestion");
-                            selected_titles.each(function () {
-                                message += $(this).data("title");
-                            });
-                        }
-                        confirmModal(message, title, yes_label, no_label, function (result) {
-                            if (result) {
-                                $("#delete_suggestions").submit();
-                            }
-                        });
-                    }
+        $(document).ready(function() {
+            // Khởi tạo word count ban đầu nếu có giá trị
+            var reasonInput = document.getElementById('patronreason');
+            if (reasonInput) {
+                handleReasonWordCount(reasonInput);
+            }
+            var docUrlInput = document.getElementById('document_url');
+            if (docUrlInput) {
+                updateLinkTestBtn(docUrlInput.value);
+            }
+
+            // Khởi tạo DataTable cho danh sách đề xuất
+            if ($("#suggestt").length) {
+                $("#suggestt").kohaTable({
+                    order: [[1, "desc"]],
+                    columnDefs: [
+                        { targets: [0], orderable: false, searchable: false },
+                        { className: "dtr-control", orderable: false, targets: -1 }
+                    ],
+                    responsive: true
                 });
             }
+
+            // Select all / Deselect all
+            $("#btnSelectAll").on("click", function(e) {
+                e.preventDefault();
+                $(".cb").prop("checked", true);
+            });
+            $("#btnUnselectAll").on("click", function(e) {
+                e.preventDefault();
+                $(".cb").prop("checked", false);
+            });
         });
     </script>
 [% END %]

@@ -79,6 +79,11 @@ properties:
       - string
       - "null"
     description: note entered on the suggestion
+  document_url:
+    type:
+      - string
+      - "null"
+    description: reference link or URL to the suggested document
   staff_note:
     type:
       - string

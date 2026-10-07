@@ -171,14 +171,27 @@
  [% AuthorisedValues.GetByCode( 'SUGGEST_FORMAT', suggestion.itemtype, 0 ) | html %]
  </li>
  [% END %]
- [% IF ( patron_reason_loop ) %]
+ [% IF ( suggestion.patronreason ) %]
  <li>
  <span class="label">Lý do đề xuất: </span>
+ [% SET matched_patron_reason = 0 %]
  [% FOREACH patron_reason_loo IN patron_reason_loop %]
  [% IF patron_reason_loo.authorised_value == suggestion.patronreason %]
  [% patron_reason_loo.lib | html %]
+ [% SET matched_patron_reason = 1 %]
  [% END %]
  [% END %]
+ [% IF !matched_patron_reason %]
+ [% suggestion.patronreason | html %]
+ [% END %]
+ </li>
+ [% END %]
+ [% IF ( suggestion.document_url ) %]
+ <li>
+ <span class="label">Link tài liệu tham khảo: </span>
+ <a href="[% suggestion.document_url | url %]" target="_blank" rel="noopener noreferrer" class="fw-bold text-primary">
+ <i class="fa fa-external-link me-1"></i> [% suggestion.document_url | html %]
+ </a>
  </li>
  [% END %]
  [% IF ( suggestion.note ) %]
@@ -408,19 +421,28 @@
  </li>
  [% IF patron_reason_loop %]
  <li>
- <label for="patronreason">Lý do đề xuất: </label>
- <select name="patronreason" id="patronreason">
- <option value=""> -- Chọn lý do đề xuất -- </option>
+ <label for="patronreason_select">Lý do mẫu: </label>
+ <select id="patronreason_select" onchange="if(this.value) { document.getElementById('patronreason').value = this.options[this.selectedIndex].text; }">
+ <option value=""> -- Chọn lý do mẫu -- </option>
  [% FOREACH patron_reason_loo IN patron_reason_loop %]
- [% IF patron_reason_loo.authorised_value == suggestion.patronreason %]
- <option value="[% patron_reason_loo.authorised_value | html %]" selected="selected">[% patron_reason_loo.lib | html %]</option>
- [% ELSE %]
  <option value="[% patron_reason_loo.authorised_value | html %]">[% patron_reason_loo.lib | html %]</option>
- [% END %]
  [% END %]
  </select>
  </li>
  [% END # /IF patron_reason_loop %]
+ <li>
+ <label for="patronreason">Lý do đề xuất: </label>
+ <textarea name="patronreason" id="patronreason" rows="2" cols="50">[% suggestion.patronreason | html %]</textarea>
+ </li>
+ <li>
+ <label for="document_url">Link tài liệu tham khảo: </label>
+ <input type="url" name="document_url" id="document_url" size="50" maxlength="500" value="[% suggestion.document_url | html %]" placeholder="https://..." />
+ [% IF ( suggestion.document_url ) %]
+ <a href="[% suggestion.document_url | url %]" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary" style="margin-left: 8px;">
+ <i class="fa fa-external-link"></i> Mở liên kết
+ </a>
+ [% END %]
+ </li>
  <li>
  <label for="note">Ghi chú:</label>
  <textarea name="note" id="note" rows="5" cols="40">[% suggestion.note | html %]</textarea>
@@ -1311,6 +1333,7 @@
                                             if (row.collection_title) node += '; <span class="suggestion_collectiontitle"><em>%s</em></span>'.format(escape_str(row.collection_title));
                                             if (row.item_type && row._strings.item_type.str) node += '; <span class="suggestion_itype"><em>%s</em></span>'.format(escape_str(row._strings.item_type.str));
                                             if (row.note) node += '<div class="suggestion_note">%s</div>'.format(escape_str(row.note));
+                                            if (row.document_url) node += '<div class="suggestion_doc_url mt-1"><a href="%s" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-outline-primary" style="padding: 2px 8px; font-size: 11px;"><i class="fa fa-external-link"></i> %s</a></div>'.format(escape_str(row.document_url), escape_str(_("Link tài liệu")));
                                             if (row.archived) node += '<br /><i class="fa fa-archive"></i> %s'.format(escape_str(_("Archived")));
                                             return node;
                                         },
@@ -1352,7 +1375,7 @@
                                         searchable: true,
                                         orderable: true,
                                         render: function (data, type, row, meta) {
-                                            return escape_str(row._strings.patron_reason.str ? row._strings.patron_reason.str : "");
+                                            return escape_str(row._strings && row._strings.patron_reason && row._strings.patron_reason.str ? row._strings.patron_reason.str : (row.patron_reason || ""));
                                         },
                                     },
                                     {

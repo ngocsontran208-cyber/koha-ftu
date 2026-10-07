@@ -233,6 +233,13 @@ reason for accepting or rejecting the suggestion
 
 reason for making the suggestion
 
+=head2 document_url
+
+  data_type: 'text'
+  is_nullable: 1
+
+reference URL or link to the suggested document/book
+
 =head2 budgetid
 
   data_type: 'integer'
@@ -333,6 +340,8 @@ __PACKAGE__->add_columns(
   { data_type => "tinyint", default_value => 0, is_nullable => 0 },
   "note",
   { data_type => "longtext", is_nullable => 1 },
+  "document_url",
+  { data_type => "text", is_nullable => 1 },
   "staff_note",
   { data_type => "longtext", is_nullable => 1 },
   "author",
