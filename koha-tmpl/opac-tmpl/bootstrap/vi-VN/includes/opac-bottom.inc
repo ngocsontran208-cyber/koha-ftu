@@ -29,124 +29,107 @@
     <!-- ========================================================================= -->
     <footer class="ftu-footer-master noprint">
         <div class="ftu-footer-container">
-            <div class="row mb-5" style="row-gap: 2.5rem;">
+            <div class="row ftu-footer-row">
                 <!-- Cột 1: Thương hiệu Thư viện FTU & Liên hệ (5/12) -->
-                <div class="col-12 col-lg-5 mb-4 mb-lg-0">
-                    <div class="d-flex align-items-center mb-4" style="gap: 14px;">
-                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.svg" alt="[% FTU_BRAND.logo_alt %]" style="height: 42px; width: auto;"
+                <div class="col-12 col-lg-5 mb-3 mb-lg-0 ftu-footer-brand-col">
+                    <div class="d-flex align-items-center mb-3 ftu-footer-brand-wrap" style="gap: 12px;">
+                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.svg" alt="[% FTU_BRAND.logo_alt %]" style="height: 38px; width: auto;"
                             onerror="this.onerror=null; this.src='[% FTU_BRAND.logo_url %]'" />
                         <div>
-                            <div style="font-weight: 800; color: #0F172A; font-size: 1.05rem; line-height: 1.3; letter-spacing: -0.01em; text-transform: uppercase;">
+                            <div class="ftu-footer-title" style="font-weight: 800; color: #0F172A; font-size: 0.98rem; line-height: 1.3; text-transform: uppercase;">
                                 [% FTU_BRAND.library_name %]
                             </div>
-                            <div style="font-size: 0.8rem; color: #64748B; font-weight: 500; margin-top: 2px;">
+                            <div class="ftu-footer-sub" style="font-size: 0.78rem; color: #64748B; font-weight: 500; margin-top: 2px;">
                                 [% FTU_BRAND.campus_current %]
                             </div>
                         </div>
                     </div>
 
-                    <div class="d-flex flex-column" style="gap: 12px; font-size: 0.875rem; color: #475569;">
+                    <div class="d-flex flex-column ftu-footer-contacts" style="gap: 8px; font-size: 0.84rem; color: #475569;">
                         <!-- Địa chỉ -->
-                        <div class="d-flex align-items-start" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0; margin-top: 2px;" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
+                        <div class="d-flex align-items-start ftu-contact-item" style="gap: 10px;">
+                            <i class="fa fa-location-dot" style="color: #b91c1c; font-size: 15px; margin-top: 3px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
-                                <span style="font-weight: 600; color: #1E293B;">Địa chỉ:</span>
-                                <span style="color: #475569;"> Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. Hồ Chí Minh</span>
+                                <strong style="color: #1E293B;">Địa chỉ:</strong>
+                                <span> Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. Hồ Chí Minh</span>
                             </div>
                         </div>
 
-                        <!-- Điện thoại -->
-                        <div class="d-flex align-items-center" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0;" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
-                            <div>
-                                <span style="font-weight: 600; color: #1E293B;">Điện thoại:</span>
-                                <span style="color: #475569; font-weight: 500;"> (028) 3512 7254 - 3512 7258</span>
+                        <!-- Điện thoại & Email nhanh trên Mobile -->
+                        <div class="d-flex flex-wrap align-items-center ftu-quick-contact-row" style="gap: 12px;">
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <i class="fa fa-phone" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
+                                <div>
+                                    <strong style="color: #1E293B;">Hotline:</strong>
+                                    <a href="tel:02835127254" style="color: #475569; font-weight: 600; text-decoration: none;">(028) 3512 7254</a>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Email -->
-                        <div class="d-flex align-items-center" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0;" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <div>
-                                <span style="font-weight: 600; color: #1E293B;">Email:</span>
-                                <a href="mailto:[% FTU_BRAND.email_contact %]"
-                                    style="color: #b91c1c; font-weight: 500; text-decoration: none;"> [% FTU_BRAND.email_contact %]</a>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <i class="fa fa-envelope" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
+                                <div>
+                                    <strong style="color: #1E293B;">Email:</strong>
+                                    <a href="mailto:[% FTU_BRAND.email_contact %]" style="color: #b91c1c; font-weight: 600; text-decoration: none;">[% FTU_BRAND.email_contact %]</a>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Giờ phục vụ -->
-                        <div class="d-flex align-items-center" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0;" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                        <div class="d-flex align-items-center ftu-contact-item" style="gap: 10px;">
+                            <i class="fa fa-clock" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
-                                <span style="font-weight: 600; color: #1E293B;">Giờ phục vụ:</span>
-                                <span style="color: #475569;"> [% FTU_BRAND.hours_summary %]</span>
+                                <strong style="color: #1E293B;">Giờ phục vụ:</strong>
+                                <span> [% FTU_BRAND.hours_summary %]</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cột 2: Khám phá tài nguyên (3/12) -->
-                <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
-                    <h4 style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="width: 3px; height: 14px; background: #b91c1c; border-radius: 2px; display: inline-block;"></span>
-                        Khám phá tài nguyên
-                    </h4>
-                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-collections.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Bộ sưu tập tài liệu số</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Tìm kiếm theo Tác giả</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Tìm kiếm theo Chủ đề</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Giáo trình &amp; Học phần</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Kho tài liệu số DSpace <i class="fa fa-external-link-alt" style="font-size: 0.75rem; margin-left: 3px;"></i></a></li>
-                    </ul>
+                <!-- Cột 2: Khám phá tài nguyên (3/12) - Dạng Accordion trên Mobile -->
+                <div class="col-12 col-md-6 col-lg-3 mb-2 mb-lg-0">
+                    <details class="ftu-footer-accordion">
+                        <summary class="ftu-footer-summary">
+                            <h4 class="ftu-footer-heading">
+                                <span class="ftu-footer-heading-bar"></span>
+                                Khám phá tài nguyên
+                            </h4>
+                            <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
+                        </summary>
+                        <ul class="ftu-footer-list">
+                            <li><a href="/cgi-bin/koha/opac-collections.pl" class="ftu-footer-link">Bộ sưu tập tài liệu số</a></li>
+                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="ftu-footer-link">Tìm kiếm theo Tác giả</a></li>
+                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="ftu-footer-link">Tìm kiếm theo Chủ đề</a></li>
+                            <li><a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-footer-link">Giáo trình &amp; Học phần</a></li>
+                            <li><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link">Kho tài liệu số DSpace <i class="fa fa-external-link-alt" style="font-size: 0.72rem; margin-left: 3px;"></i></a></li>
+                        </ul>
+                    </details>
                 </div>
 
-                <!-- Cột 3: Hỗ trợ & Hướng dẫn (4/12) -->
-                <div class="col-12 col-md-6 col-lg-4">
-                    <h4 style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="width: 3px; height: 14px; background: #b91c1c; border-radius: 2px; display: inline-block;"></span>
-                        Hỗ trợ &amp; Dịch vụ
-                    </h4>
-                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-user.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Tài khoản &amp; Gia hạn sách</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Quy định bản quyền học thuật</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-news-detail.pl?id=5" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Thông báo &amp; Lịch phục vụ</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-reportproblem.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Liên hệ Ban quản trị Thư viện</a></li>
-                    </ul>
+                <!-- Cột 3: Hỗ trợ & Dịch vụ (4/12) - Dạng Accordion trên Mobile -->
+                <div class="col-12 col-md-6 col-lg-4 mb-2 mb-lg-0">
+                    <details class="ftu-footer-accordion">
+                        <summary class="ftu-footer-summary">
+                            <h4 class="ftu-footer-heading">
+                                <span class="ftu-footer-heading-bar"></span>
+                                Hỗ trợ &amp; Dịch vụ
+                            </h4>
+                            <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
+                        </summary>
+                        <ul class="ftu-footer-list">
+                            <li><a href="/cgi-bin/koha/opac-user.pl" class="ftu-footer-link">Tài khoản &amp; Gia hạn sách</a></li>
+                            <li><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="ftu-footer-link">Quy định bản quyền học thuật</a></li>
+                            <li><a href="/cgi-bin/koha/opac-news-detail.pl?id=5" class="ftu-footer-link">Thông báo &amp; Lịch phục vụ</a></li>
+                            <li><a href="/cgi-bin/koha/opac-reportproblem.pl" class="ftu-footer-link">Liên hệ Ban quản trị Thư viện</a></li>
+                        </ul>
+                    </details>
                 </div>
             </div>
 
             <!-- Dòng bản quyền cuối cùng -->
-            <div class="pt-4 border-top d-flex flex-column flex-md-row justify-content-between align-items-center"
-                style="border-top: 1px solid #E2E8F0 !important; font-size: 13px; color: #64748B; gap: 1rem;">
-                <p style="margin: 0; color: #64748B;">[% FTU_BRAND.copyright_text %]</p>
-                <div class="d-flex align-items-center" style="gap: 16px;">
+            <div class="pt-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center ftu-footer-bottom-bar"
+                style="border-top: 1px solid #E2E8F0 !important; font-size: 12px; color: #64748B; gap: 0.5rem;">
+                <p style="margin: 0; color: #64748B; text-align: center;">[% FTU_BRAND.copyright_text %]</p>
+                <div class="d-flex align-items-center" style="gap: 12px;">
                     <a href="/cgi-bin/koha/opac-oai.pl" target="_blank" style="color: #64748B; text-decoration: none; font-weight: 500;">OAI-PMH</a>
                     <span style="display: inline-block; width: 4px; height: 4px; background: #CBD5E1; border-radius: 50%;"></span>
                     <span>Vận hành trên nền tảng <a href="https://koha-community.org" target="_blank"

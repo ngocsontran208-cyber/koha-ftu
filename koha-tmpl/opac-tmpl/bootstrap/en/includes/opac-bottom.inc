@@ -28,124 +28,107 @@
     <!-- ========================================================================= -->
     <footer class="ftu-footer-master noprint">
         <div class="ftu-footer-container">
-            <div class="row mb-5" style="row-gap: 2.5rem;">
+            <div class="row ftu-footer-row">
                 <!-- Col 1: FTU Library Brand & Contact (5/12) -->
-                <div class="col-12 col-lg-5 mb-4 mb-lg-0">
-                    <div class="d-flex align-items-center mb-4" style="gap: 14px;">
-                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.svg" alt="[% FTU_BRAND.logo_alt %]" style="height: 42px; width: auto;"
+                <div class="col-12 col-lg-5 mb-3 mb-lg-0 ftu-footer-brand-col">
+                    <div class="d-flex align-items-center mb-3 ftu-footer-brand-wrap" style="gap: 12px;">
+                        <img src="/opac-tmpl/bootstrap/images/ftu-logo.svg" alt="[% FTU_BRAND.logo_alt %]" style="height: 38px; width: auto;"
                             onerror="this.onerror=null; this.src='[% FTU_BRAND.logo_url %]'" />
                         <div>
-                            <div style="font-weight: 800; color: #0F172A; font-size: 1.05rem; line-height: 1.3; letter-spacing: -0.01em; text-transform: uppercase;">
+                            <div class="ftu-footer-title" style="font-weight: 800; color: #0F172A; font-size: 0.98rem; line-height: 1.3; text-transform: uppercase;">
                                 [% FTU_BRAND.library_name_en %]
                             </div>
-                            <div style="font-size: 0.8rem; color: #64748B; font-weight: 500; margin-top: 2px;">
+                            <div class="ftu-footer-sub" style="font-size: 0.78rem; color: #64748B; font-weight: 500; margin-top: 2px;">
                                 [% FTU_BRAND.campus_current_en %]
                             </div>
                         </div>
                     </div>
 
-                    <div class="d-flex flex-column" style="gap: 12px; font-size: 0.875rem; color: #475569;">
+                    <div class="d-flex flex-column ftu-footer-contacts" style="gap: 8px; font-size: 0.84rem; color: #475569;">
                         <!-- Address -->
-                        <div class="d-flex align-items-start" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0; margin-top: 2px;" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
+                        <div class="d-flex align-items-start ftu-contact-item" style="gap: 10px;">
+                            <i class="fa fa-location-dot" style="color: #b91c1c; font-size: 15px; margin-top: 3px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
-                                <span style="font-weight: 600; color: #1E293B;">Address:</span>
-                                <span style="color: #475569;"> No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City</span>
+                                <strong style="color: #1E293B;">Address:</strong>
+                                <span> No. 15, D5 St., Thanh My Tay Ward, Ho Chi Minh City</span>
                             </div>
                         </div>
 
-                        <!-- Phone -->
-                        <div class="d-flex align-items-center" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0;" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
-                            <div>
-                                <span style="font-weight: 600; color: #1E293B;">Phone:</span>
-                                <span style="color: #475569; font-weight: 500;"> (028) 3512 7254 - 3512 7258</span>
+                        <!-- Phone & Email quick links on Mobile -->
+                        <div class="d-flex flex-wrap align-items-center ftu-quick-contact-row" style="gap: 12px;">
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <i class="fa fa-phone" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
+                                <div>
+                                    <strong style="color: #1E293B;">Hotline:</strong>
+                                    <a href="tel:02835127254" style="color: #475569; font-weight: 600; text-decoration: none;">(028) 3512 7254</a>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Email -->
-                        <div class="d-flex align-items-center" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0;" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <div>
-                                <span style="font-weight: 600; color: #1E293B;">Email:</span>
-                                <a href="mailto:[% FTU_BRAND.email_contact %]"
-                                    style="color: #b91c1c; font-weight: 500; text-decoration: none;"> [% FTU_BRAND.email_contact %]</a>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <i class="fa fa-envelope" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
+                                <div>
+                                    <strong style="color: #1E293B;">Email:</strong>
+                                    <a href="mailto:[% FTU_BRAND.email_contact %]" style="color: #b91c1c; font-weight: 600; text-decoration: none;">[% FTU_BRAND.email_contact %]</a>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Service Hours -->
-                        <div class="d-flex align-items-center" style="gap: 12px;">
-                            <svg style="width: 18px; height: 18px; color: #b91c1c; flex-shrink: 0;" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                        <div class="d-flex align-items-center ftu-contact-item" style="gap: 10px;">
+                            <i class="fa fa-clock" style="color: #b91c1c; font-size: 14px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
-                                <span style="font-weight: 600; color: #1E293B;">Service Hours:</span>
-                                <span style="color: #475569;"> [% FTU_BRAND.hours_summary_en %]</span>
+                                <strong style="color: #1E293B;">Hours:</strong>
+                                <span> [% FTU_BRAND.hours_summary_en %]</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Col 2: Discover Resources (3/12) -->
-                <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
-                    <h4 style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="width: 3px; height: 14px; background: #b91c1c; border-radius: 2px; display: inline-block;"></span>
-                        Discover Resources
-                    </h4>
-                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-collections.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Digital Collections</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Search by Author</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Search by Subject</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Course Reserves</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">DSpace Digital Repository <i class="fa fa-external-link-alt" style="font-size: 0.75rem; margin-left: 3px;"></i></a></li>
-                    </ul>
+                <!-- Col 2: Discover Resources (3/12) - Accordion on Mobile -->
+                <div class="col-12 col-md-6 col-lg-3 mb-2 mb-lg-0">
+                    <details class="ftu-footer-accordion">
+                        <summary class="ftu-footer-summary">
+                            <h4 class="ftu-footer-heading">
+                                <span class="ftu-footer-heading-bar"></span>
+                                Discover Resources
+                            </h4>
+                            <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
+                        </summary>
+                        <ul class="ftu-footer-list">
+                            <li><a href="/cgi-bin/koha/opac-collections.pl" class="ftu-footer-link">Digital Collections</a></li>
+                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="ftu-footer-link">Search by Author</a></li>
+                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="ftu-footer-link">Search by Subject</a></li>
+                            <li><a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-footer-link">Course Reserves</a></li>
+                            <li><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link">DSpace Digital Repository <i class="fa fa-external-link-alt" style="font-size: 0.72rem; margin-left: 3px;"></i></a></li>
+                        </ul>
+                    </details>
                 </div>
 
-                <!-- Col 3: Help & Support (4/12) -->
-                <div class="col-12 col-md-6 col-lg-4">
-                    <h4 style="font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                        <span style="width: 3px; height: 14px; background: #b91c1c; border-radius: 2px; display: inline-block;"></span>
-                        Help &amp; Services
-                    </h4>
-                    <ul class="list-unstyled" style="padding-left: 0; margin-bottom: 0; list-style: none;">
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-user.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Account &amp; Renewals</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Academic Copyright Policy</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-news-detail.pl?id=5" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">News &amp; Service Notices</a></li>
-                        <li style="margin-bottom: 0.65rem;"><a href="/cgi-bin/koha/opac-reportproblem.pl" class="ftu-footer-link"
-                            style="color: #64748B; font-weight: 500; font-size: 0.875rem; text-decoration: none;">Contact Library Admin</a></li>
-                    </ul>
+                <!-- Col 3: Help & Support (4/12) - Accordion on Mobile -->
+                <div class="col-12 col-md-6 col-lg-4 mb-2 mb-lg-0">
+                    <details class="ftu-footer-accordion">
+                        <summary class="ftu-footer-summary">
+                            <h4 class="ftu-footer-heading">
+                                <span class="ftu-footer-heading-bar"></span>
+                                Help &amp; Services
+                            </h4>
+                            <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
+                        </summary>
+                        <ul class="ftu-footer-list">
+                            <li><a href="/cgi-bin/koha/opac-user.pl" class="ftu-footer-link">Account &amp; Renewals</a></li>
+                            <li><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="ftu-footer-link">Academic Copyright Policy</a></li>
+                            <li><a href="/cgi-bin/koha/opac-news-detail.pl?id=5" class="ftu-footer-link">News &amp; Service Notices</a></li>
+                            <li><a href="/cgi-bin/koha/opac-reportproblem.pl" class="ftu-footer-link">Contact Library Admin</a></li>
+                        </ul>
+                    </details>
                 </div>
             </div>
 
             <!-- Bottom Copyright Bar -->
-            <div class="pt-4 border-top d-flex flex-column flex-md-row justify-content-between align-items-center"
-                style="border-top: 1px solid #E2E8F0 !important; font-size: 13px; color: #64748B; gap: 1rem;">
-                <p style="margin: 0; color: #64748B;">[% FTU_BRAND.copyright_text %]</p>
-                <div class="d-flex align-items-center" style="gap: 16px;">
+            <div class="pt-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center ftu-footer-bottom-bar"
+                style="border-top: 1px solid #E2E8F0 !important; font-size: 12px; color: #64748B; gap: 0.5rem;">
+                <p style="margin: 0; color: #64748B; text-align: center;">[% FTU_BRAND.copyright_text %]</p>
+                <div class="d-flex align-items-center" style="gap: 12px;">
                     <a href="/cgi-bin/koha/opac-oai.pl" target="_blank" style="color: #64748B; text-decoration: none; font-weight: 500;">OAI-PMH</a>
                     <span style="display: inline-block; width: 4px; height: 4px; background: #CBD5E1; border-radius: 50%;"></span>
                     <span>Powered by <a href="https://koha-community.org" target="_blank"

@@ -402,6 +402,14 @@
  [% END # / UNLESS advsearch %]
 
  <div class="row">
+ <details class="ftu-moresearches-details col-12">
+ <summary class="ftu-moresearches-summary d-md-none">
+     <span class="d-inline-flex align-items-center gap-1">
+         <i class="fa fa-sliders text-danger" aria-hidden="true"></i>
+         <strong style="color: #334155; font-size: 0.8rem;">Tiện ích tìm kiếm mở rộng</strong>
+     </span>
+     <span class="badge bg-light text-muted border" style="font-size: 0.72rem; font-weight: normal;">Thu gọn / Mở rộng <i class="fa fa-chevron-down ms-1" style="font-size: 0.65rem;"></i></span>
+ </summary>
  <ul class="nav" id="moresearches">
  <li class="nav-item">
  <a href="/cgi-bin/koha/opac-search.pl"><i class="fa-solid fa-sliders fa-fw" aria-hidden="true"></i> <span>Tìm kiếm nâng cao</span></a>
@@ -470,6 +478,7 @@
  [% PROCESS koha_news_block news => OpacMoreSearches %]
  </ul>
  <!-- /.nav#moresearches -->
+ </details>
  </div>
  <!-- /.row -->
  </div>
