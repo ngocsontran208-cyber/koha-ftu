@@ -89,7 +89,7 @@
                                 <span class="ftu-social-heading" style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px;">
                                     <i class="fa fa-share-alt" style="color: #b91c1c; font-size: 11px; margin-right: 3px;" aria-hidden="true"></i> Kết nối:
                                 </span>
-                                <a href="[% FTU_BRAND.link_facebook || 'https://www.facebook.com/ftu2.hcmc' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-fb" title="Fanpage Facebook Thư viện Cơ sở II FTU" aria-label="Facebook">
+                                <a href="[% FTU_BRAND.link_facebook || 'https://www.facebook.com/ftu2.hcmc' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-fb" title="Fanpage Facebook Thư viện Phân hiệu Trường ĐH Ngoại thương tại TP.HCM" aria-label="Facebook">
                                     <span class="ftu-social-icon-box"><i class="fa-brands fa-facebook-f fa fa-facebook-f" style="color: #ffffff !important;" aria-hidden="true"></i></span>
                                     <span class="ftu-social-text">Facebook</span>
                                 </a>
@@ -97,7 +97,7 @@
                                     <span class="ftu-social-icon-box"><i class="fa-brands fa-youtube fa fa-youtube-play" style="color: #ffffff !important;" aria-hidden="true"></i></span>
                                     <span class="ftu-social-text">YouTube</span>
                                 </a>
-                                <a href="[% FTU_BRAND.link_portal || 'https://hcmc.ftu.edu.vn' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-web" title="Cổng thông tin điện tử FTU Cơ sở II" aria-label="Website">
+                                <a href="[% FTU_BRAND.link_portal || 'https://hcmc.ftu.edu.vn' %]" target="_blank" rel="noopener noreferrer" class="ftu-social-pill ftu-pill-web" title="Cổng thông tin điện tử Phân hiệu Trường ĐH Ngoại thương tại TP.HCM" aria-label="Website">
                                     <span class="ftu-social-icon-box"><i class="fa-solid fa-globe fa fa-globe" style="color: #ffffff !important;" aria-hidden="true"></i></span>
                                     <span class="ftu-social-text">Website</span>
                                 </a>

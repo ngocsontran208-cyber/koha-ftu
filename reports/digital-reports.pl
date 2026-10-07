@@ -64,16 +64,51 @@ sub get_drm_dbh {
     return $dbh;
 }
 
+# Lấy tên chi nhánh trực tiếp từ bảng branches trong hệ thống CSDL Koha
+sub get_system_branch_name {
+    my ($branchcode) = @_;
+    my $name;
+    eval {
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            if ($branchcode && $branchcode ne 'ALL') {
+                my $sth = $koha_dbh->prepare("SELECT branchname FROM branches WHERE branchcode = ? LIMIT 1");
+                $sth->execute($branchcode);
+                ($name) = $sth->fetchrow_array;
+            }
+            if (!$name) {
+                # Ưu tiên chi nhánh CPL hoặc chi nhánh đầu tiên cấu hình trong CSDL
+                my $sth = $koha_dbh->prepare("SELECT branchname FROM branches ORDER BY (branchcode = 'CPL') DESC LIMIT 1");
+                $sth->execute();
+                ($name) = $sth->fetchrow_array;
+            }
+        }
+    };
+    $name = ensure_utf8($name) if $name;
+    return $name || 'Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh';
+}
+
 # Lấy danh sách map bạn đọc sang chi nhánh (Koha MariaDB)
 sub get_patron_branch_map {
     my %map;
     eval {
         my $koha_dbh = C4::Context->dbh;
+        # 1. Truy vấn tên tất cả chi nhánh từ CSDL Koha
+        my %branches;
+        eval {
+            my $bsth = $koha_dbh->prepare("SELECT branchcode, branchname FROM branches");
+            $bsth->execute();
+            while (my $brow = $bsth->fetchrow_hashref) {
+                $branches{$brow->{branchcode}} = ensure_utf8($brow->{branchname});
+            }
+        };
+        my $default_branch = $branches{'CPL'} || (values %branches)[0] || 'Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh';
+
         my $sth = $koha_dbh->prepare("SELECT cardnumber, userid, branchcode, surname, firstname, categorycode FROM borrowers");
         $sth->execute();
         while (my $row = $sth->fetchrow_hashref) {
             my $branch = $row->{branchcode} || '';
-            my $branch_label = 'Cơ sở II (FTU2 - TP.HCM)';
+            my $branch_label = $branches{$branch} || $default_branch;
             my $surname = ensure_utf8($row->{surname} || '');
             my $firstname = ensure_utf8($row->{firstname} || '');
             my $fullname = "$surname $firstname";
@@ -240,9 +275,10 @@ sub fetch_report_data {
             $sth->execute();
             my $stt = 1;
             my %seen_patrons;
+            my $sys_default_branch = get_system_branch_name($branch_filter);
             while (my $r = $sth->fetchrow_hashref) {
                 my $pinfo = $patron_map->{$r->{patron_id}} || {};
-                my $branch_name = $pinfo->{branch_name} || 'Cơ sở II (FTU2 - TP.HCM)';
+                my $branch_name = $pinfo->{branch_name} || $sys_default_branch;
                 my $branch_code = $pinfo->{branchcode} || 'CPL';
 
                 if ($branch_filter && $branch_filter ne 'ALL' && $branch_code ne $branch_filter) {
@@ -407,11 +443,12 @@ sub fetch_report_data {
     }
 
     # =========================================================================
-    # 5. TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2
+    # 5. TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU
     # =========================================================================
     elsif ($report_id eq 'opac_visits_ftu2') {
         my %date_stats;
         my $koha_dbh = C4::Context->dbh;
+        my $sys_branch_name = get_system_branch_name($branch_filter);
 
         # 1. Thống kê tìm kiếm thực tế từ Koha search_history
         if ($koha_dbh) {
@@ -427,7 +464,7 @@ sub fetch_report_data {
                     my $dt = $row->{dt};
                     $date_stats{$dt} ||= {
                         visit_date => $dt,
-                        branch_name => 'Cơ sở II - TP. Hồ Chí Minh (FTU2)',
+                        branch_name => $sys_branch_name,
                         login_count => 0,
                         search_count => 0,
                         detail_views => 0,
@@ -450,7 +487,7 @@ sub fetch_report_data {
                     my $dt = $row->{dt};
                     $date_stats{$dt} ||= {
                         visit_date => $dt,
-                        branch_name => 'Cơ sở II - TP. Hồ Chí Minh (FTU2)',
+                        branch_name => $sys_branch_name,
                         login_count => 0,
                         search_count => 0,
                         detail_views => 0,
@@ -481,7 +518,7 @@ sub fetch_report_data {
                     my $dt = $r->{visit_date};
                     $date_stats{$dt} ||= {
                         visit_date => $dt,
-                        branch_name => 'Cơ sở II - TP. Hồ Chí Minh (FTU2)',
+                        branch_name => ($pinfo->{branch_name} || $sys_branch_name),
                         login_count => 0,
                         search_count => 0,
                         detail_views => 0,
@@ -527,6 +564,7 @@ sub fetch_report_data {
             my $sth = $drm_dbh->prepare($sql);
             $sth->execute($from_ts, $to_ts);
             my $stt = 1;
+            my $sys_branch_name = get_system_branch_name($branch_filter);
             while (my $r = $sth->fetchrow_hashref) {
                 my $pinfo = $patron_map->{$r->{patron_id}} || {};
                 my $branch_code = $pinfo->{branchcode} || 'CPL';
@@ -538,7 +576,7 @@ sub fetch_report_data {
                 $r->{stt} = $stt++;
                 $r->{patron_id} = ensure_utf8($r->{patron_id});
                 $r->{patron_name} = ($pinfo->{fullname} && $r->{patron_name} eq 'Bạn đọc FTU') ? $pinfo->{fullname} : ensure_utf8($r->{patron_name});
-                $r->{branch_name} = ensure_utf8($pinfo->{branch_name} || 'Cơ sở II (FTU2 - TP.HCM)');
+                $r->{branch_name} = ensure_utf8($pinfo->{branch_name} || $sys_branch_name);
                 $r->{role_label} = ($r->{patron_role} =~ /ADMIN/i) ? 'Quản trị viên' :
                                    ($r->{patron_role} =~ /FACULTY/i) ? 'Giảng viên' : 'Sinh viên FTU';
                 $r->{role_label} = ensure_utf8($r->{role_label});
@@ -1020,7 +1058,7 @@ sub fetch_report_data {
                     b.title,
                     COALESCE(b.author, 'FTU') as author,
                     COALESCE(i.itemcallnumber, 'Chưa gán') as callnumber,
-                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (FTU2)') as location,
+                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (Phân hiệu TP.HCM)') as location,
                     COALESCE(b.copyrightdate, '---') as year,
                     DATEDIFF(NOW(), COALESCE(i.dateaccessioned, '2026-01-01')) as unused_days
                 FROM items i
@@ -1052,7 +1090,7 @@ sub fetch_report_data {
         if ($koha_dbh) {
             my $sql = qq{
                 SELECT 
-                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (FTU2)') as name,
+                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (Phân hiệu TP.HCM)') as name,
                     COUNT(DISTINCT b.biblionumber) as titles,
                     COUNT(i.itemnumber) as items,
                     COUNT(iss.issue_id) as loaned,
@@ -1156,11 +1194,11 @@ sub fetch_report_data {
     # 7. Thống kê tác giả được yêu thích
     elsif ($report_id eq 'circ_popular_authors') {
         my $koha_dbh = C4::Context->dbh;
+        my $sys_branch_name = get_system_branch_name($branch_filter);
         if ($koha_dbh) {
             my $sql = qq{
                 SELECT 
                     COALESCE(NULLIF(TRIM(b.author), ''), 'Tập thể tác giả') as author,
-                    'Cơ sở II - TP. Hồ Chí Minh' as dept,
                     COUNT(DISTINCT b.biblionumber) as title_count,
                     SUM(COALESCE(i.issues, 0) + (SELECT COUNT(*) FROM issues iss2 WHERE iss2.itemnumber = i.itemnumber)) as loans,
                     COUNT(DISTINCT iss.borrowernumber) as reader_count
@@ -1177,7 +1215,7 @@ sub fetch_report_data {
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
                 $r->{author} = ensure_utf8($r->{author});
-                $r->{dept} = ensure_utf8($r->{dept});
+                $r->{dept} = $sys_branch_name;
                 $summary{total_sessions} += ($r->{loans} || 0);
                 $summary{total_users} += ($r->{reader_count} || 0);
                 push @rows, $r;
@@ -1193,7 +1231,7 @@ sub fetch_report_data {
             my $sql = qq{
                 SELECT 
                     DATE_FORMAT(NOW(), '%Y-%m-%d') as date,
-                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (FTU2)') as location,
+                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (Phân hiệu TP.HCM)') as location,
                     COUNT(iss.issue_id) as checkouts,
                     (SELECT COUNT(*) FROM old_issues oi JOIN items i2 ON oi.itemnumber = i2.itemnumber WHERE i2.location = i.location) as checkins,
                     COUNT(CASE WHEN i.itemlost != 0 OR i.notforloan != 0 THEN 1 END) as shelving,
@@ -1270,7 +1308,7 @@ sub fetch_report_data {
                     DATE_FORMAT(iss.issuedate, '%Y-%m-%d') as issue_date,
                     DATE_FORMAT(iss.date_due, '%Y-%m-%d') as due_date,
                     NULL as ret_date,
-                    'Thủ thư FTU2' as staff,
+                    'Thủ thư Phân hiệu TP.HCM' as staff,
                     CASE WHEN iss.date_due < NOW() THEN 'Quá hạn' ELSE 'Đang mượn' END as status
                 FROM issues iss
                 JOIN items i ON iss.itemnumber = i.itemnumber
@@ -1284,7 +1322,7 @@ sub fetch_report_data {
                     DATE_FORMAT(oi.issuedate, '%Y-%m-%d') as issue_date,
                     DATE_FORMAT(oi.date_due, '%Y-%m-%d') as due_date,
                     DATE_FORMAT(oi.returndate, '%Y-%m-%d') as ret_date,
-                    'Thủ thư FTU2' as staff,
+                    'Thủ thư Phân hiệu TP.HCM' as staff,
                     'Đã trả đúng hạn' as status
                 FROM old_issues oi
                 JOIN items i ON oi.itemnumber = i.itemnumber
@@ -1345,7 +1383,7 @@ sub fetch_report_data {
                 $r->{callnumber} = ensure_utf8($r->{callnumber});
                 $r->{location} = ($r->{location_code} eq 'CART') ? 'Kho xếp giá luân chuyển' :
                                  ($r->{location_code} eq 'KHO_MUON') ? 'Kho sách mượn' :
-                                 ($r->{location_code} eq 'KHO_DOC') ? 'Phòng đọc tham khảo' : 'Kho tổng hợp FTU2';
+                                 ($r->{location_code} eq 'KHO_DOC') ? 'Phòng đọc tham khảo' : 'Kho tổng hợp Phân hiệu TP.HCM';
                 $r->{price_raw} = $r->{price} + 0;
                 $total_value += $r->{price_raw};
                 $r->{price_formatted} = format_vnd($r->{price_raw});
@@ -2478,7 +2516,7 @@ elsif ($op eq 'export_csv') {
             $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{session_count}, $r->{reader_count}, $r->{avg_duration}, $r->{pageviews}, $r->{last_interaction});
         }
     } elsif ($report_id eq 'opac_visits_ftu2') {
-        $print_csv_line->('STT', 'Ngày ghi nhận', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại FTU2', 'Tổng số tương tác');
+        $print_csv_line->('STT', 'Ngày ghi nhận', 'Lượt đăng nhập OPAC', 'Lượt tra cứu biểu ghi', 'Lượt xem chi tiết tài liệu số', 'Lượt mượn / đọc tài liệu số tại Phân hiệu', 'Tổng số tương tác');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{visit_date}, $r->{login_count}, $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions});
         }
@@ -2570,7 +2608,7 @@ elsif ($op eq 'export_csv') {
             $print_csv_line->($r->{stt}, $r->{barcode}, $r->{callnumber}, $r->{title}, $r->{author}, $r->{location}, $r->{year}, $r->{unused_days});
         }
     } elsif ($report_id eq 'circ_total_docs') {
-        $print_csv_line->('STT', 'Kho lưu trữ tài liệu Phân hiệu FTU2', 'Tổng số đầu sách (Nhan đề)', 'Tổng số bản sách (Bản in)', 'Đang cho mượn', 'Sẵn sàng phục vụ', 'Tỷ lệ khả dụng');
+        $print_csv_line->('STT', 'Kho lưu trữ tài liệu Phân hiệu TP.HCM', 'Tổng số đầu sách (Nhan đề)', 'Tổng số bản sách (Bản in)', 'Đang cho mượn', 'Sẵn sàng phục vụ', 'Tỷ lệ khả dụng');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{name}, $r->{titles}, $r->{items}, $r->{loaned}, $r->{available}, $r->{ratio});
         }

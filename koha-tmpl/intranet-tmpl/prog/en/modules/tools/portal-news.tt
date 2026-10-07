@@ -1564,13 +1564,13 @@
                                             </div>
                                         </div>
 
-                                        <!-- Cơ sở 2: TP. Hồ Chí Minh -->
+                                        <!-- Phân hiệu: TP. Hồ Chí Minh -->
                                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #0284c7;">
                                             <div style="font-weight: 700; color: #0284c7; margin-bottom: 8px; font-size: 0.9rem;">
-                                                Cơ sở 2: Cơ sở II – TP. Hồ Chí Minh
+                                                Phân hiệu: Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh
                                             </div>
                                             <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên cơ sở:</label>
+                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên phân hiệu / cơ sở:</label>
                                                 <input type="text" name="campus_hcm_title" class="form-control input-sm" value="[% footer_cfg.campus_hcm_title | html %]" />
                                             </div>
                                             <div class="form-group" style="margin-bottom: 8px;">

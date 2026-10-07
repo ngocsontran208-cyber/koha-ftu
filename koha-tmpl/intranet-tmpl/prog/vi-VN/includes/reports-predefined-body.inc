@@ -313,8 +313,8 @@
                         <li class="ftu-dropdown-option" data-id="top_interactive_docs" onclick="selectReport('top_interactive_docs', 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT')">
                             THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT
                         </li>
-                        <li class="ftu-dropdown-option selected" data-id="opac_visits_ftu2" onclick="selectReport('opac_visits_ftu2', 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2')">
-                            TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2
+                        <li class="ftu-dropdown-option selected" data-id="opac_visits_ftu2" onclick="selectReport('opac_visits_ftu2', 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU')">
+                            TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU
                         </li>
                         <li class="ftu-dropdown-option" data-id="top_patrons" onclick="selectReport('top_patrons', 'THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT')">
                             THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT
@@ -413,13 +413,13 @@ var reportCategories = {
     digital_access: {
         title: 'BÁO CÁO THỐNG KÊ TRUY CẬP TÀI LIỆU SỐ',
         defaultReport: 'opac_visits_ftu2',
-        defaultTitle: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2',
+        defaultTitle: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU',
         reports: [
             { id: 'online_users', title: 'Thống kê truy cập chi tiết các user đang đăng nhập' },
             { id: 'access_over_time', title: 'Báo cáo tổng lượt truy cập tài liệu số theo thời gian' },
             { id: 'top_used_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT' },
             { id: 'top_interactive_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT' },
-            { id: 'opac_visits_ftu2', title: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2' },
+            { id: 'opac_visits_ftu2', title: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU' },
             { id: 'top_patrons', title: 'THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT' },
             { id: 'collection_usage', title: 'THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP' }
         ]
@@ -496,7 +496,7 @@ var reportCategories = {
 
 var currentCategory = 'digital_access';
 var currentReportId = 'opac_visits_ftu2';
-var currentReportTitle = 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2';
+var currentReportTitle = 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU';
 
 document.addEventListener('DOMContentLoaded', function() {
     var urlParams = new URLSearchParams(window.location.search);
@@ -831,7 +831,7 @@ function renderTable(res) {
         });
     }
 
-    // 1.5 TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY FTU2
+    // 1.5 TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU
     else if (currentReportId === 'opac_visits_ftu2') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
@@ -839,7 +839,7 @@ function renderTable(res) {
             + '<th class="text-end">Lượt đăng nhập OPAC</th>'
             + '<th class="text-end">Lượt tra cứu (Search)</th>'
             + '<th class="text-end">Xem chi tiết biểu ghi</th>'
-            + '<th class="text-end">Lượt mượn/đọc số tại FTU2</th>'
+            + '<th class="text-end">Lượt mượn/đọc số tại Phân hiệu</th>'
             + '<th class="text-end">Tổng lượt tương tác</th>'
             + '</tr>';
 
@@ -1191,7 +1191,7 @@ function renderTable(res) {
     else if (currentReportId === 'circ_total_docs') {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
-            + '<th>Kho lưu trữ tài liệu Phân hiệu FTU2</th>'
+            + '<th>Kho lưu trữ tài liệu Phân hiệu TP.HCM</th>'
             + '<th class="text-end">Tổng số đầu sách (Nhan đề)</th>'
             + '<th class="text-end">Tổng số bản sách (Bản in)</th>'
             + '<th class="text-end">Đang cho mượn</th>'
@@ -1443,7 +1443,7 @@ function renderTable(res) {
         thead.innerHTML = '<tr>'
             + '<th style="width: 45px;" class="text-center">STT</th>'
             + '<th>Mã kho</th>'
-            + '<th>Tên kho tài liệu (FTU2)</th>'
+            + '<th>Tên kho tài liệu (Phân hiệu TP.HCM)</th>'
             + '<th class="text-end">Số đầu sách (Nhan đề)</th>'
             + '<th class="text-end">Số bản sách (Item)</th>'
             + '<th class="text-end">Tổng giá trị (VNĐ)</th>'
