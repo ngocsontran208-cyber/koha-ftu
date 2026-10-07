@@ -60,7 +60,7 @@
         /* ========================================================
            THIẾT KẾ GIAO DIỆN DI ĐỘNG (MOBILE-FIRST OPAC DETAIL)
            ======================================================== */
-        @media (max-width: 768px) {
+        @media (max-width: 991px) {
             /* 1. Header chi tiết tài liệu dạng thẻ phẳng sang trọng */
             #catalogue_detail_biblio {
                 background: #ffffff !important;
@@ -305,72 +305,149 @@
             }
 
             /* 3. Bảng bản tài liệu lưu thông chuyển đổi thành Thẻ Di Động (Item Cards) */
-            .table-responsive.ftu-table-scroller {
-                overflow-x: visible !important;
+            .table-responsive.ftu-table-scroller,
+            .table-responsive:has(#holdingst),
+            .table-responsive:has(#otherholdingst),
+            .ftu-cards-scroller,
+            .ftu-holding-cards-wrap {
+                overflow-x: hidden !important;
+                overflow-y: visible !important;
                 border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 0 1rem 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
             }
+
             #holdingst,
             #holdingst thead,
             #holdingst tbody,
             #holdingst th,
             #holdingst td,
-            #holdingst tr {
+            #holdingst tr,
+            #otherholdingst,
+            #otherholdingst thead,
+            #otherholdingst tbody,
+            #otherholdingst th,
+            #otherholdingst td,
+            #otherholdingst tr {
                 display: block !important;
+                box-sizing: border-box !important;
             }
-            #holdingst thead {
+
+            #holdingst,
+            #otherholdingst {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+
+            #holdingst thead,
+            #otherholdingst thead {
                 display: none !important;
             }
-            #holdingst tbody {
+
+            #holdingst tbody,
+            #otherholdingst tbody {
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 0.85rem !important;
                 width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
-            #holdingst tbody tr {
+
+            #holdingst tbody tr,
+            #otherholdingst tbody tr {
                 background: #ffffff !important;
                 border: 1px solid #e2e8f0 !important;
                 border-radius: 14px !important;
-                padding: 1rem !important;
+                padding: 0.85rem 0.95rem !important;
                 box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 0.45rem !important;
                 box-sizing: border-box !important;
                 width: 100% !important;
-            }
-            #holdingst tbody td:empty {
-                display: none !important;
-            }
-            #holdingst tbody td {
-                border: none !important;
-                padding: 0 !important;
-                font-size: 0.88rem !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
             }
 
-            /* Trạng thái sẵn sàng */
-            #holdingst tbody td.status {
-                order: 1 !important;
-                margin-bottom: 0.25rem !important;
+            #holdingst tbody td:empty,
+            #otherholdingst tbody td:empty {
+                display: none !important;
             }
-            #holdingst .item-status {
+
+            #holdingst tbody td,
+            #otherholdingst tbody td {
+                border: none !important;
+                padding: 0 !important;
+                font-size: 0.86rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+
+            /* Thứ tự hiển thị các trường trong Thẻ Di Động */
+            /* 1. Trạng thái bản sách */
+            #holdingst tbody td.status,
+            #otherholdingst tbody td.status {
+                order: 1 !important;
+                margin-bottom: 0.2rem !important;
+            }
+            #holdingst .item-status,
+            #otherholdingst .item-status {
                 display: inline-flex !important;
                 align-items: center !important;
                 gap: 0.35rem !important;
-                padding: 0.35rem 0.85rem !important;
+                padding: 0.3rem 0.75rem !important;
                 border-radius: 20px !important;
-                font-size: 0.82rem !important;
+                font-size: 0.8rem !important;
                 font-weight: 700 !important;
             }
-            #holdingst .item-status.available {
+            #holdingst .item-status.available,
+            #otherholdingst .item-status.available {
                 background: #f0fdf4 !important;
                 color: #166534 !important;
                 border: 1px solid #bbf7d0 !important;
             }
 
-            /* Số phân loại */
-            #holdingst tbody td.call_no {
+            /* 2. Ngày hết hạn mượn (nếu có) */
+            #holdingst tbody td.date_due,
+            #otherholdingst tbody td.date_due {
                 order: 2 !important;
-                font-size: 1rem !important;
+                font-size: 0.82rem !important;
+                color: #dc2626 !important;
+                font-weight: 600 !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+            #holdingst tbody td.date_due::before,
+            #otherholdingst tbody td.date_due::before {
+                content: "Hạn trả:";
+                color: #64748b !important;
+                font-weight: 500 !important;
+            }
+
+            /* 3. Số phân loại */
+            #holdingst tbody td.call_no,
+            #otherholdingst tbody td.call_no {
+                order: 3 !important;
+                font-size: 0.95rem !important;
                 font-weight: 700 !important;
                 color: #0f172a !important;
                 display: flex !important;
@@ -381,84 +458,119 @@
                 padding-bottom: 0.4rem !important;
                 border-bottom: 1px dashed #e2e8f0 !important;
             }
-            #holdingst tbody td.call_no::before {
+            #holdingst tbody td.call_no::before,
+            #otherholdingst tbody td.call_no::before {
                 content: "Số phân loại:";
                 font-size: 0.8rem !important;
                 font-weight: 600 !important;
                 color: #64748b !important;
             }
 
-            /* Mã ĐKCB Barcode */
-            #holdingst tbody td.barcode {
-                order: 3 !important;
+            /* 4. Mã ĐKCB Barcode */
+            #holdingst tbody td.barcode,
+            #otherholdingst tbody td.barcode {
+                order: 4 !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: space-between !important;
                 padding-bottom: 0.25rem !important;
             }
-            #holdingst tbody td.barcode::before {
+            #holdingst tbody td.barcode::before,
+            #otherholdingst tbody td.barcode::before {
                 content: "Mã ĐKCB:";
                 font-size: 0.8rem !important;
                 font-weight: 600 !important;
                 color: #64748b !important;
             }
-            #holdingst .barcode-pill {
+            #holdingst .barcode-pill,
+            #otherholdingst .barcode-pill {
                 font-family: ui-monospace, SFMono-Regular, monospace !important;
                 background: #f1f5f9 !important;
                 padding: 2px 8px !important;
                 border-radius: 4px !important;
                 font-weight: 600 !important;
                 color: #1e293b !important;
+                font-size: 0.82rem !important;
             }
 
-            /* Vị trí thư viện */
-            #holdingst tbody td.location {
-                order: 4 !important;
+            /* 5. Vị trí thư viện */
+            #holdingst tbody td.location,
+            #otherholdingst tbody td.location {
+                order: 5 !important;
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 0.25rem !important;
-                font-size: 0.85rem !important;
+                font-size: 0.83rem !important;
                 color: #475569 !important;
                 padding-top: 0.4rem !important;
                 border-top: 1px solid #f8fafc !important;
             }
-            #holdingst tbody td.location a {
+            #holdingst tbody td.location a,
+            #otherholdingst tbody td.location a {
                 color: #0284c7 !important;
                 font-weight: 600 !important;
                 text-decoration: none !important;
             }
-            #holdingst .shelvingloc-wrap {
+            #holdingst .shelvingloc-wrap,
+            #otherholdingst .shelvingloc-wrap {
                 display: inline-flex !important;
             }
-            #holdingst .shelvingloc {
+            #holdingst .shelvingloc,
+            #otherholdingst .shelvingloc {
                 background: #f8fafc !important;
                 border: 1px solid #e2e8f0 !important;
                 padding: 2px 8px !important;
                 border-radius: 4px !important;
-                font-size: 0.78rem !important;
+                font-size: 0.76rem !important;
                 color: #64748b !important;
             }
 
-            /* Kiểu tài liệu */
-            #holdingst tbody td.itype {
-                order: 5 !important;
+            /* 6. Kiểu tài liệu */
+            #holdingst tbody td.itype,
+            #otherholdingst tbody td.itype {
+                order: 6 !important;
                 display: inline-flex !important;
                 align-items: center !important;
                 gap: 0.4rem !important;
                 font-size: 0.8rem !important;
                 color: #64748b !important;
             }
-            #holdingst tbody td.itype img {
+            #holdingst tbody td.itype img,
+            #otherholdingst tbody td.itype img {
                 max-width: 16px !important;
                 max-height: 16px !important;
             }
 
-            /* Nút Duyệt giá sách */
-            #holdingst .shelfbrowser-link {
+            /* 7. Đường dẫn tài nguyên số / URL */
+            #holdingst tbody td.url,
+            #otherholdingst tbody td.url {
+                order: 7 !important;
+                margin-top: 0.35rem !important;
+                padding-top: 0.4rem !important;
+                border-top: 1px dashed #e2e8f0 !important;
+            }
+            #holdingst tbody td.url a,
+            #otherholdingst tbody td.url a {
                 display: inline-flex !important;
                 align-items: center !important;
                 gap: 0.35rem !important;
+                background: #f0fdf4 !important;
+                border: 1px solid #bbf7d0 !important;
+                color: #166534 !important;
+                padding: 4px 10px !important;
+                border-radius: 6px !important;
                 font-size: 0.78rem !important;
+                font-weight: 600 !important;
+                text-decoration: none !important;
+            }
+
+            /* 8. Nút Duyệt giá sách */
+            #holdingst .shelfbrowser-link,
+            #otherholdingst .shelfbrowser-link {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 0.35rem !important;
+                font-size: 0.76rem !important;
                 font-weight: 600 !important;
                 color: #0284c7 !important;
                 background: #f0f9ff !important;

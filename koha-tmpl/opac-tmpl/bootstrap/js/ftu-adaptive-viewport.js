@@ -283,17 +283,43 @@
      * 6. NÂNG CAO TRẢI NGHIỆM BẢNG LƯU THÔNG & BẢN SÁCH TRÊN MÀN HÌNH NHỎ
      */
     enhanceHoldingsTables: function () {
-      $(document).ready(function () {
-        var tables = document.querySelectorAll('#holdingst, #itemst, .table-striped:not(.ftu-responsive-wrapped)');
+      function wrapTables() {
+        var tables = document.querySelectorAll('table:not(.ftu-responsive-wrapped):not(.ui-datepicker-calendar)');
         tables.forEach(function (table) {
-          if (!table.parentElement.classList.contains('table-responsive')) {
-            var wrap = document.createElement('div');
-            wrap.className = 'table-responsive ftu-table-scroller';
-            table.classList.add('ftu-responsive-wrapped');
-            table.parentNode.insertBefore(wrap, table);
-            wrap.appendChild(table);
+          if (table.closest('.table-responsive') || table.closest('.dataTables_scrollBody')) {
+            return;
+          }
+          var isHoldingCard = (table.id === 'holdingst' || table.id === 'otherholdingst');
+          var wrap = document.createElement('div');
+          wrap.className = isHoldingCard 
+            ? 'table-responsive ftu-holding-cards-wrap ftu-cards-scroller' 
+            : 'table-responsive ftu-table-scroller';
+          table.classList.add('ftu-responsive-wrapped');
+          table.parentNode.insertBefore(wrap, table);
+          wrap.appendChild(table);
+
+          if (isHoldingCard) {
+            table.style.setProperty('width', '100%', 'important');
+            table.style.setProperty('max-width', '100%', 'important');
+            table.style.setProperty('min-width', '0px', 'important');
           }
         });
+
+        var cardTables = document.querySelectorAll('#holdingst, #otherholdingst');
+        cardTables.forEach(function (ct) {
+          ct.style.setProperty('width', '100%', 'important');
+          ct.style.setProperty('max-width', '100%', 'important');
+          ct.style.setProperty('min-width', '0px', 'important');
+          if (ct.parentElement && ct.parentElement.classList.contains('dataTables_wrapper')) {
+            ct.parentElement.style.setProperty('width', '100%', 'important');
+            ct.parentElement.style.setProperty('max-width', '100%', 'important');
+          }
+        });
+      }
+
+      $(document).ready(wrapTables);
+      $(document).on('draw.dt shown.bs.tab page.dt', function () {
+        setTimeout(wrapTables, 50);
       });
     },
 
