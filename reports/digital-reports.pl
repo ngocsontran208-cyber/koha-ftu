@@ -275,7 +275,7 @@ sub fetch_report_data {
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
                 $r->{access_date} = ensure_utf8($r->{access_date});
-                $r->{pageviews_est} = ($r->{total_sessions} || 0) * 12 + int(rand(8));
+                $r->{pageviews_est} = ($r->{total_sessions} || 0) * 10;
                 $summary{total_sessions} += $r->{total_sessions} || 0;
                 $summary{total_users} += $r->{unique_users} || 0;
                 $summary{total_docs} += $r->{unique_docs} || 0;
@@ -368,7 +368,7 @@ sub fetch_report_data {
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{author} = ensure_utf8($r->{author});
                 $r->{avg_duration} ||= 15.5;
-                $r->{pageviews} = ($r->{session_count} || 0) * 8 + int(rand(10));
+                $r->{pageviews} = ($r->{session_count} || 0) * 8;
                 $summary{total_sessions} += $r->{session_count} || 0;
                 push @rows, $r;
             }
@@ -408,25 +408,9 @@ sub fetch_report_data {
                     };
                     $date_stats{$dt}->{login_count} += $r->{session_count} || 1;
                     $date_stats{$dt}->{digital_reads} += $r->{session_count} || 1;
-                    $date_stats{$dt}->{search_count} += ($r->{session_count} || 1) * 3 + int(rand(4));
-                    $date_stats{$dt}->{detail_views} += ($r->{session_count} || 1) * 4 + int(rand(5));
+                    $date_stats{$dt}->{search_count} += ($r->{session_count} || 1) * 2;
+                    $date_stats{$dt}->{detail_views} += ($r->{session_count} || 1) * 3;
                 }
-            }
-        }
-
-        my @dates = sort { $b cmp $a } keys %date_stats;
-        if (scalar(@dates) < 3) {
-            for my $i (0 .. 4) {
-                my $sim_date = strftime("%Y-%m-%d", localtime(time - $i * 86400));
-                next if $date_stats{$sim_date};
-                $date_stats{$sim_date} = {
-                    visit_date => $sim_date,
-                    branch_name => 'Cơ sở II - TP. Hồ Chí Minh (FTU2)',
-                    login_count => 18 + int(rand(15)),
-                    search_count => 45 + int(rand(30)),
-                    detail_views => 62 + int(rand(40)),
-                    digital_reads => 12 + int(rand(10)),
-                };
             }
         }
 
@@ -556,264 +540,419 @@ sub fetch_report_data {
     # 1. Thống kê tài liệu đang mượn theo môn loại
     elsif ($report_id eq 'circ_by_class') {
         my $koha_dbh = C4::Context->dbh;
-        my @classes = (
-            { code => '330', name => 'Kinh tế học & Kinh tế quốc tế', title_count => 142, item_count => 385, ratio => '28.5%' },
-            { code => '650', name => 'Quản trị kinh doanh & Tiếp thị (Marketing)', title_count => 118, item_count => 312, ratio => '23.1%' },
-            { code => '382', name => 'Thương mại quốc tế & Logistics chuỗi cung ứng', title_count => 96, item_count => 248, ratio => '18.4%' },
-            { code => '332', name => 'Tài chính - Ngân hàng & Đầu tư chứng khoán', title_count => 75, item_count => 186, ratio => '13.8%' },
-            { code => '340', name => 'Luật thương mại quốc tế & Pháp luật kinh tế', title_count => 52, item_count => 124, ratio => '9.2%' },
-            { code => '420', name => 'Ngoại ngữ thương mại (Tiếng Anh, Trung, Nhật)', title_count => 34, item_count => 68, ratio => '5.0%' },
-            { code => '005', name => 'Công nghệ thông tin & Khoa học dữ liệu kinh doanh', title_count => 15, item_count => 26, ratio => '2.0%' },
-        );
+        if ($koha_dbh) {
+            my %ddc_names = (
+                '000' => 'Khoa học máy tính & Thông tin tổng quát',
+                '001' => 'Tri thức, Phương pháp nghiên cứu & Dữ liệu',
+                '005' => 'Lập trình, Công nghệ phần mềm & Dữ liệu',
+                '100' => 'Triết học & Tâm lý học',
+                '200' => 'Tôn giáo',
+                '300' => 'Khoa học xã hội',
+                '303' => 'Quá trình xã hội & Phát triển',
+                '307' => 'Xã hội học & Phát triển đô thị',
+                '330' => 'Kinh tế học & Kinh tế quốc tế',
+                '332' => 'Tài chính - Ngân hàng & Đầu tư',
+                '338' => 'Kinh tế sản xuất & Phát triển công nghiệp',
+                '340' => 'Luật học & Pháp luật thương mại',
+                '380' => 'Thương mại, Giao thông & Bưu chính',
+                '382' => 'Thương mại quốc tế & Logistics',
+                '400' => 'Ngôn ngữ học',
+                '420' => 'Tiếng Anh thương mại & Ngoại ngữ',
+                '500' => 'Khoa học tự nhiên & Toán học',
+                '600' => 'Công nghệ & Khoa học ứng dụng',
+                '650' => 'Quản trị kinh doanh & Quản lý',
+                '657' => 'Kế toán & Kiểm toán doanh nghiệp',
+                '658' => 'Nghệ thuật lãnh đạo & Quản trị tổ chức',
+                '700' => 'Nghệ thuật & Kiến trúc',
+                '800' => 'Văn học',
+                '843' => 'Văn học Pháp & Tiểu thuyết dịch',
+                '895' => 'Văn học Việt Nam & Đông Á',
+                '900' => 'Lịch sử & Địa lý',
+            );
 
-        # Tích hợp thêm từ bảng issues thực tế nếu có
-        eval {
-            if ($koha_dbh) {
-                my $sth = $koha_dbh->prepare(qq{
-                    SELECT COUNT(DISTINCT b.biblionumber) as total_titles, COUNT(i.itemnumber) as total_items
-                    FROM issues iss
-                    JOIN items i ON iss.itemnumber = i.itemnumber
-                    JOIN biblio b ON i.biblionumber = b.biblionumber
-                });
-                $sth->execute();
-                my $r = $sth->fetchrow_hashref;
-                if ($r && $r->{total_items} && $r->{total_items} > 0) {
-                    $classes[0]->{item_count} += $r->{total_items};
-                }
+            my $sql = qq{
+                SELECT 
+                    COALESCE(NULLIF(REGEXP_SUBSTR(i.itemcallnumber, '^[0-9]{3}'), ''), 'Khác') as ddc_code,
+                    COUNT(DISTINCT b.biblionumber) as title_count,
+                    COUNT(iss.issue_id) as item_count
+                FROM issues iss
+                JOIN items i ON iss.itemnumber = i.itemnumber
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                GROUP BY ddc_code
+                ORDER BY item_count DESC, ddc_code ASC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $total_items_loaned = 0;
+            my @raw_rows;
+            while (my $r = $sth->fetchrow_hashref) {
+                $total_items_loaned += ($r->{item_count} || 0);
+                push @raw_rows, $r;
             }
-        };
 
-        my $stt = 1;
-        for my $item (@classes) {
-            $item->{stt} = $stt++;
-            $item->{name} = ensure_utf8($item->{name});
-            $summary{total_records} += $item->{item_count};
-            $summary{total_docs} += $item->{title_count};
-            push @rows, $item;
+            my $stt = 1;
+            for my $r (@raw_rows) {
+                $r->{stt} = $stt++;
+                my $code = $r->{ddc_code};
+                $r->{code} = $code;
+                $r->{name} = ensure_utf8($ddc_names{$code} || "Môn loại DDC $code");
+                my $ratio = ($total_items_loaned > 0) ? ($r->{item_count} / $total_items_loaned) * 100 : 0;
+                $r->{ratio} = sprintf("%.1f%%", $ratio);
+                $summary{total_docs} += $r->{title_count};
+                $summary{total_records} += $r->{item_count};
+                push @rows, $r;
+            }
         }
     }
 
     # 2. Thống kê tài liệu mượn trả theo môn loại
     elsif ($report_id eq 'circ_flow_by_class') {
-        my @flows = (
-            { code => '330', name => 'Kinh tế học & Kinh tế quốc tế', loans => 520, returns => 498, total => 1018, ratio => '95.8%' },
-            { code => '650', name => 'Quản trị kinh doanh & Marketing', loans => 435, returns => 412, total => 847, ratio => '94.7%' },
-            { code => '382', name => 'Thương mại quốc tế & Logistics', loans => 360, returns => 345, total => 705, ratio => '95.8%' },
-            { code => '332', name => 'Tài chính - Ngân hàng', loans => 280, returns => 265, total => 545, ratio => '94.6%' },
-            { code => '340', name => 'Luật kinh tế & Luật quốc tế', loans => 195, returns => 188, total => 383, ratio => '96.4%' },
-            { code => '420', name => 'Ngoại ngữ thương mại', loans => 110, returns => 102, total => 212, ratio => '92.7%' },
-            { code => '005', name => 'Công nghệ thông tin & KH dữ liệu', loans => 65, returns => 60, total => 125, ratio => '92.3%' },
-        );
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my %ddc_names = (
+                '000' => 'Khoa học máy tính & Thông tin',
+                '001' => 'Tri thức, Phương pháp nghiên cứu & Dữ liệu',
+                '005' => 'Lập trình & Khoa học dữ liệu',
+                '100' => 'Triết học & Tâm lý học',
+                '300' => 'Khoa học xã hội',
+                '303' => 'Quá trình xã hội',
+                '307' => 'Xã hội học đô thị',
+                '330' => 'Kinh tế học & Kinh tế quốc tế',
+                '332' => 'Tài chính - Ngân hàng',
+                '338' => 'Kinh tế sản xuất & Phát triển',
+                '340' => 'Luật kinh tế & Pháp luật',
+                '382' => 'Thương mại quốc tế & Logistics',
+                '650' => 'Quản trị kinh doanh & Marketing',
+                '657' => 'Kế toán & Kiểm toán',
+                '800' => 'Văn học thế giới',
+                '843' => 'Văn học Pháp',
+                '895' => 'Văn học Việt Nam',
+            );
 
-        my $stt = 1;
-        for my $f (@flows) {
-            $f->{stt} = $stt++;
-            $f->{name} = ensure_utf8($f->{name});
-            $summary{total_sessions} += $f->{total};
-            push @rows, $f;
+            my $sql = qq{
+                SELECT 
+                    COALESCE(NULLIF(REGEXP_SUBSTR(i.itemcallnumber, '^[0-9]{3}'), ''), 'Khác') as ddc_code,
+                    COUNT(CASE WHEN all_iss.type = 'CURRENT' OR all_iss.type = 'OLD' THEN 1 END) as loans,
+                    COUNT(CASE WHEN all_iss.returndate IS NOT NULL THEN 1 END) as returns,
+                    COUNT(*) as total
+                FROM (
+                    SELECT itemnumber, issuedate, date_due, returndate, 'OLD' as type 
+                    FROM old_issues 
+                    WHERE (issuedate >= ? AND issuedate <= ?) OR (returndate >= ? AND returndate <= ?)
+                    UNION ALL
+                    SELECT itemnumber, issuedate, date_due, NULL as returndate, 'CURRENT' as type 
+                    FROM issues 
+                    WHERE issuedate >= ? AND issuedate <= ?
+                ) all_iss
+                JOIN items i ON all_iss.itemnumber = i.itemnumber
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                GROUP BY ddc_code
+                ORDER BY total DESC, ddc_code ASC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute($from_ts, $to_ts, $from_ts, $to_ts, $from_ts, $to_ts);
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                my $code = $r->{ddc_code};
+                $r->{code} = $code;
+                $r->{name} = ensure_utf8($ddc_names{$code} || "Môn loại DDC $code");
+                my $ret_ratio = ($r->{loans} > 0) ? ($r->{returns} / $r->{loans}) * 100 : 0;
+                $r->{ratio} = sprintf("%.1f%%", $ret_ratio);
+                $summary{total_sessions} += ($r->{total} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 3. Thống kê tài liệu không có người mượn
     elsif ($report_id eq 'circ_unused_docs') {
         my $koha_dbh = C4::Context->dbh;
-        eval {
-            if ($koha_dbh) {
-                my $sth = $koha_dbh->prepare(qq{
-                    SELECT i.barcode, b.title, b.author, i.itemcallnumber, i.location, b.copyrightdate
-                    FROM items i
-                    JOIN biblio b ON i.biblionumber = b.biblionumber
-                    WHERE (i.issues IS NULL OR i.issues = 0)
-                    LIMIT 20
-                });
-                $sth->execute();
-                my $stt = 1;
-                while (my $r = $sth->fetchrow_hashref) {
-                    $r->{stt} = $stt++;
-                    $r->{title} = ensure_utf8($r->{title});
-                    $r->{author} = ensure_utf8($r->{author} || 'FTU');
-                    $r->{callnumber} = ensure_utf8($r->{itemcallnumber} || '330.01');
-                    $r->{location} = 'Kho Lưu chi nhánh CPL (FTU2)';
-                    $r->{year} = $r->{copyrightdate} || '2023';
-                    $r->{unused_days} = int(rand(180)) + 90;
-                    push @rows, $r;
-                }
-            }
-        };
-
-        if (!@rows) {
-            my @sample_unused = (
-                { barcode => 'FTU20000012', title => 'Kinh tế lượng ứng dụng trong phân tích tài chính', author => 'GS.TS Hoàng Văn Cường', callnumber => '330.015 KIN', location => 'Kho Đọc tại chỗ FTU2', year => '2021', unused_days => 150 },
-                { barcode => 'FTU20000034', title => 'Pháp luật về hợp đồng thương mại quốc tế Incoterms', author => 'PGS.TS Nguyễn Minh Hằng', callnumber => '343.07 PHA', location => 'Kho Mượn FTU2', year => '2022', unused_days => 120 },
-                { barcode => 'FTU20000056', title => 'Quản trị rủi ro chuỗi cung ứng toàn cầu', author => 'TS. Trịnh Thị Thu Hương', callnumber => '658.7 QUA', location => 'Kho Mượn FTU2', year => '2023', unused_days => 95 },
-                { barcode => 'FTU20000078', title => 'Kế toán quản trị doanh nghiệp thương mại', author => 'TS. Nguyễn Thị Hồng Vinh', callnumber => '657.42 KET', location => 'Kho Mượn FTU2', year => '2022', unused_days => 210 },
-                { barcode => 'FTU20000090', title => 'E-Commerce Marketing Strategy', author => 'Kotler Philip', callnumber => '658.8 ECO', location => 'Kho Ngoại văn FTU2', year => '2020', unused_days => 180 },
-            );
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    i.barcode,
+                    b.title,
+                    COALESCE(b.author, 'FTU') as author,
+                    COALESCE(i.itemcallnumber, 'Chưa gán') as callnumber,
+                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (FTU2)') as location,
+                    COALESCE(b.copyrightdate, '---') as year,
+                    DATEDIFF(NOW(), COALESCE(i.dateaccessioned, '2026-01-01')) as unused_days
+                FROM items i
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN issues iss ON i.itemnumber = iss.itemnumber
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
+                WHERE (i.issues IS NULL OR i.issues = 0)
+                  AND iss.issue_id IS NULL
+                ORDER BY i.itemnumber ASC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
             my $stt = 1;
-            for my $u (@sample_unused) {
-                $u->{stt} = $stt++;
-                $u->{title} = ensure_utf8($u->{title});
-                $u->{author} = ensure_utf8($u->{author});
-                $u->{location} = ensure_utf8($u->{location});
-                push @rows, $u;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
+                $r->{callnumber} = ensure_utf8($r->{callnumber});
+                $r->{location} = ensure_utf8($r->{location});
+                push @rows, $r;
             }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 4. Thống kê tổng số tài liệu
     elsif ($report_id eq 'circ_total_docs') {
-        my @total_inventory = (
-            { name => 'Kho Mượn về nhà (Giáo trình & Sách tham khảo)', titles => 3450, items => 12850, loaned => 1435, available => 11415, ratio => '88.8%' },
-            { name => 'Kho Đọc tại chỗ & Phòng Đọc mở FTU2', titles => 1820, items => 3640, loaned => 120, available => 3520, ratio => '96.7%' },
-            { name => 'Kho Luận văn Thạc sĩ & Khóa luận tốt nghiệp', titles => 2450, items => 2450, loaned => 65, available => 2385, ratio => '97.3%' },
-            { name => 'Kho Báo - Tạp chí chuyên ngành kinh tế', titles => 180, items => 1250, loaned => 15, available => 1235, ratio => '98.8%' },
-            { name => 'Kho Tài liệu Ngoại văn tham khảo chuyên sâu', titles => 980, items => 1960, loaned => 110, available => 1850, ratio => '94.4%' },
-        );
-
-        my $stt = 1;
-        for my $inv (@total_inventory) {
-            $inv->{stt} = $stt++;
-            $inv->{name} = ensure_utf8($inv->{name});
-            $summary{total_docs} += $inv->{titles};
-            $summary{total_records} += $inv->{items};
-            $summary{total_sessions} += $inv->{loaned};
-            push @rows, $inv;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (FTU2)') as name,
+                    COUNT(DISTINCT b.biblionumber) as titles,
+                    COUNT(i.itemnumber) as items,
+                    COUNT(iss.issue_id) as loaned,
+                    COUNT(i.itemnumber) - COUNT(iss.issue_id) as available
+                FROM items i
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN issues iss ON i.itemnumber = iss.itemnumber
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
+                GROUP BY name
+                ORDER BY items DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{name} = ensure_utf8($r->{name});
+                my $avail_ratio = ($r->{items} > 0) ? ($r->{available} / $r->{items}) * 100 : 0;
+                $r->{ratio} = sprintf("%.1f%%", $avail_ratio);
+                $summary{total_docs} += ($r->{titles} || 0);
+                $summary{total_records} += ($r->{items} || 0);
+                $summary{total_sessions} += ($r->{loaned} || 0);
+                push @rows, $r;
+            }
         }
     }
 
     # 5. Thống kê tài liệu đang mượn quá hạn
     elsif ($report_id eq 'circ_overdue_docs') {
-        my @overdues = (
-            { cardnumber => '221362', patron_name => 'Trần Bảo An', role => 'Sinh viên FTU', title => 'Giáo trình Kinh tế quốc tế', barcode => 'FTU20000101', issue_date => '2026-09-05', due_date => '2026-09-26', overdue_days => 11, fine => '22,000' },
-            { cardnumber => '211154', patron_name => 'Lê Thị Thu Thảo', role => 'Sinh viên FTU', title => 'Quản trị chuỗi cung ứng hiện đại', barcode => 'FTU20000108', issue_date => '2026-09-08', due_date => '2026-09-29', overdue_days => 8, fine => '16,000' },
-            { cardnumber => '231456', patron_name => 'Vũ Tuấn Kiệt', role => 'Sinh viên FTU', title => 'Thị trường tài chính và các định chế tài chính', barcode => 'FTU20000215', issue_date => '2026-09-10', due_date => '2026-10-01', overdue_days => 6, fine => '12,000' },
-            { cardnumber => '221890', patron_name => 'Nguyễn Thanh Tùng', role => 'Sinh viên FTU', title => 'Luật thương mại và đầu tư quốc tế', barcode => 'FTU20000340', issue_date => '2026-09-12', due_date => '2026-10-03', overdue_days => 4, fine => '8,000' },
-        );
-
-        my $stt = 1;
-        for my $od (@overdues) {
-            $od->{stt} = $stt++;
-            $od->{patron_name} = ensure_utf8($od->{patron_name});
-            $od->{title} = ensure_utf8($od->{title});
-            $od->{role} = ensure_utf8($od->{role});
-            push @rows, $od;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    br.cardnumber,
+                    CONCAT(br.surname, ' ', br.firstname) as patron_name,
+                    COALESCE(cat.description, br.categorycode, 'Bạn đọc FTU') as role,
+                    i.barcode,
+                    b.title,
+                    DATE_FORMAT(iss.issuedate, '%Y-%m-%d') as issue_date,
+                    DATE_FORMAT(iss.date_due, '%Y-%m-%d') as due_date,
+                    DATEDIFF(NOW(), iss.date_due) as overdue_days
+                FROM issues iss
+                JOIN items i ON iss.itemnumber = i.itemnumber
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                JOIN borrowers br ON iss.borrowernumber = br.borrowernumber
+                LEFT JOIN categories cat ON br.categorycode = cat.categorycode
+                WHERE iss.date_due < NOW()
+                ORDER BY overdue_days DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{patron_name} = ensure_utf8($r->{patron_name});
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{role} = ensure_utf8($r->{role});
+                my $fine_val = ($r->{overdue_days} || 0) * 2000;
+                $r->{fine} = sprintf("%d,000", $fine_val / 1000);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 6. Thống kê tài liệu được yêu thích
     elsif ($report_id eq 'circ_popular_docs') {
-        my @popular_books = (
-            { barcode => 'FTU20000101', title => 'Giáo trình Kinh tế quốc tế (Tái bản 2024)', author => 'PGS.TS Nguyễn Xuân Thiên (Chủ biên)', publisher => 'NXB Đại học Quốc gia', class => '337 KIN', loans => 184, last_issue => '2026-10-06' },
-            { barcode => 'FTU20000102', title => 'Quản trị Marketing hiện đại', author => 'Philip Kotler, Kevin Lane Keller', publisher => 'NXB Lao động - Xã hội', class => '658.8 KOT', loans => 162, last_issue => '2026-10-07' },
-            { barcode => 'FTU20000103', title => 'Logistics và vận tải quốc tế thực hành', author => 'TS. Nguyễn Thị Thương', publisher => 'NXB Giao thông Vận tải', class => '388 LOG', loans => 145, last_issue => '2026-10-05' },
-            { barcode => 'FTU20000104', title => 'Tài chính doanh nghiệp căn bản', author => 'PGS.TS Trần Ngọc Thơ', publisher => 'NXB Kinh tế TP.HCM', class => '332 TAI', loans => 138, last_issue => '2026-10-06' },
-            { barcode => 'FTU20000105', title => 'Kinh tế lượng với ứng dụng Stata và R', author => 'TS. Nguyễn Trọng Hoài', publisher => 'NXB Tài chính', class => '330.01 KIN', loans => 122, last_issue => '2026-10-04' },
-            { barcode => 'FTU20000106', title => 'Đàm phán thương mại quốc tế', author => 'PGS.TS Nguyễn Hoàng Ánh', publisher => 'NXB Thông tin và Truyền thông', class => '382 DAM', loans => 115, last_issue => '2026-10-07' },
-            { barcode => 'FTU20000107', title => 'Luật sở hữu trí tuệ trong thời đại số', author => 'TS. Lê Thị Nam Giang', publisher => 'NXB Tư pháp', class => '346.04 LUAT', loans => 98, last_issue => '2026-10-05' },
-        );
-
-        my $stt = 1;
-        for my $b (@popular_books) {
-            $b->{stt} = $stt++;
-            $b->{title} = ensure_utf8($b->{title});
-            $b->{author} = ensure_utf8($b->{author});
-            $b->{publisher} = ensure_utf8($b->{publisher});
-            $summary{total_sessions} += $b->{loans};
-            push @rows, $b;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    i.barcode,
+                    b.title,
+                    COALESCE(b.author, 'FTU') as author,
+                    COALESCE(NULLIF(TRIM(b.publishercode), ''), 'Chưa cập nhật') as publisher,
+                    COALESCE(i.itemcallnumber, 'Chưa xếp giá') as class,
+                    COALESCE(i.issues, 0) + (SELECT COUNT(*) FROM issues iss_cnt WHERE iss_cnt.itemnumber = i.itemnumber) as loans,
+                    DATE_FORMAT(COALESCE((SELECT MAX(issuedate) FROM issues iss_dt WHERE iss_dt.itemnumber = i.itemnumber), i.datelastborrowed, i.dateaccessioned, NOW()), '%Y-%m-%d') as last_issue
+                FROM items i
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                ORDER BY loans DESC, b.biblionumber ASC
+                LIMIT 20
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
+                $r->{publisher} = ensure_utf8($r->{publisher});
+                $r->{class} = ensure_utf8($r->{class});
+                $summary{total_sessions} += ($r->{loans} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 7. Thống kê tác giả được yêu thích
     elsif ($report_id eq 'circ_popular_authors') {
-        my @authors = (
-            { author => 'PGS.TS Nguyễn Xuân Thiên', dept => 'Khoa Kinh tế Quốc tế - FTU', title_count => 8, loans => 420, reader_count => 380 },
-            { author => 'Philip Kotler', dept => 'Northwestern University (Dịch giả FTU)', title_count => 6, loans => 356, reader_count => 310 },
-            { author => 'PGS.TS Trần Ngọc Thơ', dept => 'Chuyên gia Tài chính - Ngân hàng', title_count => 5, loans => 295, reader_count => 268 },
-            { author => 'TS. Trịnh Thị Thu Hương', dept => 'Khoa Kinh doanh Quốc tế - FTU', title_count => 7, loans => 275, reader_count => 245 },
-            { author => 'PGS.TS Nguyễn Hoàng Ánh', dept => 'Viện Kinh tế và Kinh doanh quốc tế', title_count => 4, loans => 240, reader_count => 215 },
-            { author => 'PGS.TS Nguyễn Minh Hằng', dept => 'Khoa Luật - FTU', title_count => 5, loans => 210, reader_count => 190 },
-        );
-
-        my $stt = 1;
-        for my $a (@authors) {
-            $a->{stt} = $stt++;
-            $a->{author} = ensure_utf8($a->{author});
-            $a->{dept} = ensure_utf8($a->{dept});
-            $summary{total_sessions} += $a->{loans};
-            $summary{total_users} += $a->{reader_count};
-            push @rows, $a;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    COALESCE(NULLIF(TRIM(b.author), ''), 'Tập thể tác giả') as author,
+                    'Cơ sở II - TP. Hồ Chí Minh' as dept,
+                    COUNT(DISTINCT b.biblionumber) as title_count,
+                    SUM(COALESCE(i.issues, 0) + (SELECT COUNT(*) FROM issues iss2 WHERE iss2.itemnumber = i.itemnumber)) as loans,
+                    COUNT(DISTINCT iss.borrowernumber) as reader_count
+                FROM biblio b
+                JOIN items i ON b.biblionumber = i.biblionumber
+                LEFT JOIN issues iss ON i.itemnumber = iss.itemnumber
+                GROUP BY author
+                ORDER BY loans DESC, title_count DESC
+                LIMIT 20
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{author} = ensure_utf8($r->{author});
+                $r->{dept} = ensure_utf8($r->{dept});
+                $summary{total_sessions} += ($r->{loans} || 0);
+                $summary{total_users} += ($r->{reader_count} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 8. Thống kê tài liệu mượn, trả vào kho
     elsif ($report_id eq 'circ_shelving_cart') {
-        my @shelving = (
-            { date => '07/10/2026', location => 'Kho Mượn FTU2 (Tầng 2)', checkouts => 68, checkins => 62, shelving => 15, stock => 11415 },
-            { date => '06/10/2026', location => 'Kho Mượn FTU2 (Tầng 2)', checkouts => 74, checkins => 70, shelving => 8, stock => 11419 },
-            { date => '05/10/2026', location => 'Kho Mượn FTU2 (Tầng 2)', checkouts => 82, checkins => 78, shelving => 12, stock => 11415 },
-            { date => '07/10/2026', location => 'Kho Đọc tại chỗ FTU2 (Tầng 3)', checkouts => 28, checkins => 28, shelving => 4, stock => 3520 },
-            { date => '06/10/2026', location => 'Kho Đọc tại chỗ FTU2 (Tầng 3)', checkouts => 32, checkins => 32, shelving => 2, stock => 3520 },
-            { date => '07/10/2026', location => 'Kho Luận văn - Khóa luận (Tầng 3)', checkouts => 14, checkins => 12, shelving => 2, stock => 2385 },
-        );
-
-        my $stt = 1;
-        for my $s (@shelving) {
-            $s->{stt} = $stt++;
-            $s->{location} = ensure_utf8($s->{location});
-            $summary{total_sessions} += ($s->{checkouts} + $s->{checkins});
-            push @rows, $s;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    DATE_FORMAT(NOW(), '%Y-%m-%d') as date,
+                    COALESCE(av.lib, i.location, 'Kho Mượn - Đọc CPL (FTU2)') as location,
+                    COUNT(iss.issue_id) as checkouts,
+                    (SELECT COUNT(*) FROM old_issues oi JOIN items i2 ON oi.itemnumber = i2.itemnumber WHERE i2.location = i.location) as checkins,
+                    COUNT(CASE WHEN i.itemlost != 0 OR i.notforloan != 0 THEN 1 END) as shelving,
+                    COUNT(CASE WHEN iss.issue_id IS NULL AND (i.notforloan = 0 OR i.notforloan IS NULL) AND (i.itemlost = 0 OR i.itemlost IS NULL) THEN 1 END) as stock
+                FROM items i
+                LEFT JOIN issues iss ON i.itemnumber = iss.itemnumber
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
+                GROUP BY location
+                ORDER BY stock DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{location} = ensure_utf8($r->{location});
+                $summary{total_sessions} += (($r->{checkouts} || 0) + ($r->{checkins} || 0));
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 9. Thống kê mượn tài liệu của bạn đọc
     elsif ($report_id eq 'circ_patron_loans') {
-        my @patrons = (
-            { patron_id => '221362', patron_name => 'Trần Bảo An', role => 'Sinh viên FTU', faculty => 'Kinh tế Quốc tế K61', total_loans => 18, active_loans => 3, return_count => 15, last_loan => '2026-10-07' },
-            { patron_id => '211154', patron_name => 'Lê Thị Thu Thảo', role => 'Sinh viên FTU', faculty => 'Quản trị Kinh doanh K60', total_loans => 15, active_loans => 2, return_count => 13, last_loan => '2026-10-06' },
-            { patron_id => '201089', patron_name => 'Nguyễn Đăng Quang', role => 'Sinh viên FTU', faculty => 'Logistics & Chuỗi cung ứng K59', total_loans => 14, active_loans => 1, return_count => 13, last_loan => '2026-10-05' },
-            { patron_id => 'GV0012', patron_name => 'TS. Phạm Minh Tuấn', role => 'Giảng viên FTU', faculty => 'Bộ môn Thương mại Quốc tế', total_loans => 12, active_loans => 4, return_count => 8, last_loan => '2026-10-04' },
-            { patron_id => '221890', patron_name => 'Vũ Thị Minh Hạnh', role => 'Sinh viên FTU', faculty => 'Tài chính - Ngân hàng K61', total_loans => 11, active_loans => 2, return_count => 9, last_loan => '2026-10-07' },
-            { patron_id => '231456', patron_name => 'Vũ Tuấn Kiệt', role => 'Sinh viên FTU', faculty => 'Luật Kinh doanh Quốc tế K62', total_loans => 10, active_loans => 2, return_count => 8, last_loan => '2026-10-03' },
-        );
-
-        my $stt = 1;
-        for my $p (@patrons) {
-            $p->{stt} = $stt++;
-            $p->{patron_name} = ensure_utf8($p->{patron_name});
-            $p->{role} = ensure_utf8($p->{role});
-            $p->{faculty} = ensure_utf8($p->{faculty});
-            $summary{total_sessions} += $p->{total_loans};
-            push @rows, $p;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    br.cardnumber as patron_id,
+                    CONCAT(br.surname, ' ', br.firstname) as patron_name,
+                    COALESCE(cat.description, br.categorycode, 'Bạn đọc') as role,
+                    COALESCE(br.branchcode, 'CPL') as faculty,
+                    (COUNT(iss.issue_id) + (SELECT COUNT(*) FROM old_issues oi WHERE oi.borrowernumber = br.borrowernumber)) as total_loans,
+                    COUNT(iss.issue_id) as active_loans,
+                    (SELECT COUNT(*) FROM old_issues oi WHERE oi.borrowernumber = br.borrowernumber AND oi.returndate IS NOT NULL) as return_count,
+                    DATE_FORMAT(COALESCE(MAX(iss.issuedate), (SELECT MAX(issuedate) FROM old_issues oi WHERE oi.borrowernumber = br.borrowernumber)), '%Y-%m-%d') as last_loan
+                FROM borrowers br
+                LEFT JOIN issues iss ON br.borrowernumber = iss.borrowernumber
+                LEFT JOIN categories cat ON br.categorycode = cat.categorycode
+                GROUP BY br.borrowernumber, br.cardnumber, br.surname, br.firstname, cat.description, br.categorycode, br.branchcode
+                ORDER BY total_loans DESC, active_loans DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{patron_name} = ensure_utf8($r->{patron_name});
+                $r->{role} = ensure_utf8($r->{role});
+                $r->{faculty} = ensure_utf8($r->{faculty});
+                $summary{total_sessions} += ($r->{total_loans} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 10. Thống kê lịch sử mượn - trả của tài liệu
     elsif ($report_id eq 'circ_doc_history') {
-        my @history = (
-            { barcode => 'FTU20000101', title => 'Giáo trình Kinh tế quốc tế', patron => '221362 - Trần Bảo An', issue_date => '2026-09-05', due_date => '2026-09-26', ret_date => 'Đang mượn', staff => 'thuthu01', status => 'Quá hạn' },
-            { barcode => 'FTU20000102', title => 'Quản trị Marketing hiện đại', patron => '211154 - Lê Thị Thu Thảo', issue_date => '2026-09-20', due_date => '2026-10-11', ret_date => 'Đang mượn', staff => 'thuthu02', status => 'Đang mượn' },
-            { barcode => 'FTU20000103', title => 'Logistics và vận tải quốc tế thực hành', patron => '201089 - Nguyễn Đăng Quang', issue_date => '2026-09-15', due_date => '2026-10-06', ret_date => '2026-10-05', staff => 'thuthu01', status => 'Đã trả đúng hạn' },
-            { barcode => 'FTU20000104', title => 'Tài chính doanh nghiệp căn bản', patron => 'GV0012 - TS. Phạm Minh Tuấn', issue_date => '2026-09-10', due_date => '2026-10-10', ret_date => 'Đang mượn', staff => 'thuthu02', status => 'Đang mượn' },
-            { barcode => 'FTU20000105', title => 'Kinh tế lượng với ứng dụng Stata và R', patron => '221890 - Vũ Thị Minh Hạnh', issue_date => '2026-09-18', due_date => '2026-10-09', ret_date => '2026-10-06', staff => 'thuthu01', status => 'Đã trả đúng hạn' },
-            { barcode => 'FTU20000106', title => 'Đàm phán thương mại quốc tế', patron => '231456 - Vũ Tuấn Kiệt', issue_date => '2026-09-25', due_date => '2026-10-16', ret_date => 'Đang mượn', staff => 'thuthu01', status => 'Đang mượn' },
-        );
-
-        my $stt = 1;
-        for my $h (@history) {
-            $h->{stt} = $stt++;
-            $h->{title} = ensure_utf8($h->{title});
-            $h->{patron} = ensure_utf8($h->{patron});
-            $h->{status} = ensure_utf8($h->{status});
-            push @rows, $h;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    i.barcode,
+                    b.title,
+                    CONCAT(br.surname, ' ', br.firstname) as patron,
+                    DATE_FORMAT(iss.issuedate, '%Y-%m-%d') as issue_date,
+                    DATE_FORMAT(iss.date_due, '%Y-%m-%d') as due_date,
+                    NULL as ret_date,
+                    'Thủ thư FTU2' as staff,
+                    CASE WHEN iss.date_due < NOW() THEN 'Quá hạn' ELSE 'Đang mượn' END as status
+                FROM issues iss
+                JOIN items i ON iss.itemnumber = i.itemnumber
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                JOIN borrowers br ON iss.borrowernumber = br.borrowernumber
+                UNION ALL
+                SELECT 
+                    i.barcode,
+                    b.title,
+                    CONCAT(br.surname, ' ', br.firstname) as patron,
+                    DATE_FORMAT(oi.issuedate, '%Y-%m-%d') as issue_date,
+                    DATE_FORMAT(oi.date_due, '%Y-%m-%d') as due_date,
+                    DATE_FORMAT(oi.returndate, '%Y-%m-%d') as ret_date,
+                    'Thủ thư FTU2' as staff,
+                    'Đã trả đúng hạn' as status
+                FROM old_issues oi
+                JOIN items i ON oi.itemnumber = i.itemnumber
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                JOIN borrowers br ON oi.borrowernumber = br.borrowernumber
+                ORDER BY issue_date DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{patron} = ensure_utf8($r->{patron});
+                $r->{status} = ensure_utf8($r->{status});
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     return (\@rows, \%summary);
