@@ -268,51 +268,51 @@
  <label for="masthead_search" class="visually-hidden">Tìm kiếm trong mục lục theo:</label>
  <select name="idx" id="masthead_search" class="form-select">
  [% IF ( ms_kw ) %]
- <option selected="selected" value="" data-placeholder="[% t("Search the catalog") | html %]">Danh mục tài liệu thư viện</option>
+ <option selected="selected" value="" data-placeholder="Nhập từ khóa tìm kiếm tài liệu...">Danh mục tài liệu thư viện</option>
  [% ELSE %]
- <option value="" data-placeholder="[% t("Search the catalog") | html %]">Danh mục tài liệu thư viện</option>
+ <option value="" data-placeholder="Nhập từ khóa tìm kiếm tài liệu...">Danh mục tài liệu thư viện</option>
  [% END # /ms_kw %]
  [% IF ( ms_ti ) %]
- <option selected="selected" value="ti" data-placeholder="[% t("Search the catalog by title") | html %]">Nhan đề</option>
+ <option selected="selected" value="ti" data-placeholder="Nhập nhan đề tài liệu...">Nhan đề</option>
  [% ELSE %]
- <option value="ti" data-placeholder="[% t("Search the catalog by title") | html %]">Nhan đề</option>
+ <option value="ti" data-placeholder="Nhập nhan đề tài liệu...">Nhan đề</option>
  [% END # /ms_ti %]
  [% IF ( ms_au ) %]
- <option selected="selected" value="au" data-placeholder="[% t("Search the catalog by author") | html %]">Tác giả</option>
+ <option selected="selected" value="au" data-placeholder="Nhập tên tác giả...">Tác giả</option>
  [% ELSE %]
- <option value="au" data-placeholder="[% t("Search the catalog by author") | html %]">Tác giả</option>
+ <option value="au" data-placeholder="Nhập tên tác giả...">Tác giả</option>
  [% END # /ms_au %]
  [% IF ( ms_su ) %]
- <option selected="selected" value="su" data-placeholder="[% t("Search the catalog by subject") | html %]">Chủ đề</option>
+ <option selected="selected" value="su" data-placeholder="Nhập chủ đề cần tìm...">Chủ đề</option>
  [% ELSE %]
- <option value="su" data-placeholder="[% t("Search the catalog by subject") | html %]">Chủ đề</option>
+ <option value="su" data-placeholder="Nhập chủ đề cần tìm...">Chủ đề</option>
  [% END # /ms_su %]
  [% IF ( ms_nb ) %]
- <option selected="selected" value="nb" data-placeholder="[% t("Search the catalog by ISBN") | html %]">Số ISBN</option>
+ <option selected="selected" value="nb" data-placeholder="Nhập mã số ISBN...">Số ISBN</option>
  [% ELSE %]
- <option value="nb" data-placeholder="[% t("Search the catalog by ISBN") | html %]">Số ISBN</option>
+ <option value="nb" data-placeholder="Nhập mã số ISBN...">Số ISBN</option>
  [% END # /ms_nb %]
  [% IF ( ms_ns ) %]
- <option selected="selected" value="ns" data-placeholder="[% t("Search the catalog by ISSN") | html %]">Số ISSN</option>
+ <option selected="selected" value="ns" data-placeholder="Nhập mã số ISSN...">Số ISSN</option>
  [% ELSE %]
- <option value="ns" data-placeholder="[% t("Search the catalog by ISSN") | html %]">Số ISSN</option>
+ <option value="ns" data-placeholder="Nhập mã số ISSN...">Số ISSN</option>
  [% END # /ms_ns %]
  [% IF ( ms_se ) %]
- <option selected="selected" value="se" data-placeholder="[% t("Search the catalog by series") | html %]">Tuyển tập</option>
+ <option selected="selected" value="se" data-placeholder="Nhập tên tuyển tập...">Tuyển tập</option>
  [% ELSE %]
- <option value="se" data-placeholder="[% t("Search the catalog by series") | html %]">Tuyển tập</option>
+ <option value="se" data-placeholder="Nhập tên tuyển tập...">Tuyển tập</option>
  [% END # /ms_se %]
  [% IF ( Koha.Preference('OPACNumbersPreferPhrase') ) %]
  [% IF ( ms_callnumcommaphr ) %]
- <option selected="selected" value="callnum,phr" data-placeholder="[% t("Search the catalog by call number") | html %]">Số phân loại</option>
+ <option selected="selected" value="callnum,phr" data-placeholder="Nhập số phân loại (Call number)...">Số phân loại</option>
  [% ELSE %]
- <option value="callnum,phr" data-placeholder="[% t("Search the catalog by call number") | html %]">Số phân loại</option>
+ <option value="callnum,phr" data-placeholder="Nhập số phân loại (Call number)...">Số phân loại</option>
  [% END #/ms_callnumcommaphr %]
  [% ELSE %]
  [% IF ( ms_callnum ) %]
- <option selected="selected" value="callnum" data-placeholder="[% t("Search the catalog by call number") | html %]">Số phân loại</option>
+ <option selected="selected" value="callnum" data-placeholder="Nhập số phân loại (Call number)...">Số phân loại</option>
  [% ELSE %]
- <option value="callnum" data-placeholder="[% t("Search the catalog by call number") | html %]">Số phân loại</option>
+ <option value="callnum" data-placeholder="Nhập số phân loại (Call number)...">Số phân loại</option>
  [% END # /ms_callnum %]
  [% END # /IF OPACNumbersPreferPhrase %]
  </select>

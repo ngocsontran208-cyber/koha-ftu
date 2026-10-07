@@ -15,94 +15,409 @@
 <meta name="robots" content="noindex" />
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
+<style>
+.ftu-auth-wrapper {
+    max-width: 1140px;
+    margin: 0 auto;
+}
+.ftu-auth-hero {
+    background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 60%, #F8FAFC 100%);
+    border: 1px solid #F1F5F9;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+.ftu-auth-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+    background: #ffffff;
+}
+.ftu-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #E2E8F0;
+    background: #F8FAFC;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+.ftu-chip-btn:hover {
+    background: #FEE2E2;
+    border-color: #FECACA;
+    color: #A31A24;
+    transform: translateY(-1px);
+}
+.ftu-chip-btn.active {
+    background: #A31A24 !important;
+    border-color: #A31A24 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(163, 26, 36, 0.25);
+}
+.ftu-search-box-lg {
+    display: flex;
+    align-items: center;
+    border-radius: 14px;
+    border: 2px solid #E2E8F0;
+    transition: all 0.25s ease;
+    background: #ffffff;
+    overflow: hidden;
+}
+.ftu-search-box-lg:focus-within {
+    border-color: #A31A24;
+    box-shadow: 0 0 0 4px rgba(163, 26, 36, 0.12);
+}
+.ftu-search-box-lg input {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.95rem 1rem;
+    font-size: 1.1rem;
+    background: transparent;
+    flex-grow: 1;
+}
+.ftu-search-box-lg input:focus {
+    outline: none;
+}
+.ftu-filter-panel {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+}
+.ftu-filter-panel label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ftu-filter-panel .form-select {
+    border-radius: 10px;
+    border-color: #CBD5E1;
+    font-size: 0.92rem;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+}
+.ftu-filter-panel .form-select:focus {
+    border-color: #A31A24;
+    box-shadow: 0 0 0 3px rgba(163, 26, 36, 0.12);
+}
+.ftu-info-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 1.35rem;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+.ftu-info-card:hover {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+    border-color: #CBD5E1;
+    transform: translateY(-2px);
+}
+</style>
 [% END %]
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='opac-authorities' bodyclass='scrollto' %]
 [% INCLUDE 'masthead.inc' %]
 
 <main class="main">
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Tìm kiếm dữ liệu kiểm soát</span>
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Tìm kiếm dữ liệu kiểm soát</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 
- <div class="container-fluid">
- <div class="row">
- [% SET column_class = "col order-first order-md-first order-lg-2" %]
- [% IF ( OpacNav || OpacNavBottom ) %]
- [% column_class = "col-10 order-first order-md-first order-lg-2" %]
- <div class="col-lg-2">
- <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
- </div>
- [% END %]
- <div class="[% column_class | html %]">
- <div id="userauthhome" class="maincontent">
- <form name="f" action="/cgi-bin/koha/opac-authorities-home.pl" method="get">
- <input type="hidden" name="op" value="do_search" />
- <input type="hidden" name="type" value="opac" />
- <fieldset class="rows">
- <legend><h1>Tìm kiếm dữ liệu kiểm soát</h1></legend>
- <ol>
- <li>
- <label for="authtypecode">Loại dữ liệu kiểm soát định danh: </label>
- <select name="authtypecode" id="authtypecode">
- [% FOREACH authority_type IN authority_types %]
- [% IF authority_type.authtypecode == authtypecode %]
- <option value="[% authority_type.authtypecode | html %]" selected="selected">[% authority_type.authtypetext | html %]</option>
- [% ELSE %]
- <option value="[% authority_type.authtypecode | html %]">[% authority_type.authtypetext | html %]</option>
- [% END %]
- [% END %]
- </select>
- </li>
- <li>
- <label for="anywhere">Tùy chọn tìm kiếm:</label>
- <select name="operator" id="anywhere">
- <option value="contains">có chứa</option>
- <option value="start">bắt đầu với</option>
- <option value="exact">chính xác là</option>
- </select>
- </li>
- <li>
- <label for="value">Thuật ngữ:</label>
- <input type="text" name="value" id="value" value="[% value | html %]" />
- </li>
- <li>
- <label for="marclist">Vị trí:</label>
- <select name="marclist" id="marclist">
- <option value="all" selected="selected">trong toàn bộ biểu ghi</option>
- <option value="match">trong bất kỳ tiêu đề nào</option>
- <option value="mainentry">trong điểm truy cập chính</option>
- </select>
- </li>
- <li>
- <input type="hidden" name="and_or" value="and" />
- <input type="hidden" name="excluding" value="" />
- <label for="orderby">Sắp xếp theo: </label>
- <select name="orderby" id="orderby">
- <option value="">Không có</option>
- <option value="HeadingAsc" selected="selected">Tiêu đề tăng dần</option>
- <option value="HeadingDsc">Tiêu đề giảm dần</option>
- </select>
- </li>
- </ol>
- </fieldset>
- <fieldset class="action">
- <input class="btn btn-primary" type="submit" value="Gửi" />
- </fieldset>
- </form>
- </div>
- <!-- / #userauthhome -->
- </div>
- <!-- / .col-lg-10/12 -->
- </div>
- <!-- / .row -->
- </div>
- <!-- / .container-fluid -->
+    <div class="container-fluid py-3">
+        <div class="row justify-content-center">
+            [% SET column_class = "col-12" %]
+            [% IF ( OpacNav || OpacNavBottom ) %]
+                [% column_class = "col-12 col-lg-10" %]
+                <div class="col-12 col-lg-2 d-none d-lg-block">
+                    <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+                </div>
+            [% END %]
+            <div class="[% column_class | html %]">
+                <div id="userauthhome" class="maincontent ftu-auth-wrapper">
+
+                    <!-- Header Hero Card -->
+                    <div class="ftu-auth-hero p-4 p-md-5 mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(163, 26, 36, 0.08); border: 1px solid rgba(163, 26, 36, 0.2);">
+                                    <i class="fa fa-id-card-clip text-danger" style="font-size: 0.85rem;"></i>
+                                    <span class="fw-bold text-danger text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Hệ thống Biên mục Chuẩn hóa • Thư viện FTU</span>
+                                </div>
+                                <h1 class="display-6 fw-bold text-dark mb-2" style="letter-spacing: -0.02em;">
+                                    Tìm kiếm Dữ liệu Kiểm soát Định danh
+                                </h1>
+                                <p class="text-secondary mb-0 fs-6" style="line-height: 1.6;">
+                                    Tra cứu các điểm truy cập chuẩn hóa cho <strong>Tác giả cá nhân</strong>, <strong>Cơ quan/Tổ chức</strong>, <strong>Đề mục chủ đề</strong> và <strong>Hội nghị</strong> trong toàn bộ kho tài liệu Thư viện Đại học Ngoại thương.
+                                </p>
+                            </div>
+                            <div class="col-lg-4 d-none d-lg-flex justify-content-end">
+                                <div class="p-3 rounded-4 bg-white border" style="box-shadow: 0 10px 25px rgba(0,0,0,0.04); width: 270px;">
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; color: #A31A24; font-size: 1.3rem;">
+                                            <i class="fa fa-tags"></i>
+                                        </div>
+                                        <div>
+                                            <div class="small fw-bold text-dark">Chuẩn MARC21 Authorities</div>
+                                            <small class="text-muted">Kiểm soát đồng bộ</small>
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted border-top pt-2" style="font-size: 0.8rem; line-height: 1.5;">
+                                        Tập hợp đầy đủ mọi đầu sách của một tác giả hoặc chủ đề dù có nhiều biến thể tên gọi.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Search Form Card -->
+                    <div class="ftu-auth-card p-4 p-md-5 mb-4">
+                        <form name="f" action="/cgi-bin/koha/opac-authorities-home.pl" method="get" id="ftuAuthoritySearchForm">
+                            <input type="hidden" name="op" value="do_search" />
+                            <input type="hidden" name="type" value="opac" />
+                            <input type="hidden" name="and_or" value="and" />
+                            <input type="hidden" name="excluding" value="" />
+
+                            <!-- Quick Filter Chips -->
+                            <div class="mb-4">
+                                <label class="text-muted small fw-bold text-uppercase d-flex align-items-center gap-2 mb-2">
+                                    <i class="fa fa-filter text-danger"></i> Chọn nhanh loại dữ liệu kiểm soát:
+                                </label>
+                                <div class="d-flex flex-wrap gap-2" id="ftuAuthorityChipsContainer">
+                                    <button type="button" class="ftu-chip-btn active" data-authtype="">
+                                        <i class="fa fa-layer-group"></i> Tất cả loại
+                                    </button>
+                                    [% FOREACH authority_type IN authority_types %]
+                                        <button type="button" class="ftu-chip-btn [% IF authority_type.authtypecode == authtypecode %]active[% END %]" data-authtype="[% authority_type.authtypecode | html %]">
+                                            [% authority_type.authtypetext | html %]
+                                        </button>
+                                    [% END %]
+                                </div>
+                            </div>
+
+                            <!-- Primary Search Input Box -->
+                            <div class="mb-4">
+                                <label for="value" class="form-label fw-bold text-dark fs-6 d-flex align-items-center justify-content-between mb-2">
+                                    <span>
+                                        <i class="fa fa-keyboard text-danger me-2"></i>Thuật ngữ / Tên cần tra cứu <span class="text-danger">*</span>
+                                    </span>
+                                    <span class="text-muted small fw-normal">Hỗ trợ gõ tiếng Việt có dấu hoặc không dấu</span>
+                                </label>
+                                <div class="ftu-search-box-lg shadow-sm">
+                                    <span class="text-muted ps-3 pe-2">
+                                        <i class="fa fa-search text-danger fs-5"></i>
+                                    </span>
+                                    <input type="text" name="value" id="value" value="[% value | html %]" placeholder="Nhập tên tác giả, tên cơ quan, đề mục chủ đề hoặc thuật ngữ cần tra cứu..." required autocomplete="off" autofocus />
+                                    <button type="button" class="btn btn-link text-muted pe-3 text-decoration-none" id="ftuClearTermBtn" style="display: none;" title="Xóa từ khóa">
+                                        <i class="fa fa-times-circle fs-5"></i>
+                                    </button>
+                                    <button class="btn btn-danger px-4 px-md-5 py-3 fw-bold d-flex align-items-center gap-2 rounded-0" type="submit" style="background: linear-gradient(135deg, #A31A24 0%, #7F1019 100%); border: none;">
+                                        <i class="fa fa-search"></i>
+                                        <span class="d-none d-sm-inline">Tìm kiếm</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Filter Controls -->
+                            <div class="ftu-filter-panel p-3 p-md-4 mb-4">
+                                <div class="row g-3">
+                                    <!-- Cột 1: Loại dữ liệu -->
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <label for="authtypecode">
+                                            <i class="fa fa-id-badge text-danger"></i> Loại dữ liệu định danh
+                                        </label>
+                                        <select name="authtypecode" id="authtypecode" class="form-select">
+                                            [% FOREACH authority_type IN authority_types %]
+                                                [% IF authority_type.authtypecode == authtypecode %]
+                                                    <option value="[% authority_type.authtypecode | html %]" selected="selected">[% authority_type.authtypetext | html %]</option>
+                                                [% ELSE %]
+                                                    <option value="[% authority_type.authtypecode | html %]">[% authority_type.authtypetext | html %]</option>
+                                                [% END %]
+                                            [% END %]
+                                        </select>
+                                    </div>
+
+                                    <!-- Cột 2: Phương thức so khớp -->
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <label for="anywhere">
+                                            <i class="fa fa-sliders text-danger"></i> Tùy chọn tìm kiếm
+                                        </label>
+                                        <select name="operator" id="anywhere" class="form-select">
+                                            <option value="contains" selected="selected">Có chứa từ khóa (Contains)</option>
+                                            <option value="start">Bắt đầu bằng (Starts with)</option>
+                                            <option value="exact">Chính xác hoàn toàn (Exact match)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Cột 3: Vị trí trong biểu ghi -->
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <label for="marclist">
+                                            <i class="fa fa-crosshairs text-danger"></i> Phạm vi tìm kiếm
+                                        </label>
+                                        <select name="marclist" id="marclist" class="form-select">
+                                            <option value="all" selected="selected">Toàn bộ biểu ghi kiểm soát</option>
+                                            <option value="match">Trong bất kỳ tiêu đề nào</option>
+                                            <option value="mainentry">Trong điểm truy cập chính (1XX)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Cột 4: Thứ tự sắp xếp -->
+                                    <div class="col-12 col-md-6 col-lg-3">
+                                        <label for="orderby">
+                                            <i class="fa fa-arrow-down-a-z text-danger"></i> Sắp xếp kết quả
+                                        </label>
+                                        <select name="orderby" id="orderby" class="form-select">
+                                            <option value="HeadingAsc" selected="selected">Tiêu đề tăng dần (A &rarr; Z)</option>
+                                            <option value="HeadingDsc">Tiêu đề giảm dần (Z &rarr; A)</option>
+                                            <option value="">Mặc định hệ thống</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Action Row -->
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="submit" class="btn btn-danger px-4 py-2 fw-bold" style="background: #A31A24; border-color: #A31A24; border-radius: 10px;">
+                                        <i class="fa fa-search me-1"></i> Bắt đầu tìm kiếm
+                                    </button>
+                                    <a href="/cgi-bin/koha/opac-authorities-home.pl" class="btn btn-outline-secondary px-3 py-2 fw-semibold" style="border-radius: 10px;">
+                                        <i class="fa fa-rotate-left me-1"></i> Đặt lại
+                                    </a>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
+                                    <a href="/cgi-bin/koha/opac-search.pl" class="text-decoration-none text-secondary">
+                                        <i class="fa fa-book-open me-1 text-danger"></i> Tra cứu danh mục tài liệu thông thường
+                                    </a>
+                                    <span class="text-muted d-none d-md-inline">&bull;</span>
+                                    <a href="/cgi-bin/koha/opac-tags.pl" class="text-decoration-none text-secondary">
+                                        <i class="fa fa-tags me-1 text-danger"></i> Đám mây thẻ
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Educational Guidance Section -->
+                    <div class="row g-4 mt-1 mb-5">
+                        <div class="col-12 col-md-4">
+                            <div class="ftu-info-card">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                                    <i class="fa fa-lightbulb"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Dữ liệu kiểm soát là gì?</h6>
+                                <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                    Dữ liệu kiểm soát (Authority records) giúp chuẩn hóa danh xưng tác giả, tổ chức và chủ đề theo quy chuẩn MARC21 quốc tế, liên kết mọi biến thể tên gọi về một điểm truy cập duy nhất.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="ftu-info-card">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                                    <i class="fa fa-bullseye"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Mẹo tìm kiếm chính xác</h6>
+                                <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                    Chọn tùy chọn <strong>"Bắt đầu bằng"</strong> nếu bạn nhớ các chữ cái đầu tiên của họ tên tác giả; chọn <strong>"Có chứa"</strong> khi tìm kiếm các thuật ngữ chuyên ngành học thuật.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="ftu-info-card">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: #ECFDF5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                                    <i class="fa fa-book-bookmark"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Xem ngay biểu ghi sách</h6>
+                                <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                    Tại trang kết quả kiểm soát, bạn chỉ cần nhấp vào số lượng biểu ghi tương ứng để xem toàn bộ danh mục tài liệu sách in và tài liệu số của tác giả hoặc chủ đề đó.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- / #userauthhome -->
+            </div>
+            <!-- / .col -->
+        </div>
+        <!-- / .row -->
+    </div>
+    <!-- / .container-fluid -->
 </main>
-<!-- / .main -->
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var inputEl = document.getElementById('value');
+        var clearBtn = document.getElementById('ftuClearTermBtn');
+        var authtypeSelect = document.getElementById('authtypecode');
+        var chipsContainer = document.getElementById('ftuAuthorityChipsContainer');
+
+        // 1. Quản lý nút xóa nhanh nội dung input
+        if (inputEl && clearBtn) {
+            function updateClearBtn() {
+                clearBtn.style.display = inputEl.value.trim().length > 0 ? 'inline-block' : 'none';
+            }
+            inputEl.addEventListener('input', updateClearBtn);
+            updateClearBtn();
+
+            clearBtn.addEventListener('click', function() {
+                inputEl.value = '';
+                inputEl.focus();
+                updateClearBtn();
+            });
+        }
+
+        // 2. Đồng bộ hóa Quick Chips với Select Dropdown
+        if (chipsContainer && authtypeSelect) {
+            var chips = chipsContainer.querySelectorAll('.ftu-chip-btn');
+
+            function syncActiveChip(selectedVal) {
+                chips.forEach(function(chip) {
+                    var chipVal = chip.getAttribute('data-authtype') || '';
+                    if (chipVal === selectedVal) {
+                        chip.classList.add('active');
+                    } else {
+                        chip.classList.remove('active');
+                    }
+                });
+            }
+
+            chips.forEach(function(chip) {
+                chip.addEventListener('click', function() {
+                    var val = this.getAttribute('data-authtype') || '';
+                    authtypeSelect.value = val;
+                    syncActiveChip(val);
+                    if (inputEl) {
+                        inputEl.focus();
+                    }
+                });
+            });
+
+            authtypeSelect.addEventListener('change', function() {
+                syncActiveChip(this.value);
+            });
+
+            // Đồng bộ trạng thái khởi tạo ban đầu
+            syncActiveChip(authtypeSelect.value);
+        }
+    });
+})();
+</script>
 [% END %]

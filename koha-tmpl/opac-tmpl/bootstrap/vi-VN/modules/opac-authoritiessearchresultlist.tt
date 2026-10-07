@@ -17,97 +17,186 @@
 >
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
+<style>
+.ftu-auth-res-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    padding: 1.5rem;
+}
+.ftu-auth-table th {
+    background-color: #F8FAFC !important;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+.ftu-auth-table td {
+    vertical-align: middle;
+}
+.ftu-record-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.ftu-record-badge.has-records {
+    background: #FEE2E2;
+    color: #A31A24;
+    border: 1px solid #FECACA;
+}
+.ftu-record-badge.has-records:hover {
+    background: #A31A24;
+    color: #ffffff;
+}
+.ftu-record-badge.zero {
+    background: #F1F5F9;
+    color: #94A3B8;
+    border: 1px solid #E2E8F0;
+}
+</style>
 [% END %]
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='opac-authoritiesresultlist' bodyclass='scrollto' %]
 [% INCLUDE 'masthead.inc' %]
 
 <main class="main">
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item %]
- <a href="/cgi-bin/koha/opac-authorities-home.pl">Tìm kiếm dữ liệu kiểm soát</a>
- [% END %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Kết quả</span>
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/opac-authorities-home.pl">Tìm kiếm dữ liệu kiểm soát</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Kết quả</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
 
- <div class="container-fluid">
- <div class="row">
- [% SET column_class = "col order-first order-md-first order-lg-2" %]
- [% IF ( OpacNav || OpacNavBottom ) %]
- [% column_class = "col-10 order-first order-md-first order-lg-2" %]
- <div class="col-lg-2">
- <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
- </div>
- [% END %]
- <div class="[% column_class | html %]">
- <div id="userauthsearchresults" class="maincontent">
- <h1>Kết quả tìm kiếm dữ liệu kiểm soát định danh</h1>
+    <div class="container-fluid py-3">
+        <div class="row">
+            [% SET column_class = "col-12" %]
+            [% IF ( OpacNav || OpacNavBottom ) %]
+                [% column_class = "col-12 col-lg-10" %]
+                <div class="col-12 col-lg-2 d-none d-lg-block">
+                    <div id="navigation"> [% INCLUDE 'navigation.inc' %] </div>
+                </div>
+            [% END %]
+            <div class="[% column_class | html %]">
+                <div id="userauthsearchresults" class="maincontent">
+                    
+                    <!-- Header Bar -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3 rounded-4 bg-light border">
+                        <div>
+                            <h2 class="fw-bold text-dark mb-1" style="font-size: 1.35rem;">
+                                <i class="fa fa-id-card-clip text-danger me-2"></i>Kết quả tìm kiếm dữ liệu kiểm soát định danh
+                            </h2>
+                            <div class="small text-muted">
+                                [% IF ( total ) %]
+                                    [% IF ( countfuzzy ) %]
+                                        Hiển thị <strong>[% resultcount | html %]</strong> trong tổng số khoảng <strong>[% total | html %]</strong> kết quả phù hợp
+                                    [% ELSE %]
+                                        Hiển thị kết quả từ <strong>[% from | html %]</strong> đến <strong>[% to | html %]</strong> (Tổng số: <strong>[% total | html %]</strong> kết quả)
+                                    [% END %]
+                                [% ELSE %]
+                                    Không tìm thấy dữ liệu kiểm soát phù hợp với từ khóa
+                                [% END %]
+                            </div>
+                        </div>
+                        <div>
+                            <a href="/cgi-bin/koha/opac-authorities-home.pl" class="btn btn-outline-danger btn-sm px-3 py-2 fw-semibold" style="border-radius: 8px;">
+                                <i class="fa fa-arrow-left me-1"></i> Tra cứu lại
+                            </a>
+                        </div>
+                    </div>
 
- [% IF total %]
- <div class="pages" id="pagination_top"> [% pagination_bar | $raw %] </div>
- [% END %]
- <div id="results">
- [% IF ( total ) %]
- [% IF ( countfuzzy ) %]
- <p><strong>Hiển thị [% resultcount | html %] trong tổng số khoảng [% total | html %] kết quả</strong></p>
- [% ELSE %]
- <p><strong>Kết quả từ [% from | html %] đến [% to | html %] trong tổng số [% total | html %]</strong></p>
- [% END %] [% ELSE %] Không tìm thấy kết quả nào. [% END %] </div>
+                    [% IF total %]
+                        <div class="pages mb-3" id="pagination_top"> [% pagination_bar | $raw %] </div>
+                    [% END %]
 
- [% IF ( total ) %]
- <div class="searchresults">
- <table class="table table-bordered table-striped">
- <caption class="visually-hidden">Kết quả tìm kiếm dữ liệu kiểm soát định danh</caption>
- <thead>
- <tr>
- <th>Các tiêu đề kiểm soát định danh</th>
- <th></th>
- <th>Loại tiêu đề</th>
- [% UNLESS ( isEDITORS ) %]
- <th>Biểu ghi</th>
- [% END %]
- <th class="dtr-control-col"></th>
- </tr>
- </thead>
- <tbody>
- [% FOREACH line IN result %]
- <tr>
- <td>
- [% IF line.html %]
- [% line.html | $raw %]
- [% ELSE %]
- [% PROCESS authresult summary=line.summary authid=line.authid %]
- [% END %]
- </td>
- <td><a href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% line.authid | uri %]">Chi tiết</a> </td><td>[% line.authtype | html %]</td>
- [% UNLESS ( line.isEDITORS ) %]
- <td>
- [% IF line.used > 0 %]
- <a href="/cgi-bin/koha/opac-search.pl?type=opac&amp;op=do_search&amp;q=an,phr:[% line.authid | uri %]">[% line.used | html %] [% tn('record', 'records', line.used ) | html %]</a>
- [% ELSE %] 0 biểu ghi [% END %] </td>
- [% END %]
- <td></td>
- </tr>
- [% END %]
- </tbody>
- </table>
- </div>
- <!-- / .searchresults -->
+                    [% IF ( total ) %]
+                        <div class="ftu-auth-res-card mb-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle ftu-auth-table mb-0">
+                                    <caption class="visually-hidden">Kết quả tìm kiếm dữ liệu kiểm soát định danh</caption>
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 250px;">Tiêu đề kiểm soát định danh (Heading)</th>
+                                            <th style="width: 140px;" class="text-center">Thao tác</th>
+                                            <th style="width: 180px;">Loại tiêu đề</th>
+                                            [% UNLESS ( isEDITORS ) %]
+                                                <th style="width: 160px;" class="text-center">Tài liệu liên kết</th>
+                                            [% END %]
+                                            <th class="dtr-control-col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        [% FOREACH line IN result %]
+                                            <tr>
+                                                <td>
+                                                    [% IF line.html %]
+                                                        <div class="fw-bold text-dark">[% line.html | $raw %]</div>
+                                                    [% ELSE %]
+                                                        <div class="fw-bold text-dark">[% PROCESS authresult summary=line.summary authid=line.authid %]</div>
+                                                    [% END %]
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% line.authid | uri %]" class="btn btn-sm btn-outline-secondary px-2 py-1 fw-semibold" title="Xem chi tiết biểu ghi kiểm soát">
+                                                        <i class="fa fa-eye me-1"></i> Chi tiết
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border px-2 py-1">[% line.authtype | html %]</span>
+                                                </td>
+                                                [% UNLESS ( line.isEDITORS ) %]
+                                                    <td class="text-center">
+                                                        [% IF line.used > 0 %]
+                                                            <a href="/cgi-bin/koha/opac-search.pl?type=opac&amp;op=do_search&amp;q=an,phr:[% line.authid | uri %]" class="ftu-record-badge has-records" title="Xem tất cả tài liệu sử dụng tiêu đề này">
+                                                                <i class="fa fa-book"></i> [% line.used | html %] biểu ghi
+                                                            </a>
+                                                        [% ELSE %]
+                                                            <span class="ftu-record-badge zero">0 biểu ghi</span>
+                                                        [% END %]
+                                                    </td>
+                                                [% END %]
+                                                <td></td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
- <div class="pages" id="pagination_bottom"> [% pagination_bar | $raw %] </div>
- [% END # / IF total %]
- </div>
- <!-- / #userauthsearchresults -->
- </div>
- <!-- / .col-lg-10/12 -->
- </div>
- <!-- / .row -->
- </div>
- <!-- / .container-fluid -->
+                        <div class="pages mb-4" id="pagination_bottom"> [% pagination_bar | $raw %] </div>
+                    [% ELSE %]
+                        <div class="text-center py-5 bg-light rounded-4 border my-4">
+                            <div style="width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 50%; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-size: 1.75rem;">
+                                <i class="fa fa-search"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-2">Không tìm thấy dữ liệu kiểm soát nào phù hợp</h5>
+                            <p class="text-muted small mb-4" style="max-width: 460px; margin: 0 auto;">
+                                Hãy thử kiểm tra lại chính tả, thử lại với tùy chọn "Có chứa" thay vì "Chính xác là", hoặc chọn "Tất cả loại dữ liệu" để mở rộng phạm vi tìm kiếm.
+                            </p>
+                            <a href="/cgi-bin/koha/opac-authorities-home.pl" class="btn btn-danger px-4 py-2 fw-semibold" style="background: #A31A24; border-color: #A31A24; border-radius: 8px;">
+                                <i class="fa fa-redo me-1"></i> Quay lại tra cứu
+                            </a>
+                        </div>
+                    [% END # / IF total %]
+
+                </div>
+                <!-- / #userauthsearchresults -->
+            </div>
+            <!-- / .col -->
+        </div>
+        <!-- / .row -->
+    </div>
+    <!-- / .container-fluid -->
 </main>
-<!-- / .main -->
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
@@ -128,10 +217,12 @@
                     details: {
                         display: responsive_display,
                         type: "column",
-                        target: -1,
-                    },
+                        target: -1
+                    }
                 },
-                columnDefs: [{ className: "dtr-control", orderable: false, targets: -1 }],
+                columnDefs: [
+                    { className: 'dtr-control', orderable: false, targets: -1 }
+                ]
             });
         });
     </script>
