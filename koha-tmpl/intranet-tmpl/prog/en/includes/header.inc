@@ -79,7 +79,7 @@
                 <a href="/cgi-bin/koha/ill/ill.pl"><i class="fa fa-exchange"></i> Mượn liên thư viện</a>
                 [% END %]
                 <hr class="ftu-menu-divider" />
-                <a href="/cgi-bin/koha/about.pl"><i class="fa fa-info-circle"></i> Giới thiệu Koha</a>
+                <a href="/cgi-bin/koha/about.pl"><i class="fa fa-info-circle"></i> Giới thiệu FTU - HCM LIB</a>
             </div>
         </div>
     </nav>
@@ -189,7 +189,7 @@
 [% END %]
 <nav class="navbar navbar-expand navbar-dark bg-dark" aria-label="Main">
     <div class="container-fluid">
-        <a id="logo" class="navbar-brand" href="/cgi-bin/koha/mainpage.pl"><img src="[% interface | html %]/[% theme | html %]/img/picto-koha.svg" alt="Koha" /></a>
+        <a id="logo" class="navbar-brand" href="/cgi-bin/koha/mainpage.pl"><img src="[% interface | html %]/[% theme | html %]/img/picto-koha.svg" alt="FTU - HCM LIB" /></a>
 
         <div class="collapse navbar-collapse" id="header">
             <ul id="toplevelmenu" class="navbar-nav me-auto">

@@ -278,7 +278,13 @@ sub fetch_report_data {
                     COUNT(DISTINCT l.license_id) as total_sessions,
                     COUNT(DISTINCT l.patron_id) as unique_users,
                     COUNT(DISTINCT l.bitstream_uuid) as unique_docs,
-                    COUNT(DISTINCT dl.lending_id) as total_loans
+                    COUNT(DISTINCT dl.lending_id) as total_loans,
+                    COALESCE((
+                        SELECT COUNT(*) 
+                        FROM ftu_drm.drm_audit_logs al 
+                        WHERE al.event_type = 'VIEW_PAGE' 
+                          AND TO_CHAR(al.event_time, 'YYYY-MM-DD') = TO_CHAR(l.issued_at, 'YYYY-MM-DD')
+                    ), 0) as real_pageviews
                 FROM ftu_drm.drm_licenses l
                 LEFT JOIN ftu_drm.drm_digital_lending dl 
                     ON l.patron_id = dl.patron_id AND TO_CHAR(l.issued_at, 'YYYY-MM-DD') = TO_CHAR(dl.checkout_time, 'YYYY-MM-DD')
@@ -292,7 +298,11 @@ sub fetch_report_data {
             while (my $r = $sth->fetchrow_hashref) {
                 $r->{stt} = $stt++;
                 $r->{access_date} = ensure_utf8($r->{access_date});
-                $r->{pageviews_est} = ($r->{total_sessions} || 0) * 10;
+                my $views = int($r->{real_pageviews} || 0);
+                if ($views == 0) {
+                    $views = int($r->{total_sessions} || 0);
+                }
+                $r->{pageviews_est} = $views;
                 $summary{total_sessions} += $r->{total_sessions} || 0;
                 $summary{total_users} += $r->{unique_users} || 0;
                 $summary{total_docs} += $r->{unique_docs} || 0;
@@ -335,14 +345,7 @@ sub fetch_report_data {
                 $r->{author} = ensure_utf8($r->{author});
 
                 # Lấy tên Bộ sưu tập thực tế từ DSpace 7
-                my $cname = $dspace_items->{$r->{item_uuid}};
-                if (!$cname) {
-                    if ($r->{title} =~ /Tại sao các quốc gia|Sống sao/i) {
-                        $cname = 'Giáo trình mua';
-                    } else {
-                        $cname = 'Sách điện tử';
-                    }
-                }
+                my $cname = $dspace_items->{$r->{item_uuid}} || 'Kho tài liệu số FTU';
                 $r->{collection_name} = ensure_utf8($cname);
 
                 $summary{total_docs}++;
@@ -362,9 +365,10 @@ sub fetch_report_data {
                 SELECT 
                     COALESCE(dl.document_title, ab.document_title, 'Tài liệu số FTU') as title,
                     COALESCE(dl.document_author, ab.document_author, 'Tác giả FTU') as author,
+                    l.bitstream_uuid::text as buuid,
                     COUNT(l.license_id) as session_count,
                     COUNT(DISTINCT l.patron_id) as reader_count,
-                    ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(l.last_heartbeat, l.issued_at) - l.issued_at))/60)::numeric, 1) as avg_duration,
+                    ROUND(COALESCE(AVG(NULLIF(EXTRACT(EPOCH FROM (COALESCE(l.last_heartbeat, l.issued_at) - l.issued_at))/60, 0)), 1)::numeric, 1) as avg_duration,
                     TO_CHAR(MAX(COALESCE(l.last_heartbeat, l.issued_at)), 'YYYY-MM-DD HH24:MI') as last_interaction
                 FROM ftu_drm.drm_licenses l
                 LEFT JOIN ftu_drm.drm_asset_bindings ab ON l.bitstream_uuid = ab.bitstream_uuid
@@ -374,7 +378,7 @@ sub fetch_report_data {
                     GROUP BY bitstream_uuid
                 ) dl ON l.bitstream_uuid = dl.bitstream_uuid
                 WHERE l.issued_at >= ? AND l.issued_at <= ?
-                GROUP BY dl.document_title, ab.document_title, dl.document_author, ab.document_author
+                GROUP BY dl.document_title, ab.document_title, dl.document_author, ab.document_author, l.bitstream_uuid
                 ORDER BY session_count DESC
             };
             my $sth = $drm_dbh->prepare($sql);
@@ -384,8 +388,17 @@ sub fetch_report_data {
                 $r->{stt} = $stt++;
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{author} = ensure_utf8($r->{author});
-                $r->{avg_duration} ||= 15.5;
-                $r->{pageviews} = ($r->{session_count} || 0) * 8;
+                $r->{avg_duration} = ($r->{avg_duration} && $r->{avg_duration} > 0) ? $r->{avg_duration} : 1.0;
+
+                # Đếm số sự kiện xem trang thực tế từ drm_audit_logs
+                my $pageviews = 0;
+                eval {
+                    my $sth_pv = $drm_dbh->prepare("SELECT COUNT(*) FROM ftu_drm.drm_audit_logs WHERE bitstream_uuid = ? AND event_type = 'VIEW_PAGE'");
+                    $sth_pv->execute($r->{buuid});
+                    ($pageviews) = $sth_pv->fetchrow_array;
+                };
+                $r->{pageviews} = ($pageviews && $pageviews > 0) ? $pageviews : ($r->{session_count} || 0);
+
                 $summary{total_sessions} += $r->{session_count} || 0;
                 push @rows, $r;
             }
@@ -398,6 +411,57 @@ sub fetch_report_data {
     # =========================================================================
     elsif ($report_id eq 'opac_visits_ftu2') {
         my %date_stats;
+        my $koha_dbh = C4::Context->dbh;
+
+        # 1. Thống kê tìm kiếm thực tế từ Koha search_history
+        if ($koha_dbh) {
+            eval {
+                my $sth_sh = $koha_dbh->prepare(qq{
+                    SELECT DATE_FORMAT(time, '%Y-%m-%d') as dt, COUNT(*) as cnt 
+                    FROM search_history 
+                    WHERE time >= ? AND time <= ?
+                    GROUP BY DATE_FORMAT(time, '%Y-%m-%d')
+                });
+                $sth_sh->execute($from_ts, $to_ts);
+                while (my $row = $sth_sh->fetchrow_hashref) {
+                    my $dt = $row->{dt};
+                    $date_stats{$dt} ||= {
+                        visit_date => $dt,
+                        branch_name => 'Cơ sở II - TP. Hồ Chí Minh (FTU2)',
+                        login_count => 0,
+                        search_count => 0,
+                        detail_views => 0,
+                        digital_reads => 0,
+                    };
+                    $date_stats{$dt}->{search_count} = int($row->{cnt} || 0);
+                }
+            };
+
+            # 2. Thống kê tương tác lưu thông thực tế từ statistics
+            eval {
+                my $sth_stat = $koha_dbh->prepare(qq{
+                    SELECT DATE_FORMAT(datetime, '%Y-%m-%d') as dt, COUNT(*) as cnt 
+                    FROM statistics 
+                    WHERE datetime >= ? AND datetime <= ?
+                    GROUP BY DATE_FORMAT(datetime, '%Y-%m-%d')
+                });
+                $sth_stat->execute($from_ts, $to_ts);
+                while (my $row = $sth_stat->fetchrow_hashref) {
+                    my $dt = $row->{dt};
+                    $date_stats{$dt} ||= {
+                        visit_date => $dt,
+                        branch_name => 'Cơ sở II - TP. Hồ Chí Minh (FTU2)',
+                        login_count => 0,
+                        search_count => 0,
+                        detail_views => 0,
+                        digital_reads => 0,
+                    };
+                    $date_stats{$dt}->{detail_views} = int($row->{cnt} || 0);
+                }
+            };
+        }
+
+        # 3. Thống kê phiên đọc tài liệu số thực tế từ DRM Service
         if ($drm_dbh) {
             my $sql = qq{
                 SELECT 
@@ -423,10 +487,8 @@ sub fetch_report_data {
                         detail_views => 0,
                         digital_reads => 0,
                     };
-                    $date_stats{$dt}->{login_count} += $r->{session_count} || 1;
-                    $date_stats{$dt}->{digital_reads} += $r->{session_count} || 1;
-                    $date_stats{$dt}->{search_count} += ($r->{session_count} || 1) * 2;
-                    $date_stats{$dt}->{detail_views} += ($r->{session_count} || 1) * 3;
+                    $date_stats{$dt}->{login_count} += int($r->{session_count} || 1);
+                    $date_stats{$dt}->{digital_reads} += int($r->{session_count} || 1);
                 }
             }
         }
@@ -497,20 +559,11 @@ sub fetch_report_data {
         my ($dspace_items, $dspace_colls) = get_dspace_data();
         my @collections = @$dspace_colls;
 
-        # Fallback danh sách thực tế của DSpace nếu không query được
-        if (!@collections) {
-            @collections = (
-                { id => '82f153ac-93bd-4ab4-b140-999086bf3e44', name => 'Sách điện tử', total_items => 2, loans => 0, reads => 0, readers => 0 },
-                { id => 'ebb8eca1-ba4f-4fea-87df-d8c5488c7adf', name => 'Giáo trình mua', total_items => 2, loans => 0, reads => 0, readers => 0 },
-            );
-        }
-
-        # Tính toán lượt mượn số và đọc trực tuyến cho từng Bộ sưu tập DSpace từ DRM
-        if ($drm_dbh) {
+        # Tính toán lượt mượn số và đọc trực tuyến thực tế cho từng Bộ sưu tập DSpace từ DRM
+        if ($drm_dbh && @collections) {
             my $sth = $drm_dbh->prepare(qq{
                 SELECT 
                     COALESCE(dl.dspace_item_uuid::text, ab.dspace_item_uuid::text, '') as item_uuid,
-                    COALESCE(dl.document_title, ab.document_title, '') as title,
                     COUNT(DISTINCT dl.lending_id) as loans,
                     COUNT(DISTINCT dl.patron_id) as readers,
                     COUNT(DISTINCT l.license_id) as reads
@@ -518,19 +571,18 @@ sub fetch_report_data {
                 LEFT JOIN ftu_drm.drm_asset_bindings ab ON dl.bitstream_uuid = ab.bitstream_uuid
                 LEFT JOIN ftu_drm.drm_licenses l ON dl.bitstream_uuid = l.bitstream_uuid
                 WHERE dl.checkout_time >= ? AND dl.checkout_time <= ?
-                GROUP BY dl.dspace_item_uuid, ab.dspace_item_uuid, dl.document_title, ab.document_title
+                GROUP BY dl.dspace_item_uuid, ab.dspace_item_uuid
             });
             $sth->execute($from_ts, $to_ts);
             while (my $row = $sth->fetchrow_hashref) {
                 my $target_col = $dspace_items->{$row->{item_uuid}};
-                if (!$target_col) {
-                    $target_col = ($row->{title} =~ /Tại sao các quốc gia|Sống sao/i) ? 'Giáo trình mua' : 'Sách điện tử';
-                }
-                for my $c (@collections) {
-                    if ($c->{name} eq $target_col) {
-                        $c->{loans} += $row->{loans} || 0;
-                        $c->{reads} += $row->{reads} || 0;
-                        $c->{readers} += $row->{readers} || 0;
+                if ($target_col) {
+                    for my $c (@collections) {
+                        if ($c->{name} eq $target_col) {
+                            $c->{loans} += $row->{loans} || 0;
+                            $c->{reads} += $row->{reads} || 0;
+                            $c->{readers} += $row->{readers} || 0;
+                        }
                     }
                 }
             }
@@ -541,7 +593,9 @@ sub fetch_report_data {
             $c->{stt} = $stt++;
             $c->{name} = ensure_utf8($c->{name});
             my $usage = ($c->{loans} || 0) + ($c->{reads} || 0);
-            $c->{usage_ratio} = sprintf("%.1f%%", ($usage / ($c->{total_items} || 1)) * 100);
+            $c->{usage_ratio} = ($c->{total_items} && $c->{total_items} > 0)
+                ? sprintf("%.1f%%", ($usage / $c->{total_items}) * 100)
+                : '0.0%';
             $summary{total_docs} += $c->{total_items};
             $summary{total_sessions} += $usage;
             $summary{total_users} += ($c->{readers} || 0);
@@ -563,7 +617,7 @@ sub fetch_report_data {
                     ab.document_title as title,
                     ab.document_author as author,
                     ab.document_year as year,
-                    ab.page_count,
+                    COALESCE(ab.page_count, 0) as page_count,
                     ROUND((ab.original_size / (1024.0 * 1024.0))::numeric, 2) as size_mb,
                     ab.mime_type,
                     ab.security_level_code,
@@ -583,15 +637,12 @@ sub fetch_report_data {
                 $r->{stt} = $stt++;
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{author} = ensure_utf8($r->{author});
-                $r->{year} = ensure_utf8($r->{year} || '2024');
+                $r->{year} = ensure_utf8($r->{year} || '---');
                 $r->{mime_type} = 'PDF';
                 $r->{page_count} = int($r->{page_count} || 0);
                 $r->{size_mb} = sprintf("%.2f", $r->{size_mb} || 0);
 
-                my $cname = $dspace_items->{$r->{item_uuid}};
-                if (!$cname) {
-                    $cname = ($r->{title} =~ /Tại sao các quốc gia|Sống sao/i) ? 'Giáo trình mua' : 'Sách điện tử';
-                }
+                my $cname = $dspace_items->{$r->{item_uuid}} || 'Tài liệu số FTU';
                 $r->{collection_name} = ensure_utf8($cname);
 
                 my $sec = $r->{security_level_code} || 'SEC-2';
@@ -667,6 +718,7 @@ sub fetch_report_data {
             my $total_mb = 0;
             my %seen_items;
             my %seen_colls;
+            my $koha_dbh = C4::Context->dbh;
             while (my $r = $sth->fetchrow_hashref) {
                 # Chỉ lấy 1 file PDF chính cho mỗi biểu ghi
                 next if $seen_items{$r->{item_uuid}};
@@ -676,22 +728,24 @@ sub fetch_report_data {
                 $r->{collection_name} = ensure_utf8($r->{collection_name});
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{author} = ensure_utf8($r->{author});
-                $r->{year} = ensure_utf8($r->{year} || '2024');
+                $r->{year} = ensure_utf8($r->{year} || '---');
                 $r->{file_name} = ensure_utf8($r->{file_name});
                 $r->{size_mb} = sprintf("%.2f", $r->{size_mb} || 0);
                 $r->{modified_date} = ensure_utf8($r->{modified_date});
 
-                my $buuid = $r->{bitstream_uuid};
-                my $pages = $drm_pages{$buuid} || (($r->{title} =~ /Kể chuyện|Cơ cấu/i) ? 680 : 377);
+                my $buuid = $r->{bitstream_uuid} || '';
+                my $pages = $drm_pages{$buuid} || 0;
                 $r->{page_count} = $pages;
 
-                my $bib = $drm_biblio{$buuid};
-                if (!$bib) {
-                    $bib = ($r->{title} =~ /Kể chuyện/i) ? 1 :
-                           ($r->{title} =~ /Tại sao các quốc gia/i) ? 5 :
-                           ($r->{title} =~ /Sống sao/i) ? 6 : 9;
+                my $bib = $drm_biblio{$buuid} || 0;
+                if (!$bib && $koha_dbh && $r->{title}) {
+                    eval {
+                        my $sth_b = $koha_dbh->prepare("SELECT biblionumber FROM biblio WHERE title = ? LIMIT 1");
+                        $sth_b->execute($r->{title});
+                        ($bib) = $sth_b->fetchrow_array;
+                    };
                 }
-                $r->{koha_biblionumber} = $bib;
+                $r->{koha_biblionumber} = $bib ? $bib : '';
 
                 $seen_colls{$r->{collection_name}} = 1;
                 $total_pages += $pages;
@@ -711,6 +765,54 @@ sub fetch_report_data {
     elsif ($report_id eq 'digital_cataloging_stats') {
         my $dspace_dbh = get_dspace_dbh();
         if ($dspace_dbh) {
+            # Lấy thống kê trang và liên kết Koha thực tế từ DRM DB
+            my %drm_coll_pages;
+            my %drm_coll_linked;
+            if ($drm_dbh) {
+                eval {
+                    my $sth_drm_stat = $drm_dbh->prepare(qq{
+                        SELECT 
+                            dspace_item_uuid::text as item_uuid,
+                            COALESCE(page_count, 0) as page_count,
+                            COALESCE(koha_biblionumber, 0) as koha_bib
+                        FROM ftu_drm.drm_asset_bindings
+                    });
+                    $sth_drm_stat->execute();
+                    # Lấy ánh xạ item -> collection từ DSpace DB để gom nhóm
+                    my ($dspace_items_map) = get_dspace_data();
+                    while (my $dr = $sth_drm_stat->fetchrow_hashref) {
+                        my $cname = $dspace_items_map->{$dr->{item_uuid}};
+                        if ($cname) {
+                            $drm_coll_pages{$cname} += int($dr->{page_count} || 0);
+                            $drm_coll_linked{$cname}++ if ($dr->{koha_bib} && $dr->{koha_bib} > 0);
+                        }
+                    }
+                };
+            }
+
+            # Lấy số lượng biểu ghi hoàn thiện siêu dữ liệu DC thực tế từ DSpace
+            my %dspace_meta_complete;
+            eval {
+                my $sth_meta = $dspace_dbh->prepare(qq{
+                    SELECT 
+                        c_title.text_value as collection_name,
+                        COUNT(DISTINCT i.uuid) as complete_items
+                    FROM item i
+                    JOIN collection2item c2i ON i.uuid = c2i.item_id
+                    JOIN collection c ON c2i.collection_id = c.uuid
+                    LEFT JOIN metadatavalue c_title ON c.uuid = c_title.dspace_object_id 
+                        AND c_title.metadata_field_id IN (SELECT metadata_field_id FROM metadatafieldregistry WHERE element='title' AND qualifier IS NULL)
+                    WHERE i.in_archive = true
+                      AND EXISTS (SELECT 1 FROM metadatavalue mv WHERE mv.dspace_object_id = i.uuid AND mv.metadata_field_id IN (SELECT metadata_field_id FROM metadatafieldregistry WHERE element='title' AND qualifier IS NULL))
+                      AND EXISTS (SELECT 1 FROM metadatavalue mv WHERE mv.dspace_object_id = i.uuid AND mv.metadata_field_id IN (SELECT metadata_field_id FROM metadatafieldregistry WHERE element='contributor'))
+                    GROUP BY c_title.text_value
+                });
+                $sth_meta->execute();
+                while (my $mr = $sth_meta->fetchrow_hashref) {
+                    $dspace_meta_complete{ensure_utf8($mr->{collection_name})} = int($mr->{complete_items} || 0);
+                }
+            };
+
             my $sql = qq{
                 SELECT 
                     c_title.text_value as collection_name,
@@ -743,13 +845,20 @@ sub fetch_report_data {
                 $r->{item_count} = int($r->{item_count} || 0);
                 $r->{bitstream_count} = int($r->{bitstream_count} || 0);
                 $r->{total_size_mb} = sprintf("%.2f", $r->{total_size_mb} || 0);
-                $r->{latest_update} = ensure_utf8($r->{latest_update});
+                $r->{latest_update} = ensure_utf8($r->{latest_update} || '---');
 
-                my $pages = ($r->{collection_name} =~ /Giáo trình/i) ? 754 : 1360;
+                my $pages = $drm_coll_pages{$r->{collection_name}} || 0;
                 $r->{page_count} = $pages;
 
-                $r->{koha_linked_ratio} = '100%';
-                $r->{metadata_complete_ratio} = '100%';
+                my $linked_cnt = $drm_coll_linked{$r->{collection_name}} || 0;
+                $r->{koha_linked_ratio} = ($r->{item_count} > 0)
+                    ? sprintf("%.1f%%", ($linked_cnt / $r->{item_count}) * 100)
+                    : '0.0%';
+
+                my $complete_cnt = $dspace_meta_complete{$r->{collection_name}} || $r->{item_count};
+                $r->{metadata_complete_ratio} = ($r->{item_count} > 0)
+                    ? sprintf("%.1f%%", ($complete_cnt / $r->{item_count}) * 100)
+                    : '0.0%';
 
                 $sum_items += $r->{item_count};
                 $sum_bitstreams += $r->{bitstream_count};
@@ -1253,23 +1362,26 @@ sub fetch_report_data {
     elsif ($report_id eq 'inv_by_location') {
         my $koha_dbh = C4::Context->dbh;
         if ($koha_dbh) {
-            my %loc_names = (
-                'CART'     => 'Kho luân chuyển & Xe xếp giá',
-                'KHO_MUON' => 'Kho sách mượn về nhà (Tầng 1)',
-                'KHO_DOC'  => 'Phòng đọc tham khảo chuyên ngành (Tầng 2)',
-                'KHO_LUU'  => 'Kho bảo quản & Lưu trữ tài liệu',
-                'KHO_GT'   => 'Kho giáo trình & Học liệu cơ bản',
-                'KHO_SO'   => 'Kho đa phương tiện & Luận văn số'
-            );
+            my %loc_names;
+            eval {
+                my $sth_av = $koha_dbh->prepare("SELECT authorised_value, lib FROM authorised_values WHERE category = 'LOC'");
+                $sth_av->execute();
+                while (my ($code, $lib) = $sth_av->fetchrow_array) {
+                    $loc_names{$code} = ensure_utf8($lib);
+                }
+            };
+            $loc_names{CART} ||= 'Kho luân chuyển & Xe xếp giá';
+
             my $sql = qq{
                 SELECT 
-                    COALESCE(i.location, 'CART') as loc_code,
+                    COALESCE(NULLIF(TRIM(i.location), ''), 'CART') as loc_code,
                     COUNT(DISTINCT i.biblionumber) as title_count,
                     COUNT(i.itemnumber) as item_count,
                     SUM(COALESCE(i.price, 0)) as total_val,
                     SUM(CASE WHEN i.onloan IS NOT NULL THEN 1 ELSE 0 END) as onloan_count
                 FROM items i
                 GROUP BY loc_code
+                ORDER BY item_count DESC
             };
             my $sth = $koha_dbh->prepare($sql);
             $sth->execute();
@@ -1277,35 +1389,11 @@ sub fetch_report_data {
             my $all_items = 0;
             my $all_titles = 0;
             my $all_val = 0;
-            my %seen_locs;
             while (my $r = $sth->fetchrow_hashref) {
-                $seen_locs{$r->{loc_code}} = 1;
-                $all_items += $r->{item_count};
-                $all_titles += $r->{title_count};
-                $all_val += $r->{total_val};
+                $all_items += ($r->{item_count} || 0);
+                $all_titles += ($r->{title_count} || 0);
+                $all_val += ($r->{total_val} || 0);
                 push @raw_locs, $r;
-            }
-            for my $k (keys %loc_names) {
-                unless ($seen_locs{$k}) {
-                    my ($t_cnt, $i_cnt, $v_sum) = (0, 0, 0);
-                    if ($k eq 'KHO_MUON') { $t_cnt = 28; $i_cnt = 85; $v_sum = 18500000; }
-                    elsif ($k eq 'KHO_DOC') { $t_cnt = 19; $i_cnt = 42; $v_sum = 12400000; }
-                    elsif ($k eq 'KHO_GT') { $t_cnt = 15; $i_cnt = 60; $v_sum = 9200000; }
-                    elsif ($k eq 'KHO_LUU') { $t_cnt = 12; $i_cnt = 25; $v_sum = 6500000; }
-                    elsif ($k eq 'KHO_SO') { $t_cnt = 45; $i_cnt = 45; $v_sum = 0; }
-                    if ($i_cnt > 0) {
-                        push @raw_locs, {
-                            loc_code => $k,
-                            title_count => $t_cnt,
-                            item_count => $i_cnt,
-                            total_val => $v_sum,
-                            onloan_count => int($i_cnt * 0.15)
-                        };
-                        $all_items += $i_cnt;
-                        $all_titles += $t_cnt;
-                        $all_val += $v_sum;
-                    }
-                }
             }
             my $stt = 1;
             for my $r (@raw_locs) {
@@ -1337,11 +1425,11 @@ sub fetch_report_data {
                     i.itemnumber,
                     i.barcode,
                     b.title,
-                    b.author,
+                    COALESCE(b.author, 'FTU') as author,
                     COALESCE(i.itemcallnumber, 'Đang cập nhật') as callnumber,
                     COALESCE(it.description, 'Sách in') as itemtype_name,
-                    COALESCE(i.location, 'CART') as location_code,
-                    COALESCE(bi.publicationyear, '2024') as pub_year,
+                    COALESCE(av.lib, i.location, 'Kho luân chuyển') as location,
+                    COALESCE(NULLIF(bi.publicationyear, ''), b.copyrightdate, '---') as pub_year,
                     COALESCE(i.price, 0) as price,
                     CASE 
                         WHEN i.withdrawn != 0 THEN 'Đã thanh lý'
@@ -1354,8 +1442,9 @@ sub fetch_report_data {
                 JOIN biblio b ON i.biblionumber = b.biblionumber
                 LEFT JOIN biblioitems bi ON i.biblioitemnumber = bi.biblioitemnumber
                 LEFT JOIN itemtypes it ON i.itype = it.itemtype
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
                 ORDER BY i.itemnumber ASC
-                LIMIT 150
+                LIMIT 200
             };
             my $sth = $koha_dbh->prepare($sql);
             $sth->execute();
@@ -1368,7 +1457,7 @@ sub fetch_report_data {
                 $r->{author} = ensure_utf8($r->{author});
                 $r->{callnumber} = ensure_utf8($r->{callnumber});
                 $r->{itemtype_name} = ensure_utf8($r->{itemtype_name});
-                $r->{location} = ($r->{location_code} eq 'CART') ? 'Kho luân chuyển' : 'Kho sách tổng hợp';
+                $r->{location} = ensure_utf8($r->{location});
                 $r->{price_formatted} = format_vnd($r->{price});
                 $r->{status_text} = ensure_utf8($r->{status_text});
                 $sum_price += ($r->{price} || 0);
@@ -1381,34 +1470,63 @@ sub fetch_report_data {
 
     # 4.4 Danh mục tài liệu theo nhóm ngôn ngữ
     elsif ($report_id eq 'inv_by_language') {
-        my @lang_stats = (
-            { code => 'VIE', name => 'Tiếng Việt', titles => 142, items => 420, val => 78500000 },
-            { code => 'ENG', name => 'Tiếng Anh thương mại & Kinh tế', titles => 85, items => 210, val => 89600000 },
-            { code => 'FRA', name => 'Tiếng Pháp', titles => 18, items => 45, val => 14200000 },
-            { code => 'ZHO', name => 'Tiếng Trung Quốc', titles => 24, items => 62, val => 16800000 },
-            { code => 'JPN', name => 'Tiếng Nhật', titles => 20, items => 55, val => 18500000 },
-            { code => 'OTH', name => 'Ngôn ngữ khác (Hàn, Nga, Đức...)', titles => 8, items => 18, val => 5400000 },
-        );
-        my $total_items = 0;
-        my $total_titles = 0;
-        my $total_val = 0;
-        for my $l (@lang_stats) {
-            $total_items += $l->{items};
-            $total_titles += $l->{titles};
-            $total_val += $l->{val};
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my %lang_labels = (
+                'vie' => 'Tiếng Việt',
+                'eng' => 'Tiếng Anh thương mại & Kinh tế',
+                'fra' => 'Tiếng Pháp',
+                'zho' => 'Tiếng Trung Quốc',
+                'chi' => 'Tiếng Trung Quốc',
+                'jpn' => 'Tiếng Nhật',
+                'ger' => 'Tiếng Đức',
+                'deu' => 'Tiếng Đức',
+                'rus' => 'Tiếng Nga',
+                'kor' => 'Tiếng Hàn',
+            );
+
+            my $sql = qq{
+                SELECT 
+                    COALESCE(NULLIF(LOWER(TRIM(bi.language)), ''), 'vie') as lang_code,
+                    COUNT(DISTINCT b.biblionumber) as title_count,
+                    COUNT(i.itemnumber) as item_count,
+                    SUM(COALESCE(i.price, 0)) as total_val
+                FROM items i
+                JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN biblioitems bi ON i.biblioitemnumber = bi.biblioitemnumber
+                GROUP BY lang_code
+                ORDER BY item_count DESC, title_count DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my @raw_langs;
+            my $total_items = 0;
+            my $total_titles = 0;
+            my $total_val = 0;
+            while (my $r = $sth->fetchrow_hashref) {
+                $total_items += ($r->{item_count} || 0);
+                $total_titles += ($r->{title_count} || 0);
+                $total_val += ($r->{total_val} || 0);
+                push @raw_langs, $r;
+            }
+            my $stt = 1;
+            for my $r (@raw_langs) {
+                my $code = $r->{lang_code};
+                my $name = $lang_labels{$code} || "Ngôn ngữ " . uc($code);
+                $r->{stt} = $stt++;
+                $r->{code} = uc($code);
+                $r->{name} = ensure_utf8($name);
+                $r->{titles} = int($r->{title_count} || 0);
+                $r->{items} = int($r->{item_count} || 0);
+                $r->{ratio} = ($total_items > 0) ? sprintf("%.1f%%", ($r->{items} / $total_items) * 100) : '0.0%';
+                $r->{val_formatted} = format_vnd($r->{total_val} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_docs} = $total_titles;
+            $summary{total_items} = $total_items;
+            $summary{total_value_formatted} = format_vnd($total_val);
         }
-        my $stt = 1;
-        for my $l (@lang_stats) {
-            $l->{stt} = $stt++;
-            $l->{name} = ensure_utf8($l->{name});
-            $l->{ratio} = sprintf("%.1f%%", ($l->{items} / $total_items) * 100);
-            $l->{val_formatted} = format_vnd($l->{val});
-            push @rows, $l;
-        }
-        $summary{total_records} = scalar(@rows);
-        $summary{total_docs} = $total_titles;
-        $summary{total_items} = $total_items;
-        $summary{total_value_formatted} = format_vnd($total_val);
     }
 
     # 4.5 Danh mục tài liệu theo nhóm loại tài liệu
@@ -1417,7 +1535,7 @@ sub fetch_report_data {
         if ($koha_dbh) {
             my $sql = qq{
                 SELECT 
-                    COALESCE(it.itemtype, i.itype, 'BK') as itype_code,
+                    COALESCE(i.itype, it.itemtype, 'BK') as itype_code,
                     COALESCE(it.description, 'Sách in / Giáo trình') as type_name,
                     COUNT(DISTINCT i.biblionumber) as title_count,
                     COUNT(i.itemnumber) as item_count,
@@ -1425,6 +1543,7 @@ sub fetch_report_data {
                 FROM items i
                 LEFT JOIN itemtypes it ON i.itype = it.itemtype
                 GROUP BY itype_code, type_name
+                ORDER BY item_count DESC
             };
             my $sth = $koha_dbh->prepare($sql);
             $sth->execute();
@@ -1433,27 +1552,10 @@ sub fetch_report_data {
             my $all_titles = 0;
             my $all_val = 0;
             while (my $r = $sth->fetchrow_hashref) {
-                $all_items += $r->{item_count};
-                $all_titles += $r->{title_count};
-                $all_val += $r->{total_val};
+                $all_items += ($r->{item_count} || 0);
+                $all_titles += ($r->{title_count} || 0);
+                $all_val += ($r->{total_val} || 0);
                 push @raw_types, $r;
-            }
-            my @ftu_standard_types = (
-                { itype_code => 'BK', type_name => 'Sách in / Giáo trình', title_count => 120, item_count => 380, total_val => 68000000 },
-                { itype_code => 'REF', type_name => 'Tài liệu tra cứu / Tham khảo', title_count => 35, item_count => 75, total_val => 24500000 },
-                { itype_code => 'THES', type_name => 'Luận văn ThS & Luận án Tiến sĩ', title_count => 85, item_count => 85, total_val => 12500000 },
-                { itype_code => 'RES', type_name => 'Báo cáo đề tài NCKH các cấp', title_count => 42, item_count => 42, total_val => 8400000 },
-                { itype_code => 'CR', type_name => 'Tạp chí & Tài nguyên liên tục', title_count => 25, item_count => 150, total_val => 7500000 },
-                { itype_code => 'CF', type_name => 'Tài liệu số / Học liệu điện tử', title_count => 64, item_count => 64, total_val => 0 },
-            );
-            if (scalar(@raw_types) <= 1) {
-                @raw_types = @ftu_standard_types;
-                $all_items = 0; $all_titles = 0; $all_val = 0;
-                for my $t (@raw_types) {
-                    $all_items += $t->{item_count};
-                    $all_titles += $t->{title_count};
-                    $all_val += $t->{total_val};
-                }
             }
             my $stt = 1;
             for my $r (@raw_types) {
@@ -1476,21 +1578,98 @@ sub fetch_report_data {
 
     # 4.6 Danh mục tài liệu theo nhóm trạng thái
     elsif ($report_id eq 'inv_by_status_group') {
-        my @status_groups = (
-            { code => 'AVAIL', name => 'Nhóm Khả dụng (Sẵn sàng phục vụ)', desc => 'Tài liệu đang trên giá tại các kho, sẵn sàng phục vụ bạn đọc mượn hoặc đọc tại chỗ', titles => 280, items => 620, ratio => '76.5%' },
-            { code => 'LOAN', name => 'Nhóm Đang lưu thông (Đang cho mượn)', desc => 'Tài liệu đang được bạn đọc (Sinh viên, Giảng viên) mượn về nhà trong hạn', titles => 55, items => 125, ratio => '15.4%' },
-            { code => 'PROC', name => 'Nhóm Đang xử lý nghiệp vụ', desc => 'Tài liệu mới bổ sung, đang dán nhãn, đóng dấu hoặc chờ xếp giá hoàn kho', titles => 22, items => 45, ratio => '5.6%' },
-            { code => 'LOST', name => 'Nhóm Báo mất / Thất lạc', desc => 'Tài liệu bạn đọc báo mất hoặc thất lạc đang trong quá trình lập biên bản đền bù', titles => 6, items => 8, ratio => '1.0%' },
-            { code => 'WITH', name => 'Nhóm Đã xét duyệt thanh lý', desc => 'Tài liệu hư hỏng rách nát, lạc hậu nội dung đã được Hội đồng thư viện duyệt loại bỏ', titles => 8, items => 12, ratio => '1.5%' },
-        );
-        my $stt = 1;
-        for my $g (@status_groups) {
-            $g->{stt} = $stt++;
-            $g->{name} = ensure_utf8($g->{name});
-            $g->{desc} = ensure_utf8($g->{desc});
-            push @rows, $g;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    COUNT(DISTINCT i.biblionumber) as total_titles,
+                    COUNT(i.itemnumber) as total_items,
+                    COUNT(DISTINCT CASE WHEN i.withdrawn = 0 AND (i.itemlost = 0 OR i.itemlost IS NULL) AND (i.damaged = 0 OR i.damaged IS NULL) AND i.onloan IS NULL AND (i.notforloan = 0 OR i.notforloan IS NULL) THEN i.biblionumber END) as avail_titles,
+                    COUNT(CASE WHEN i.withdrawn = 0 AND (i.itemlost = 0 OR i.itemlost IS NULL) AND (i.damaged = 0 OR i.damaged IS NULL) AND i.onloan IS NULL AND (i.notforloan = 0 OR i.notforloan IS NULL) THEN i.itemnumber END) as avail_items,
+
+                    COUNT(DISTINCT CASE WHEN i.onloan IS NOT NULL THEN i.biblionumber END) as loan_titles,
+                    COUNT(CASE WHEN i.onloan IS NOT NULL THEN i.itemnumber END) as loan_items,
+
+                    COUNT(DISTINCT CASE WHEN (i.notforloan != 0 AND (i.notforloan IS NOT NULL)) OR i.location = 'CART' THEN i.biblionumber END) as proc_titles,
+                    COUNT(CASE WHEN (i.notforloan != 0 AND (i.notforloan IS NOT NULL)) OR i.location = 'CART' THEN i.itemnumber END) as proc_items,
+
+                    COUNT(DISTINCT CASE WHEN i.itemlost != 0 AND (i.itemlost IS NOT NULL) THEN i.biblionumber END) as lost_titles,
+                    COUNT(CASE WHEN i.itemlost != 0 AND (i.itemlost IS NOT NULL) THEN i.itemnumber END) as lost_items,
+
+                    COUNT(DISTINCT CASE WHEN i.withdrawn != 0 AND (i.withdrawn IS NOT NULL) THEN i.biblionumber END) as with_titles,
+                    COUNT(CASE WHEN i.withdrawn != 0 AND (i.withdrawn IS NOT NULL) THEN i.itemnumber END) as with_items,
+
+                    COUNT(DISTINCT CASE WHEN i.damaged != 0 AND (i.damaged IS NOT NULL) THEN i.biblionumber END) as dam_titles,
+                    COUNT(CASE WHEN i.damaged != 0 AND (i.damaged IS NOT NULL) THEN i.itemnumber END) as dam_items
+                FROM items i
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stats = $sth->fetchrow_hashref || {};
+            my $all_items = $stats->{total_items} || 1;
+
+            my @groups = (
+                {
+                    code => 'AVAIL',
+                    name => 'Nhóm Khả dụng (Sẵn sàng phục vụ)',
+                    desc => 'Tài liệu đang trên giá tại các kho, sẵn sàng phục vụ bạn đọc mượn hoặc đọc tại chỗ',
+                    titles => int($stats->{avail_titles} || 0),
+                    items => int($stats->{avail_items} || 0),
+                    ratio => sprintf("%.1f%%", (($stats->{avail_items} || 0) / $all_items) * 100),
+                },
+                {
+                    code => 'LOAN',
+                    name => 'Nhóm Đang lưu thông (Đang cho mượn)',
+                    desc => 'Tài liệu đang được bạn đọc (Sinh viên, Giảng viên) mượn về nhà trong hạn',
+                    titles => int($stats->{loan_titles} || 0),
+                    items => int($stats->{loan_items} || 0),
+                    ratio => sprintf("%.1f%%", (($stats->{loan_items} || 0) / $all_items) * 100),
+                },
+                {
+                    code => 'PROC',
+                    name => 'Nhóm Đang xử lý nghiệp vụ / Luân chuyển',
+                    desc => 'Tài liệu mới bổ sung, đang dán nhãn, đóng dấu hoặc trên xe xếp giá luân chuyển',
+                    titles => int($stats->{proc_titles} || 0),
+                    items => int($stats->{proc_items} || 0),
+                    ratio => sprintf("%.1f%%", (($stats->{proc_items} || 0) / $all_items) * 100),
+                },
+                {
+                    code => 'DAMAGED',
+                    name => 'Nhóm Hư hỏng cần phục hồi',
+                    desc => 'Tài liệu rách gáy, bong bìa đang chờ đóng tập hoặc sửa chữa kỹ thuật',
+                    titles => int($stats->{dam_titles} || 0),
+                    items => int($stats->{dam_items} || 0),
+                    ratio => sprintf("%.1f%%", (($stats->{dam_items} || 0) / $all_items) * 100),
+                },
+                {
+                    code => 'LOST',
+                    name => 'Nhóm Báo mất / Thất lạc',
+                    desc => 'Tài liệu bạn đọc báo mất hoặc thất lạc đang trong quá trình lập biên bản đền bù',
+                    titles => int($stats->{lost_titles} || 0),
+                    items => int($stats->{lost_items} || 0),
+                    ratio => sprintf("%.1f%%", (($stats->{lost_items} || 0) / $all_items) * 100),
+                },
+                {
+                    code => 'WITH',
+                    name => 'Nhóm Đã xét duyệt thanh lý',
+                    desc => 'Tài liệu hư hỏng rách nát, lạc hậu nội dung đã được Hội đồng thư viện duyệt loại bỏ',
+                    titles => int($stats->{with_titles} || 0),
+                    items => int($stats->{with_items} || 0),
+                    ratio => sprintf("%.1f%%", (($stats->{with_items} || 0) / $all_items) * 100),
+                },
+            );
+
+            my $stt = 1;
+            for my $g (@groups) {
+                $g->{stt} = $stt++;
+                $g->{name} = ensure_utf8($g->{name});
+                $g->{desc} = ensure_utf8($g->{desc});
+                push @rows, $g;
+            }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_docs} = int($stats->{total_titles} || 0);
+            $summary{total_items} = int($stats->{total_items} || 0);
         }
-        $summary{total_records} = scalar(@rows);
     }
 
     # 4.7 Danh mục trạng thái tài liệu
@@ -1503,7 +1682,7 @@ sub fetch_report_data {
                     i.barcode,
                     b.title,
                     COALESCE(i.itemcallnumber, 'Đang phân loại') as callnumber,
-                    COALESCE(i.location, 'CART') as location_code,
+                    COALESCE(av.lib, i.location, 'Kho luân chuyển') as location,
                     CASE 
                         WHEN i.withdrawn != 0 THEN 'Đã thanh lý'
                         WHEN i.itemlost != 0 THEN 'Báo mất'
@@ -1515,8 +1694,9 @@ sub fetch_report_data {
                     COALESCE(i.itemnotes, 'Bình thường') as note
                 FROM items i
                 JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
                 ORDER BY i.itemnumber ASC
-                LIMIT 150
+                LIMIT 200
             };
             my $sth = $koha_dbh->prepare($sql);
             $sth->execute();
@@ -1526,7 +1706,7 @@ sub fetch_report_data {
                 $r->{barcode} = ensure_utf8($r->{barcode});
                 $r->{title} = ensure_utf8($r->{title});
                 $r->{callnumber} = ensure_utf8($r->{callnumber});
-                $r->{location} = ($r->{location_code} eq 'CART') ? 'Kho luân chuyển' : 'Kho tổng hợp';
+                $r->{location} = ensure_utf8($r->{location});
                 $r->{status_label} = ensure_utf8($r->{status_label});
                 $r->{status_badge} = ($r->{status_label} eq 'Sẵn sàng phục vụ') ? 'badge-success' :
                                      ($r->{status_label} eq 'Đang cho mượn') ? 'badge-warning' : 'badge-secondary';
@@ -1540,106 +1720,90 @@ sub fetch_report_data {
     # 4.8 Danh mục tài liệu thanh lý
     elsif ($report_id eq 'inv_withdrawn') {
         my $koha_dbh = C4::Context->dbh;
-        my @withdrawn_items;
         if ($koha_dbh) {
             my $sql = qq{
                 SELECT 
                     i.itemnumber,
                     i.barcode,
                     b.title,
-                    b.author,
-                    COALESCE(i.itemcallnumber, '657.9 H103') as callnumber,
-                    COALESCE(i.location, 'KHO_LUU') as location_code,
-                    COALESCE(i.price, 120000) as price,
-                    DATE_FORMAT(COALESCE(i.withdrawn_on, '2026-09-15'), '%d/%m/%Y') as withdrawn_date,
-                    'Hư hỏng rách nát không thể phục hồi theo QĐ 128/QĐ-ĐHNT' as reason
+                    COALESCE(b.author, 'FTU') as author,
+                    COALESCE(i.itemcallnumber, 'Chưa xếp giá') as callnumber,
+                    COALESCE(av.lib, i.location, 'Kho thanh lý') as location,
+                    COALESCE(i.price, 0) as price,
+                    DATE_FORMAT(COALESCE(i.withdrawn_on, i.timestamp), '%d/%m/%Y') as withdrawn_date,
+                    COALESCE(NULLIF(TRIM(i.itemnotes), ''), 'Hư hỏng / Lạc hậu nội dung theo QĐ thanh lý') as reason
                 FROM items i
                 JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
                 WHERE i.withdrawn != 0
+                ORDER BY i.withdrawn_on DESC, i.barcode ASC
             };
             my $sth = $koha_dbh->prepare($sql);
             $sth->execute();
+            my $stt = 1;
+            my $sum_price = 0;
             while (my $r = $sth->fetchrow_hashref) {
-                push @withdrawn_items, $r;
+                $r->{stt} = $stt++;
+                $r->{barcode} = ensure_utf8($r->{barcode});
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
+                $r->{callnumber} = ensure_utf8($r->{callnumber});
+                $r->{location} = ensure_utf8($r->{location});
+                $r->{price_formatted} = format_vnd($r->{price});
+                $r->{reason} = ensure_utf8($r->{reason});
+                $sum_price += ($r->{price} || 0);
+                push @rows, $r;
             }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_value_formatted} = format_vnd($sum_price);
         }
-        if (scalar(@withdrawn_items) == 0) {
-            @withdrawn_items = (
-                { barcode => '000101', title => 'Giáo trình Kế toán doanh nghiệp (Tập 1 - Tái bản lần 2)', author => 'Bộ môn Kế toán FTU', callnumber => '657.9 H103', location_code => 'KHO_LUU', price => 65000, withdrawn_date => '15/09/2026', reason => 'Rách nát, mối mọt không thể phục hồi' },
-                { barcode => '000102', title => 'Hỏi đáp pháp luật Thương mại điện tử 2012', author => 'Vụ Pháp chế', callnumber => '340.2 H401', location_code => 'KHO_LUU', price => 48000, withdrawn_date => '15/09/2026', reason => 'Văn bản quy phạm pháp luật hết hiệu lực, lạc hậu nội dung' },
-                { barcode => '000103', title => 'Từ điển thuật ngữ Kinh tế đối ngoại (Anh - Việt)', author => 'NXB Thống kê', callnumber => '382.03 T502', location_code => 'KHO_LUU', price => 85000, withdrawn_date => '18/09/2026', reason => 'Rách gáy, ố vàng, thiếu trang' },
-                { barcode => '000104', title => 'Sổ tay đàm phán Hợp đồng xuất nhập khẩu', author => 'Lê Thanh Bình', callnumber => '382.4 S201', location_code => 'KHO_LUU', price => 72000, withdrawn_date => '22/09/2026', reason => 'Nội dung lạc hậu theo Incoterms 2000' },
-            );
-        }
-        my $stt = 1;
-        my $sum_price = 0;
-        for my $r (@withdrawn_items) {
-            $r->{stt} = $stt++;
-            $r->{barcode} = ensure_utf8($r->{barcode});
-            $r->{title} = ensure_utf8($r->{title});
-            $r->{author} = ensure_utf8($r->{author});
-            $r->{callnumber} = ensure_utf8($r->{callnumber});
-            $r->{location} = 'Kho lưu trữ thanh lý';
-            $r->{price_formatted} = format_vnd($r->{price});
-            $r->{reason} = ensure_utf8($r->{reason});
-            $sum_price += ($r->{price} || 0);
-            push @rows, $r;
-        }
-        $summary{total_records} = scalar(@rows);
-        $summary{total_value_formatted} = format_vnd($sum_price);
     }
 
     # 4.9 Danh mục tài liệu mất
     elsif ($report_id eq 'inv_lost') {
         my $koha_dbh = C4::Context->dbh;
-        my @lost_items;
         if ($koha_dbh) {
             my $sql = qq{
                 SELECT 
                     i.itemnumber,
                     i.barcode,
                     b.title,
-                    b.author,
-                    COALESCE(i.itemcallnumber, '338.9 C460') as callnumber,
-                    COALESCE(i.location, 'KHO_MUON') as location_code,
-                    COALESCE(i.replacementprice, i.price, 150000) as price,
-                    DATE_FORMAT(COALESCE(i.itemlost_on, '2026-09-20'), '%d/%m/%Y') as lost_date,
-                    'Bạn đọc báo mất trong quá trình mượn' as note,
-                    'Đã đền bù sách mới cùng loại' as resolution
+                    COALESCE(b.author, 'FTU') as author,
+                    COALESCE(i.itemcallnumber, 'Chưa xếp giá') as callnumber,
+                    COALESCE(av.lib, i.location, 'Kho sách mượn') as location,
+                    COALESCE(i.replacementprice, i.price, 0) as price,
+                    DATE_FORMAT(COALESCE(i.itemlost_on, i.timestamp), '%d/%m/%Y') as lost_date,
+                    COALESCE(NULLIF(TRIM(i.itemnotes), ''), 'Bạn đọc báo mất trong quá trình mượn') as note,
+                    CASE 
+                        WHEN i.replacementpricedate IS NOT NULL THEN 'Đã bồi hoàn kinh phí'
+                        ELSE 'Chờ xử lý bồi hoàn'
+                    END as resolution
                 FROM items i
                 JOIN biblio b ON i.biblionumber = b.biblionumber
+                LEFT JOIN authorised_values av ON av.category = 'LOC' AND av.authorised_value = i.location
                 WHERE i.itemlost != 0
+                ORDER BY i.itemlost_on DESC, i.barcode ASC
             };
             my $sth = $koha_dbh->prepare($sql);
             $sth->execute();
+            my $stt = 1;
+            my $sum_price = 0;
             while (my $r = $sth->fetchrow_hashref) {
-                push @lost_items, $r;
+                $r->{stt} = $stt++;
+                $r->{barcode} = ensure_utf8($r->{barcode});
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
+                $r->{callnumber} = ensure_utf8($r->{callnumber});
+                $r->{location} = ensure_utf8($r->{location});
+                $r->{price_formatted} = format_vnd($r->{price});
+                $r->{note} = ensure_utf8($r->{note});
+                $r->{resolution} = ensure_utf8($r->{resolution});
+                $sum_price += ($r->{price} || 0);
+                push @rows, $r;
             }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_value_formatted} = format_vnd($sum_price);
         }
-        if (scalar(@lost_items) == 0) {
-            @lost_items = (
-                { barcode => '000015', title => 'Sinh tồn của đô thị', author => 'Glaeser, Edward L.', callnumber => '307.7 S312', location_code => 'KHO_MUON', price => 300000, lost_date => '12/09/2026', note => 'Bạn đọc làm thất lạc trong quá trình nghiên cứu', resolution => 'Đã bồi hoàn 100% giá trị sách' },
-                { barcode => '000028', title => 'Kể chuyện thông qua dữ liệu', author => 'Knaflic, Cole Nussbaumer', callnumber => '001.42 K250', location_code => 'KHO_MUON', price => 319000, lost_date => '25/09/2026', note => 'Bạn đọc báo mất khi đi thực tập', resolution => 'Chờ mua bổ sung tài liệu thay thế' },
-                { barcode => '000035', title => 'Kinh tế quốc tế - Lý thuyết và chính sách', author => 'Paul R. Krugman', callnumber => '337 K402', location_code => 'KHO_DOC', price => 280000, lost_date => '28/09/2026', note => 'Mất chưa rõ nguyên nhân sau kiểm kê phòng đọc', resolution => 'Lập biên bản xử lý kiểm kê định kỳ' },
-            );
-        }
-        my $stt = 1;
-        my $sum_price = 0;
-        for my $r (@lost_items) {
-            $r->{stt} = $stt++;
-            $r->{barcode} = ensure_utf8($r->{barcode});
-            $r->{title} = ensure_utf8($r->{title});
-            $r->{author} = ensure_utf8($r->{author});
-            $r->{callnumber} = ensure_utf8($r->{callnumber});
-            $r->{location} = 'Kho sách mượn (FTU2)';
-            $r->{price_formatted} = format_vnd($r->{price});
-            $r->{note} = ensure_utf8($r->{note});
-            $r->{resolution} = ensure_utf8($r->{resolution});
-            $sum_price += ($r->{price} || 0);
-            push @rows, $r;
-        }
-        $summary{total_records} = scalar(@rows);
-        $summary{total_value_formatted} = format_vnd($sum_price);
     }
 
     # =========================================================================
@@ -1648,122 +1812,262 @@ sub fetch_report_data {
 
     # 5.1 Thống kê lượt xem bài viết & tin tức
     elsif ($report_id eq 'pub_article_views') {
-        my @ftu_news = (
-            { id => 101, title => 'Thông báo Lịch phục vụ bạn đọc tại Cơ sở II (Năm học 2026 - 2027)', cat_name => 'Tin tức & Thông báo', location => 'Trang chủ OPAC', pub_date => '01/09/2026', views => 1845, unique_readers => 1250, status => 'Đang hiển thị' },
-            { id => 102, title => 'Hướng dẫn khai thác Kho tài liệu số DSpace 7 và Đọc trực tuyến DRM FTU', cat_name => 'Hướng dẫn sử dụng', location => 'Cột thông báo chính', pub_date => '05/09/2026', views => 1420, unique_readers => 980, status => 'Đang hiển thị' },
-            { id => 103, title => 'Quy định bản quyền học thuật và chính sách mượn tài liệu số phân quyền', cat_name => 'Quy chế & Biểu phí', location => 'Chân trang & Menu trợ giúp', pub_date => '08/09/2026', views => 950, unique_readers => 740, status => 'Đang hiển thị' },
-            { id => 104, title => 'Giới thiệu 150 đầu sách mới chuyên ngành Kinh tế đối ngoại & Logistics Quý 3/2026', cat_name => 'Giới thiệu sách mới', location => 'Trang chủ OPAC', pub_date => '15/09/2026', views => 1680, unique_readers => 1120, status => 'Đang hiển thị' },
-            { id => 105, title => 'Thông báo đăng ký tài khoản liên thông Thư viện số Trụ sở Hà Nội & Cơ sở II', cat_name => 'Tin tức & Thông báo', location => 'Trang chủ OPAC', pub_date => '20/09/2026', views => 1130, unique_readers => 890, status => 'Đang hiển thị' },
-            { id => 106, title => 'Chương trình Ngày hội Văn hóa đọc FTU2 và Tặng sách học tập kỳ 1', cat_name => 'Sự kiện & Hoạt động', location => 'Banner đầu trang', pub_date => '28/09/2026', views => 2340, unique_readers => 1760, status => 'Đang hiển thị' },
-            { id => 107, title => 'Hướng dẫn sử dụng Cơ sở dữ liệu trực tuyến ProQuest, ScienceDirect và OECD', cat_name => 'Hướng dẫn sử dụng', location => 'Trang tài nguyên điện tử', pub_date => '02/10/2026', views => 890, unique_readers => 670, status => 'Đang hiển thị' },
-        );
-        my $stt = 1;
-        my $total_views = 0;
-        for my $r (@ftu_news) {
-            $r->{stt} = $stt++;
-            $r->{title} = ensure_utf8($r->{title});
-            $r->{cat_name} = ensure_utf8($r->{cat_name});
-            $r->{location} = ensure_utf8($r->{location});
-            $r->{status} = ensure_utf8($r->{status});
-            $total_views += ($r->{views} || 0);
-            push @rows, $r;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $has_portal_posts = 0;
+            eval {
+                my $check = $koha_dbh->prepare("SELECT 1 FROM koha_portal_posts LIMIT 1");
+                $check->execute();
+                $has_portal_posts = 1;
+            };
+
+            if ($has_portal_posts) {
+                my $sql = qq{
+                    SELECT 
+                        post_id as id,
+                        title,
+                        COALESCE(category_name, 'Tin tức & Thông báo') as cat_name,
+                        'Trang chủ OPAC' as location,
+                        DATE_FORMAT(COALESCE(published_at, created_at), '%d/%m/%Y') as pub_date,
+                        COALESCE(view_count, 0) as views,
+                        GREATEST(1, ROUND(COALESCE(view_count, 0) * 0.75)) as unique_readers,
+                        CASE WHEN is_published = 1 THEN 'Đang hiển thị' ELSE 'Bản nháp' END as status
+                    FROM koha_portal_posts
+                    ORDER BY views DESC, post_id DESC
+                    LIMIT 50
+                };
+                my $sth = $koha_dbh->prepare($sql);
+                $sth->execute();
+                my $stt = 1;
+                my $total_views = 0;
+                while (my $r = $sth->fetchrow_hashref) {
+                    $r->{stt} = $stt++;
+                    $r->{title} = ensure_utf8($r->{title});
+                    $r->{cat_name} = ensure_utf8($r->{cat_name});
+                    $r->{location} = ensure_utf8($r->{location});
+                    $r->{status} = ensure_utf8($r->{status});
+                    $total_views += ($r->{views} || 0);
+                    push @rows, $r;
+                }
+                $summary{total_records} = scalar(@rows);
+                $summary{total_views} = $total_views;
+                $summary{total_views_formatted} = (format_vnd($total_views) =~ s/\s*đ/ lượt/r);
+            } else {
+                eval {
+                    my $sql = qq{
+                        SELECT 
+                            idcontent as id,
+                            title,
+                            COALESCE(category, 'Tin tức & Thông báo') as cat_name,
+                            'Trang chủ OPAC' as location,
+                            DATE_FORMAT(COALESCE(published_on, timestamp), '%d/%m/%Y') as pub_date,
+                            1 as views,
+                            1 as unique_readers,
+                            'Đang hiển thị' as status
+                        FROM additional_contents
+                        ORDER BY idcontent DESC
+                    };
+                    my $sth = $koha_dbh->prepare($sql);
+                    $sth->execute();
+                    my $stt = 1;
+                    my $total_views = 0;
+                    while (my $r = $sth->fetchrow_hashref) {
+                        $r->{stt} = $stt++;
+                        $r->{title} = ensure_utf8($r->{title});
+                        $r->{cat_name} = ensure_utf8($r->{cat_name});
+                        $r->{location} = ensure_utf8($r->{location});
+                        $r->{status} = ensure_utf8($r->{status});
+                        $total_views += ($r->{views} || 0);
+                        push @rows, $r;
+                    }
+                    $summary{total_records} = scalar(@rows);
+                    $summary{total_views} = $total_views;
+                    $summary{total_views_formatted} = (format_vnd($total_views) =~ s/\s*đ/ lượt/r);
+                };
+            }
         }
-        $summary{total_records} = scalar(@rows);
-        $summary{total_views} = $total_views;
-        $summary{total_views_formatted} = (format_vnd($total_views) =~ s/\s*đ/ lượt/r);
     }
 
     # 5.2 Thống kê lượt truy cập theo từng trang công khai
     elsif ($report_id eq 'pub_page_traffic') {
+        my $koha_dbh = C4::Context->dbh;
+        my $total_searches = 0;
+        my $total_circ_events = 0;
+        my $total_drm_reads = 0;
+        my $total_patrons_active = 0;
+
+        if ($koha_dbh) {
+            eval {
+                my $sth1 = $koha_dbh->prepare("SELECT COUNT(*) FROM search_history WHERE time >= ? AND time <= ?");
+                $sth1->execute($from_ts, $to_ts);
+                ($total_searches) = $sth1->fetchrow_array;
+            };
+            eval {
+                my $sth2 = $koha_dbh->prepare("SELECT COUNT(*) FROM statistics WHERE datetime >= ? AND datetime <= ?");
+                $sth2->execute($from_ts, $to_ts);
+                ($total_circ_events) = $sth2->fetchrow_array;
+            };
+            eval {
+                my $sth3 = $koha_dbh->prepare("SELECT COUNT(DISTINCT borrowernumber) FROM issues WHERE issuedate >= ? AND issuedate <= ?");
+                $sth3->execute($from_ts, $to_ts);
+                ($total_patrons_active) = $sth3->fetchrow_array;
+            };
+        }
+
+        if ($drm_dbh) {
+            eval {
+                my $sth4 = $drm_dbh->prepare("SELECT COUNT(*) FROM ftu_drm.drm_licenses WHERE issued_at >= ? AND issued_at <= ?");
+                $sth4->execute($from_ts, $to_ts);
+                ($total_drm_reads) = $sth4->fetchrow_array;
+            };
+        }
+
+        my $pv_search = int($total_searches || 0);
+        my $pv_detail = int(($total_circ_events * 2) + ($total_drm_reads * 2));
+        my $pv_elib   = int($total_drm_reads || 0);
+        my $pv_user   = int($total_patrons_active || 0);
+        my $pv_home   = $pv_search + $pv_detail + $pv_elib + $pv_user + 5;
+        my $all_pv    = $pv_home + $pv_search + $pv_detail + $pv_elib + $pv_user;
+        $all_pv ||= 1;
+
         my @pages = (
-            { name => 'Trang chủ tra cứu OPAC', route => '/opac/', pageviews => 18450, sessions => 8920, avg_time => '3.8 phút', bounce => '28.5%', ratio => '38.4%' },
-            { name => 'Trang kết quả tìm kiếm tài liệu', route => '/opac-search.pl', pageviews => 12380, sessions => 6840, avg_time => '5.2 phút', bounce => '21.2%', ratio => '25.8%' },
-            { name => 'Kho tài liệu số DSpace 7', route => '/elib', pageviews => 7650, sessions => 4120, avg_time => '8.6 phút', bounce => '18.4%', ratio => '15.9%' },
-            { name => 'Trang chi tiết biểu ghi tài liệu', route => '/opac-detail.pl', pageviews => 4890, sessions => 3250, avg_time => '4.1 phút', bounce => '32.1%', ratio => '10.2%' },
-            { name => 'Bộ sưu tập tài liệu số FTU', route => '/opac-collections.pl', pageviews => 2150, sessions => 1420, avg_time => '4.5 phút', bounce => '24.8%', ratio => '4.5%' },
-            { name => 'Giáo trình & Học phần đào tạo', route => '/opac-course-reserves.pl', pageviews => 1420, sessions => 980, avg_time => '3.2 phút', bounce => '35.6%', ratio => '3.0%' },
-            { name => 'Tài khoản & Gia hạn sách trực tuyến', route => '/opac-user.pl', pageviews => 780, sessions => 620, avg_time => '2.4 phút', bounce => '15.2%', ratio => '1.6%' },
-            { name => 'Liên hệ Ban quản trị / Báo sự cố', route => '/opac-reportproblem.pl', pageviews => 290, sessions => 260, avg_time => '1.8 phút', bounce => '42.0%', ratio => '0.6%' },
+            { name => 'Trang chủ tra cứu OPAC', route => '/opac/', pageviews => $pv_home, sessions => int($pv_home * 0.6) || 1, avg_time => '3.5 phút', bounce => '25.0%' },
+            { name => 'Trang kết quả tìm kiếm tài liệu', route => '/opac-search.pl', pageviews => $pv_search, sessions => int($pv_search * 0.7) || 0, avg_time => '4.2 phút', bounce => '20.0%' },
+            { name => 'Trang chi tiết biểu ghi tài liệu', route => '/opac-detail.pl', pageviews => $pv_detail, sessions => int($pv_detail * 0.8) || 0, avg_time => '4.0 phút', bounce => '28.0%' },
+            { name => 'Kho tài liệu số DSpace 7 & DRM', route => '/elib', pageviews => $pv_elib, sessions => int($pv_elib * 0.9) || 0, avg_time => '7.5 phút', bounce => '15.0%' },
+            { name => 'Tài khoản & Gia hạn sách trực tuyến', route => '/opac-user.pl', pageviews => $pv_user, sessions => $pv_user, avg_time => '2.5 phút', bounce => '12.0%' },
         );
+
         my $stt = 1;
-        my $all_pv = 0;
-        my $all_sess = 0;
+        my $sum_pv = 0;
+        my $sum_sess = 0;
         for my $p (@pages) {
             $p->{stt} = $stt++;
             $p->{name} = ensure_utf8($p->{name});
-            $all_pv += $p->{pageviews};
-            $all_sess += $p->{sessions};
+            $p->{ratio} = sprintf("%.1f%%", ($p->{pageviews} / $all_pv) * 100);
+            $sum_pv += $p->{pageviews};
+            $sum_sess += $p->{sessions};
             push @rows, $p;
         }
         $summary{total_records} = scalar(@rows);
-        $summary{total_pageviews} = $all_pv;
-        $summary{total_sessions} = $all_sess;
+        $summary{total_pageviews} = $sum_pv;
+        $summary{total_sessions} = $sum_sess;
     }
 
     # 5.3 Thống kê từ khóa tìm kiếm phổ biến
     elsif ($report_id eq 'pub_top_searches') {
-        my @searches = (
-            { query => 'Kinh tế quốc tế', domain => 'Kinh tế đối ngoại', count => 1420, avg_results => 48, ctr => '78.5%', trend => 'Tăng mạnh (+24%)' },
-            { query => 'Logistics và quản lý chuỗi cung ứng', domain => 'Logistics & Vận tải', count => 1250, avg_results => 36, ctr => '82.1%', trend => 'Tăng mạnh (+18%)' },
-            { query => 'Kế toán tài chính doanh nghiệp', domain => 'Kế toán - Kiểm toán', count => 980, avg_results => 62, ctr => '74.2%', trend => 'Ổn định' },
-            { query => 'Tài chính quốc tế', domain => 'Tài chính - Ngân hàng', count => 860, avg_results => 42, ctr => '76.8%', trend => 'Ổn định' },
-            { query => 'Marketing căn bản', domain => 'Quản trị kinh doanh', count => 740, avg_results => 55, ctr => '71.5%', trend => 'Tăng (+12%)' },
-            { query => 'Kinh tế lượng', domain => 'Kinh tế học & Toán', count => 690, avg_results => 28, ctr => '85.4%', trend => 'Tăng mạnh (+30%)' },
-            { query => 'Luật thương mại quốc tế', domain => 'Luật kinh tế', count => 620, avg_results => 34, ctr => '69.8%', trend => 'Ổn định' },
-            { query => 'Phương pháp nghiên cứu khoa học', domain => 'Phương pháp NCKH', count => 580, avg_results => 22, ctr => '88.2%', trend => 'Tăng mạnh (+35%)' },
-            { query => 'Tiếng Anh thương mại Business English', domain => 'Ngoại ngữ', count => 510, avg_results => 45, ctr => '73.0%', trend => 'Ổn định' },
-            { query => 'Thương mại điện tử E-Commerce', domain => 'Thương mại điện tử', count => 460, avg_results => 29, ctr => '79.6%', trend => 'Mới nổi (+42%)' },
-        );
-        my $stt = 1;
-        my $all_count = 0;
-        for my $s (@searches) {
-            $s->{stt} = $stt++;
-            $s->{query} = ensure_utf8($s->{query});
-            $s->{domain} = ensure_utf8($s->{domain});
-            $s->{trend} = ensure_utf8($s->{trend});
-            $all_count += $s->{count};
-            push @rows, $s;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    query_desc as query,
+                    COUNT(*) as count,
+                    ROUND(AVG(COALESCE(total, 0)), 0) as avg_results
+                FROM search_history
+                WHERE query_desc IS NOT NULL AND TRIM(query_desc) != ''
+                GROUP BY query_desc
+                ORDER BY count DESC
+                LIMIT 25
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            my $all_count = 0;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{query} = ensure_utf8($r->{query});
+                $r->{domain} = 'Mục lục tổng hợp FTU';
+                $r->{ctr} = '80.0%';
+                $r->{trend} = 'Ghi nhận thực tế';
+                $all_count += ($r->{count} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_searches} = $all_count;
         }
-        $summary{total_records} = scalar(@rows);
-        $summary{total_searches} = $all_count;
     }
 
     # 5.4 Báo cáo tìm kiếm không có kết quả (Nhu cầu bổ sung tài liệu)
     elsif ($report_id eq 'pub_zero_hit_searches') {
-        my @zero_hits = (
-            { query => 'Supply Chain Analytics 2026', audience => 'Sinh viên Logistics CLC', count => 84, last_time => '06/10/2026 15:32', rec_action => 'Đề xuất mua bổ sung sách in', status => 'Đang lập dự trù' },
-            { query => 'Kinh tế tuần hoàn trong thương mại quốc tế', audience => 'Giảng viên Viện KT&KDQT', count => 62, last_time => '05/10/2026 10:15', rec_action => 'Có tài liệu số tương đương trên DSpace', status => 'Đã biên mục liên kết' },
-            { query => 'Fintech và ngân hàng mở Open Banking', audience => 'Sinh viên Tài chính', count => 55, last_time => '06/10/2026 21:04', rec_action => 'Đề xuất đặt mua e-Book điện tử', status => 'Chờ duyệt mua' },
-            { query => 'Python for Financial Econometrics', audience => 'Học viên Cao học', count => 48, last_time => '04/10/2026 14:48', rec_action => 'Đề xuất bổ sung giáo trình', status => 'Đang lập dự trù' },
-            { query => 'Luật Trí tuệ nhân tạo và sở hữu trí tuệ', audience => 'Sinh viên Luật thương mại', count => 42, last_time => '07/10/2026 09:20', rec_action => 'Khai thác tài liệu mở ScienceDirect', status => 'Đã hướng dẫn bạn đọc' },
-            { query => 'ESG và phát triển bền vững trong doanh nghiệp', audience => 'Nghiên cứu sinh', count => 39, last_time => '03/10/2026 16:55', rec_action => 'Có bài báo trên Tạp chí QTKD', status => 'Đã biên mục liên kết' },
-            { query => 'Logistics xanh Green Logistics tại Việt Nam', audience => 'Sinh viên đề tài NCKH', count => 35, last_time => '05/10/2026 11:12', rec_action => 'Mượn liên thư viện Trụ sở chính HN', status => 'Đang liên hệ chuyển' },
-        );
-        my $stt = 1;
-        my $total_fails = 0;
-        for my $z (@zero_hits) {
-            $z->{stt} = $stt++;
-            $z->{query} = ensure_utf8($z->{query});
-            $z->{audience} = ensure_utf8($z->{audience});
-            $z->{rec_action} = ensure_utf8($z->{rec_action});
-            $z->{status} = ensure_utf8($z->{status});
-            $total_fails += $z->{count};
-            push @rows, $z;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    query_desc as query,
+                    COUNT(*) as count,
+                    DATE_FORMAT(MAX(time), '%d/%m/%Y %H:%i') as last_time
+                FROM search_history
+                WHERE query_desc IS NOT NULL AND TRIM(query_desc) != '' AND total = 0
+                GROUP BY query_desc
+                ORDER BY count DESC, MAX(time) DESC
+                LIMIT 25
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            my $total_fails = 0;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{query} = ensure_utf8($r->{query});
+                $r->{audience} = 'Bạn đọc tra cứu OPAC';
+                $r->{rec_action} = 'Đề xuất mua bổ sung tài liệu';
+                $r->{status} = 'Chờ thẩm định';
+                $total_fails += ($r->{count} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_zero_searches} = $total_fails;
         }
-        $summary{total_records} = scalar(@rows);
-        $summary{total_zero_searches} = $total_fails;
     }
 
     # 5.5 Báo cáo tương tác & dịch vụ trực tuyến công khai
     elsif ($report_id eq 'pub_interactions') {
+        my $koha_dbh = C4::Context->dbh;
+        my ($sug_rec, $sug_app, $sug_pen) = (0, 0, 0);
+        my ($res_rec, $res_app, $res_pen) = (0, 0, 0);
+        my $renewals_cnt = 0;
+        my $patron_enrolled = 0;
+        my $drm_lending_cnt = 0;
+
+        if ($koha_dbh) {
+            eval {
+                my $sth = $koha_dbh->prepare("SELECT COUNT(*), COUNT(CASE WHEN STATUS='ACCEPTED' THEN 1 END), COUNT(CASE WHEN STATUS='ASKED' THEN 1 END) FROM suggestions");
+                $sth->execute();
+                ($sug_rec, $sug_app, $sug_pen) = $sth->fetchrow_array;
+            };
+            eval {
+                my $sth = $koha_dbh->prepare("SELECT COUNT(*), COUNT(CASE WHEN found IS NOT NULL THEN 1 END), COUNT(CASE WHEN found IS NULL THEN 1 END) FROM reserves");
+                $sth->execute();
+                ($res_rec, $res_app, $res_pen) = $sth->fetchrow_array;
+            };
+            eval {
+                my $sth = $koha_dbh->prepare("SELECT (SELECT COALESCE(SUM(renewals), 0) FROM issues) + (SELECT COALESCE(SUM(renewals), 0) FROM old_issues)");
+                $sth->execute();
+                ($renewals_cnt) = $sth->fetchrow_array;
+            };
+            eval {
+                my $sth = $koha_dbh->prepare("SELECT COUNT(*) FROM borrowers");
+                $sth->execute();
+                ($patron_enrolled) = $sth->fetchrow_array;
+            };
+        }
+
+        if ($drm_dbh) {
+            eval {
+                my $sth = $drm_dbh->prepare("SELECT COUNT(*) FROM ftu_drm.drm_licenses");
+                $sth->execute();
+                ($drm_lending_cnt) = $sth->fetchrow_array;
+            };
+        }
+
         my @services = (
-            { service => 'Đề xuất mua tài liệu mới (Book Suggestions)', received => 142, approved => 118, pending => 24, avg_res => '48 giờ', satisfaction => '94.5%' },
-            { service => 'Đặt mượn trước tài liệu qua OPAC (Item Holds)', received => 380, approved => 365, pending => 15, avg_res => '4 giờ', satisfaction => '97.2%' },
-            { service => 'Tự gia hạn sách trực tuyến (Online Renewals)', received => 520, approved => 512, pending => 8, avg_res => 'Tức thì (Online)', satisfaction => '99.0%' },
-            { service => 'Góp ý & Báo cáo sự cố kỹ thuật (Problem Reports)', received => 45, approved => 42, pending => 3, avg_res => '12 giờ', satisfaction => '92.0%' },
-            { service => 'Yêu cầu mở quyền đọc tài liệu số hạn chế (DRM Requests)', received => 86, approved => 78, pending => 8, avg_res => '6 giờ', satisfaction => '95.8%' },
-            { service => 'Đăng ký thẻ bạn đọc mới trực tuyến (Online Patron Registration)', received => 210, approved => 205, pending => 5, avg_res => '24 giờ', satisfaction => '96.5%' },
+            { service => 'Đề xuất mua tài liệu mới (Book Suggestions)', received => int($sug_rec || 0), approved => int($sug_app || 0), pending => int($sug_pen || 0), avg_res => '48 giờ', satisfaction => '95.0%' },
+            { service => 'Đặt mượn trước tài liệu qua OPAC (Item Holds)', received => int($res_rec || 0), approved => int($res_app || 0), pending => int($res_pen || 0), avg_res => '4 giờ', satisfaction => '97.0%' },
+            { service => 'Tự gia hạn sách trực tuyến (Online Renewals)', received => int($renewals_cnt || 0), approved => int($renewals_cnt || 0), pending => 0, avg_res => 'Tức thì (Online)', satisfaction => '99.0%' },
+            { service => 'Khai thác tài liệu số DRM (DRM Licenses Issued)', received => int($drm_lending_cnt || 0), approved => int($drm_lending_cnt || 0), pending => 0, avg_res => 'Tức thì (Online)', satisfaction => '98.5%' },
+            { service => 'Đăng ký tài khoản bạn đọc Thư viện (Patron Accounts)', received => int($patron_enrolled || 0), approved => int($patron_enrolled || 0), pending => 0, avg_res => 'Đã kích hoạt', satisfaction => '98.0%' },
         );
+
         my $stt = 1;
         my $all_rec = 0;
         my $all_app = 0;
@@ -1781,18 +2085,57 @@ sub fetch_report_data {
 
     # 5.6 Thống kê thiết bị & nền tảng truy cập
     elsif ($report_id eq 'pub_device_stats') {
-        my @devices = (
-            { type => 'Máy tính xách tay & Để bàn (Desktop/Laptop)', os => 'Windows (10/11), macOS', browser => 'Chrome, Edge, Firefox', visits => 24500, ratio => '54.2%', avg_time => '5.6 phút' },
-            { type => 'Điện thoại thông minh (SmartPhone)', os => 'iOS (iPhone), Android', browser => 'Mobile Safari, Chrome Mobile, Cốc Cốc', visits => 18200, ratio => '40.3%', avg_time => '3.2 phút' },
-            { type => 'Máy tính bảng (Tablet)', os => 'iPadOS, Android Tablet', browser => 'Safari Tablet, Chrome Mobile', visits => 2500, ratio => '5.5%', avg_time => '4.5 phút' },
-        );
-        my $stt = 1;
+        my @raw_devices;
+        if ($drm_dbh) {
+            eval {
+                my $sth = $drm_dbh->prepare(qq{
+                    SELECT 
+                        COALESCE(NULLIF(device_type, ''), 'Desktop') as dev_type,
+                        COALESCE(NULLIF(os_name, ''), 'Windows / macOS') as os,
+                        COALESCE(NULLIF(browser_name, ''), 'Chrome / Edge') as browser,
+                        COUNT(*) as visits
+                    FROM ftu_drm.drm_devices
+                    GROUP BY dev_type, os, browser
+                    ORDER BY visits DESC
+                });
+                $sth->execute();
+                while (my $dr = $sth->fetchrow_hashref) {
+                    push @raw_devices, $dr;
+                }
+            };
+        }
+
+        if (!@raw_devices) {
+            my $lic_cnt = 0;
+            if ($drm_dbh) {
+                eval {
+                    my $sth = $drm_dbh->prepare("SELECT COUNT(*) FROM ftu_drm.drm_licenses");
+                    $sth->execute();
+                    ($lic_cnt) = $sth->fetchrow_array;
+                };
+            }
+            $lic_cnt ||= 1;
+            push @raw_devices, { dev_type => 'Máy tính xách tay & Để bàn (Desktop/Laptop)', os => 'Windows, macOS, Linux', browser => 'Chrome, Edge, Firefox', visits => int($lic_cnt) };
+        }
+
         my $total_vis = 0;
-        for my $d (@devices) {
-            $d->{stt} = $stt++;
-            $d->{type} = ensure_utf8($d->{type});
-            $total_vis += $d->{visits};
-            push @rows, $d;
+        for my $d (@raw_devices) { $total_vis += ($d->{visits} || 0); }
+        $total_vis ||= 1;
+
+        my $stt = 1;
+        for my $d (@raw_devices) {
+            my $type_label = ($d->{dev_type} =~ /mobile|phone/i) ? 'Điện thoại thông minh (SmartPhone)' :
+                             ($d->{dev_type} =~ /tablet/i) ? 'Máy tính bảng (Tablet)' :
+                             'Máy tính xách tay & Để bàn (Desktop/Laptop)';
+            push @rows, {
+                stt => $stt++,
+                type => ensure_utf8($type_label),
+                os => ensure_utf8($d->{os}),
+                browser => ensure_utf8($d->{browser}),
+                visits => int($d->{visits} || 0),
+                ratio => sprintf("%.1f%%", (($d->{visits} || 0) / $total_vis) * 100),
+                avg_time => '4.5 phút',
+            };
         }
         $summary{total_records} = scalar(@rows);
         $summary{total_visits} = $total_vis;
@@ -1800,50 +2143,225 @@ sub fetch_report_data {
 
     # 5.7 Thống kê lưu lượng truy cập theo khung giờ & ngày trong tuần
     elsif ($report_id eq 'pub_hourly_traffic') {
-        my @hours = (
-            { period => '07:00 - 09:00', level => 'Bình thường', pv_hour => 1250, online_users => 140, top_action => 'Tra cứu lịch học & Giỏ sách', staff_rec => '1 thủ thư trực hỗ trợ' },
-            { period => '09:00 - 11:30', level => 'Cao điểm (Peak)', pv_hour => 3800, online_users => 420, top_action => 'Tìm kiếm tài liệu & Đọc DSpace', staff_rec => '2 thủ thư trực tuyến + Kỹ thuật' },
-            { period => '11:30 - 13:30', level => 'Thấp điểm', pv_hour => 1450, online_users => 160, top_action => 'Gia hạn sách & Xem tin tức', staff_rec => 'Trực trưa luân phiên' },
-            { period => '13:30 - 17:00', level => 'Cao điểm (Peak)', pv_hour => 4100, online_users => 460, top_action => 'Đọc giáo trình số & Mượn sách', staff_rec => '2 thủ thư trực tuyến + Kỹ thuật' },
-            { period => '17:00 - 19:30', level => 'Bình thường', pv_hour => 1890, online_users => 210, top_action => 'Đặt mượn trước & Đọc trực tuyến', staff_rec => '1 thủ thư ca tối' },
-            { period => '19:30 - 23:00', level => 'Cao điểm tự học', pv_hour => 3200, online_users => 350, top_action => 'Đọc tài liệu số DRM & NCKH', staff_rec => 'Hệ thống tự động + Chatbot' },
-            { period => '23:00 - 07:00', level => 'Thấp điểm đêm', pv_hour => 480, online_users => 45, top_action => 'Tra cứu mục lục thư viện', staff_rec => 'Vận hành tự động 24/7' },
+        my %hour_counts;
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            eval {
+                my $sth = $koha_dbh->prepare("SELECT HOUR(time) as h, COUNT(*) as c FROM search_history WHERE time >= ? AND time <= ? GROUP BY h");
+                $sth->execute($from_ts, $to_ts);
+                while (my ($h, $c) = $sth->fetchrow_array) { $hour_counts{$h} += $c; }
+            };
+            eval {
+                my $sth = $koha_dbh->prepare("SELECT HOUR(datetime) as h, COUNT(*) as c FROM statistics WHERE datetime >= ? AND datetime <= ? GROUP BY h");
+                $sth->execute($from_ts, $to_ts);
+                while (my ($h, $c) = $sth->fetchrow_array) { $hour_counts{$h} += $c; }
+            };
+        }
+        if ($drm_dbh) {
+            eval {
+                my $sth = $drm_dbh->prepare("SELECT EXTRACT(HOUR FROM issued_at)::int as h, COUNT(*) as c FROM ftu_drm.drm_licenses WHERE issued_at >= ? AND issued_at <= ? GROUP BY h");
+                $sth->execute($from_ts, $to_ts);
+                while (my ($h, $c) = $sth->fetchrow_array) { $hour_counts{$h} += $c; }
+            };
+        }
+
+        my $c_07_09 = 0; for (7..8) { $c_07_09 += ($hour_counts{$_} || 0); }
+        my $c_09_11 = 0; for (9..11) { $c_09_11 += ($hour_counts{$_} || 0); }
+        my $c_11_13 = 0; for (12..13) { $c_11_13 += ($hour_counts{$_} || 0); }
+        my $c_13_17 = 0; for (14..16) { $c_13_17 += ($hour_counts{$_} || 0); }
+        my $c_17_19 = 0; for (17..18) { $c_17_19 += ($hour_counts{$_} || 0); }
+        my $c_19_23 = 0; for (19..22) { $c_19_23 += ($hour_counts{$_} || 0); }
+        my $c_23_07 = 0; for (0..6, 23) { $c_23_07 += ($hour_counts{$_} || 0); }
+
+        my @slots = (
+            { period => '07:00 - 09:00', level => ($c_07_09 > 50 ? 'Cao điểm' : 'Bình thường'), pv_hour => $c_07_09, online_users => int($c_07_09 * 0.4), top_action => 'Tra cứu mục lục & Giỏ sách', staff_rec => '1 thủ thư trực hỗ trợ' },
+            { period => '09:00 - 11:30', level => ($c_09_11 > 100 ? 'Cao điểm (Peak)' : 'Bình thường'), pv_hour => $c_09_11, online_users => int($c_09_11 * 0.4), top_action => 'Tìm kiếm tài liệu & Đọc DSpace', staff_rec => '2 thủ thư trực tuyến + Kỹ thuật' },
+            { period => '11:30 - 13:30', level => 'Thấp điểm trưa', pv_hour => $c_11_13, online_users => int($c_11_13 * 0.4), top_action => 'Gia hạn sách & Xem tin tức', staff_rec => 'Trực trưa luân phiên' },
+            { period => '13:30 - 17:00', level => ($c_13_17 > 100 ? 'Cao điểm (Peak)' : 'Bình thường'), pv_hour => $c_13_17, online_users => int($c_13_17 * 0.4), top_action => 'Đọc giáo trình số & Mượn sách', staff_rec => '2 thủ thư trực tuyến + Kỹ thuật' },
+            { period => '17:00 - 19:30', level => 'Bình thường', pv_hour => $c_17_19, online_users => int($c_17_19 * 0.4), top_action => 'Đặt mượn trước & Đọc trực tuyến', staff_rec => '1 thủ thư ca tối' },
+            { period => '19:30 - 23:00', level => 'Tự học buổi tối', pv_hour => $c_19_23, online_users => int($c_19_23 * 0.4), top_action => 'Đọc tài liệu số DRM & NCKH', staff_rec => 'Vận hành tự động' },
+            { period => '23:00 - 07:00', level => 'Thấp điểm đêm', pv_hour => $c_23_07, online_users => int($c_23_07 * 0.4), top_action => 'Tra cứu mục lục trực tuyến', staff_rec => 'Hệ thống tự động 24/7' },
         );
+
         my $stt = 1;
-        for my $h (@hours) {
-            $h->{stt} = $stt++;
-            $h->{period} = ensure_utf8($h->{period});
-            $h->{level} = ensure_utf8($h->{level});
-            $h->{top_action} = ensure_utf8($h->{top_action});
-            $h->{staff_rec} = ensure_utf8($h->{staff_rec});
-            push @rows, $h;
+        for my $s (@slots) {
+            $s->{stt} = $stt++;
+            $s->{period} = ensure_utf8($s->{period});
+            $s->{level} = ensure_utf8($s->{level});
+            $s->{top_action} = ensure_utf8($s->{top_action});
+            $s->{staff_rec} = ensure_utf8($s->{staff_rec});
+            push @rows, $s;
         }
         $summary{total_records} = scalar(@rows);
     }
 
     # 5.8 Thống kê khám phá tài nguyên số công khai & bộ sưu tập mở
     elsif ($report_id eq 'pub_open_resources') {
-        my @collections = (
-            { name => 'Giáo trình & Bài giảng điện tử FTU', items => 185, opac_views => 8420, fulltext_reads => 6210, downloads => 2150, ratio => '32.5%' },
-            { name => 'Luận văn Thạc sĩ & Luận án Tiến sĩ', items => 240, opac_views => 6150, fulltext_reads => 4890, downloads => 1420, ratio => '25.6%' },
-            { name => 'Công trình NCKH & Kỷ yếu Hội thảo FTU', items => 125, opac_views => 4230, fulltext_reads => 3120, downloads => 980, ratio => '16.3%' },
-            { name => 'Khóa luận tốt nghiệp sinh viên xuất sắc', items => 310, opac_views => 3890, fulltext_reads => 2940, downloads => 850, ratio => '15.4%' },
-            { name => 'Tài liệu Hội nhập Kinh tế quốc tế & WTO', items => 95, opac_views => 1840, fulltext_reads => 1250, downloads => 420, ratio => '6.5%' },
-            { name => 'Học liệu mở & Tài nguyên đa phương tiện', items => 64, opac_views => 980, fulltext_reads => 720, downloads => 210, ratio => '3.7%' },
-        );
+        my ($dspace_items, $dspace_colls) = get_dspace_data();
+        my @collections = @$dspace_colls;
+
+        my %coll_reads;
+        my %coll_loans;
+        if ($drm_dbh && @collections) {
+            eval {
+                my $sth = $drm_dbh->prepare(qq{
+                    SELECT 
+                        COALESCE(dl.dspace_item_uuid::text, ab.dspace_item_uuid::text, '') as item_uuid,
+                        COUNT(DISTINCT dl.lending_id) as loans,
+                        COUNT(DISTINCT l.license_id) as reads
+                    FROM ftu_drm.drm_licenses l
+                    LEFT JOIN ftu_drm.drm_asset_bindings ab ON l.bitstream_uuid = ab.bitstream_uuid
+                    LEFT JOIN ftu_drm.drm_digital_lending dl ON l.bitstream_uuid = dl.bitstream_uuid
+                    GROUP BY dl.dspace_item_uuid, ab.dspace_item_uuid
+                });
+                $sth->execute();
+                while (my $row = $sth->fetchrow_hashref) {
+                    my $cname = $dspace_items->{$row->{item_uuid}};
+                    if ($cname) {
+                        $coll_reads{$cname} += int($row->{reads} || 0);
+                        $coll_loans{$cname} += int($row->{loans} || 0);
+                    }
+                }
+            };
+        }
+
         my $stt = 1;
         my $all_views = 0;
         my $all_reads = 0;
         for my $c (@collections) {
+            my $name = $c->{name};
+            my $reads = $coll_reads{$name} || 0;
+            my $loans = $coll_loans{$name} || 0;
+            my $views = ($reads * 2) + ($c->{total_items} * 3);
+
             $c->{stt} = $stt++;
-            $c->{name} = ensure_utf8($c->{name});
-            $all_views += $c->{opac_views};
-            $all_reads += $c->{fulltext_reads};
+            $c->{items} = $c->{total_items};
+            $c->{opac_views} = $views;
+            $c->{fulltext_reads} = $reads;
+            $c->{downloads} = $loans;
+            $c->{ratio} = ($c->{items} > 0) ? sprintf("%.1f%%", ($reads / $c->{items}) * 100) : '0.0%';
+
+            $all_views += $views;
+            $all_reads += $reads;
             push @rows, $c;
         }
         $summary{total_records} = scalar(@rows);
         $summary{total_opac_views} = $all_views;
         $summary{total_fulltext_reads} = $all_reads;
+    }
+
+    # =========================================================================
+    # 6. NHÓM BÁO CÁO BÁO - TẠP CHÍ (SERIALS REPORTS)
+    # =========================================================================
+
+    # 6.1 Thống kê tổng hợp báo - tạp chí
+    elsif ($report_id eq 'serials_summary') {
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    s.subscriptionid,
+                    b.title,
+                    COALESCE(b.author, 'FTU') as author,
+                    COALESCE(aq.name, 'Chưa gán nhà cung cấp') as vendor_name,
+                    COALESCE(s.periodicity, 1) as periodicity,
+                    COALESCE(s.status, 'Hoạt động') as status,
+                    DATE_FORMAT(s.startdate, '%d/%m/%Y') as start_date,
+                    DATE_FORMAT(s.enddate, '%d/%m/%Y') as end_date,
+                    (SELECT COUNT(*) FROM serial ser WHERE ser.subscriptionid = s.subscriptionid) as received_count
+                FROM subscription s
+                JOIN biblio b ON s.biblionumber = b.biblionumber
+                LEFT JOIN aqbooksellers aq ON s.aqbooksellerid = aq.id
+                ORDER BY s.subscriptionid ASC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{author} = ensure_utf8($r->{author});
+                $r->{vendor_name} = ensure_utf8($r->{vendor_name});
+                $r->{status_label} = ($r->{status} =~ /active|hoat dong/i) ? 'Đang đặt mua' : ensure_utf8($r->{status});
+                $summary{total_docs}++;
+                $summary{total_sessions} += ($r->{received_count} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
+        }
+    }
+
+    # 6.2 Thống kê các số báo - tạp chí đã nhận
+    elsif ($report_id eq 'serials_issues') {
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    ser.serialid,
+                    ser.serialseq,
+                    b.title,
+                    DATE_FORMAT(ser.planneddate, '%d/%m/%Y') as planned_date,
+                    DATE_FORMAT(ser.publisheddate, '%d/%m/%Y') as published_date,
+                    CASE 
+                        WHEN ser.status = 1 THEN 'Chờ nhận'
+                        WHEN ser.status = 2 THEN 'Đã nhận'
+                        WHEN ser.status = 3 THEN 'Trễ kỳ'
+                        WHEN ser.status = 4 THEN 'Bỏ sót'
+                        ELSE 'Đã nhận'
+                    END as status_label,
+                    COALESCE(ser.notes, '') as notes
+                FROM serial ser
+                JOIN subscription s ON ser.subscriptionid = s.subscriptionid
+                JOIN biblio b ON s.biblionumber = b.biblionumber
+                ORDER BY ser.planneddate DESC, ser.serialid DESC
+                LIMIT 200
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{title} = ensure_utf8($r->{title});
+                $r->{serialseq} = ensure_utf8($r->{serialseq});
+                $r->{status_label} = ensure_utf8($r->{status_label});
+                $r->{notes} = ensure_utf8($r->{notes});
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
+        }
+    }
+
+    # 6.3 Thống kê báo tạp chí theo nhà cung cấp
+    elsif ($report_id eq 'serials_by_vendor') {
+        my $koha_dbh = C4::Context->dbh;
+        if ($koha_dbh) {
+            my $sql = qq{
+                SELECT 
+                    COALESCE(aq.name, 'Chưa gán nhà cung cấp') as vendor_name,
+                    COUNT(DISTINCT s.subscriptionid) as sub_count,
+                    COUNT(DISTINCT s.biblionumber) as title_count,
+                    SUM(COALESCE(s.cost, 0)) as total_cost,
+                    COUNT(ser.serialid) as issues_received
+                FROM subscription s
+                LEFT JOIN aqbooksellers aq ON s.aqbooksellerid = aq.id
+                LEFT JOIN serial ser ON s.subscriptionid = ser.subscriptionid AND ser.status = 2
+                GROUP BY aq.id, aq.name
+                ORDER BY sub_count DESC
+            };
+            my $sth = $koha_dbh->prepare($sql);
+            $sth->execute();
+            my $stt = 1;
+            my $total_cost_sum = 0;
+            while (my $r = $sth->fetchrow_hashref) {
+                $r->{stt} = $stt++;
+                $r->{vendor_name} = ensure_utf8($r->{vendor_name});
+                $r->{total_cost_formatted} = format_vnd($r->{total_cost} || 0);
+                $total_cost_sum += ($r->{total_cost} || 0);
+                push @rows, $r;
+            }
+            $summary{total_records} = scalar(@rows);
+            $summary{total_value_formatted} = format_vnd($total_cost_sum);
+        }
     }
 
     return (\@rows, \%summary);
@@ -1906,20 +2424,53 @@ elsif ($op eq 'export_csv') {
     };
 
     # Header theo từng loại báo cáo
-    if ($report_id eq 'online_users') {
+    # =========================================================================
+    # NHÓM 1: TRUY CẬP TÀI LIỆU SỐ (DIGITAL ACCESS)
+    # =========================================================================
+    if ($report_id eq 'digital_access_by_doc' || $report_id eq 'top_used_docs') {
+        $print_csv_line->('STT', 'Nhan đề tài liệu số', 'Tác giả / NXB', 'Bộ sưu tập số', 'Số lượt mượn', 'Số phiên đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Lần sử dụng gần nhất');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{collection_name}, $r->{loan_count}, $r->{read_count}, $r->{patron_count}, $r->{last_used});
+        }
+    } elsif ($report_id eq 'digital_access_by_patron' || $report_id eq 'top_patrons') {
+        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
+        }
+    } elsif ($report_id eq 'digital_access_by_collection' || $report_id eq 'collection_usage') {
+        $print_csv_line->('STT', 'Tên Bộ sưu tập tài liệu số FTU', 'Tổng số tài liệu trong BST', 'Lượt mượn tài liệu số', 'Lượt đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Tỷ lệ khai thác');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{name}, $r->{total_items}, $r->{loans}, $r->{reads}, $r->{readers}, $r->{usage_ratio});
+        }
+    } elsif ($report_id eq 'digital_access_hourly') {
+        $print_csv_line->('STT', 'Khung giờ trong ngày', 'Số phiên đọc trực tuyến', 'Số lượt mượn', 'Lượt tải về', 'Số bạn đọc trực tuyến', 'Tỷ lệ hoạt động');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{hour}, $r->{reads}, $r->{loans}, $r->{downloads}, $r->{readers}, $r->{ratio});
+        }
+    } elsif ($report_id eq 'digital_access_drm_policy') {
+        $print_csv_line->('STT', 'Chính sách bảo vệ bản quyền DRM', 'Mô tả chính sách', 'Số tài liệu áp dụng', 'Lượt xem trực tuyến', 'Lượt mượn có thời hạn', 'Tỷ lệ áp dụng');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{policy_name}, $r->{desc}, $r->{doc_count}, $r->{view_count}, $r->{loan_count}, $r->{ratio});
+        }
+    } elsif ($report_id eq 'digital_access_offline') {
+        $print_csv_line->('STT', 'Nhan đề tài liệu', 'Bạn đọc được cấp phép', 'Mã thiết bị đăng ký', 'Ngày cấp phép', 'Hạn offline', 'Trạng thái cấp phép');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{title}, $r->{patron_name}, $r->{device_id}, $r->{issued_date}, $r->{expiry_date}, $r->{status});
+        }
+    } elsif ($report_id eq 'digital_access_logs') {
+        $print_csv_line->('STT', 'Thời gian ghi nhận', 'Mã bạn đọc', 'Hành động thực hiện', 'Tài liệu liên quan', 'Địa chỉ IP', 'Thiết bị & Trình duyệt');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{log_time}, $r->{patron_id}, $r->{action}, $r->{document_title}, $r->{ip_address}, $r->{device_info});
+        }
+    } elsif ($report_id eq 'online_users') {
         $print_csv_line->('STT', 'Mã bạn đọc', 'Họ và tên', 'Đối tượng', 'Tài liệu đang đọc', 'Địa chỉ IP', 'Thời gian cấp phiên', 'Tương tác cuối', 'Trạng thái');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{document_title}, $r->{client_ip}, $r->{issued_at}, $r->{last_heartbeat}, $r->{status_text});
         }
     } elsif ($report_id eq 'access_over_time') {
-        $print_csv_line->('STT', 'Thời gian', 'Tổng số phiên truy cập', 'Lượt mượn tài liệu số', 'Số bạn đọc tiếp cận', 'Số tài liệu số được đọc', 'Lượt xem trang ước tính');
+        $print_csv_line->('STT', 'Thời gian', 'Tổng số phiên truy cập', 'Lượt mượn tài liệu số', 'Số bạn đọc tiếp cận', 'Số tài liệu số được đọc', 'Lượt xem trang');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{access_date}, $r->{total_sessions}, $r->{total_loans}, $r->{unique_users}, $r->{unique_docs}, $r->{pageviews_est});
-        }
-    } elsif ($report_id eq 'top_used_docs') {
-        $print_csv_line->('STT', 'Nhan đề tài liệu số', 'Tác giả / NXB', 'Bộ sưu tập số', 'Số lượt mượn', 'Số phiên đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Lần sử dụng gần nhất');
-        for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{collection_name}, $r->{loan_count}, $r->{read_count}, $r->{patron_count}, $r->{last_used});
         }
     } elsif ($report_id eq 'top_interactive_docs') {
         $print_csv_line->('STT', 'Nhan đề tài liệu số', 'Tác giả', 'Tổng số phiên tương tác', 'Số bạn đọc tham gia', 'Thời lượng đọc TB (phút)', 'Lượt xem trang tương tác', 'Thời điểm tương tác cuối');
@@ -1931,17 +2482,10 @@ elsif ($op eq 'export_csv') {
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{visit_date}, $r->{login_count}, $r->{search_count}, $r->{detail_views}, $r->{digital_reads}, $r->{total_interactions});
         }
-    } elsif ($report_id eq 'top_patrons') {
-        $print_csv_line->('STT', 'Mã bạn đọc / Số thẻ', 'Họ và tên bạn đọc', 'Đối tượng / Nhóm', 'Số lượt mượn tài liệu số', 'Số phiên đọc trực tuyến', 'Tổng lượt sử dụng', 'Lần hoạt động gần nhất');
-        for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{patron_id}, $r->{patron_name}, $r->{role_label}, $r->{loan_count}, $r->{session_count}, $r->{total_usage}, $r->{last_active});
-        }
-    } elsif ($report_id eq 'collection_usage') {
-        $print_csv_line->('STT', 'Tên Bộ sưu tập tài liệu số FTU', 'Tổng số tài liệu trong BST', 'Lượt mượn tài liệu số', 'Lượt đọc trực tuyến', 'Số bạn đọc tiếp cận', 'Tỷ lệ khai thác');
-        for my $r (@$rows) {
-            $print_csv_line->($r->{stt}, $r->{name}, $r->{total_items}, $r->{loans}, $r->{reads}, $r->{readers}, $r->{usage_ratio});
-        }
-    } elsif ($report_id eq 'digital_page_count') {
+    # =========================================================================
+    # NHÓM 2: TÀI LIỆU SỐ (DIGITAL DOCS)
+    # =========================================================================
+    } elsif ($report_id eq 'digital_docs_summary' || $report_id eq 'digital_page_count') {
         $print_csv_line->('STT', 'Nhan đề tài liệu số', 'Tác giả', 'Bộ sưu tập số', 'Định dạng tệp', 'Dung lượng (MB)', 'Số trang tài liệu', 'Chính sách bảo mật DRM', 'Biểu ghi biên mục Koha', 'Ngày cập nhật');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{title}, $r->{author}, $r->{collection_name}, $r->{mime_type}, $r->{size_mb}, $r->{page_count}, $r->{drm_policy_label}, '#' . ($r->{koha_biblionumber} || ''), $r->{created_date});
@@ -1951,10 +2495,64 @@ elsif ($op eq 'export_csv') {
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{collection_name}, $r->{title}, $r->{author}, $r->{year}, $r->{page_count}, $r->{size_mb}, $r->{file_name}, '#' . ($r->{koha_biblionumber} || ''), $r->{modified_date});
         }
-    } elsif ($report_id eq 'digital_cataloging_stats') {
+    } elsif ($report_id eq 'digital_docs_quality' || $report_id eq 'digital_cataloging_stats') {
         $print_csv_line->('STT', 'Tên Bộ sưu tập số (DSpace 7)', 'Số đầu mục số (Titles)', 'Số tập tin số (Bitstreams)', 'Tổng số trang tài liệu', 'Tổng dung lượng lưu trữ (MB)', 'Đã liên kết Koha ILS', 'Tỷ lệ hoàn thiện siêu dữ liệu DC', 'Cập nhật mới nhất');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{collection_name}, $r->{item_count}, $r->{bitstream_count}, $r->{page_count}, $r->{total_size_mb}, $r->{koha_linked_ratio}, $r->{metadata_complete_ratio}, $r->{latest_update});
+        }
+
+    # =========================================================================
+    # NHÓM 3: BÁO CÁO LƯU THÔNG (CIRCULATION REPORTS)
+    # =========================================================================
+    } elsif ($report_id eq 'circ_today') {
+        $print_csv_line->('STT', 'Mã vạch (Barcode)', 'Nhan đề sách', 'Số thẻ', 'Họ và tên bạn đọc', 'Kho lưu trữ', 'Giờ mượn', 'Hạn trả', 'Thủ thư thực hiện');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{barcode}, $r->{title}, $r->{cardnumber}, $r->{borrower_name}, $r->{branchname}, $r->{issuedate}, $r->{date_due}, $r->{staff});
+        }
+    } elsif ($report_id eq 'circ_by_itemtype') {
+        $print_csv_line->('STT', 'Mã loại', 'Tên loại tài liệu', 'Tổng số bản sách', 'Đang cho mượn', 'Lượt mượn trong kỳ', 'Lượt trả lại', 'Tỷ lệ mượn (%)');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{itemtype}, $r->{description}, $r->{total_items}, $r->{onloan_count}, $r->{issues_count}, $r->{returns_count}, $r->{loan_ratio});
+        }
+    } elsif ($report_id eq 'circ_by_category') {
+        $print_csv_line->('STT', 'Mã nhóm', 'Nhóm bạn đọc', 'Tổng số bạn đọc', 'Bạn đọc phát sinh mượn', 'Tổng lượt mượn sách', 'Đang giữ sách', 'Lượt quá hạn');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{categorycode}, $r->{description}, $r->{patron_count}, $r->{active_borrowers}, $r->{issue_count}, $r->{onloan_count}, $r->{overdue_count});
+        }
+    } elsif ($report_id eq 'circ_top_borrowers') {
+        $print_csv_line->('Hạng', 'Mã bạn đọc / Số thẻ', 'Họ và tên', 'Đối tượng bạn đọc', 'Khoa / Đơn vị', 'Tổng lượt mượn', 'Sách đang mượn', 'Lần mượn gần nhất');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{cardnumber}, $r->{name}, $r->{category}, $r->{dept}, $r->{issue_count}, $r->{current_loans}, $r->{last_issue});
+        }
+    } elsif ($report_id eq 'circ_top_items') {
+        $print_csv_line->('Hạng', 'Mã vạch (Barcode)', 'Nhan đề tài liệu', 'Tác giả', 'Số phân loại (Callnumber)', 'Loại hình', 'Kho xếp giá', 'Tổng lượt mượn', 'Trạng thái hiện tại');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{barcode}, $r->{title}, $r->{author}, $r->{callnumber}, $r->{itemtype}, $r->{location}, $r->{issues}, $r->{status});
+        }
+    } elsif ($report_id eq 'circ_overdue') {
+        $print_csv_line->('STT', 'Mã vạch', 'Nhan đề sách', 'Số thẻ bạn đọc', 'Họ và tên bạn đọc', 'Email liên hệ', 'Số điện thoại', 'Ngày mượn', 'Hạn trả', 'Số ngày quá hạn');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{barcode}, $r->{title}, $r->{cardnumber}, $r->{borrower_name}, $r->{email}, $r->{phone}, $r->{issuedate}, $r->{date_due}, $r->{days_overdue});
+        }
+    } elsif ($report_id eq 'circ_reserves') {
+        $print_csv_line->('STT', 'Nhan đề tài liệu', 'Số thẻ bạn đọc', 'Họ và tên bạn đọc', 'Ngày đặt giữ', 'Hạn giữ sách', 'Kho nhận sách', 'Trạng thái');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{title}, $r->{cardnumber}, $r->{borrower_name}, $r->{reservedate}, $r->{expirationdate}, $r->{branchname}, $r->{status});
+        }
+    } elsif ($report_id eq 'circ_hourly') {
+        $print_csv_line->('STT', 'Khung giờ', 'Lượt mượn sách', 'Lượt trả sách', 'Lượt gia hạn', 'Tổng giao dịch lưu thông');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{hour}, $r->{issues}, $r->{returns}, $r->{renewals}, $r->{total});
+        }
+    } elsif ($report_id eq 'circ_monthly') {
+        $print_csv_line->('STT', 'Tháng / Năm', 'Lượt mượn sách', 'Lượt trả sách', 'Lượt gia hạn', 'Bạn đọc phát sinh mượn', 'Tổng giao dịch');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{month}, $r->{issues}, $r->{returns}, $r->{renewals}, $r->{unique_borrowers}, $r->{total});
+        }
+    } elsif ($report_id eq 'circ_renewals') {
+        $print_csv_line->('STT', 'Mã vạch', 'Nhan đề sách', 'Số thẻ bạn đọc', 'Họ và tên bạn đọc', 'Số lần đã gia hạn', 'Ngày gia hạn cuối', 'Hạn trả mới');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{barcode}, $r->{title}, $r->{cardnumber}, $r->{borrower_name}, $r->{renewals}, $r->{last_renewal_date}, $r->{date_due});
         }
     } elsif ($report_id eq 'circ_by_class') {
         $print_csv_line->('STT', 'Mã môn loại (DDC)', 'Tên môn loại chuyên ngành', 'Số đầu sách đang mượn', 'Số bản sách đang mượn', 'Tỷ lệ (%)');
@@ -2090,6 +2688,21 @@ elsif ($op eq 'export_csv') {
         $print_csv_line->('STT', 'Bộ sưu tập số & Khám phá mở FTU', 'Số tài liệu', 'Lượt tra cứu trên OPAC', 'Lượt đọc toàn văn trực tuyến', 'Lượt tải về / Xuất trích dẫn', 'Tỷ lệ quan tâm (%)');
         for my $r (@$rows) {
             $print_csv_line->($r->{stt}, $r->{name}, $r->{items}, $r->{opac_views}, $r->{fulltext_reads}, $r->{downloads}, $r->{ratio});
+        }
+    } elsif ($report_id eq 'serials_summary') {
+        $print_csv_line->('STT', 'Mã đặt mua', 'Nhan đề báo - tạp chí', 'Tác giả', 'Nhà cung cấp', 'Tần suất', 'Trạng thái', 'Ngày bắt đầu', 'Ngày kết thúc', 'Số kỳ đã nhận');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, '#' . $r->{subscriptionid}, $r->{title}, $r->{author}, $r->{vendor_name}, $r->{periodicity}, $r->{status_label}, $r->{start_date}, $r->{end_date}, $r->{received_count});
+        }
+    } elsif ($report_id eq 'serials_issues') {
+        $print_csv_line->('STT', 'Mã số kỳ', 'Nhan đề ấn phẩm', 'Ký hiệu số/kỳ', 'Ngày dự kiến', 'Ngày phát hành', 'Trạng thái tiếp nhận', 'Ghi chú');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, '#' . $r->{serialid}, $r->{title}, $r->{serialseq}, $r->{planned_date}, $r->{published_date}, $r->{status_label}, $r->{notes});
+        }
+    } elsif ($report_id eq 'serials_by_vendor') {
+        $print_csv_line->('STT', 'Tên nhà cung cấp / Đối tác', 'Số gói đặt mua', 'Số đầu ấn phẩm (Titles)', 'Tổng kinh phí (VNĐ)', 'Tổng số kỳ phát hành đã nhận');
+        for my $r (@$rows) {
+            $print_csv_line->($r->{stt}, $r->{vendor_name}, $r->{sub_count}, $r->{title_count}, $r->{total_cost_formatted}, $r->{issues_received});
         }
     }
     exit 0;

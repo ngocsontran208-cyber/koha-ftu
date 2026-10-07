@@ -7,7 +7,7 @@
 <title
     >[% FILTER collapse %]
  [% t("Reports") | html %]
- &rsaquo; [% t("Koha") | html %]
+ &rsaquo; FTU - HCM LIB
  [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
@@ -37,7 +37,7 @@
     <span>Báo cáo có sẵn</span>
    [% END %]
    [% WRAPPER tab_item tabname= "standard" bt_active= (active_tab == 'standard') %]
-    <span>Báo cáo chuẩn Koha & SQL</span>
+    <span>Báo cáo chuẩn FTU - HCM LIB & SQL</span>
    [% END %]
   [% END # /WRAPPER tabs_nav %]
 
@@ -131,11 +131,11 @@
          <li><a href="/cgi-bin/koha/reports/issues_avg_stats.pl">Thời gian ghi mượn trung bình</a></li>
          [% SET koha_version = Koha.Version %]
          [% IF koha_version.development %]
-         <li><a href="https://schema.koha-community.org/main" target="blank">Sơ đồ dữ liệu Koha</a></li>
+         <li><a href="https://schema.koha-community.org/main" target="blank">Sơ đồ dữ liệu FTU - HCM LIB</a></li>
          [% ELSE %]
-         <li><a href="https://schema.koha-community.org/[% koha_version.major | uri %]_[% koha_version.minor | uri %]" target="blank">Sơ đồ dữ liệu Koha</a></li>
+         <li><a href="https://schema.koha-community.org/[% koha_version.major | uri %]_[% koha_version.minor | uri %]" target="blank">Sơ đồ dữ liệu FTU - HCM LIB</a></li>
          [% END %]
-         <li><a href="https://wiki.koha-community.org/wiki/SQL_Reports_Library" target="blank">Báo cáo mẫu Koha</a></li>
+         <li><a href="https://wiki.koha-community.org/wiki/SQL_Reports_Library" target="blank">Báo cáo mẫu FTU - HCM LIB</a></li>
          </ul>
         </div>
 

@@ -71,3 +71,37 @@
 [% UNLESS ( footerjs ) %]
  [% INCLUDE js_includes.inc %]
 [% END %]
+
+<!-- FTU Enforce Brand Title & UI Script -->
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    function enforceFtuBrand() {
+        try {
+            if (document.title && /koha/i.test(document.title)) {
+                document.title = document.title
+                    .replace(/(?:\s*[›&rsaquo;>»]+\s*|\s+)Koha\b/gi, ' › FTU - HCM LIB')
+                    .replace(/\bKoha\b/gi, 'FTU - HCM LIB');
+            }
+            var titleEl = document.querySelector('title');
+            if (titleEl && /koha/i.test(titleEl.textContent)) {
+                titleEl.textContent = titleEl.textContent
+                    .replace(/(?:\s*[›&rsaquo;>»]+\s*|\s+)Koha\b/gi, ' › FTU - HCM LIB')
+                    .replace(/\bKoha\b/gi, 'FTU - HCM LIB');
+            }
+        } catch(e) {}
+    }
+    enforceFtuBrand();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', enforceFtuBrand);
+    }
+    window.addEventListener('load', enforceFtuBrand);
+    if (window.MutationObserver) {
+        new MutationObserver(enforceFtuBrand).observe(document.head || document.documentElement, {
+            subtree: true,
+            childList: true,
+            characterData: true
+        });
+    }
+})();
+</script>
+

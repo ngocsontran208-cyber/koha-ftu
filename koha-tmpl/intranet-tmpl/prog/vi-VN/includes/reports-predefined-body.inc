@@ -371,7 +371,7 @@
                 <div class="table-responsive">
                     <div id="loading_indicator" class="text-center py-4 d-none">
                         <i class="fa fa-spinner fa-spin fa-2x text-primary mb-2"></i>
-                        <div class="text-muted" style="font-size: 13.5px;">Đang tổng hợp dữ liệu báo cáo từ DRM Service & Koha ILS...</div>
+                        <div class="text-muted" style="font-size: 13.5px;">Đang tổng hợp dữ liệu báo cáo từ DRM Service & FTU - HCM LIB...</div>
                     </div>
                     <table class="table table-bordered table-hover table-ftu-report" id="report_table">
                         <thead id="report_table_head">
@@ -480,6 +480,16 @@ var reportCategories = {
             { id: 'pub_device_stats', title: 'Thống kê thiết bị & nền tảng truy cập' },
             { id: 'pub_hourly_traffic', title: 'Thống kê lưu lượng truy cập theo khung giờ & ngày trong tuần' },
             { id: 'pub_open_resources', title: 'Thống kê khám phá tài nguyên số công khai & bộ sưu tập mở' }
+        ]
+    },
+    serials: {
+        title: 'BÁO CÁO BÁO - TẠP CHÍ',
+        defaultReport: 'serials_summary',
+        defaultTitle: 'Thống kê tổng hợp báo - tạp chí',
+        reports: [
+            { id: 'serials_summary', title: 'Thống kê tổng hợp báo - tạp chí' },
+            { id: 'serials_issues', title: 'Thống kê các số báo - tạp chí đã nhận' },
+            { id: 'serials_by_vendor', title: 'Thống kê báo tạp chí theo nhà cung cấp' }
         ]
     }
 };
@@ -646,7 +656,8 @@ function loadReportData() {
     document.getElementById('loading_indicator').classList.remove('d-none');
     document.getElementById('report_table').classList.add('opacity-50');
 
-    var apiUrl = '/cgi-bin/koha/reports/digital-reports.pl?op=api_data'
+    var baseReportsUrl = (window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) || '/cgi-bin/koha/reports/');
+    var apiUrl = baseReportsUrl + 'digital-reports.pl?op=api_data'
         + '&report_id=' + encodeURIComponent(currentReportId)
         + '&from_date=' + encodeURIComponent(fromDate)
         + '&to_date=' + encodeURIComponent(toDate)
@@ -943,7 +954,7 @@ function renderTable(res) {
             + '<th class="text-end">Dung lượng (MB)</th>'
             + '<th class="text-end">Số trang</th>'
             + '<th>Chính sách bảo mật DRM</th>'
-            + '<th class="text-center">Biểu ghi Koha</th>'
+            + '<th class="text-center">Biểu ghi FTU - HCM LIB</th>'
             + '<th class="text-center">Ngày cập nhật</th>'
             + '</tr>';
 
@@ -994,7 +1005,7 @@ function renderTable(res) {
             + '<th class="text-end">Số trang</th>'
             + '<th class="text-end">Dung lượng</th>'
             + '<th>Tập tin số (Bitstream)</th>'
-            + '<th class="text-center">Biểu ghi Koha</th>'
+            + '<th class="text-center">Biểu ghi FTU - HCM LIB</th>'
             + '<th class="text-center">Ngày nhập</th>'
             + '</tr>';
 
@@ -1038,7 +1049,7 @@ function renderTable(res) {
             + '<th class="text-end">Số tập tin số (Bitstreams)</th>'
             + '<th class="text-end">Tổng số trang</th>'
             + '<th class="text-end">Tổng dung lượng</th>'
-            + '<th class="text-center">Đã liên kết Koha ILS</th>'
+            + '<th class="text-center">Đã liên kết FTU - HCM LIB</th>'
             + '<th class="text-center">Hoàn thiện siêu dữ liệu DC</th>'
             + '<th class="text-center">Cập nhật mới nhất</th>'
             + '</tr>';
@@ -2049,6 +2060,121 @@ function renderTable(res) {
             + '<td class="text-end"><strong>100%</strong></td>'
             + '</tr>';
     }
+
+    // =========================================================================
+    // 6. NHÓM BÁO CÁO BÁO - TẠP CHÍ (SERIALS REPORTS)
+    // =========================================================================
+
+    // 6.1 Thống kê tổng hợp báo - tạp chí
+    else if (currentReportId === 'serials_summary') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th style="width: 80px;" class="text-center">Mã đặt</th>'
+            + '<th>Nhan đề báo - tạp chí</th>'
+            + '<th>Tác giả / Cơ quan chủ quản</th>'
+            + '<th>Nhà cung cấp / Đại lý</th>'
+            + '<th class="text-center">Tần suất</th>'
+            + '<th class="text-center">Kỳ đã nhận</th>'
+            + '<th class="text-center">Thời gian đặt</th>'
+            + '<th class="text-center">Trạng thái</th>'
+            + '</tr>';
+
+        var totalRec = 0;
+        rows.forEach(function(r) {
+            totalRec += (r.received_count || 0);
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td class="text-center"><span class="badge bg-light text-dark border">#' + (r.subscriptionid || '') + '</span></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td>' + (r.author || '') + '</td>'
+                + '<td><span class="badge bg-light text-dark border">' + (r.vendor_name || '') + '</span></td>'
+                + '<td class="text-center">' + (r.periodicity || 1) + ' kỳ/năm</td>'
+                + '<td class="text-center font-weight-bold text-success">' + (r.received_count || 0) + '</td>'
+                + '<td class="text-center text-muted"><small>' + (r.start_date || '') + ' - ' + (r.end_date || '') + '</small></td>'
+                + '<td class="text-center"><span class="badge bg-success">' + (r.status_label || 'Đang đặt mua') + '</span></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="6" class="text-end"><strong>TỔNG SỐ ' + rows.length + ' ĐẦU BÁO - TẠP CHÍ ĐÃ THIẾT LẬP:</strong></td>'
+            + '<td class="text-center text-success font-weight-bold"><strong>' + totalRec + ' kỳ</strong></td>'
+            + '<td colspan="2"></td>'
+            + '</tr>';
+    }
+
+    // 6.2 Thống kê các số báo - tạp chí đã nhận
+    else if (currentReportId === 'serials_issues') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th style="width: 80px;" class="text-center">Mã số kỳ</th>'
+            + '<th>Nhan đề ấn phẩm định kỳ</th>'
+            + '<th>Ký hiệu số / kỳ phát hành</th>'
+            + '<th class="text-center">Ngày dự kiến</th>'
+            + '<th class="text-center">Ngày phát hành</th>'
+            + '<th class="text-center">Trạng thái tiếp nhận</th>'
+            + '<th>Ghi chú</th>'
+            + '</tr>';
+
+        rows.forEach(function(r) {
+            var stBadge = r.status_label === 'Đã nhận' ? '<span class="badge bg-success">Đã nhận</span>' :
+                          r.status_label === 'Trễ kỳ' ? '<span class="badge bg-warning">Trễ kỳ</span>' :
+                          '<span class="badge bg-secondary">' + (r.status_label || 'Chờ nhận') + '</span>';
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td class="text-center"><span class="badge bg-light text-dark border">#' + (r.serialid || '') + '</span></td>'
+                + '<td><strong class="text-primary">' + (r.title || '') + '</strong></td>'
+                + '<td><span class="badge bg-info text-white">' + (r.serialseq || '') + '</span></td>'
+                + '<td class="text-center text-muted"><small>' + (r.planned_date || '') + '</small></td>'
+                + '<td class="text-center text-muted"><small>' + (r.published_date || '') + '</small></td>'
+                + '<td class="text-center">' + stBadge + '</td>'
+                + '<td><small class="text-muted">' + (r.notes || '') + '</small></td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="8" class="text-end"><strong>TỔNG SỐ ' + rows.length + ' KỲ PHÁT HÀNH ĐÃ ĐƯỢC TIẾP NHẬN</strong></td>'
+            + '</tr>';
+    }
+
+    // 6.3 Thống kê báo tạp chí theo nhà cung cấp
+    else if (currentReportId === 'serials_by_vendor') {
+        thead.innerHTML = '<tr>'
+            + '<th style="width: 45px;" class="text-center">STT</th>'
+            + '<th>Tên nhà cung cấp / Đối tác phát hành</th>'
+            + '<th class="text-end">Số gói đặt mua</th>'
+            + '<th class="text-end">Số đầu ấn phẩm (Titles)</th>'
+            + '<th class="text-end">Tổng kinh phí (VNĐ)</th>'
+            + '<th class="text-end">Số kỳ phát hành đã nhận</th>'
+            + '</tr>';
+
+        var sumSubs = 0;
+        var sumTitles = 0;
+        var sumIssues = 0;
+
+        rows.forEach(function(r) {
+            sumSubs += (r.sub_count || 0);
+            sumTitles += (r.title_count || 0);
+            sumIssues += (r.issues_received || 0);
+
+            tbody.innerHTML += '<tr>'
+                + '<td class="text-center">' + r.stt + '</td>'
+                + '<td><strong class="text-primary"><i class="fa fa-building-o me-1"></i> ' + (r.vendor_name || '') + '</strong></td>'
+                + '<td class="text-end font-weight-bold text-info">' + (r.sub_count || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end text-primary">' + (r.title_count || 0).toLocaleString('vi-VN') + '</td>'
+                + '<td class="text-end font-weight-bold text-success">' + (r.total_cost_formatted || '0 đ') + '</td>'
+                + '<td class="text-end text-muted">' + (r.issues_received || 0).toLocaleString('vi-VN') + '</td>'
+                + '</tr>';
+        });
+
+        tfoot.innerHTML = '<tr>'
+            + '<td colspan="2" class="text-end"><strong>TỔNG CỘNG THEO TẤT CẢ ĐỐI TÁC:</strong></td>'
+            + '<td class="text-end text-info font-weight-bold"><strong>' + sumSubs.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-primary font-weight-bold"><strong>' + sumTitles.toLocaleString('vi-VN') + '</strong></td>'
+            + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
+            + '<td class="text-end text-muted font-weight-bold"><strong>' + sumIssues.toLocaleString('vi-VN') + '</strong></td>'
+            + '</tr>';
+    }
 }
 
 function exportExcel() {
@@ -2060,7 +2186,8 @@ function exportExcel() {
     var toDate = document.getElementById('filter_to_date').value;
     var branch = document.getElementById('filter_branch').value;
 
-    var exportUrl = '/cgi-bin/koha/reports/digital-reports.pl?op=export_csv'
+    var baseReportsUrl = (window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) || '/cgi-bin/koha/reports/');
+    var exportUrl = baseReportsUrl + 'digital-reports.pl?op=export_csv'
         + '&report_id=' + encodeURIComponent(currentReportId)
         + '&from_date=' + encodeURIComponent(fromDate)
         + '&to_date=' + encodeURIComponent(toDate)

@@ -2,11 +2,23 @@
 [% USE raw %]
 
 [% MACRO t(msgid) BLOCK %]
-    [%- I18N.t(msgid) | $raw -%]
+    [%- IF msgid == 'Koha' -%]
+        FTU - HCM LIB
+    [%- ELSIF msgid == 'About Koha' -%]
+        Giới thiệu FTU - HCM LIB
+    [%- ELSIF msgid == 'Koha administration' -%]
+        Quản trị FTU - HCM LIB
+    [%- ELSE -%]
+        [%- I18N.t(msgid) | $raw -%]
+    [%- END -%]
 [% END %]
 
 [% MACRO tx(msgid, vars) BLOCK %]
-    [%- I18N.tx(msgid, vars) | $raw -%]
+    [%- IF msgid == 'Koha' -%]
+        FTU - HCM LIB
+    [%- ELSE -%]
+        [%- I18N.tx(msgid, vars) | $raw -%]
+    [%- END -%]
 [% END %]
 
 [% MACRO tn(msgid, msgid_plural, count) BLOCK %]
