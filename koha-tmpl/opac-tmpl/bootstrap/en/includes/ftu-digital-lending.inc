@@ -4,17 +4,12 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
             <!-- Modal Header -->
-            <div class="modal-header" style="background: linear-gradient(135deg, #A31A24 0%, #7F1019 100%); color: #ffffff; padding: 1.25rem 1.5rem; border: none;">
-                <div class="d-flex align-items-center" style="gap: 12px;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-                        <i class="fa fa-book-reader" aria-hidden="true"></i>
-                    </div>
-                    <div>
-                        <h5 class="modal-title fw-bold mb-0" id="ftuDigitalLendingModalLabel" style="font-size: 1.15rem; letter-spacing: -0.01em;">Xác nhận mượn tài liệu số</h5>
-                        <small style="opacity: 0.85; font-size: 0.8rem;">Hệ thống Kiểm soát Lưu thông Số Bản quyền (FTU CDL &amp; DRM)</small>
-                    </div>
+            <div class="modal-header" style="background: #A31A24; color: #ffffff; padding: 1rem 1.25rem; border: none;">
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <i class="fa fa-book-reader" style="font-size: 1.15rem;"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="ftuDigitalLendingModalLabel" style="font-size: 1.1rem;">Digital Lending Confirmation</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <!-- Modal Body -->
@@ -257,30 +252,22 @@
         if (data.alreadyBorrowed) {
             bodyEl.innerHTML = `
                 <div class="p-3 bg-light rounded-3 mb-3 border">
-                    <div class="d-flex align-items-start" style="gap: 15px;">
-                        <div style="font-size: 2.2rem; color: #059669; line-height: 1;">
+                    <div class="d-flex align-items-start" style="gap: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: #D1FAE5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
                             <i class="fa fa-check-circle"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <span class="badge bg-success mb-1">Đang trong hạn mượn</span>
-                            <h5 class="fw-bold text-dark mb-1">${doc.title || 'Tài liệu số FTU'}</h5>
-                            <p class="text-muted small mb-2"><i class="fa fa-user-edit me-1"></i> Tác giả: ${doc.author || 'Đại học Ngoại Thương'}</p>
-                            <p class="mb-0 small text-secondary">
-                                Tài liệu này đang nằm trong danh sách mượn của bạn. Bạn có thể mở đọc toàn văn ngay bây giờ mà không tốn thêm lượt mượn.
-                            </p>
+                            <span class="badge bg-success mb-1">Active Loan</span>
+                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
+                            <div class="text-muted small"><i class="fa fa-user me-1"></i> Author: <strong>${doc.author || 'Foreign Trade University'}</strong></div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center pt-2">
-                    <span class="small text-muted">
-                        <i class="fa fa-id-card me-1"></i> ${groupName} &bull; Đang mượn: <strong>${activeLoans}/${maxLoans}</strong>
-                    </span>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-success fw-bold px-4" id="ftuBtnReadNow">
-                            <i class="fa fa-book-open me-1"></i> Mở đọc ngay
-                        </button>
-                    </div>
+                <div class="d-flex justify-content-end align-items-center gap-2 pt-2">
+                    <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" id="ftuBtnReadNow">
+                        <i class="fa fa-book-open me-1"></i> Read Online
+                    </button>
                 </div>
             `;
             document.getElementById('ftuBtnReadNow').onclick = function() {
@@ -305,36 +292,22 @@
         if (!data.canBorrow) {
             bodyEl.innerHTML = `
                 <div class="p-3 rounded-3 mb-3 border border-danger" style="background: #FEF2F2;">
-                    <div class="d-flex align-items-start" style="gap: 15px;">
-                        <div style="font-size: 2.2rem; color: #DC2626; line-height: 1;">
-                            <i class="fa fa-exclamation-circle"></i>
+                    <div class="d-flex align-items-start" style="gap: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+                            <i class="fa fa-exclamation-triangle"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <span class="badge bg-danger mb-1">Đã đạt giới hạn tối đa</span>
-                            <h5 class="fw-bold text-dark mb-1">${doc.title || 'Tài liệu số FTU'}</h5>
-                            <p class="text-danger fw-semibold small mb-2">
-                                <i class="fa fa-ban me-1"></i> Không thể mượn thêm tài liệu số mới
-                            </p>
-                            <p class="mb-2 small text-secondary">
-                                Nhóm bạn đọc <strong>${groupName}</strong> có hạn mức mượn tối đa là <strong>${maxLoans} tài liệu số</strong> cùng lúc.
-                                Hiện tại bạn đã mượn <strong>${activeLoans}/${maxLoans} cuốn</strong>.
-                            </p>
-                            <div class="p-2 rounded bg-white border border-danger-subtle small text-danger fw-semibold">
-                                <i class="fa fa-info-circle me-1"></i> Quy định mượn trả: Bạn phải trả bớt tài liệu số đang mượn trước rồi mới được đọc hoặc mượn cuốn khác!
-                            </div>
+                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
+                            <div class="text-danger small fw-semibold mb-1">Maximum borrowing limit reached (${maxLoans} items)</div>
+                            <div class="text-muted small">Please return previously borrowed digital items before borrowing new ones.</div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center pt-2">
-                    <span class="small text-muted">
-                        Hạn mức: <strong class="text-danger">${activeLoans}/${maxLoans}</strong> (Còn 0 lượt)
-                    </span>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Đóng</button>
-                        <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-digital-checkouts" class="btn btn-danger fw-bold px-3" style="background: #A31A24; border-color: #A31A24;">
-                            <i class="fa fa-list-check me-1"></i> Đến trang Trả tài liệu số
-                        </a>
-                    </div>
+                <div class="d-flex justify-content-end align-items-center gap-2 pt-2">
+                    <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Close</button>
+                    <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-digital-checkouts" class="btn btn-danger fw-bold px-3" style="background: #A31A24; border-color: #A31A24;">
+                        <i class="fa fa-list-check me-1"></i> Return digital documents
+                    </a>
                 </div>
             `;
             return;
@@ -343,49 +316,25 @@
         // TRƯỜNG HỢP 3: ĐỦ ĐIỀU KIỆN MƯỢN SỐ
         bodyEl.innerHTML = `
             <div class="p-3 bg-light rounded-3 mb-3 border">
-                <div class="d-flex align-items-start" style="gap: 15px;">
-                    <div style="width: 48px; height: 48px; border-radius: 10px; background: #FEE2E2; color: #A31A24; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                <div class="d-flex align-items-start" style="gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: #FEE2E2; color: #A31A24; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
                         <i class="fa fa-book"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h5 class="fw-bold text-dark mb-1">${doc.title || 'Tài liệu số FTU'}</h5>
-                        <p class="text-muted small mb-2"><i class="fa fa-user-edit me-1"></i> Tác giả: <strong>${doc.author || 'Trường Đại học Ngoại Thương'}</strong></p>
-                        
-                        <div class="row g-2 mt-1">
-                            <div class="col-6">
-                                <div class="p-2 bg-white rounded border small">
-                                    <span class="text-muted d-block">Thời hạn mượn:</span>
-                                    <strong class="text-danger"><i class="fa fa-calendar-alt me-1"></i> 14 ngày</strong> (đọc trực tuyến)
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-2 bg-white rounded border small">
-                                    <span class="text-muted d-block">Lượt mượn còn lại:</span>
-                                    <strong class="text-success"><i class="fa fa-check me-1"></i> ${remainingLoans} / ${maxLoans} tài liệu</strong>
-                                </div>
-                            </div>
+                        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
+                        <div class="text-muted small mb-2"><i class="fa fa-user me-1"></i> Author: <strong>${doc.author || 'Foreign Trade University'}</strong></div>
+                        <div class="d-inline-flex align-items-center gap-2 px-2.5 py-1 bg-white border rounded text-secondary small">
+                            <i class="fa fa-clock text-danger"></i> Loan Period: <strong class="text-dark">14 days</strong> (online reading)
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center" style="border-radius: 8px;">
-                <i class="fa fa-shield-alt text-primary me-2 fa-lg"></i>
-                <div>
-                    Tài liệu được bảo vệ bản quyền số FTU DRM. Bạn đọc được đọc toàn văn trực tuyến kèm dấu bản quyền danh tính. Không sao chép hoặc phát tán trái phép.
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center pt-2">
-                <span class="small text-muted">
-                    <i class="fa fa-user-tag me-1"></i> ${groupName}
-                </span>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="button" class="btn btn-danger fw-bold px-4" id="ftuBtnDoBorrow" style="background: #A31A24; border-color: #A31A24;">
-                        <i class="fa fa-check me-1"></i> Đồng ý mượn &amp; Mở đọc
-                    </button>
-                </div>
+            <div class="d-flex justify-content-end align-items-center gap-2 pt-2">
+                <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger fw-bold px-4" id="ftuBtnDoBorrow" style="background: #A31A24; border-color: #A31A24;">
+                    <i class="fa fa-check me-1"></i> Borrow &amp; Read Online
+                </button>
             </div>
         `;
 
