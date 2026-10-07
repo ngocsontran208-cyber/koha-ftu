@@ -258,7 +258,14 @@
  [% WRAPPER tabs id= "opac-user-views" %]
  [% WRAPPER tabs_nav %]
  [% WRAPPER tab_item tabname= "opac-user-checkouts" %]
- <span>Checked out ([% issues_count | html %])</span>
+ <span>Tài liệu đang mượn ([% issues_count | html %])</span>
+ [% END %]
+ [% WRAPPER tab_item tabname= "opac-user-digital-checkouts" %]
+ <span class="d-inline-flex align-items-center" style="gap: 5px;">
+     <i class="fa fa-book-reader text-danger" aria-hidden="true"></i>
+     <span>Tài liệu số đang mượn</span>
+     <span class="badge bg-danger rounded-pill ms-1" id="digital-loans-count-badge">0</span>
+ </span>
  [% END %]
  [% IF relatives %]
  [% WRAPPER tab_item tabname= "opac-user-relative-issues" %]
@@ -598,6 +605,17 @@
  </div>
  </div>
  [% END # /tab_panel#opac-user-checkouts %]
+
+ [% WRAPPER tab_panel tabname="opac-user-digital-checkouts" %]
+ <div id="opac-user-digital-checkouts-panel-container" class="py-2">
+     <div class="text-center py-4">
+         <div class="spinner-border text-danger" role="status" style="width: 2.5rem; height: 2.5rem;">
+             <span class="visually-hidden">Đang tải...</span>
+         </div>
+         <p class="mt-2 text-muted small fw-semibold">Đang kết nối dịch vụ DRM và tải danh sách tài liệu số đang mượn...</p>
+     </div>
+ </div>
+ [% END # /tab_panel#opac-user-digital-checkouts %]
 
  [% IF borrower_club_enrollments.count || borrower_enrollable_clubs.count %]
  [% WRAPPER tab_panel tabname="opac-user-clubs" %]

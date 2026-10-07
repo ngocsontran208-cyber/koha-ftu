@@ -417,6 +417,9 @@
 })();
 </script>
 
+<!-- FTU Controlled Digital Lending & DRM Engine -->
+[% INCLUDE 'ftu-digital-lending.inc' %]
+
 <!-- FTU Adaptive Viewport & Mobile Controller Engine -->
 <script src="/opac-tmpl/bootstrap/js/ftu-adaptive-viewport.js?v=20261006_mobile_engine" nonce="[% Koha.CSPNonce | $raw %]"></script>
 </body>
