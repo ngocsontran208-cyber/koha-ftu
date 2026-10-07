@@ -407,6 +407,9 @@
                 if (typeof window.ftuReloadDigitalLoans === 'function') {
                     window.ftuReloadDigitalLoans();
                 }
+                if (typeof window.ftuSyncHeaderLoansCount === 'function') {
+                    window.ftuSyncHeaderLoansCount();
+                }
 
                 // Chuyển Modal sang trạng thái thành công + cung cấp nút bấm trực tiếp nếu trình duyệt chặn popup
                 bodyEl.innerHTML = `
@@ -789,14 +792,118 @@
 
                 // Cập nhật lại danh sách mượn ngay lập tức
                 window.ftuReloadDigitalLoans();
+                if (typeof window.ftuSyncHeaderLoansCount === 'function') {
+                    window.ftuSyncHeaderLoansCount();
+                }
             })
             .catch(function(err) {
-                alert('Lỗi kết nối khi trả tài liệu: ' + err.message);
+                alert('Connection error when returning document: ' + err.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-check me-1"></i> Xác nhận trả ngay';
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Return now';
             });
         });
     }
+
+    // 6. Đồng bộ số lượng mượn (sách in & tài liệu số) lên thanh User Menu Topbar và các Thẻ dịch vụ
+    window.ftuSyncHeaderLoansCount = function() {
+        var patron = getLoggedInPatron();
+        if (!patron || !patron.patronId) return;
+
+        var badgeEl = document.getElementById('ftu-user-loans-badge');
+        var userMenuBtn = document.getElementById('user-menu');
+        var printLoansMenu = document.getElementById('ftu-menu-print-loans');
+        var printValEl = document.getElementById('ftu-print-count-val');
+        var digitalLoansMenu = document.getElementById('ftu-menu-digital-loans');
+        var digitalValEl = document.getElementById('ftu-digital-count-val');
+
+        var printCount = 0;
+        if (userMenuBtn && userMenuBtn.hasAttribute('data-print-loans')) {
+            printCount = parseInt(userMenuBtn.getAttribute('data-print-loans'), 10) || 0;
+        } else if (printValEl) {
+            printCount = parseInt(printValEl.textContent, 10) || 0;
+        }
+
+        var drmBase = getDrmApiBase();
+        fetch(drmBase + '/lending/patron/' + encodeURIComponent(patron.patronId))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.success) return;
+                var loans = data.loans || [];
+                var digitalCount = loans.length;
+                var totalCount = printCount + digitalCount;
+
+                // Cập nhật tab badge nếu đang ở trang cá nhân
+                var tabBadgeEl = document.getElementById('digital-loans-count-badge');
+                if (tabBadgeEl) {
+                    tabBadgeEl.textContent = digitalCount;
+                }
+
+                // Cập nhật menu dropdown dòng "Digital loans"
+                if (digitalLoansMenu && digitalValEl) {
+                    digitalValEl.textContent = digitalCount;
+                    if (digitalCount > 0) {
+                        digitalLoansMenu.style.display = 'block';
+                    } else {
+                        digitalLoansMenu.style.display = 'none';
+                    }
+                }
+
+                // Cập nhật menu dropdown dòng "Print loans"
+                if (printLoansMenu && printValEl) {
+                    printValEl.textContent = printCount;
+                    if (printCount > 0) {
+                        printLoansMenu.style.display = 'block';
+                    } else {
+                        printLoansMenu.style.display = 'none';
+                    }
+                }
+
+                // Cập nhật badge đỏ tổng trên nút User Menu ở Topbar
+                if (badgeEl) {
+                    if (totalCount > 0) {
+                        badgeEl.textContent = totalCount;
+                        badgeEl.style.display = 'inline-block';
+                        var tip = [];
+                        if (printCount > 0) tip.push(printCount + ' print items');
+                        if (digitalCount > 0) tip.push(digitalCount + ' digital documents');
+                        badgeEl.setAttribute('title', tip.join(', ') + ' on loan');
+                    } else {
+                        badgeEl.style.display = 'none';
+                    }
+                }
+
+                // Cập nhật thẻ "Patron Account" trên trang chủ (nếu có)
+                var accountCard = document.querySelector('a.ftu-shortcut-card[href*="opac-user.pl"]');
+                if (accountCard) {
+                    var cardBadge = accountCard.querySelector('.ftu-card-count');
+                    if (totalCount > 0) {
+                        if (!cardBadge) {
+                            cardBadge = document.createElement('span');
+                            cardBadge.className = 'ftu-card-count';
+                            var iconBox = accountCard.querySelector('.ftu-shortcut-icon-box');
+                            if (iconBox) iconBox.appendChild(cardBadge);
+                        }
+                        if (cardBadge) cardBadge.textContent = totalCount;
+                    } else if (cardBadge) {
+                        cardBadge.remove();
+                    }
+
+                    var cardSub = accountCard.querySelector('.ftu-shortcut-sub');
+                    if (cardSub) {
+                        if (printCount > 0 && digitalCount > 0) {
+                            cardSub.textContent = printCount + ' print • ' + digitalCount + ' digital';
+                        } else if (digitalCount > 0) {
+                            cardSub.textContent = digitalCount + ' digital documents on loan';
+                        } else if (printCount > 0) {
+                            cardSub.textContent = printCount + ' print items on loan';
+                        }
+                    }
+                }
+            })
+            .catch(function(err) {
+                console.warn('[FTU-DIGITAL-LENDING] Sync error:', err);
+            });
+    };
 
     // Tự động tải danh sách và mở tab nếu có tham số ?tab=opac-user-digital-checkouts
     document.addEventListener('DOMContentLoaded', function() {
@@ -817,6 +924,11 @@
         // Tải danh sách mượn số ban đầu và cập nhật badge
         if (document.getElementById('opac-user-digital-checkouts_panel') || document.getElementById('digital-loans-count-badge') || document.getElementById('opac-user-digital-checkouts-panel-container')) {
             window.ftuReloadDigitalLoans();
+        }
+
+        // Luôn đồng bộ số lượng mượn lên Header Menu và Badge
+        if (typeof window.ftuSyncHeaderLoansCount === 'function') {
+            window.ftuSyncHeaderLoansCount();
         }
     });
 

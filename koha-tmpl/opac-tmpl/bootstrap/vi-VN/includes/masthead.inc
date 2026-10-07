@@ -158,12 +158,10 @@
  <li class="nav-item dropdown dropdown-menu-end">
  [% IF ( Koha.Preference( 'opacuserlogin' ) == 1 ) %]
  [% IF ( loggedinusername ) %]
- <a href="/cgi-bin/koha/opac-user.pl" class="nav-link dropdown-toggle ftu-nav-user-btn" id="user-menu" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+ <a href="/cgi-bin/koha/opac-user.pl" class="nav-link dropdown-toggle ftu-nav-user-btn" id="user-menu" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" data-print-loans="[% logged_in_user.checkouts.count || 0 %]">
  <i class="fa fa-user-circle fa-fw" aria-hidden="true"></i>
  <span class="userlabel">Xin chào, [% INCLUDE 'patron-title.inc' patron = logged_in_user no_html = 1 %]</span>
- [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
- <span class="badge rounded-pill bg-danger ms-1" style="font-size: 11px; padding: 2px 6px;" title="[% logged_in_user.checkouts.count %] tài liệu đang mượn">[% logged_in_user.checkouts.count %]</span>
- [% END %]
+ <span id="ftu-user-loans-badge" class="badge rounded-pill bg-danger ms-1" style="font-size: 11px; padding: 2px 6px; [% logged_in_user && logged_in_user.checkouts.count > 0 ? '' : 'display:none;' %]" title="[% logged_in_user.checkouts.count %] tài liệu đang mượn">[% logged_in_user.checkouts.count || 0 %]</span>
  </a>
  <a tabindex="0" role="menuitem" class="logout js-hide" href="/opac/logout"><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> Đăng xuất</a>
  [% ELSE %]
@@ -196,13 +194,16 @@
                                         ></a
                                     >
  </p>
- [% IF logged_in_user && logged_in_user.checkouts.count > 0 %]
- <p>
+ <p id="ftu-menu-print-loans" class="ftu-menu-loan-item" style="[% logged_in_user && logged_in_user.checkouts.count > 0 ? '' : 'display:none;' %]">
      <a class="login-link" href="/cgi-bin/koha/opac-user.pl?tab=opac-user-checkouts">
-         <i class="fa fa-book" aria-hidden="true"></i> Đang mượn: <strong>[% logged_in_user.checkouts.count %] tài liệu</strong>
+         <i class="fa fa-book text-primary" aria-hidden="true"></i> Sách in đang mượn: <strong><span id="ftu-print-count-val">[% logged_in_user.checkouts.count || 0 %]</span> cuốn</strong>
      </a>
  </p>
- [% END %]
+ <p id="ftu-menu-digital-loans" class="ftu-menu-loan-item" style="display:none;">
+     <a class="login-link" href="/cgi-bin/koha/opac-user.pl?tab=opac-user-digital-checkouts">
+         <i class="fa fa-laptop-code text-danger" aria-hidden="true"></i> Tài liệu số đang mượn: <strong><span id="ftu-digital-count-val">0</span> tài liệu</strong>
+     </a>
+ </p>
  [% IF Koha.Preference( 'EnableOpacSearchHistory' ) %]
  <p>
  <a class="login-link" href="/cgi-bin/koha/opac-search-history.pl" role="menuitem" tabindex="0" title="Xem lịch sử tìm kiếm của bạn">Lịch sử tìm kiếm</a>
