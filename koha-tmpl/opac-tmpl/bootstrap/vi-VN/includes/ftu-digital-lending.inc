@@ -177,20 +177,33 @@
 
         bsModal.show();
 
-        // Kiểm tra nếu chưa đăng nhập
+        // Kiểm tra nếu chưa đăng nhập: Cung cấp tùy chọn Đọc thử trực tuyến (Guest) hoặc Đăng nhập để mượn toàn văn
         if (!patron || !patron.patronId) {
+            var ssoHost = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
+            var ssoBase = ssoHost.endsWith('/sso') ? ssoHost : (ssoHost + '/sso');
+            var guestTarget = (params.bitstreamUuid && !params.bitstreamUuid.startsWith('00000000-'))
+                ? ('/bitstreams/' + encodeURIComponent(params.bitstreamUuid))
+                : (params.itemUuid ? ('/elib/items/' + encodeURIComponent(params.itemUuid)) : (params.fallbackUrl || ''));
+            var guestPreviewUrl = ssoBase + '/koha-to-dspace?user=guest&target=' + encodeURIComponent(guestTarget);
+            var loginReturnUrl = encodeURIComponent(window.location.href);
+
             bodyEl.innerHTML = `
                 <div class="text-center py-4">
                     <div style="width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 50%; background: #FEF3C7; display: flex; align-items: center; justify-content: center; color: #D97706; font-size: 1.75rem;">
-                        <i class="fa fa-lock"></i>
+                        <i class="fa fa-book-reader"></i>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Yêu cầu đăng nhập tài khoản</h5>
-                    <p class="text-muted" style="max-width: 480px; margin: 0 auto 1.5rem;">
-                        Bạn cần đăng nhập tài khoản Thư viện FTU để hệ thống kiểm tra chính sách bạn đọc và cấp quyền mượn đọc tài liệu số.
+                    <h5 class="fw-bold text-dark mb-2">Đọc trực tuyến &amp; Bản quyền tài liệu số</h5>
+                    <p class="text-muted" style="max-width: 520px; margin: 0 auto 1.5rem;">
+                        Tài liệu này được quản lý bản quyền số FTU DRM. Bạn đọc có thể xem trước nội dung trực tuyến hoặc đăng nhập tài khoản Thư viện FTU để mượn đọc toàn văn.
                     </p>
-                    <a href="/cgi-bin/koha/opac-user.pl" class="btn btn-danger px-4 py-2 fw-bold" style="background: #A31A24; border-color: #A31A24; border-radius: 8px;">
-                        <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập ngay
-                    </a>
+                    <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                        <a href="${guestPreviewUrl}" target="_blank" class="btn btn-outline-danger px-3 py-2 fw-semibold" id="ftuBtnGuestPreview">
+                            <i class="fa fa-book-open me-1"></i> Xem trước trực tuyến
+                        </a>
+                        <a href="/opac/cgi-bin/opac-user.pl?return=${loginReturnUrl}" class="btn btn-danger px-4 py-2 fw-bold" style="background: #A31A24; border-color: #A31A24;">
+                            <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập mượn toàn văn
+                        </a>
+                    </div>
                 </div>
             `;
             return;
@@ -273,14 +286,10 @@
             document.getElementById('ftuBtnReadNow').onclick = function() {
                 var ssoHost = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
                 var ssoBase = ssoHost.endsWith('/sso') ? ssoHost : (ssoHost + '/sso');
-                var readerTarget = '/bitstreams/' + encodeURIComponent(doc.bitstreamUuid);
-                if (originalParams && originalParams.handle) {
-                    readerTarget = '/elib/handle/' + encodeURIComponent(originalParams.handle.replace(/^handle\//i, ''));
-                } else if (originalParams && originalParams.fallbackUrl) {
-                    readerTarget = originalParams.fallbackUrl;
-                } else if (doc.itemUuid) {
-                    readerTarget = '/elib/items/' + encodeURIComponent(doc.itemUuid);
-                }
+                var bUuid = doc.bitstreamUuid || (originalParams ? originalParams.bitstreamUuid : null);
+                var readerTarget = (bUuid && !bUuid.startsWith('00000000-'))
+                    ? ('/bitstreams/' + encodeURIComponent(bUuid))
+                    : (doc.itemUuid ? ('/elib/items/' + encodeURIComponent(doc.itemUuid)) : (originalParams && originalParams.fallbackUrl ? originalParams.fallbackUrl : ''));
                 var readerUrl = ssoBase + '/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget);
                 var win = window.open(readerUrl, '_blank');
                 if (!win || win.closed || typeof win.closed === 'undefined') {
@@ -382,17 +391,13 @@
                     throw new Error(borrowRes.error || 'Mượn tài liệu số thất bại');
                 }
 
-                // Xây dựng link reader an toàn
+                // Xây dựng link reader an toàn: Ưu tiên tuyệt đối bitstreamUuid để mở trình đọc toàn văn
                 var ssoHost = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
                 var ssoBase = ssoHost.endsWith('/sso') ? ssoHost : (ssoHost + '/sso');
-                var readerTarget = '/bitstreams/' + encodeURIComponent(borrowRes.bitstreamUuid || doc.bitstreamUuid);
-                if (originalParams && originalParams.handle) {
-                    readerTarget = '/elib/handle/' + encodeURIComponent(originalParams.handle.replace(/^handle\//i, ''));
-                } else if (originalParams && originalParams.fallbackUrl) {
-                    readerTarget = originalParams.fallbackUrl;
-                } else if (doc.itemUuid) {
-                    readerTarget = '/elib/items/' + encodeURIComponent(doc.itemUuid);
-                }
+                var bUuid = borrowRes.bitstreamUuid || doc.bitstreamUuid || (originalParams ? originalParams.bitstreamUuid : null);
+                var readerTarget = (bUuid && !bUuid.startsWith('00000000-'))
+                    ? ('/bitstreams/' + encodeURIComponent(bUuid))
+                    : (doc.itemUuid ? ('/elib/items/' + encodeURIComponent(doc.itemUuid)) : (originalParams && originalParams.fallbackUrl ? originalParams.fallbackUrl : ''));
                 var targetUrl = borrowRes.readerUrl || (ssoBase + '/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget));
 
                 var winNavigated = false;
