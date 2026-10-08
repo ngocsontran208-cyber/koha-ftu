@@ -92,6 +92,7 @@
     flex-wrap: wrap;
     margin-bottom: 20px;
 }
+.grad-hero-text h1,
 .grad-hero-text h2 {
     font-size: 1.35rem;
     font-weight: 800;
@@ -860,19 +861,6 @@
 [% END #/ WRAPPER sub-header.inc %]
 
 <div class="grad-wrapper">
-    <!-- Header title (Đã xóa box FTU Library theo yêu cầu) -->
-    <div class="grad-header-card">
-        <div class="grad-title-group">
-            <h1>
-                Xét tốt nghiệp &amp; Đối soát Thư viện
-            </h1>
-            <p class="grad-subtitle">Quản lý theo đợt xét tốt nghiệp, đối soát nghĩa vụ tài liệu &amp; khóa thẻ bạn đọc tập trung</p>
-        </div>
-        <div>
-            <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Về Trang chủ</a>
-        </div>
-    </div>
-
     <!-- Alert banner -->
     <div id="status-alert" class="status-msg"></div>
     <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% Koha.GenerateCSRF | $raw %]">
@@ -881,11 +869,11 @@
     <!-- MÀN HÌNH 1: QUẢN LÝ DANH SÁCH ĐỢT XÉT TỐT NGHIỆP (MẶC ĐỊNH KHI VÀO TRANG)   -->
     <!-- ========================================================================= -->
     <div id="view-batches-list" class="grad-view-section">
-        <!-- Hero Header Card -->
+        <!-- Hero Header Card (Hợp nhất tiêu đề duy nhất, loại bỏ trùng lặp) -->
         <div class="grad-batches-hero">
             <div class="grad-hero-content">
                 <div class="grad-hero-text">
-                    <h2><i class="fa fa-graduation-cap"></i> Quản lý Đợt Xét Tốt Nghiệp</h2>
+                    <h1><i class="fa fa-graduation-cap"></i> Quản lý Đợt Xét Tốt Nghiệp</h1>
                     <p>Khởi tạo và quản lý hồ sơ theo từng đợt tốt nghiệp của trường. Bấm vào một đợt để tra cứu đối soát nợ sách, tự động gửi email nhắc nhở và khóa thẻ hàng loạt mà không cần nạp lại file.</p>
                 </div>
                 <div class="grad-hero-actions">
@@ -895,6 +883,9 @@
                     <button type="button" class="grad-btn grad-btn-outline" onclick="openAdhocCheckModal()">
                         <i class="fa fa-bolt"></i> Tra cứu nhanh (không lưu đợt)
                     </button>
+                    <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline" title="Quay về trang chủ quản trị Koha">
+                        <i class="fa fa-home"></i> Về Trang chủ
+                    </a>
                 </div>
             </div>
             <!-- Summary Stats Row -->
