@@ -5,167 +5,844 @@
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Phân hệ Xét tốt nghiệp &rsaquo; Quản trị &rsaquo; Koha</title>
+<title>Graduation Clearance &rsaquo; Tools &rsaquo; FTU Library Koha</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <style>
-/* MINIMALIST FUNCTIONAL STYLES */
-.grad-container { padding: 16px 20px; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-.grad-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-.grad-header h1 { font-size: 1.25rem; font-weight: 700; margin: 0; color: #0f172a; }
-.grad-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.grad-box { border: 1px solid #e2e8f0; border-radius: 4px; padding: 14px; background: #fafafa; }
-.grad-box-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 8px; }
-.grad-textarea { width: 100%; height: 90px; font-family: monospace; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 3px; padding: 8px; box-sizing: border-box; resize: vertical; background: #ffffff; }
-.grad-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-.grad-stat-card { border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px 14px; background: #ffffff; }
-.grad-stat-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; display: block; }
-.grad-stat-val { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-top: 2px; display: block; }
-.grad-stat-val.danger { color: #b91c1c; }
-.grad-stat-val.success { color: #15803d; }
-.grad-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.grad-btn { display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; text-decoration: none; line-height: 1.2; }
-.grad-btn-primary { background: #0f172a; color: #ffffff; border-color: #0f172a; }
-.grad-btn-primary:hover { background: #1e293b; color: #ffffff; }
-.grad-btn-outline { background: #ffffff; color: #1e293b; border-color: #cbd5e1; }
-.grad-btn-outline:hover { background: #f1f5f9; }
-.grad-btn-danger { background: #b91c1c; color: #ffffff; border-color: #b91c1c; }
-.grad-btn-danger:hover { background: #991b1b; }
-.grad-btn-sm { padding: 3px 8px; font-size: 12px; }
-.grad-filters { display: flex; gap: 4px; }
-.grad-filter-btn { background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 5px 10px; font-size: 12px; font-weight: 600; border-radius: 3px; cursor: pointer; }
-.grad-filter-btn.active { background: #0f172a; color: #ffffff; border-color: #0f172a; }
-.grad-table { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #e2e8f0; }
-.grad-table th { background: #f8fafc; color: #334155; font-weight: 700; font-size: 12px; text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #e2e8f0; }
-.grad-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
-.grad-table tr:hover td { background: #f8fafc; }
-.grad-badge { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: 600; border-radius: 2px; line-height: 1.2; }
-.badge-cleared { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-.badge-debt { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.badge-locked { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-.badge-notfound { background: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
-.debt-details { margin-top: 6px; padding: 6px 10px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 3px; font-size: 12px; }
-.debt-item { padding: 2px 0; border-bottom: 1px dashed #fecaca; }
-.debt-item:last-child { border-bottom: none; }
-.text-danger { color: #b91c1c; font-weight: 600; }
-.text-muted { color: #64748b; }
-.text-mono { font-family: monospace; font-size: 12px; }
-.status-msg { padding: 10px 14px; margin-bottom: 12px; border-radius: 3px; font-size: 13px; display: none; }
-.status-msg.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: block; }
-.status-msg.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: block; }
+/* ==========================================================================
+   FTU LIBRARY GRADUATION CLEARANCE - MODERN REFINED THEME (EN)
+   ========================================================================== */
+:root {
+    --ftu-crimson: #A31A24;
+    --ftu-crimson-dark: #86141D;
+    --ftu-crimson-light: #fef2f2;
+    --ftu-crimson-border: #fecaca;
+    --ftu-slate-900: #0f172a;
+    --ftu-slate-800: #1e293b;
+    --ftu-slate-700: #334155;
+    --ftu-slate-600: #475569;
+    --ftu-slate-500: #64748b;
+    --ftu-slate-200: #e2e8f0;
+    --ftu-slate-100: #f1f5f9;
+    --ftu-slate-50: #f8fafc;
+    --ftu-green-600: #16a34a;
+    --ftu-green-50: #f0fdf4;
+    --ftu-green-border: #bbf7d0;
+    --ftu-amber-600: #d97706;
+    --ftu-amber-50: #fffbeb;
+    --ftu-amber-border: #fde68a;
+}
+
+.grad-wrapper {
+    padding: 18px 24px 36px;
+    background: #ffffff;
+    color: var(--ftu-slate-900);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Header bar */
+.grad-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--ftu-crimson);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+}
+.grad-title-group h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--ftu-slate-900);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.grad-title-group .grad-subtitle {
+    font-size: 0.85rem;
+    color: var(--ftu-slate-500);
+    margin: 0;
+}
+.grad-badge-brand {
+    background: var(--ftu-crimson);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Input Section */
+.grad-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+.grad-card {
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+}
+.grad-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.grad-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ftu-slate-700);
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.grad-dropzone {
+    border: 2px dashed var(--ftu-slate-200);
+    border-radius: 6px;
+    padding: 18px 14px;
+    text-align: center;
+    background: var(--ftu-slate-50);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.grad-dropzone:hover, .grad-dropzone.dragover {
+    border-color: var(--ftu-crimson);
+    background: var(--ftu-crimson-light);
+}
+.grad-dropzone input[type="file"] {
+    display: none;
+}
+.grad-dropzone-icon {
+    font-size: 24px;
+    color: var(--ftu-slate-500);
+    margin-bottom: 6px;
+}
+.grad-dropzone-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ftu-slate-800);
+}
+.grad-dropzone-hint {
+    font-size: 11px;
+    color: var(--ftu-slate-500);
+    margin-top: 4px;
+}
+
+.grad-textarea {
+    width: 100%;
+    height: 105px;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 6px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    resize: vertical;
+    background: #ffffff;
+    color: var(--ftu-slate-900);
+    transition: border-color 0.2s ease;
+}
+.grad-textarea:focus {
+    outline: none;
+    border-color: var(--ftu-crimson);
+    box-shadow: 0 0 0 3px rgba(163, 26, 36, 0.1);
+}
+.grad-input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+.grad-counter-badge {
+    font-size: 12px;
+    color: var(--ftu-slate-500);
+    font-weight: 500;
+}
+
+/* Button system */
+.grad-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.25;
+    transition: all 0.15s ease;
+}
+.grad-btn-primary {
+    background: var(--ftu-crimson);
+    color: #ffffff;
+    border-color: var(--ftu-crimson);
+}
+.grad-btn-primary:hover {
+    background: var(--ftu-crimson-dark);
+    border-color: var(--ftu-crimson-dark);
+    color: #ffffff;
+}
+.grad-btn-dark {
+    background: var(--ftu-slate-900);
+    color: #ffffff;
+    border-color: var(--ftu-slate-900);
+}
+.grad-btn-dark:hover {
+    background: var(--ftu-slate-800);
+    color: #ffffff;
+}
+.grad-btn-outline {
+    background: #ffffff;
+    color: var(--ftu-slate-700);
+    border-color: var(--ftu-slate-200);
+}
+.grad-btn-outline:hover {
+    background: var(--ftu-slate-50);
+    border-color: var(--ftu-slate-500);
+    color: var(--ftu-slate-900);
+}
+.grad-btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+}
+.grad-btn-danger:hover {
+    background: #b91c1c;
+    color: #ffffff;
+}
+.grad-btn-success {
+    background: #15803d;
+    color: #ffffff;
+    border-color: #15803d;
+}
+.grad-btn-success:hover {
+    background: #166534;
+    color: #ffffff;
+}
+.grad-btn-sm {
+    padding: 5px 10px;
+    font-size: 11.5px;
+}
+
+/* Status message */
+.status-msg {
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+.status-msg.success { background: var(--ftu-green-50); color: #166534; border: 1px solid var(--ftu-green-border); display: flex; }
+.status-msg.error { background: var(--ftu-crimson-light); color: var(--ftu-crimson); border: 1px solid var(--ftu-crimson-border); display: flex; }
+
+/* Filter & Control Section */
+.grad-filter-section {
+    background: var(--ftu-slate-50);
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Tabs */
+.grad-status-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.grad-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid var(--ftu-slate-200);
+    color: var(--ftu-slate-700);
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.grad-tab-btn:hover {
+    background: #ffffff;
+    border-color: var(--ftu-slate-500);
+    color: var(--ftu-slate-900);
+}
+.grad-tab-btn.active {
+    background: var(--ftu-slate-900);
+    color: #ffffff;
+    border-color: var(--ftu-slate-900);
+}
+.grad-tab-pill {
+    display: inline-block;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 12px;
+    background: var(--ftu-slate-100);
+    color: var(--ftu-slate-700);
+}
+.grad-tab-btn.active .grad-tab-pill {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+.pill-cleared { background: #dcfce7; color: #166534; }
+.pill-debt { background: #fee2e2; color: #b91c1c; }
+.pill-locked { background: #e2e8f0; color: #475569; }
+.pill-notfound { background: #fef3c7; color: #92400e; }
+
+/* Filter Controls Row */
+.grad-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.grad-search-box {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+}
+.grad-search-input {
+    width: 100%;
+    padding: 7px 32px 7px 32px;
+    font-size: 12.5px;
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 6px;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+.grad-search-input:focus {
+    outline: none;
+    border-color: var(--ftu-crimson);
+}
+.grad-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: var(--ftu-slate-500);
+    pointer-events: none;
+}
+.grad-search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: var(--ftu-slate-500);
+    cursor: pointer;
+    display: none;
+}
+.grad-search-clear:hover {
+    color: var(--ftu-crimson);
+}
+
+.grad-select {
+    padding: 7px 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ftu-slate-800);
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 6px;
+    background: #ffffff;
+    min-width: 150px;
+    cursor: pointer;
+}
+.grad-select:focus {
+    outline: none;
+    border-color: var(--ftu-crimson);
+}
+
+/* Action Toolbar */
+.grad-action-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.grad-selection-summary {
+    font-size: 12.5px;
+    color: var(--ftu-slate-600);
+    font-weight: 500;
+}
+.grad-selection-summary strong {
+    color: var(--ftu-slate-900);
+}
+.grad-actions-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Table styling */
+.grad-table-container {
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 8px;
+    overflow-x: auto;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+.grad-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+.grad-table th {
+    background: #f8fafc;
+    color: var(--ftu-slate-700);
+    font-weight: 700;
+    font-size: 12px;
+    text-align: left;
+    padding: 10px 10px;
+    border-bottom: 2px solid var(--ftu-slate-200);
+    border-right: 1px solid var(--ftu-slate-100);
+    white-space: nowrap;
+    user-select: none;
+}
+.grad-table th.sortable {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.grad-table th.sortable:hover {
+    background: #f1f5f9;
+    color: var(--ftu-slate-900);
+}
+.grad-sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    color: var(--ftu-slate-500);
+}
+.grad-table th.sorted .grad-sort-icon {
+    color: var(--ftu-crimson);
+    font-weight: bold;
+}
+.grad-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--ftu-slate-100);
+    border-right: 1px solid var(--ftu-slate-100);
+    color: var(--ftu-slate-800);
+    vertical-align: middle;
+}
+.grad-table tbody tr:hover td {
+    background: #fbfcfe;
+}
+.grad-table tbody tr.row-selected td {
+    background: #f0f7ff;
+}
+
+/* Badges */
+.grad-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    line-height: 1.3;
+}
+.badge-cleared { background: var(--ftu-green-50); color: var(--ftu-green-600); border: 1px solid var(--ftu-green-border); }
+.badge-debt { background: var(--ftu-crimson-light); color: var(--ftu-crimson); border: 1px solid var(--ftu-crimson-border); }
+.badge-locked { background: var(--ftu-slate-100); color: var(--ftu-slate-600); border: 1px solid var(--ftu-slate-200); }
+.badge-notfound { background: var(--ftu-amber-50); color: var(--ftu-amber-600); border: 1px solid var(--ftu-amber-border); }
+.badge-active { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* Debt Details Accordion */
+.debt-details {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: var(--ftu-crimson-light);
+    border: 1px solid var(--ftu-crimson-border);
+    border-radius: 5px;
+    font-size: 12px;
+}
+.debt-item {
+    padding: 4px 0;
+    border-bottom: 1px dashed #fecaca;
+    color: var(--ftu-slate-800);
+}
+.debt-item:last-child {
+    border-bottom: none;
+}
+.text-danger { color: #dc2626; font-weight: 600; }
+.text-success { color: #16a34a; font-weight: 600; }
+.text-mono { font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+
+/* Empty state */
+.grad-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ftu-slate-500);
+}
+.grad-empty-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+    color: var(--ftu-slate-500);
+}
+
+/* Pagination bar */
+.grad-pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-top: 1px solid var(--ftu-slate-200);
+    font-size: 12px;
+    color: var(--ftu-slate-600);
+}
+.grad-pages {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.grad-page-btn {
+    padding: 4px 8px;
+    border: 1px solid var(--ftu-slate-200);
+    background: #ffffff;
+    color: var(--ftu-slate-700);
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.grad-page-btn:hover:not(:disabled) {
+    background: var(--ftu-slate-100);
+}
+.grad-page-btn.active {
+    background: var(--ftu-slate-900);
+    color: #ffffff;
+    border-color: var(--ftu-slate-900);
+}
+.grad-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
 </style>
 
 [% INCLUDE 'header.inc' %]
 
 <nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
     <ol>
-        <li><a href="/cgi-bin/koha/mainpage.pl">Trang chủ</a></li>
-        <li><a href="/cgi-bin/koha/tools/tools-home.pl">Công cụ</a></li>
-        <li><a href="#" aria-current="page">Xét tốt nghiệp</a></li>
+        <li><a href="/cgi-bin/koha/mainpage.pl">Home</a></li>
+        <li><a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a></li>
+        <li><a href="#" aria-current="page">Graduation Clearance</a></li>
     </ol>
 </nav>
 
-<div class="grad-container">
-    <div class="grad-header">
-        <div>
-            <h1>Xét tốt nghiệp</h1>
+<div class="grad-wrapper">
+    <!-- Header title -->
+    <div class="grad-header-card">
+        <div class="grad-title-group">
+            <h1>
+                Graduation Clearance &amp; Verification
+                <span class="grad-badge-brand">FTU Library</span>
+            </h1>
+            <p class="grad-subtitle">Check library obligations, overdue loans, fines, and sync graduation card locks across systems (Koha &bull; SSO &bull; DSpace)</p>
         </div>
         <div>
-            <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Trang chủ</a>
+            <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Staff Home</a>
         </div>
     </div>
 
+    <!-- Alert banner -->
     <div id="status-alert" class="status-msg"></div>
     <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% Koha.GenerateCSRF | $raw %]">
 
+    <!-- INPUT CARDS (TWO COLUMNS) -->
     <div class="grad-input-grid">
-        <div class="grad-box">
-            <div class="grad-box-title">Tệp Excel / CSV</div>
-            <div>
-                <input type="file" id="file-input" accept=".xlsx, .xls, .csv" style="font-size: 13px;">
+        <!-- CARD 1: EXCEL / CSV UPLOAD -->
+        <div class="grad-card">
+            <div class="grad-card-header">
+                <span class="grad-card-title">&#128196; Upload Excel / CSV</span>
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="downloadSampleExcel()">
+                    &#11015; Sample Template (.xlsx)
+                </button>
+            </div>
+            <div class="grad-dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+                <div class="grad-dropzone-icon">&#128194;</div>
+                <div class="grad-dropzone-text" id="dropzone-text">Drag and drop file here, or click to browse</div>
+                <div class="grad-dropzone-hint">Supports .xlsx, .xls, .csv (Auto-detects Student ID / MSSV / Cardnumber column)</div>
+                <input type="file" id="file-input" accept=".xlsx, .xls, .csv">
+            </div>
+            <div id="file-status" style="display: none;"></div>
+        </div>
+
+        <!-- CARD 2: DIRECT PASTE TEXTAREA -->
+        <div class="grad-card">
+            <div class="grad-card-header">
+                <span class="grad-card-title">&#9998; Direct Input Student IDs</span>
+                <span class="grad-counter-badge" id="uid-input-counter">0 IDs</span>
+            </div>
+            <textarea id="uids-input" class="grad-textarea" placeholder="Enter one student ID per line or separated by commas, semicolons, tabs...&#10;Example:&#10;2011110001&#10;2011110002&#10;2011110003" oninput="updateInputCounter()"></textarea>
+            <div class="grad-input-footer">
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="clearInput()">Clear</button>
+                <button type="button" id="btn-check" class="grad-btn grad-btn-primary" onclick="startCheck()">
+                    &#128269; Start Verification
+                </button>
             </div>
         </div>
+    </div>
 
-        <div class="grad-box">
-            <div class="grad-box-title">Danh sách mã sinh viên</div>
-            <textarea id="uids-input" class="grad-textarea" placeholder="Mỗi mã 1 dòng hoặc cách nhau bởi dấu phẩy..."></textarea>
-            <div style="display: flex; justify-content: flex-end; margin-top: 6px; gap: 8px;">
-                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="clearInput()">Xóa</button>
-                <button type="button" id="btn-check" class="grad-btn grad-btn-primary grad-btn-sm" onclick="startCheck()">Kiểm tra</button>
+    <!-- FILTER & CONTROL SECTION (FILTERS & SORTING) -->
+    <div class="grad-filter-section">
+        <!-- ROW 1: STATUS TABS WITH INTEGRATED COUNTERS -->
+        <div class="grad-status-tabs">
+            <button type="button" class="grad-tab-btn active" onclick="setTabFilter('ALL', this)">
+                All <span class="grad-tab-pill" id="count-all">0</span>
+            </button>
+            <button type="button" class="grad-tab-btn" onclick="setTabFilter('CLEARED', this)">
+                Cleared (No Debt) <span class="grad-tab-pill pill-cleared" id="count-cleared">0</span>
+            </button>
+            <button type="button" class="grad-tab-btn" onclick="setTabFilter('DEBT', this)">
+                Has Debt / Overdue <span class="grad-tab-pill pill-debt" id="count-debt">0</span>
+            </button>
+            <button type="button" class="grad-tab-btn" onclick="setTabFilter('DEBARRED', this)">
+                Card Locked <span class="grad-tab-pill pill-locked" id="count-debarred">0</span>
+            </button>
+            <button type="button" class="grad-tab-btn" onclick="setTabFilter('NOTFOUND', this)">
+                Not Found <span class="grad-tab-pill pill-notfound" id="count-notfound">0</span>
+            </button>
+        </div>
+
+        <!-- ROW 2: SEARCH, CLASS FILTER, DEBT FILTER, SORT SELECTOR -->
+        <div class="grad-filter-row">
+            <!-- Search input -->
+            <div class="grad-search-box">
+                <span class="grad-search-icon">&#128269;</span>
+                <input type="text" id="filter-search" class="grad-search-input" placeholder="Quick search: ID, Name, Class..." oninput="handleSearchInput(this)">
+                <span id="search-clear-btn" class="grad-search-clear" onclick="clearSearch()">&#10005;</span>
             </div>
+
+            <!-- Filter Class dropdown -->
+            <select id="filter-class" class="grad-select" onchange="applyFilters()">
+                <option value="">All Classes / Cohorts</option>
+            </select>
+
+            <!-- Filter Debt Type dropdown -->
+            <select id="filter-debt-type" class="grad-select" onchange="applyFilters()">
+                <option value="">All Debt Conditions</option>
+                <option value="OVERDUE">Has Overdue Loans</option>
+                <option value="FINE">Has Pending Fines</option>
+                <option value="BORROWING_OK">Active Loans (Not Overdue)</option>
+                <option value="NO_DEBT">No Loans &amp; No Fines</option>
+            </select>
+
+            <!-- Sort selector dropdown -->
+            <select id="sort-selector" class="grad-select" onchange="handleSortSelectorChange(this)">
+                <option value="index_asc">Sort: Default (Input Order)</option>
+                <option value="cardnumber_asc">Student ID: A &rarr; Z</option>
+                <option value="cardnumber_desc">Student ID: Z &rarr; A</option>
+                <option value="name_asc">Full Name: A &rarr; Z</option>
+                <option value="name_desc">Full Name: Z &rarr; A</option>
+                <option value="books_desc">Books Borrowed: Highest First</option>
+                <option value="fine_desc">Fines: Highest First</option>
+                <option value="debt_first">Has Debt First</option>
+                <option value="cleared_first">Cleared First</option>
+            </select>
+
+            <!-- Reset filters button -->
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="resetAllFilters()" title="Reset all filters">
+                &#8634; Reset
+            </button>
         </div>
     </div>
 
-    <div class="grad-stats">
-        <div class="grad-stat-card">
-            <span class="grad-stat-label">Tổng số mã nạp</span>
-            <span class="grad-stat-val" id="stat-total">0</span>
+    <!-- ACTION TOOLBAR -->
+    <div class="grad-action-toolbar">
+        <div class="grad-selection-summary">
+            Showing <strong id="visible-count">0</strong> / <span id="total-count">0</span> students
+            &bull; Selected <strong id="selected-count" style="color: var(--ftu-crimson);">0</strong> items
         </div>
-        <div class="grad-stat-card">
-            <span class="grad-stat-label">Đủ điều kiện (Không nợ)</span>
-            <span class="grad-stat-val success" id="stat-cleared">0</span>
-        </div>
-        <div class="grad-stat-card">
-            <span class="grad-stat-label">Chưa đủ điều kiện (Còn nợ)</span>
-            <span class="grad-stat-val danger" id="stat-debt">0</span>
-        </div>
-        <div class="grad-stat-card">
-            <span class="grad-stat-label">Không tìm thấy</span>
-            <span class="grad-stat-val" id="stat-notfound">0</span>
+
+        <div class="grad-actions-group">
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()" title="Send email reminder to return books">
+                &#9993; Send Email Reminders
+            </button>
+            <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()" title="Batch lock cards for graduated students (Koha + SSO)">
+                &#128274; Batch Lock Cards
+            </button>
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected()" title="Batch unlock cards for selected students">
+                &#128275; Batch Unlock Cards
+            </button>
+            <button type="button" class="grad-btn grad-btn-success grad-btn-sm" onclick="exportExcel()" title="Export results to Excel file">
+                &#128196; Export to Excel
+            </button>
         </div>
     </div>
 
-    <div class="grad-toolbar">
-        <div class="grad-filters">
-            <button type="button" class="grad-filter-btn active" onclick="setFilter('ALL', this)">Tất cả (<span id="count-all">0</span>)</button>
-            <button type="button" class="grad-filter-btn" onclick="setFilter('DEBT', this)">Còn nợ sách (<span id="count-debt">0</span>)</button>
-            <button type="button" class="grad-filter-btn" onclick="setFilter('CLEARED', this)">Đủ điều kiện (<span id="count-cleared">0</span>)</button>
-            <button type="button" class="grad-filter-btn" onclick="setFilter('DEBARRED', this)">Đã khóa thẻ (<span id="count-debarred">0</span>)</button>
-        </div>
-
-        <div style="display: flex; gap: 8px;">
-            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()">Gửi email nhắc nhở đã chọn</button>
-            <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()">Khóa thẻ hàng loạt đã chọn</button>
-            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcel()">Xuất kết quả Excel</button>
-        </div>
-    </div>
-
-    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 4px;">
+    <!-- RESULTS TABLE -->
+    <div class="grad-table-container">
         <table class="grad-table">
             <thead>
                 <tr>
-                    <th style="width: 32px; text-align: center;"><input type="checkbox" id="check-all" onchange="toggleCheckAll(this)"></th>
-                    <th style="width: 40px; text-align: center;">STT</th>
-                    <th style="width: 110px;">Mã sinh viên</th>
-                    <th>Họ và tên</th>
-                    <th style="width: 120px;">Lớp / Khóa</th>
-                    <th style="width: 90px; text-align: center;">Sách nợ</th>
-                    <th style="width: 90px; text-align: right;">Tiền phạt</th>
-                    <th style="width: 150px; text-align: center;">Xét tốt nghiệp</th>
-                    <th style="width: 130px; text-align: center;">Trạng thái thẻ</th>
-                    <th style="width: 140px; text-align: center;">Thao tác</th>
+                    <th style="width: 34px; text-align: center;">
+                        <input type="checkbox" id="check-all" onchange="toggleCheckAll(this)" title="Select all displayed rows">
+                    </th>
+                    <th class="sortable" style="width: 45px; text-align: center;" onclick="sortBy('index')">
+                        # <span class="grad-sort-icon" id="sort-index">&#8645;</span>
+                    </th>
+                    <th class="sortable" style="width: 120px;" onclick="sortBy('cardnumber')">
+                        Student ID <span class="grad-sort-icon" id="sort-cardnumber">&#8645;</span>
+                    </th>
+                    <th class="sortable" onclick="sortBy('name')">
+                        Full Name <span class="grad-sort-icon" id="sort-name">&#8645;</span>
+                    </th>
+                    <th class="sortable" style="width: 130px;" onclick="sortBy('class')">
+                        Class / Cohort <span class="grad-sort-icon" id="sort-class">&#8645;</span>
+                    </th>
+                    <th class="sortable" style="width: 100px; text-align: center;" onclick="sortBy('books')">
+                        Loans <span class="grad-sort-icon" id="sort-books">&#8645;</span>
+                    </th>
+                    <th class="sortable" style="width: 100px; text-align: right;" onclick="sortBy('fine')">
+                        Fines <span class="grad-sort-icon" id="sort-fine">&#8645;</span>
+                    </th>
+                    <th class="sortable" style="width: 150px; text-align: center;" onclick="sortBy('grad_status')">
+                        Clearance <span class="grad-sort-icon" id="sort-grad_status">&#8645;</span>
+                    </th>
+                    <th class="sortable" style="width: 130px; text-align: center;" onclick="sortBy('card_status')">
+                        Card Status <span class="grad-sort-icon" id="sort-card_status">&#8645;</span>
+                    </th>
+                    <th style="width: 150px; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody id="results-tbody">
                 <tr>
-                    <td colspan="10" style="text-align: center; color: #64748b; padding: 30px;">
-                        Chưa có dữ liệu. Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên để đối soát.
+                    <td colspan="10">
+                        <div class="grad-empty-state">
+                            <div class="grad-empty-icon">&#128221;</div>
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No verification data</div>
+                            <div style="font-size: 12px;">Please upload an Excel/CSV file or paste student IDs above to start verification.</div>
+                        </div>
                     </td>
                 </tr>
             </tbody>
         </table>
+
+        <!-- Table pagination / footer -->
+        <div id="pagination-bar" class="grad-pagination-bar" style="display: none;">
+            <div>
+                Page <span id="current-page-num">1</span> / <span id="total-pages-num">1</span>
+                &bull; Rows per page:
+                <select id="page-size-selector" onchange="changePageSize(this.value)" style="padding: 2px 4px; font-size: 11.5px; border-radius: 4px; border: 1px solid var(--ftu-slate-200);">
+                    <option value="50">50</option>
+                    <option value="100" selected>100</option>
+                    <option value="200">200</option>
+                    <option value="500">500</option>
+                    <option value="ALL">All</option>
+                </select>
+            </div>
+            <div class="grad-pages" id="pagination-controls"></div>
+        </div>
     </div>
 </div>
 
 [% INCLUDE 'intranet-bottom.inc' %]
 
+<!-- SheetJS for Excel processing (loaded from SSO internal domain) -->
 <script src="/sso/xlsx.full.min.js"></script>
-<script>
-let rawDataList = [];
-let currentFilter = 'ALL';
 
-document.getElementById('file-input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
+<script>
+// ==============================================================================
+// STATE MANAGEMENT & DATA STORE
+// ==============================================================================
+let rawDataList = [];        // Raw records returned from Koha API
+let filteredDataList = [];   // Filtered and sorted records
+let currentTabFilter = 'ALL';
+let currentSearchQuery = '';
+let currentClassFilter = '';
+let currentDebtFilter = '';
+let currentSort = { key: 'index', dir: 'asc' };
+
+// Pagination
+let currentPage = 1;
+let pageSize = 100;
+
+// Selected set
+const selectedSet = new Set();
+
+// ==============================================================================
+// INITIALIZATION & EVENT LISTENERS
+// ==============================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    setupDragAndDrop();
+    updateInputCounter();
+});
+
+function setupDragAndDrop() {
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+
+    ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            handleSelectedFile(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            handleSelectedFile(e.target.files[0]);
+        }
+    });
+}
+
+function handleSelectedFile(file) {
     if (!file) return;
+
+    const dropzoneText = document.getElementById('dropzone-text');
+    dropzoneText.innerHTML = '<strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
 
     const reader = new FileReader();
     reader.onload = function(evt) {
@@ -182,7 +859,7 @@ document.getElementById('file-input').addEventListener('change', function(e) {
                 const headerRow = jsonSheet[0];
                 for (let c = 0; c < headerRow.length; c++) {
                     const colName = String(headerRow[c] || '').toLowerCase().trim();
-                    if (colName.includes('mã') || colName.includes('mssv') || colName.includes('cardnumber') || colName.includes('uid')) {
+                    if (colName.includes('mã') || colName.includes('mssv') || colName.includes('cardnumber') || colName.includes('uid') || colName.includes('student')) {
                         headerColIdx = c;
                         break;
                     }
@@ -198,49 +875,84 @@ document.getElementById('file-input').addEventListener('change', function(e) {
             }
 
             if (extractedUids.length === 0) {
-                showAlert('Không tìm thấy dữ liệu mã sinh viên trong tệp đã chọn.', 'error');
+                showAlert('No student IDs found in file ' + file.name, 'error');
                 return;
             }
 
             document.getElementById('uids-input').value = extractedUids.join('\n');
-            showAlert('Đã nạp thành công ' + extractedUids.length + ' mã sinh viên từ tệp.', 'success');
+            updateInputCounter();
+            showAlert('Loaded ' + extractedUids.length + ' student IDs from file: ' + file.name, 'success');
             startCheck();
         } catch (err) {
-            showAlert('Lỗi khi đọc tệp Excel: ' + err.message, 'error');
+            showAlert('Error reading Excel/CSV file: ' + err.message, 'error');
         }
     };
     reader.readAsArrayBuffer(file);
-});
+}
+
+function updateInputCounter() {
+    const text = document.getElementById('uids-input').value.trim();
+    if (!text) {
+        document.getElementById('uid-input-counter').textContent = '0 IDs';
+        return;
+    }
+    const lines = text.split(/[\r\n,;\t]+/).filter(l => l.trim().length > 0);
+    document.getElementById('uid-input-counter').textContent = lines.length + ' IDs';
+}
 
 function clearInput() {
     document.getElementById('file-input').value = '';
+    document.getElementById('dropzone-text').textContent = 'Drag and drop file here, or click to browse';
     document.getElementById('uids-input').value = '';
+    document.getElementById('filter-search').value = '';
+    document.getElementById('search-clear-btn').style.display = 'none';
+    updateInputCounter();
     rawDataList = [];
+    filteredDataList = [];
+    selectedSet.clear();
+    updateStatsAndBadges();
+    populateClassDropdown();
     renderTable();
-    updateStats();
 }
 
 function showAlert(msg, type) {
     const el = document.getElementById('status-alert');
     el.className = 'status-msg ' + (type || 'success');
-    el.textContent = msg;
+    el.innerHTML = (type === 'error' ? '&#9888; ' : '&#10003; ') + escapeHtml(msg);
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     setTimeout(() => { el.style.display = 'none'; }, 8000);
 }
 
+function downloadSampleExcel() {
+    const sampleData = [
+        ['Student ID', 'Full Name', 'Class / Cohort', 'Notes'],
+        ['2011110001', 'Nguyen Van An', 'K60-CLC1', 'Standard program'],
+        ['2011110002', 'Tran Thi Binh', 'K60-TCNH', 'Standard program'],
+        ['2011110003', 'Le Hoang Cuong', 'K60-KTQT', 'Advanced program'],
+        ['2011110004', 'Pham Minh Duc', 'K60-QTKD', 'High quality program']
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Students");
+    XLSX.writeFile(wb, "FTU_Sample_Graduation_Clearance.xlsx");
+}
+
+// ==============================================================================
+// API INTERACTION: VERIFICATION
+// ==============================================================================
 async function startCheck() {
     const rawText = document.getElementById('uids-input').value.trim();
     if (!rawText) {
-        showAlert('Vui lòng nhập hoặc nạp danh sách mã sinh viên.', 'error');
+        showAlert('Please enter student IDs or upload an Excel/CSV file.', 'error');
         return;
     }
 
     const btn = document.getElementById('btn-check');
     btn.disabled = true;
-    btn.textContent = 'Đang đối soát...';
+    btn.innerHTML = '&#9203; Verifying...';
 
     const tbody = document.getElementById('results-tbody');
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 24px; color: #475569;">Đang truy vấn CSDL Koha và đồng bộ SSO... Vui lòng đợi.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);"><div style="font-size: 24px; margin-bottom: 8px;">&#9203;</div>Querying Koha database and syncing account statuses... Please wait.</td></tr>';
 
     try {
         const formData = new FormData();
@@ -256,22 +968,29 @@ async function startCheck() {
 
         const data = await res.json();
         if (data.success) {
-            rawDataList = data.results || [];
-            updateStats();
-            renderTable();
-            showAlert('Đối soát hoàn tất: ' + data.total_input + ' mã sinh viên (' + data.count_cleared + ' đủ điều kiện, ' + data.count_has_debt + ' còn nợ sách).', 'success');
+            rawDataList = (data.results || []).map((item, idx) => {
+                item._original_index = idx + 1;
+                return item;
+            });
+
+            selectedSet.clear();
+            populateClassDropdown();
+            updateStatsAndBadges();
+            applyFilters();
+
+            showAlert('Verification complete: ' + data.total_input + ' IDs (' + data.count_cleared + ' cleared, ' + data.count_has_debt + ' has debt/overdue, ' + data.count_not_found + ' not found).', 'success');
         } else {
-            showAlert('Lỗi: ' + (data.error || 'Không xác định'), 'error');
+            showAlert('System error: ' + (data.error || 'Unknown error'), 'error');
         }
     } catch (err) {
-        showAlert('Lỗi kết nối máy chủ: ' + err.message, 'error');
+        showAlert('Network connection error: ' + err.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Kiểm tra đối soát';
+        btn.innerHTML = '&#128269; Start Verification';
     }
 }
 
-function updateStats() {
+function updateStatsAndBadges() {
     let total = rawDataList.length;
     let cleared = 0;
     let debt = 0;
@@ -286,83 +1005,363 @@ function updateStats() {
         if (item.is_debarred) debarred++;
     });
 
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-cleared').textContent = cleared;
-    document.getElementById('stat-debt').textContent = debt;
-    document.getElementById('stat-notfound').textContent = notfound;
-
     document.getElementById('count-all').textContent = total;
-    document.getElementById('count-debt').textContent = debt;
     document.getElementById('count-cleared').textContent = cleared;
+    document.getElementById('count-debt').textContent = debt;
     document.getElementById('count-debarred').textContent = debarred;
+    document.getElementById('count-notfound').textContent = notfound;
+    document.getElementById('total-count').textContent = total;
 }
 
-function setFilter(filterType, btnEl) {
-    currentFilter = filterType;
-    document.querySelectorAll('.grad-filter-btn').forEach(b => b.classList.remove('active'));
+function populateClassDropdown() {
+    const classSelect = document.getElementById('filter-class');
+    const currentVal = classSelect.value;
+    classSelect.innerHTML = '<option value="">All Classes / Cohorts</option>';
+
+    const classCounts = {};
+    rawDataList.forEach(item => {
+        const c = (item.student_class || '').trim();
+        if (c) {
+            classCounts[c] = (classCounts[c] || 0) + 1;
+        }
+    });
+
+    const sortedClasses = Object.keys(classCounts).sort();
+    sortedClasses.forEach(className => {
+        const opt = document.createElement('option');
+        opt.value = className;
+        opt.textContent = className + ' (' + classCounts[className] + ')';
+        if (className === currentVal) opt.selected = true;
+        classSelect.appendChild(opt);
+    });
+}
+
+// ==============================================================================
+// FILTERING & SEARCHING
+// ==============================================================================
+function setTabFilter(tab, btnEl) {
+    currentTabFilter = tab;
+    document.querySelectorAll('.grad-tab-btn').forEach(b => b.classList.remove('active'));
     if (btnEl) btnEl.classList.add('active');
-    renderTable();
+    currentPage = 1;
+    applyFilters();
 }
 
-function renderTable() {
-    const tbody = document.getElementById('results-tbody');
-    let filtered = rawDataList.filter(item => {
-        if (currentFilter === 'DEBT') return item.has_debt;
-        if (currentFilter === 'CLEARED') return item.is_cleared;
-        if (currentFilter === 'DEBARRED') return item.is_debarred;
+function handleSearchInput(input) {
+    currentSearchQuery = input.value.trim().toLowerCase();
+    document.getElementById('search-clear-btn').style.display = currentSearchQuery ? 'block' : 'none';
+    currentPage = 1;
+    applyFilters();
+}
+
+function clearSearch() {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('search-clear-btn').style.display = 'none';
+    currentSearchQuery = '';
+    currentPage = 1;
+    applyFilters();
+}
+
+function resetAllFilters() {
+    currentTabFilter = 'ALL';
+    currentSearchQuery = '';
+    currentClassFilter = '';
+    currentDebtFilter = '';
+    currentSort = { key: 'index', dir: 'asc' };
+
+    document.querySelectorAll('.grad-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.grad-tab-btn').classList.add('active');
+
+    document.getElementById('filter-search').value = '';
+    document.getElementById('search-clear-btn').style.display = 'none';
+    document.getElementById('filter-class').value = '';
+    document.getElementById('filter-debt-type').value = '';
+    document.getElementById('sort-selector').value = 'index_asc';
+
+    currentPage = 1;
+    applyFilters();
+}
+
+function applyFilters() {
+    currentClassFilter = document.getElementById('filter-class').value;
+    currentDebtFilter = document.getElementById('filter-debt-type').value;
+
+    filteredDataList = rawDataList.filter(item => {
+        if (currentTabFilter === 'CLEARED' && !item.is_cleared) return false;
+        if (currentTabFilter === 'DEBT' && !item.has_debt) return false;
+        if (currentTabFilter === 'DEBARRED' && !item.is_debarred) return false;
+        if (currentTabFilter === 'NOTFOUND' && !item.is_not_found) return false;
+
+        if (currentClassFilter && (item.student_class || '').trim() !== currentClassFilter) return false;
+
+        if (currentDebtFilter === 'OVERDUE' && (item.total_overdue || 0) <= 0) return false;
+        if (currentDebtFilter === 'FINE' && (item.total_fine || 0) <= 0) return false;
+        if (currentDebtFilter === 'BORROWING_OK' && ((item.total_borrowed || 0) <= 0 || (item.total_overdue || 0) > 0)) return false;
+        if (currentDebtFilter === 'NO_DEBT' && ((item.total_borrowed || 0) > 0 || (item.total_fine || 0) > 0)) return false;
+
+        if (currentSearchQuery) {
+            const cardnumber = String(item.cardnumber || '').toLowerCase();
+            const fullName = String(item.full_name || '').toLowerCase();
+            const studentClass = String(item.student_class || '').toLowerCase();
+            if (!cardnumber.includes(currentSearchQuery) && !fullName.includes(currentSearchQuery) && !studentClass.includes(currentSearchQuery)) {
+                return false;
+            }
+        }
+
         return true;
     });
 
-    if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#64748b; padding:24px;">Không có bản ghi nào phù hợp với bộ lọc.</td></tr>';
+    applySorting();
+    document.getElementById('visible-count').textContent = filteredDataList.length;
+    updateSelectionCounter();
+    renderTable();
+}
+
+// ==============================================================================
+// SORTING
+// ==============================================================================
+function handleSortSelectorChange(select) {
+    const val = select.value;
+    const parts = val.split('_');
+    const key = parts[0];
+    const dir = parts[1] || 'asc';
+
+    if (key === 'index') {
+        currentSort = { key: 'index', dir: dir };
+    } else if (key === 'cardnumber') {
+        currentSort = { key: 'cardnumber', dir: dir };
+    } else if (key === 'name') {
+        currentSort = { key: 'name', dir: dir };
+    } else if (key === 'books') {
+        currentSort = { key: 'books', dir: 'desc' };
+    } else if (key === 'fine') {
+        currentSort = { key: 'fine', dir: 'desc' };
+    } else if (key === 'debt') {
+        currentSort = { key: 'debt_first', dir: 'asc' };
+    } else if (key === 'cleared') {
+        currentSort = { key: 'cleared_first', dir: 'asc' };
+    }
+
+    applySorting();
+    renderTable();
+}
+
+function sortBy(columnKey) {
+    if (currentSort.key === columnKey) {
+        currentSort.dir = (currentSort.dir === 'asc') ? 'desc' : 'asc';
+    } else {
+        currentSort.key = columnKey;
+        currentSort.dir = (columnKey === 'books' || columnKey === 'fine') ? 'desc' : 'asc';
+    }
+
+    const selector = document.getElementById('sort-selector');
+    if (columnKey === 'index') selector.value = 'index_' + currentSort.dir;
+    else if (columnKey === 'cardnumber') selector.value = 'cardnumber_' + currentSort.dir;
+    else if (columnKey === 'name') selector.value = 'name_' + currentSort.dir;
+    else if (columnKey === 'books') selector.value = 'books_desc';
+    else if (columnKey === 'fine') selector.value = 'fine_desc';
+    else selector.value = '';
+
+    applySorting();
+    renderTable();
+}
+
+function applySorting() {
+    const { key, dir } = currentSort;
+    const sign = (dir === 'desc') ? -1 : 1;
+
+    filteredDataList.sort((a, b) => {
+        if (key === 'index') {
+            return (a._original_index - b._original_index) * sign;
+        }
+        if (key === 'cardnumber') {
+            return String(a.cardnumber || '').localeCompare(String(b.cardnumber || '')) * sign;
+        }
+        if (key === 'name') {
+            return String(a.full_name || '').localeCompare(String(b.full_name || ''), 'vi', { sensitivity: 'base' }) * sign;
+        }
+        if (key === 'class') {
+            return String(a.student_class || '').localeCompare(String(b.student_class || '')) * sign;
+        }
+        if (key === 'books') {
+            const diff = (Number(a.total_borrowed) || 0) - (Number(b.total_borrowed) || 0);
+            if (diff !== 0) return diff * sign;
+            return ((Number(a.total_overdue) || 0) - (Number(b.total_overdue) || 0)) * sign;
+        }
+        if (key === 'fine') {
+            return ((Number(a.total_fine) || 0) - (Number(b.total_fine) || 0)) * sign;
+        }
+        if (key === 'grad_status') {
+            const getPriority = (x) => x.is_not_found ? 3 : (x.has_debt ? 2 : 1);
+            return (getPriority(a) - getPriority(b)) * sign;
+        }
+        if (key === 'card_status') {
+            return ((a.is_debarred ? 1 : 0) - (b.is_debarred ? 1 : 0)) * sign;
+        }
+        if (key === 'debt_first') {
+            return ((b.has_debt ? 1 : 0) - (a.has_debt ? 1 : 0));
+        }
+        if (key === 'cleared_first') {
+            return ((b.is_cleared ? 1 : 0) - (a.is_cleared ? 1 : 0));
+        }
+        return 0;
+    });
+
+    document.querySelectorAll('.grad-table th.sortable').forEach(th => th.classList.remove('sorted'));
+    document.querySelectorAll('.grad-sort-icon').forEach(icon => icon.innerHTML = '&#8645;');
+
+    const activeThIcon = document.getElementById('sort-' + key);
+    if (activeThIcon) {
+        activeThIcon.closest('th').classList.add('sorted');
+        activeThIcon.innerHTML = (dir === 'asc') ? '&#9650;' : '&#9660;';
+    }
+}
+
+// ==============================================================================
+// TABLE RENDERING & PAGINATION
+// ==============================================================================
+function renderTable() {
+    const tbody = document.getElementById('results-tbody');
+    const paginationBar = document.getElementById('pagination-bar');
+
+    if (rawDataList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div class="grad-empty-icon">&#128221;</div><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No verification data</div><div style="font-size: 12px;">Please upload an Excel/CSV file or paste student IDs above to start verification.</div></div></td></tr>';
+        paginationBar.style.display = 'none';
+        updateCheckAllState();
         return;
     }
 
+    if (filteredDataList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div class="grad-empty-icon">&#128270;</div><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No matching records found</div><div style="font-size: 12px;">No students match the current filter or search criteria.</div></div></td></tr>';
+        paginationBar.style.display = 'none';
+        updateCheckAllState();
+        return;
+    }
+
+    const totalItems = filteredDataList.length;
+    let actualPageSize = (pageSize === 'ALL') ? totalItems : Number(pageSize);
+    let totalPages = Math.ceil(totalItems / actualPageSize) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * actualPageSize;
+    const endIdx = (pageSize === 'ALL') ? totalItems : Math.min(startIdx + actualPageSize, totalItems);
+    const pageItems = filteredDataList.slice(startIdx, endIdx);
+
     let html = '';
-    filtered.forEach((item, idx) => {
-        let gradStatusBadge = item.is_not_found ? '<span class="grad-badge badge-notfound">Không tìm thấy</span>' : (item.has_debt ? '<span class="grad-badge badge-debt">Chưa đủ điều kiện</span>' : '<span class="grad-badge badge-cleared">Đủ điều kiện</span>');
-        let cardStatusBadge = item.is_debarred ? '<span class="grad-badge badge-locked">Đã khóa thẻ</span>' : '<span class="grad-badge" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Hoạt động</span>';
-        let booksDisplay = item.total_borrowed;
+    pageItems.forEach((item, idx) => {
+        const isSelected = selectedSet.has(item.cardnumber);
+
+        let gradStatusBadge = '';
+        if (item.is_not_found) {
+            gradStatusBadge = '<span class="grad-badge badge-notfound">&#9888; Not Found</span>';
+        } else if (item.has_debt) {
+            gradStatusBadge = '<span class="grad-badge badge-debt">&#10006; Has Debt</span>';
+        } else {
+            gradStatusBadge = '<span class="grad-badge badge-cleared">&#10003; Cleared</span>';
+        }
+
+        let cardStatusBadge = '';
+        if (item.is_debarred) {
+            cardStatusBadge = '<span class="grad-badge badge-locked">&#128274; Card Locked</span>';
+        } else {
+            cardStatusBadge = '<span class="grad-badge badge-active">&#128275; Active</span>';
+        }
+
+        let booksDisplay = item.total_borrowed || 0;
         if (item.total_overdue > 0) {
-            booksDisplay += ' <span style="color:#b91c1c; font-weight:600;">(' + item.total_overdue + ' quá hạn)</span>';
+            booksDisplay += ' <span class="text-danger">(' + item.total_overdue + ' overdue)</span>';
         }
 
         let actions = [];
-        if (item.has_debt) {
-            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')">Gửi email</button>');
+        if (item.borrowernumber) {
+            actions.push('<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + item.borrowernumber + '" target="_blank" class="grad-btn grad-btn-outline grad-btn-sm" title="View patron record">&#128100; Patron</a>');
         }
-        if (!item.is_debarred && !item.is_not_found) {
-            actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')">Khóa thẻ</button>');
+        if (item.has_debt) {
+            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')" title="Send email reminder">&#9993;</button>');
+        }
+        if (!item.is_not_found) {
+            if (item.is_debarred) {
+                actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected([\'' + item.cardnumber + '\'])" title="Unlock card">&#128275;</button>');
+            } else {
+                actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')" title="Lock card">&#128274;</button>');
+            }
         }
 
         let issuesDetailHtml = '';
         if (item.issues && item.issues.length > 0) {
             issuesDetailHtml = '<div class="debt-details" id="issues-' + item.cardnumber + '" style="display:none;">';
             item.issues.forEach(iss => {
-                let overText = iss.is_overdue ? '<span class="text-danger"> [Quá hạn ' + iss.days_overdue + ' ngày]</span>' : '';
-                issuesDetailHtml += '<div class="debt-item">&bull; <strong>' + escapeHtml(iss.title) + '</strong> (' + iss.barcode + ') &mdash; Hạn trả: ' + iss.date_due_formatted + overText + '</div>';
+                let overText = iss.is_overdue ? '<span class="text-danger"> [Overdue ' + iss.days_overdue + ' days]</span>' : '<span class="text-success"> [On time]</span>';
+                issuesDetailHtml += '<div class="debt-item">&bull; <strong>' + escapeHtml(iss.title) + '</strong> (' + iss.barcode + ') &mdash; Due: ' + iss.date_due_formatted + overText + '</div>';
             });
             issuesDetailHtml += '</div>';
         }
 
-        let toggleBtn = item.total_borrowed > 0 ? (' <a href="javascript:void(0)" onclick="toggleIssues(\'' + item.cardnumber + '\')" style="font-size:11px; text-decoration:underline; color:#2563eb; margin-left:4px;">(chi tiết)</a>') : '';
-        let fineText = item.total_fine > 0 ? ('<span class="text-danger">' + Number(item.total_fine).toLocaleString('vi-VN') + ' đ</span>') : '0 đ';
+        let toggleBtn = '';
+        if (item.total_borrowed > 0) {
+            toggleBtn = ' <a href="javascript:void(0)" onclick="toggleIssues(\'' + item.cardnumber + '\')" style="font-size:11px; text-decoration:underline; color:#2563eb; margin-left:4px;">(details)</a>';
+        }
 
-        html += '<tr>' +
-            '<td style="text-align:center;"><input type="checkbox" class="patron-checkbox" value="' + item.cardnumber + '"></td>' +
-            '<td style="text-align:center;">' + (idx + 1) + '</td>' +
-            '<td class="text-mono"><strong>' + item.cardnumber + '</strong></td>' +
-            '<td><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + (item.borrowernumber || '') + '" target="_blank" style="color:#0f172a; font-weight:600; text-decoration:none;">' + escapeHtml(item.full_name) + '</a>' + issuesDetailHtml + '</td>' +
-            '<td>' + escapeHtml(item.student_class) + '</td>' +
+        let fineText = item.total_fine > 0 ? ('<span class="text-danger">' + Number(item.total_fine).toLocaleString('vi-VN') + ' đ</span>') : '<span style="color:#64748b;">0 đ</span>';
+
+        html += '<tr class="' + (isSelected ? 'row-selected' : '') + '">' +
+            '<td style="text-align:center;"><input type="checkbox" class="patron-checkbox" value="' + item.cardnumber + '" ' + (isSelected ? 'checked' : '') + ' onchange="togglePatronSelection(\'' + item.cardnumber + '\', this)"></td>' +
+            '<td style="text-align:center; color:#64748b;">' + (startIdx + idx + 1) + '</td>' +
+            '<td class="text-mono"><strong>' + escapeHtml(item.cardnumber) + '</strong></td>' +
+            '<td><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + (item.borrowernumber || '') + '" target="_blank" style="color:var(--ftu-slate-900); font-weight:600; text-decoration:none;">' + escapeHtml(item.full_name || 'No Name') + '</a>' + issuesDetailHtml + '</td>' +
+            '<td>' + (escapeHtml(item.student_class) || '<span style="color:#94a3b8;">-</span>') + '</td>' +
             '<td style="text-align:center;">' + booksDisplay + toggleBtn + '</td>' +
             '<td style="text-align:right;">' + fineText + '</td>' +
             '<td style="text-align:center;">' + gradStatusBadge + '</td>' +
-            '<td style="text-align:center;">' + cardStatusBadge + (item.notes ? '<div style="font-size:11px; color:#64748b;">' + escapeHtml(item.notes) + '</div>' : '') + '</td>' +
-            '<td style="text-align:center; white-space:nowrap;">' + (actions.join(' ') || '-') + '</td>' +
+            '<td style="text-align:center;">' + cardStatusBadge + (item.notes ? '<div style="font-size:11px; color:#64748b; margin-top:2px;">' + escapeHtml(item.notes) + '</div>' : '') + '</td>' +
+            '<td style="text-align:center; white-space:nowrap;"><div style="display:inline-flex; gap:4px;">' + (actions.join(' ') || '-') + '</div></td>' +
             '</tr>';
     });
 
     tbody.innerHTML = html;
+    updateCheckAllState();
+    renderPagination(totalItems, actualPageSize, totalPages);
+}
+
+function renderPagination(totalItems, actualPageSize, totalPages) {
+    const paginationBar = document.getElementById('pagination-bar');
+    if (totalItems <= actualPageSize || pageSize === 'ALL') {
+        paginationBar.style.display = 'none';
+        return;
+    }
+
+    paginationBar.style.display = 'flex';
+    document.getElementById('current-page-num').textContent = currentPage;
+    document.getElementById('total-pages-num').textContent = totalPages;
+
+    const controls = document.getElementById('pagination-controls');
+    let pagesHtml = '';
+
+    pagesHtml += '<button type="button" class="grad-page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="goToPage(1)">&laquo;</button>';
+    pagesHtml += '<button type="button" class="grad-page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="goToPage(' + (currentPage - 1) + ')">&lsaquo;</button>';
+
+    let startP = Math.max(1, currentPage - 2);
+    let endP = Math.min(totalPages, currentPage + 2);
+    for (let p = startP; p <= endP; p++) {
+        pagesHtml += '<button type="button" class="grad-page-btn ' + (p === currentPage ? 'active' : '') + '" onclick="goToPage(' + p + ')">' + p + '</button>';
+    }
+
+    pagesHtml += '<button type="button" class="grad-page-btn " ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="goToPage(' + (currentPage + 1) + ')">&rsaquo;</button>';
+    pagesHtml += '<button type="button" class="grad-page-btn" ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="goToPage(' + totalPages + ')">&raquo;</button>';
+
+    controls.innerHTML = pagesHtml;
+}
+
+function goToPage(p) {
+    currentPage = p;
+    renderTable();
+}
+
+function changePageSize(sz) {
+    pageSize = sz;
+    currentPage = 1;
+    renderTable();
 }
 
 function toggleIssues(cardnumber) {
@@ -371,34 +1370,93 @@ function toggleIssues(cardnumber) {
     el.style.display = (el.style.display === 'none') ? 'block' : 'none';
 }
 
+// ==============================================================================
+// CHECKBOX SELECTION LOGIC
+// ==============================================================================
+function togglePatronSelection(cardnumber, cb) {
+    if (cb.checked) {
+        selectedSet.add(cardnumber);
+        cb.closest('tr')?.classList.add('row-selected');
+    } else {
+        selectedSet.delete(cardnumber);
+        cb.closest('tr')?.classList.remove('row-selected');
+    }
+    updateSelectionCounter();
+    updateCheckAllState();
+}
+
 function toggleCheckAll(master) {
-    document.querySelectorAll('.patron-checkbox').forEach(cb => { cb.checked = master.checked; });
+    const isChecked = master.checked;
+    filteredDataList.forEach(item => {
+        if (isChecked) {
+            selectedSet.add(item.cardnumber);
+        } else {
+            selectedSet.delete(item.cardnumber);
+        }
+    });
+
+    document.querySelectorAll('.patron-checkbox').forEach(cb => {
+        cb.checked = isChecked;
+        const row = cb.closest('tr');
+        if (row) {
+            if (isChecked) row.classList.add('row-selected');
+            else row.classList.remove('row-selected');
+        }
+    });
+
+    updateSelectionCounter();
+}
+
+function updateCheckAllState() {
+    const master = document.getElementById('check-all');
+    if (!master) return;
+    if (filteredDataList.length === 0) {
+        master.checked = false;
+        master.indeterminate = false;
+        return;
+    }
+
+    let allChecked = true;
+    let anyChecked = false;
+    filteredDataList.forEach(item => {
+        if (selectedSet.has(item.cardnumber)) anyChecked = true;
+        else allChecked = false;
+    });
+
+    master.checked = allChecked && filteredDataList.length > 0;
+    master.indeterminate = !allChecked && anyChecked;
+}
+
+function updateSelectionCounter() {
+    document.getElementById('selected-count').textContent = selectedSet.size;
 }
 
 function getSelectedCardnumbers() {
-    const selected = [];
-    document.querySelectorAll('.patron-checkbox:checked').forEach(cb => { selected.push(cb.value); });
-    return selected;
+    return Array.from(selectedSet);
 }
 
+// ==============================================================================
+// ACTIONS: REMINDERS, LOCK, UNLOCK, EXCEL
+// ==============================================================================
 async function sendReminderSingle(cardnumber) {
-    if (!confirm('Gửi email nhắc nhở hoàn tất trả sách cho sinh viên mã số: ' + cardnumber + '?')) return;
+    if (!confirm('Send book return reminder email to student: ' + cardnumber + '?')) return;
     await executeSendReminders([cardnumber]);
 }
 
 async function sendRemindersSelected() {
     let selected = getSelectedCardnumbers();
     if (selected.length === 0) {
-        const debtUids = rawDataList.filter(i => i.has_debt).map(i => i.cardnumber);
+        const debtUids = filteredDataList.filter(i => i.has_debt).map(i => i.cardnumber);
         if (debtUids.length === 0) {
-            showAlert('Không có sinh viên nào đang nợ sách.', 'error');
+            showAlert('No students with book debt in the current displayed list.', 'error');
             return;
         }
-        if (!confirm('Bạn chưa chọn sinh viên cụ thể. Gửi email nhắc nhở cho TOÀN BỘ ' + debtUids.length + ' sinh viên còn nợ sách?')) return;
+        if (!confirm('No individual student selected. Send reminder email to ALL ' + debtUids.length + ' students with debt?')) return;
         selected = debtUids;
     } else {
-        if (!confirm('Gửi email nhắc nhở cho ' + selected.length + ' sinh viên đã chọn?')) return;
+        if (!confirm('Send reminder email to ' + selected.length + ' selected students?')) return;
     }
+
     await executeSendReminders(selected);
 }
 
@@ -418,31 +1476,32 @@ async function executeSendReminders(uids) {
         if (data.success) {
             showAlert(data.message, 'success');
         } else {
-            showAlert('Lỗi: ' + (data.error || 'Không gửi được email'), 'error');
+            showAlert('Error: ' + (data.error || 'Failed to send emails'), 'error');
         }
     } catch (err) {
-        showAlert('Lỗi gửi email: ' + err.message, 'error');
+        showAlert('Email dispatch error: ' + err.message, 'error');
     }
 }
 
 async function lockSingle(cardnumber) {
-    if (!confirm('Xác nhận khóa thẻ bạn đọc và đồng bộ trạng thái "Người học đã tốt nghiệp" cho mã SV: ' + cardnumber + '?')) return;
+    if (!confirm('Confirm locking card and updating graduation status for ID: ' + cardnumber + '?')) return;
     await executeBatchLock([cardnumber]);
 }
 
 async function batchLockSelected() {
     let selected = getSelectedCardnumbers();
     if (selected.length === 0) {
-        const clearedUids = rawDataList.filter(i => i.is_cleared && !i.is_debarred).map(i => i.cardnumber);
+        const clearedUids = filteredDataList.filter(i => i.is_cleared && !i.is_debarred).map(i => i.cardnumber);
         if (clearedUids.length === 0) {
-            showAlert('Vui lòng chọn ít nhất một sinh viên để khóa thẻ.', 'error');
+            showAlert('Please select at least one student to lock cards.', 'error');
             return;
         }
-        if (!confirm('Bạn chưa chọn sinh viên. Bạn có muốn khóa thẻ hàng loạt cho TOÀN BỘ ' + clearedUids.length + ' sinh viên ĐỦ ĐIỀU KIỆN tốt nghiệp?')) return;
+        if (!confirm('No students selected. Do you want to batch lock cards for ALL ' + clearedUids.length + ' CLEARED students?')) return;
         selected = clearedUids;
     } else {
-        if (!confirm('Xác nhận KHÓA THẺ HÀNG LOẠT cho ' + selected.length + ' sinh viên đã chọn (cập nhật trạng thái "Người học đã tốt nghiệp" trên cả Koha và SSO)?')) return;
+        if (!confirm('Confirm BATCH CARD LOCK for ' + selected.length + ' selected students (synced to Koha & SSO)?')) return;
     }
+
     await executeBatchLock(selected);
 }
 
@@ -464,32 +1523,80 @@ async function executeBatchLock(uids) {
             rawDataList.forEach(item => {
                 if (uids.includes(item.cardnumber)) {
                     item.is_debarred = 1;
-                    item.notes = 'Người học đã tốt nghiệp';
+                    item.notes = 'Graduated Student';
                 }
             });
-            updateStats();
-            renderTable();
+            updateStatsAndBadges();
+            applyFilters();
         } else {
-            showAlert('Lỗi: ' + (data.error || 'Không thể khóa thẻ'), 'error');
+            showAlert('Error: ' + (data.error || 'Failed to lock cards'), 'error');
         }
     } catch (err) {
-        showAlert('Lỗi khóa thẻ: ' + err.message, 'error');
+        showAlert('Lock error: ' + err.message, 'error');
+    }
+}
+
+async function batchUnlockSelected(specificUids) {
+    let selected = specificUids || getSelectedCardnumbers();
+    if (selected.length === 0) {
+        const debarredUids = filteredDataList.filter(i => i.is_debarred).map(i => i.cardnumber);
+        if (debarredUids.length === 0) {
+            showAlert('Please select at least one locked student to unlock.', 'error');
+            return;
+        }
+        if (!confirm('Unlock cards for ALL ' + debarredUids.length + ' locked students in the displayed list?')) return;
+        selected = debarredUids;
+    } else {
+        if (!confirm('Confirm UNLOCK CARDS for ' + selected.length + ' selected students (restores active status on Koha & SSO)?')) return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-batch_unlock');
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+        formData.append('uids', selected.join('\n'));
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert(data.message, 'success');
+            rawDataList.forEach(item => {
+                if (selected.includes(item.cardnumber)) {
+                    item.is_debarred = 0;
+                    item.notes = '';
+                }
+            });
+            updateStatsAndBadges();
+            applyFilters();
+        } else {
+            showAlert('Error: ' + (data.error || 'Failed to unlock cards'), 'error');
+        }
+    } catch (err) {
+        showAlert('Unlock error: ' + err.message, 'error');
     }
 }
 
 function exportExcel() {
     if (rawDataList.length === 0) {
-        showAlert('Chưa có dữ liệu để xuất Excel.', 'error');
+        showAlert('No data to export.', 'error');
         return;
     }
 
+    const listToExport = (selectedSet.size > 0)
+        ? rawDataList.filter(i => selectedSet.has(i.cardnumber))
+        : filteredDataList;
+
     const exportRows = [
-        ['STT', 'Mã sinh viên', 'Họ và tên', 'Lớp / Khóa', 'Khoa / Đơn vị', 'Số sách đang mượn', 'Sách quá hạn', 'Tiền phạt (VNĐ)', 'Tình trạng xét tốt nghiệp', 'Trạng thái thẻ', 'Ghi chú']
+        ['No.', 'Student ID', 'Full Name', 'Class / Cohort', 'Department', 'Loans', 'Overdue', 'Fines (VND)', 'Clearance Status', 'Card Status', 'Notes']
     ];
 
-    rawDataList.forEach((item, idx) => {
-        let gradStatus = item.is_not_found ? 'Không tìm thấy' : (item.has_debt ? 'Chưa đủ điều kiện (Còn nợ sách/tiền)' : 'Đủ điều kiện');
-        let cardStatus = item.is_debarred ? 'Đã khóa thẻ' : 'Hoạt động';
+    listToExport.forEach((item, idx) => {
+        let gradStatus = item.is_not_found ? 'Not Found' : (item.has_debt ? 'Has Debt (Loans/Fines)' : 'Cleared');
+        let cardStatus = item.is_debarred ? 'Card Locked' : 'Active';
 
         exportRows.push([
             idx + 1,
@@ -508,12 +1615,18 @@ function exportExcel() {
 
     const ws = XLSX.utils.aoa_to_sheet(exportRows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "XetTotNghiep");
-    XLSX.writeFile(wb, "FTU_XetTotNghiep_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "GraduationClearance");
+    XLSX.writeFile(wb, "FTU_Graduation_Clearance_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+    showAlert('Exported ' + listToExport.length + ' records to Excel file successfully.', 'success');
 }
 
 function escapeHtml(text) {
     if (!text) return '';
-    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 </script>

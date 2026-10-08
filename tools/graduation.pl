@@ -478,6 +478,91 @@ if ($op eq "batch_lock") {
 }
 
 # ------------------------------------------------------------------------------
+# API 4: MỞ KHÓA THẺ HÀNG LOẠT (OP = BATCH_UNLOCK)
+# ------------------------------------------------------------------------------
+if ($op eq "batch_unlock") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+
+    my $raw_data = $cgi->param("uids") || "";
+    if (!$raw_data) {
+        my $post_body = $cgi->param("POSTDATA") || "";
+        if ($post_body) {
+            eval {
+                my $parsed = $json->decode($post_body);
+                $raw_data = $parsed->{uids} if ref($parsed) eq "HASH";
+            };
+        }
+    }
+
+    my @target_uids = ref($raw_data) eq "ARRAY" ? @$raw_data : split(/[\r\n,;\t]+/, $raw_data);
+    @target_uids = grep { s/^\s+|\s+$//g; length($_) > 0 } @target_uids;
+
+    if (!@target_uids) {
+        print $json->encode({ success => 0, error => "Chưa chọn tài khoản cần mở khóa thẻ" });
+        exit;
+    }
+
+    my $placeholders = join(",", map { "?" } @target_uids);
+
+    # 1. Cập nhật Koha borrowers: debarred = NULL, debarredcomment = ''
+    my $today_str = strftime("%d/%m/%Y", localtime);
+    my $update_query = qq{
+        UPDATE borrowers
+        SET debarred = NULL,
+            debarredcomment = '',
+            borrowernotes = CONCAT(COALESCE(borrowernotes,''), IF(borrowernotes IS NULL OR borrowernotes = '', '', '\n'), '[$today_str] Đã mở khóa thẻ')
+        WHERE cardnumber IN ($placeholders)
+    };
+
+    my $sth_update = $dbh->prepare($update_query);
+    $sth_update->execute(@target_uids);
+    my $rows_affected = $sth_update->rows;
+
+    # 2. Đồng bộ sang OpenLDAP & SSO Portal qua API nội bộ
+    my $sso_synced = 0;
+    eval {
+        my $http = HTTP::Tiny->new(timeout => 5);
+        my $payload = $json->encode({
+            uids   => \@target_uids,
+            status => "ACTIVE",
+            reason => "Mở khóa thẻ thư viện",
+            notes  => "Mở khóa thẻ thư viện"
+        });
+        my @sso_endpoints = (
+            "http://ftulib-sso-portal:8090/api/v1/sso/users/batch-status",
+            "http://10.2.0.226/api/v1/sso/users/batch-status",
+            "http://127.0.0.1:8090/api/v1/sso/users/batch-status"
+        );
+        for my $endpoint (@sso_endpoints) {
+            my $res = $http->post($endpoint, {
+                headers => {
+                    "Content-Type"    => "application/json",
+                    "x-koha-staff"    => "1",
+                    "x-koha-internal" => "1"
+                },
+                content => $payload
+            });
+            if ($res->{success}) {
+                my $res_json = eval { $json->decode($res->{content}) };
+                if ($res_json && $res_json->{success}) {
+                    $sso_synced = $res_json->{count} || scalar(@target_uids);
+                    last;
+                }
+            }
+        }
+    };
+
+    print $json->encode({
+        success       => 1,
+        message       => "Đã mở khóa thẻ thành công $rows_affected sinh viên trên Koha và đồng bộ trạng thái hoạt động sang SSO Portal!",
+        rows_affected => $rows_affected,
+        sso_synced    => $sso_synced,
+        uids          => \@target_uids
+    });
+    exit;
+}
+
+# ------------------------------------------------------------------------------
 # GIAO DIỆN CHÍNH (OP = LIST): XUẤT TEMPLATE TT
 # ------------------------------------------------------------------------------
 $template->param(
