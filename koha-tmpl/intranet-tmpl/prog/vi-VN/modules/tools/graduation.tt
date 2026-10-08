@@ -873,8 +873,7 @@
         <div class="grad-batches-hero">
             <div class="grad-hero-content">
                 <div class="grad-hero-text">
-                    <h1><i class="fa fa-graduation-cap"></i> Quản lý Đợt Xét Tốt Nghiệp</h1>
-                    <p>Khởi tạo và quản lý hồ sơ theo từng đợt tốt nghiệp của trường. Bấm vào một đợt để tra cứu đối soát nợ sách, tự động gửi email nhắc nhở và khóa thẻ hàng loạt mà không cần nạp lại file.</p>
+                    <h1>Quản lý Đợt Xét Tốt Nghiệp</h1>
                 </div>
                 <div class="grad-hero-actions">
                     <button type="button" class="grad-btn grad-btn-crimson grad-btn-lg" onclick="openCreateBatchModal()">
