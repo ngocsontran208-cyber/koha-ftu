@@ -719,8 +719,11 @@
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected()" title="Mở khóa thẻ sinh viên đã chọn">
                 Mở khóa thẻ đã chọn
             </button>
-            <button type="button" class="grad-btn grad-btn-success grad-btn-sm" onclick="exportExcel()" title="Xuất kết quả danh sách ra tệp Excel">
-                Xuất kết quả Excel
+            <button type="button" class="grad-btn grad-btn-success grad-btn-sm" onclick="exportExcelMode('ALL')" title="Xuất toàn bộ danh sách đối soát (Kèm sheet chi tiết sách nợ)">
+                Xuất tất cả danh sách (Excel)
+            </button>
+            <button type="button" class="grad-btn grad-btn-sm" style="background:#ea580c; color:#ffffff; border:1px solid #c2410c;" onclick="exportExcelMode('DEBT_ONLY')" title="Chỉ xuất danh sách những sinh viên đang nợ sách kèm chi tiết từng cuốn">
+                Chỉ xuất danh sách nợ sách (Excel)
             </button>
         </div>
     </div>
@@ -1328,23 +1331,56 @@ function renderTable() {
             }
         }
 
-        // Danh sách sách chi tiết
+        // Danh sách sách chi tiết (Tên sách, Tác giả, Nhà XB, Barcode, Ngày mượn, Hạn trả, Quá hạn)
         let issuesDetailHtml = '';
         if (item.issues && item.issues.length > 0) {
-            issuesDetailHtml = '<div class="debt-details" id="issues-' + item.cardnumber + '" style="display:none;">';
+            issuesDetailHtml = '<div class="debt-details" id="issues-' + item.cardnumber + '" style="display:none; margin-top:8px; padding:10px 12px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">' +
+                '<div style="font-weight:700; color:#9a3412; font-size:12px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">' +
+                '<span>Danh sách tài liệu đang mượn (' + item.issues.length + ' cuốn):</span>' +
+                '<span style="font-weight:normal; font-size:11px; color:#c2410c;">Bấm (ẩn) để thu gọn</span>' +
+                '</div>' +
+                '<table style="width:100%; border-collapse:collapse; font-size:11.5px; background:#ffffff; border:1px solid #fed7aa; border-radius:4px; overflow:hidden;">' +
+                '<thead><tr style="background:#ffedd5; color:#7c2d12; border-bottom:1px solid #fed7aa;">' +
+                '<th style="padding:5px 6px; text-align:left; width:110px;">Mã vạch (Barcode)</th>' +
+                '<th style="padding:5px 6px; text-align:left;">Tên sách (Nhan đề)</th>' +
+                '<th style="padding:5px 6px; text-align:left; width:140px;">Tác giả</th>' +
+                '<th style="padding:5px 6px; text-align:left; width:140px;">Nhà xuất bản</th>' +
+                '<th style="padding:5px 6px; text-align:center; width:85px;">Ngày mượn</th>' +
+                '<th style="padding:5px 6px; text-align:center; width:85px;">Hạn trả</th>' +
+                '<th style="padding:5px 6px; text-align:center; width:105px;">Tình trạng</th>' +
+                '</tr></thead><tbody>';
+
             item.issues.forEach(iss => {
-                let overText = iss.is_overdue ? '<span class="text-danger"> [Quá hạn ' + iss.days_overdue + ' ngày]</span>' : '<span class="text-success"> [Trong hạn]</span>';
-                issuesDetailHtml += '<div class="debt-item">&bull; <strong>' + escapeHtml(iss.title) + '</strong> (' + iss.barcode + ') &mdash; Hạn trả: ' + iss.date_due_formatted + overText + '</div>';
+                let overBadge = iss.is_overdue
+                    ? '<span class="grad-badge badge-debt" style="font-size:10.5px;">Quá hạn ' + iss.days_overdue + ' ngày</span>'
+                    : '<span class="grad-badge badge-cleared" style="font-size:10.5px;">Trong hạn</span>';
+
+                issuesDetailHtml += '<tr style="border-bottom:1px solid #f1f5f9;">' +
+                    '<td style="padding:5px 6px;" class="text-mono"><strong>' + escapeHtml(iss.barcode || '-') + '</strong></td>' +
+                    '<td style="padding:5px 6px; font-weight:600; color:#1e293b;">' + escapeHtml(iss.title || '-') + '</td>' +
+                    '<td style="padding:5px 6px; color:#475569;">' + escapeHtml(iss.author || '-') + '</td>' +
+                    '<td style="padding:5px 6px; color:#475569;">' + escapeHtml(iss.publisher || '-') + '</td>' +
+                    '<td style="padding:5px 6px; text-align:center; color:#64748b;">' + (iss.issuedate_formatted || '-') + '</td>' +
+                    '<td style="padding:5px 6px; text-align:center; color:#64748b;">' + (iss.date_due_formatted || '-') + '</td>' +
+                    '<td style="padding:5px 6px; text-align:center;">' + overBadge + '</td>' +
+                    '</tr>';
             });
-            issuesDetailHtml += '</div>';
+
+            issuesDetailHtml += '</tbody></table></div>';
         }
 
         let toggleBtn = '';
         if (item.total_borrowed > 0) {
-            toggleBtn = ' <a href="javascript:void(0)" onclick="toggleIssues(\'' + item.cardnumber + '\')" style="font-size:11px; text-decoration:underline; color:#2563eb; margin-left:4px;">(chi tiết)</a>';
+            toggleBtn = ' <a href="javascript:void(0)" onclick="toggleIssues(\'' + item.cardnumber + '\')" style="font-size:11px; text-decoration:underline; color:#2563eb; margin-left:4px; font-weight:600;">(chi tiết)</a>';
         }
 
         let fineText = item.total_fine > 0 ? ('<span class="text-danger">' + Number(item.total_fine).toLocaleString('vi-VN') + ' đ</span>') : '<span style="color:#64748b;">0 đ</span>';
+
+        // Trạng thái thẻ: chỉ hiển thị huy hiệu chuẩn, không kèm chuỗi metadata rác
+        let cardNoteDisplay = '';
+        if (item.is_debarred) {
+            cardNoteDisplay = '<div style="font-size:11px; color:#b91c1c; font-weight:600; margin-top:3px;">Người học đã tốt nghiệp</div>';
+        }
 
         html += '<tr class="' + (isSelected ? 'row-selected' : '') + '">' +
             '<td style="text-align:center;"><input type="checkbox" class="patron-checkbox" value="' + item.cardnumber + '" ' + (isSelected ? 'checked' : '') + ' onchange="togglePatronSelection(\'' + item.cardnumber + '\', this)"></td>' +
@@ -1355,7 +1391,7 @@ function renderTable() {
             '<td style="text-align:center;">' + booksDisplay + toggleBtn + '</td>' +
             '<td style="text-align:right;">' + fineText + '</td>' +
             '<td style="text-align:center;">' + gradStatusBadge + '</td>' +
-            '<td style="text-align:center;">' + cardStatusBadge + (item.notes ? '<div style="font-size:11px; color:#64748b; margin-top:2px;">' + escapeHtml(item.notes) + '</div>' : '') + '</td>' +
+            '<td style="text-align:center;">' + cardStatusBadge + cardNoteDisplay + '</td>' +
             '<td style="text-align:center; white-space:nowrap;"><div style="display:inline-flex; gap:4px;">' + (actions.join(' ') || '-') + '</div></td>' +
             '</tr>';
     });
@@ -1621,45 +1657,263 @@ async function batchUnlockSelected(specificUids) {
     }
 }
 
-// Xuất file Excel báo cáo
-function exportExcel() {
+// ==============================================================================
+// EXPORT EXCEL (2 HƯỚNG: TẤT CẢ DANH SÁCH & CHỈ XUẤT NHỮNG NGƯỜI ĐANG NỢ SÁCH)
+// ==============================================================================
+function exportExcelMode(mode) {
     if (rawDataList.length === 0) {
-        showAlert('Chưa có dữ liệu để xuất Excel.', 'error');
+        showAlert('Chưa có dữ liệu đối soát để xuất Excel.', 'error');
         return;
     }
 
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    // --------------------------------------------------------------------------
+    // HƯỚNG 1: CHỈ XUẤT NHỮNG NGƯỜI ĐANG NỢ SÁCH (LÀM RÕ TỪNG ĐẦU SÁCH MƯỢN)
+    // --------------------------------------------------------------------------
+    if (mode === 'DEBT_ONLY') {
+        const debtPatrons = rawDataList.filter(i => (i.total_borrowed > 0 || (i.issues && i.issues.length > 0)));
+        if (debtPatrons.length === 0) {
+            showAlert('Tuyệt vời! Không có sinh viên nào đang nợ sách trong danh sách đối soát.', 'success');
+            return;
+        }
+
+        const exportRows = [
+            [
+                'STT',
+                'Mã sinh viên',
+                'Họ và tên',
+                'Lớp / Khóa',
+                'Khoa / Đơn vị',
+                'Số điện thoại',
+                'Email',
+                'Mã vạch (Barcode)',
+                'Tên sách (Nhan đề)',
+                'Tác giả',
+                'Nhà xuất bản',
+                'Ngày mượn',
+                'Hạn trả',
+                'Số ngày quá hạn',
+                'Tình trạng quá hạn',
+                'Tiền phạt (VNĐ)',
+                'Trạng thái thẻ'
+            ]
+        ];
+
+        let stt = 1;
+        debtPatrons.forEach(p => {
+            const cardStatus = p.is_debarred ? 'Đã khóa thẻ' : 'Hoạt động';
+
+            if (p.issues && p.issues.length > 0) {
+                p.issues.forEach(iss => {
+                    const overdueStatus = iss.is_overdue ? ('Quá hạn ' + iss.days_overdue + ' ngày') : 'Trong hạn';
+                    exportRows.push([
+                        stt++,
+                        p.cardnumber,
+                        p.full_name,
+                        p.student_class,
+                        p.department,
+                        p.phone || '',
+                        p.email || '',
+                        iss.barcode || '',
+                        iss.title || '',
+                        iss.author || '',
+                        iss.publisher || '',
+                        iss.issuedate_formatted || '',
+                        iss.date_due_formatted || '',
+                        iss.is_overdue ? Number(iss.days_overdue) : 0,
+                        overdueStatus,
+                        Number(p.total_fine || 0),
+                        cardStatus
+                    ]);
+                });
+            } else {
+                exportRows.push([
+                    stt++,
+                    p.cardnumber,
+                    p.full_name,
+                    p.student_class,
+                    p.department,
+                    p.phone || '',
+                    p.email || '',
+                    '-',
+                    'Đang nợ ' + p.total_borrowed + ' cuốn sách',
+                    '-',
+                    '-',
+                    '-',
+                    '-',
+                    p.total_overdue,
+                    p.total_overdue > 0 ? ('Có ' + p.total_overdue + ' sách quá hạn') : 'Trong hạn',
+                    Number(p.total_fine || 0),
+                    cardStatus
+                ]);
+            }
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(exportRows);
+        ws['!cols'] = [
+            { wch: 6 },  // STT
+            { wch: 15 }, // Mã SV
+            { wch: 24 }, // Họ và tên
+            { wch: 16 }, // Lớp
+            { wch: 24 }, // Khoa
+            { wch: 14 }, // SĐT
+            { wch: 26 }, // Email
+            { wch: 16 }, // Barcode
+            { wch: 38 }, // Tên sách
+            { wch: 24 }, // Tác giả
+            { wch: 24 }, // Nhà XB
+            { wch: 13 }, // Ngày mượn
+            { wch: 13 }, // Hạn trả
+            { wch: 16 }, // Quá hạn
+            { wch: 18 }, // Tình trạng
+            { wch: 15 }, // Tiền phạt
+            { wch: 14 }  // Trạng thái thẻ
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DanhSachNoSach");
+        XLSX.writeFile(wb, "FTU_DanhSach_NoSach_XetTotNghiep_" + todayStr + ".xlsx");
+        showAlert('Đã xuất thành công danh sách ' + debtPatrons.length + ' sinh viên nợ sách (' + (exportRows.length - 1) + ' lượt sách) ra Excel.', 'success');
+        return;
+    }
+
+    // --------------------------------------------------------------------------
+    // HƯỚNG 2: XUẤT TẤT CẢ DANH SÁCH (GỒM SHEET TỔNG HỢP & SHEET CHI TIẾT SÁCH NỢ)
+    // --------------------------------------------------------------------------
     const listToExport = (selectedSet.size > 0)
         ? rawDataList.filter(i => selectedSet.has(i.cardnumber))
-        : filteredDataList;
+        : (filteredDataList.length > 0 ? filteredDataList : rawDataList);
 
-    const exportRows = [
-        ['STT', 'Mã sinh viên', 'Họ và tên', 'Lớp / Khóa', 'Khoa / Đơn vị', 'Số sách đang mượn', 'Sách quá hạn', 'Tiền phạt (VNĐ)', 'Tình trạng xét tốt nghiệp', 'Trạng thái thẻ', 'Ghi chú']
+    // SHEET 1: TỔNG HỢP SINH VIÊN
+    const sheet1Rows = [
+        [
+            'STT',
+            'Mã sinh viên',
+            'Họ và tên',
+            'Lớp / Khóa',
+            'Khoa / Đơn vị',
+            'Số điện thoại',
+            'Email',
+            'Số sách đang mượn',
+            'Số sách quá hạn',
+            'Tiền phạt (VNĐ)',
+            'Tình trạng xét tốt nghiệp',
+            'Trạng thái thẻ'
+        ]
     ];
 
     listToExport.forEach((item, idx) => {
         let gradStatus = item.is_not_found ? 'Không tìm thấy' : (item.has_debt ? 'Chưa đủ điều kiện (Còn nợ sách/tiền)' : 'Đủ điều kiện');
         let cardStatus = item.is_debarred ? 'Đã khóa thẻ' : 'Hoạt động';
 
-        exportRows.push([
+        sheet1Rows.push([
             idx + 1,
             item.cardnumber,
             item.full_name,
             item.student_class,
             item.department,
+            item.phone || '',
+            item.email || '',
             item.total_borrowed,
             item.total_overdue,
-            item.total_fine,
+            Number(item.total_fine || 0),
             gradStatus,
-            cardStatus,
-            item.notes
+            cardStatus
         ]);
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(exportRows);
+    const ws1 = XLSX.utils.aoa_to_sheet(sheet1Rows);
+    ws1['!cols'] = [
+        { wch: 6 },  // STT
+        { wch: 15 }, // Mã SV
+        { wch: 24 }, // Họ và tên
+        { wch: 16 }, // Lớp
+        { wch: 24 }, // Khoa
+        { wch: 14 }, // SĐT
+        { wch: 26 }, // Email
+        { wch: 16 }, // Sách mượn
+        { wch: 16 }, // Sách quá hạn
+        { wch: 15 }, // Tiền phạt
+        { wch: 30 }, // Tình trạng
+        { wch: 14 }  // Trạng thái thẻ
+    ];
+
+    // SHEET 2: CHI TIẾT SÁCH ĐANG MƯỢN
+    const sheet2Rows = [
+        [
+            'STT',
+            'Mã sinh viên',
+            'Họ và tên',
+            'Lớp / Khóa',
+            'Mã vạch (Barcode)',
+            'Tên sách (Nhan đề)',
+            'Tác giả',
+            'Nhà xuất bản',
+            'Ngày mượn',
+            'Hạn trả',
+            'Số ngày quá hạn',
+            'Tình trạng quá hạn',
+            'Số điện thoại',
+            'Email'
+        ]
+    ];
+
+    let bookStt = 1;
+    listToExport.forEach(item => {
+        if (item.issues && item.issues.length > 0) {
+            item.issues.forEach(iss => {
+                const overdueStatus = iss.is_overdue ? ('Quá hạn ' + iss.days_overdue + ' ngày') : 'Trong hạn';
+                sheet2Rows.push([
+                    bookStt++,
+                    item.cardnumber,
+                    item.full_name,
+                    item.student_class,
+                    iss.barcode || '',
+                    iss.title || '',
+                    iss.author || '',
+                    iss.publisher || '',
+                    iss.issuedate_formatted || '',
+                    iss.date_due_formatted || '',
+                    iss.is_overdue ? Number(iss.days_overdue) : 0,
+                    overdueStatus,
+                    item.phone || '',
+                    item.email || ''
+                ]);
+            });
+        }
+    });
+
+    const ws2 = XLSX.utils.aoa_to_sheet(sheet2Rows);
+    ws2['!cols'] = [
+        { wch: 6 },  // STT
+        { wch: 15 }, // Mã SV
+        { wch: 24 }, // Họ tên
+        { wch: 16 }, // Lớp
+        { wch: 16 }, // Barcode
+        { wch: 38 }, // Tên sách
+        { wch: 24 }, // Tác giả
+        { wch: 24 }, // Nhà XB
+        { wch: 13 }, // Ngày mượn
+        { wch: 13 }, // Hạn trả
+        { wch: 15 }, // Quá hạn
+        { wch: 18 }, // Tình trạng
+        { wch: 14 }, // SĐT
+        { wch: 26 }  // Email
+    ];
+
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "XetTotNghiep");
-    XLSX.writeFile(wb, "FTU_XetTotNghiep_" + new Date().toISOString().slice(0, 10) + ".xlsx");
-    showAlert('Đã xuất thành công tệp Excel gồm ' + listToExport.length + ' bản ghi.', 'success');
+    XLSX.utils.book_append_sheet(wb, ws1, "TongHopSinhVien");
+    if (sheet2Rows.length > 1) {
+        XLSX.utils.book_append_sheet(wb, ws2, "ChiTietSachNo");
+    }
+
+    XLSX.writeFile(wb, "FTU_TatCa_XetTotNghiep_" + todayStr + ".xlsx");
+    showAlert('Đã xuất thành công tệp Excel gồm ' + listToExport.length + ' sinh viên (' + (sheet2Rows.length - 1) + ' lượt sách nợ).', 'success');
+}
+
+function exportExcel() {
+    exportExcelMode('ALL');
 }
 
 function escapeHtml(text) {

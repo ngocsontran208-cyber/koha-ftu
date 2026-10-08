@@ -136,6 +136,8 @@ if ($op eq "check") {
                 it.itemcallnumber,
                 bi.title,
                 bi.author,
+                COALESCE(bi_items.publishercode, '') AS publishercode,
+                COALESCE(bi_items.publicationyear, '') AS publicationyear,
                 DATE_FORMAT(i.issuedate, '%d/%m/%Y') AS issuedate_formatted,
                 DATE_FORMAT(i.date_due, '%d/%m/%Y') AS date_due_formatted,
                 i.date_due,
@@ -144,6 +146,7 @@ if ($op eq "check") {
             FROM issues i
             JOIN items it ON i.itemnumber = it.itemnumber
             JOIN biblio bi ON it.biblionumber = bi.biblionumber
+            LEFT JOIN biblioitems bi_items ON it.biblionumber = bi_items.biblionumber
             JOIN borrowers b ON i.borrowernumber = b.borrowernumber
             WHERE i.borrowernumber IN ($b_placeholders)
             ORDER BY i.date_due ASC
@@ -153,6 +156,14 @@ if ($op eq "check") {
 
         while (my $issue = $sth_issues->fetchrow_hashref) {
             my $cnum = $issue->{cardnumber};
+            my $pub = $issue->{publishercode} || "";
+            if ($pub && $issue->{publicationyear}) {
+                $pub .= " (" . $issue->{publicationyear} . ")";
+            } elsif (!$pub && $issue->{publicationyear}) {
+                $pub = $issue->{publicationyear};
+            }
+            $issue->{publisher} = $pub || "-";
+
             if ($found_patrons{$cnum}) {
                 push @{$found_patrons{$cnum}->{issues_list}}, $issue;
             }
@@ -206,7 +217,15 @@ if ($op eq "check") {
             my $sso_info = $sso_meta{$cnum} || {};
             my $class_name = $sso_info->{studentClass} || $p->{sort1} || "Chưa cập nhật";
             my $dept_name  = $sso_info->{department}   || $p->{sort2} || "Trường ĐH Ngoại Thương";
-            my $sso_notes  = $sso_info->{ssoNotes}     || $p->{borrowernotes} || "";
+            my $clean_note = "";
+            if ($p->{is_debarred}) {
+                $clean_note = $p->{debarredcomment} || "Người học đã tốt nghiệp";
+                $clean_note =~ s/\[\d{2}\/\d{2}\/\d{4}\]\s*//g;
+                $clean_note =~ s/\[\d{4}-\d{2}-\d{2}\]\s*//g;
+                $clean_note =~ s/Người học đã tốt nghiệp\s*Người học đã tốt nghiệp/Người học đã tốt nghiệp/g;
+                $clean_note =~ s/\s+/ /g;
+                $clean_note =~ s/^\s+|\s+$//g;
+            }
 
             push @results, {
                 cardnumber     => $cnum,
@@ -223,7 +242,7 @@ if ($op eq "check") {
                 is_cleared     => $is_cleared,
                 is_debarred    => $p->{is_debarred},
                 debarred_comment => $p->{debarredcomment} || "",
-                notes          => $sso_notes,
+                notes          => $clean_note,
                 issues         => $p->{issues_list}
             };
         } else {
