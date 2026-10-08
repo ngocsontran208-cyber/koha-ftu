@@ -553,16 +553,26 @@
     cursor: not-allowed;
 }
 </style>
+</head>
 
-[% INCLUDE 'header.inc' %]
+<body id="tools_graduation" class="tools">
+[% WRAPPER 'header.inc' %]
+    [% INCLUDE 'cat-search.inc' %]
+[% END %]
 
-<nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
-    <ol>
-        <li><a href="/cgi-bin/koha/mainpage.pl">Home</a></li>
-        <li><a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a></li>
-        <li><a href="#" aria-current="page">Graduation Clearance</a></li>
-    </ol>
-</nav>
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Graduation Clearance</span>
+        [% END %]
+    [% END #/ WRAPPER breadcrumbs %]
+[% END #/ WRAPPER sub-header.inc %]
 
 <div class="grad-wrapper">
     <!-- Header title -->
@@ -1626,3 +1636,5 @@ function escapeHtml(text) {
         .replace(/'/g, '&#039;');
 }
 </script>
+
+[% INCLUDE 'intranet-bottom.inc' %]
