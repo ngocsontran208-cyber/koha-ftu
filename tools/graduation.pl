@@ -20,6 +20,7 @@ use POSIX qw( strftime );
 use C4::Auth qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
+use Encode qw( decode_utf8 );
 
 my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
@@ -857,8 +858,8 @@ my @initial_batches = @{$sth_initial_batches->fetchall_arrayref({})};
 
 $template->param(
     page_title         => "Phân hệ Xét tốt nghiệp - Thư viện FTU",
-    saved_batches      => \@initial_batches,
-    saved_batches_json => $json->encode(\@initial_batches),
+    saved_batches         => \@initial_batches,
+    saved_batches_json    => decode_utf8($json->encode(\@initial_batches)),
 );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;
