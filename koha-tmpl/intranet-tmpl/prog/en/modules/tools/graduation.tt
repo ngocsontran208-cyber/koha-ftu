@@ -1,0 +1,519 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Phân hệ Xét tốt nghiệp &rsaquo; Quản trị &rsaquo; Koha</title>
+[% INCLUDE 'doc-head-close.inc' %]
+<style>
+/* MINIMALIST FUNCTIONAL STYLES */
+.grad-container { padding: 16px 20px; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+.grad-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.grad-header h1 { font-size: 1.25rem; font-weight: 700; margin: 0; color: #0f172a; }
+.grad-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grad-box { border: 1px solid #e2e8f0; border-radius: 4px; padding: 14px; background: #fafafa; }
+.grad-box-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 8px; }
+.grad-textarea { width: 100%; height: 90px; font-family: monospace; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 3px; padding: 8px; box-sizing: border-box; resize: vertical; background: #ffffff; }
+.grad-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.grad-stat-card { border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px 14px; background: #ffffff; }
+.grad-stat-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; display: block; }
+.grad-stat-val { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-top: 2px; display: block; }
+.grad-stat-val.danger { color: #b91c1c; }
+.grad-stat-val.success { color: #15803d; }
+.grad-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.grad-btn { display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 3px; border: 1px solid transparent; cursor: pointer; text-decoration: none; line-height: 1.2; }
+.grad-btn-primary { background: #0f172a; color: #ffffff; border-color: #0f172a; }
+.grad-btn-primary:hover { background: #1e293b; color: #ffffff; }
+.grad-btn-outline { background: #ffffff; color: #1e293b; border-color: #cbd5e1; }
+.grad-btn-outline:hover { background: #f1f5f9; }
+.grad-btn-danger { background: #b91c1c; color: #ffffff; border-color: #b91c1c; }
+.grad-btn-danger:hover { background: #991b1b; }
+.grad-btn-sm { padding: 3px 8px; font-size: 12px; }
+.grad-filters { display: flex; gap: 4px; }
+.grad-filter-btn { background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 5px 10px; font-size: 12px; font-weight: 600; border-radius: 3px; cursor: pointer; }
+.grad-filter-btn.active { background: #0f172a; color: #ffffff; border-color: #0f172a; }
+.grad-table { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #e2e8f0; }
+.grad-table th { background: #f8fafc; color: #334155; font-weight: 700; font-size: 12px; text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #e2e8f0; }
+.grad-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
+.grad-table tr:hover td { background: #f8fafc; }
+.grad-badge { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: 600; border-radius: 2px; line-height: 1.2; }
+.badge-cleared { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.badge-debt { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.badge-locked { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+.badge-notfound { background: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
+.debt-details { margin-top: 6px; padding: 6px 10px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 3px; font-size: 12px; }
+.debt-item { padding: 2px 0; border-bottom: 1px dashed #fecaca; }
+.debt-item:last-child { border-bottom: none; }
+.text-danger { color: #b91c1c; font-weight: 600; }
+.text-muted { color: #64748b; }
+.text-mono { font-family: monospace; font-size: 12px; }
+.status-msg { padding: 10px 14px; margin-bottom: 12px; border-radius: 3px; font-size: 13px; display: none; }
+.status-msg.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: block; }
+.status-msg.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: block; }
+</style>
+
+[% INCLUDE 'header.inc' %]
+
+<nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+    <ol>
+        <li><a href="/cgi-bin/koha/mainpage.pl">Trang chủ</a></li>
+        <li><a href="/cgi-bin/koha/tools/tools-home.pl">Công cụ</a></li>
+        <li><a href="#" aria-current="page">Xét tốt nghiệp</a></li>
+    </ol>
+</nav>
+
+<div class="grad-container">
+    <div class="grad-header">
+        <div>
+            <h1>Xét tốt nghiệp</h1>
+        </div>
+        <div>
+            <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Trang chủ</a>
+        </div>
+    </div>
+
+    <div id="status-alert" class="status-msg"></div>
+    <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% csrf_token | html %]">
+
+    <div class="grad-input-grid">
+        <div class="grad-box">
+            <div class="grad-box-title">Tệp Excel / CSV</div>
+            <div>
+                <input type="file" id="file-input" accept=".xlsx, .xls, .csv" style="font-size: 13px;">
+            </div>
+        </div>
+
+        <div class="grad-box">
+            <div class="grad-box-title">Danh sách mã sinh viên</div>
+            <textarea id="uids-input" class="grad-textarea" placeholder="Mỗi mã 1 dòng hoặc cách nhau bởi dấu phẩy..."></textarea>
+            <div style="display: flex; justify-content: flex-end; margin-top: 6px; gap: 8px;">
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="clearInput()">Xóa</button>
+                <button type="button" id="btn-check" class="grad-btn grad-btn-primary grad-btn-sm" onclick="startCheck()">Kiểm tra</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grad-stats">
+        <div class="grad-stat-card">
+            <span class="grad-stat-label">Tổng số mã nạp</span>
+            <span class="grad-stat-val" id="stat-total">0</span>
+        </div>
+        <div class="grad-stat-card">
+            <span class="grad-stat-label">Đủ điều kiện (Không nợ)</span>
+            <span class="grad-stat-val success" id="stat-cleared">0</span>
+        </div>
+        <div class="grad-stat-card">
+            <span class="grad-stat-label">Chưa đủ điều kiện (Còn nợ)</span>
+            <span class="grad-stat-val danger" id="stat-debt">0</span>
+        </div>
+        <div class="grad-stat-card">
+            <span class="grad-stat-label">Không tìm thấy</span>
+            <span class="grad-stat-val" id="stat-notfound">0</span>
+        </div>
+    </div>
+
+    <div class="grad-toolbar">
+        <div class="grad-filters">
+            <button type="button" class="grad-filter-btn active" onclick="setFilter('ALL', this)">Tất cả (<span id="count-all">0</span>)</button>
+            <button type="button" class="grad-filter-btn" onclick="setFilter('DEBT', this)">Còn nợ sách (<span id="count-debt">0</span>)</button>
+            <button type="button" class="grad-filter-btn" onclick="setFilter('CLEARED', this)">Đủ điều kiện (<span id="count-cleared">0</span>)</button>
+            <button type="button" class="grad-filter-btn" onclick="setFilter('DEBARRED', this)">Đã khóa thẻ (<span id="count-debarred">0</span>)</button>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()">Gửi email nhắc nhở đã chọn</button>
+            <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()">Khóa thẻ hàng loạt đã chọn</button>
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcel()">Xuất kết quả Excel</button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 4px;">
+        <table class="grad-table">
+            <thead>
+                <tr>
+                    <th style="width: 32px; text-align: center;"><input type="checkbox" id="check-all" onchange="toggleCheckAll(this)"></th>
+                    <th style="width: 40px; text-align: center;">STT</th>
+                    <th style="width: 110px;">Mã sinh viên</th>
+                    <th>Họ và tên</th>
+                    <th style="width: 120px;">Lớp / Khóa</th>
+                    <th style="width: 90px; text-align: center;">Sách nợ</th>
+                    <th style="width: 90px; text-align: right;">Tiền phạt</th>
+                    <th style="width: 150px; text-align: center;">Xét tốt nghiệp</th>
+                    <th style="width: 130px; text-align: center;">Trạng thái thẻ</th>
+                    <th style="width: 140px; text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="results-tbody">
+                <tr>
+                    <td colspan="10" style="text-align: center; color: #64748b; padding: 30px;">
+                        Chưa có dữ liệu. Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên để đối soát.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+[% INCLUDE 'intranet-bottom.inc' %]
+
+<script src="/sso/xlsx.full.min.js"></script>
+<script>
+let rawDataList = [];
+let currentFilter = 'ALL';
+
+document.getElementById('file-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonSheet = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+            let extractedUids = [];
+            let headerColIdx = 0;
+
+            if (jsonSheet.length > 0) {
+                const headerRow = jsonSheet[0];
+                for (let c = 0; c < headerRow.length; c++) {
+                    const colName = String(headerRow[c] || '').toLowerCase().trim();
+                    if (colName.includes('mã') || colName.includes('mssv') || colName.includes('cardnumber') || colName.includes('uid')) {
+                        headerColIdx = c;
+                        break;
+                    }
+                }
+
+                for (let r = 1; r < jsonSheet.length; r++) {
+                    const row = jsonSheet[r];
+                    if (row && row[headerColIdx]) {
+                        const val = String(row[headerColIdx]).trim();
+                        if (val) extractedUids.push(val);
+                    }
+                }
+            }
+
+            if (extractedUids.length === 0) {
+                showAlert('Không tìm thấy dữ liệu mã sinh viên trong tệp đã chọn.', 'error');
+                return;
+            }
+
+            document.getElementById('uids-input').value = extractedUids.join('\n');
+            showAlert('Đã nạp thành công ' + extractedUids.length + ' mã sinh viên từ tệp.', 'success');
+            startCheck();
+        } catch (err) {
+            showAlert('Lỗi khi đọc tệp Excel: ' + err.message, 'error');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+function clearInput() {
+    document.getElementById('file-input').value = '';
+    document.getElementById('uids-input').value = '';
+    rawDataList = [];
+    renderTable();
+    updateStats();
+}
+
+function showAlert(msg, type) {
+    const el = document.getElementById('status-alert');
+    el.className = 'status-msg ' + (type || 'success');
+    el.textContent = msg;
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => { el.style.display = 'none'; }, 8000);
+}
+
+async function startCheck() {
+    const rawText = document.getElementById('uids-input').value.trim();
+    if (!rawText) {
+        showAlert('Vui lòng nhập hoặc nạp danh sách mã sinh viên.', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-check');
+    btn.disabled = true;
+    btn.textContent = 'Đang đối soát...';
+
+    const tbody = document.getElementById('results-tbody');
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 24px; color: #475569;">Đang truy vấn CSDL Koha và đồng bộ SSO... Vui lòng đợi.</td></tr>';
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-check');
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+        formData.append('uids', rawText);
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            rawDataList = data.results || [];
+            updateStats();
+            renderTable();
+            showAlert('Đối soát hoàn tất: ' + data.total_input + ' mã sinh viên (' + data.count_cleared + ' đủ điều kiện, ' + data.count_has_debt + ' còn nợ sách).', 'success');
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không xác định'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi kết nối máy chủ: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Kiểm tra đối soát';
+    }
+}
+
+function updateStats() {
+    let total = rawDataList.length;
+    let cleared = 0;
+    let debt = 0;
+    let notfound = 0;
+    let debarred = 0;
+
+    rawDataList.forEach(item => {
+        if (item.is_not_found) notfound++;
+        else if (item.has_debt) debt++;
+        else if (item.is_cleared) cleared++;
+
+        if (item.is_debarred) debarred++;
+    });
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-cleared').textContent = cleared;
+    document.getElementById('stat-debt').textContent = debt;
+    document.getElementById('stat-notfound').textContent = notfound;
+
+    document.getElementById('count-all').textContent = total;
+    document.getElementById('count-debt').textContent = debt;
+    document.getElementById('count-cleared').textContent = cleared;
+    document.getElementById('count-debarred').textContent = debarred;
+}
+
+function setFilter(filterType, btnEl) {
+    currentFilter = filterType;
+    document.querySelectorAll('.grad-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    renderTable();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('results-tbody');
+    let filtered = rawDataList.filter(item => {
+        if (currentFilter === 'DEBT') return item.has_debt;
+        if (currentFilter === 'CLEARED') return item.is_cleared;
+        if (currentFilter === 'DEBARRED') return item.is_debarred;
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#64748b; padding:24px;">Không có bản ghi nào phù hợp với bộ lọc.</td></tr>';
+        return;
+    }
+
+    let html = '';
+    filtered.forEach((item, idx) => {
+        let gradStatusBadge = item.is_not_found ? '<span class="grad-badge badge-notfound">Không tìm thấy</span>' : (item.has_debt ? '<span class="grad-badge badge-debt">Chưa đủ điều kiện</span>' : '<span class="grad-badge badge-cleared">Đủ điều kiện</span>');
+        let cardStatusBadge = item.is_debarred ? '<span class="grad-badge badge-locked">Đã khóa thẻ</span>' : '<span class="grad-badge" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1;">Hoạt động</span>';
+        let booksDisplay = item.total_borrowed;
+        if (item.total_overdue > 0) {
+            booksDisplay += ' <span style="color:#b91c1c; font-weight:600;">(' + item.total_overdue + ' quá hạn)</span>';
+        }
+
+        let actions = [];
+        if (item.has_debt) {
+            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')">Gửi email</button>');
+        }
+        if (!item.is_debarred && !item.is_not_found) {
+            actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')">Khóa thẻ</button>');
+        }
+
+        let issuesDetailHtml = '';
+        if (item.issues && item.issues.length > 0) {
+            issuesDetailHtml = '<div class="debt-details" id="issues-' + item.cardnumber + '" style="display:none;">';
+            item.issues.forEach(iss => {
+                let overText = iss.is_overdue ? '<span class="text-danger"> [Quá hạn ' + iss.days_overdue + ' ngày]</span>' : '';
+                issuesDetailHtml += '<div class="debt-item">&bull; <strong>' + escapeHtml(iss.title) + '</strong> (' + iss.barcode + ') &mdash; Hạn trả: ' + iss.date_due_formatted + overText + '</div>';
+            });
+            issuesDetailHtml += '</div>';
+        }
+
+        let toggleBtn = item.total_borrowed > 0 ? (' <a href="javascript:void(0)" onclick="toggleIssues(\'' + item.cardnumber + '\')" style="font-size:11px; text-decoration:underline; color:#2563eb; margin-left:4px;">(chi tiết)</a>') : '';
+        let fineText = item.total_fine > 0 ? ('<span class="text-danger">' + Number(item.total_fine).toLocaleString('vi-VN') + ' đ</span>') : '0 đ';
+
+        html += '<tr>' +
+            '<td style="text-align:center;"><input type="checkbox" class="patron-checkbox" value="' + item.cardnumber + '"></td>' +
+            '<td style="text-align:center;">' + (idx + 1) + '</td>' +
+            '<td class="text-mono"><strong>' + item.cardnumber + '</strong></td>' +
+            '<td><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + (item.borrowernumber || '') + '" target="_blank" style="color:#0f172a; font-weight:600; text-decoration:none;">' + escapeHtml(item.full_name) + '</a>' + issuesDetailHtml + '</td>' +
+            '<td>' + escapeHtml(item.student_class) + '</td>' +
+            '<td style="text-align:center;">' + booksDisplay + toggleBtn + '</td>' +
+            '<td style="text-align:right;">' + fineText + '</td>' +
+            '<td style="text-align:center;">' + gradStatusBadge + '</td>' +
+            '<td style="text-align:center;">' + cardStatusBadge + (item.notes ? '<div style="font-size:11px; color:#64748b;">' + escapeHtml(item.notes) + '</div>' : '') + '</td>' +
+            '<td style="text-align:center; white-space:nowrap;">' + (actions.join(' ') || '-') + '</td>' +
+            '</tr>';
+    });
+
+    tbody.innerHTML = html;
+}
+
+function toggleIssues(cardnumber) {
+    const el = document.getElementById('issues-' + cardnumber);
+    if (!el) return;
+    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+function toggleCheckAll(master) {
+    document.querySelectorAll('.patron-checkbox').forEach(cb => { cb.checked = master.checked; });
+}
+
+function getSelectedCardnumbers() {
+    const selected = [];
+    document.querySelectorAll('.patron-checkbox:checked').forEach(cb => { selected.push(cb.value); });
+    return selected;
+}
+
+async function sendReminderSingle(cardnumber) {
+    if (!confirm('Gửi email nhắc nhở hoàn tất trả sách cho sinh viên mã số: ' + cardnumber + '?')) return;
+    await executeSendReminders([cardnumber]);
+}
+
+async function sendRemindersSelected() {
+    let selected = getSelectedCardnumbers();
+    if (selected.length === 0) {
+        const debtUids = rawDataList.filter(i => i.has_debt).map(i => i.cardnumber);
+        if (debtUids.length === 0) {
+            showAlert('Không có sinh viên nào đang nợ sách.', 'error');
+            return;
+        }
+        if (!confirm('Bạn chưa chọn sinh viên cụ thể. Gửi email nhắc nhở cho TOÀN BỘ ' + debtUids.length + ' sinh viên còn nợ sách?')) return;
+        selected = debtUids;
+    } else {
+        if (!confirm('Gửi email nhắc nhở cho ' + selected.length + ' sinh viên đã chọn?')) return;
+    }
+    await executeSendReminders(selected);
+}
+
+async function executeSendReminders(uids) {
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-send_reminders');
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+        formData.append('uids', uids.join('\n'));
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert(data.message, 'success');
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không gửi được email'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi gửi email: ' + err.message, 'error');
+    }
+}
+
+async function lockSingle(cardnumber) {
+    if (!confirm('Xác nhận khóa thẻ bạn đọc và đồng bộ trạng thái "Người học đã tốt nghiệp" cho mã SV: ' + cardnumber + '?')) return;
+    await executeBatchLock([cardnumber]);
+}
+
+async function batchLockSelected() {
+    let selected = getSelectedCardnumbers();
+    if (selected.length === 0) {
+        const clearedUids = rawDataList.filter(i => i.is_cleared && !i.is_debarred).map(i => i.cardnumber);
+        if (clearedUids.length === 0) {
+            showAlert('Vui lòng chọn ít nhất một sinh viên để khóa thẻ.', 'error');
+            return;
+        }
+        if (!confirm('Bạn chưa chọn sinh viên. Bạn có muốn khóa thẻ hàng loạt cho TOÀN BỘ ' + clearedUids.length + ' sinh viên ĐỦ ĐIỀU KIỆN tốt nghiệp?')) return;
+        selected = clearedUids;
+    } else {
+        if (!confirm('Xác nhận KHÓA THẺ HÀNG LOẠT cho ' + selected.length + ' sinh viên đã chọn (cập nhật trạng thái "Người học đã tốt nghiệp" trên cả Koha và SSO)?')) return;
+    }
+    await executeBatchLock(selected);
+}
+
+async function executeBatchLock(uids) {
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-batch_lock');
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+        formData.append('uids', uids.join('\n'));
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert(data.message, 'success');
+            rawDataList.forEach(item => {
+                if (uids.includes(item.cardnumber)) {
+                    item.is_debarred = 1;
+                    item.notes = 'Người học đã tốt nghiệp';
+                }
+            });
+            updateStats();
+            renderTable();
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không thể khóa thẻ'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi khóa thẻ: ' + err.message, 'error');
+    }
+}
+
+function exportExcel() {
+    if (rawDataList.length === 0) {
+        showAlert('Chưa có dữ liệu để xuất Excel.', 'error');
+        return;
+    }
+
+    const exportRows = [
+        ['STT', 'Mã sinh viên', 'Họ và tên', 'Lớp / Khóa', 'Khoa / Đơn vị', 'Số sách đang mượn', 'Sách quá hạn', 'Tiền phạt (VNĐ)', 'Tình trạng xét tốt nghiệp', 'Trạng thái thẻ', 'Ghi chú']
+    ];
+
+    rawDataList.forEach((item, idx) => {
+        let gradStatus = item.is_not_found ? 'Không tìm thấy' : (item.has_debt ? 'Chưa đủ điều kiện (Còn nợ sách/tiền)' : 'Đủ điều kiện');
+        let cardStatus = item.is_debarred ? 'Đã khóa thẻ' : 'Hoạt động';
+
+        exportRows.push([
+            idx + 1,
+            item.cardnumber,
+            item.full_name,
+            item.student_class,
+            item.department,
+            item.total_borrowed,
+            item.total_overdue,
+            item.total_fine,
+            gradStatus,
+            cardStatus,
+            item.notes
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(exportRows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "XetTotNghiep");
+    XLSX.writeFile(wb, "FTU_XetTotNghiep_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+</script>

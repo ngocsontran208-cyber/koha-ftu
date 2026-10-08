@@ -83,6 +83,9 @@
  <dd>Sửa nhiều bạn đọc đồng thời</dd>
  [% END %]
 
+ <dt><a href="/cgi-bin/koha/tools/graduation.pl">Xét tốt nghiệp</a></dt>
+ <dd>Đối soát nợ sách, gửi email nhắc nhở và khóa thẻ hàng loạt phục vụ thủ tục tốt nghiệp</dd>
+
  [% IF ( CAN_user_tools_batch_extend_due_dates ) %]
  <dt><a href="/cgi-bin/koha/tools/batch_extend_due_dates.pl">Batch extend due dates</a></dt>
  <dd>Modify the due date checkouts in batch</dd>
