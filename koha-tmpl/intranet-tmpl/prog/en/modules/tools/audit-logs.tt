@@ -174,6 +174,8 @@
     font-size: 12px;
     font-weight: 600;
 }
+.mod-grad     { background: #ede9fe; color: #5b21b6; }
+.mod-portal   { background: #fee2e2; color: #991b1b; }
 .mod-patrons  { background: #dcfce7; color: #166534; }
 .mod-circ     { background: #e0f2fe; color: #0369a1; }
 .mod-cat      { background: #fee2e2; color: #991b1b; }
@@ -343,6 +345,8 @@
                 <label><i class="fa fa-folder-open-o"></i> Module</label>
                 <select id="filter-module">
                     <option value="ALL">-- All Modules --</option>
+                    <option value="GRADUATION">Graduation Clearance (GRADUATION)</option>
+                    <option value="PORTAL_NEWS">Public Portal Management (PORTAL_NEWS)</option>
                     <option value="MEMBERS">Patrons (MEMBERS)</option>
                     <option value="CIRCULATION">Circulation (CIRCULATION)</option>
                     <option value="CATALOGUING">Cataloguing (CATALOGUING)</option>
@@ -367,6 +371,13 @@
                     <option value="ADD">Add / Create (ADD / CREATE)</option>
                     <option value="MODIFY">Modify / Update (MODIFY)</option>
                     <option value="DELETE">Delete / Remove (DELETE)</option>
+                    <option value="BATCH_CREATE">Create Graduation Batch (BATCH_CREATE)</option>
+                    <option value="BATCH_IMPORT">Import Student List (BATCH_IMPORT)</option>
+                    <option value="BATCH_DELETE">Delete Graduation Batch (BATCH_DELETE)</option>
+                    <option value="BATCH_LOCK">Batch Lock Graduation (BATCH_LOCK)</option>
+                    <option value="BATCH_UNLOCK">Batch Unlock Patrons (BATCH_UNLOCK)</option>
+                    <option value="SEND_REMINDER">Send Debt Reminders (SEND_REMINDER)</option>
+                    <option value="STATUS_CHANGE">Change Status (STATUS_CHANGE)</option>
                     <option value="LOGIN">Login (LOGIN)</option>
                     <option value="LOGIN_FAILED">Login Failed (LOGIN_FAILED)</option>
                     <option value="CHANGE PASS">Change Password (CHANGE PASS)</option>

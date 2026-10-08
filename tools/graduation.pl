@@ -20,6 +20,7 @@ use POSIX qw( strftime );
 use C4::Auth qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
+use C4::Log qw( logaction );
 use Encode qw( decode_utf8 );
 
 my $cgi = CGI->new;
@@ -379,6 +380,7 @@ if ($op eq "batch_create") {
     });
     $sth_insert_b->execute($batch_name, $academic_year, $cohort, $description, scalar(@cardnumbers));
     my $batch_id = $dbh->{mysql_insertid} || $dbh->last_insert_id(undef, undef, 'ftu_graduation_batches', 'id');
+    logaction( 'GRADUATION', 'BATCH_CREATE', $batch_id, "Tạo đợt xét tốt nghiệp: $batch_name ($academic_year - $cohort)" );
 
     if (!@cardnumbers) {
         print $json->encode({
@@ -577,6 +579,7 @@ if ($op eq "batch_import_students") {
     $check_result->{cohort}        = $batch_row->{cohort} || "";
     $check_result->{description}   = $batch_row->{description} || "";
     $check_result->{message}       = "Đã nạp thành công $inserted_count sinh viên mới vào đợt [" . $batch_row->{batch_name} . "] (Tổng cộng: " . scalar(@all_cardnumbers) . " SV).";
+    logaction( 'GRADUATION', 'BATCH_IMPORT', $batch_id, "Nạp $inserted_count sinh viên vào đợt #$batch_id ($batch_row->{batch_name})" );
 
     print $json->encode($check_result);
     exit;
@@ -606,6 +609,7 @@ if ($op eq "batch_delete") {
 
     my $sth_del = $dbh->prepare("DELETE FROM ftu_graduation_batches WHERE id = ?");
     $sth_del->execute($batch_id);
+    logaction( 'GRADUATION', 'BATCH_DELETE', $batch_id, "Xóa đợt xét tốt nghiệp #$batch_id" );
 
     print $json->encode({ success => 1, message => "Đã xóa đợt xét tốt nghiệp thành công!" });
     exit;
@@ -770,6 +774,7 @@ if ($op eq "send_reminders") {
     eval {
         system("nohup /kohadevbox/koha/misc/cronjobs/process_message_queue.pl >/dev/null 2>&1 &");
     };
+    logaction( 'GRADUATION', 'SEND_REMINDER', scalar(keys %patron_debts), "Gửi email nhắc nhở trả sách phục vụ xét tốt nghiệp tới " . scalar(keys %patron_debts) . " sinh viên" );
 
     print $json->encode({
         success      => 1,
@@ -869,6 +874,8 @@ if ($op eq "batch_lock") {
         }
     };
 
+    logaction( 'GRADUATION', 'BATCH_LOCK', scalar(@target_uids), "Khóa thẻ tốt nghiệp cho $rows_affected sinh viên" );
+
     print $json->encode({
         success       => 1,
         message       => "Đã khóa thẻ thành công $rows_affected sinh viên trên Koha và đồng bộ trạng thái tốt nghiệp sang SSO Portal!",
@@ -953,6 +960,8 @@ if ($op eq "batch_unlock") {
             }
         }
     };
+
+    logaction( 'GRADUATION', 'BATCH_UNLOCK', scalar(@target_uids), "Mở khóa thẻ thư viện cho $rows_affected sinh viên" );
 
     print $json->encode({
         success       => 1,

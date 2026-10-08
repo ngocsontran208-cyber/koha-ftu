@@ -174,6 +174,8 @@
     font-size: 12px;
     font-weight: 600;
 }
+.mod-grad     { background: #ede9fe; color: #5b21b6; }
+.mod-portal   { background: #fee2e2; color: #991b1b; }
 .mod-patrons  { background: #dcfce7; color: #166534; }
 .mod-circ     { background: #e0f2fe; color: #0369a1; }
 .mod-cat      { background: #fee2e2; color: #991b1b; }
@@ -343,6 +345,8 @@
                 <label><i class="fa fa-folder-open-o"></i> Phân hệ (Module)</label>
                 <select id="filter-module">
                     <option value="ALL">-- Tất cả phân hệ --</option>
+                    <option value="GRADUATION">Xét tốt nghiệp (GRADUATION)</option>
+                    <option value="PORTAL_NEWS">Quản lý trang công khai (PORTAL_NEWS)</option>
                     <option value="MEMBERS">Bạn đọc (MEMBERS)</option>
                     <option value="CIRCULATION">Lưu thông (CIRCULATION)</option>
                     <option value="CATALOGUING">Biên mục &amp; Biểu ghi (CATALOGUING)</option>
@@ -367,6 +371,13 @@
                     <option value="ADD">Thêm mới (ADD / CREATE)</option>
                     <option value="MODIFY">Chỉnh sửa (MODIFY)</option>
                     <option value="DELETE">Xóa bỏ (DELETE)</option>
+                    <option value="BATCH_CREATE">Tạo đợt xét tốt nghiệp (BATCH_CREATE)</option>
+                    <option value="BATCH_IMPORT">Nạp danh sách SV (BATCH_IMPORT)</option>
+                    <option value="BATCH_DELETE">Xóa đợt tốt nghiệp (BATCH_DELETE)</option>
+                    <option value="BATCH_LOCK">Khóa thẻ tốt nghiệp (BATCH_LOCK)</option>
+                    <option value="BATCH_UNLOCK">Mở khóa thẻ (BATCH_UNLOCK)</option>
+                    <option value="SEND_REMINDER">Gửi email nhắc nợ sách (SEND_REMINDER)</option>
+                    <option value="STATUS_CHANGE">Đổi trạng thái (STATUS_CHANGE)</option>
                     <option value="LOGIN">Đăng nhập (LOGIN)</option>
                     <option value="LOGIN_FAILED">Đăng nhập thất bại (LOGIN_FAILED)</option>
                     <option value="CHANGE PASS">Đổi mật khẩu (CHANGE PASS)</option>

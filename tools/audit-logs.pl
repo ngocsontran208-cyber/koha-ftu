@@ -299,6 +299,12 @@ if ($op eq "list") {
             if ($r->{module} eq 'SYSTEMPREFERENCE') {
                 $target_label = "Cấu hình: " . $info;
                 $target_link  = "/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=" . $info;
+            } elsif ($r->{module} eq 'GRADUATION') {
+                $target_label = "Đợt xét TN #" . $r->{object};
+                $target_link  = "/cgi-bin/koha/tools/graduation.pl?batch_id=" . $r->{object};
+            } elsif ($r->{module} eq 'PORTAL_NEWS') {
+                $target_label = "Trang/Bài viết #" . $r->{object};
+                $target_link  = "/cgi-bin/koha/tools/portal-news.pl?op=add_form&id=" . $r->{object};
             } else {
                 $target_label = "ID Đối tượng #" . $r->{object};
             }
@@ -314,6 +320,9 @@ if ($op eq "list") {
 
         # Nhãn tiếng Việt cho module
         my %mod_map = (
+            'GRADUATION'       => { name => 'Xét tốt nghiệp', class => 'mod-grad', icon => 'fa-graduation-cap' },
+            'PORTAL_NEWS'      => { name => 'Trang công khai', class => 'mod-portal', icon => 'fa-newspaper-o' },
+            'PUBLIC_PORTAL'    => { name => 'Trang công khai', class => 'mod-portal', icon => 'fa-globe' },
             'MEMBERS'          => { name => 'Bạn đọc', class => 'mod-patrons', icon => 'fa-id-card' },
             'CIRCULATION'      => { name => 'Lưu thông', class => 'mod-circ', icon => 'fa-exchange' },
             'CATALOGUING'      => { name => 'Biên mục', class => 'mod-cat', icon => 'fa-book' },
@@ -335,20 +344,26 @@ if ($op eq "list") {
 
         # Nhãn tiếng Việt cho action
         my %act_map = (
-            'ADD'          => { name => 'Thêm mới', badge => 'badge-success' },
-            'CREATE'       => { name => 'Tạo mới', badge => 'badge-success' },
-            'MODIFY'       => { name => 'Chỉnh sửa', badge => 'badge-primary' },
-            'DELETE'       => { name => 'Xóa bỏ', badge => 'badge-danger' },
-            'ISSUE'        => { name => 'Cho mượn', badge => 'badge-info' },
-            'RETURN'       => { name => 'Nhận trả', badge => 'badge-success' },
-            'RENEW'        => { name => 'Gia hạn', badge => 'badge-info' },
-            'RENEWAL'      => { name => 'Gia hạn', badge => 'badge-info' },
-            'CHANGE PASS'  => { name => 'Đổi mật khẩu', badge => 'badge-warning' },
-            'RESET PASS'   => { name => 'Đặt lại MK', badge => 'badge-warning' },
-            'LOGIN'        => { name => 'Đăng nhập', badge => 'badge-success' },
-            'LOGIN_FAILED' => { name => 'Đăng nhập lỗi', badge => 'badge-danger' },
-            'LOGOUT'       => { name => 'Đăng xuất', badge => 'badge-secondary' },
-            'STATUS_CHANGE'=> { name => 'Đổi trạng thái', badge => 'badge-info' },
+            'ADD'              => { name => 'Thêm mới', badge => 'badge-success' },
+            'CREATE'           => { name => 'Tạo mới', badge => 'badge-success' },
+            'MODIFY'           => { name => 'Chỉnh sửa', badge => 'badge-primary' },
+            'DELETE'           => { name => 'Xóa bỏ', badge => 'badge-danger' },
+            'ISSUE'            => { name => 'Cho mượn', badge => 'badge-info' },
+            'RETURN'           => { name => 'Nhận trả', badge => 'badge-success' },
+            'RENEW'            => { name => 'Gia hạn', badge => 'badge-info' },
+            'RENEWAL'          => { name => 'Gia hạn', badge => 'badge-info' },
+            'CHANGE PASS'      => { name => 'Đổi mật khẩu', badge => 'badge-warning' },
+            'RESET PASS'       => { name => 'Đặt lại MK', badge => 'badge-warning' },
+            'LOGIN'            => { name => 'Đăng nhập', badge => 'badge-success' },
+            'LOGIN_FAILED'     => { name => 'Đăng nhập lỗi', badge => 'badge-danger' },
+            'LOGOUT'           => { name => 'Đăng xuất', badge => 'badge-secondary' },
+            'STATUS_CHANGE'    => { name => 'Đổi trạng thái', badge => 'badge-info' },
+            'BATCH_CREATE'     => { name => 'Tạo đợt', badge => 'badge-success' },
+            'BATCH_IMPORT'     => { name => 'Nạp sinh viên', badge => 'badge-info' },
+            'BATCH_DELETE'     => { name => 'Xóa đợt', badge => 'badge-danger' },
+            'BATCH_LOCK'       => { name => 'Khóa thẻ TN', badge => 'badge-danger' },
+            'BATCH_UNLOCK'     => { name => 'Mở khóa thẻ', badge => 'badge-success' },
+            'SEND_REMINDER'    => { name => 'Gửi nhắc nợ', badge => 'badge-warning' },
         );
 
         my $a_meta = $act_map{$r->{action}} || { name => $r->{action} || 'Thao tác', badge => 'badge-secondary' };

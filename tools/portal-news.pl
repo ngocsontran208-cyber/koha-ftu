@@ -6,6 +6,7 @@ use CGI qw( -utf8 );
 use C4::Auth qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
+use C4::Log qw( logaction );
 
 my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
@@ -186,6 +187,7 @@ if (($op eq "delete" || $op eq "cud-delete")) {
         $section = "database" if ($pt && $pt eq "database");
         $section = "banner" if ($pt && $pt eq "banner");
         $dbh->do("DELETE FROM koha_portal_posts WHERE id = ?", undef, $id);
+        logaction( 'PORTAL_NEWS', 'DELETE', $id, "Xóa mục #" . $id . " (loại: " . ($pt || 'news') . ")" );
     }
     print $cgi->redirect("/cgi-bin/koha/tools/portal-news.pl?op=list&msg=deleted" . ($section ? "&section=$section" : ""));
     exit;
@@ -202,6 +204,7 @@ if (($op eq "toggle_status" || $op eq "cud-toggle_status")) {
         $section = "banner" if ($pt && $pt eq "banner");
         my $new_status = ($curr eq "published") ? "draft" : "published";
         $dbh->do("UPDATE koha_portal_posts SET status = ? WHERE id = ?", undef, $new_status, $id);
+        logaction( 'PORTAL_NEWS', 'STATUS_CHANGE', $id, "Đổi trạng thái mục #$id sang $new_status (loại: " . ($pt || 'news') . ")" );
     }
     print $cgi->redirect("/cgi-bin/koha/tools/portal-news.pl?op=list&msg=status_updated" . ($section ? "&section=$section" : ""));
     exit;
@@ -280,6 +283,7 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
             $event_start, $event_end, $event_location, $event_reg_link,
             $event_tag, $views_count, $id
         );
+        logaction( 'PORTAL_NEWS', 'MODIFY', $id, "$post_type: $title" );
     } else {
         my $sql = "INSERT INTO koha_portal_posts 
             (sort_order, post_type, title, excerpt, classification, access_instructions, db_user, db_pass, support_link, content, featured_image, author_name, status, is_featured, event_start, event_end, event_location, event_reg_link, event_tag, views_count)
@@ -291,6 +295,8 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
             $event_start, $event_end, $event_location, $event_reg_link,
             $event_tag, $views_count
         );
+        my $new_id = $dbh->{mysql_insertid} || $dbh->last_insert_id(undef, undef, 'koha_portal_posts', 'id');
+        logaction( 'PORTAL_NEWS', 'ADD', $new_id, "$post_type: $title" );
     }
     my $redirect_url = "/cgi-bin/koha/tools/portal-news.pl?op=list&msg=saved";
     $redirect_url .= "&section=database" if ($post_type eq "database");
@@ -390,6 +396,8 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         require Koha::Caches;
         Koha::Caches->get_instance()->flush_all();
     };
+
+    logaction( 'PORTAL_NEWS', 'MODIFY', 0, "Cập nhật cấu hình thông tin chân trang (Footer)" );
 
     print $cgi->redirect("/cgi-bin/koha/tools/portal-news.pl?section=footer&msg=footer_saved");
     exit;
