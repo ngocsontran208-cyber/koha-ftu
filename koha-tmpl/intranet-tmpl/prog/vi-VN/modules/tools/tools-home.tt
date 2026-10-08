@@ -135,8 +135,10 @@
  [% END %]
 
  [% IF ( CAN_user_tools_view_system_logs ) %]
- <dt><a href="/cgi-bin/koha/tools/viewlog.pl">Nhật ký</a></dt>
- <dd>Xem nhật ký hệ thống</dd>
+    <dt><a href="/cgi-bin/koha/tools/audit-logs.pl" style="font-weight: bold; color: #4338ca;"><i class="fa fa-shield"></i> Nhật ký Hệ thống &amp; Giám sát An ninh</a></dt>
+    <dd>Bảng điều khiển kiểm toán tập trung: Giám sát ai đã làm gì, thời gian, giao diện thực hiện và chi tiết thay đổi trên toàn hệ thống FTULIB</dd>
+    <dt><a href="/cgi-bin/koha/tools/viewlog.pl">Nhật ký (Cổ điển)</a></dt>
+    <dd>Xem nhật ký hệ thống dạng cơ bản</dd>
  [% END %]
 
  [% IF ( CAN_user_tools_edit_additional_contents ) %]

@@ -64,7 +64,8 @@
  <li><a href="/cgi-bin/koha/tools/csv-profiles.pl">Mẫu CSV</a></li>
  [% END %]
  [% IF ( CAN_user_tools_view_system_logs ) %]
- <li><a href="/cgi-bin/koha/tools/viewlog.pl">Nhật ký</a></li>
+    <li><a href="/cgi-bin/koha/tools/audit-logs.pl" style="font-weight: 700; color: #4338ca;"><i class="fa fa-shield"></i> Nhật ký &amp; Giám sát An ninh</a></li>
+    <li><a href="/cgi-bin/koha/tools/viewlog.pl">Nhật ký (Cổ điển)</a></li>
  [% END %]
  [% IF ( CAN_user_tools_edit_additional_contents ) %]
  <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=news" style="font-weight: 700; color: #b91c1c;"><i class="fa fa-newspaper-o"></i> Tin tức &amp; Bảng tin</a></li>

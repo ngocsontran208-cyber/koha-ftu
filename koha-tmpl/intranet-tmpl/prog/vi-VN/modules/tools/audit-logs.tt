@@ -1,0 +1,848 @@
+[% USE raw %]
+[% USE Asset %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Nhật ký Hệ thống & Giám sát An ninh &rsaquo; Công cụ &rsaquo; Thư viện Phân hiệu Trường Đại học Ngoại thương</title>
+[% INCLUDE 'doc-head-close.inc' %]
+
+<style>
+/* ==========================================================================
+   FTULIB SYSTEM AUDIT & ACTION LOGS CONSOLE STYLES
+   ========================================================================== */
+.audit-container {
+    padding: 0 5px 25px 5px;
+}
+
+/* Page Header */
+.audit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.audit-header-title h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.audit-header-title p {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 0;
+}
+.audit-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* KPI Cards */
+.audit-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.audit-kpi-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.audit-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+.audit-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+}
+.audit-kpi-card.kpi-blue::before { background: #2563eb; }
+.audit-kpi-card.kpi-green::before { background: #16a34a; }
+.audit-kpi-card.kpi-amber::before { background: #ea580c; }
+.audit-kpi-card.kpi-purple::before { background: #7c3aed; }
+
+.audit-kpi-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.kpi-blue .audit-kpi-icon { background: #eff6ff; color: #2563eb; }
+.kpi-green .audit-kpi-icon { background: #f0fdf4; color: #16a34a; }
+.kpi-amber .audit-kpi-icon { background: #fff7ed; color: #ea580c; }
+.kpi-purple .audit-kpi-icon { background: #faf5ff; color: #7c3aed; }
+
+.audit-kpi-body {
+    flex-grow: 1;
+}
+.audit-kpi-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+}
+.audit-kpi-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Filter Box */
+.audit-filter-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+.filter-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.filter-col label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #334155;
+    margin: 0;
+}
+.filter-col input[type="text"],
+.filter-col select {
+    height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    background: #f8fafc;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.filter-col input[type="text"]:focus,
+.filter-col select:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.date-preset-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+}
+.btn-preset {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.btn-preset:hover, .btn-preset.active {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+/* Table Card */
+.audit-table-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+#table-audit-logs {
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+#table-audit-logs thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+#table-audit-logs tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+#table-audit-logs tbody tr:hover td {
+    background: #f8fafc;
+}
+
+/* Badges */
+.badge-user {
+    display: flex;
+    flex-direction: column;
+}
+.badge-user-name {
+    font-weight: 700;
+    color: #0f172a;
+}
+.badge-user-sub {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.mod-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.mod-patrons  { background: #dcfce7; color: #166534; }
+.mod-circ     { background: #e0f2fe; color: #0369a1; }
+.mod-cat      { background: #fee2e2; color: #991b1b; }
+.mod-sys      { background: #fef3c7; color: #92400e; }
+.mod-auth     { background: #f3e8ff; color: #6b21a8; }
+.mod-drm      { background: #ffe4e6; color: #9f1239; }
+.mod-rep      { background: #e0e7ff; color: #3730a3; }
+.mod-authval  { background: #ccfbf1; color: #115e59; }
+.mod-fines    { background: #fef08a; color: #854d0e; }
+.mod-notices  { background: #ffedd5; color: #9a3412; }
+.mod-cron     { background: #f1f5f9; color: #475569; }
+.mod-script   { background: #f1f5f9; color: #334155; }
+.mod-default  { background: #f1f5f9; color: #475569; }
+
+.act-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.badge-success   { background: #16a34a; color: #ffffff; }
+.badge-primary   { background: #2563eb; color: #ffffff; }
+.badge-danger    { background: #dc2626; color: #ffffff; }
+.badge-warning   { background: #d97706; color: #ffffff; }
+.badge-info      { background: #0284c7; color: #ffffff; }
+.badge-secondary { background: #64748b; color: #ffffff; }
+
+.if-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-intranet { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.badge-opac     { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+.badge-api      { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+.badge-cron     { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+.badge-cmd      { background: #0f172a; color: #f8fafc; }
+
+/* Target Object link */
+.target-cell {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.target-cell a {
+    font-weight: 600;
+    color: #1d4ed8;
+    text-decoration: none;
+}
+.target-cell a:hover {
+    text-decoration: underline;
+}
+
+/* Info Snippet */
+.info-snippet {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 11.5px;
+    color: #334155;
+    background: #f8fafc;
+    padding: 4px 7px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    max-width: 320px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Diff Modal Styling */
+#modalAuditDiff pre {
+    background: #0f172a;
+    color: #f8fafc;
+    border-radius: 6px;
+    padding: 14px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 12.5px;
+    max-height: 480px;
+    overflow-y: auto;
+}
+</style>
+</head>
+
+<body id="tools_audit_logs" class="tools">
+[% WRAPPER 'header.inc' %]
+    [% INCLUDE 'cat-search.inc' %]
+[% END %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/tools/tools-home.pl">Công cụ</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Nhật ký Hệ thống & Giám sát An ninh</span>
+        [% END %]
+    [% END %]
+[% END %]
+
+[% WRAPPER 'main-container.inc' asides=['tools-menu'] %]
+<div class="audit-container">
+
+    <!-- PAGE HEADER -->
+    <div class="audit-header">
+        <div class="audit-header-title">
+            <h1><i class="fa fa-shield" style="color: #4338ca;"></i> Nhật ký Hệ thống & Giám sát An ninh</h1>
+            <p>Kiểm soát tập trung toàn bộ hoạt động: ai thực hiện, thực thi khi nào, qua giao diện nào và chi tiết thay đổi trên hệ thống thư viện FTU.</p>
+        </div>
+        <div class="audit-header-actions">
+            <button id="btnExportCsv" class="btn btn-default" style="font-weight: 600;">
+                <i class="fa fa-download" style="color: #16a34a;"></i> Xuất Excel / CSV
+            </button>
+            <button id="btnPrintLog" class="btn btn-default" style="font-weight: 600;">
+                <i class="fa fa-print" style="color: #0284c7;"></i> In biên bản
+            </button>
+            <button id="btnRefreshLogs" class="btn btn-primary" style="font-weight: 600;">
+                <i class="fa fa-refresh"></i> Làm mới
+            </button>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #475569; margin: 0; cursor: pointer; user-select: none;">
+                <input type="checkbox" id="chkAutoRefresh" style="margin: 0;"> Tự động cập nhật (30s)
+            </label>
+        </div>
+    </div>
+
+    <!-- LIVE METRIC KPI CARDS -->
+    <div class="audit-kpi-grid">
+        <div class="audit-kpi-card kpi-blue">
+            <div class="audit-kpi-icon"><i class="fa fa-bolt"></i></div>
+            <div class="audit-kpi-body">
+                <div class="audit-kpi-value" id="kpi-total-today">--</div>
+                <div class="audit-kpi-label">Tổng thao tác hôm nay</div>
+            </div>
+        </div>
+        <div class="audit-kpi-card kpi-green">
+            <div class="audit-kpi-icon"><i class="fa fa-key"></i></div>
+            <div class="audit-kpi-body">
+                <div class="audit-kpi-value" id="kpi-logins-today">--</div>
+                <div class="audit-kpi-label">Đăng nhập &amp; Xác thực SSO</div>
+            </div>
+        </div>
+        <div class="audit-kpi-card kpi-amber">
+            <div class="audit-kpi-icon"><i class="fa fa-pencil-square-o"></i></div>
+            <div class="audit-kpi-body">
+                <div class="audit-kpi-value" id="kpi-mods-today">--</div>
+                <div class="audit-kpi-label">Chỉnh sửa &amp; Đổi mật khẩu</div>
+            </div>
+        </div>
+        <div class="audit-kpi-card kpi-purple">
+            <div class="audit-kpi-icon"><i class="fa fa-exchange"></i></div>
+            <div class="audit-kpi-body">
+                <div class="audit-kpi-value" id="kpi-circ-today">--</div>
+                <div class="audit-kpi-label">Lưu thông &amp; Mượn số DRM</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MULTI-DIMENSIONAL FILTER TOOLBAR -->
+    <div class="audit-filter-card">
+        <div class="filter-row" style="margin-bottom: 12px;">
+            <!-- Thời gian -->
+            <div class="filter-col" style="flex: 2; min-width: 280px;">
+                <label><i class="fa fa-calendar"></i> Khoảng thời gian</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="filter-date-from" class="flatpickr" placeholder="Từ ngày (YYYY-MM-DD)" style="flex: 1;">
+                    <span style="color: #94a3b8;">&rarr;</span>
+                    <input type="text" id="filter-date-to" class="flatpickr" placeholder="Đến ngày (YYYY-MM-DD)" style="flex: 1;">
+                </div>
+                <div class="date-preset-buttons">
+                    <button type="button" class="btn-preset active" data-preset="all">Tất cả</button>
+                    <button type="button" class="btn-preset" data-preset="today">Hôm nay</button>
+                    <button type="button" class="btn-preset" data-preset="yesterday">Hôm qua</button>
+                    <button type="button" class="btn-preset" data-preset="7days">7 ngày qua</button>
+                    <button type="button" class="btn-preset" data-preset="30days">30 ngày qua</button>
+                </div>
+            </div>
+
+            <!-- Người thực hiện -->
+            <div class="filter-col" style="flex: 1.5; min-width: 200px;">
+                <label><i class="fa fa-user"></i> Người thực hiện (Thủ thư / Bạn đọc)</label>
+                <input type="text" id="filter-user" placeholder="Tên, mã thẻ, username hoặc ID...">
+            </div>
+
+            <!-- Từ khóa nội dung -->
+            <div class="filter-col" style="flex: 1.5; min-width: 200px;">
+                <label><i class="fa fa-search"></i> Từ khóa chi tiết (Info / Diff)</label>
+                <input type="text" id="filter-keyword" placeholder="Mã sách, biến cấu hình, IP, ghi chú...">
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <!-- Phân hệ -->
+            <div class="filter-col" style="flex: 1; min-width: 160px;">
+                <label><i class="fa fa-folder-open-o"></i> Phân hệ (Module)</label>
+                <select id="filter-module">
+                    <option value="ALL">-- Tất cả phân hệ --</option>
+                    <option value="MEMBERS">Bạn đọc (MEMBERS)</option>
+                    <option value="CIRCULATION">Lưu thông (CIRCULATION)</option>
+                    <option value="CATALOGUING">Biên mục &amp; Biểu ghi (CATALOGUING)</option>
+                    <option value="SYSTEMPREFERENCE">Cấu hình hệ thống (SYSTEMPREFERENCE)</option>
+                    <option value="AUTH">Xác thực &amp; Đăng nhập (AUTH)</option>
+                    <option value="DRM">Thư viện số &amp; DRM (DRM)</option>
+                    <option value="REPORTS">Báo cáo &amp; Truy vấn (REPORTS)</option>
+                    <option value="AUTHORITIES">Từ điển từ chuẩn (AUTHORITIES)</option>
+                    <option value="FINES">Tiền phạt &amp; Phí (FINES)</option>
+                    <option value="NOTICES">Thông báo &amp; Email (NOTICES)</option>
+                    <option value="CRONJOBS">Tiến trình ngầm (CRONJOBS)</option>
+                    <option value="SCRIPTS">Tập lệnh thực thi (SCRIPTS)</option>
+                    <option value="ACQUISITIONS">Bổ sung tài liệu (ACQUISITIONS)</option>
+                </select>
+            </div>
+
+            <!-- Hành động -->
+            <div class="filter-col" style="flex: 1; min-width: 160px;">
+                <label><i class="fa fa-check-square-o"></i> Hành động (Action)</label>
+                <select id="filter-action">
+                    <option value="ALL">-- Tất cả hành động --</option>
+                    <option value="ADD">Thêm mới (ADD / CREATE)</option>
+                    <option value="MODIFY">Chỉnh sửa (MODIFY)</option>
+                    <option value="DELETE">Xóa bỏ (DELETE)</option>
+                    <option value="LOGIN">Đăng nhập (LOGIN)</option>
+                    <option value="LOGIN_FAILED">Đăng nhập thất bại (LOGIN_FAILED)</option>
+                    <option value="CHANGE PASS">Đổi mật khẩu (CHANGE PASS)</option>
+                    <option value="ISSUE">Cho mượn (ISSUE)</option>
+                    <option value="RETURN">Nhận trả (RETURN)</option>
+                    <option value="RENEW">Gia hạn (RENEW / RENEWAL)</option>
+                </select>
+            </div>
+
+            <!-- Giao diện -->
+            <div class="filter-col" style="flex: 1; min-width: 150px;">
+                <label><i class="fa fa-desktop"></i> Giao diện thực thi</label>
+                <select id="filter-interface">
+                    <option value="ALL">-- Tất cả giao diện --</option>
+                    <option value="intranet">Cán bộ (Intranet)</option>
+                    <option value="opac">Bạn đọc (OPAC)</option>
+                    <option value="api">Giao diện lập trình (API)</option>
+                    <option value="cron">Tiến trình ngầm (Cron)</option>
+                    <option value="commandline">Dòng lệnh Terminal</option>
+                    <option value="sip">Máy trạm SIP</option>
+                </select>
+            </div>
+
+            <!-- Nút bấm -->
+            <div class="filter-col" style="flex: 0 0 auto; display: flex; flex-direction: row; gap: 8px;">
+                <button type="button" id="btnApplyFilter" class="btn btn-primary" style="height: 36px; font-weight: 600;">
+                    <i class="fa fa-filter"></i> Lọc dữ liệu
+                </button>
+                <button type="button" id="btnResetFilter" class="btn btn-default" style="height: 36px;">
+                    <i class="fa fa-undo"></i> Đặt lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DATA TABLE -->
+    <div class="audit-table-card">
+        <table id="table-audit-logs">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">Mã Log</th>
+                    <th style="width: 140px;">Thời gian</th>
+                    <th style="width: 180px;">Người thực hiện</th>
+                    <th style="width: 100px;">Giao diện</th>
+                    <th style="width: 150px;">Phân hệ</th>
+                    <th style="width: 120px;">Hành động</th>
+                    <th style="width: 220px;">Đối tượng tác động</th>
+                    <th>Chi tiết thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dữ liệu nạp động từ AJAX DataTables -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- MODAL: XEM CHI TIẾT DIFF & THAY ĐỔI -->
+<div class="modal" id="modalAuditDiff" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" style="font-weight: 700; color: #0f172a;">
+                    <i class="fa fa-code-fork" style="color: #2563eb;"></i> Chi tiết thay đổi dữ liệu (Diff Inspector)
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 12px; font-size: 13px; color: #475569;" id="diff-modal-meta">
+                    <!-- Meta info: Mã log, thời gian, ai thực hiện -->
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">Nội dung thay đổi chi tiết:</div>
+                <pre id="diff-modal-content"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+[% END %]
+
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE 'calendar.inc' %]
+    [% INCLUDE 'datatables.inc' %]
+    <script nonce="[% Koha.CSPNonce | $raw %]">
+    (function($) {
+        'use strict';
+
+        let auditDataTable = null;
+        let autoRefreshTimer = null;
+
+        // Định dạng ngày cho flatpickr
+        flatpickr("#filter-date-from, #filter-date-to", {
+            dateFormat: "Y-m-d",
+            allowInput: true
+        });
+
+        // 1. TẢI THỐNG KÊ DASHBOARD (KPIS)
+        function loadAuditStats() {
+            $.getJSON('audit-logs.pl?op=stats', function(data) {
+                if (data && data.success) {
+                    $('#kpi-total-today').text(Number(data.total_today || 0).toLocaleString('vi-VN'));
+                    $('#kpi-logins-today').text(Number(data.logins_today || 0).toLocaleString('vi-VN'));
+                    $('#kpi-mods-today').text(Number(data.mods_deletes_today || 0).toLocaleString('vi-VN'));
+                    $('#kpi-circ-today').text(Number(data.circ_today || 0).toLocaleString('vi-VN'));
+                }
+            });
+        }
+
+        // 2. KHỞI TẠO DATATABLE VỚI SERVER-SIDE AJAX
+        function initAuditDataTable() {
+            auditDataTable = $('#table-audit-logs').DataTable({
+                serverSide: true,
+                processing: true,
+                order: [[0, 'desc']],
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                language: {
+                    processing:     '<div style="padding: 10px; font-weight: 600; color: #2563eb;"><i class="fa fa-spinner fa-spin"></i> Đang tải nhật ký kiểm toán...</div>',
+                    search:         'Tìm kiếm nhanh:',
+                    lengthMenu:     'Hiển thị _MENU_ bản ghi/trang',
+                    info:           'Hiển thị từ _START_ đến _END_ trong tổng số <b>_TOTAL_</b> nhật ký',
+                    infoEmpty:      'Không có dữ liệu nhật ký phù hợp',
+                    infoFiltered:   '(được lọc từ _MAX_ nhật ký toàn hệ thống)',
+                    zeroRecords:    'Không tìm thấy nhật ký nào khớp với bộ lọc',
+                    paginate: {
+                        first:      '<i class="fa fa-angle-double-left"></i>',
+                        previous:   '<i class="fa fa-angle-left"></i>',
+                        next:       '<i class="fa fa-angle-right"></i>',
+                        last:       '<i class="fa fa-angle-double-right"></i>'
+                    }
+                },
+                ajax: {
+                    url: 'audit-logs.pl?op=list',
+                    type: 'GET',
+                    data: function(d) {
+                        d.module      = $('#filter-module').val();
+                        d.action      = $('#filter-action').val();
+                        d.interface   = $('#filter-interface').val();
+                        d.user_search = $('#filter-user').val();
+                        d.date_from   = $('#filter-date-from').val();
+                        d.date_to     = $('#filter-date-to').val();
+                        d.keyword     = $('#filter-keyword').val();
+                    }
+                },
+                columns: [
+                    {
+                        data: 'action_id',
+                        render: function(data) {
+                            return '<span style="font-family: monospace; font-weight: 700; color: #64748b;">#' + data + '</span>';
+                        }
+                    },
+                    {
+                        data: 'timestamp',
+                        render: function(data, type, row) {
+                            return '<span style="font-weight: 600; color: #0f172a; white-space: nowrap;">' + (data || '') + '</span>';
+                        }
+                    },
+                    {
+                        data: 'user_display',
+                        render: function(data, type, row) {
+                            let html = '<div class="badge-user">';
+                            if (row.user_link) {
+                                html += '<a href="' + row.user_link + '" class="badge-user-name" target="_blank">' + $('<div>').text(data).html() + '</a>';
+                            } else {
+                                html += '<span class="badge-user-name">' + $('<div>').text(data).html() + '</span>';
+                            }
+                            if (row.user_sub) {
+                                html += '<span class="badge-user-sub">' + $('<div>').text(row.user_sub).html() + '</span>';
+                            }
+                            html += '</div>';
+                            return html;
+                        }
+                    },
+                    {
+                        data: 'interface_name',
+                        render: function(data, type, row) {
+                            return '<span class="if-badge ' + (row.interface_badge || 'badge-default') + '">' + $('<div>').text(data || '').html() + '</span>';
+                        }
+                    },
+                    {
+                        data: 'module_name',
+                        render: function(data, type, row) {
+                            let icon = row.module_icon ? '<i class="fa ' + row.module_icon + '"></i> ' : '';
+                            return '<span class="mod-badge ' + (row.module_class || 'mod-default') + '">' + icon + $('<div>').text(data || '').html() + '</span>';
+                        }
+                    },
+                    {
+                        data: 'action_name',
+                        render: function(data, type, row) {
+                            return '<span class="act-badge ' + (row.action_badge || 'badge-secondary') + '">' + $('<div>').text(data || '').html() + '</span>';
+                        }
+                    },
+                    {
+                        data: 'target_label',
+                        render: function(data, type, row) {
+                            if (!data) return '<span style="color: #94a3b8; font-style: italic;">--</span>';
+                            let html = '<div class="target-cell" title="' + $('<div>').text(data).html() + '">';
+                            if (row.target_link) {
+                                html += '<a href="' + row.target_link + '" target="_blank">' + $('<div>').text(data).html() + '</a>';
+                            } else {
+                                html += $('<div>').text(data).html();
+                            }
+                            html += '</div>';
+                            return html;
+                        }
+                    },
+                    {
+                        data: 'info',
+                        orderable: false,
+                        render: function(data, type, row) {
+                            let html = '<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">';
+                            if (data) {
+                                html += '<span class="info-snippet" title="' + $('<div>').text(data).html() + '">' + $('<div>').text(data).html() + '</span>';
+                            }
+                            if (row.has_diff) {
+                                html += '<button type="button" class="btn btn-xs btn-default btn-view-diff" data-row=\'' + JSON.stringify(row).replace(/'/g, "&#39;") + '\' style="font-weight: 600; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;"><i class="fa fa-search"></i> Xem Diff</button>';
+                            }
+                            html += '</div>';
+                            return html;
+                        }
+                    }
+                ]
+            });
+        }
+
+        // 3. XỬ LÝ SỰ KIỆN BỘ LỌC
+        $('#btnApplyFilter').on('click', function() {
+            if (auditDataTable) {
+                auditDataTable.ajax.reload();
+            }
+        });
+
+        $('#filter-keyword, #filter-user').on('keypress', function(e) {
+            if (e.which === 13) {
+                $('#btnApplyFilter').click();
+            }
+        });
+
+        $('#filter-module, #filter-action, #filter-interface').on('change', function() {
+            $('#btnApplyFilter').click();
+        });
+
+        $('#btnResetFilter').on('click', function() {
+            $('#filter-module').val('ALL');
+            $('#filter-action').val('ALL');
+            $('#filter-interface').val('ALL');
+            $('#filter-user').val('');
+            $('#filter-keyword').val('');
+            $('#filter-date-from').val('');
+            $('#filter-date-to').val('');
+            $('.btn-preset').removeClass('active');
+            $('.btn-preset[data-preset="all"]').addClass('active');
+            if (auditDataTable) {
+                auditDataTable.ajax.reload();
+            }
+        });
+
+        // Nút chọn ngày nhanh (Date Presets)
+        $('.btn-preset').on('click', function() {
+            $('.btn-preset').removeClass('active');
+            $(this).addClass('active');
+            const preset = $(this).data('preset');
+            const today = new Date();
+
+            function formatDate(d) {
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+
+            if (preset === 'all') {
+                $('#filter-date-from').val('');
+                $('#filter-date-to').val('');
+            } else if (preset === 'today') {
+                const ds = formatDate(today);
+                $('#filter-date-from').val(ds);
+                $('#filter-date-to').val(ds);
+            } else if (preset === 'yesterday') {
+                const yest = new Date(today);
+                yest.setDate(yest.getDate() - 1);
+                const ds = formatDate(yest);
+                $('#filter-date-from').val(ds);
+                $('#filter-date-to').val(ds);
+            } else if (preset === '7days') {
+                const start = new Date(today);
+                start.setDate(start.getDate() - 6);
+                $('#filter-date-from').val(formatDate(start));
+                $('#filter-date-to').val(formatDate(today));
+            } else if (preset === '30days') {
+                const start = new Date(today);
+                start.setDate(start.getDate() - 29);
+                $('#filter-date-from').val(formatDate(start));
+                $('#filter-date-to').val(formatDate(today));
+            }
+
+            if (auditDataTable) {
+                auditDataTable.ajax.reload();
+            }
+        });
+
+        // Làm mới dữ liệu
+        $('#btnRefreshLogs').on('click', function() {
+            loadAuditStats();
+            if (auditDataTable) {
+                auditDataTable.ajax.reload(null, false);
+            }
+        });
+
+        // Tự động làm mới
+        $('#chkAutoRefresh').on('change', function() {
+            if ($(this).is(':checked')) {
+                autoRefreshTimer = setInterval(function() {
+                    $('#btnRefreshLogs').click();
+                }, 30000);
+            } else {
+                if (autoRefreshTimer) {
+                    clearInterval(autoRefreshTimer);
+                    autoRefreshTimer = null;
+                }
+            }
+        });
+
+        // 4. XUẤT CSV / EXCEL
+        $('#btnExportCsv').on('click', function() {
+            const params = new URLSearchParams({
+                op: 'export_csv',
+                module: $('#filter-module').val(),
+                action: $('#filter-action').val(),
+                interface: $('#filter-interface').val(),
+                user_search: $('#filter-user').val(),
+                date_from: $('#filter-date-from').val(),
+                date_to: $('#filter-date-to').val(),
+                keyword: $('#filter-keyword').val()
+            });
+            window.location.href = 'audit-logs.pl?' + params.toString();
+        });
+
+        // 5. IN BIÊN BẢN NHẬT KÝ
+        $('#btnPrintLog').on('click', function() {
+            window.print();
+        });
+
+        // 6. XEM CHI TIẾT DIFF / THAY ĐỔI
+        $(document).on('click', '.btn-view-diff', function() {
+            const raw = $(this).data('row');
+            let row = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+            let metaHtml = '<b>Mã nhật ký:</b> #' + row.action_id + 
+                           ' &nbsp;|&nbsp; <b>Thời gian:</b> ' + row.timestamp +
+                           ' &nbsp;|&nbsp; <b>Người thực hiện:</b> ' + row.user_display +
+                           ' &nbsp;|&nbsp; <b>Thao tác:</b> ' + row.action_name + ' (' + row.module_name + ')';
+            $('#diff-modal-meta').html(metaHtml);
+
+            let diffText = row.diff || row.info || 'Không có dữ liệu chi tiết';
+            // Cố gắng format JSON nếu nội dung là JSON hợp lệ
+            try {
+                const parsed = JSON.parse(diffText);
+                diffText = JSON.stringify(parsed, null, 2);
+            } catch (e) {
+                // Giữ nguyên chuỗi
+            }
+
+            $('#diff-modal-content').text(diffText);
+            $('#modalAuditDiff').modal('show');
+        });
+
+        // KHỞI ĐỘNG
+        $(document).ready(function() {
+            loadAuditStats();
+            initAuditDataTable();
+        });
+
+    })(jQuery);
+    </script>
+[% END %]
+
+[% INCLUDE 'intranet-bottom.inc' %]
