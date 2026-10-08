@@ -440,7 +440,7 @@
             <path d="M-100,320 C340,460 640,150 1040,360 C1380,530 1540,330 1720,380" stroke="url(#ftuRibbonGrad1)" stroke-width="1" fill="none" opacity="0.5" />
         </svg>
 
-        <!-- 4. Modern Geometric Knowledge Wireframe with Orbital Rings (Right Margin) -->
+        <!-- 4. Concentric Orbital Rings (Right Margin) -->
         <svg class="ftu-art-svg ftu-art-polyhedron" viewBox="0 0 360 360" fill="none">
             <defs>
                 <linearGradient id="ftuPolyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -454,7 +454,7 @@
                 </linearGradient>
             </defs>
 
-            <!-- A. Rotating Orbital Outer Ring -->
+            <!-- A. Outer Orbital Ring -->
             <g class="ftu-art-orbit-outer">
                 <circle cx="180" cy="180" r="162" stroke="url(#ftuCircleGrad)" stroke-width="1.2" stroke-dasharray="6 10" opacity="0.65" />
                 <circle cx="180" cy="180" r="144" stroke="url(#ftuPolyGrad)" stroke-width="0.8" stroke-dasharray="2 12" opacity="0.45" />
@@ -464,27 +464,13 @@
                 <circle cx="18" cy="180" r="3" fill="#e11d48" opacity="0.5" />
             </g>
 
-            <!-- B. Reverse Counter-Orbit Ring -->
+            <!-- B. Inner Orbital Ring -->
             <g class="ftu-art-orbit-inner">
                 <circle cx="180" cy="180" r="124" stroke="url(#ftuCircleGrad)" stroke-width="1.2" stroke-dasharray="8 14" opacity="0.55" />
+                <circle cx="180" cy="180" r="92" stroke="url(#ftuPolyGrad)" stroke-width="1" stroke-dasharray="4 8" opacity="0.4" />
                 <circle cx="268" cy="92" r="2.5" fill="#c8922a" opacity="0.7" />
                 <circle cx="92" cy="268" r="2.5" fill="#b91c1c" opacity="0.7" />
-            </g>
-
-            <!-- C. Original 3D Geometric Wireframe Polyhedron -->
-            <g class="ftu-art-poly-core">
-                <circle cx="180" cy="180" r="105" stroke="url(#ftuPolyGrad)" stroke-width="1.2" opacity="0.4" />
-                <polygon points="180,75 268,126 268,234 180,285 92,234 92,126" stroke="url(#ftuPolyGrad)" stroke-width="1.6" fill="rgba(185, 28, 28, 0.02)" />
-                <line x1="180" y1="75" x2="180" y2="180" stroke="url(#ftuPolyGrad)" stroke-width="1.6" />
-                <line x1="180" y1="180" x2="268" y2="234" stroke="url(#ftuPolyGrad)" stroke-width="1.6" />
-                <line x1="180" y1="180" x2="92" y2="234" stroke="url(#ftuPolyGrad)" stroke-width="1.6" />
-                <circle cx="180" cy="75" r="3.5" fill="#b91c1c" opacity="0.7" />
-                <circle cx="268" cy="126" r="3" fill="#e11d48" opacity="0.6" />
-                <circle cx="268" cy="234" r="3" fill="#6366f1" opacity="0.6" />
-                <circle cx="180" cy="285" r="3.5" fill="#c8922a" opacity="0.7" />
-                <circle cx="92" cy="234" r="3" fill="#e11d48" opacity="0.6" />
-                <circle cx="92" cy="126" r="3" fill="#b91c1c" opacity="0.6" />
-                <circle cx="180" cy="180" r="4.5" fill="#b91c1c" opacity="0.75" />
+                <circle cx="180" cy="180" r="4" fill="#b91c1c" opacity="0.6" />
             </g>
         </svg>
 
