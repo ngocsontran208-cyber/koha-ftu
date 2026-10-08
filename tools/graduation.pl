@@ -425,6 +425,7 @@ if ($op eq "batch_lock") {
         UPDATE borrowers
         SET debarred = '9999-12-31',
             debarredcomment = 'Người học đã tốt nghiệp',
+            login_attempts = -1,
             borrowernotes = CONCAT(COALESCE(borrowernotes,''), IF(borrowernotes IS NULL OR borrowernotes = '', '', '\n'), '[$today_str] Người học đã tốt nghiệp')
         WHERE cardnumber IN ($placeholders) AND categorycode != 'S'
     };

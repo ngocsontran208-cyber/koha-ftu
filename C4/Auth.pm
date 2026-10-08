@@ -969,7 +969,18 @@ sub checkauth {
                 map { $session->param($_) || q{} } qw(cardnumber firstname surname branch)
             );
 
-            if (   ( $query->param('koha_login_context') && ( $q_userid ne $userid ) )
+            my $active_patron = $userid ? Koha::Patrons->find_by_identifier($userid) : undef;
+            if ( $active_patron && $active_patron->account_locked ) {
+                $anon_search_history = $session->param('search_history');
+                $session->delete();
+                $session->flush;
+                $cookie = $cookie_mgr->clear_unless( $query->cookie, @$cookie );
+                C4::Context::unset_userenv();
+                $sessionID = undef;
+                undef $userid;
+                $auth_state = 'failed';
+                $info{'account_is_locked'} = 1;
+            } elsif (   ( $query->param('koha_login_context') && ( $q_userid ne $userid ) )
                 || ( $cas && $query->param('ticket') && !C4::Context->userenv->{'id'} )
                 || ( $shib && $shib_login && !$logout && !C4::Context->userenv->{'id'} ) )
             {
@@ -1173,8 +1184,13 @@ sub checkauth {
 
                         ( $return, $cardnumber, $retuserid, $patron, $cas_ticket ) =
                             checkpw( $q_userid, $password, $query, $type );
+                        $patron ||= Koha::Patrons->find_by_identifier($q_userid);
                         $userid = $retuserid if ($retuserid);
-                        $info{'invalid_username_or_password'} = 1 unless ($return);
+                        if ( $patron && $patron->account_locked ) {
+                            $info{'account_is_locked'} = 1;
+                        } elsif ( !$return ) {
+                            $info{'invalid_username_or_password'} = 1;
+                        }
                     }
                 }
             }
@@ -1488,7 +1504,7 @@ sub checkauth {
     #
     #
 
-    my $patron = Koha::Patrons->find( { userid => $q_userid } );    # Not necessary logged in!
+    my $patron = Koha::Patrons->find_by_identifier($q_userid);    # Not necessary logged in!
 
     # get the inputs from the incoming query
     my @inputs          = ();
@@ -1539,7 +1555,9 @@ sub checkauth {
         PatronSelfRegistration                => C4::Context->preference("PatronSelfRegistration"),
         PatronSelfRegistrationDefaultCategory => C4::Context->preference("PatronSelfRegistrationDefaultCategory"),
         opac_css_override                     => $ENV{'OPAC_CSS_OVERRIDE'},
-        too_many_login_attempts               => ( $patron and $patron->account_locked ),
+        account_is_locked                     => ( $info{'account_is_locked'} || ( $patron and $patron->account_locked ) ),
+        too_many_login_attempts               => ( $info{'account_is_locked'} || ( $patron and $patron->account_locked ) ),
+        debarred_comment                      => ( ( $patron and $patron->debarredcomment ) ? $patron->debarredcomment : '' ),
         password_has_expired                  => ( $patron and $patron->password_expired ),
         is_anonymous_patron                   => ( $patron and $patron->is_anonymous ),
         password_expiration_date              => ( $patron and $patron->password_expiration_date ),
@@ -2139,7 +2157,7 @@ sub checkpw {
         # INTERNAL AUTH
         @return    = checkpw_internal( $userid, $password, $no_set_userenv );
         $passwd_ok = $return[0];
-        $patron    = $passwd_ok ? $return[3] : undef;
+        $patron    = $return[3] || ( $passwd_ok ? $return[3] : undef );
     }
 
     if ( defined $userid && !$patron ) {
@@ -2149,7 +2167,8 @@ sub checkpw {
 
     if ($patron) {
         if ( $patron->account_locked ) {
-            @return = ();
+            @return = ( 0, $patron->cardnumber, $patron->userid, $patron );
+            $passwd_ok = 0;
         } elsif ($passwd_ok) {
             $patron->update( { login_attempts => 0 } );
             if ( defined($anonymous_patron) && ( $patron->borrowernumber eq $anonymous_patron ) ) {
@@ -2186,6 +2205,9 @@ sub checkpw_internal {
 
     my $patron = Koha::Patrons->find_by_identifier($identifier);
     if ($patron) {
+        if ( $patron->account_locked ) {
+            return 0, $patron->cardnumber, $patron->userid, $patron;
+        }
         if ( checkpw_hash( $password, $patron->password ) ) {
             my $borrowernumber = $patron->borrowernumber;
             C4::Context->set_userenv(

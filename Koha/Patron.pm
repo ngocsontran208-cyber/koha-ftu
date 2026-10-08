@@ -2187,13 +2187,14 @@ disabled.
 
 sub account_locked {
     my ($self) = @_;
+    return 1 if $self->is_debarred;
+    return 1 if ( $self->login_attempts || 0 ) < 0;    # administrative lockout
     my $FailedLoginAttempts = C4::Context->preference('FailedLoginAttempts');
     return 1
         if $FailedLoginAttempts
         && $FailedLoginAttempts > 0
         && $self->login_attempts
         && $self->login_attempts >= $FailedLoginAttempts;
-    return 1 if ( $self->login_attempts || 0 ) < 0;    # administrative lockout
     return 0;
 }
 
