@@ -7,9 +7,9 @@
             <div class="modal-header" style="background: #A31A24; color: #ffffff; padding: 1rem 1.25rem; border: none;">
                 <div class="d-flex align-items-center" style="gap: 10px;">
                     <i class="fa fa-book-reader" style="font-size: 1.15rem;"></i>
-                    <h5 class="modal-title fw-bold mb-0" id="ftuDigitalLendingModalLabel" style="font-size: 1.1rem;">Digital Lending Confirmation</h5>
+                    <h5 class="modal-title fw-bold mb-0" id="ftuDigitalLendingModalLabel" style="font-size: 1.1rem;">Xác nhận mượn tài liệu số</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
 
             <!-- Modal Body -->
@@ -167,7 +167,7 @@
     var returnTargetDoc = null;
 
     // 3. Hàm kích hoạt Modal mượn tài liệu số
-    window.ftuOpenDigitalLendingModal = function(params) {
+    window.ftuOpenDigitalLendingModal = function(params, autoBorrowIfAllowed) {
         params = params || {};
         var patron = getLoggedInPatron();
         var modalEl = document.getElementById('ftuDigitalLendingModal');
@@ -185,7 +185,13 @@
                 ? ('/bitstreams/' + encodeURIComponent(params.bitstreamUuid))
                 : (params.itemUuid ? ('/elib/items/' + encodeURIComponent(params.itemUuid)) : (params.fallbackUrl || ''));
             var guestPreviewUrl = ssoBase + '/koha-to-dspace?user=guest&target=' + encodeURIComponent(guestTarget);
-            var loginReturnUrl = encodeURIComponent(window.location.href);
+
+            // Tạo đường dẫn trả về tương đối chuẩn xác kèm cờ auto_read=1 để tự động mở sau khi đăng nhập
+            var retPath = window.location.pathname + window.location.search;
+            if (retPath.indexOf('auto_read=1') === -1) {
+                retPath += (retPath.indexOf('?') > -1 ? '&' : '?') + 'auto_read=1';
+            }
+            var loginReturnUrl = encodeURIComponent(retPath);
 
             bodyEl.innerHTML = `
                 <div class="text-center py-4">
@@ -200,12 +206,58 @@
                         <a href="${guestPreviewUrl}" target="_blank" class="btn btn-outline-danger px-3 py-2 fw-semibold" id="ftuBtnGuestPreview">
                             <i class="fa fa-book-open me-1"></i> Xem trước trực tuyến
                         </a>
-                        <a href="/opac/cgi-bin/opac-user.pl?return=${loginReturnUrl}" class="btn btn-danger px-4 py-2 fw-bold" style="background: #A31A24; border-color: #A31A24;">
+                        <button type="button" class="btn btn-danger px-4 py-2 fw-bold" id="ftuBtnLoginToRead" style="background: #A31A24; border-color: #A31A24;">
                             <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập mượn toàn văn
-                        </a>
+                        </button>
                     </div>
                 </div>
             `;
+
+            var btnLogin = document.getElementById('ftuBtnLoginToRead');
+            if (btnLogin) {
+                btnLogin.onclick = function(e) {
+                    if (e) e.preventDefault();
+                    // Lưu lại chính xác thông tin tài liệu người đọc muốn xem vào sessionStorage
+                    sessionStorage.setItem('ftu_pending_digital_doc', JSON.stringify({
+                        itemUuid: params.itemUuid,
+                        bitstreamUuid: params.bitstreamUuid,
+                        biblionumber: params.biblionumber,
+                        handle: params.handle,
+                        title: params.title,
+                        author: params.author,
+                        fallbackUrl: params.fallbackUrl,
+                        timestamp: Date.now()
+                    }));
+
+                    // Ưu tiên mở modal đăng nhập ngay trên trang hiện tại nếu có
+                    var loginModalEl = document.getElementById('loginModal');
+                    var modalAuth = document.getElementById('modalAuth');
+                    if (loginModalEl && modalAuth && typeof bootstrap !== 'undefined') {
+                        var currModal = bootstrap.Modal.getInstance(modalEl);
+                        if (currModal) currModal.hide();
+
+                        var retInput = modalAuth.querySelector('input[name="return"]');
+                        if (retInput) {
+                            retInput.value = retPath;
+                            retInput.setAttribute('data-ftu-lock', '1');
+                        } else {
+                            var inp = document.createElement('input');
+                            inp.type = 'hidden';
+                            inp.name = 'return';
+                            inp.value = retPath;
+                            inp.setAttribute('data-ftu-lock', '1');
+                            modalAuth.appendChild(inp);
+                        }
+
+                        var bsLoginModal = bootstrap.Modal.getInstance(loginModalEl) || new bootstrap.Modal(loginModalEl);
+                        bsLoginModal.show();
+                        return;
+                    }
+
+                    // Điều hướng sang trang đăng nhập với URL đích chuẩn xác
+                    window.location.href = '/opac/login?return=' + loginReturnUrl;
+                };
+            }
             return;
         }
 
@@ -234,7 +286,7 @@
                     throw new Error(data.error || 'Không thể kiểm tra chính sách mượn số');
                 }
                 activeCheckDoc = data;
-                renderPrecheckModal(data, params);
+                renderPrecheckModal(data, params, autoBorrowIfAllowed);
             })
             .catch(function(err) {
                 bodyEl.innerHTML = `
@@ -252,7 +304,7 @@
             });
     };
 
-    function renderPrecheckModal(data, originalParams) {
+    function renderPrecheckModal(data, originalParams, autoBorrowIfAllowed) {
         var bodyEl = document.getElementById('ftuDigitalLendingModalBody');
         var quota = data.quota || {};
         var doc = data.document || {};
@@ -270,16 +322,16 @@
                             <i class="fa fa-check-circle"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <span class="badge bg-success mb-1">Active Loan</span>
-                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
-                            <div class="text-muted small"><i class="fa fa-user me-1"></i> Author: <strong>${doc.author || 'Foreign Trade University'}</strong></div>
+                            <span class="badge bg-success mb-1">Đang trong hạn mượn</span>
+                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'Tài liệu số FTU'}</h5>
+                            <div class="text-muted small"><i class="fa fa-user me-1"></i> Tác giả: <strong>${doc.author || 'Đại học Ngoại Thương'}</strong></div>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end align-items-center gap-2 pt-2">
-                    <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-success fw-bold px-4" id="ftuBtnReadNow">
-                        <i class="fa fa-book-open me-1"></i> Read Online
+                        <i class="fa fa-book-open me-1"></i> Mở đọc ngay
                     </button>
                 </div>
             `;
@@ -299,6 +351,12 @@
                     if (modal) modal.hide();
                 }
             };
+            if (autoBorrowIfAllowed) {
+                setTimeout(function() {
+                    var btn = document.getElementById('ftuBtnReadNow');
+                    if (btn) btn.click();
+                }, 300);
+            }
             return;
         }
 
@@ -311,16 +369,16 @@
                             <i class="fa fa-exclamation-triangle"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
-                            <div class="text-danger small fw-semibold mb-1">Maximum borrowing limit reached (${maxLoans} items)</div>
-                            <div class="text-muted small">Please return previously borrowed digital items before borrowing new ones.</div>
+                            <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'Tài liệu số FTU'}</h5>
+                            <div class="text-danger small fw-semibold mb-1">Đã đạt giới hạn mượn tối đa (${maxLoans} cuốn)</div>
+                            <div class="text-muted small">Vui lòng trả bớt tài liệu số đang mượn trước khi mượn tài liệu mới.</div>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end align-items-center gap-2 pt-2">
-                    <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Đóng</button>
                     <a href="/cgi-bin/koha/opac-user.pl?tab=opac-user-digital-checkouts" class="btn btn-danger fw-bold px-3" style="background: #A31A24; border-color: #A31A24;">
-                        <i class="fa fa-list-check me-1"></i> Return digital documents
+                        <i class="fa fa-list-check me-1"></i> Đến trang Trả tài liệu số
                     </a>
                 </div>
             `;
@@ -335,19 +393,19 @@
                         <i class="fa fa-book"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
-                        <div class="text-muted small mb-2"><i class="fa fa-user me-1"></i> Author: <strong>${doc.author || 'Foreign Trade University'}</strong></div>
+                        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'Tài liệu số FTU'}</h5>
+                        <div class="text-muted small mb-2"><i class="fa fa-user me-1"></i> Tác giả: <strong>${doc.author || 'Trường Đại học Ngoại Thương'}</strong></div>
                         <div class="d-inline-flex align-items-center gap-2 px-2.5 py-1 bg-white border rounded text-secondary small">
-                            <i class="fa fa-clock text-danger"></i> Loan Period: <strong class="text-dark">14 days</strong> (online reading)
+                            <i class="fa fa-clock text-danger"></i> Thời hạn mượn: <strong class="text-dark">14 ngày</strong> (đọc trực tuyến)
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="d-flex justify-content-end align-items-center gap-2 pt-2">
-                <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Hủy bỏ</button>
                 <button type="button" class="btn btn-danger fw-bold px-4" id="ftuBtnDoBorrow" style="background: #A31A24; border-color: #A31A24;">
-                    <i class="fa fa-check me-1"></i> Borrow &amp; Read Online
+                    <i class="fa fa-check me-1"></i> Đồng ý mượn &amp; Mở đọc
                 </button>
             </div>
         `;
@@ -355,14 +413,14 @@
         document.getElementById('ftuBtnDoBorrow').onclick = function() {
             var btn = this;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Activating digital loan...';
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Đang kích hoạt mượn...';
 
             // 1. Mở sẵn tab mới trực tiếp trong luồng click của người dùng để tránh bị Popup Blocker chặn
             var readerWin = null;
             try {
                 readerWin = window.open('about:blank', '_blank');
                 if (readerWin) {
-                    readerWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Opening FTU Digital Document...</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0F172A;color:white;text-align:center;}.card{padding:2.2rem 2rem;border-radius:1rem;background:rgba(30,41,59,0.85);border:1px solid rgba(255,255,255,0.1);max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.5);}.spinner{width:42px;height:42px;border:3px solid rgba(225,29,72,0.2);border-top-color:#E11D48;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.25rem;}@keyframes spin{to{transform:rotate(360deg);}}h3{margin:0 0 8px;font-size:1.15rem;font-weight:700;}p{margin:0;font-size:0.875rem;color:#94A3B8;line-height:1.5;}</style></head><body><div class="card"><div class="spinner"></div><h3>Connecting to Secure Reader...</h3><p>Authorizing DRM reading session and opening digital document...</p></div></body></html>');
+                    readerWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Đang mở tài liệu số FTU DRM...</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0F172A;color:white;text-align:center;}.card{padding:2.2rem 2rem;border-radius:1rem;background:rgba(30,41,59,0.85);border:1px solid rgba(255,255,255,0.1);max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.5);}.spinner{width:42px;height:42px;border:3px solid rgba(225,29,72,0.2);border-top-color:#E11D48;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.25rem;}@keyframes spin{to{transform:rotate(360deg);}}h3{margin:0 0 8px;font-size:1.15rem;font-weight:700;}p{margin:0;font-size:0.875rem;color:#94A3B8;line-height:1.5;}</style></head><body><div class="card"><div class="spinner"></div><h3>Đang kết nối phiên đọc số...</h3><p>Đang cấp vé bảo mật DRM và mở toàn văn tài liệu cho bạn đọc...</p></div></body></html>');
                 }
             } catch (_) {}
 
@@ -388,7 +446,7 @@
                     if (readerWin && !readerWin.closed) {
                         try { readerWin.close(); } catch(_) {}
                     }
-                    throw new Error(borrowRes.error || 'Borrowing digital document failed');
+                    throw new Error(borrowRes.error || 'Mượn tài liệu số thất bại');
                 }
 
                 // Xây dựng link reader an toàn: Ưu tiên tuyệt đối bitstreamUuid để mở trình đọc toàn văn
@@ -424,23 +482,23 @@
                                 <i class="fa fa-check-circle"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <span class="badge bg-success mb-1">Borrowed successfully</span>
-                                <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'FTU Digital Document'}</h5>
-                                <div class="text-muted small mb-2"><i class="fa fa-user me-1"></i> Author: <strong>${doc.author || 'Foreign Trade University'}</strong></div>
+                                <span class="badge bg-success mb-1">Mượn thành công</span>
+                                <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem; line-height: 1.4;">${doc.title || 'Tài liệu số FTU'}</h5>
+                                <div class="text-muted small mb-2"><i class="fa fa-user me-1"></i> Tác giả: <strong>${doc.author || 'Đại học Ngoại Thương'}</strong></div>
                                 <div class="d-inline-flex align-items-center gap-2 px-2.5 py-1 bg-white border rounded text-success small fw-semibold">
-                                    <i class="fa fa-clock"></i> Loan Period: 14 days (until ${new Date(borrowRes.dueTime || (Date.now() + 14*86400000)).toLocaleDateString('vi-VN')})
+                                    <i class="fa fa-clock"></i> Thời hạn đọc: 14 ngày (đến ${new Date(borrowRes.dueTime || (Date.now() + 14*86400000)).toLocaleDateString('vi-VN')})
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="text-center py-2 mb-2">
-                        <p class="text-muted small mb-3">The document is opening in a new tab. You can also click the button below to read immediately:</p>
+                        <p class="text-muted small mb-3">Tài liệu đang được mở trong tab mới. Bạn cũng có thể bấm nút bên dưới để mở đọc ngay:</p>
                         <a href="${targetUrl}" target="_blank" class="btn btn-success btn-lg fw-bold px-4 py-2" id="ftuModalDirectReadBtn" style="background: #059669; border-color: #059669; border-radius: 10px; font-size: 1rem;">
-                            <i class="fa fa-book-open me-2"></i> Open Digital Document Now
+                            <i class="fa fa-book-open me-2"></i> Mở đọc tài liệu ngay bây giờ
                         </a>
                     </div>
                     <div class="d-flex justify-content-end align-items-center gap-2 pt-2 border-top">
-                        <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-light px-3 fw-semibold" data-bs-dismiss="modal">Đóng</button>
                     </div>
                 `;
 
@@ -455,11 +513,18 @@
                 if (readerWin && !readerWin.closed) {
                     try { readerWin.close(); } catch(_) {}
                 }
-                alert('Error borrowing document: ' + err.message);
+                alert('Lỗi mượn tài liệu: ' + err.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-check me-1"></i> Borrow &amp; Read Online';
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Đồng ý mượn &amp; Mở đọc';
             });
         };
+
+        if (autoBorrowIfAllowed) {
+            setTimeout(function() {
+                var btn = document.getElementById('ftuBtnDoBorrow');
+                if (btn) btn.click();
+            }, 350);
+        }
     }
 
     // 4. Bắt chặn toàn cục các liên kết "Truy cập toàn văn số" trên Koha OPAC
@@ -802,9 +867,9 @@
                 }
             })
             .catch(function(err) {
-                alert('Connection error when returning document: ' + err.message);
+                alert('Lỗi kết nối khi trả tài liệu: ' + err.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-check me-1"></i> Return now';
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Xác nhận trả ngay';
             });
         });
     }
@@ -843,7 +908,7 @@
                     tabBadgeEl.textContent = digitalCount;
                 }
 
-                // Cập nhật menu dropdown dòng "Digital loans"
+                // Cập nhật menu dropdown dòng "Tài liệu số đang mượn"
                 if (digitalLoansMenu && digitalValEl) {
                     digitalValEl.textContent = digitalCount;
                     if (digitalCount > 0) {
@@ -853,7 +918,7 @@
                     }
                 }
 
-                // Cập nhật menu dropdown dòng "Print loans"
+                // Cập nhật menu dropdown dòng "Sách in đang mượn"
                 if (printLoansMenu && printValEl) {
                     printValEl.textContent = printCount;
                     if (printCount > 0) {
@@ -869,15 +934,15 @@
                         badgeEl.textContent = totalCount;
                         badgeEl.style.display = 'inline-block';
                         var tip = [];
-                        if (printCount > 0) tip.push(printCount + ' print items');
-                        if (digitalCount > 0) tip.push(digitalCount + ' digital documents');
-                        badgeEl.setAttribute('title', tip.join(', ') + ' on loan');
+                        if (printCount > 0) tip.push(printCount + ' sách in');
+                        if (digitalCount > 0) tip.push(digitalCount + ' tài liệu số');
+                        badgeEl.setAttribute('title', tip.join(', ') + ' đang mượn');
                     } else {
                         badgeEl.style.display = 'none';
                     }
                 }
 
-                // Cập nhật thẻ "Patron Account" trên trang chủ (nếu có)
+                // Cập nhật thẻ "Tài khoản bạn đọc" trên trang chủ (nếu có)
                 var accountCard = document.querySelector('a.ftu-shortcut-card[href*="opac-user.pl"]');
                 if (accountCard) {
                     var cardBadge = accountCard.querySelector('.ftu-card-count');
@@ -896,19 +961,77 @@
                     var cardSub = accountCard.querySelector('.ftu-shortcut-sub');
                     if (cardSub) {
                         if (printCount > 0 && digitalCount > 0) {
-                            cardSub.textContent = printCount + ' print • ' + digitalCount + ' digital';
+                            cardSub.textContent = printCount + ' sách in • ' + digitalCount + ' tài liệu số';
                         } else if (digitalCount > 0) {
-                            cardSub.textContent = digitalCount + ' digital documents on loan';
+                            cardSub.textContent = digitalCount + ' tài liệu số đang mượn';
                         } else if (printCount > 0) {
-                            cardSub.textContent = printCount + ' print items on loan';
+                            cardSub.textContent = printCount + ' sách in đang mượn';
                         }
                     }
                 }
             })
             .catch(function(err) {
-                console.warn('[FTU-DIGITAL-LENDING] Sync error:', err);
+                console.warn('[FTU-DIGITAL-LENDING] Lỗi đồng bộ số lượng mượn:', err);
             });
     };
+
+    // 6. Tự động khôi phục ý định đọc tài liệu số sau khi đăng nhập thành công
+    function checkAndResumePendingDigitalRead() {
+        var rawPending = sessionStorage.getItem('ftu_pending_digital_doc');
+        var urlParams = new URLSearchParams(window.location.search);
+        var hasAutoRead = urlParams.get('auto_read') === '1';
+
+        // Dọn sạch query param auto_read trên URL để giữ thanh địa chỉ sạch đẹp
+        if (hasAutoRead) {
+            urlParams.delete('auto_read');
+            var newSearch = urlParams.toString();
+            var newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', newUrl);
+            }
+        }
+
+        if (!rawPending && !hasAutoRead) {
+            return;
+        }
+
+        var patron = getLoggedInPatron();
+        if (!patron || !patron.patronId) {
+            // Người đọc chưa đăng nhập, giữ pending trong sessionStorage
+            return;
+        }
+
+        var pendingDoc = null;
+        if (rawPending) {
+            try {
+                pendingDoc = JSON.parse(rawPending);
+                if (pendingDoc.timestamp && Date.now() - pendingDoc.timestamp > 15 * 60 * 1000) {
+                    pendingDoc = null;
+                }
+            } catch (_) {
+                pendingDoc = null;
+            }
+            sessionStorage.removeItem('ftu_pending_digital_doc');
+        }
+
+        if (pendingDoc) {
+            setTimeout(function() {
+                if (typeof window.ftuOpenDigitalLendingModal === 'function') {
+                    window.ftuOpenDigitalLendingModal(pendingDoc, true);
+                }
+            }, 300);
+            return;
+        }
+
+        if (hasAutoRead) {
+            setTimeout(function() {
+                var digiBtn = document.querySelector('a.ftu-digital-direct-btn, a.ftu-digital-read-btn, a.ftu-dspace-link, .online_resources a[href*="dspace"], .online_resources a[href*="drm"]');
+                if (digiBtn) {
+                    digiBtn.click();
+                }
+            }, 300);
+        }
+    }
 
     // Tự động tải danh sách và mở tab nếu có tham số ?tab=opac-user-digital-checkouts
     document.addEventListener('DOMContentLoaded', function() {
@@ -935,6 +1058,9 @@
         if (typeof window.ftuSyncHeaderLoansCount === 'function') {
             window.ftuSyncHeaderLoansCount();
         }
+
+        // Tự động kích hoạt lại phiên đọc tài liệu số nếu vừa đăng nhập
+        checkAndResumePendingDigitalRead();
     });
 
 })();

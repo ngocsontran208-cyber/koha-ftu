@@ -1458,7 +1458,7 @@ sub checkauth {
         {
             my $return_param = $query->param('return') || $query->param('return_url') || $query->param('destination');
             my $uri;
-            if ( $return_param && $return_param !~ /opac-user\.pl/ && $return_param !~ /opac-auth\.pl/ && $return_param !~ /logout/i ) {
+            if ( $return_param && $return_param !~ /opac-auth\.pl/ && $return_param !~ /logout/i ) {
                 $return_param =~ s/([?&])logout(?:\.x|\.y)?=[^&]*(&|$)/$1/g;
                 $return_param =~ s/[?&]$//;
                 if ( $return_param =~ m{^/[^/\\]} ) {
@@ -1467,7 +1467,7 @@ sub checkauth {
                     my $cand = URI->new($return_param);
                     my $cur_host = $query->virtual_host || $ENV{HTTP_HOST} || '';
                     $cur_host =~ s/:\d+$//;
-                    if ( $cand->host eq $cur_host ) {
+                    if ( $cand->host eq $cur_host || $cand->host =~ /^(10\.2\.0\.|localhost|127\.0\.0\.1|.*\.ftu\.edu\.vn)/ ) {
                         $uri = $cand;
                     }
                 }

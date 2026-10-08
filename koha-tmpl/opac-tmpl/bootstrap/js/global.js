@@ -319,6 +319,11 @@ $(document).ready(function () {
     });
 
     function syncModalReturnUrl(tab) {
+        var $modalAuth = $("#modalAuth");
+        var $retInput = $modalAuth.find("input[name='return']");
+        if ($retInput.length && ($retInput.attr("data-ftu-lock") === "1" || ($retInput.val() && $retInput.val().indexOf("auto_read=1") > -1))) {
+            return;
+        }
         var return_url = window.location.pathname + window.location.search;
         if (tab) {
             return_url += (return_url.indexOf("?") > -1 ? "&" : "?") + "tab=" + encodeURIComponent(tab);
@@ -326,9 +331,7 @@ $(document).ready(function () {
         if (return_url) {
             return_url = return_url.replace(/([?&])logout(\.x|\.y)?=[^&]*(&|$)/g, '$1').replace(/[?&]$/, '');
         }
-        var $modalAuth = $("#modalAuth");
-        var $retInput = $modalAuth.find("input[name='return']");
-        if (return_url && !return_url.includes("opac-user.pl") && !return_url.includes("opac-auth.pl") && !return_url.includes("logout")) {
+        if (return_url && !return_url.includes("opac-auth.pl") && !return_url.includes("logout")) {
             if ($retInput.length) {
                 $retInput.val(return_url);
             } else {
