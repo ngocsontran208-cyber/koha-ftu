@@ -856,8 +856,9 @@ $sth_initial_batches->execute();
 my @initial_batches = @{$sth_initial_batches->fetchall_arrayref({})};
 
 $template->param(
-    page_title    => "Phân hệ Xét tốt nghiệp - Thư viện FTU",
-    saved_batches => \@initial_batches,
+    page_title         => "Phân hệ Xét tốt nghiệp - Thư viện FTU",
+    saved_batches      => \@initial_batches,
+    saved_batches_json => $json->encode(\@initial_batches),
 );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;

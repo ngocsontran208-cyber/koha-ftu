@@ -64,43 +64,60 @@
     margin: 0;
 }
 
-/* Cohort / Batch Management Bar */
-.grad-batch-bar {
+/* Views Container & Transitions */
+.grad-view-section {
+    animation: gradViewFadeIn 0.2s ease-in-out;
+}
+@keyframes gradViewFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   VIEW 1: QUẢN LÝ DANH SÁCH ĐỢT XÉT TỐT NGHIỆP (HERO & STATS CARDS)
+   ========================================================================== */
+.grad-batches-hero {
+    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 50%, #f8fafc 100%);
+    border: 1px solid var(--ftu-crimson-border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(163, 26, 36, 0.04);
+}
+.grad-hero-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--ftu-slate-50);
-    border: 1px solid var(--ftu-slate-200);
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin-bottom: 14px;
-    gap: 12px;
+    gap: 20px;
     flex-wrap: wrap;
+    margin-bottom: 20px;
 }
-.grad-batch-left, .grad-batch-right {
+.grad-hero-text h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--ftu-crimson);
+    margin: 0 0 6px 0;
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 10px;
 }
-.grad-batch-label {
-    font-weight: 700;
-    font-size: 12.5px;
-    color: var(--ftu-slate-800);
+.grad-hero-text p {
+    font-size: 13px;
+    color: var(--ftu-slate-600);
     margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    max-width: 680px;
+    line-height: 1.5;
 }
-.grad-batch-select {
-    min-width: 320px;
-    max-width: 480px;
-    font-weight: 600;
-    border-color: var(--ftu-slate-300);
-    color: var(--ftu-slate-900);
-    background: #ffffff;
-    padding: 6px 10px;
-    font-size: 12.5px;
+.grad-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.grad-btn-lg {
+    padding: 9px 18px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
 }
 .grad-btn-crimson {
     background: var(--ftu-crimson);
@@ -110,6 +127,115 @@
 .grad-btn-crimson:hover {
     background: var(--ftu-crimson-dark);
     color: #ffffff;
+}
+
+/* Summary stats grid */
+.grad-hero-stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    border-top: 1px solid var(--ftu-crimson-border);
+    padding-top: 16px;
+}
+.grad-summary-card {
+    background: #ffffff;
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+.grad-summary-card .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.grad-summary-card .card-val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--ftu-slate-900);
+}
+.grad-summary-card .card-lbl {
+    font-size: 11.5px;
+    color: var(--ftu-slate-500);
+    font-weight: 500;
+}
+
+/* Batches table card */
+.grad-batches-table-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    margin-bottom: 24px;
+}
+.grad-batch-name-link {
+    font-weight: 700;
+    color: var(--ftu-crimson);
+    font-size: 13.5px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.grad-batch-name-link:hover {
+    color: var(--ftu-crimson-dark);
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   VIEW 2: MÀN HÌNH TRA CỨU ĐỐI SOÁT CHI TIẾT CỦA ĐỢT
+   ========================================================================== */
+.grad-detail-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1.5px solid var(--ftu-slate-200);
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.grad-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.grad-btn-back {
+    font-weight: 700 !important;
+    color: var(--ftu-slate-800) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px !important;
+    background: #f8fafc !important;
+    border: 1.5px solid var(--ftu-slate-300) !important;
+    border-radius: 8px !important;
+}
+.grad-btn-back:hover {
+    background: var(--ftu-crimson-light) !important;
+    border-color: var(--ftu-crimson) !important;
+    color: var(--ftu-crimson) !important;
+}
+.grad-topbar-batch-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.grad-detail-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--ftu-slate-900);
 }
 
 /* Active Batch Banner */
@@ -751,92 +877,196 @@
     <div id="status-alert" class="status-msg"></div>
     <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% Koha.GenerateCSRF | $raw %]">
 
-    <!-- THANH QUẢN LÝ ĐỢT XÉT TỐT NGHIỆP (GRADUATION BATCH MANAGEMENT) -->
-    <div class="grad-batch-bar">
-        <div class="grad-batch-left">
-            <label class="grad-batch-label"><i class="fa fa-folder-open-o"></i> Đợt xét tốt nghiệp:</label>
-            <select id="select-batch" class="grad-select grad-batch-select" onchange="onBatchSelectChange(this.value)">
-                <option value="">-- Chọn đợt xét tốt nghiệp đã lưu --</option>
-                [% FOREACH b IN saved_batches %]
-                <option value="[% b.id %]">[% b.batch_name %][% IF b.cohort %] ([% b.cohort %])[% END %] - [% b.total_patrons %] SV [[% b.created_at_formatted %]]</option>
-                [% END %]
-            </select>
-            <button type="button" id="btn-recheck-batch" class="grad-btn grad-btn-primary grad-btn-sm" style="display:none;" onclick="recheckCurrentBatch()" title="Đối soát lại toàn bộ sinh viên trong đợt này">
-                <i class="fa fa-refresh"></i> Đối soát lại đợt này
-            </button>
-            <button type="button" id="btn-delete-batch" class="grad-btn grad-btn-outline grad-btn-sm" style="display:none; color: #dc2626; border-color: #fca5a5;" onclick="deleteCurrentBatch()" title="Xóa đợt này khỏi hệ thống">
-                <i class="fa fa-trash-o"></i> Xóa đợt
-            </button>
-        </div>
-        <div class="grad-batch-right">
-            <button type="button" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="openCreateBatchModal()">
-                <i class="fa fa-plus-circle"></i> Tạo đợt mới &amp; Lưu lại
-            </button>
-            <button type="button" id="btn-toggle-quick-input" class="grad-btn grad-btn-outline grad-btn-sm" onclick="toggleQuickInput()">
-                <i class="fa fa-upload"></i> Nạp nhanh (không lưu)
-            </button>
-        </div>
-    </div>
-
-    <!-- BANNER ĐỢT ĐANG HOẠT ĐỘNG -->
-    <div id="batch-active-banner" class="grad-batch-active-banner" style="display:none;">
-        <div class="grad-batch-info-box">
-            <div class="grad-batch-active-title">
-                <i class="fa fa-graduation-cap"></i> <strong id="active-batch-name">-</strong>
-                <span class="grad-batch-tag" id="active-batch-tag">Đợt xét</span>
+    <!-- ========================================================================= -->
+    <!-- MÀN HÌNH 1: QUẢN LÝ DANH SÁCH ĐỢT XÉT TỐT NGHIỆP (MẶC ĐỊNH KHI VÀO TRANG)   -->
+    <!-- ========================================================================= -->
+    <div id="view-batches-list" class="grad-view-section">
+        <!-- Hero Header Card -->
+        <div class="grad-batches-hero">
+            <div class="grad-hero-content">
+                <div class="grad-hero-text">
+                    <h2><i class="fa fa-graduation-cap"></i> Quản lý Đợt Xét Tốt Nghiệp</h2>
+                    <p>Khởi tạo và quản lý hồ sơ theo từng đợt tốt nghiệp của trường. Bấm vào một đợt để tra cứu đối soát nợ sách, tự động gửi email nhắc nhở và khóa thẻ hàng loạt mà không cần nạp lại file.</p>
+                </div>
+                <div class="grad-hero-actions">
+                    <button type="button" class="grad-btn grad-btn-crimson grad-btn-lg" onclick="openCreateBatchModal()">
+                        <i class="fa fa-plus-circle"></i> Tạo đợt xét tốt nghiệp mới
+                    </button>
+                    <button type="button" class="grad-btn grad-btn-outline" onclick="openAdhocCheckModal()">
+                        <i class="fa fa-bolt"></i> Tra cứu nhanh (không lưu đợt)
+                    </button>
+                </div>
             </div>
-            <div class="grad-batch-active-meta" id="active-batch-meta">
-                Đang đối soát thời gian thực &bull; Nhấn "Đối soát lại đợt này" bất kỳ lúc nào để cập nhật dữ liệu trả sách mới nhất
+            <!-- Summary Stats Row -->
+            <div class="grad-hero-stats-row">
+                <div class="grad-summary-card">
+                    <div class="card-icon" style="background:#fee2e2; color:#a31a24;"><i class="fa fa-folder-open"></i></div>
+                    <div class="card-content">
+                        <div class="card-val" id="stat-total-batches">[% saved_batches.size || 0 %]</div>
+                        <div class="card-lbl">Tổng số đợt xét</div>
+                    </div>
+                </div>
+                <div class="grad-summary-card">
+                    <div class="card-icon" style="background:#e0f2fe; color:#0284c7;"><i class="fa fa-users"></i></div>
+                    <div class="card-content">
+                        <div class="card-val" id="stat-total-students">0</div>
+                        <div class="card-lbl">Tổng sinh viên đã lưu</div>
+                    </div>
+                </div>
+                <div class="grad-summary-card">
+                    <div class="card-icon" style="background:#dcfce7; color:#16a34a;"><i class="fa fa-check-circle"></i></div>
+                    <div class="card-content">
+                        <div class="card-val" id="stat-total-cleared">0</div>
+                        <div class="card-lbl">Đã đủ điều kiện (Không nợ)</div>
+                    </div>
+                </div>
+                <div class="grad-summary-card">
+                    <div class="card-icon" style="background:#fef3c7; color:#d97706;"><i class="fa fa-exclamation-circle"></i></div>
+                    <div class="card-content">
+                        <div class="card-val" id="stat-total-debt">0</div>
+                        <div class="card-lbl">Còn nợ sách / tiền phạt</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div>
-            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="recheckCurrentBatch()">
-                <i class="fa fa-refresh"></i> Làm mới dữ liệu mượn trả
-            </button>
+
+        <!-- Bảng danh sách các đợt -->
+        <div class="grad-card grad-batches-table-card">
+            <div class="grad-card-header" style="padding: 14px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="grad-card-title"><i class="fa fa-list-ul"></i> Danh sách các Đợt xét tốt nghiệp</span>
+                    <span class="grad-counter-badge" id="batches-count-badge">[% saved_batches.size || 0 %] đợt</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="search-batch-input" class="grad-search-input" style="width: 260px;" placeholder="Tìm theo tên đợt, niên khóa..." oninput="filterBatchesList(this.value)">
+                    <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="loadBatchesList()">
+                        <i class="fa fa-refresh"></i> Tải lại
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="grad-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">STT</th>
+                            <th>Tên đợt xét tốt nghiệp</th>
+                            <th style="width: 140px; text-align: center;">Khóa / Niên khóa</th>
+                            <th style="width: 110px; text-align: center;">Số lượng SV</th>
+                            <th style="width: 250px;">Tiến độ đối soát</th>
+                            <th style="width: 150px; text-align: center;">Ngày tạo</th>
+                            <th style="width: 220px; text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batches-tbody">
+                        [% IF saved_batches.size %]
+                            [% FOREACH b IN saved_batches %]
+                            <tr data-batch-id="[% b.id %]">
+                                <td style="text-align: center; font-weight: 700; color: #64748b;">[% loop.count %]</td>
+                                <td>
+                                    <a href="javascript:void(0)" onclick="openBatchDetail([% b.id %])" class="grad-batch-name-link">
+                                        <i class="fa fa-folder-open-o"></i> [% b.batch_name %]
+                                    </a>
+                                    [% IF b.description %]
+                                    <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">[% b.description %]</div>
+                                    [% END %]
+                                </td>
+                                <td style="text-align: center;">
+                                    <span class="grad-batch-tag">[% b.cohort || b.academic_year || 'Đợt xét' %]</span>
+                                </td>
+                                <td style="text-align: center; font-weight: 700; font-size: 13.5px; color: #0f172a;">
+                                    [% b.total_patrons %] SV
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="grad-tab-pill pill-cleared" style="font-size: 11px;">
+                                            <i class="fa fa-check"></i> [% b.cleared_count || 0 %] Đủ ĐK
+                                        </span>
+                                        <span class="grad-tab-pill pill-debt" style="font-size: 11px;">
+                                            <i class="fa fa-exclamation-triangle"></i> [% b.debt_count || 0 %] Còn nợ
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; font-size: 12px; color: #64748b;">
+                                    [% b.created_at_formatted %]
+                                </td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 6px;">
+                                        <button type="button" class="grad-btn grad-btn-primary grad-btn-sm" onclick="openBatchDetail([% b.id %])" title="Vào tra cứu và đối soát đợt này">
+                                            <i class="fa fa-search"></i> Vào tra cứu
+                                        </button>
+                                        <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="recheckBatchFromList([% b.id %])" title="Đối soát lại dữ liệu mượn trả">
+                                            <i class="fa fa-refresh"></i>
+                                        </button>
+                                        <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" style="color: #dc2626; border-color: #fca5a5;" onclick="deleteBatchFromList([% b.id %], '[% b.batch_name %]')" title="Xóa đợt này">
+                                            <i class="fa fa-trash-o"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            [% END %]
+                        [% ELSE %]
+                            <tr>
+                                <td colspan="7">
+                                    <div id="batches-empty-msg" style="text-align: center; padding: 48px 20px;">
+                                        <i class="fa fa-folder-open-o" style="font-size: 48px; color: #cbd5e1; margin-bottom: 12px;"></i>
+                                        <h3 style="color: #475569; font-weight: 700; margin-bottom: 6px;">Chưa có đợt xét tốt nghiệp nào</h3>
+                                        <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Vui lòng tạo đợt xét mới và nạp danh sách sinh viên để bắt đầu quản lý.</p>
+                                        <button type="button" class="grad-btn grad-btn-crimson" onclick="openCreateBatchModal()">
+                                            <i class="fa fa-plus-circle"></i> Tạo đợt xét tốt nghiệp đầu tiên
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        [% END %]
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- NÚT THU GỌN / MỞ RỘNG VÙNG NẠP NHANH -->
-    <div id="quick-input-toggle-container" style="display:none;">
-        <span class="grad-collapse-toggle" onclick="toggleQuickInput()">
-            <i class="fa fa-caret-down" id="toggle-caret-icon"></i>
-            <span id="toggle-label-text">Hiển thị vùng nạp nhanh file / danh sách MSSV</span>
-        </span>
-    </div>
-
-    <!-- INPUT CARDS (TWO COLUMNS - NẠP NHANH) -->
-    <div class="grad-input-grid" id="quick-input-grid">
-        <!-- CARD 1: EXCEL / CSV UPLOAD -->
-        <div class="grad-card">
-            <div class="grad-card-header">
-                <span class="grad-card-title">Nạp tệp Excel / CSV</span>
-                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="downloadSampleExcel()">
-                    Tải file mẫu (.xlsx)
+    <!-- ========================================================================= -->
+    <!-- MÀN HÌNH 2: GIAO DIỆN TRA CỨU & ĐỐI SOÁT CHI TIẾT CỦA ĐỢT (ẨN MẶC ĐỊNH)    -->
+    <!-- ========================================================================= -->
+    <div id="view-batch-detail" class="grad-view-section" style="display: none;">
+        <!-- Top Navigation Bar -->
+        <div class="grad-detail-topbar">
+            <div class="grad-topbar-left">
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-back" onclick="backToBatchesList()">
+                    <i class="fa fa-arrow-left"></i> <span>Quay lại Danh sách các đợt</span>
+                </button>
+                <div class="grad-topbar-batch-info">
+                    <span class="grad-batch-tag" id="detail-batch-tag">Đợt xét</span>
+                    <strong id="detail-batch-name" class="grad-detail-title">-</strong>
+                </div>
+            </div>
+            <div class="grad-topbar-right" style="display: flex; gap: 8px;">
+                <button type="button" id="btn-recheck-batch" class="grad-btn grad-btn-primary grad-btn-sm" onclick="recheckCurrentBatch()" title="Đối soát lại toàn bộ dữ liệu mượn trả từ Koha">
+                    <i class="fa fa-refresh"></i> Đối soát lại đợt này
+                </button>
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcelMode('DEBT_ONLY')" title="Xuất danh sách sinh viên còn nợ ra Excel">
+                    <i class="fa fa-file-excel-o"></i> Xuất DS nợ sách
+                </button>
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcelMode('ALL')" title="Xuất toàn bộ danh sách đợt này ra Excel">
+                    <i class="fa fa-download"></i> Xuất tất cả
+                </button>
+                <button type="button" id="btn-delete-batch" class="grad-btn grad-btn-outline grad-btn-sm" style="color: #dc2626; border-color: #fca5a5;" onclick="deleteCurrentBatch()" title="Xóa đợt này khỏi hệ thống">
+                    <i class="fa fa-trash-o"></i> Xóa đợt
                 </button>
             </div>
-            <div class="grad-dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
-                <div class="grad-dropzone-text" id="dropzone-text">Kéo thả tệp vào đây hoặc bấm để chọn tệp</div>
-                <div class="grad-dropzone-hint">Hỗ trợ định dạng .xlsx, .xls, .csv (Tự động nhận diện cột Mã SV / MSSV / Cardnumber)</div>
-                <input type="file" id="file-input" accept=".xlsx, .xls, .csv">
-            </div>
-            <div id="file-status" style="display: none;"></div>
         </div>
 
-        <!-- CARD 2: DIRECT PASTE TEXTAREA -->
-        <div class="grad-card">
-            <div class="grad-card-header">
-                <span class="grad-card-title">Nhập trực tiếp danh sách mã sinh viên</span>
-                <span class="grad-counter-badge" id="uid-input-counter">0 mã</span>
-            </div>
-            <textarea id="uids-input" class="grad-textarea" placeholder="Nhập mỗi mã sinh viên trên 1 dòng hoặc cách nhau bởi dấu phẩy, chấm phẩy, khoảng trắng...&#10;Ví dụ:&#10;2011110001&#10;2011110002&#10;2011110003" oninput="updateInputCounter()"></textarea>
-            <div class="grad-input-footer">
-                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="clearInput()">Xóa trắng</button>
-                <button type="button" id="btn-check" class="grad-btn grad-btn-primary" onclick="startCheck()">
-                    Bắt đầu đối soát
-                </button>
+        <!-- BANNER ĐỢT ĐANG HOẠT ĐỘNG -->
+        <div id="batch-active-banner" class="grad-batch-active-banner">
+            <div class="grad-batch-info-box">
+                <div class="grad-batch-active-title">
+                    <i class="fa fa-graduation-cap"></i> <strong id="active-batch-name">-</strong>
+                    <span class="grad-batch-tag" id="active-batch-tag">Đợt xét</span>
+                </div>
+                <div class="grad-batch-active-meta" id="active-batch-meta">
+                    Đang đối soát thời gian thực &bull; Nhấn "Đối soát lại đợt này" bất kỳ lúc nào để cập nhật dữ liệu trả sách mới nhất
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- FILTER & CONTROL SECTION (BỘ LỌC VÀ SẮP XẾP) -->
     <div class="grad-filter-section">
@@ -990,7 +1220,8 @@
             <div class="grad-pages" id="pagination-controls"></div>
         </div>
     </div>
-</div>
+    </div> <!-- /#view-batch-detail -->
+</div> <!-- /.grad-wrapper -->
 
 <!-- MODAL TẠO ĐỢT XÉT TỐT NGHIỆP MỚI -->
 <div id="modal-create-batch" class="grad-modal-backdrop" onclick="handleModalBackdropClick(event)">
@@ -1043,6 +1274,43 @@
     </div>
 </div>
 
+<!-- MODAL TRA CỨU NHANH (KHÔNG LƯU ĐỢT) -->
+<div id="modal-adhoc-check" class="grad-modal-backdrop" onclick="handleAdhocModalBackdropClick(event)">
+    <div class="grad-modal-dialog">
+        <div class="grad-modal-header">
+            <h3 class="grad-modal-title"><i class="fa fa-bolt" style="color: var(--ftu-crimson);"></i> Tra Cứu Nhanh Đối Soát Tốt Nghiệp</h3>
+            <button type="button" class="grad-modal-close" onclick="closeAdhocCheckModal()">&times;</button>
+        </div>
+        <div class="grad-modal-body">
+            <p style="font-size: 13px; color: #64748b; margin: 0 0 10px 0;">Tra cứu đối soát tạm thời nợ sách và tiền phạt trực tiếp từ Koha mà không tạo đợt lưu vào cơ sở dữ liệu.</p>
+            <div class="grad-form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label class="grad-form-label">Nạp file Excel / CSV:</label>
+                    <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="downloadSampleExcel()">Tải file mẫu (.xlsx)</button>
+                </div>
+                <div class="grad-dropzone" id="adhoc-dropzone" onclick="document.getElementById('adhoc-file-input').click()">
+                    <div class="grad-dropzone-text" id="adhoc-dropzone-text">Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp</div>
+                    <div class="grad-dropzone-hint">Hỗ trợ .xlsx, .xls, .csv</div>
+                    <input type="file" id="adhoc-file-input" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleAdhocFileSelect(this)">
+                </div>
+            </div>
+            <div class="grad-form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label class="grad-form-label">Hoặc nhập/dán danh sách mã sinh viên:</label>
+                    <span class="grad-counter-badge" id="adhoc-uid-counter">0 mã</span>
+                </div>
+                <textarea id="adhoc-uids-input" class="grad-textarea" style="min-height: 120px;" placeholder="Nhập mỗi MSSV trên 1 dòng hoặc cách nhau bởi dấu phẩy, khoảng trắng...&#10;Ví dụ:&#10;2011110001&#10;2011110002" oninput="updateAdhocCounter()"></textarea>
+            </div>
+        </div>
+        <div class="grad-modal-footer">
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="closeAdhocCheckModal()">Hủy bỏ</button>
+            <button type="button" id="btn-adhoc-start" class="grad-btn grad-btn-primary grad-btn-sm" onclick="submitAdhocCheck()">
+                <i class="fa fa-play"></i> Bắt đầu đối soát
+            </button>
+        </div>
+    </div>
+</div>
+
 [% INCLUDE 'intranet-bottom.inc' %]
 
 <!-- SheetJS xử lý đọc Excel (tải từ domain nội bộ SSO) -->
@@ -1076,17 +1344,37 @@ const selectedSet = new Set();
 // INITIALIZATION & EVENT LISTENERS
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', function() {
-    setupDragAndDrop();
     setupModalDragAndDrop();
-    updateInputCounter();
-    
+    setupAdhocModalDragAndDrop();
+
     // Tự động kiểm tra URL nếu có batch_id
     const urlParams = new URLSearchParams(window.location.search);
     const initBatchId = urlParams.get('batch_id');
     if (initBatchId) {
-        document.getElementById('select-batch').value = initBatchId;
-        loadBatch(initBatchId);
+        openBatchDetail(initBatchId);
+    } else {
+        const viewList = document.getElementById('view-batches-list');
+        const viewDetail = document.getElementById('view-batch-detail');
+        if (viewList) viewList.style.display = 'block';
+        if (viewDetail) viewDetail.style.display = 'none';
+        if (Array.isArray(allBatchesData) && allBatchesData.length > 0) {
+            renderBatchesTable(allBatchesData);
+            updateBatchesHeroStats(allBatchesData);
+        } else {
+            loadBatchesList();
+        }
     }
+
+    // Điều hướng tiến/lùi bằng nút trình duyệt
+    window.addEventListener('popstate', function(event) {
+        const params = new URLSearchParams(window.location.search);
+        const bId = params.get('batch_id');
+        if (bId) {
+            openBatchDetail(bId);
+        } else {
+            backToBatchesList(true);
+        }
+    });
 });
 
 function setupDragAndDrop() {
@@ -1229,45 +1517,177 @@ function downloadSampleExcel() {
 }
 
 // ==============================================================================
-// QUẢN LÝ ĐỢT XÉT TỐT NGHIỆP (GRADUATION BATCH MANAGEMENT)
+// QUẢN LÝ ĐỢT XÉT TỐT NGHIỆP (GRADUATION BATCH MANAGEMENT - 2 VIEWS)
 // ==============================================================================
-async function loadBatchesList(selectBatchId) {
+let allBatchesData = [% saved_batches_json ? saved_batches_json : '[]' | $raw %];
+
+async function loadBatchesList() {
     try {
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl?op=batches_list');
+        const res = await fetch('graduation.pl?op=batches_list');
         const data = await res.json();
         if (data.success && Array.isArray(data.batches)) {
-            const sel = document.getElementById('select-batch');
-            sel.innerHTML = '<option value="">-- Chọn đợt xét tốt nghiệp đã lưu --</option>';
-            data.batches.forEach(b => {
-                const opt = document.createElement('option');
-                opt.value = b.id;
-                let text = b.batch_name;
-                if (b.cohort) text += ' (' + b.cohort + ')';
-                text += ' - ' + b.total_patrons + ' SV [' + (b.created_at_formatted || '') + ']';
-                opt.textContent = text;
-                sel.appendChild(opt);
-            });
-            if (selectBatchId) {
-                sel.value = selectBatchId;
-            }
+            allBatchesData = data.batches;
+            renderBatchesTable(allBatchesData);
+            updateBatchesHeroStats(allBatchesData);
         }
     } catch (e) {
         console.error('Không thể tải danh sách đợt:', e);
     }
 }
 
-function onBatchSelectChange(val) {
-    if (!val) {
-        currentBatchId = null;
-        currentBatchName = '';
-        document.getElementById('batch-active-banner').style.display = 'none';
-        document.getElementById('btn-recheck-batch').style.display = 'none';
-        document.getElementById('btn-delete-batch').style.display = 'none';
-        document.getElementById('quick-input-toggle-container').style.display = 'none';
-        document.getElementById('quick-input-grid').style.display = 'grid';
+function updateBatchesHeroStats(batches) {
+    const totalBatches = batches.length;
+    let totalStudents = 0;
+    let totalCleared = 0;
+    let totalDebt = 0;
+    batches.forEach(b => {
+        totalStudents += Number(b.total_patrons || 0);
+        totalCleared += Number(b.cleared_count || 0);
+        totalDebt += Number(b.debt_count || 0);
+    });
+    const elBatches = document.getElementById('stat-total-batches');
+    const elStudents = document.getElementById('stat-total-students');
+    const elCleared = document.getElementById('stat-total-cleared');
+    const elDebt = document.getElementById('stat-total-debt');
+    const elBadge = document.getElementById('batches-count-badge');
+    if (elBatches) elBatches.textContent = totalBatches;
+    if (elStudents) elStudents.textContent = totalStudents.toLocaleString('vi-VN');
+    if (elCleared) elCleared.textContent = totalCleared.toLocaleString('vi-VN');
+    if (elDebt) elDebt.textContent = totalDebt.toLocaleString('vi-VN');
+    if (elBadge) elBadge.textContent = totalBatches + ' đợt';
+}
+
+function renderBatchesTable(batches) {
+    const tbody = document.getElementById('batches-tbody');
+    const emptyMsg = document.getElementById('batches-empty-msg');
+    if (!tbody) return;
+
+    if (!batches || batches.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7">
+            <div id="batches-empty-msg" style="text-align: center; padding: 48px 20px;">
+                <i class="fa fa-folder-open-o" style="font-size: 48px; color: #cbd5e1; margin-bottom: 12px;"></i>
+                <h3 style="color: #475569; font-weight: 700; margin-bottom: 6px;">Chưa có đợt xét tốt nghiệp nào</h3>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Vui lòng tạo đợt xét mới và nạp danh sách sinh viên để bắt đầu quản lý.</p>
+                <button type="button" class="grad-btn grad-btn-crimson" onclick="openCreateBatchModal()">
+                    <i class="fa fa-plus-circle"></i> Tạo đợt xét tốt nghiệp đầu tiên
+                </button>
+            </div>
+        </td></tr>`;
         return;
     }
-    loadBatch(val);
+
+    let html = '';
+    batches.forEach((b, idx) => {
+        html += `
+        <tr data-batch-id="${b.id}">
+            <td style="text-align: center; font-weight: 700; color: #64748b;">${idx + 1}</td>
+            <td>
+                <a href="javascript:void(0)" onclick="openBatchDetail(${b.id})" class="grad-batch-name-link" style="font-size: 13.5px; font-weight: 700; color: var(--ftu-crimson); text-decoration: none;">
+                    <i class="fa fa-folder-open-o" style="margin-right: 6px;"></i>${escapeHtml(b.batch_name)}
+                </a>
+                ${b.description ? `<div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">${escapeHtml(b.description)}</div>` : ''}
+            </td>
+            <td style="text-align: center;">
+                <span class="grad-batch-tag">${escapeHtml(b.cohort || b.academic_year || 'Đợt xét')}</span>
+            </td>
+            <td style="text-align: center; font-weight: 700; font-size: 13.5px; color: #0f172a;">
+                ${Number(b.total_patrons || 0).toLocaleString('vi-VN')} SV
+            </td>
+            <td>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <span class="grad-tab-pill pill-cleared" style="font-size: 11px;" title="Số sinh viên đủ điều kiện ra trường">
+                        <i class="fa fa-check"></i> ${Number(b.cleared_count || 0).toLocaleString('vi-VN')} Đủ ĐK
+                    </span>
+                    <span class="grad-tab-pill pill-debt" style="font-size: 11px;" title="Số sinh viên còn nợ sách hoặc tiền phạt">
+                        <i class="fa fa-exclamation-triangle"></i> ${Number(b.debt_count || 0).toLocaleString('vi-VN')} Còn nợ
+                    </span>
+                </div>
+            </td>
+            <td style="text-align: center; font-size: 12px; color: #64748b;">
+                <div>${b.created_at_formatted || '-'}</div>
+                <div style="font-size: 11px; color: #94a3b8;">${escapeHtml(b.created_by || 'Thủ thư')}</div>
+            </td>
+            <td style="text-align: center;">
+                <div style="display: flex; justify-content: center; gap: 6px;">
+                    <button type="button" class="grad-btn grad-btn-primary grad-btn-sm" onclick="openBatchDetail(${b.id})" title="Vào tra cứu và đối soát chi tiết đợt này">
+                        <i class="fa fa-search"></i> Vào tra cứu
+                    </button>
+                    <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="recheckBatchFromList(${b.id})" title="Đối soát lại dữ liệu mượn trả">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                    <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" style="color: #dc2626; border-color: #fca5a5;" onclick="deleteBatchFromList(${b.id}, '${escapeHtml(b.batch_name).replace(/'/g, "\\'")}')" title="Xóa đợt này">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+function filterBatchesList(query) {
+    const q = (query || '').toLowerCase().trim();
+    if (!q) {
+        renderBatchesTable(allBatchesData);
+        return;
+    }
+    const filtered = allBatchesData.filter(b => {
+        return (b.batch_name && b.batch_name.toLowerCase().includes(q)) ||
+               (b.cohort && b.cohort.toLowerCase().includes(q)) ||
+               (b.academic_year && b.academic_year.toLowerCase().includes(q)) ||
+               (b.description && b.description.toLowerCase().includes(q));
+    });
+    renderBatchesTable(filtered);
+}
+
+function openBatchDetail(batchId, preloadedData) {
+    if (!batchId) return;
+    const viewList = document.getElementById('view-batches-list');
+    const viewDetail = document.getElementById('view-batch-detail');
+    if (viewList) viewList.style.display = 'none';
+    if (viewDetail) viewDetail.style.display = 'block';
+
+    const curUrl = new URL(window.location.href);
+    curUrl.searchParams.set('batch_id', batchId);
+    window.history.pushState({ batch_id: batchId }, '', curUrl.toString());
+
+    if (preloadedData) {
+        currentBatchId = preloadedData.batch_id;
+        currentBatchName = preloadedData.batch_name;
+        document.getElementById('detail-batch-name').textContent = preloadedData.batch_name;
+        document.getElementById('detail-batch-tag').textContent = preloadedData.cohort || preloadedData.academic_year || 'Đợt xét';
+        document.getElementById('active-batch-name').textContent = preloadedData.batch_name;
+        document.getElementById('active-batch-meta').innerHTML =
+            'Tổng cộng: <strong>' + preloadedData.total_input + '</strong> sinh viên &bull; ' +
+            'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + preloadedData.count_cleared + '</strong> &bull; ' +
+            'Còn nợ sách/phạt: <strong style="color:var(--ftu-crimson);">' + preloadedData.count_has_debt + '</strong> &bull; ' +
+            'Đã khóa thẻ: <strong>' + preloadedData.count_debarred + '</strong>';
+
+        rawDataList = (preloadedData.results || []).map((item, idx) => {
+            item._original_index = idx + 1;
+            return item;
+        });
+        selectedSet.clear();
+        populateClassDropdown();
+        updateStatsAndBadges();
+        applyFilters();
+    } else {
+        loadBatch(batchId);
+    }
+}
+
+function backToBatchesList(skipHistory) {
+    const viewList = document.getElementById('view-batches-list');
+    const viewDetail = document.getElementById('view-batch-detail');
+    if (viewDetail) viewDetail.style.display = 'none';
+    if (viewList) viewList.style.display = 'block';
+
+    if (!skipHistory) {
+        const curUrl = new URL(window.location.href);
+        curUrl.searchParams.delete('batch_id');
+        window.history.pushState({}, '', curUrl.pathname);
+    }
+    loadBatchesList();
 }
 
 async function loadBatch(batchId) {
@@ -1278,7 +1698,7 @@ async function loadBatch(batchId) {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);"><i class="fa fa-spinner fa-spin"></i> Đang đọc danh sách và đối soát lại dữ liệu mượn trả từ Koha... Vui lòng đợi.</td></tr>';
 
     try {
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl?op=batch_load&batch_id=' + batchId);
+        const res = await fetch('graduation.pl?op=batch_load&batch_id=' + batchId);
         const data = await res.json();
 
         if (data.success) {
@@ -1297,8 +1717,9 @@ async function loadBatch(batchId) {
             applyFilters();
 
             // Cập nhật banner đợt đang hoạt động
+            document.getElementById('detail-batch-name').textContent = data.batch_name;
+            document.getElementById('detail-batch-tag').textContent = data.cohort || data.academic_year || 'Đợt xét';
             document.getElementById('active-batch-name').textContent = data.batch_name;
-            document.getElementById('active-batch-tag').textContent = data.cohort || data.academic_year || 'Đợt xét';
             document.getElementById('active-batch-meta').innerHTML =
                 'Tổng cộng: <strong>' + data.total_input + '</strong> sinh viên &bull; ' +
                 'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + data.count_cleared + '</strong> &bull; ' +
@@ -1306,15 +1727,8 @@ async function loadBatch(batchId) {
                 'Đã khóa thẻ: <strong>' + data.count_debarred + '</strong> &bull; ' +
                 'Cập nhật lúc: ' + new Date().toLocaleTimeString('vi-VN');
 
-            document.getElementById('batch-active-banner').style.display = 'flex';
             document.getElementById('btn-recheck-batch').style.display = 'inline-flex';
             document.getElementById('btn-delete-batch').style.display = 'inline-flex';
-
-            // Thu gọn vùng nạp nhanh để tạo không gian thoáng
-            document.getElementById('quick-input-grid').style.display = 'none';
-            document.getElementById('quick-input-toggle-container').style.display = 'block';
-            document.getElementById('toggle-label-text').textContent = 'Mở rộng vùng nạp nhanh file / danh sách MSSV';
-            document.getElementById('toggle-caret-icon').className = 'fa fa-caret-right';
 
             showAlert('Đã tải thành công đợt [' + data.batch_name + '] gồm ' + data.total_input + ' sinh viên (' + data.count_cleared + ' đủ điều kiện, ' + data.count_has_debt + ' còn nợ).', 'success');
         } else {
@@ -1336,7 +1750,7 @@ async function recheckCurrentBatch() {
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang đối soát lại...';
 
     try {
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl?op=batch_recheck&batch_id=' + currentBatchId);
+        const res = await fetch('graduation.pl?op=batch_recheck&batch_id=' + currentBatchId);
         const data = await res.json();
 
         if (data.success) {
@@ -1369,6 +1783,10 @@ async function recheckCurrentBatch() {
     }
 }
 
+function recheckBatchFromList(batchId) {
+    openBatchDetail(batchId);
+}
+
 async function deleteCurrentBatch() {
     if (!currentBatchId) return;
     if (!confirm('Bạn có chắc chắn muốn xóa đợt [' + currentBatchName + '] khỏi hệ thống? Dữ liệu lưu trữ của đợt này sẽ bị xóa hoàn toàn.')) {
@@ -1377,12 +1795,12 @@ async function deleteCurrentBatch() {
 
     try {
         const formData = new FormData();
-        formData.append('op', 'batch_delete');
+        formData.append('op', 'cud-batch_delete');
         formData.append('batch_id', currentBatchId);
         const csrfToken = document.getElementById('koha-csrf-token')?.value;
         if (csrfToken) formData.append('csrf_token', csrfToken);
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -1391,13 +1809,7 @@ async function deleteCurrentBatch() {
             showAlert('Đã xóa đợt xét tốt nghiệp thành công!', 'success');
             currentBatchId = null;
             currentBatchName = '';
-            document.getElementById('batch-active-banner').style.display = 'none';
-            document.getElementById('btn-recheck-batch').style.display = 'none';
-            document.getElementById('btn-delete-batch').style.display = 'none';
-            document.getElementById('quick-input-toggle-container').style.display = 'none';
-            document.getElementById('quick-input-grid').style.display = 'grid';
-            clearInput();
-            loadBatchesList();
+            backToBatchesList();
         } else {
             showAlert('Lỗi: ' + (data.error || 'Không thể xóa đợt'), 'error');
         }
@@ -1406,18 +1818,31 @@ async function deleteCurrentBatch() {
     }
 }
 
-function toggleQuickInput() {
-    const grid = document.getElementById('quick-input-grid');
-    const caret = document.getElementById('toggle-caret-icon');
-    const text = document.getElementById('toggle-label-text');
-    if (grid.style.display === 'none') {
-        grid.style.display = 'grid';
-        if (caret) caret.className = 'fa fa-caret-down';
-        if (text) text.textContent = 'Thu gọn vùng nạp nhanh';
-    } else {
-        grid.style.display = 'none';
-        if (caret) caret.className = 'fa fa-caret-right';
-        if (text) text.textContent = 'Mở rộng vùng nạp nhanh file / danh sách MSSV';
+async function deleteBatchFromList(batchId, batchName) {
+    if (!confirm('Bạn có chắc chắn muốn xóa đợt [' + batchName + '] khỏi hệ thống? Dữ liệu lưu trữ của đợt này sẽ bị xóa hoàn toàn.')) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-batch_delete');
+        formData.append('batch_id', batchId);
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+
+        const res = await fetch('graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert('Đã xóa đợt xét tốt nghiệp thành công!', 'success');
+            loadBatchesList();
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không thể xóa đợt'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi kết nối: ' + err.message, 'error');
     }
 }
 
@@ -1569,7 +1994,7 @@ async function submitCreateBatch() {
 
     try {
         const formData = new FormData();
-        formData.append('op', 'batch_create');
+        formData.append('op', 'cud-batch_create');
         formData.append('batch_name', batchName);
         formData.append('cohort', cohort);
         formData.append('academic_year', academicYear);
@@ -1578,7 +2003,7 @@ async function submitCreateBatch() {
         const csrfToken = document.getElementById('koha-csrf-token')?.value;
         if (csrfToken) formData.append('csrf_token', csrfToken);
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -1586,42 +2011,9 @@ async function submitCreateBatch() {
 
         if (data.success) {
             closeCreateBatchModal();
-
-            // Tải lại dropdown đợt và tự động chọn đợt mới tạo
-            await loadBatchesList(data.batch_id);
-            document.getElementById('select-batch').value = data.batch_id;
-
-            currentBatchId = data.batch_id;
-            currentBatchName = data.batch_name;
-
-            rawDataList = (data.results || []).map((item, idx) => {
-                item._original_index = idx + 1;
-                return item;
-            });
-
-            selectedSet.clear();
-            populateClassDropdown();
-            updateStatsAndBadges();
-            applyFilters();
-
-            // Cập nhật banner đợt
-            document.getElementById('active-batch-name').textContent = data.batch_name;
-            document.getElementById('active-batch-tag').textContent = data.cohort || data.academic_year || 'Đợt mới';
-            document.getElementById('active-batch-meta').innerHTML =
-                'Tổng cộng: <strong>' + data.total_input + '</strong> sinh viên &bull; ' +
-                'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + data.count_cleared + '</strong> &bull; ' +
-                'Còn nợ sách/phạt: <strong style="color:var(--ftu-crimson);">' + data.count_has_debt + '</strong> &bull; ' +
-                'Đã khóa thẻ: <strong>' + data.count_debarred + '</strong> &bull; ' +
-                'Tạo lúc: ' + new Date().toLocaleTimeString('vi-VN');
-
-            document.getElementById('batch-active-banner').style.display = 'flex';
-            document.getElementById('btn-recheck-batch').style.display = 'inline-flex';
-            document.getElementById('btn-delete-batch').style.display = 'inline-flex';
-
-            document.getElementById('quick-input-grid').style.display = 'none';
-            document.getElementById('quick-input-toggle-container').style.display = 'block';
-
-            showAlert('Đã lưu thành công đợt [' + data.batch_name + '] với ' + data.total_input + ' sinh viên!', 'success');
+            showAlert('Đã tạo thành công đợt [' + data.batch_name + '] với ' + data.total_input + ' sinh viên!', 'success');
+            // Chuyển thẳng sang Màn hình 2 của đợt vừa tạo
+            openBatchDetail(data.batch_id, data);
         } else {
             alert('Lỗi tạo đợt: ' + (data.error || 'Không xác định'));
         }
@@ -1630,6 +2022,181 @@ async function submitCreateBatch() {
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa fa-save"></i> Lưu đợt và Đối soát ngay';
+    }
+}
+
+// ==============================================================================
+// MODAL TRA CỨU NHANH (KHÔNG LƯU ĐỢT)
+// ==============================================================================
+function openAdhocCheckModal() {
+    document.getElementById('modal-adhoc-check').style.display = 'flex';
+    document.getElementById('adhoc-uids-input').focus();
+}
+
+function closeAdhocCheckModal() {
+    document.getElementById('modal-adhoc-check').style.display = 'none';
+    document.getElementById('adhoc-uids-input').value = '';
+    document.getElementById('adhoc-file-input').value = '';
+    document.getElementById('adhoc-dropzone-text').textContent = 'Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp';
+    updateAdhocCounter();
+}
+
+function handleAdhocModalBackdropClick(event) {
+    if (event.target === document.getElementById('modal-adhoc-check')) {
+        closeAdhocCheckModal();
+    }
+}
+
+function updateAdhocCounter() {
+    const text = document.getElementById('adhoc-uids-input').value.trim();
+    if (!text) {
+        document.getElementById('adhoc-uid-counter').textContent = '0 mã';
+        return;
+    }
+    const lines = text.split(/[\r\n,;\t]+/).filter(l => l.trim().length > 0);
+    document.getElementById('adhoc-uid-counter').textContent = lines.length + ' mã';
+}
+
+function setupAdhocModalDragAndDrop() {
+    const dropzone = document.getElementById('adhoc-dropzone');
+    if (!dropzone) return;
+
+    ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            handleAdhocFile(files[0]);
+        }
+    });
+}
+
+function handleAdhocFileSelect(input) {
+    if (input.files && input.files.length > 0) {
+        handleAdhocFile(input.files[0]);
+    }
+}
+
+function handleAdhocFile(file) {
+    if (!file) return;
+    const dropzoneText = document.getElementById('adhoc-dropzone-text');
+    dropzoneText.innerHTML = '<strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonSheet = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            let extractedUids = [];
+            let headerColIdx = 0;
+            if (jsonSheet.length > 0) {
+                const headerRow = jsonSheet[0];
+                for (let c = 0; c < headerRow.length; c++) {
+                    const colName = String(headerRow[c] || '').toLowerCase().trim();
+                    if (colName.includes('mã') || colName.includes('mssv') || colName.includes('cardnumber') || colName.includes('uid') || colName.includes('student')) {
+                        headerColIdx = c;
+                        break;
+                    }
+                }
+                for (let r = 1; r < jsonSheet.length; r++) {
+                    const row = jsonSheet[r];
+                    if (row && row[headerColIdx]) {
+                        const val = String(row[headerColIdx]).trim();
+                        if (val) extractedUids.push(val);
+                    }
+                }
+            }
+            if (extractedUids.length === 0) {
+                alert('Không tìm thấy dữ liệu mã sinh viên trong tệp ' + file.name);
+                return;
+            }
+            document.getElementById('adhoc-uids-input').value = extractedUids.join('\n');
+            updateAdhocCounter();
+        } catch (err) {
+            alert('Lỗi đọc tệp Excel: ' + err.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+async function submitAdhocCheck() {
+    const rawText = document.getElementById('adhoc-uids-input').value.trim();
+    if (!rawText) {
+        alert('Vui lòng nhập mã sinh viên hoặc nạp file Excel.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-adhoc-start');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang đối soát...';
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-check');
+        formData.append('uids', rawText);
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+
+        const res = await fetch('graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            closeAdhocCheckModal();
+            currentBatchId = null;
+            currentBatchName = 'Tra cứu nhanh (Tạm thời)';
+
+            document.getElementById('view-batches-list').style.display = 'none';
+            document.getElementById('view-batch-detail').style.display = 'block';
+
+            document.getElementById('detail-batch-name').textContent = 'Tra cứu nhanh (Tạm thời)';
+            document.getElementById('detail-batch-tag').textContent = 'Chưa lưu đợt';
+            document.getElementById('active-batch-name').textContent = 'Tra cứu nhanh';
+            document.getElementById('active-batch-meta').innerHTML =
+                'Tổng cộng: <strong>' + data.total_input + '</strong> sinh viên &bull; ' +
+                'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + data.count_cleared + '</strong> &bull; ' +
+                'Còn nợ sách/phạt: <strong style="color:var(--ftu-crimson);">' + data.count_has_debt + '</strong>';
+
+            document.getElementById('btn-recheck-batch').style.display = 'none';
+            document.getElementById('btn-delete-batch').style.display = 'none';
+
+            rawDataList = (data.results || []).map((item, idx) => {
+                item._original_index = idx + 1;
+                return item;
+            });
+            selectedSet.clear();
+            populateClassDropdown();
+            updateStatsAndBadges();
+            applyFilters();
+
+            showAlert('Đã đối soát thành công ' + data.total_input + ' sinh viên!', 'success');
+        } else {
+            alert('Lỗi: ' + (data.error || 'Không thể đối soát'));
+        }
+    } catch (err) {
+        alert('Lỗi kết nối: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-play"></i> Bắt đầu đối soát';
     }
 }
 
@@ -1657,7 +2224,7 @@ async function startCheck() {
         if (csrfToken) formData.append('csrf_token', csrfToken);
         formData.append('uids', rawText);
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -2197,7 +2764,7 @@ async function sendRemindersSelected() {
         if (csrfToken) formData.append('csrf_token', csrfToken);
         formData.append('uids', targetUids.join('\n'));
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -2222,7 +2789,7 @@ async function sendReminderSingle(cardnumber) {
         if (csrfToken) formData.append('csrf_token', csrfToken);
         formData.append('uids', cardnumber);
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -2270,7 +2837,7 @@ async function batchLockSelected() {
         if (csrfToken) formData.append('csrf_token', csrfToken);
         formData.append('uids', targetUids.join('\n'));
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -2306,7 +2873,7 @@ async function lockSingle(cardnumber) {
         if (csrfToken) formData.append('csrf_token', csrfToken);
         formData.append('uids', cardnumber);
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
@@ -2364,7 +2931,7 @@ async function batchUnlockSelected(explicitUids) {
         if (csrfToken) formData.append('csrf_token', csrfToken);
         formData.append('uids', targetUids.join('\n'));
 
-        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+        const res = await fetch('graduation.pl', {
             method: 'POST',
             body: formData
         });
