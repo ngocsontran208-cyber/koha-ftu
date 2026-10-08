@@ -345,7 +345,7 @@
 }
 .grad-search-input {
     width: 100%;
-    padding: 7px 32px 7px 32px;
+    padding: 7px 32px 7px 12px;
     font-size: 12.5px;
     border: 1px solid var(--ftu-slate-200);
     border-radius: 6px;
@@ -585,7 +585,6 @@
                 Xét tốt nghiệp &amp; Đối soát Thư viện
                 <span class="grad-badge-brand">FTU Library</span>
             </h1>
-            <p class="grad-subtitle">Kiểm tra nghĩa vụ thư viện, nợ sách quá hạn, tiền phạt và đồng bộ khóa thẻ tốt nghiệp tập trung (Koha &bull; SSO &bull; DSpace)</p>
         </div>
         <div>
             <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Về Trang chủ</a>
@@ -601,13 +600,12 @@
         <!-- CARD 1: EXCEL / CSV UPLOAD -->
         <div class="grad-card">
             <div class="grad-card-header">
-                <span class="grad-card-title">&#128196; Nạp tệp Excel / CSV</span>
+                <span class="grad-card-title">Nạp tệp Excel / CSV</span>
                 <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="downloadSampleExcel()">
-                    &#11015; Tải file mẫu (.xlsx)
+                    Tải file mẫu (.xlsx)
                 </button>
             </div>
             <div class="grad-dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
-                <div class="grad-dropzone-icon">&#128194;</div>
                 <div class="grad-dropzone-text" id="dropzone-text">Kéo thả tệp vào đây hoặc bấm để chọn tệp</div>
                 <div class="grad-dropzone-hint">Hỗ trợ định dạng .xlsx, .xls, .csv (Tự động nhận diện cột Mã SV / MSSV / Cardnumber)</div>
                 <input type="file" id="file-input" accept=".xlsx, .xls, .csv">
@@ -618,14 +616,14 @@
         <!-- CARD 2: DIRECT PASTE TEXTAREA -->
         <div class="grad-card">
             <div class="grad-card-header">
-                <span class="grad-card-title">&#9998; Nhập trực tiếp danh sách mã sinh viên</span>
+                <span class="grad-card-title">Nhập trực tiếp danh sách mã sinh viên</span>
                 <span class="grad-counter-badge" id="uid-input-counter">0 mã</span>
             </div>
             <textarea id="uids-input" class="grad-textarea" placeholder="Nhập mỗi mã sinh viên trên 1 dòng hoặc cách nhau bởi dấu phẩy, chấm phẩy, khoảng trắng...&#10;Ví dụ:&#10;2011110001&#10;2011110002&#10;2011110003" oninput="updateInputCounter()"></textarea>
             <div class="grad-input-footer">
                 <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="clearInput()">Xóa trắng</button>
                 <button type="button" id="btn-check" class="grad-btn grad-btn-primary" onclick="startCheck()">
-                    &#128269; Bắt đầu đối soát
+                    Bắt đầu đối soát
                 </button>
             </div>
         </div>
@@ -656,7 +654,6 @@
         <div class="grad-filter-row">
             <!-- Search input -->
             <div class="grad-search-box">
-                <span class="grad-search-icon">&#128269;</span>
                 <input type="text" id="filter-search" class="grad-search-input" placeholder="Tìm kiếm nhanh: Mã SV, Họ tên, Lớp..." oninput="handleSearchInput(this)">
                 <span id="search-clear-btn" class="grad-search-clear" onclick="clearSearch()">&#10005;</span>
             </div>
@@ -690,7 +687,7 @@
 
             <!-- Reset filters button -->
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="resetAllFilters()" title="Đặt lại tất cả bộ lọc">
-                &#8634; Đặt lại
+                Đặt lại
             </button>
         </div>
     </div>
@@ -704,16 +701,16 @@
 
         <div class="grad-actions-group">
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()" title="Gửi email nhắc nhở hoàn trả sách">
-                &#9993; Gửi email nhắc nhở đã chọn
+                Gửi email nhắc nhở đã chọn
             </button>
             <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()" title="Khóa thẻ sinh viên tốt nghiệp (Koha + SSO)">
-                &#128274; Khóa thẻ hàng loạt
+                Khóa thẻ hàng loạt
             </button>
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected()" title="Mở khóa thẻ sinh viên đã chọn">
-                &#128275; Mở khóa thẻ đã chọn
+                Mở khóa thẻ đã chọn
             </button>
             <button type="button" class="grad-btn grad-btn-success grad-btn-sm" onclick="exportExcel()" title="Xuất kết quả danh sách ra tệp Excel">
-                &#128196; Xuất kết quả Excel
+                Xuất kết quả Excel
             </button>
         </div>
     </div>
@@ -757,7 +754,6 @@
                 <tr>
                     <td colspan="10">
                         <div class="grad-empty-state">
-                            <div class="grad-empty-icon">&#128221;</div>
                             <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div>
                             <div style="font-size: 12px;">Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên phía trên để bắt đầu kiểm tra.</div>
                         </div>
@@ -934,7 +930,7 @@ function clearInput() {
 function showAlert(msg, type) {
     const el = document.getElementById('status-alert');
     el.className = 'status-msg ' + (type || 'success');
-    el.innerHTML = (type === 'error' ? '&#9888; ' : '&#10003; ') + escapeHtml(msg);
+    el.innerHTML = escapeHtml(msg);
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     setTimeout(() => { el.style.display = 'none'; }, 8000);
 }
@@ -966,10 +962,10 @@ async function startCheck() {
 
     const btn = document.getElementById('btn-check');
     btn.disabled = true;
-    btn.innerHTML = '&#9203; Đang đối soát...';
+    btn.innerHTML = 'Đang đối soát...';
 
     const tbody = document.getElementById('results-tbody');
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);"><div style="font-size: 24px; margin-bottom: 8px;">&#9203;</div>Đang truy vấn cơ sở dữ liệu Koha và đồng bộ trạng thái... Vui lòng đợi trong giây lát.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);">Đang truy vấn cơ sở dữ liệu Koha và đồng bộ trạng thái... Vui lòng đợi trong giây lát.</td></tr>';
 
     try {
         const formData = new FormData();
@@ -1004,7 +1000,7 @@ async function startCheck() {
         showAlert('Lỗi kết nối máy chủ: ' + err.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '&#128269; Bắt đầu đối soát';
+        btn.innerHTML = 'Bắt đầu đối soát';
     }
 }
 
@@ -1254,14 +1250,14 @@ function renderTable() {
     const paginationBar = document.getElementById('pagination-bar');
 
     if (rawDataList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div class="grad-empty-icon">&#128221;</div><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div><div style="font-size: 12px;">Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên phía trên để bắt đầu kiểm tra.</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div><div style="font-size: 12px;">Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên phía trên để bắt đầu kiểm tra.</div></div></td></tr>';
         paginationBar.style.display = 'none';
         updateCheckAllState();
         return;
     }
 
     if (filteredDataList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div class="grad-empty-icon">&#128270;</div><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Không tìm thấy bản ghi nào</div><div style="font-size: 12px;">Không có sinh viên nào khớp với bộ lọc hoặc từ khóa tìm kiếm hiện tại.</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Không tìm thấy bản ghi nào</div><div style="font-size: 12px;">Không có sinh viên nào khớp với bộ lọc hoặc từ khóa tìm kiếm hiện tại.</div></div></td></tr>';
         paginationBar.style.display = 'none';
         updateCheckAllState();
         return;
@@ -1285,19 +1281,19 @@ function renderTable() {
         // Huy hiệu Tốt nghiệp
         let gradStatusBadge = '';
         if (item.is_not_found) {
-            gradStatusBadge = '<span class="grad-badge badge-notfound">&#9888; Không tìm thấy</span>';
+            gradStatusBadge = '<span class="grad-badge badge-notfound">Không tìm thấy</span>';
         } else if (item.has_debt) {
-            gradStatusBadge = '<span class="grad-badge badge-debt">&#10006; Chưa đủ điều kiện</span>';
+            gradStatusBadge = '<span class="grad-badge badge-debt">Chưa đủ điều kiện</span>';
         } else {
-            gradStatusBadge = '<span class="grad-badge badge-cleared">&#10003; Đủ điều kiện</span>';
+            gradStatusBadge = '<span class="grad-badge badge-cleared">Đủ điều kiện</span>';
         }
 
         // Huy hiệu Thẻ
         let cardStatusBadge = '';
         if (item.is_debarred) {
-            cardStatusBadge = '<span class="grad-badge badge-locked">&#128274; Đã khóa thẻ</span>';
+            cardStatusBadge = '<span class="grad-badge badge-locked">Đã khóa thẻ</span>';
         } else {
-            cardStatusBadge = '<span class="grad-badge badge-active">&#128275; Hoạt động</span>';
+            cardStatusBadge = '<span class="grad-badge badge-active">Hoạt động</span>';
         }
 
         // Hiển thị sách nợ
@@ -1309,16 +1305,16 @@ function renderTable() {
         // Thao tác dòng
         let actions = [];
         if (item.borrowernumber) {
-            actions.push('<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + item.borrowernumber + '" target="_blank" class="grad-btn grad-btn-outline grad-btn-sm" title="Mở hồ sơ bạn đọc">&#128100; Hồ sơ</a>');
+            actions.push('<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + item.borrowernumber + '" target="_blank" class="grad-btn grad-btn-outline grad-btn-sm" title="Mở hồ sơ bạn đọc">Hồ sơ</a>');
         }
         if (item.has_debt) {
-            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')" title="Gửi email nhắc nhở">&#9993;</button>');
+            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')" title="Gửi email nhắc nhở">Nhắc nhở</button>');
         }
         if (!item.is_not_found) {
             if (item.is_debarred) {
-                actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected([\'' + item.cardnumber + '\'])" title="Mở khóa thẻ">&#128275;</button>');
+                actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected([\'' + item.cardnumber + '\'])" title="Mở khóa thẻ">Mở khóa</button>');
             } else {
-                actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')" title="Khóa thẻ tốt nghiệp">&#128274;</button>');
+                actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')" title="Khóa thẻ tốt nghiệp">Khóa thẻ</button>');
             }
         }
 

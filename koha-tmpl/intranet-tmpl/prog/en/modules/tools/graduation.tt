@@ -332,7 +332,7 @@
 }
 .grad-search-input {
     width: 100%;
-    padding: 7px 32px 7px 32px;
+    padding: 7px 32px 7px 12px;
     font-size: 12.5px;
     border: 1px solid var(--ftu-slate-200);
     border-radius: 6px;
@@ -572,7 +572,6 @@
                 Graduation Clearance &amp; Verification
                 <span class="grad-badge-brand">FTU Library</span>
             </h1>
-            <p class="grad-subtitle">Check library obligations, overdue loans, fines, and sync graduation card locks across systems (Koha &bull; SSO &bull; DSpace)</p>
         </div>
         <div>
             <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Staff Home</a>
@@ -588,13 +587,12 @@
         <!-- CARD 1: EXCEL / CSV UPLOAD -->
         <div class="grad-card">
             <div class="grad-card-header">
-                <span class="grad-card-title">&#128196; Upload Excel / CSV</span>
+                <span class="grad-card-title">Upload Excel / CSV</span>
                 <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="downloadSampleExcel()">
-                    &#11015; Sample Template (.xlsx)
+                    Sample Template (.xlsx)
                 </button>
             </div>
             <div class="grad-dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
-                <div class="grad-dropzone-icon">&#128194;</div>
                 <div class="grad-dropzone-text" id="dropzone-text">Drag and drop file here, or click to browse</div>
                 <div class="grad-dropzone-hint">Supports .xlsx, .xls, .csv (Auto-detects Student ID / MSSV / Cardnumber column)</div>
                 <input type="file" id="file-input" accept=".xlsx, .xls, .csv">
@@ -605,14 +603,14 @@
         <!-- CARD 2: DIRECT PASTE TEXTAREA -->
         <div class="grad-card">
             <div class="grad-card-header">
-                <span class="grad-card-title">&#9998; Direct Input Student IDs</span>
+                <span class="grad-card-title">Direct Input Student IDs</span>
                 <span class="grad-counter-badge" id="uid-input-counter">0 IDs</span>
             </div>
             <textarea id="uids-input" class="grad-textarea" placeholder="Enter one student ID per line or separated by commas, semicolons, tabs...&#10;Example:&#10;2011110001&#10;2011110002&#10;2011110003" oninput="updateInputCounter()"></textarea>
             <div class="grad-input-footer">
                 <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="clearInput()">Clear</button>
                 <button type="button" id="btn-check" class="grad-btn grad-btn-primary" onclick="startCheck()">
-                    &#128269; Start Verification
+                    Start Verification
                 </button>
             </div>
         </div>
@@ -643,7 +641,6 @@
         <div class="grad-filter-row">
             <!-- Search input -->
             <div class="grad-search-box">
-                <span class="grad-search-icon">&#128269;</span>
                 <input type="text" id="filter-search" class="grad-search-input" placeholder="Quick search: ID, Name, Class..." oninput="handleSearchInput(this)">
                 <span id="search-clear-btn" class="grad-search-clear" onclick="clearSearch()">&#10005;</span>
             </div>
@@ -677,7 +674,7 @@
 
             <!-- Reset filters button -->
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="resetAllFilters()" title="Reset all filters">
-                &#8634; Reset
+                Reset
             </button>
         </div>
     </div>
@@ -691,16 +688,16 @@
 
         <div class="grad-actions-group">
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()" title="Send email reminder to return books">
-                &#9993; Send Email Reminders
+                Send Email Reminders
             </button>
             <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()" title="Batch lock cards for graduated students (Koha + SSO)">
-                &#128274; Batch Lock Cards
+                Batch Lock Cards
             </button>
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected()" title="Batch unlock cards for selected students">
-                &#128275; Batch Unlock Cards
+                Batch Unlock Cards
             </button>
             <button type="button" class="grad-btn grad-btn-success grad-btn-sm" onclick="exportExcel()" title="Export results to Excel file">
-                &#128196; Export to Excel
+                Export to Excel
             </button>
         </div>
     </div>
@@ -744,7 +741,6 @@
                 <tr>
                     <td colspan="10">
                         <div class="grad-empty-state">
-                            <div class="grad-empty-icon">&#128221;</div>
                             <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No verification data</div>
                             <div style="font-size: 12px;">Please upload an Excel/CSV file or paste student IDs above to start verification.</div>
                         </div>
@@ -918,7 +914,7 @@ function clearInput() {
 function showAlert(msg, type) {
     const el = document.getElementById('status-alert');
     el.className = 'status-msg ' + (type || 'success');
-    el.innerHTML = (type === 'error' ? '&#9888; ' : '&#10003; ') + escapeHtml(msg);
+    el.innerHTML = escapeHtml(msg);
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     setTimeout(() => { el.style.display = 'none'; }, 8000);
 }
@@ -949,10 +945,10 @@ async function startCheck() {
 
     const btn = document.getElementById('btn-check');
     btn.disabled = true;
-    btn.innerHTML = '&#9203; Verifying...';
+    btn.innerHTML = 'Verifying...';
 
     const tbody = document.getElementById('results-tbody');
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);"><div style="font-size: 24px; margin-bottom: 8px;">&#9203;</div>Querying Koha database and syncing account statuses... Please wait.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);">Querying Koha database and syncing account statuses... Please wait.</td></tr>';
 
     try {
         const formData = new FormData();
@@ -986,7 +982,7 @@ async function startCheck() {
         showAlert('Network connection error: ' + err.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '&#128269; Start Verification';
+        btn.innerHTML = 'Start Verification';
     }
 }
 
@@ -1225,14 +1221,14 @@ function renderTable() {
     const paginationBar = document.getElementById('pagination-bar');
 
     if (rawDataList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div class="grad-empty-icon">&#128221;</div><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No verification data</div><div style="font-size: 12px;">Please upload an Excel/CSV file or paste student IDs above to start verification.</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No verification data</div><div style="font-size: 12px;">Please upload an Excel/CSV file or paste student IDs above to start verification.</div></div></td></tr>';
         paginationBar.style.display = 'none';
         updateCheckAllState();
         return;
     }
 
     if (filteredDataList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div class="grad-empty-icon">&#128270;</div><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No matching records found</div><div style="font-size: 12px;">No students match the current filter or search criteria.</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">No matching records found</div><div style="font-size: 12px;">No students match the current filter or search criteria.</div></div></td></tr>';
         paginationBar.style.display = 'none';
         updateCheckAllState();
         return;
@@ -1254,18 +1250,18 @@ function renderTable() {
 
         let gradStatusBadge = '';
         if (item.is_not_found) {
-            gradStatusBadge = '<span class="grad-badge badge-notfound">&#9888; Not Found</span>';
+            gradStatusBadge = '<span class="grad-badge badge-notfound">Not Found</span>';
         } else if (item.has_debt) {
-            gradStatusBadge = '<span class="grad-badge badge-debt">&#10006; Has Debt</span>';
+            gradStatusBadge = '<span class="grad-badge badge-debt">Has Debt</span>';
         } else {
-            gradStatusBadge = '<span class="grad-badge badge-cleared">&#10003; Cleared</span>';
+            gradStatusBadge = '<span class="grad-badge badge-cleared">Cleared</span>';
         }
 
         let cardStatusBadge = '';
         if (item.is_debarred) {
-            cardStatusBadge = '<span class="grad-badge badge-locked">&#128274; Card Locked</span>';
+            cardStatusBadge = '<span class="grad-badge badge-locked">Card Locked</span>';
         } else {
-            cardStatusBadge = '<span class="grad-badge badge-active">&#128275; Active</span>';
+            cardStatusBadge = '<span class="grad-badge badge-active">Active</span>';
         }
 
         let booksDisplay = item.total_borrowed || 0;
@@ -1275,16 +1271,16 @@ function renderTable() {
 
         let actions = [];
         if (item.borrowernumber) {
-            actions.push('<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + item.borrowernumber + '" target="_blank" class="grad-btn grad-btn-outline grad-btn-sm" title="View patron record">&#128100; Patron</a>');
+            actions.push('<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + item.borrowernumber + '" target="_blank" class="grad-btn grad-btn-outline grad-btn-sm" title="View patron record">Patron</a>');
         }
         if (item.has_debt) {
-            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')" title="Send email reminder">&#9993;</button>');
+            actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendReminderSingle(\'' + item.cardnumber + '\')" title="Send email reminder">Reminder</button>');
         }
         if (!item.is_not_found) {
             if (item.is_debarred) {
-                actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected([\'' + item.cardnumber + '\'])" title="Unlock card">&#128275;</button>');
+                actions.push('<button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected([\'' + item.cardnumber + '\'])" title="Unlock card">Unlock</button>');
             } else {
-                actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')" title="Lock card">&#128274;</button>');
+                actions.push('<button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="lockSingle(\'' + item.cardnumber + '\')" title="Lock card">Lock</button>');
             }
         }
 
