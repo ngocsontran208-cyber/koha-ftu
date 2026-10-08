@@ -433,6 +433,18 @@ if ($op eq "batch_lock") {
     $sth_update->execute(@target_uids);
     my $rows_affected = $sth_update->rows;
 
+    # 1.1 Tạo bản ghi debarment trong borrower_debarments để Koha UI hiển thị chi tiết lịch sử giới hạn
+    eval {
+        my $sth_debar = $dbh->prepare(qq{
+            INSERT INTO borrower_debarments (borrowernumber, type, comment, expiration, created)
+            SELECT borrowernumber, 'MANUAL', 'Người học đã tốt nghiệp', '9999-12-31', NOW()
+            FROM borrowers
+            WHERE cardnumber IN ($placeholders)
+              AND borrowernumber NOT IN (SELECT borrowernumber FROM borrower_debarments WHERE comment LIKE '%tốt nghiệp%')
+        });
+        $sth_debar->execute(@target_uids);
+    };
+
     # 2. Đồng bộ sang OpenLDAP & SSO Portal qua API nội bộ
     my $sso_synced = 0;
     eval {

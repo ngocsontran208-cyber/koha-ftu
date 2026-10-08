@@ -307,10 +307,11 @@ if ($patron) {
     );
 
     if ( $patron and $patron->is_debarred ) {
+        my $restriction = eval { $patron->restrictions->search( {}, { order_by => { -desc => 'borrower_debarment_id' } } )->next };
         $template->param(
             'userdebarred'    => $patron->debarred,
             'debarredcomment' => $patron->debarredcomment,
-            'debarredsince'   => $patron->restrictions->search()->single->created,
+            'debarredsince'   => $restriction ? $restriction->created : $patron->debarred,
         );
 
         if ( $patron->debarred ne "9999-12-31" ) {
