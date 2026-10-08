@@ -351,8 +351,8 @@ if ($op eq "send_reminders") {
         my $body = qq{
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1e293b; max-width: 680px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 24px;">
                 <div style="border-bottom: 2px solid #b91c1c; padding-bottom: 12px; margin-bottom: 16px;">
-                    <h3 style="color: #b91c1c; margin: 0;">TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</h3>
-                    <p style="margin: 4px 0 0 0; color: #475569; font-size: 13px;">Thư viện - Phân hệ Xét tốt nghiệp</p>
+                    <h3 style="color: #b91c1c; margin: 0;">PHÂN HIỆU TRƯỜNG ĐẠI HỌC NGOẠI THƯƠNG</h3>
+                    <p style="margin: 4px 0 0 0; color: #475569; font-size: 13px;">Thư viện Phân hiệu - Phân hệ Xét tốt nghiệp</p>
                 </div>
                 <p>Kính gửi sinh viên: <strong>$p->{full_name}</strong> (Mã SV: <strong>$cnum</strong>),</p>
                 <p>Căn cứ dữ liệu mượn trả tại Thư viện, hiện tại bạn vẫn còn giữ <strong>} . scalar(@{$p->{books}}) . qq{ cuốn sách</strong> chưa hoàn trả:</p>
@@ -362,7 +362,7 @@ if ($op eq "send_reminders") {
                     <strong>Lưu ý:</strong> Mọi thắc mắc xin vui lòng liên hệ trực tiếp Bộ phận Mượn trả Thư viện hoặc gửi email về thuvien\@ftu.edu.vn.
                 </div>
                 <p style="color: #64748b; font-size: 12px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                    Thông báo này được gửi tự động từ Hệ thống Thư viện Đại học Ngoại thương (FTULIB SYSTEM).
+                    Thông báo này được gửi tự động từ Hệ thống Thư viện Phân hiệu Trường Đại học Ngoại thương (FTULIB SYSTEM).
                 </p>
             </div>
         };

@@ -102,7 +102,7 @@
  [% IF too_many_login_attempts || account_is_locked %]
  <div id="login_error" class="alert alert-danger" style="margin-bottom: 15px;">
  <strong>Lỗi: </strong>
- Tài khoản này đã bị khóa![% IF debarred_comment %] Lý do: <strong>[% debarred_comment | html %]</strong>.[% END %] Vui lòng liên hệ Quản trị viên Thư viện để được giải quyết.
+ Tài khoản này đã bị khóa![% IF debarred_comment %] Lý do: <strong>[% debarred_comment | html %]</strong>.[% END %] Vui lòng liên hệ cán bộ Thư viện Phân hiệu Trường Đại học Ngoại thương để được hướng dẫn xử lý.
  [% IF Categories.can_any_reset_password && Koha.Preference('OpacBaseURL') %]
  <a href="[% Koha.Preference('OpacBaseURL') | url %]/cgi-bin/koha/opac-password-recovery.pl">Đặt lại mật khẩu của bạn</a>.
  [% END %]

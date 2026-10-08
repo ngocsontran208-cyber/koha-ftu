@@ -79,7 +79,7 @@
  Tài khoản bạn đọc của bạn đang ở trạng thái <strong>BỊ KHÓA</strong>[% IF debarred_comment %] (Lý do: <em>[% debarred_comment | html %]</em>)[% END %].
  </p>
  <p style="color: #718096; margin-bottom: 0; font-size: 13px;">
- Toàn bộ quyền đăng nhập, mượn sách tại thư viện và truy cập kho tài liệu số đã bị tạm dừng. Vui lòng liên hệ cán bộ Thư viện Đại học Ngoại thương để được hướng dẫn xử lý.
+ Toàn bộ quyền đăng nhập, mượn sách tại thư viện và truy cập kho tài liệu số đã bị tạm dừng. Vui lòng liên hệ cán bộ Thư viện Phân hiệu Trường Đại học Ngoại thương để được hướng dẫn xử lý.
  </p>
  </div>
  [% ELSIF invalid_username_or_password %]

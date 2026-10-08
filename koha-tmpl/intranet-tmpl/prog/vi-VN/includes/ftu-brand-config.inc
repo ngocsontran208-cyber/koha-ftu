@@ -37,7 +37,7 @@
 
     # ── 3. LOGO & BIỂU TRƯNG NHẬN DIỆN ──────────────────────────────────────
     logo_url               => "/opac-tmpl/bootstrap/images/ftu-logo.png",
-    logo_alt               => "FTU Logo - Thư viện Đại học Ngoại thương",
+    logo_alt               => "FTU Logo - Thư viện Phân hiệu Trường Đại học Ngoại thương",
     favicon_svg            => "/opac-tmpl/bootstrap/images/favicon.svg?v=ftu",
     favicon_ico            => "/opac-tmpl/bootstrap/images/favicon.ico?v=ftu",
 
