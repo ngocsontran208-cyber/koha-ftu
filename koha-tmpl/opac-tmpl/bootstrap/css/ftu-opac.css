@@ -2106,7 +2106,8 @@ td.covercol .hint,
 #catalogue_detail_biblio #views,
 #opac-detail #views,
 #views {
-  display: flex !important;
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
   justify-content: center !important;
   background: #f1f5f9 !important;
@@ -2115,24 +2116,38 @@ td.covercol .hint,
   padding: 4px !important;
   gap: 4px !important;
   margin: 0.5rem auto 1.25rem auto !important;
-  max-width: 480px !important;
-  width: 100% !important;
+  max-width: 100% !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
   clear: both !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  align-self: center !important;
 }
 
 #catalogue_detail_biblio #views .view,
 #opac-detail #views .view,
 #views .view {
-  flex: 1 1 0% !important;
-  min-width: 0 !important;
-  display: flex !important;
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   margin: 0 !important;
   padding: 0 !important;
   border: none !important;
   background: transparent !important;
+  box-sizing: border-box !important;
+}
+
+/* Ẩn chữ "Chế độ xem" / "view" lặp thừa thãi để các nút gọn gàng, tinh tế */
+#catalogue_detail_biblio #views .d-sm-inline,
+#catalogue_detail_biblio #views .d-none.d-sm-inline,
+#opac-detail #views .d-sm-inline,
+#opac-detail #views .d-none.d-sm-inline,
+#views .d-sm-inline,
+#views .d-none.d-sm-inline {
+  display: none !important;
 }
 
 #catalogue_detail_biblio #views .view.current-view,
@@ -2141,24 +2156,33 @@ td.covercol .hint,
   background: #ffffff !important;
   color: #990000 !important;
   font-weight: 700 !important;
-  font-size: 0.815rem !important;
-  padding: 6px 8px !important;
+  font-size: 0.825rem !important;
+  padding: 6px 14px !important;
   border-radius: 8px !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.04) !important;
   border: 1px solid rgba(0, 0, 0, 0.04) !important;
   white-space: nowrap !important;
   text-align: center !important;
-  width: 100% !important;
+  width: auto !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
 }
 
-#catalogue_detail_biblio #views .view.current-view span,
-#opac-detail #views .view.current-view span,
-#views .view.current-view span {
+#catalogue_detail_biblio #views .view.current-view > span,
+#opac-detail #views .view.current-view > span,
+#views .view.current-view > span {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 0.35rem !important;
-  width: 100% !important;
+  gap: 0.4rem !important;
+  width: auto !important;
+}
+
+#catalogue_detail_biblio #views .view.current-view i,
+#opac-detail #views .view.current-view i,
+#views .view.current-view i {
+  color: #990000 !important;
+  font-size: 0.85rem !important;
 }
 
 #catalogue_detail_biblio #views .btn-link,
@@ -2168,26 +2192,44 @@ td.covercol .hint,
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 0.35rem !important;
+  gap: 0.4rem !important;
   color: #64748b !important;
-  font-weight: 500 !important;
-  font-size: 0.815rem !important;
-  padding: 6px 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.825rem !important;
+  padding: 6px 14px !important;
   border-radius: 8px !important;
   text-decoration: none !important;
   transition: all 0.15s ease !important;
-  width: 100% !important;
+  width: auto !important;
   border: none !important;
   background: transparent !important;
   white-space: nowrap !important;
   text-align: center !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+}
+
+#catalogue_detail_biblio #views .btn-link i,
+#opac-detail #views .btn-link i,
+#views .btn-link i,
+#views a i {
+  color: #64748b !important;
+  font-size: 0.85rem !important;
+  transition: color 0.15s ease !important;
 }
 
 #catalogue_detail_biblio #views .btn-link:hover,
 #opac-detail #views .btn-link:hover,
 #views .btn-link:hover,
 #views a:hover {
-  background: rgba(255, 255, 255, 0.7) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #990000 !important;
+}
+
+#catalogue_detail_biblio #views .btn-link:hover i,
+#opac-detail #views .btn-link:hover i,
+#views .btn-link:hover i,
+#views a:hover i {
   color: #990000 !important;
 }
 
@@ -2507,9 +2549,18 @@ td.covercol .hint,
   #views {
     order: 4 !important;
     max-width: 100% !important;
+    width: fit-content !important;
     padding: 3px !important;
     gap: 3px !important;
     margin: 0.25rem auto 1rem auto !important;
+    align-self: center !important;
+  }
+  #catalogue_detail_biblio #views .view,
+  #opac-detail #views .view,
+  #views .view {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    width: auto !important;
   }
   #catalogue_detail_biblio #views .view.current-view,
   #opac-detail #views .view.current-view,
@@ -2518,8 +2569,9 @@ td.covercol .hint,
   #opac-detail #views .btn-link,
   #views .btn-link,
   #views a {
-    font-size: 0.75rem !important;
-    padding: 6px 4px !important;
+    font-size: 0.775rem !important;
+    padding: 6px 10px !important;
+    width: auto !important;
   }
   #catalogue_detail_biblio .record {
     order: 5 !important;

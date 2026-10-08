@@ -137,7 +137,8 @@
             /* Bộ chọn chế độ xem tinh giản dạng Segmented Control */
             #catalogue_detail_biblio #views {
                 order: 4 !important;
-                display: flex !important;
+                display: inline-flex !important;
+                flex-wrap: wrap !important;
                 align-items: center !important;
                 justify-content: center !important;
                 background: #f1f5f9 !important;
@@ -146,59 +147,75 @@
                 padding: 4px !important;
                 gap: 4px !important;
                 margin: 0.25rem auto 1.25rem auto !important;
-                max-width: 480px !important;
-                width: 100% !important;
+                max-width: 100% !important;
+                width: fit-content !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
                 box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+                align-self: center !important;
             }
             #catalogue_detail_biblio #views .view {
-                flex: 1 1 0% !important;
-                min-width: 0 !important;
-                display: flex !important;
+                flex: 0 0 auto !important;
+                min-width: max-content !important;
+                display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                font-size: 0.8rem !important;
+                font-size: 0.825rem !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 background: transparent !important;
                 border: none !important;
+                box-sizing: border-box !important;
+            }
+            #catalogue_detail_biblio #views .d-sm-inline,
+            #catalogue_detail_biblio #views .d-none.d-sm-inline {
+                display: none !important;
             }
             #catalogue_detail_biblio #views .view.current-view {
                 background: #ffffff !important;
                 color: #990000 !important;
                 font-weight: 700 !important;
-                padding: 6px 8px !important;
+                padding: 6px 14px !important;
                 border-radius: 8px !important;
                 box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
                 border: 1px solid rgba(0, 0, 0, 0.04) !important;
                 white-space: nowrap !important;
-                width: 100% !important;
+                width: auto !important;
+                box-sizing: border-box !important;
             }
-            #catalogue_detail_biblio #views .view.current-view span {
+            #catalogue_detail_biblio #views .view.current-view > span {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 0.35rem !important;
-                width: 100% !important;
+                gap: 0.4rem !important;
+                width: auto !important;
+            }
+            #catalogue_detail_biblio #views .view.current-view i {
+                color: #990000 !important;
             }
             #catalogue_detail_biblio #views a.btn-link {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 0.35rem !important;
-                padding: 6px 8px !important;
-                font-size: 0.8rem !important;
-                font-weight: 500 !important;
+                gap: 0.4rem !important;
+                padding: 6px 14px !important;
+                font-size: 0.825rem !important;
+                font-weight: 600 !important;
                 color: #64748b !important;
                 border-radius: 8px !important;
                 text-decoration: none !important;
                 border: none !important;
                 background: transparent !important;
                 white-space: nowrap !important;
-                width: 100% !important;
+                width: auto !important;
+                box-sizing: border-box !important;
                 transition: all 0.15s ease !important;
             }
             #catalogue_detail_biblio #views a.btn-link:hover {
-                background: rgba(255, 255, 255, 0.7) !important;
+                background: rgba(255, 255, 255, 0.85) !important;
+                color: #990000 !important;
+            }
+            #catalogue_detail_biblio #views a.btn-link:hover i {
                 color: #990000 !important;
             }
 
