@@ -36,9 +36,27 @@
         -moz-osx-font-smoothing: grayscale;
     }
     .ftu-sugg-wrapper {
-        max-width: 1040px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
         padding-bottom: 2.5rem;
+    }
+
+    body#opac-usersuggestions .container-fluid,
+    body#opac-suggestions .container-fluid,
+    body#opac-usersuggestions .breadcrumbs,
+    body#opac-suggestions .breadcrumbs {
+        padding-left: 1.75rem !important;
+        padding-right: 1.75rem !important;
+    }
+    @media (max-width: 768px) {
+        body#opac-usersuggestions .container-fluid,
+        body#opac-suggestions .container-fluid,
+        body#opac-usersuggestions .breadcrumbs,
+        body#opac-suggestions .breadcrumbs {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
     }
 
     /* Page Header */
@@ -56,14 +74,11 @@
         font-size: 1.45rem;
         font-weight: 700;
         color: #0f172a;
-        margin: 0 0 0.2rem 0;
+        margin: 0;
         line-height: 1.3;
     }
     .ftu-page-subtitle {
-        font-size: 0.88rem;
-        color: #64748b;
-        margin: 0;
-        line-height: 1.4;
+        display: none !important;
     }
 
     /* Cards */
@@ -223,7 +238,7 @@
             <div class="col col-lg-2 order-2 order-lg-1">
                 <div id="navigation"> [% INCLUDE 'navigation.inc' IsPatronPage=1 %] </div>
             </div>
-            <div class="col-md-12 col-lg-10 order-1">
+            <div class="col-md-12 col-lg-10 order-1 order-lg-2">
                 <div id="usersuggestions" class="maincontent ftu-sugg-wrapper">
 
                     <!-- Minimal Page Header -->
@@ -237,9 +252,6 @@
                                         Your Purchase Suggestions
                                     [% END %]
                                 </h1>
-                                <p class="ftu-page-subtitle">
-                                    Submit suggestions for textbooks, academic references, or research publications to FTU Library.
-                                </p>
                             </div>
                             [% IF ( op_else ) %]
                                 [% IF ( loggedinusername || ( Koha.Preference( 'AnonSuggestions' ) == 1 ) ) %]
