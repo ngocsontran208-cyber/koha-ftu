@@ -4,10 +4,11 @@
 # PHÂN HỆ XÉT TỐT NGHIỆP - THƯ VIỆN ĐẠI HỌC NGOẠI THƯƠNG (FTU LIBRARY)
 # ==============================================================================
 # Chức năng:
-# 1. Tiếp nhận danh sách mã người dùng (sinh viên) từ Excel / CSV hoặc paste text.
-# 2. Đối soát tự động nợ sách (issues), hạn trả (date_due), tiền phạt (accountlines).
-# 3. Gửi email nhắc nhở hoàn tất trả sách trước khi xét tốt nghiệp.
-# 4. Khóa thẻ hàng loạt khi sinh viên tốt nghiệp (Koha + đồng bộ OpenLDAP/SSO).
+# 1. Quản lý theo Đợt xét tốt nghiệp (Lưu trữ đợt, tái đối soát không cần re-upload).
+# 2. Tiếp nhận danh sách mã sinh viên từ Excel / CSV hoặc paste text.
+# 3. Đối soát tự động nợ sách (issues), hạn trả (date_due), tiền phạt (accountlines).
+# 4. Gửi email nhắc nhở hoàn tất trả sách trước khi xét tốt nghiệp.
+# 5. Khóa thẻ hàng loạt khi sinh viên tốt nghiệp (Koha + đồng bộ OpenLDAP/SSO).
 # ==============================================================================
 
 use Modern::Perl;
@@ -24,6 +25,9 @@ my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
 my $json = JSON->new->utf8;
 
+# Tự động bảo đảm bảng dữ liệu đợt xét tốt nghiệp tồn tại
+ensure_graduation_tables($dbh);
+
 my ($template, $borrowernumber, $cookie) = get_template_and_user(
     {
         template_name   => "tools/graduation.tt",
@@ -37,42 +41,24 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
 my $op = $cgi->param("op") || "list";
 $op =~ s/^cud-//;
 
-# ------------------------------------------------------------------------------
-# API 1: ĐỐI SOÁT NỢ SÁCH & TÌNH TRẠNG SINH VIÊN (OP = CHECK)
-# ------------------------------------------------------------------------------
-if ($op eq "check") {
-    print $cgi->header( -type => "application/json", -charset => "utf-8" );
-
-    my $raw_data = $cgi->param("uids") || "";
-    # Hỗ trợ đọc body JSON nếu client gửi application/json
-    if (!$raw_data) {
-        my $post_body = $cgi->param("POSTDATA") || "";
-        if ($post_body) {
-            eval {
-                my $parsed = $json->decode($post_body);
-                $raw_data = $parsed->{uids} if ref($parsed) eq "HASH";
-            };
-        }
-    }
-
-    my @cardnumbers = ();
-    if (ref($raw_data) eq "ARRAY") {
-        @cardnumbers = @$raw_data;
-    } else {
-        # Tách theo dòng, dấu phẩy, dấu chấm phẩy, tab, dấu cách
-        for my $line (split(/[\r\n,;\t]+/, $raw_data)) {
-            $line =~ s/^\s+|\s+$//g;
-            push @cardnumbers, $line if length($line) > 0;
-        }
-    }
-
-    # Loại bỏ trùng lặp và giữ thứ tự
-    my %seen;
-    @cardnumbers = grep { !$seen{$_}++ } @cardnumbers;
+# ==============================================================================
+# SUBROUTINE: ĐỐI SOÁT CHI TIẾT DANH SÁCH BẠN ĐỌC
+# ==============================================================================
+sub perform_patron_clearance_check {
+    my ($dbh, $cardnumbers_ref, $batch_id) = @_;
+    my @cardnumbers = @$cardnumbers_ref;
 
     if (!@cardnumbers) {
-        print $json->encode({ success => 0, error => "Danh sách mã người dùng trống" });
-        exit;
+        return {
+            success         => 0,
+            error           => "Danh sách mã người dùng trống",
+            total_input     => 0,
+            count_cleared   => 0,
+            count_has_debt  => 0,
+            count_not_found => 0,
+            count_debarred  => 0,
+            results         => []
+        };
     }
 
     # Giới hạn tối đa 5000 mã/lần kiểm tra để bảo đảm hiệu năng
@@ -106,7 +92,6 @@ if ($op eq "check") {
         WHERE b.cardnumber IN ($placeholders) OR b.userid IN ($placeholders)
     };
 
-    # Truy vấn với tham số nhân đôi (cho cardnumber và userid)
     my $sth_patrons = $dbh->prepare($query_patrons);
     $sth_patrons->execute(@cardnumbers, @cardnumbers);
 
@@ -117,7 +102,7 @@ if ($op eq "check") {
         my $cnum = $row->{cardnumber} || "";
         $row->{total_borrowed} = int($row->{total_borrowed} || 0);
         $row->{total_overdue}  = int($row->{total_overdue} || 0);
-        $row->{total_fine}      = 0 + ($row->{total_fine} || 0);
+        $row->{total_fine}     = 0 + ($row->{total_fine} || 0);
         $row->{is_debarred}    = ($row->{debarred} && $row->{debarred} ge strftime("%Y-%m-%d", localtime)) ? 1 : 0;
         $row->{issues_list}    = [];
 
@@ -170,7 +155,7 @@ if ($op eq "check") {
         }
     }
 
-    # 3. Lấy thêm thông tin từ LDAP/SSO nếu có (lớp, khoa, ghi chú SSO)
+    # 3. Lấy thêm thông tin từ LDAP/SSO nếu có
     my %sso_meta;
     eval {
         my $http = HTTP::Tiny->new(timeout => 3);
@@ -228,22 +213,22 @@ if ($op eq "check") {
             }
 
             push @results, {
-                cardnumber     => $cnum,
-                borrowernumber => $p->{borrowernumber},
-                full_name      => $p->{full_name},
-                email          => $p->{email} || "",
-                phone          => $p->{phone} || "",
-                student_class  => $class_name,
-                department     => $dept_name,
-                total_borrowed => $p->{total_borrowed},
-                total_overdue  => $p->{total_overdue},
-                total_fine     => $p->{total_fine},
-                has_debt       => $has_debt,
-                is_cleared     => $is_cleared,
-                is_debarred    => $p->{is_debarred},
+                cardnumber       => $cnum,
+                borrowernumber   => $p->{borrowernumber},
+                full_name        => $p->{full_name},
+                email            => $p->{email} || "",
+                phone            => $p->{phone} || "",
+                student_class    => $class_name,
+                department       => $dept_name,
+                total_borrowed   => $p->{total_borrowed},
+                total_overdue    => $p->{total_overdue},
+                total_fine       => $p->{total_fine},
+                has_debt         => $has_debt,
+                is_cleared       => $is_cleared,
+                is_debarred      => $p->{is_debarred},
                 debarred_comment => $p->{debarredcomment} || "",
-                notes          => $clean_note,
-                issues         => $p->{issues_list}
+                notes            => $clean_note,
+                issues           => $p->{issues_list}
             };
         } else {
             $count_not_found++;
@@ -268,15 +253,279 @@ if ($op eq "check") {
         }
     }
 
-    print $json->encode({
-        success => 1,
-        total_input  => scalar(@cardnumbers),
-        count_cleared => $count_cleared,
-        count_has_debt => $count_has_debt,
+    # 5. Nếu đối soát theo đợt ($batch_id), cập nhật thống kê và chi tiết vào CSDL
+    if ($batch_id) {
+        eval {
+            my $sth_up_batch = $dbh->prepare(qq{
+                UPDATE ftu_graduation_batches
+                SET total_patrons = ?,
+                    cleared_count = ?,
+                    debt_count    = ?,
+                    updated_at    = NOW()
+                WHERE id = ?
+            });
+            $sth_up_batch->execute(scalar(@cardnumbers), $count_cleared, $count_has_debt, $batch_id);
+
+            my $sth_up_item = $dbh->prepare(qq{
+                UPDATE ftu_graduation_batch_items
+                SET full_name = ?,
+                    student_class = ?,
+                    department = ?,
+                    last_status = ?,
+                    last_checked_at = NOW()
+                WHERE batch_id = ? AND cardnumber = ?
+            });
+
+            for my $r (@results) {
+                my $st = 'CLEARED';
+                if ($r->{is_not_found}) {
+                    $st = 'NOT_FOUND';
+                } elsif ($r->{is_debarred}) {
+                    $st = 'LOCKED';
+                } elsif ($r->{has_debt}) {
+                    $st = 'DEBT';
+                }
+                $sth_up_item->execute(
+                    $r->{full_name} || '',
+                    $r->{student_class} || '',
+                    $r->{department} || '',
+                    $st,
+                    $batch_id,
+                    $r->{cardnumber}
+                );
+            }
+        };
+    }
+
+    return {
+        success         => 1,
+        total_input     => scalar(@cardnumbers),
+        count_cleared   => $count_cleared,
+        count_has_debt  => $count_has_debt,
         count_not_found => $count_not_found,
         count_debarred  => $count_debarred,
-        results      => \@results
+        results         => \@results
+    };
+}
+
+# ------------------------------------------------------------------------------
+# API 0.1: DANH SÁCH CÁC ĐỢT XÉT TỐT NGHIỆP ĐÃ LƯU (OP = BATCHES_LIST)
+# ------------------------------------------------------------------------------
+if ($op eq "batches_list") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+    my $sth = $dbh->prepare(qq{
+        SELECT 
+            b.id,
+            b.batch_name,
+            b.academic_year,
+            b.cohort,
+            b.description,
+            b.total_patrons,
+            b.cleared_count,
+            b.debt_count,
+            b.created_by,
+            DATE_FORMAT(b.created_at, '%d/%m/%Y %H:%i') AS created_at_formatted,
+            DATE_FORMAT(b.updated_at, '%d/%m/%Y %H:%i') AS updated_at_formatted
+        FROM ftu_graduation_batches b
+        ORDER BY b.id DESC
     });
+    $sth->execute();
+    my @batches = @{$sth->fetchall_arrayref({})};
+    print $json->encode({ success => 1, batches => \@batches });
+    exit;
+}
+
+# ------------------------------------------------------------------------------
+# API 0.2: TẠO ĐỢT XÉT TỐT NGHIỆP MỚI VÀ LƯU LẠI (OP = BATCH_CREATE)
+# ------------------------------------------------------------------------------
+if ($op eq "batch_create") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+
+    my $post_body = $cgi->param("POSTDATA") || "";
+    my $parsed_body = {};
+    if ($post_body) {
+        eval { $parsed_body = $json->decode($post_body); };
+    }
+
+    my $batch_name    = $cgi->param("batch_name") || $parsed_body->{batch_name} || "";
+    my $academic_year = $cgi->param("academic_year") || $parsed_body->{academic_year} || "";
+    my $cohort        = $cgi->param("cohort") || $parsed_body->{cohort} || "";
+    my $description   = $cgi->param("description") || $parsed_body->{description} || "";
+    my $raw_uids      = $cgi->param("uids") || $parsed_body->{uids} || "";
+
+    $batch_name =~ s/^\s+|\s+$//g;
+    if (!$batch_name) {
+        print $json->encode({ success => 0, error => "Vui lòng nhập tên đợt xét tốt nghiệp" });
+        exit;
+    }
+
+    my @cardnumbers = ();
+    if (ref($raw_uids) eq "ARRAY") {
+        @cardnumbers = @$raw_uids;
+    } else {
+        for my $line (split(/[\r\n,;\t]+/, $raw_uids)) {
+            $line =~ s/^\s+|\s+$//g;
+            push @cardnumbers, $line if length($line) > 0;
+        }
+    }
+    my %seen;
+    @cardnumbers = grep { !$seen{$_}++ } @cardnumbers;
+
+    if (!@cardnumbers) {
+        print $json->encode({ success => 0, error => "Danh sách sinh viên trống. Vui lòng nạp file hoặc nhập MSSV." });
+        exit;
+    }
+
+    # 1. Thêm vào bảng ftu_graduation_batches
+    my $sth_insert_b = $dbh->prepare(qq{
+        INSERT INTO ftu_graduation_batches (batch_name, academic_year, cohort, description, total_patrons, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, 'Thủ thư', NOW(), NOW())
+    });
+    $sth_insert_b->execute($batch_name, $academic_year, $cohort, $description, scalar(@cardnumbers));
+    my $batch_id = $dbh->{mysql_insertid} || $dbh->last_insert_id(undef, undef, 'ftu_graduation_batches', 'id');
+
+    # 2. Thêm các sinh viên vào ftu_graduation_batch_items
+    my $sth_insert_i = $dbh->prepare(qq{
+        INSERT INTO ftu_graduation_batch_items (batch_id, cardnumber, last_status)
+        VALUES (?, ?, 'PENDING')
+    });
+    for my $cnum (@cardnumbers) {
+        $sth_insert_i->execute($batch_id, $cnum);
+    }
+
+    # 3. Chạy đối soát ngay và cập nhật thống kê
+    my $check_result = perform_patron_clearance_check($dbh, \@cardnumbers, $batch_id);
+    $check_result->{batch_id} = $batch_id;
+    $check_result->{batch_name} = $batch_name;
+    $check_result->{academic_year} = $academic_year;
+    $check_result->{cohort} = $cohort;
+    $check_result->{message} = "Đã tạo đợt [$batch_name] và lưu danh sách " . scalar(@cardnumbers) . " sinh viên thành công!";
+
+    print $json->encode($check_result);
+    exit;
+}
+
+# ------------------------------------------------------------------------------
+# API 0.3: TẢI & ĐỐI SOÁT LẠI ĐỢT XÉT TỐT NGHIỆP (OP = BATCH_LOAD / BATCH_RECHECK)
+# ------------------------------------------------------------------------------
+if ($op eq "batch_load" || $op eq "batch_recheck") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+    my $batch_id = int($cgi->param("batch_id") || 0);
+
+    if (!$batch_id) {
+        my $post_body = $cgi->param("POSTDATA") || "";
+        if ($post_body) {
+            eval {
+                my $parsed = $json->decode($post_body);
+                $batch_id = int($parsed->{batch_id} || 0);
+            };
+        }
+    }
+
+    if (!$batch_id) {
+        print $json->encode({ success => 0, error => "Mã đợt xét tốt nghiệp không hợp lệ" });
+        exit;
+    }
+
+    my $sth_b = $dbh->prepare("SELECT * FROM ftu_graduation_batches WHERE id = ?");
+    $sth_b->execute($batch_id);
+    my $batch_row = $sth_b->fetchrow_hashref;
+    if (!$batch_row) {
+        print $json->encode({ success => 0, error => "Không tìm thấy đợt xét tốt nghiệp có ID $batch_id" });
+        exit;
+    }
+
+    my $sth_items = $dbh->prepare("SELECT cardnumber FROM ftu_graduation_batch_items WHERE batch_id = ? ORDER BY id ASC");
+    $sth_items->execute($batch_id);
+    my @cardnumbers;
+    while (my ($cnum) = $sth_items->fetchrow_array) {
+        push @cardnumbers, $cnum if $cnum;
+    }
+
+    if (!@cardnumbers) {
+        print $json->encode({ success => 0, error => "Đợt này hiện chưa có sinh viên nào" });
+        exit;
+    }
+
+    # Chạy đối soát thời gian thực để làm mới dữ liệu
+    my $check_result = perform_patron_clearance_check($dbh, \@cardnumbers, $batch_id);
+    $check_result->{batch_id} = $batch_id;
+    $check_result->{batch_name} = $batch_row->{batch_name};
+    $check_result->{academic_year} = $batch_row->{academic_year} || "";
+    $check_result->{cohort} = $batch_row->{cohort} || "";
+    $check_result->{description} = $batch_row->{description} || "";
+    $check_result->{message} = "Đã đối soát lại thành công dữ liệu đợt: " . $batch_row->{batch_name};
+
+    print $json->encode($check_result);
+    exit;
+}
+
+# ------------------------------------------------------------------------------
+# API 0.4: XÓA ĐỢT XÉT TỐT NGHIỆP (OP = BATCH_DELETE)
+# ------------------------------------------------------------------------------
+if ($op eq "batch_delete") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+    my $batch_id = int($cgi->param("batch_id") || 0);
+
+    if (!$batch_id) {
+        my $post_body = $cgi->param("POSTDATA") || "";
+        if ($post_body) {
+            eval {
+                my $parsed = $json->decode($post_body);
+                $batch_id = int($parsed->{batch_id} || 0);
+            };
+        }
+    }
+
+    if (!$batch_id) {
+        print $json->encode({ success => 0, error => "Mã đợt không hợp lệ" });
+        exit;
+    }
+
+    my $sth_del = $dbh->prepare("DELETE FROM ftu_graduation_batches WHERE id = ?");
+    $sth_del->execute($batch_id);
+
+    print $json->encode({ success => 1, message => "Đã xóa đợt xét tốt nghiệp thành công!" });
+    exit;
+}
+
+# ------------------------------------------------------------------------------
+# API 1: ĐỐI SOÁT NHANH KHÔNG LƯU ĐỢT (OP = CHECK)
+# ------------------------------------------------------------------------------
+if ($op eq "check") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+
+    my $raw_data = $cgi->param("uids") || "";
+    if (!$raw_data) {
+        my $post_body = $cgi->param("POSTDATA") || "";
+        if ($post_body) {
+            eval {
+                my $parsed = $json->decode($post_body);
+                $raw_data = $parsed->{uids} if ref($parsed) eq "HASH";
+            };
+        }
+    }
+
+    my @cardnumbers = ();
+    if (ref($raw_data) eq "ARRAY") {
+        @cardnumbers = @$raw_data;
+    } else {
+        for my $line (split(/[\r\n,;\t]+/, $raw_data)) {
+            $line =~ s/^\s+|\s+$//g;
+            push @cardnumbers, $line if length($line) > 0;
+        }
+    }
+
+    my %seen;
+    @cardnumbers = grep { !$seen{$_}++ } @cardnumbers;
+
+    if (!@cardnumbers) {
+        print $json->encode({ success => 0, error => "Danh sách mã người dùng trống" });
+        exit;
+    }
+
+    my $result = perform_patron_clearance_check($dbh, \@cardnumbers, undef);
+    print $json->encode($result);
     exit;
 }
 
@@ -396,7 +645,6 @@ if ($op eq "send_reminders") {
         }
     }
 
-    # Kích hoạt gửi ngay hàng đợi thư điện tử nếu có script process_message_queue
     eval {
         system("nohup /kohadevbox/koha/misc/cronjobs/process_message_queue.pl >/dev/null 2>&1 &");
     };
@@ -453,7 +701,7 @@ if ($op eq "batch_lock") {
     $sth_update->execute(@target_uids);
     my $rows_affected = $sth_update->rows;
 
-    # 1.1 Tạo bản ghi debarment trong borrower_debarments để Koha UI hiển thị chi tiết lịch sử giới hạn
+    # 1.1 Tạo bản ghi debarment trong borrower_debarments
     eval {
         my $sth_debar = $dbh->prepare(qq{
             INSERT INTO borrower_debarments (borrowernumber, type, comment, expiration, created)
@@ -465,7 +713,7 @@ if ($op eq "batch_lock") {
         $sth_debar->execute(@target_uids);
     };
 
-    # 2. Đồng bộ sang OpenLDAP & SSO Portal qua API nội bộ
+    # 2. Đồng bộ sang OpenLDAP & SSO Portal
     my $sso_synced = 0;
     eval {
         my $http = HTTP::Tiny->new(timeout => 5);
@@ -550,7 +798,7 @@ if ($op eq "batch_unlock") {
     $sth_update->execute(@target_uids);
     my $rows_affected = $sth_update->rows;
 
-    # 2. Đồng bộ sang OpenLDAP & SSO Portal qua API nội bộ
+    # 2. Đồng bộ sang OpenLDAP & SSO Portal
     my $sso_synced = 0;
     eval {
         my $http = HTTP::Tiny->new(timeout => 5);
@@ -597,8 +845,58 @@ if ($op eq "batch_unlock") {
 # ------------------------------------------------------------------------------
 # GIAO DIỆN CHÍNH (OP = LIST): XUẤT TEMPLATE TT
 # ------------------------------------------------------------------------------
+my $sth_initial_batches = $dbh->prepare(qq{
+    SELECT 
+        id, batch_name, academic_year, cohort, description, total_patrons, cleared_count, debt_count,
+        DATE_FORMAT(created_at, '%d/%m/%Y %H:%i') AS created_at_formatted
+    FROM ftu_graduation_batches
+    ORDER BY id DESC
+});
+$sth_initial_batches->execute();
+my @initial_batches = @{$sth_initial_batches->fetchall_arrayref({})};
+
 $template->param(
-    page_title => "Phân hệ Xét tốt nghiệp - Thư viện FTU",
+    page_title    => "Phân hệ Xét tốt nghiệp - Thư viện FTU",
+    saved_batches => \@initial_batches,
 );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;
+
+# ==============================================================================
+# SUBROUTINE: BẢO ĐẢM CẤU TRÚC BẢNG ĐỢT TỐT NGHIỆP TRONG CSDL
+# ==============================================================================
+sub ensure_graduation_tables {
+    my ($dbh) = @_;
+    eval {
+        $dbh->do(qq{
+            CREATE TABLE IF NOT EXISTS ftu_graduation_batches (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                batch_name VARCHAR(255) NOT NULL,
+                academic_year VARCHAR(50) DEFAULT '',
+                cohort VARCHAR(50) DEFAULT '',
+                description TEXT NULL,
+                total_patrons INT DEFAULT 0,
+                cleared_count INT DEFAULT 0,
+                debt_count INT DEFAULT 0,
+                created_by VARCHAR(100) DEFAULT 'Thủ thư',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        });
+        $dbh->do(qq{
+            CREATE TABLE IF NOT EXISTS ftu_graduation_batch_items (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                batch_id INT NOT NULL,
+                cardnumber VARCHAR(64) NOT NULL,
+                full_name VARCHAR(255) DEFAULT '',
+                student_class VARCHAR(100) DEFAULT '',
+                department VARCHAR(255) DEFAULT '',
+                last_status VARCHAR(30) DEFAULT 'PENDING',
+                last_checked_at DATETIME NULL,
+                INDEX idx_batch_id (batch_id),
+                INDEX idx_cardnumber (cardnumber),
+                CONSTRAINT fk_ftu_grad_batch FOREIGN KEY (batch_id) REFERENCES ftu_graduation_batches (id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        });
+    };
+}

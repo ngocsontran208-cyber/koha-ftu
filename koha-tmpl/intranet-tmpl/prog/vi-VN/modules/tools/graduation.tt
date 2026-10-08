@@ -46,7 +46,7 @@
     align-items: center;
     border-bottom: 2px solid var(--ftu-crimson);
     padding-bottom: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 .grad-title-group h1 {
     font-size: 1.35rem;
@@ -63,23 +63,122 @@
     color: var(--ftu-slate-500);
     margin: 0;
 }
-.grad-badge-brand {
+
+/* Cohort / Batch Management Bar */
+.grad-batch-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--ftu-slate-50);
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.grad-batch-left, .grad-batch-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.grad-batch-label {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--ftu-slate-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.grad-batch-select {
+    min-width: 320px;
+    max-width: 480px;
+    font-weight: 600;
+    border-color: var(--ftu-slate-300);
+    color: var(--ftu-slate-900);
+    background: #ffffff;
+    padding: 6px 10px;
+    font-size: 12.5px;
+}
+.grad-btn-crimson {
     background: var(--ftu-crimson);
     color: #ffffff;
+    border: 1px solid var(--ftu-crimson-dark);
+}
+.grad-btn-crimson:hover {
+    background: var(--ftu-crimson-dark);
+    color: #ffffff;
+}
+
+/* Active Batch Banner */
+.grad-batch-active-banner {
+    background: #f0fdf4;
+    border: 1px solid var(--ftu-green-border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.grad-batch-info-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.grad-batch-active-title {
+    font-size: 14px;
+    color: #14532d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.grad-batch-tag {
+    background: #dcfce7;
+    color: #166534;
     font-size: 11px;
     font-weight: 700;
-    padding: 2px 7px;
+    padding: 2px 8px;
     border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    border: 1px solid #bbf7d0;
+}
+.grad-batch-active-meta {
+    font-size: 12px;
+    color: #374151;
+}
+
+/* Collapsible toggle bar */
+.grad-collapse-toggle {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ftu-slate-600);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    user-select: none;
+    padding: 4px 8px;
+    background: var(--ftu-slate-100);
+    border-radius: 4px;
+    border: 1px solid var(--ftu-slate-200);
+}
+.grad-collapse-toggle:hover {
+    color: var(--ftu-crimson);
+    background: var(--ftu-crimson-light);
+    border-color: var(--ftu-crimson-border);
 }
 
 /* Input Section */
 .grad-input-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 18px;
+    transition: all 0.3s ease;
 }
 .grad-card {
     border: 1px solid var(--ftu-slate-200);
@@ -99,77 +198,57 @@
 .grad-card-title {
     font-size: 0.85rem;
     font-weight: 700;
+    color: var(--ftu-slate-800);
     text-transform: uppercase;
-    color: var(--ftu-slate-700);
     letter-spacing: 0.03em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
+
+/* Drag & Drop Area */
 .grad-dropzone {
-    border: 2px dashed var(--ftu-slate-200);
+    border: 2px dashed var(--ftu-slate-300);
     border-radius: 6px;
-    padding: 18px 14px;
+    padding: 24px 16px;
     text-align: center;
     background: var(--ftu-slate-50);
     cursor: pointer;
     transition: all 0.2s ease;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    min-height: 120px;
 }
 .grad-dropzone:hover, .grad-dropzone.dragover {
     border-color: var(--ftu-crimson);
     background: var(--ftu-crimson-light);
 }
+.grad-dropzone-text {
+    font-size: 0.85rem;
+    color: var(--ftu-slate-700);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.grad-dropzone-hint {
+    font-size: 0.75rem;
+    color: var(--ftu-slate-500);
+}
 .grad-dropzone input[type="file"] {
     display: none;
 }
-.grad-dropzone-icon {
-    font-size: 24px;
-    color: var(--ftu-slate-500);
-    margin-bottom: 6px;
-}
-.grad-dropzone-text {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ftu-slate-800);
-}
-.grad-dropzone-hint {
-    font-size: 11px;
-    color: var(--ftu-slate-500);
-    margin-top: 4px;
-}
-.grad-file-loaded {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--ftu-green-50);
-    color: var(--ftu-green-600);
-    border: 1px solid var(--ftu-green-border);
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 8px;
-}
 
+/* Textarea input */
 .grad-textarea {
     width: 100%;
-    height: 105px;
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size: 13px;
-    line-height: 1.5;
-    border: 1px solid var(--ftu-slate-200);
-    border-radius: 6px;
+    min-height: 120px;
     padding: 10px 12px;
+    border: 1px solid var(--ftu-slate-300);
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--ftu-slate-900);
     box-sizing: border-box;
     resize: vertical;
-    background: #ffffff;
-    color: var(--ftu-slate-900);
-    transition: border-color 0.2s ease;
+    transition: border-color 0.15s ease;
 }
 .grad-textarea:focus {
     outline: none;
@@ -180,220 +259,174 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 8px;
+    margin-top: 10px;
 }
 .grad-counter-badge {
-    font-size: 12px;
-    color: var(--ftu-slate-500);
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ftu-slate-600);
+    background: var(--ftu-slate-100);
+    padding: 3px 8px;
+    border-radius: 12px;
 }
 
-/* Button system */
+/* Buttons */
 .grad-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 12px;
     font-weight: 600;
-    padding: 7px 14px;
+    font-size: 12px;
+    padding: 6px 12px;
     border-radius: 5px;
-    border: 1px solid transparent;
     cursor: pointer;
-    text-decoration: none;
-    line-height: 1.25;
     transition: all 0.15s ease;
-}
-.grad-btn-primary {
-    background: var(--ftu-crimson);
-    color: #ffffff;
-    border-color: var(--ftu-crimson);
-}
-.grad-btn-primary:hover {
-    background: var(--ftu-crimson-dark);
-    border-color: var(--ftu-crimson-dark);
-    color: #ffffff;
-}
-.grad-btn-dark {
-    background: var(--ftu-slate-900);
-    color: #ffffff;
-    border-color: var(--ftu-slate-900);
-}
-.grad-btn-dark:hover {
-    background: var(--ftu-slate-800);
-    color: #ffffff;
-}
-.grad-btn-outline {
-    background: #ffffff;
-    color: var(--ftu-slate-700);
-    border-color: var(--ftu-slate-200);
-}
-.grad-btn-outline:hover {
-    background: var(--ftu-slate-50);
-    border-color: var(--ftu-slate-500);
-    color: var(--ftu-slate-900);
-}
-.grad-btn-danger {
-    background: #dc2626;
-    color: #ffffff;
-    border-color: #dc2626;
-}
-.grad-btn-danger:hover {
-    background: #b91c1c;
-    color: #ffffff;
-}
-.grad-btn-success {
-    background: #15803d;
-    color: #ffffff;
-    border-color: #15803d;
-}
-.grad-btn-success:hover {
-    background: #166534;
-    color: #ffffff;
+    border: 1px solid transparent;
+    text-decoration: none;
+    line-height: 1.4;
 }
 .grad-btn-sm {
     padding: 5px 10px;
     font-size: 11.5px;
 }
-
-/* Status message */
-.status-msg {
-    padding: 10px 16px;
-    margin-bottom: 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    display: none;
-    align-items: center;
-    gap: 8px;
+.grad-btn-primary {
+    background: var(--ftu-slate-900);
+    color: #ffffff;
+    border-color: var(--ftu-slate-900);
 }
-.status-msg.success { background: var(--ftu-green-50); color: #166534; border: 1px solid var(--ftu-green-border); display: flex; }
-.status-msg.error { background: var(--ftu-crimson-light); color: var(--ftu-crimson); border: 1px solid var(--ftu-crimson-border); display: flex; }
-
-/* Filter & Control Section */
-.grad-filter-section {
+.grad-btn-primary:hover {
+    background: var(--ftu-slate-800);
+    color: #ffffff;
+}
+.grad-btn-danger {
+    background: var(--ftu-crimson);
+    color: #ffffff;
+    border-color: var(--ftu-crimson);
+}
+.grad-btn-danger:hover {
+    background: var(--ftu-crimson-dark);
+    color: #ffffff;
+}
+.grad-btn-success {
+    background: var(--ftu-green-600);
+    color: #ffffff;
+    border-color: var(--ftu-green-600);
+}
+.grad-btn-success:hover {
+    background: #15803d;
+    color: #ffffff;
+}
+.grad-btn-outline {
+    background: #ffffff;
+    color: var(--ftu-slate-700);
+    border-color: var(--ftu-slate-300);
+}
+.grad-btn-outline:hover {
     background: var(--ftu-slate-50);
+    color: var(--ftu-slate-900);
+    border-color: var(--ftu-slate-400);
+}
+.grad-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Filter & Controls */
+.grad-filter-section {
+    background: #ffffff;
     border: 1px solid var(--ftu-slate-200);
     border-radius: 8px;
     padding: 14px 16px;
     margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
-
-/* Tabs */
 .grad-status-tabs {
     display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--ftu-slate-200);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
 }
 .grad-tab-btn {
+    background: transparent;
+    border: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ftu-slate-600);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #ffffff;
-    border: 1px solid var(--ftu-slate-200);
-    color: var(--ftu-slate-700);
-    padding: 6px 12px;
-    font-size: 12.5px;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
     transition: all 0.15s ease;
 }
 .grad-tab-btn:hover {
-    background: #ffffff;
-    border-color: var(--ftu-slate-500);
+    background: var(--ftu-slate-100);
     color: var(--ftu-slate-900);
 }
 .grad-tab-btn.active {
     background: var(--ftu-slate-900);
     color: #ffffff;
-    border-color: var(--ftu-slate-900);
 }
 .grad-tab-pill {
-    display: inline-block;
-    padding: 1px 7px;
     font-size: 11px;
-    font-weight: 700;
-    border-radius: 12px;
-    background: var(--ftu-slate-100);
-    color: var(--ftu-slate-700);
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--ftu-slate-200);
+    color: var(--ftu-slate-800);
 }
 .grad-tab-btn.active .grad-tab-pill {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.2);
     color: #ffffff;
 }
-.pill-cleared { background: #dcfce7; color: #166534; }
-.pill-debt { background: #fee2e2; color: #b91c1c; }
-.pill-locked { background: #e2e8f0; color: #475569; }
-.pill-notfound { background: #fef3c7; color: #92400e; }
+.grad-tab-pill.pill-cleared { background: var(--ftu-green-50); color: var(--ftu-green-600); border: 1px solid var(--ftu-green-border); }
+.grad-tab-pill.pill-debt { background: var(--ftu-crimson-light); color: var(--ftu-crimson); border: 1px solid var(--ftu-crimson-border); }
+.grad-tab-pill.pill-locked { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.grad-tab-pill.pill-notfound { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
-/* Filter Controls Row */
 .grad-filter-row {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap;
 }
 .grad-search-box {
-    position: relative;
     flex: 1;
-    min-width: 240px;
+    min-width: 220px;
+    position: relative;
 }
 .grad-search-input {
     width: 100%;
-    padding: 7px 32px 7px 12px;
+    border: 1px solid var(--ftu-slate-300);
+    border-radius: 5px;
+    padding: 6px 30px 6px 10px;
     font-size: 12.5px;
-    border: 1px solid var(--ftu-slate-200);
-    border-radius: 6px;
-    background: #ffffff;
     box-sizing: border-box;
-    transition: border-color 0.2s ease;
 }
 .grad-search-input:focus {
     outline: none;
     border-color: var(--ftu-crimson);
 }
-.grad-search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 13px;
-    color: var(--ftu-slate-500);
-    pointer-events: none;
-}
 .grad-search-clear {
     position: absolute;
-    right: 10px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 13px;
-    color: var(--ftu-slate-500);
+    color: var(--ftu-slate-400);
     cursor: pointer;
+    font-size: 12px;
     display: none;
 }
-.grad-search-clear:hover {
-    color: var(--ftu-crimson);
-}
-
 .grad-select {
-    padding: 7px 10px;
-    font-size: 12.5px;
-    font-weight: 500;
+    border: 1px solid var(--ftu-slate-300);
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 12px;
     color: var(--ftu-slate-800);
-    border: 1px solid var(--ftu-slate-200);
-    border-radius: 6px;
     background: #ffffff;
-    min-width: 150px;
-    cursor: pointer;
-}
-.grad-select:focus {
-    outline: none;
-    border-color: var(--ftu-crimson);
 }
 
 /* Action Toolbar */
@@ -401,130 +434,137 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+    background: var(--ftu-slate-50);
+    border: 1px solid var(--ftu-slate-200);
+    border-radius: 6px;
+    padding: 10px 14px;
     margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .grad-selection-summary {
     font-size: 12.5px;
-    color: var(--ftu-slate-600);
-    font-weight: 500;
-}
-.grad-selection-summary strong {
-    color: var(--ftu-slate-900);
+    color: var(--ftu-slate-700);
 }
 .grad-actions-group {
     display: flex;
+    gap: 6px;
     flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
 }
 
-/* Table styling */
+/* Results Table */
 .grad-table-container {
     border: 1px solid var(--ftu-slate-200);
     border-radius: 8px;
-    overflow-x: auto;
     background: #ffffff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 .grad-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12.5px;
-}
-.grad-table th {
-    background: #f8fafc;
-    color: var(--ftu-slate-700);
-    font-weight: 700;
     font-size: 12px;
     text-align: left;
-    padding: 10px 10px;
+}
+.grad-table th {
+    background: var(--ftu-slate-50);
+    color: var(--ftu-slate-700);
+    font-weight: 700;
+    padding: 10px 12px;
     border-bottom: 2px solid var(--ftu-slate-200);
-    border-right: 1px solid var(--ftu-slate-100);
     white-space: nowrap;
     user-select: none;
 }
 .grad-table th.sortable {
     cursor: pointer;
-    transition: background 0.15s ease;
 }
 .grad-table th.sortable:hover {
-    background: #f1f5f9;
+    background: var(--ftu-slate-100);
     color: var(--ftu-slate-900);
 }
+.grad-table th.sorted {
+    color: var(--ftu-crimson);
+}
 .grad-sort-icon {
-    display: inline-block;
-    margin-left: 4px;
     font-size: 10px;
-    color: var(--ftu-slate-500);
+    margin-left: 4px;
+    color: var(--ftu-slate-400);
 }
 .grad-table th.sorted .grad-sort-icon {
     color: var(--ftu-crimson);
-    font-weight: bold;
 }
 .grad-table td {
-    padding: 9px 10px;
-    border-bottom: 1px solid var(--ftu-slate-100);
-    border-right: 1px solid var(--ftu-slate-100);
-    color: var(--ftu-slate-800);
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--ftu-slate-200);
     vertical-align: middle;
 }
-.grad-table tbody tr:hover td {
-    background: #fbfcfe;
+.grad-table tr:hover {
+    background: var(--ftu-slate-50);
 }
-.grad-table tbody tr.row-selected td {
-    background: #f0f7ff;
+.grad-table tr.row-selected {
+    background: #fef2f2 !important;
 }
 
 /* Badges */
 .grad-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
+    padding: 2px 8px;
     border-radius: 4px;
-    line-height: 1.3;
+    white-space: nowrap;
 }
-.badge-cleared { background: var(--ftu-green-50); color: var(--ftu-green-600); border: 1px solid var(--ftu-green-border); }
-.badge-debt { background: var(--ftu-crimson-light); color: var(--ftu-crimson); border: 1px solid var(--ftu-crimson-border); }
-.badge-locked { background: var(--ftu-slate-100); color: var(--ftu-slate-600); border: 1px solid var(--ftu-slate-200); }
-.badge-notfound { background: var(--ftu-amber-50); color: var(--ftu-amber-600); border: 1px solid var(--ftu-amber-border); }
-.badge-active { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-cleared {
+    background: var(--ftu-green-50);
+    color: var(--ftu-green-600);
+    border: 1px solid var(--ftu-green-border);
+}
+.badge-debt {
+    background: var(--ftu-crimson-light);
+    color: var(--ftu-crimson);
+    border: 1px solid var(--ftu-crimson-border);
+}
+.badge-locked {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+.badge-notfound {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+.badge-active {
+    background: var(--ftu-slate-100);
+    color: var(--ftu-slate-700);
+}
 
-/* Debt Details Accordion */
-.debt-details {
-    margin-top: 6px;
-    padding: 8px 12px;
+/* Empty State */
+.grad-empty-state {
+    padding: 48px 16px;
+    text-align: center;
+    color: var(--ftu-slate-500);
+}
+
+/* Status message */
+.status-msg {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    display: none;
+}
+.status-msg.success {
+    background: var(--ftu-green-50);
+    border: 1px solid var(--ftu-green-border);
+    color: #14532d;
+}
+.status-msg.error {
     background: var(--ftu-crimson-light);
     border: 1px solid var(--ftu-crimson-border);
-    border-radius: 5px;
-    font-size: 12px;
-}
-.debt-item {
-    padding: 4px 0;
-    border-bottom: 1px dashed #fecaca;
-    color: var(--ftu-slate-800);
-}
-.debt-item:last-child {
-    border-bottom: none;
-}
-.text-danger { color: #dc2626; font-weight: 600; }
-.text-success { color: #16a34a; font-weight: 600; }
-.text-mono { font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
-
-/* Empty state */
-.grad-empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--ftu-slate-500);
-}
-.grad-empty-icon {
-    font-size: 36px;
-    margin-bottom: 8px;
-    color: var(--ftu-slate-500);
+    color: var(--ftu-crimson-dark);
 }
 
 /* Pagination bar */
@@ -532,8 +572,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    background: #ffffff;
+    padding: 10px 16px;
+    background: var(--ftu-slate-50);
     border-top: 1px solid var(--ftu-slate-200);
     font-size: 12px;
     color: var(--ftu-slate-600);
@@ -541,12 +581,11 @@
 .grad-pages {
     display: flex;
     gap: 4px;
-    align-items: center;
 }
 .grad-page-btn {
-    padding: 4px 8px;
     border: 1px solid var(--ftu-slate-200);
     background: #ffffff;
+    padding: 4px 8px;
     color: var(--ftu-slate-700);
     border-radius: 4px;
     font-size: 11.5px;
@@ -564,6 +603,113 @@
 .grad-page-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+/* Modal styles */
+.grad-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    backdrop-filter: blur(2px);
+}
+.grad-modal-dialog {
+    background: #ffffff;
+    border-radius: 12px;
+    width: 660px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2), 0 10px 10px -5px rgba(0,0,0,0.1);
+    border: 1px solid var(--ftu-slate-200);
+    animation: gradModalFadeIn 0.2s ease-out;
+}
+@keyframes gradModalFadeIn {
+    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.grad-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ftu-slate-200);
+    background: var(--ftu-slate-50);
+    border-radius: 12px 12px 0 0;
+}
+.grad-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ftu-slate-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.grad-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    color: var(--ftu-slate-500);
+    cursor: pointer;
+    padding: 0 6px;
+    line-height: 1;
+}
+.grad-modal-close:hover {
+    color: var(--ftu-crimson);
+}
+.grad-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.grad-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ftu-slate-200);
+    background: var(--ftu-slate-50);
+    border-radius: 0 0 12px 12px;
+}
+.grad-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.grad-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.grad-form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ftu-slate-800);
+    margin: 0;
+}
+.grad-form-label .required {
+    color: var(--ftu-crimson);
+}
+.grad-form-input {
+    border: 1px solid var(--ftu-slate-300);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--ftu-slate-900);
+    transition: border-color 0.15s ease;
+}
+.grad-form-input:focus {
+    outline: none;
+    border-color: var(--ftu-crimson);
+    box-shadow: 0 0 0 3px rgba(163, 26, 36, 0.1);
 }
 </style>
 </head>
@@ -588,13 +734,13 @@
 [% END #/ WRAPPER sub-header.inc %]
 
 <div class="grad-wrapper">
-    <!-- Header title -->
+    <!-- Header title (Đã xóa box FTU Library theo yêu cầu) -->
     <div class="grad-header-card">
         <div class="grad-title-group">
             <h1>
                 Xét tốt nghiệp &amp; Đối soát Thư viện
-                <span class="grad-badge-brand">FTU Library</span>
             </h1>
+            <p class="grad-subtitle">Quản lý theo đợt xét tốt nghiệp, đối soát nghĩa vụ tài liệu &amp; khóa thẻ bạn đọc tập trung</p>
         </div>
         <div>
             <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline grad-btn-sm">Về Trang chủ</a>
@@ -605,8 +751,61 @@
     <div id="status-alert" class="status-msg"></div>
     <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% Koha.GenerateCSRF | $raw %]">
 
-    <!-- INPUT CARDS (TWO COLUMNS) -->
-    <div class="grad-input-grid">
+    <!-- THANH QUẢN LÝ ĐỢT XÉT TỐT NGHIỆP (GRADUATION BATCH MANAGEMENT) -->
+    <div class="grad-batch-bar">
+        <div class="grad-batch-left">
+            <label class="grad-batch-label"><i class="fa fa-folder-open-o"></i> Đợt xét tốt nghiệp:</label>
+            <select id="select-batch" class="grad-select grad-batch-select" onchange="onBatchSelectChange(this.value)">
+                <option value="">-- Chọn đợt xét tốt nghiệp đã lưu --</option>
+                [% FOREACH b IN saved_batches %]
+                <option value="[% b.id %]">[% b.batch_name %][% IF b.cohort %] ([% b.cohort %])[% END %] - [% b.total_patrons %] SV [[% b.created_at_formatted %]]</option>
+                [% END %]
+            </select>
+            <button type="button" id="btn-recheck-batch" class="grad-btn grad-btn-primary grad-btn-sm" style="display:none;" onclick="recheckCurrentBatch()" title="Đối soát lại toàn bộ sinh viên trong đợt này">
+                <i class="fa fa-refresh"></i> Đối soát lại đợt này
+            </button>
+            <button type="button" id="btn-delete-batch" class="grad-btn grad-btn-outline grad-btn-sm" style="display:none; color: #dc2626; border-color: #fca5a5;" onclick="deleteCurrentBatch()" title="Xóa đợt này khỏi hệ thống">
+                <i class="fa fa-trash-o"></i> Xóa đợt
+            </button>
+        </div>
+        <div class="grad-batch-right">
+            <button type="button" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="openCreateBatchModal()">
+                <i class="fa fa-plus-circle"></i> Tạo đợt mới &amp; Lưu lại
+            </button>
+            <button type="button" id="btn-toggle-quick-input" class="grad-btn grad-btn-outline grad-btn-sm" onclick="toggleQuickInput()">
+                <i class="fa fa-upload"></i> Nạp nhanh (không lưu)
+            </button>
+        </div>
+    </div>
+
+    <!-- BANNER ĐỢT ĐANG HOẠT ĐỘNG -->
+    <div id="batch-active-banner" class="grad-batch-active-banner" style="display:none;">
+        <div class="grad-batch-info-box">
+            <div class="grad-batch-active-title">
+                <i class="fa fa-graduation-cap"></i> <strong id="active-batch-name">-</strong>
+                <span class="grad-batch-tag" id="active-batch-tag">Đợt xét</span>
+            </div>
+            <div class="grad-batch-active-meta" id="active-batch-meta">
+                Đang đối soát thời gian thực &bull; Nhấn "Đối soát lại đợt này" bất kỳ lúc nào để cập nhật dữ liệu trả sách mới nhất
+            </div>
+        </div>
+        <div>
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="recheckCurrentBatch()">
+                <i class="fa fa-refresh"></i> Làm mới dữ liệu mượn trả
+            </button>
+        </div>
+    </div>
+
+    <!-- NÚT THU GỌN / MỞ RỘNG VÙNG NẠP NHANH -->
+    <div id="quick-input-toggle-container" style="display:none;">
+        <span class="grad-collapse-toggle" onclick="toggleQuickInput()">
+            <i class="fa fa-caret-down" id="toggle-caret-icon"></i>
+            <span id="toggle-label-text">Hiển thị vùng nạp nhanh file / danh sách MSSV</span>
+        </span>
+    </div>
+
+    <!-- INPUT CARDS (TWO COLUMNS - NẠP NHANH) -->
+    <div class="grad-input-grid" id="quick-input-grid">
         <!-- CARD 1: EXCEL / CSV UPLOAD -->
         <div class="grad-card">
             <div class="grad-card-header">
@@ -768,7 +967,7 @@
                     <td colspan="10">
                         <div class="grad-empty-state">
                             <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div>
-                            <div style="font-size: 12px;">Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên phía trên để bắt đầu kiểm tra.</div>
+                            <div style="font-size: 12px;">Vui lòng chọn một Đợt xét tốt nghiệp đã lưu hoặc nạp tệp Excel/CSV để bắt đầu kiểm tra.</div>
                         </div>
                     </td>
                 </tr>
@@ -793,6 +992,57 @@
     </div>
 </div>
 
+<!-- MODAL TẠO ĐỢT XÉT TỐT NGHIỆP MỚI -->
+<div id="modal-create-batch" class="grad-modal-backdrop" onclick="handleModalBackdropClick(event)">
+    <div class="grad-modal-dialog">
+        <div class="grad-modal-header">
+            <h3 class="grad-modal-title"><i class="fa fa-graduation-cap" style="color: var(--ftu-crimson);"></i> Tạo Đợt Xét Tốt Nghiệp Mới</h3>
+            <button type="button" class="grad-modal-close" onclick="closeCreateBatchModal()">&times;</button>
+        </div>
+        <div class="grad-modal-body">
+            <div class="grad-form-group">
+                <label class="grad-form-label">Tên đợt xét tốt nghiệp <span class="required">*</span></label>
+                <input type="text" id="modal-batch-name" class="grad-form-input" placeholder="Ví dụ: Đợt 1 - Tốt nghiệp K60 (Tháng 10/2026)">
+            </div>
+            <div class="grad-form-row">
+                <div class="grad-form-group">
+                    <label class="grad-form-label">Khóa sinh viên</label>
+                    <input type="text" id="modal-cohort" class="grad-form-input" placeholder="Ví dụ: K60, K59, Cao học K31...">
+                </div>
+                <div class="grad-form-group">
+                    <label class="grad-form-label">Năm học</label>
+                    <input type="text" id="modal-academic-year" class="grad-form-input" placeholder="Ví dụ: 2025-2026">
+                </div>
+            </div>
+            <div class="grad-form-group">
+                <label class="grad-form-label">Ghi chú đợt</label>
+                <input type="text" id="modal-description" class="grad-form-input" placeholder="Ghi chú thêm về đợt xét tốt nghiệp...">
+            </div>
+            <div class="grad-form-group">
+                <label class="grad-form-label">Nạp danh sách sinh viên <span class="required">*</span></label>
+                <div class="grad-dropzone" id="modal-dropzone" onclick="document.getElementById('modal-file-input').click()">
+                    <div class="grad-dropzone-text" id="modal-dropzone-text">Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp</div>
+                    <div class="grad-dropzone-hint">Hỗ trợ .xlsx, .xls, .csv hoặc nhập trực tiếp ô bên dưới</div>
+                    <input type="file" id="modal-file-input" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleModalFileSelect(this)">
+                </div>
+            </div>
+            <div class="grad-form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label class="grad-form-label">Hoặc dán trực tiếp danh sách mã sinh viên:</label>
+                    <span class="grad-counter-badge" id="modal-uid-counter">0 mã</span>
+                </div>
+                <textarea id="modal-uids-input" class="grad-textarea" style="min-height: 100px;" placeholder="Nhập mỗi mã sinh viên trên một dòng hoặc cách nhau bằng dấu phẩy...&#10;2011110001&#10;2011110002" oninput="updateModalCounter()"></textarea>
+            </div>
+        </div>
+        <div class="grad-modal-footer">
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="closeCreateBatchModal()">Hủy bỏ</button>
+            <button type="button" id="btn-modal-save" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="submitCreateBatch()">
+                <i class="fa fa-save"></i> Lưu đợt và Đối soát ngay
+            </button>
+        </div>
+    </div>
+</div>
+
 [% INCLUDE 'intranet-bottom.inc' %]
 
 <!-- SheetJS xử lý đọc Excel (tải từ domain nội bộ SSO) -->
@@ -810,6 +1060,11 @@ let currentClassFilter = '';
 let currentDebtFilter = '';
 let currentSort = { key: 'index', dir: 'asc' };
 
+// Quản lý đợt
+let currentBatchId = null;
+let currentBatchName = '';
+let modalExtractedUids = [];
+
 // Phân trang
 let currentPage = 1;
 let pageSize = 100;
@@ -822,12 +1077,22 @@ const selectedSet = new Set();
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', function() {
     setupDragAndDrop();
+    setupModalDragAndDrop();
     updateInputCounter();
+    
+    // Tự động kiểm tra URL nếu có batch_id
+    const urlParams = new URLSearchParams(window.location.search);
+    const initBatchId = urlParams.get('batch_id');
+    if (initBatchId) {
+        document.getElementById('select-batch').value = initBatchId;
+        loadBatch(initBatchId);
+    }
 });
 
 function setupDragAndDrop() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('file-input');
+    if (!dropzone || !fileInput) return;
 
     ['dragenter', 'dragover'].forEach(name => {
         dropzone.addEventListener(name, (e) => {
@@ -863,7 +1128,6 @@ function setupDragAndDrop() {
 function handleSelectedFile(file) {
     if (!file) return;
 
-    const fileStatus = document.getElementById('file-status');
     const dropzoneText = document.getElementById('dropzone-text');
     dropzoneText.innerHTML = '<strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
 
@@ -944,6 +1208,7 @@ function showAlert(msg, type) {
     const el = document.getElementById('status-alert');
     el.className = 'status-msg ' + (type || 'success');
     el.innerHTML = escapeHtml(msg);
+    el.style.display = 'block';
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     setTimeout(() => { el.style.display = 'none'; }, 8000);
 }
@@ -964,7 +1229,412 @@ function downloadSampleExcel() {
 }
 
 // ==============================================================================
-// API INTERACTION: ĐỐI SOÁT
+// QUẢN LÝ ĐỢT XÉT TỐT NGHIỆP (GRADUATION BATCH MANAGEMENT)
+// ==============================================================================
+async function loadBatchesList(selectBatchId) {
+    try {
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl?op=batches_list');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.batches)) {
+            const sel = document.getElementById('select-batch');
+            sel.innerHTML = '<option value="">-- Chọn đợt xét tốt nghiệp đã lưu --</option>';
+            data.batches.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b.id;
+                let text = b.batch_name;
+                if (b.cohort) text += ' (' + b.cohort + ')';
+                text += ' - ' + b.total_patrons + ' SV [' + (b.created_at_formatted || '') + ']';
+                opt.textContent = text;
+                sel.appendChild(opt);
+            });
+            if (selectBatchId) {
+                sel.value = selectBatchId;
+            }
+        }
+    } catch (e) {
+        console.error('Không thể tải danh sách đợt:', e);
+    }
+}
+
+function onBatchSelectChange(val) {
+    if (!val) {
+        currentBatchId = null;
+        currentBatchName = '';
+        document.getElementById('batch-active-banner').style.display = 'none';
+        document.getElementById('btn-recheck-batch').style.display = 'none';
+        document.getElementById('btn-delete-batch').style.display = 'none';
+        document.getElementById('quick-input-toggle-container').style.display = 'none';
+        document.getElementById('quick-input-grid').style.display = 'grid';
+        return;
+    }
+    loadBatch(val);
+}
+
+async function loadBatch(batchId) {
+    if (!batchId) return;
+
+    showAlert('Đang tải và đối soát thời gian thực dữ liệu đợt...', 'success');
+    const tbody = document.getElementById('results-tbody');
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 36px; color: var(--ftu-slate-600);"><i class="fa fa-spinner fa-spin"></i> Đang đọc danh sách và đối soát lại dữ liệu mượn trả từ Koha... Vui lòng đợi.</td></tr>';
+
+    try {
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl?op=batch_load&batch_id=' + batchId);
+        const data = await res.json();
+
+        if (data.success) {
+            currentBatchId = data.batch_id;
+            currentBatchName = data.batch_name;
+
+            // Gán dữ liệu vào bảng
+            rawDataList = (data.results || []).map((item, idx) => {
+                item._original_index = idx + 1;
+                return item;
+            });
+
+            selectedSet.clear();
+            populateClassDropdown();
+            updateStatsAndBadges();
+            applyFilters();
+
+            // Cập nhật banner đợt đang hoạt động
+            document.getElementById('active-batch-name').textContent = data.batch_name;
+            document.getElementById('active-batch-tag').textContent = data.cohort || data.academic_year || 'Đợt xét';
+            document.getElementById('active-batch-meta').innerHTML =
+                'Tổng cộng: <strong>' + data.total_input + '</strong> sinh viên &bull; ' +
+                'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + data.count_cleared + '</strong> &bull; ' +
+                'Còn nợ sách/phạt: <strong style="color:var(--ftu-crimson);">' + data.count_has_debt + '</strong> &bull; ' +
+                'Đã khóa thẻ: <strong>' + data.count_debarred + '</strong> &bull; ' +
+                'Cập nhật lúc: ' + new Date().toLocaleTimeString('vi-VN');
+
+            document.getElementById('batch-active-banner').style.display = 'flex';
+            document.getElementById('btn-recheck-batch').style.display = 'inline-flex';
+            document.getElementById('btn-delete-batch').style.display = 'inline-flex';
+
+            // Thu gọn vùng nạp nhanh để tạo không gian thoáng
+            document.getElementById('quick-input-grid').style.display = 'none';
+            document.getElementById('quick-input-toggle-container').style.display = 'block';
+            document.getElementById('toggle-label-text').textContent = 'Mở rộng vùng nạp nhanh file / danh sách MSSV';
+            document.getElementById('toggle-caret-icon').className = 'fa fa-caret-right';
+
+            showAlert('Đã tải thành công đợt [' + data.batch_name + '] gồm ' + data.total_input + ' sinh viên (' + data.count_cleared + ' đủ điều kiện, ' + data.count_has_debt + ' còn nợ).', 'success');
+        } else {
+            showAlert('Lỗi tải đợt: ' + (data.error || 'Không xác định'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi kết nối máy chủ: ' + err.message, 'error');
+    }
+}
+
+async function recheckCurrentBatch() {
+    if (!currentBatchId) {
+        showAlert('Chưa chọn đợt xét tốt nghiệp nào.', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-recheck-batch');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang đối soát lại...';
+
+    try {
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl?op=batch_recheck&batch_id=' + currentBatchId);
+        const data = await res.json();
+
+        if (data.success) {
+            rawDataList = (data.results || []).map((item, idx) => {
+                item._original_index = idx + 1;
+                return item;
+            });
+
+            selectedSet.clear();
+            populateClassDropdown();
+            updateStatsAndBadges();
+            applyFilters();
+
+            document.getElementById('active-batch-meta').innerHTML =
+                'Tổng cộng: <strong>' + data.total_input + '</strong> sinh viên &bull; ' +
+                'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + data.count_cleared + '</strong> &bull; ' +
+                'Còn nợ sách/phạt: <strong style="color:var(--ftu-crimson);">' + data.count_has_debt + '</strong> &bull; ' +
+                'Đã khóa thẻ: <strong>' + data.count_debarred + '</strong> &bull; ' +
+                'Cập nhật lúc: ' + new Date().toLocaleTimeString('vi-VN');
+
+            showAlert('Đã đối soát lại thành công đợt [' + data.batch_name + ']: ' + data.count_cleared + ' đủ điều kiện, ' + data.count_has_debt + ' còn nợ.', 'success');
+        } else {
+            showAlert('Lỗi đối soát lại: ' + (data.error || 'Không xác định'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi kết nối máy chủ: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-refresh"></i> Đối soát lại đợt này';
+    }
+}
+
+async function deleteCurrentBatch() {
+    if (!currentBatchId) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa đợt [' + currentBatchName + '] khỏi hệ thống? Dữ liệu lưu trữ của đợt này sẽ bị xóa hoàn toàn.')) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'batch_delete');
+        formData.append('batch_id', currentBatchId);
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAlert('Đã xóa đợt xét tốt nghiệp thành công!', 'success');
+            currentBatchId = null;
+            currentBatchName = '';
+            document.getElementById('batch-active-banner').style.display = 'none';
+            document.getElementById('btn-recheck-batch').style.display = 'none';
+            document.getElementById('btn-delete-batch').style.display = 'none';
+            document.getElementById('quick-input-toggle-container').style.display = 'none';
+            document.getElementById('quick-input-grid').style.display = 'grid';
+            clearInput();
+            loadBatchesList();
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không thể xóa đợt'), 'error');
+        }
+    } catch (err) {
+        showAlert('Lỗi kết nối: ' + err.message, 'error');
+    }
+}
+
+function toggleQuickInput() {
+    const grid = document.getElementById('quick-input-grid');
+    const caret = document.getElementById('toggle-caret-icon');
+    const text = document.getElementById('toggle-label-text');
+    if (grid.style.display === 'none') {
+        grid.style.display = 'grid';
+        if (caret) caret.className = 'fa fa-caret-down';
+        if (text) text.textContent = 'Thu gọn vùng nạp nhanh';
+    } else {
+        grid.style.display = 'none';
+        if (caret) caret.className = 'fa fa-caret-right';
+        if (text) text.textContent = 'Mở rộng vùng nạp nhanh file / danh sách MSSV';
+    }
+}
+
+// ==============================================================================
+// MODAL TẠO ĐỢT MỚI & NẠP DỮ LIỆU
+// ==============================================================================
+function openCreateBatchModal() {
+    document.getElementById('modal-create-batch').style.display = 'flex';
+    document.getElementById('modal-batch-name').focus();
+}
+
+function closeCreateBatchModal() {
+    document.getElementById('modal-create-batch').style.display = 'none';
+    document.getElementById('modal-batch-name').value = '';
+    document.getElementById('modal-cohort').value = '';
+    document.getElementById('modal-academic-year').value = '';
+    document.getElementById('modal-description').value = '';
+    document.getElementById('modal-uids-input').value = '';
+    document.getElementById('modal-dropzone-text').textContent = 'Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp';
+    document.getElementById('modal-file-input').value = '';
+    modalExtractedUids = [];
+    updateModalCounter();
+}
+
+function handleModalBackdropClick(event) {
+    if (event.target === document.getElementById('modal-create-batch')) {
+        closeCreateBatchModal();
+    }
+}
+
+function setupModalDragAndDrop() {
+    const dropzone = document.getElementById('modal-dropzone');
+    if (!dropzone) return;
+
+    ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            handleModalSelectedFile(files[0]);
+        }
+    });
+}
+
+function handleModalFileSelect(input) {
+    if (input.files && input.files.length > 0) {
+        handleModalSelectedFile(input.files[0]);
+    }
+}
+
+function handleModalSelectedFile(file) {
+    if (!file) return;
+
+    const dropzoneText = document.getElementById('modal-dropzone-text');
+    dropzoneText.innerHTML = '<strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonSheet = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+            let extractedUids = [];
+            let headerColIdx = 0;
+
+            if (jsonSheet.length > 0) {
+                const headerRow = jsonSheet[0];
+                for (let c = 0; c < headerRow.length; c++) {
+                    const colName = String(headerRow[c] || '').toLowerCase().trim();
+                    if (colName.includes('mã') || colName.includes('mssv') || colName.includes('cardnumber') || colName.includes('uid') || colName.includes('student')) {
+                        headerColIdx = c;
+                        break;
+                    }
+                }
+
+                for (let r = 1; r < jsonSheet.length; r++) {
+                    const row = jsonSheet[r];
+                    if (row && row[headerColIdx]) {
+                        const val = String(row[headerColIdx]).trim();
+                        if (val) extractedUids.push(val);
+                    }
+                }
+            }
+
+            if (extractedUids.length === 0) {
+                alert('Không tìm thấy dữ liệu mã sinh viên trong tệp ' + file.name);
+                return;
+            }
+
+            modalExtractedUids = extractedUids;
+            document.getElementById('modal-uids-input').value = extractedUids.join('\n');
+            updateModalCounter();
+        } catch (err) {
+            alert('Lỗi đọc tệp Excel: ' + err.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function updateModalCounter() {
+    const text = document.getElementById('modal-uids-input').value.trim();
+    if (!text) {
+        document.getElementById('modal-uid-counter').textContent = '0 mã';
+        return;
+    }
+    const lines = text.split(/[\r\n,;\t]+/).filter(l => l.trim().length > 0);
+    document.getElementById('modal-uid-counter').textContent = lines.length + ' mã';
+}
+
+async function submitCreateBatch() {
+    const batchName = document.getElementById('modal-batch-name').value.trim();
+    const cohort = document.getElementById('modal-cohort').value.trim();
+    const academicYear = document.getElementById('modal-academic-year').value.trim();
+    const description = document.getElementById('modal-description').value.trim();
+    const rawUids = document.getElementById('modal-uids-input').value.trim();
+
+    if (!batchName) {
+        alert('Vui lòng nhập Tên đợt xét tốt nghiệp.');
+        document.getElementById('modal-batch-name').focus();
+        return;
+    }
+
+    if (!rawUids) {
+        alert('Vui lòng nạp file Excel/CSV hoặc dán danh sách mã sinh viên.');
+        document.getElementById('modal-uids-input').focus();
+        return;
+    }
+
+    const btn = document.getElementById('btn-modal-save');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang lưu và đối soát...';
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'batch_create');
+        formData.append('batch_name', batchName);
+        formData.append('cohort', cohort);
+        formData.append('academic_year', academicYear);
+        formData.append('description', description);
+        formData.append('uids', rawUids);
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            closeCreateBatchModal();
+
+            // Tải lại dropdown đợt và tự động chọn đợt mới tạo
+            await loadBatchesList(data.batch_id);
+            document.getElementById('select-batch').value = data.batch_id;
+
+            currentBatchId = data.batch_id;
+            currentBatchName = data.batch_name;
+
+            rawDataList = (data.results || []).map((item, idx) => {
+                item._original_index = idx + 1;
+                return item;
+            });
+
+            selectedSet.clear();
+            populateClassDropdown();
+            updateStatsAndBadges();
+            applyFilters();
+
+            // Cập nhật banner đợt
+            document.getElementById('active-batch-name').textContent = data.batch_name;
+            document.getElementById('active-batch-tag').textContent = data.cohort || data.academic_year || 'Đợt mới';
+            document.getElementById('active-batch-meta').innerHTML =
+                'Tổng cộng: <strong>' + data.total_input + '</strong> sinh viên &bull; ' +
+                'Đủ điều kiện: <strong style="color:var(--ftu-green-600);">' + data.count_cleared + '</strong> &bull; ' +
+                'Còn nợ sách/phạt: <strong style="color:var(--ftu-crimson);">' + data.count_has_debt + '</strong> &bull; ' +
+                'Đã khóa thẻ: <strong>' + data.count_debarred + '</strong> &bull; ' +
+                'Tạo lúc: ' + new Date().toLocaleTimeString('vi-VN');
+
+            document.getElementById('batch-active-banner').style.display = 'flex';
+            document.getElementById('btn-recheck-batch').style.display = 'inline-flex';
+            document.getElementById('btn-delete-batch').style.display = 'inline-flex';
+
+            document.getElementById('quick-input-grid').style.display = 'none';
+            document.getElementById('quick-input-toggle-container').style.display = 'block';
+
+            showAlert('Đã lưu thành công đợt [' + data.batch_name + '] với ' + data.total_input + ' sinh viên!', 'success');
+        } else {
+            alert('Lỗi tạo đợt: ' + (data.error || 'Không xác định'));
+        }
+    } catch (err) {
+        alert('Lỗi kết nối máy chủ: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Lưu đợt và Đối soát ngay';
+    }
+}
+
+// ==============================================================================
+// API INTERACTION: ĐỐI SOÁT NHANH (KHÔNG LƯU)
 // ==============================================================================
 async function startCheck() {
     const rawText = document.getElementById('uids-input').value.trim();
@@ -994,7 +1664,13 @@ async function startCheck() {
 
         const data = await res.json();
         if (data.success) {
-            // Gán STT gốc vào từng item để có thể sort theo index
+            currentBatchId = null;
+            currentBatchName = '';
+            document.getElementById('select-batch').value = '';
+            document.getElementById('batch-active-banner').style.display = 'none';
+            document.getElementById('btn-recheck-batch').style.display = 'none';
+            document.getElementById('btn-delete-batch').style.display = 'none';
+
             rawDataList = (data.results || []).map((item, idx) => {
                 item._original_index = idx + 1;
                 return item;
@@ -1144,10 +1820,7 @@ function applyFilters() {
         return true;
     });
 
-    // Sau khi lọc, tiến hành sắp xếp dữ liệu
     applySorting();
-
-    // Cập nhật số lượng hiển thị
     document.getElementById('visible-count').textContent = filteredDataList.length;
     updateSelectionCounter();
     renderTable();
@@ -1190,7 +1863,6 @@ function sortBy(columnKey) {
         currentSort.dir = (columnKey === 'books' || columnKey === 'fine') ? 'desc' : 'asc';
     }
 
-    // Đồng bộ lại dropdown sắp xếp
     const selector = document.getElementById('sort-selector');
     if (columnKey === 'index') selector.value = 'index_' + currentSort.dir;
     else if (columnKey === 'cardnumber') selector.value = 'cardnumber_' + currentSort.dir;
@@ -1244,7 +1916,6 @@ function applySorting() {
         return 0;
     });
 
-    // Cập nhật biểu tượng mũi tên sắp xếp trên các cột của bảng
     document.querySelectorAll('.grad-table th.sortable').forEach(th => th.classList.remove('sorted'));
     document.querySelectorAll('.grad-sort-icon').forEach(icon => icon.innerHTML = '&#8645;');
 
@@ -1263,7 +1934,7 @@ function renderTable() {
     const paginationBar = document.getElementById('pagination-bar');
 
     if (rawDataList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div><div style="font-size: 12px;">Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên phía trên để bắt đầu kiểm tra.</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div><div style="font-size: 12px;">Vui lòng chọn một Đợt xét tốt nghiệp đã lưu hoặc nạp tệp Excel/CSV để bắt đầu kiểm tra.</div></div></td></tr>';
         paginationBar.style.display = 'none';
         updateCheckAllState();
         return;
@@ -1276,7 +1947,6 @@ function renderTable() {
         return;
     }
 
-    // Phân trang
     const totalItems = filteredDataList.length;
     let actualPageSize = (pageSize === 'ALL') ? totalItems : Number(pageSize);
     let totalPages = Math.ceil(totalItems / actualPageSize) || 1;
@@ -1291,7 +1961,6 @@ function renderTable() {
     pageItems.forEach((item, idx) => {
         const isSelected = selectedSet.has(item.cardnumber);
 
-        // Huy hiệu Tốt nghiệp
         let gradStatusBadge = '';
         if (item.is_not_found) {
             gradStatusBadge = '<span class="grad-badge badge-notfound">Không tìm thấy</span>';
@@ -1301,7 +1970,6 @@ function renderTable() {
             gradStatusBadge = '<span class="grad-badge badge-cleared">Đủ điều kiện</span>';
         }
 
-        // Huy hiệu Thẻ
         let cardStatusBadge = '';
         if (item.is_debarred) {
             cardStatusBadge = '<span class="grad-badge badge-locked">Đã khóa thẻ</span>';
@@ -1309,13 +1977,11 @@ function renderTable() {
             cardStatusBadge = '<span class="grad-badge badge-active">Hoạt động</span>';
         }
 
-        // Hiển thị sách nợ
         let booksDisplay = item.total_borrowed || 0;
         if (item.total_overdue > 0) {
             booksDisplay += ' <span class="text-danger">(' + item.total_overdue + ' quá hạn)</span>';
         }
 
-        // Thao tác dòng
         let actions = [];
         if (item.borrowernumber) {
             actions.push('<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + item.borrowernumber + '" target="_blank" class="grad-btn grad-btn-outline grad-btn-sm" title="Mở hồ sơ bạn đọc">Hồ sơ</a>');
@@ -1331,7 +1997,6 @@ function renderTable() {
             }
         }
 
-        // Danh sách sách chi tiết (Tên sách, Tác giả, Nhà XB, Barcode, Ngày mượn, Hạn trả, Quá hạn)
         let issuesDetailHtml = '';
         if (item.issues && item.issues.length > 0) {
             issuesDetailHtml = '<div class="debt-details" id="issues-' + item.cardnumber + '" style="display:none; margin-top:8px; padding:10px 12px; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">' +
@@ -1376,7 +2041,6 @@ function renderTable() {
 
         let fineText = item.total_fine > 0 ? ('<span class="text-danger">' + Number(item.total_fine).toLocaleString('vi-VN') + ' đ</span>') : '<span style="color:#64748b;">0 đ</span>';
 
-        // Trạng thái thẻ: chỉ hiển thị huy hiệu chuẩn, không kèm chuỗi metadata rác
         let cardNoteDisplay = '';
         if (item.is_debarred) {
             cardNoteDisplay = '<div style="font-size:11px; color:#b91c1c; font-weight:600; margin-top:3px;">Người học đã tốt nghiệp</div>';
@@ -1495,114 +2159,134 @@ function updateCheckAllState() {
 
     let allChecked = true;
     let anyChecked = false;
+
     filteredDataList.forEach(item => {
         if (selectedSet.has(item.cardnumber)) anyChecked = true;
         else allChecked = false;
     });
 
-    master.checked = allChecked && filteredDataList.length > 0;
-    master.indeterminate = !allChecked && anyChecked;
+    master.checked = allChecked;
+    master.indeterminate = (!allChecked && anyChecked);
 }
 
 function updateSelectionCounter() {
     document.getElementById('selected-count').textContent = selectedSet.size;
 }
 
-function getSelectedCardnumbers() {
-    return Array.from(selectedSet);
-}
-
 // ==============================================================================
-// ACTIONS: GỬI EMAIL, KHÓA THẺ, MỞ KHÓA THẺ, XUẤT EXCEL
+// GỬI EMAIL NHẮC NHỞ TRẢ SÁCH
 // ==============================================================================
-async function sendReminderSingle(cardnumber) {
-    if (!confirm('Gửi email nhắc nhở hoàn tất trả sách cho sinh viên mã số: ' + cardnumber + '?')) return;
-    await executeSendReminders([cardnumber]);
-}
-
 async function sendRemindersSelected() {
-    let selected = getSelectedCardnumbers();
-    if (selected.length === 0) {
-        const debtUids = filteredDataList.filter(i => i.has_debt).map(i => i.cardnumber);
-        if (debtUids.length === 0) {
-            showAlert('Không có sinh viên nào đang nợ sách trong danh sách hiện tại.', 'error');
-            return;
-        }
-        if (!confirm('Bạn chưa chọn ô cụ thể. Gửi email nhắc nhở cho TOÀN BỘ ' + debtUids.length + ' sinh viên còn nợ sách đang hiển thị?')) return;
-        selected = debtUids;
-    } else {
-        if (!confirm('Gửi email nhắc nhở cho ' + selected.length + ' sinh viên đã chọn?')) return;
+    const targetUids = (selectedSet.size > 0)
+        ? Array.from(selectedSet)
+        : filteredDataList.filter(i => i.has_debt).map(i => i.cardnumber);
+
+    if (targetUids.length === 0) {
+        showAlert('Chưa chọn sinh viên nào có sách nợ để gửi email.', 'error');
+        return;
     }
 
-    await executeSendReminders(selected);
-}
+    if (!confirm('Xác nhận gửi email nhắc nhở hoàn trả sách đến ' + targetUids.length + ' sinh viên?')) return;
 
-async function executeSendReminders(uids) {
+    showAlert('Đang gửi hàng đợi email nhắc nhở...', 'success');
+
     try {
         const formData = new FormData();
         formData.append('op', 'cud-send_reminders');
         const csrfToken = document.getElementById('koha-csrf-token')?.value;
         if (csrfToken) formData.append('csrf_token', csrfToken);
-        formData.append('uids', uids.join('\n'));
+        formData.append('uids', targetUids.join('\n'));
 
         const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
             method: 'POST',
             body: formData
         });
+
         const data = await res.json();
         if (data.success) {
-            showAlert(data.message, 'success');
+            showAlert(data.message || ('Đã gửi thành công ' + data.sent_count + ' email thông báo.'), 'success');
         } else {
-            showAlert('Lỗi: ' + (data.error || 'Không gửi được email'), 'error');
+            showAlert('Lỗi: ' + (data.error || 'Không thể gửi email'), 'error');
         }
     } catch (err) {
-        showAlert('Lỗi gửi email: ' + err.message, 'error');
+        showAlert('Lỗi kết nối gửi email: ' + err.message, 'error');
     }
 }
 
-async function lockSingle(cardnumber) {
-    if (!confirm('Xác nhận khóa thẻ và đồng bộ trạng thái "Người học đã tốt nghiệp" cho mã SV: ' + cardnumber + '?')) return;
-    await executeBatchLock([cardnumber]);
-}
+async function sendReminderSingle(cardnumber) {
+    if (!confirm('Xác nhận gửi email nhắc nhở tài liệu nợ đến mã sinh viên: ' + cardnumber + '?')) return;
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-send_reminders');
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+        formData.append('uids', cardnumber);
 
-async function batchLockSelected() {
-    let selected = getSelectedCardnumbers();
-    if (selected.length === 0) {
-        const clearedUids = filteredDataList.filter(i => i.is_cleared && !i.is_debarred).map(i => i.cardnumber);
-        if (clearedUids.length === 0) {
-            showAlert('Vui lòng chọn ít nhất một sinh viên để khóa thẻ.', 'error');
-            return;
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            showAlert('Đã xếp hàng email nhắc nhở cho sinh viên ' + cardnumber, 'success');
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không thể gửi email'), 'error');
         }
-        if (!confirm('Bạn chưa chọn ô. Bạn có muốn khóa thẻ hàng loạt cho TOÀN BỘ ' + clearedUids.length + ' sinh viên ĐỦ ĐIỀU KIỆN tốt nghiệp trong danh sách hiển thị?')) return;
-        selected = clearedUids;
-    } else {
-        if (!confirm('Xác nhận KHÓA THẺ HÀNG LOẠT cho ' + selected.length + ' sinh viên đã chọn (cập nhật trạng thái "Người học đã tốt nghiệp" trên cả Koha và SSO)?')) return;
+    } catch (err) {
+        showAlert('Lỗi: ' + err.message, 'error');
     }
-
-    await executeBatchLock(selected);
 }
 
-async function executeBatchLock(uids) {
+// ==============================================================================
+// KHÓA THẺ HÀNG LOẠT & ĐỒNG BỘ SSO
+// ==============================================================================
+async function batchLockSelected() {
+    let targetUids = [];
+    if (selectedSet.size > 0) {
+        targetUids = Array.from(selectedSet).filter(cnum => {
+            const p = rawDataList.find(i => i.cardnumber === cnum);
+            return p && !p.is_debarred && !p.is_not_found;
+        });
+    } else {
+        targetUids = filteredDataList.filter(i => i.is_cleared && !i.is_debarred).map(i => i.cardnumber);
+    }
+
+    if (targetUids.length === 0) {
+        showAlert('Không có sinh viên hợp lệ để khóa thẻ (Tất cả đã khóa hoặc chưa đủ điều kiện).', 'error');
+        return;
+    }
+
+    if (!confirm('CẢNH BÁO: Khóa thẻ ' + targetUids.length + ' sinh viên tốt nghiệp trên Koha và đồng bộ khóa đăng nhập trên SSO Portal. Xác nhận tiếp tục?')) {
+        return;
+    }
+
+    showAlert('Đang thực hiện khóa thẻ và đồng bộ SSO...', 'success');
+
     try {
         const formData = new FormData();
         formData.append('op', 'cud-batch_lock');
         const csrfToken = document.getElementById('koha-csrf-token')?.value;
         if (csrfToken) formData.append('csrf_token', csrfToken);
-        formData.append('uids', uids.join('\n'));
+        formData.append('uids', targetUids.join('\n'));
 
         const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
             method: 'POST',
             body: formData
         });
+
         const data = await res.json();
         if (data.success) {
-            showAlert(data.message, 'success');
-            rawDataList.forEach(item => {
-                if (uids.includes(item.cardnumber)) {
+            targetUids.forEach(cnum => {
+                const item = rawDataList.find(i => i.cardnumber === cnum);
+                if (item) {
                     item.is_debarred = 1;
+                    item.debarred_comment = 'Người học đã tốt nghiệp';
                     item.notes = 'Người học đã tốt nghiệp';
                 }
             });
+
+            showAlert(data.message || ('Đã khóa thẻ thành công ' + targetUids.length + ' sinh viên.'), 'success');
             updateStatsAndBadges();
             applyFilters();
         } else {
@@ -1613,40 +2297,90 @@ async function executeBatchLock(uids) {
     }
 }
 
-async function batchUnlockSelected(specificUids) {
-    let selected = specificUids || getSelectedCardnumbers();
-    if (selected.length === 0) {
-        const debarredUids = filteredDataList.filter(i => i.is_debarred).map(i => i.cardnumber);
-        if (debarredUids.length === 0) {
-            showAlert('Vui lòng chọn ít nhất một sinh viên đang bị khóa thẻ để mở khóa.', 'error');
-            return;
+async function lockSingle(cardnumber) {
+    if (!confirm('Xác nhận khóa thẻ và ghi chú tốt nghiệp cho sinh viên: ' + cardnumber + '?')) return;
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-batch_lock');
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+        formData.append('uids', cardnumber);
+
+        const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            const item = rawDataList.find(i => i.cardnumber === cardnumber);
+            if (item) {
+                item.is_debarred = 1;
+                item.debarred_comment = 'Người học đã tốt nghiệp';
+                item.notes = 'Người học đã tốt nghiệp';
+            }
+            showAlert('Đã khóa thẻ sinh viên ' + cardnumber, 'success');
+            updateStatsAndBadges();
+            applyFilters();
+        } else {
+            showAlert('Lỗi: ' + (data.error || 'Không thể khóa thẻ'), 'error');
         }
-        if (!confirm('Mở khóa thẻ hàng loạt cho TOÀN BỘ ' + debarredUids.length + ' sinh viên đang bị khóa thẻ trong danh sách hiển thị?')) return;
-        selected = debarredUids;
-    } else {
-        if (!confirm('Xác nhận MỞ KHÓA THẺ cho ' + selected.length + ' sinh viên đã chọn (khôi phục trạng thái hoạt động trên cả Koha và SSO)?')) return;
+    } catch (err) {
+        showAlert('Lỗi khóa thẻ: ' + err.message, 'error');
     }
+}
+
+// ==============================================================================
+// MỞ KHÓA THẺ HÀNG LOẠT
+// ==============================================================================
+async function batchUnlockSelected(explicitUids) {
+    let targetUids = [];
+    if (explicitUids && Array.isArray(explicitUids)) {
+        targetUids = explicitUids;
+    } else if (selectedSet.size > 0) {
+        targetUids = Array.from(selectedSet).filter(cnum => {
+            const p = rawDataList.find(i => i.cardnumber === cnum);
+            return p && p.is_debarred;
+        });
+    } else {
+        targetUids = filteredDataList.filter(i => i.is_debarred).map(i => i.cardnumber);
+    }
+
+    if (targetUids.length === 0) {
+        showAlert('Không có sinh viên nào đang bị khóa để mở khóa thẻ.', 'error');
+        return;
+    }
+
+    if (!confirm('Xác nhận mở khóa thẻ thư viện cho ' + targetUids.length + ' sinh viên và đồng bộ kích hoạt lại tài khoản SSO?')) {
+        return;
+    }
+
+    showAlert('Đang mở khóa thẻ...', 'success');
 
     try {
         const formData = new FormData();
         formData.append('op', 'cud-batch_unlock');
         const csrfToken = document.getElementById('koha-csrf-token')?.value;
         if (csrfToken) formData.append('csrf_token', csrfToken);
-        formData.append('uids', selected.join('\n'));
+        formData.append('uids', targetUids.join('\n'));
 
         const res = await fetch('/cgi-bin/koha/tools/graduation.pl', {
             method: 'POST',
             body: formData
         });
+
         const data = await res.json();
         if (data.success) {
-            showAlert(data.message, 'success');
-            rawDataList.forEach(item => {
-                if (selected.includes(item.cardnumber)) {
+            targetUids.forEach(cnum => {
+                const item = rawDataList.find(i => i.cardnumber === cnum);
+                if (item) {
                     item.is_debarred = 0;
+                    item.debarred_comment = '';
                     item.notes = '';
                 }
             });
+
+            showAlert(data.message || ('Đã mở khóa thẻ thành công ' + targetUids.length + ' sinh viên.'), 'success');
             updateStatsAndBadges();
             applyFilters();
         } else {
@@ -1667,6 +2401,7 @@ function exportExcelMode(mode) {
     }
 
     const todayStr = new Date().toISOString().slice(0, 10);
+    const batchSuffix = currentBatchName ? ('_' + currentBatchName.replace(/[^a-zA-Z0-9_\u00C0-\u024F\u1EA0-\u1EF9]/g, '_')) : '';
 
     // --------------------------------------------------------------------------
     // HƯỚNG 1: CHỈ XUẤT NHỮNG NGƯỜI ĐANG NỢ SÁCH (LÀM RÕ TỪNG ĐẦU SÁCH MƯỢN)
@@ -1773,7 +2508,7 @@ function exportExcelMode(mode) {
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "DanhSachNoSach");
-        XLSX.writeFile(wb, "FTU_DanhSach_NoSach_XetTotNghiep_" + todayStr + ".xlsx");
+        XLSX.writeFile(wb, "FTU_DanhSach_NoSach" + batchSuffix + "_" + todayStr + ".xlsx");
         showAlert('Đã xuất thành công danh sách ' + debtPatrons.length + ' sinh viên nợ sách (' + (exportRows.length - 1) + ' lượt sách) ra Excel.', 'success');
         return;
     }
@@ -1908,12 +2643,8 @@ function exportExcelMode(mode) {
         XLSX.utils.book_append_sheet(wb, ws2, "ChiTietSachNo");
     }
 
-    XLSX.writeFile(wb, "FTU_TatCa_XetTotNghiep_" + todayStr + ".xlsx");
+    XLSX.writeFile(wb, "FTU_TatCa_XetTotNghiep" + batchSuffix + "_" + todayStr + ".xlsx");
     showAlert('Đã xuất thành công tệp Excel gồm ' + listToExport.length + ' sinh viên (' + (sheet2Rows.length - 1) + ' lượt sách nợ).', 'success');
-}
-
-function exportExcel() {
-    exportExcelMode('ALL');
 }
 
 function escapeHtml(text) {
@@ -1926,5 +2657,3 @@ function escapeHtml(text) {
         .replace(/'/g, '&#039;');
 }
 </script>
-
-[% INCLUDE 'intranet-bottom.inc' %]
