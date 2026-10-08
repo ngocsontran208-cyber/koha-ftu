@@ -90,7 +90,7 @@
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 .grad-hero-text h1,
 .grad-hero-text h2 {
@@ -885,37 +885,6 @@
                     <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline" title="Quay về trang chủ quản trị Koha">
                         <i class="fa fa-home"></i> Về Trang chủ
                     </a>
-                </div>
-            </div>
-            <!-- Summary Stats Row -->
-            <div class="grad-hero-stats-row">
-                <div class="grad-summary-card">
-                    <div class="card-icon" style="background:#fee2e2; color:#a31a24;"><i class="fa fa-folder-open"></i></div>
-                    <div class="card-content">
-                        <div class="card-val" id="stat-total-batches">[% saved_batches.size || 0 %]</div>
-                        <div class="card-lbl">Tổng số đợt xét</div>
-                    </div>
-                </div>
-                <div class="grad-summary-card">
-                    <div class="card-icon" style="background:#e0f2fe; color:#0284c7;"><i class="fa fa-users"></i></div>
-                    <div class="card-content">
-                        <div class="card-val" id="stat-total-students">0</div>
-                        <div class="card-lbl">Tổng sinh viên đã lưu</div>
-                    </div>
-                </div>
-                <div class="grad-summary-card">
-                    <div class="card-icon" style="background:#dcfce7; color:#16a34a;"><i class="fa fa-check-circle"></i></div>
-                    <div class="card-content">
-                        <div class="card-val" id="stat-total-cleared">0</div>
-                        <div class="card-lbl">Đã đủ điều kiện (Không nợ)</div>
-                    </div>
-                </div>
-                <div class="grad-summary-card">
-                    <div class="card-icon" style="background:#fef3c7; color:#d97706;"><i class="fa fa-exclamation-circle"></i></div>
-                    <div class="card-content">
-                        <div class="card-val" id="stat-total-debt">0</div>
-                        <div class="card-lbl">Còn nợ sách / tiền phạt</div>
-                    </div>
                 </div>
             </div>
         </div>
