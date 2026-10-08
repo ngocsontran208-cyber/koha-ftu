@@ -443,17 +443,27 @@ if ($op eq "batch_lock") {
             reason => "Người học đã tốt nghiệp",
             notes  => "Người học đã tốt nghiệp"
         });
-        my $res = $http->post("http://10.2.0.227:8090/api/v1/sso/users/batch-status", {
-            headers => {
-                "Content-Type"  => "application/json",
-                "x-koha-staff"  => "1",
-                "x-koha-internal" => "1"
-            },
-            content => $payload
-        });
-        if ($res->{success}) {
-            my $res_json = $json->decode($res->{content});
-            $sso_synced = $res_json->{count} || scalar(@target_uids);
+        my @sso_endpoints = (
+            "http://ftulib-sso-portal:8090/api/v1/sso/users/batch-status",
+            "http://10.2.0.226/api/v1/sso/users/batch-status",
+            "http://127.0.0.1:8090/api/v1/sso/users/batch-status"
+        );
+        for my $endpoint (@sso_endpoints) {
+            my $res = $http->post($endpoint, {
+                headers => {
+                    "Content-Type"    => "application/json",
+                    "x-koha-staff"    => "1",
+                    "x-koha-internal" => "1"
+                },
+                content => $payload
+            });
+            if ($res->{success}) {
+                my $res_json = eval { $json->decode($res->{content}) };
+                if ($res_json && $res_json->{success}) {
+                    $sso_synced = $res_json->{count} || scalar(@target_uids);
+                    last;
+                }
+            }
         }
     };
 

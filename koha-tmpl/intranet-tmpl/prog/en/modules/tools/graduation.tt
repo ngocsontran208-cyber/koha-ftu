@@ -75,7 +75,7 @@
     </div>
 
     <div id="status-alert" class="status-msg"></div>
-    <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% csrf_token | html %]">
+    <input type="hidden" id="koha-csrf-token" name="csrf_token" value="[% Koha.GenerateCSRF | $raw %]">
 
     <div class="grad-input-grid">
         <div class="grad-box">
