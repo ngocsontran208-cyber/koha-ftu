@@ -16,44 +16,95 @@
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
 <style>
-.ftu-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-.ftu-col-stat-card {
+/* FTU Collection Filter & Toolbar */
+.ftu-filter-card {
     background: #ffffff;
-    border-radius: 8px;
     border: 1px solid #e2e8f0;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    border-radius: 8px;
+    padding: 16px 20px 14px 20px;
+    margin-top: 15px;
+    margin-bottom: 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-.ftu-stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+.ftu-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) minmax(160px, 1.2fr) minmax(170px, 1.2fr) minmax(200px, 1.5fr) auto;
+    gap: 16px;
+    align-items: flex-end;
+}
+@media (max-width: 1200px) {
+    .ftu-filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 640px) {
+    .ftu-filter-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.ftu-filter-item label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.ftu-filter-item label i {
+    color: #b91c1c;
+    margin-right: 4px;
+}
+.ftu-filter-item .form-control {
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    height: 38px;
+    font-size: 13px;
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ftu-filter-item .form-control:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.15);
+}
+.ftu-filter-summary {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 20px;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
 }
-.ftu-stat-icon.red { background: #fee2e2; color: #b91c1c; }
-.ftu-stat-icon.amber { background: #fef3c7; color: #b45309; }
-.ftu-stat-icon.blue { background: #dbeafe; color: #1d4ed8; }
-.ftu-stat-info .num {
-    font-size: 24px;
+.ftu-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12.5px;
+}
+.ftu-count-badge strong {
+    color: #b91c1c;
     font-weight: 700;
-    color: #1e293b;
-    line-height: 1.1;
 }
-.ftu-stat-info .lbl {
-    font-size: 13px;
-    color: #64748b;
-    margin-top: 2px;
+.btn-reset-filters {
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+#collections_table thead th {
+    vertical-align: middle;
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-weight: 600;
+}
+#collections_table tbody tr:hover {
+    background-color: #f8fafc;
 }
 
 .ftu-thumb-img {
@@ -346,28 +397,74 @@
 
         <h1>Collection Management</h1>
 
-        <!-- Stats Overview -->
-        <div class="ftu-stat-grid">
-            <div class="ftu-col-stat-card">
-                <div class="ftu-stat-icon red"><i class="fa fa-folder-open"></i></div>
-                <div class="ftu-stat-info">
-                    <div class="num">[% total_count | html %]</div>
-                    <div class="lbl">Total collections</div>
+        <!-- Filter & Sort Toolbar -->
+        <div class="ftu-filter-card">
+            <div class="ftu-filter-grid">
+                <!-- Quick Search -->
+                <div class="ftu-filter-item">
+                    <label for="filter_search"><i class="fa fa-search"></i> Quick search</label>
+                    <div class="input-group">
+                        <input type="text" id="filter_search" class="form-control" placeholder="Search by name, CCODE, description..." autocomplete="off">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="btn_clear_search" title="Clear search"><i class="fa fa-times"></i></button>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="ftu-filter-item">
+                    <label for="filter_status"><i class="fa fa-star"></i> Status</label>
+                    <select id="filter_status" class="form-control">
+                        <option value="all">All statuses</option>
+                        <option value="featured">★ Featured only</option>
+                        <option value="normal">Standard only</option>
+                    </select>
+                </div>
+
+                <!-- Items Count Filter -->
+                <div class="ftu-filter-item">
+                    <label for="filter_items"><i class="fa fa-book"></i> Catalogued items</label>
+                    <select id="filter_items" class="form-control">
+                        <option value="all">All collections</option>
+                        <option value="has_items">With items (&gt; 0 items)</option>
+                        <option value="no_items">No items (0 items)</option>
+                    </select>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="ftu-filter-item">
+                    <label for="sort_by"><i class="fa fa-sort"></i> Sort by</label>
+                    <select id="sort_by" class="form-control">
+                        <option value="order_asc">Display order (Ascending - Default)</option>
+                        <option value="order_desc">Display order (Descending)</option>
+                        <option value="name_asc">Collection title (A &rarr; Z)</option>
+                        <option value="name_desc">Collection title (Z &rarr; A)</option>
+                        <option value="items_desc">Number of items (Most first)</option>
+                        <option value="items_asc">Number of items (Least first)</option>
+                        <option value="ccode_asc">CCODE (A &rarr; Z)</option>
+                        <option value="featured_first">Featured collections first</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="ftu-filter-item">
+                    <label>&nbsp;</label>
+                    <div>
+                        <button type="button" id="btn_reset_filters" class="btn btn-default btn-reset-filters" title="Reset all filters to default">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="ftu-col-stat-card">
-                <div class="ftu-stat-icon amber"><i class="fa fa-star"></i></div>
-                <div class="ftu-stat-info">
-                    <div class="num">[% featured_count | html %]</div>
-                    <div class="lbl">Featured collections</div>
-                </div>
-            </div>
-            <div class="ftu-col-stat-card">
-                <div class="ftu-stat-icon blue"><i class="fa fa-book"></i></div>
-                <div class="ftu-stat-info">
-                    <div class="num">[% total_items | html %]</div>
-                    <div class="lbl">Catalogued items</div>
-                </div>
+
+            <!-- Summary counter -->
+            <div class="ftu-filter-summary">
+                <span class="ftu-count-badge">
+                    <i class="fa fa-folder-open"></i> Showing: <strong id="visible_count">[% total_count | html %]</strong> / <strong id="total_count">[% total_count | html %]</strong> collections
+                </span>
+                <span id="active_filters_notice" class="text-muted" style="display: none; font-size: 13px;">
+                    <i class="fa fa-info-circle text-primary"></i> Active custom filters
+                </span>
             </div>
         </div>
 
@@ -392,23 +489,23 @@
                             <td style="text-align: center;">
                                 <img src="[% col.image_url | html %]" class="ftu-thumb-img" alt="[% col.lib | html %]" onerror="this.src='/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg'" />
                             </td>
-                            <td>
+                            <td data-order="[% col.ccode | html %]">
                                 <span class="badge-ccode">[% col.ccode | html %]</span>
                             </td>
-                            <td>
+                            <td data-order="[% col.lib | html %]">
                                 <strong>[% col.lib | html %]</strong>
                                 [% IF col.lib_opac && col.lib_opac != col.lib %]
                                     <br /><small class="text-muted">OPAC: [% col.lib_opac | html %]</small>
                                 [% END %]
                             </td>
-                            <td style="font-size: 13px; color: #475569; max-width: 320px;">
+                            <td>
                                 [% IF col.description %]
                                     [% col.description | html %]
                                 [% ELSE %]
                                     <em class="text-muted">(No summary description)</em>
                                 [% END %]
                             </td>
-                            <td style="text-align: center;">
+                            <td style="text-align: center;" data-order="[% col.items_count %]" data-filter="[% IF col.items_count > 0 %]has_items[% ELSE %]no_items[% END %]">
                                 [% IF col.items_count > 0 %]
                                     <a href="/cgi-bin/koha/catalogue/search.pl?idx=mc-ccode&amp;q=[% col.ccode | uri %]" class="badge bg-primary text-decoration-none" title="Search items in staff catalogue">
                                         <i class="fa fa-book"></i> [% col.items_count | html %] items
@@ -417,7 +514,7 @@
                                     <span class="badge bg-secondary">0 items</span>
                                 [% END %]
                             </td>
-                            <td style="text-align: center;">
+                            <td style="text-align: center;" data-order="[% IF col.is_featured %]1[% ELSE %]0[% END %]" data-filter="[% IF col.is_featured %]featured[% ELSE %]normal[% END %]">
                                 <form action="/cgi-bin/koha/admin/collections.pl" method="post" style="display:inline;">
                                     [% INCLUDE 'csrf-token.inc' %]
                                     <input type="hidden" name="op" value="cud-toggle_featured" />
@@ -431,7 +528,7 @@
                                     </button>
                                 </form>
                             </td>
-                            <td style="text-align: center; font-weight: 600;">
+                            <td style="text-align: center; font-weight: 600;" data-order="[% col.sort_order %]">
                                 [% col.sort_order | html %]
                             </td>
                             <td style="text-align: center; white-space: nowrap;">
@@ -467,7 +564,156 @@
 [% END #/ WRAPPER main-container.inc %]
 
 [% MACRO jsinclude BLOCK %]
-<script>
+[% INCLUDE 'datatables.inc' %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+var colTable;
+
+$(document).ready(function() {
+    if ($("#collections_table").length) {
+        // Custom DataTables filter for status and item count
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            if (!settings.nTable || settings.nTable.id !== 'collections_table') {
+                return true;
+            }
+
+            var rowNode = settings.aoData[dataIndex] ? settings.aoData[dataIndex].nTr : null;
+            if (!rowNode) return true;
+            var $row = $(rowNode);
+
+            // Status filter
+            var statusFilter = $('#filter_status').val();
+            if (statusFilter && statusFilter !== 'all') {
+                var rowStatus = $row.find('td:eq(5)').attr('data-filter');
+                if (rowStatus !== statusFilter) {
+                    return false;
+                }
+            }
+
+            // Items count filter
+            var itemsFilter = $('#filter_items').val();
+            if (itemsFilter && itemsFilter !== 'all') {
+                var rowItems = $row.find('td:eq(4)').attr('data-filter');
+                if (rowItems !== itemsFilter) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        colTable = $("#collections_table").kohaTable({
+            order: [[6, "asc"]],
+            columnDefs: [
+                { targets: [0, 7], orderable: false, searchable: false },
+                { targets: [4, 6], type: 'num' }
+            ],
+            dom: 't<"bottom pager"ilp>',
+            pageLength: 25,
+            autoWidth: false
+        });
+
+        function updateSummary() {
+            if (!colTable) return;
+            var info = colTable.page.info();
+            $('#visible_count').text(info.recordsDisplay);
+            $('#total_count').text(info.recordsTotal);
+
+            var isFiltered = (info.recordsDisplay !== info.recordsTotal) ||
+                             ($('#filter_search').val() !== '') ||
+                             ($('#filter_status').val() !== 'all') ||
+                             ($('#filter_items').val() !== 'all');
+            if (isFiltered) {
+                $('#active_filters_notice').show();
+            } else {
+                $('#active_filters_notice').hide();
+            }
+        }
+
+        colTable.on('draw', function() {
+            updateSummary();
+        });
+
+        colTable.on('order.dt', function() {
+            var order = colTable.order();
+            if (!order || !order.length) return;
+            var col = order[0][0];
+            var dir = order[0][1];
+            var matchVal = '';
+            if (col === 6 && dir === 'asc') matchVal = 'order_asc';
+            else if (col === 6 && dir === 'desc') matchVal = 'order_desc';
+            else if (col === 2 && dir === 'asc') matchVal = 'name_asc';
+            else if (col === 2 && dir === 'desc') matchVal = 'name_desc';
+            else if (col === 4 && dir === 'desc') matchVal = 'items_desc';
+            else if (col === 4 && dir === 'asc') matchVal = 'items_asc';
+            else if (col === 1 && dir === 'asc') matchVal = 'ccode_asc';
+            else if (col === 5 && dir === 'desc') matchVal = 'featured_first';
+            
+            if (matchVal) {
+                $('#sort_by').val(matchVal);
+            }
+        });
+
+        updateSummary();
+
+        // Search box
+        $('#filter_search').on('keyup input', function() {
+            colTable.search(this.value).draw();
+        });
+
+        $('#btn_clear_search').on('click', function() {
+            $('#filter_search').val('');
+            colTable.search('').draw();
+        });
+
+        // Dropdown filters
+        $('#filter_status, #filter_items').on('change', function() {
+            colTable.draw();
+        });
+
+        // Sort dropdown
+        $('#sort_by').on('change', function() {
+            var val = $(this).val();
+            switch (val) {
+                case 'order_asc':
+                    colTable.order([[6, 'asc']]).draw();
+                    break;
+                case 'order_desc':
+                    colTable.order([[6, 'desc']]).draw();
+                    break;
+                case 'name_asc':
+                    colTable.order([[2, 'asc']]).draw();
+                    break;
+                case 'name_desc':
+                    colTable.order([[2, 'desc']]).draw();
+                    break;
+                case 'items_desc':
+                    colTable.order([[4, 'desc']]).draw();
+                    break;
+                case 'items_asc':
+                    colTable.order([[4, 'asc']]).draw();
+                    break;
+                case 'ccode_asc':
+                    colTable.order([[1, 'asc']]).draw();
+                    break;
+                case 'featured_first':
+                    colTable.order([[5, 'desc'], [6, 'asc']]).draw();
+                    break;
+                default:
+                    colTable.order([[6, 'asc']]).draw();
+            }
+        });
+
+        // Reset
+        $('#btn_reset_filters').on('click', function() {
+            $('#filter_search').val('');
+            $('#filter_status').val('all');
+            $('#filter_items').val('all');
+            $('#sort_by').val('order_asc');
+            colTable.search('').order([[6, 'asc']]).draw();
+        });
+    }
+});
+
 function handleImageFile(input) {
     if (input.files && input.files[0]) {
         var file = input.files[0];
