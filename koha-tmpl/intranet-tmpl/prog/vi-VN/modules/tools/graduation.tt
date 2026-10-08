@@ -999,6 +999,9 @@
                 </div>
             </div>
             <div class="grad-topbar-right" style="display: flex; gap: 8px;">
+                <button type="button" id="btn-import-students" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="openImportStudentsModal()" title="Nạp file Excel hoặc dán thêm danh sách MSSV vào đợt này">
+                    <i class="fa fa-upload"></i> Nạp / Thêm sinh viên
+                </button>
                 <button type="button" id="btn-recheck-batch" class="grad-btn grad-btn-primary grad-btn-sm" onclick="recheckCurrentBatch()" title="Đối soát lại toàn bộ dữ liệu mượn trả từ Koha">
                     <i class="fa fa-refresh"></i> Đối soát lại đợt này
                 </button>
@@ -1209,7 +1212,7 @@
                 <input type="text" id="modal-description" class="grad-form-input" placeholder="Ghi chú thêm về đợt xét tốt nghiệp...">
             </div>
             <div class="grad-form-group">
-                <label class="grad-form-label">Nạp danh sách sinh viên <span class="required">*</span></label>
+                <label class="grad-form-label">Nạp danh sách sinh viên <span style="font-weight: 400; color: #64748b; font-size: 12px;">(Tùy chọn - có thể nạp sau khi vào đợt)</span></label>
                 <div class="grad-dropzone" id="modal-dropzone" onclick="document.getElementById('modal-file-input').click()">
                     <div class="grad-dropzone-text" id="modal-dropzone-text">Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp</div>
                     <div class="grad-dropzone-hint">Hỗ trợ .xlsx, .xls, .csv hoặc nhập trực tiếp ô bên dưới</div>
@@ -1227,7 +1230,59 @@
         <div class="grad-modal-footer">
             <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="closeCreateBatchModal()">Hủy bỏ</button>
             <button type="button" id="btn-modal-save" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="submitCreateBatch()">
-                <i class="fa fa-save"></i> Lưu đợt và Đối soát ngay
+                <i class="fa fa-save"></i> Lưu đợt xét tốt nghiệp
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NẠP / THÊM SINH VIÊN VÀO ĐỢT -->
+<div id="modal-import-students" class="grad-modal-backdrop" onclick="handleImportModalBackdropClick(event)">
+    <div class="grad-modal-dialog">
+        <div class="grad-modal-header">
+            <h3 class="grad-modal-title"><i class="fa fa-upload" style="color: var(--ftu-crimson);"></i> Nạp Danh Sách Sinh Viên Vào Đợt</h3>
+            <button type="button" class="grad-modal-close" onclick="closeImportStudentsModal()">&times;</button>
+        </div>
+        <div class="grad-modal-body">
+            <p style="font-size: 13px; color: #475569; margin: 0 0 14px 0;">
+                Đang nạp sinh viên vào: <strong id="import-modal-batch-name" style="color: var(--ftu-crimson);">-</strong>
+            </p>
+            <div class="grad-form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label class="grad-form-label">Tải tệp Excel / CSV:</label>
+                    <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="downloadSampleExcel()">Tải file mẫu (.xlsx)</button>
+                </div>
+                <div class="grad-dropzone" id="import-dropzone" onclick="document.getElementById('import-file-input').click()">
+                    <div class="grad-dropzone-text" id="import-dropzone-text">Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp</div>
+                    <div class="grad-dropzone-hint">Hỗ trợ .xlsx, .xls, .csv hoặc dán trực tiếp ô bên dưới</div>
+                    <input type="file" id="import-file-input" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleImportFileSelect(this)">
+                </div>
+            </div>
+            <div class="grad-form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label class="grad-form-label">Hoặc dán trực tiếp danh sách mã sinh viên:</label>
+                    <span class="grad-counter-badge" id="import-uid-counter">0 mã</span>
+                </div>
+                <textarea id="import-uids-input" class="grad-textarea" style="min-height: 110px;" placeholder="Nhập mỗi mã sinh viên trên một dòng hoặc cách nhau bằng dấu phẩy...&#10;2011110001&#10;2011110002" oninput="updateImportCounter()"></textarea>
+            </div>
+            <div class="grad-form-group" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                <label class="grad-form-label" style="margin-bottom: 6px;">Chế độ nạp dữ liệu:</label>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="import_mode" value="append" id="import-mode-append" checked>
+                        <span><strong>Bổ sung thêm</strong> (giữ nguyên các sinh viên đã có trong đợt)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="import_mode" value="replace" id="import-mode-replace">
+                        <span><strong>Thay thế toàn bộ</strong> (ghi đè danh sách mới)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="grad-modal-footer">
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="closeImportStudentsModal()">Hủy bỏ</button>
+            <button type="button" id="btn-import-save" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="submitImportStudents()">
+                <i class="fa fa-save"></i> Nạp và Đối soát ngay
             </button>
         </div>
     </div>
@@ -1305,6 +1360,7 @@ const selectedSet = new Set();
 document.addEventListener('DOMContentLoaded', function() {
     setupModalDragAndDrop();
     setupAdhocModalDragAndDrop();
+    setupImportModalDragAndDrop();
 
     // Tự động kiểm tra URL nếu có batch_id
     const urlParams = new URLSearchParams(window.location.search);
@@ -1941,15 +1997,9 @@ async function submitCreateBatch() {
         return;
     }
 
-    if (!rawUids) {
-        alert('Vui lòng nạp file Excel/CSV hoặc dán danh sách mã sinh viên.');
-        document.getElementById('modal-uids-input').focus();
-        return;
-    }
-
     const btn = document.getElementById('btn-modal-save');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang lưu và đối soát...';
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang lưu...';
 
     try {
         const formData = new FormData();
@@ -1970,7 +2020,11 @@ async function submitCreateBatch() {
 
         if (data.success) {
             closeCreateBatchModal();
-            showAlert('Đã tạo thành công đợt [' + data.batch_name + '] với ' + data.total_input + ' sinh viên!', 'success');
+            if (data.total_input > 0) {
+                showAlert('Đã tạo thành công đợt [' + data.batch_name + '] với ' + data.total_input + ' sinh viên!', 'success');
+            } else {
+                showAlert('Đã tạo đợt [' + data.batch_name + '] thành công! Bạn có thể nạp danh sách sinh viên ngay bây giờ.', 'success');
+            }
             // Chuyển thẳng sang Màn hình 2 của đợt vừa tạo
             openBatchDetail(data.batch_id, data);
         } else {
@@ -1980,7 +2034,205 @@ async function submitCreateBatch() {
         alert('Lỗi kết nối máy chủ: ' + err.message);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa fa-save"></i> Lưu đợt và Đối soát ngay';
+        btn.innerHTML = '<i class="fa fa-save"></i> Lưu đợt xét tốt nghiệp';
+    }
+}
+
+// ==============================================================================
+// MODAL NẠP / THÊM SINH VIÊN VÀO ĐỢT (IMPORT STUDENTS)
+// ==============================================================================
+let importExtractedUids = [];
+
+function openImportStudentsModal() {
+    if (!currentBatchId) {
+        showAlert('Chưa chọn đợt xét tốt nghiệp nào.', 'error');
+        return;
+    }
+    const nameEl = document.getElementById('import-modal-batch-name');
+    if (nameEl) nameEl.textContent = currentBatchName || ('Đợt #' + currentBatchId);
+
+    const dropText = document.getElementById('import-dropzone-text');
+    if (dropText) dropText.textContent = 'Kéo thả tệp Excel/CSV vào đây hoặc bấm để chọn tệp';
+
+    const inputArea = document.getElementById('import-uids-input');
+    if (inputArea) inputArea.value = '';
+
+    const counter = document.getElementById('import-uid-counter');
+    if (counter) counter.textContent = '0 mã';
+
+    const fileInput = document.getElementById('import-file-input');
+    if (fileInput) fileInput.value = '';
+
+    // Nếu đợt hiện đang rỗng, mặc định chọn 'replace', ngược lại chọn 'append'
+    if (rawDataList.length === 0) {
+        const replaceRadio = document.getElementById('import-mode-replace');
+        if (replaceRadio) replaceRadio.checked = true;
+    } else {
+        const appendRadio = document.getElementById('import-mode-append');
+        if (appendRadio) appendRadio.checked = true;
+    }
+
+    const modal = document.getElementById('modal-import-students');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeImportStudentsModal() {
+    const modal = document.getElementById('modal-import-students');
+    if (modal) modal.style.display = 'none';
+}
+
+function handleImportModalBackdropClick(evt) {
+    if (evt.target === document.getElementById('modal-import-students')) {
+        closeImportStudentsModal();
+    }
+}
+
+function handleImportFileSelect(input) {
+    if (input.files && input.files.length > 0) {
+        handleImportSelectedFile(input.files[0]);
+    }
+}
+
+function handleImportSelectedFile(file) {
+    if (!file) return;
+
+    const dropzoneText = document.getElementById('import-dropzone-text');
+    if (dropzoneText) {
+        dropzoneText.innerHTML = '<strong>' + escapeHtml(file.name) + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonSheet = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+            let extractedUids = [];
+            let headerColIdx = 0;
+
+            if (jsonSheet.length > 0) {
+                const headerRow = jsonSheet[0];
+                for (let c = 0; c < headerRow.length; c++) {
+                    const colName = String(headerRow[c] || '').toLowerCase().trim();
+                    if (colName.includes('mã') || colName.includes('mssv') || colName.includes('cardnumber') || colName.includes('uid') || colName.includes('student')) {
+                        headerColIdx = c;
+                        break;
+                    }
+                }
+
+                for (let r = 1; r < jsonSheet.length; r++) {
+                    const row = jsonSheet[r];
+                    if (row && row[headerColIdx]) {
+                        const val = String(row[headerColIdx]).trim();
+                        if (val) extractedUids.push(val);
+                    }
+                }
+            }
+
+            if (extractedUids.length === 0) {
+                alert('Không tìm thấy dữ liệu mã sinh viên trong tệp ' + file.name);
+                return;
+            }
+
+            importExtractedUids = extractedUids;
+            document.getElementById('import-uids-input').value = extractedUids.join('\n');
+            updateImportCounter();
+        } catch (err) {
+            alert('Lỗi đọc tệp Excel: ' + err.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function updateImportCounter() {
+    const text = document.getElementById('import-uids-input').value.trim();
+    const counter = document.getElementById('import-uid-counter');
+    if (!text) {
+        if (counter) counter.textContent = '0 mã';
+        return;
+    }
+    const lines = text.split(/[\r\n,;\t]+/).filter(l => l.trim().length > 0);
+    if (counter) counter.textContent = lines.length + ' mã';
+}
+
+function setupImportModalDragAndDrop() {
+    const dropzone = document.getElementById('import-dropzone');
+    if (!dropzone) return;
+
+    ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            handleImportSelectedFile(files[0]);
+        }
+    });
+}
+
+async function submitImportStudents() {
+    if (!currentBatchId) {
+        alert('Chưa chọn đợt xét tốt nghiệp.');
+        return;
+    }
+    const rawUids = document.getElementById('import-uids-input').value.trim();
+    if (!rawUids) {
+        alert('Vui lòng nạp file Excel/CSV hoặc dán danh sách mã sinh viên.');
+        document.getElementById('import-uids-input').focus();
+        return;
+    }
+
+    const modeRadio = document.querySelector('input[name="import_mode"]:checked');
+    const importMode = modeRadio ? modeRadio.value : 'append';
+
+    const btn = document.getElementById('btn-import-save');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang nạp và đối soát...';
+
+    try {
+        const formData = new FormData();
+        formData.append('op', 'cud-batch_import_students');
+        formData.append('batch_id', currentBatchId);
+        formData.append('uids', rawUids);
+        formData.append('import_mode', importMode);
+        const csrfToken = document.getElementById('koha-csrf-token')?.value;
+        if (csrfToken) formData.append('csrf_token', csrfToken);
+
+        const res = await fetch('graduation.pl', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            closeImportStudentsModal();
+            showAlert(data.message || 'Nạp danh sách sinh viên thành công!', 'success');
+            // Cập nhật lại giao diện của đợt với dữ liệu mới
+            openBatchDetail(data.batch_id, data);
+        } else {
+            alert('Lỗi nạp sinh viên: ' + (data.error || 'Không xác định'));
+        }
+    } catch (err) {
+        alert('Lỗi kết nối máy chủ: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-save"></i> Nạp và Đối soát ngay';
     }
 }
 
@@ -2460,7 +2712,16 @@ function renderTable() {
     const paginationBar = document.getElementById('pagination-bar');
 
     if (rawDataList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="grad-empty-state"><div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có dữ liệu đối soát</div><div style="font-size: 12px;">Vui lòng chọn một Đợt xét tốt nghiệp đã lưu hoặc nạp tệp Excel/CSV để bắt đầu kiểm tra.</div></div></td></tr>';
+        tbody.innerHTML = `<tr><td colspan="10">
+            <div class="grad-empty-state" style="padding: 42px 20px;">
+                <i class="fa fa-folder-open" style="font-size: 44px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+                <div style="font-weight: 700; font-size: 15px; color: #334155; margin-bottom: 6px;">Đợt xét này chưa có danh sách sinh viên</div>
+                <div style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Vui lòng nạp tệp Excel/CSV hoặc dán danh sách mã sinh viên trực tiếp để tiến hành đối soát.</div>
+                <button type="button" class="grad-btn grad-btn-crimson" onclick="openImportStudentsModal()">
+                    <i class="fa fa-upload"></i> Nạp danh sách sinh viên vào đợt này
+                </button>
+            </div>
+        </td></tr>`;
         paginationBar.style.display = 'none';
         updateCheckAllState();
         return;

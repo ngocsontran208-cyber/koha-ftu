@@ -372,11 +372,6 @@ if ($op eq "batch_create") {
     my %seen;
     @cardnumbers = grep { !$seen{$_}++ } @cardnumbers;
 
-    if (!@cardnumbers) {
-        print $json->encode({ success => 0, error => "Danh sách sinh viên trống. Vui lòng nạp file hoặc nhập MSSV." });
-        exit;
-    }
-
     # 1. Thêm vào bảng ftu_graduation_batches
     my $sth_insert_b = $dbh->prepare(qq{
         INSERT INTO ftu_graduation_batches (batch_name, academic_year, cohort, description, total_patrons, created_by, created_at, updated_at)
@@ -384,6 +379,25 @@ if ($op eq "batch_create") {
     });
     $sth_insert_b->execute($batch_name, $academic_year, $cohort, $description, scalar(@cardnumbers));
     my $batch_id = $dbh->{mysql_insertid} || $dbh->last_insert_id(undef, undef, 'ftu_graduation_batches', 'id');
+
+    if (!@cardnumbers) {
+        print $json->encode({
+            success         => 1,
+            batch_id        => $batch_id,
+            batch_name      => $batch_name,
+            academic_year   => $academic_year,
+            cohort          => $cohort,
+            description     => $description,
+            total_input     => 0,
+            count_cleared   => 0,
+            count_has_debt  => 0,
+            count_not_found => 0,
+            count_debarred  => 0,
+            results         => [],
+            message         => "Đã tạo đợt [$batch_name] thành công. Bạn có thể nạp danh sách sinh viên ngay bây giờ!"
+        });
+        exit;
+    }
 
     # 2. Thêm các sinh viên vào ftu_graduation_batch_items
     my $sth_insert_i = $dbh->prepare(qq{
@@ -444,7 +458,22 @@ if ($op eq "batch_load" || $op eq "batch_recheck") {
     }
 
     if (!@cardnumbers) {
-        print $json->encode({ success => 0, error => "Đợt này hiện chưa có sinh viên nào" });
+        print $json->encode({
+            success         => 1,
+            batch_id        => $batch_id,
+            batch_name      => $batch_row->{batch_name},
+            academic_year   => $batch_row->{academic_year} || "",
+            cohort          => $batch_row->{cohort} || "",
+            description     => $batch_row->{description} || "",
+            is_locked       => int($batch_row->{is_locked} || 0),
+            total_input     => 0,
+            count_cleared   => 0,
+            count_has_debt  => 0,
+            count_not_found => 0,
+            count_debarred  => 0,
+            results         => [],
+            message         => "Đợt xét chưa có sinh viên nào. Vui lòng nạp file Excel hoặc nhập mã sinh viên."
+        });
         exit;
     }
 
@@ -462,7 +491,99 @@ if ($op eq "batch_load" || $op eq "batch_recheck") {
 }
 
 # ------------------------------------------------------------------------------
-# API 0.4: XÓA ĐỢT XÉT TỐT NGHIỆP (OP = BATCH_DELETE)
+# API 0.4: NẠP / THÊM SINH VIÊN VÀO ĐỢT (OP = BATCH_IMPORT_STUDENTS)
+# ------------------------------------------------------------------------------
+if ($op eq "batch_import_students") {
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+
+    my $post_body = $cgi->param("POSTDATA") || "";
+    my $parsed_body = {};
+    if ($post_body) {
+        eval { $parsed_body = $json->decode($post_body); };
+    }
+
+    my $batch_id    = int($cgi->param("batch_id") || $parsed_body->{batch_id} || 0);
+    my $raw_uids    = $cgi->param("uids") || $parsed_body->{uids} || "";
+    my $import_mode = $cgi->param("import_mode") || $parsed_body->{import_mode} || "append";
+
+    if (!$batch_id) {
+        print $json->encode({ success => 0, error => "Mã đợt xét tốt nghiệp không hợp lệ" });
+        exit;
+    }
+
+    my $sth_b = $dbh->prepare("SELECT * FROM ftu_graduation_batches WHERE id = ?");
+    $sth_b->execute($batch_id);
+    my $batch_row = $sth_b->fetchrow_hashref;
+    if (!$batch_row) {
+        print $json->encode({ success => 0, error => "Không tìm thấy đợt xét tốt nghiệp có ID $batch_id" });
+        exit;
+    }
+
+    my @new_cardnumbers = ();
+    if (ref($raw_uids) eq "ARRAY") {
+        @new_cardnumbers = @$raw_uids;
+    } else {
+        for my $line (split(/[\r\n,;\t]+/, $raw_uids)) {
+            $line =~ s/^\s+|\s+$//g;
+            push @new_cardnumbers, $line if length($line) > 0;
+        }
+    }
+    my %seen_new;
+    @new_cardnumbers = grep { !$seen_new{$_}++ } @new_cardnumbers;
+
+    if (!@new_cardnumbers) {
+        print $json->encode({ success => 0, error => "Danh sách sinh viên trống. Vui lòng nạp file hoặc dán MSSV." });
+        exit;
+    }
+
+    if ($import_mode eq "replace") {
+        $dbh->do("DELETE FROM ftu_graduation_batch_items WHERE batch_id = ?", undef, $batch_id);
+    }
+
+    # Đọc danh sách hiện có để tránh trùng lặp khi append
+    my %existing;
+    my $sth_exist = $dbh->prepare("SELECT cardnumber FROM ftu_graduation_batch_items WHERE batch_id = ?");
+    $sth_exist->execute($batch_id);
+    while (my ($c) = $sth_exist->fetchrow_array) {
+        $existing{$c} = 1;
+    }
+
+    my $sth_insert_i = $dbh->prepare(qq{
+        INSERT INTO ftu_graduation_batch_items (batch_id, cardnumber, last_status)
+        VALUES (?, ?, 'PENDING')
+    });
+    my $inserted_count = 0;
+    for my $cnum (@new_cardnumbers) {
+        next if $existing{$cnum};
+        $sth_insert_i->execute($batch_id, $cnum);
+        $existing{$cnum} = 1;
+        $inserted_count++;
+    }
+
+    # Lấy toàn bộ cardnumbers của đợt này để đối soát
+    my $sth_items = $dbh->prepare("SELECT DISTINCT cardnumber FROM ftu_graduation_batch_items WHERE batch_id = ?");
+    $sth_items->execute($batch_id);
+    my @all_cardnumbers;
+    while (my ($cnum) = $sth_items->fetchrow_array) {
+        push @all_cardnumbers, $cnum if $cnum;
+    }
+
+    $dbh->do("UPDATE ftu_graduation_batches SET total_patrons = ?, updated_at = NOW() WHERE id = ?", undef, scalar(@all_cardnumbers), $batch_id);
+
+    my $check_result = perform_patron_clearance_check($dbh, \@all_cardnumbers, $batch_id);
+    $check_result->{batch_id}      = $batch_id;
+    $check_result->{batch_name}    = $batch_row->{batch_name};
+    $check_result->{academic_year} = $batch_row->{academic_year} || "";
+    $check_result->{cohort}        = $batch_row->{cohort} || "";
+    $check_result->{description}   = $batch_row->{description} || "";
+    $check_result->{message}       = "Đã nạp thành công $inserted_count sinh viên mới vào đợt [" . $batch_row->{batch_name} . "] (Tổng cộng: " . scalar(@all_cardnumbers) . " SV).";
+
+    print $json->encode($check_result);
+    exit;
+}
+
+# ------------------------------------------------------------------------------
+# API 0.5: XÓA ĐỢT XÉT TỐT NGHIỆP (OP = BATCH_DELETE)
 # ------------------------------------------------------------------------------
 if ($op eq "batch_delete") {
     print $cgi->header( -type => "application/json", -charset => "utf-8" );
