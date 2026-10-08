@@ -58,7 +58,6 @@
     height: 680px;
     background: radial-gradient(circle, rgba(185, 28, 28, 0.12) 0%, rgba(225, 29, 72, 0.04) 50%, transparent 70%);
     filter: blur(85px);
-    animation: ftuOrbFloat1 22s ease-in-out infinite alternate;
 }
 
 .ftu-orb-indigo {
@@ -68,7 +67,6 @@
     height: 640px;
     background: radial-gradient(circle, rgba(99, 102, 241, 0.10) 0%, rgba(59, 130, 246, 0.03) 50%, transparent 70%);
     filter: blur(95px);
-    animation: ftuOrbFloat2 26s ease-in-out infinite alternate;
 }
 
 .ftu-orb-amber {
@@ -78,7 +76,6 @@
     height: 540px;
     background: radial-gradient(circle, rgba(200, 146, 42, 0.08) 0%, rgba(245, 158, 11, 0.02) 50%, transparent 70%);
     filter: blur(80px);
-    animation: ftuOrbFloat3 20s ease-in-out infinite alternate;
 }
 
 .ftu-orb-rose {
@@ -88,7 +85,6 @@
     height: 620px;
     background: radial-gradient(circle, rgba(163, 26, 36, 0.09) 0%, rgba(244, 63, 94, 0.025) 50%, transparent 70%);
     filter: blur(90px);
-    animation: ftuOrbFloat1 24s ease-in-out infinite alternate-reverse;
 }
 
 /* Subtle Dot Matrix Pattern */
@@ -117,7 +113,6 @@
     width: 100%;
     height: 850px;
     opacity: 0.95;
-    animation: ftuRibbonWave 16s ease-in-out infinite alternate;
 }
 
 .ftu-art-polyhedron {
@@ -128,28 +123,12 @@
     opacity: 0.92;
 }
 
-.ftu-art-polyhedron .ftu-art-orbit-outer {
-    transform-origin: 180px 180px;
-    animation: ftuPolyRotate 48s linear infinite;
-}
-
-.ftu-art-polyhedron .ftu-art-orbit-inner {
-    transform-origin: 180px 180px;
-    animation: ftuPolyRotate 34s linear infinite reverse;
-}
-
-.ftu-art-polyhedron .ftu-art-poly-core {
-    transform-origin: 180px 180px;
-    animation: ftuPolyRotate 56s linear infinite;
-}
-
 .ftu-art-rings {
     top: 1080px;
     left: -30px;
     width: 320px;
     height: 320px;
     opacity: 0.8;
-    animation: ftuRingsPulse 14s ease-in-out infinite alternate;
 }
 
 .ftu-art-topography {
@@ -370,40 +349,6 @@
         height: 44px !important;
         font-size: 1.2rem !important;
     }
-}
-
-/* Subtle Motion Keyframes */
-@keyframes ftuOrbFloat1 {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(35px, 25px) scale(1.06); }
-    100% { transform: translate(-25px, 40px) scale(0.96); }
-}
-
-@keyframes ftuOrbFloat2 {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-40px, -30px) scale(1.05); }
-    100% { transform: translate(25px, 35px) scale(0.95); }
-}
-
-@keyframes ftuOrbFloat3 {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(30px, -25px) scale(1.04); }
-    100% { transform: translate(-20px, 20px) scale(0.98); }
-}
-
-@keyframes ftuRibbonWave {
-    0% { transform: translateY(0) scaleY(1); }
-    100% { transform: translateY(18px) scaleY(1.03); }
-}
-
-@keyframes ftuPolyRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes ftuRingsPulse {
-    0% { transform: scale(1) rotate(0deg); }
-    100% { transform: scale(1.04) rotate(12deg); }
 }
 
 @media (max-width: 900px) {
