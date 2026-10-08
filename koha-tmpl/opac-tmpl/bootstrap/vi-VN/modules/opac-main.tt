@@ -52,41 +52,41 @@
 }
 
 .ftu-orb-crimson {
-    top: -80px;
+    top: 420px;
     left: -100px;
     width: 680px;
     height: 680px;
-    background: radial-gradient(circle, rgba(185, 28, 28, 0.09) 0%, rgba(225, 29, 72, 0.03) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(185, 28, 28, 0.12) 0%, rgba(225, 29, 72, 0.04) 50%, transparent 70%);
     filter: blur(85px);
     animation: ftuOrbFloat1 22s ease-in-out infinite alternate;
 }
 
 .ftu-orb-indigo {
-    top: 180px;
-    right: -120px;
+    top: 580px;
+    right: -100px;
     width: 640px;
     height: 640px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.10) 0%, rgba(59, 130, 246, 0.03) 50%, transparent 70%);
     filter: blur(95px);
     animation: ftuOrbFloat2 26s ease-in-out infinite alternate;
 }
 
 .ftu-orb-amber {
-    top: 780px;
-    left: 5%;
+    top: 1120px;
+    left: 4%;
     width: 540px;
     height: 540px;
-    background: radial-gradient(circle, rgba(200, 146, 42, 0.06) 0%, rgba(245, 158, 11, 0.015) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(200, 146, 42, 0.08) 0%, rgba(245, 158, 11, 0.02) 50%, transparent 70%);
     filter: blur(80px);
     animation: ftuOrbFloat3 20s ease-in-out infinite alternate;
 }
 
 .ftu-orb-rose {
-    top: 1400px;
-    right: 4%;
+    top: 1680px;
+    right: 3%;
     width: 620px;
     height: 620px;
-    background: radial-gradient(circle, rgba(163, 26, 36, 0.08) 0%, rgba(244, 63, 94, 0.02) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(163, 26, 36, 0.09) 0%, rgba(244, 63, 94, 0.025) 50%, transparent 70%);
     filter: blur(90px);
     animation: ftuOrbFloat1 24s ease-in-out infinite alternate-reverse;
 }
@@ -94,14 +94,14 @@
 /* Subtle Dot Matrix Pattern */
 .ftu-art-dot-matrix {
     position: absolute;
-    top: 0;
+    top: 400px;
     left: 0;
     width: 100%;
-    height: 100%;
-    background-image: radial-gradient(circle, rgba(148, 163, 184, 0.18) 1.2px, transparent 1.2px);
+    height: calc(100% - 400px);
+    background-image: radial-gradient(circle, rgba(148, 163, 184, 0.22) 1.2px, transparent 1.2px);
     background-size: 28px 28px;
-    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 40%, transparent 85%);
-    mask-image: radial-gradient(ellipse at 50% 30%, black 40%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 45%, transparent 85%);
+    mask-image: radial-gradient(ellipse at 50% 30%, black 45%, transparent 85%);
     opacity: 0.85;
 }
 
@@ -112,29 +112,29 @@
 }
 
 .ftu-art-ribbon {
-    top: 60px;
+    top: 480px;
     left: 0;
     width: 100%;
-    height: 750px;
-    opacity: 0.9;
+    height: 850px;
+    opacity: 0.95;
     animation: ftuRibbonWave 16s ease-in-out infinite alternate;
 }
 
 .ftu-art-polyhedron {
-    top: 100px;
-    right: 2%;
-    width: 320px;
-    height: 320px;
-    opacity: 0.8;
+    top: 540px;
+    right: 2.5%;
+    width: 340px;
+    height: 340px;
+    opacity: 0.88;
     animation: ftuPolyRotate 48s linear infinite;
 }
 
 .ftu-art-rings {
-    top: 960px;
-    left: -40px;
-    width: 300px;
-    height: 300px;
-    opacity: 0.7;
+    top: 1080px;
+    left: -30px;
+    width: 320px;
+    height: 320px;
+    opacity: 0.8;
     animation: ftuRingsPulse 14s ease-in-out infinite alternate;
 }
 
@@ -142,8 +142,8 @@
     bottom: 80px;
     left: 0;
     width: 100%;
-    height: 340px;
-    opacity: 0.75;
+    height: 360px;
+    opacity: 0.8;
 }
 
 /* Glassmorphism & Elevation */
@@ -437,20 +437,20 @@
         <svg class="ftu-art-svg ftu-art-ribbon" viewBox="0 0 1600 800" fill="none" preserveAspectRatio="none">
             <defs>
                 <linearGradient id="ftuRibbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.18" />
-                    <stop offset="35%" stop-color="#e11d48" stop-opacity="0.12" />
-                    <stop offset="70%" stop-color="#6366f1" stop-opacity="0.08" />
-                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.03" />
+                    <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.28" />
+                    <stop offset="35%" stop-color="#e11d48" stop-opacity="0.20" />
+                    <stop offset="70%" stop-color="#6366f1" stop-opacity="0.14" />
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.06" />
                 </linearGradient>
                 <linearGradient id="ftuRibbonGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#c8922a" stop-opacity="0.15" />
-                    <stop offset="50%" stop-color="#f43f5e" stop-opacity="0.09" />
-                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.04" />
+                    <stop offset="0%" stop-color="#c8922a" stop-opacity="0.24" />
+                    <stop offset="50%" stop-color="#f43f5e" stop-opacity="0.16" />
+                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.08" />
                 </linearGradient>
                 <linearGradient id="ftuGlowLine" x1="0%" y1="50%" x2="100%" y2="50%">
                     <stop offset="0%" stop-color="#b91c1c" stop-opacity="0" />
-                    <stop offset="25%" stop-color="#e11d48" stop-opacity="0.35" />
-                    <stop offset="65%" stop-color="#c8922a" stop-opacity="0.25" />
+                    <stop offset="25%" stop-color="#e11d48" stop-opacity="0.45" />
+                    <stop offset="65%" stop-color="#c8922a" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
                 </linearGradient>
             </defs>
@@ -464,13 +464,13 @@
         <svg class="ftu-art-svg ftu-art-polyhedron" viewBox="0 0 360 360" fill="none">
             <defs>
                 <linearGradient id="ftuPolyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.22" />
-                    <stop offset="50%" stop-color="#e11d48" stop-opacity="0.14" />
-                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0.08" />
+                    <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.32" />
+                    <stop offset="50%" stop-color="#e11d48" stop-opacity="0.22" />
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0.14" />
                 </linearGradient>
                 <linearGradient id="ftuCircleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#c8922a" stop-opacity="0.2" />
-                    <stop offset="100%" stop-color="#b91c1c" stop-opacity="0.04" />
+                    <stop offset="0%" stop-color="#c8922a" stop-opacity="0.28" />
+                    <stop offset="100%" stop-color="#b91c1c" stop-opacity="0.08" />
                 </linearGradient>
             </defs>
             <g class="ftu-geo-group">
