@@ -17,7 +17,7 @@ use CGI qw( -utf8 );
 use JSON;
 use HTTP::Tiny;
 use POSIX qw( strftime );
-use C4::Auth qw( get_template_and_user );
+use C4::Auth qw( get_template_and_user haspermission );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
 use C4::Log qw( logaction );
@@ -36,8 +36,25 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
         query           => $cgi,
         type            => "intranet",
         authnotrequired => 0,
-        flagsrequired   => [ { tools => "edit_patrons" }, { borrowers => "edit_borrowers" }, { tools => "*" } ],
+        flagsrequired   => [
+            { tools => "graduation_view" },
+            { tools => "graduation_manage" },
+            { tools => "graduation_remind" },
+            { tools => "edit_patrons" },
+            { tools => "*" }
+        ],
     }
+);
+
+my $userenv = C4::Context->userenv;
+my $user_id = $userenv ? $userenv->{id} : $borrowernumber;
+my $is_super = ($userenv && ($userenv->{flags} & 1)) ? 1 : 0;
+my $can_manage = ($is_super || haspermission($user_id, { tools => "graduation_manage" }) || haspermission($user_id, { tools => "*" })) ? 1 : 0;
+my $can_remind = ($is_super || $can_manage || haspermission($user_id, { tools => "graduation_remind" }) || haspermission($user_id, { tools => "*" })) ? 1 : 0;
+
+$template->param(
+    can_graduation_manage => $can_manage,
+    can_graduation_remind => $can_remind,
 );
 
 my $op = $cgi->param("op") || "list";

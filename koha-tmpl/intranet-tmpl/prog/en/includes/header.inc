@@ -67,8 +67,11 @@
                                 [% IF ( CAN_user_tools || CAN_user_clubs ) %]
                 <a href="/cgi-bin/koha/tools/tools-home.pl"><i class="fa fa-wrench"></i> Công cụ</a>
                 [% END %]
-                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools ) %]
+                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools ) %]
                 <a href="/cgi-bin/koha/tools/portal-news.pl"><i class="fa fa-globe"></i> Quản lý trang công khai</a>
+                [% END %]
+                [% IF ( CAN_user_tools_graduation_view || CAN_user_tools_graduation_manage || CAN_user_tools_graduation_remind || CAN_user_tools_edit_patrons || CAN_user_borrowers || CAN_user_tools ) %]
+                <a href="/cgi-bin/koha/tools/graduation.pl"><i class="fa fa-graduation-cap"></i> Xét tốt nghiệp</a>
                 [% END %]
                 [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_parameters || CAN_user_editcatalogue_edit_catalogue ) %]
                 <a href="/cgi-bin/koha/admin/collections.pl"><i class="fa fa-layer-group"></i> Bộ sưu tập</a>

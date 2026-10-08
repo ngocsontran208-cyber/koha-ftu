@@ -481,6 +481,36 @@
     [%- CASE 'view_system_logs' -%]
         <span class="sub_permission view_system_logs_subpermission"> Browse the system logs </span>
         <span class="permissioncode">([% name | html %])</span>
+    [%# FTULIB: Graduation clearance permissions %]
+    [%- CASE 'graduation_view' -%]
+        <span class="sub_permission graduation_view_subpermission"> View patron clearance list & check loans for graduation </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'graduation_manage' -%]
+        <span class="sub_permission graduation_manage_subpermission"> Manage graduation batches & batch-lock graduating patron cards </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'graduation_remind' -%]
+        <span class="sub_permission graduation_remind_subpermission"> Send automated email debt reminders to graduating patrons </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%# FTULIB: Public portal & e-databases management permissions %]
+    [%- CASE 'portal_news' -%]
+        <span class="sub_permission portal_news_subpermission"> Manage portal news, announcements and events </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'portal_database' -%]
+        <span class="sub_permission portal_database_subpermission"> Manage e-databases directory (IEEE, Springer, ScienceDirect) </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'portal_banner' -%]
+        <span class="sub_permission portal_banner_subpermission"> Manage homepage hero banners and sliders </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'portal_footer' -%]
+        <span class="sub_permission portal_footer_subpermission"> Manage footer copyright, contacts and social links </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%# FTULIB: Audit logs & security permissions %]
+    [%- CASE 'audit_logs' -%]
+        <span class="sub_permission audit_logs_subpermission"> View system audit logs and security monitoring dashboard </span>
+        <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'audit_export' -%]
+        <span class="sub_permission audit_export_subpermission"> Export audit reports and security logs to Excel/CSV </span>
+        <span class="permissioncode">([% name | html %])</span>
     [%- CASE 'check_expiration' -%]
         <span class="sub_permission check_expiration_subpermission"> Check the expiration of a serial </span>
         <span class="permissioncode">([% name | html %])</span>

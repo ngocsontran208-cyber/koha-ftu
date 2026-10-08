@@ -256,7 +256,7 @@
                 </a>
                 [% END %]
 
-                                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools ) %]
+                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools ) %]
                 <a class="ftu-module-card" href="/cgi-bin/koha/tools/portal-news.pl">
                     <div class="module-icon mod-portal-news" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #ffffff;"><i class="fa fa-globe"></i></div>
                     <div class="module-name">Quản lý trang công khai</div>
@@ -288,7 +288,7 @@
                 </a>
                 [% END %]
 
-                [% IF ( CAN_user_tools_edit_patrons || CAN_user_borrowers || CAN_user_tools ) %]
+                [% IF ( CAN_user_tools_graduation_view || CAN_user_tools_graduation_manage || CAN_user_tools_graduation_remind || CAN_user_tools_edit_patrons || CAN_user_borrowers || CAN_user_tools ) %]
                 <a class="ftu-module-card" href="/cgi-bin/koha/tools/graduation.pl">
                     <div class="module-icon mod-graduation" style="background: #0f172a; color: #ffffff;"><i class="fa fa-graduation-cap"></i></div>
                     <div class="module-name">Xét tốt nghiệp</div>

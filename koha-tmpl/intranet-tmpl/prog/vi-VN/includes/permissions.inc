@@ -481,6 +481,36 @@
  [%- CASE 'view_system_logs' -%]
  <span class="sub_permission view_system_logs_subpermission"> Browse the system logs </span>
  <span class="permissioncode">([% name | html %])</span>
+ [%# FTULIB: Phân hệ Xét tốt nghiệp %]
+ [%- CASE 'graduation_view' -%]
+ <span class="sub_permission graduation_view_subpermission"> Xem danh sách & đối soát nợ sách xét tốt nghiệp </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'graduation_manage' -%]
+ <span class="sub_permission graduation_manage_subpermission"> Duyệt & khóa thẻ sinh viên tốt nghiệp hàng loạt </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'graduation_remind' -%]
+ <span class="sub_permission graduation_remind_subpermission"> Gửi email cảnh báo & đôn đốc hoàn trả tài liệu </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%# FTULIB: Phân hệ Quản lý trang công khai & CSDL số %]
+ [%- CASE 'portal_news' -%]
+ <span class="sub_permission portal_news_subpermission"> Quản lý tin tức, thông báo & sự kiện OPAC </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'portal_database' -%]
+ <span class="sub_permission portal_database_subpermission"> Quản lý danh mục Cơ sở dữ liệu số & điện tử (IEEE, Springer...) </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'portal_banner' -%]
+ <span class="sub_permission portal_banner_subpermission"> Quản lý banner tiêu điểm trang chủ OPAC </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'portal_footer' -%]
+ <span class="sub_permission portal_footer_subpermission"> Quản lý thông tin liên hệ & bản quyền chân trang </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%# FTULIB: Phân hệ Nhật ký Kiểm toán & Giám sát An ninh %]
+ [%- CASE 'audit_logs' -%]
+ <span class="sub_permission audit_logs_subpermission"> Xem nhật ký kiểm toán hệ thống & giám sát an ninh </span>
+ <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'audit_export' -%]
+ <span class="sub_permission audit_export_subpermission"> Xuất báo cáo & biên bản kiểm toán ra Excel/CSV </span>
+ <span class="permissioncode">([% name | html %])</span>
  [%- CASE 'check_expiration' -%]
  <span class="sub_permission check_expiration_subpermission"> Check the expiration of a serial </span>
  <span class="permissioncode">([% name | html %])</span>

@@ -17,7 +17,14 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
         query           => $cgi,
         type            => "intranet",
         authnotrequired => 0,
-        flagsrequired   => { tools => "edit_additional_contents" },
+        flagsrequired   => [
+            { tools => "portal_news" },
+            { tools => "portal_database" },
+            { tools => "portal_banner" },
+            { tools => "portal_footer" },
+            { tools => "edit_additional_contents" },
+            { tools => "*" }
+        ],
     }
 );
 
