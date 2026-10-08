@@ -880,7 +880,7 @@
                         <i class="fa fa-plus-circle"></i> Tạo đợt xét tốt nghiệp mới
                     </button>
                     <button type="button" class="grad-btn grad-btn-outline" onclick="openAdhocCheckModal()">
-                        <i class="fa fa-bolt"></i> Tra cứu nhanh (không lưu đợt)
+                        Tra cứu nhanh (không lưu đợt)
                     </button>
                     <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline" title="Quay về trang chủ quản trị Koha">
                         <i class="fa fa-home"></i> Về Trang chủ
@@ -1237,7 +1237,7 @@
 <div id="modal-adhoc-check" class="grad-modal-backdrop" onclick="handleAdhocModalBackdropClick(event)">
     <div class="grad-modal-dialog">
         <div class="grad-modal-header">
-            <h3 class="grad-modal-title"><i class="fa fa-bolt" style="color: var(--ftu-crimson);"></i> Tra Cứu Nhanh Đối Soát Tốt Nghiệp</h3>
+            <h3 class="grad-modal-title">Tra Cứu Nhanh Đối Soát Tốt Nghiệp</h3>
             <button type="button" class="grad-modal-close" onclick="closeAdhocCheckModal()">&times;</button>
         </div>
         <div class="grad-modal-body">
