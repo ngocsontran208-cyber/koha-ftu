@@ -16,20 +16,24 @@
 use Modern::Perl;
 use utf8;
 use CGI qw( -utf8 );
-use JSON;
+use JSON qw( to_json );
 use POSIX qw( strftime );
 use Text::CSV::Encoded;
 use C4::Auth qw( get_template_and_user );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
 use C4::Log qw( logaction );
-use Encode qw( decode_utf8 encode_utf8 );
+use Encode qw( decode_utf8 encode_utf8 is_utf8 );
 
-binmode STDOUT, ":encoding(UTF-8)";
+sub _utf8_str {
+    my ($val) = @_;
+    return "" unless defined $val;
+    return $val if utf8::is_utf8($val);
+    return eval { decode_utf8($val) } // $val;
+}
 
 my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
-my $json = JSON->new->utf8;
 
 my ($template, $borrowernumber, $cookie) = get_template_and_user(
     {
@@ -110,7 +114,7 @@ if ($op eq "stats") {
         };
     }
 
-    print $json->encode({
+    print to_json({
         success            => 1,
         total_today        => int($total_today),
         logins_today       => int($logins_today),
@@ -257,13 +261,19 @@ if ($op eq "list") {
         my $user_link    = "";
         my $is_system    = 0;
 
+        my $user_name           = _utf8_str($r->{user_name});
+        my $target_patron_name  = _utf8_str($r->{target_patron_name});
+        my $target_biblio_title = _utf8_str($r->{target_biblio_title});
+        my $info                = _utf8_str($r->{info});
+        my $diff                = _utf8_str($r->{diff});
+
         if ($r->{user_id} && $r->{user_id} > 0) {
-            $user_display = $r->{user_name} || ("Thủ thư #" . $r->{user_id});
+            $user_display = $user_name || ("Thủ thư #" . $r->{user_id});
             $user_sub     = $r->{user_cardnumber} ? "Mã thẻ: " . $r->{user_cardnumber} : "ID: #" . $r->{user_id};
             $user_link    = "/cgi-bin/koha/members/moremember.pl?borrowernumber=" . $r->{user_id};
         } else {
-            if ($r->{interface} eq 'opac' && $r->{target_patron_name} && $r->{target_patron_name} =~ /\S/) {
-                $user_display = $r->{target_patron_name} . " (Bạn đọc)";
+            if ($r->{interface} eq 'opac' && $target_patron_name && $target_patron_name =~ /\S/) {
+                $user_display = $target_patron_name . " (Bạn đọc)";
                 $user_sub     = $r->{target_patron_cardnumber} ? "Mã thẻ: " . $r->{target_patron_cardnumber} : "OPAC";
                 $user_link    = "/cgi-bin/koha/members/moremember.pl?borrowernumber=" . ($r->{object} || 0);
             } else {
@@ -276,19 +286,19 @@ if ($op eq "list") {
         # Đối tượng tác động (Target Object)
         my $target_label = "";
         my $target_link  = "";
-        if ($r->{target_patron_name} && $r->{target_patron_name} =~ /\S/) {
-            $target_label = "Bạn đọc: " . $r->{target_patron_name};
+        if ($target_patron_name && $target_patron_name =~ /\S/) {
+            $target_label = "Bạn đọc: " . $target_patron_name;
             if ($r->{target_patron_cardnumber}) {
                 $target_label .= " (" . $r->{target_patron_cardnumber} . ")";
             }
             $target_link  = "/cgi-bin/koha/members/moremember.pl?borrowernumber=" . $r->{object};
-        } elsif ($r->{target_biblio_title} && $r->{target_biblio_title} =~ /\S/) {
-            $target_label = "Tài liệu: " . $r->{target_biblio_title};
+        } elsif ($target_biblio_title && $target_biblio_title =~ /\S/) {
+            $target_label = "Tài liệu: " . $target_biblio_title;
             $target_link  = "/cgi-bin/koha/catalogue/detail.pl?biblionumber=" . $r->{object};
         } elsif ($r->{object}) {
             if ($r->{module} eq 'SYSTEMPREFERENCE') {
-                $target_label = "Cấu hình: " . $r->{info};
-                $target_link  = "/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=" . $r->{info};
+                $target_label = "Cấu hình: " . $info;
+                $target_link  = "/cgi-bin/koha/admin/preferences.pl?op=search&searchfield=" . $info;
             } else {
                 $target_label = "ID Đối tượng #" . $r->{object};
             }
@@ -375,13 +385,13 @@ if ($op eq "list") {
             interface_badge  => $if_meta->{badge},
             target_label     => $target_label,
             target_link      => $target_link,
-            info             => $r->{info} || "",
-            has_diff         => ($r->{diff} && length($r->{diff}) > 2) ? 1 : 0,
-            diff             => $r->{diff} || "",
+            info             => $info,
+            has_diff         => ($diff && length($diff) > 2) ? 1 : 0,
+            diff             => $diff,
         };
     }
 
-    print $json->encode({
+    print to_json({
         draw            => $draw,
         recordsTotal    => int($records_total || 0),
         recordsFiltered => int($records_filtered || 0),

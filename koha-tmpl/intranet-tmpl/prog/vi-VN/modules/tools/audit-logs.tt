@@ -48,73 +48,6 @@
     flex-wrap: wrap;
 }
 
-/* KPI Cards */
-.audit-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-.audit-kpi-card {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 16px 18px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.audit-kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
-}
-.audit-kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 4px;
-}
-.audit-kpi-card.kpi-blue::before { background: #2563eb; }
-.audit-kpi-card.kpi-green::before { background: #16a34a; }
-.audit-kpi-card.kpi-amber::before { background: #ea580c; }
-.audit-kpi-card.kpi-purple::before { background: #7c3aed; }
-
-.audit-kpi-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-.kpi-blue .audit-kpi-icon { background: #eff6ff; color: #2563eb; }
-.kpi-green .audit-kpi-icon { background: #f0fdf4; color: #16a34a; }
-.kpi-amber .audit-kpi-icon { background: #fff7ed; color: #ea580c; }
-.kpi-purple .audit-kpi-icon { background: #faf5ff; color: #7c3aed; }
-
-.audit-kpi-body {
-    flex-grow: 1;
-}
-.audit-kpi-value {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1.2;
-}
-.audit-kpi-label {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: #64748b;
-    margin-top: 2px;
-}
 
 /* Filter Box */
 .audit-filter-card {
@@ -370,37 +303,6 @@
         </div>
     </div>
 
-    <!-- LIVE METRIC KPI CARDS -->
-    <div class="audit-kpi-grid">
-        <div class="audit-kpi-card kpi-blue">
-            <div class="audit-kpi-icon"><i class="fa fa-bolt"></i></div>
-            <div class="audit-kpi-body">
-                <div class="audit-kpi-value" id="kpi-total-today">--</div>
-                <div class="audit-kpi-label">Tổng thao tác hôm nay</div>
-            </div>
-        </div>
-        <div class="audit-kpi-card kpi-green">
-            <div class="audit-kpi-icon"><i class="fa fa-key"></i></div>
-            <div class="audit-kpi-body">
-                <div class="audit-kpi-value" id="kpi-logins-today">--</div>
-                <div class="audit-kpi-label">Đăng nhập &amp; Xác thực SSO</div>
-            </div>
-        </div>
-        <div class="audit-kpi-card kpi-amber">
-            <div class="audit-kpi-icon"><i class="fa fa-pencil-square-o"></i></div>
-            <div class="audit-kpi-body">
-                <div class="audit-kpi-value" id="kpi-mods-today">--</div>
-                <div class="audit-kpi-label">Chỉnh sửa &amp; Đổi mật khẩu</div>
-            </div>
-        </div>
-        <div class="audit-kpi-card kpi-purple">
-            <div class="audit-kpi-icon"><i class="fa fa-exchange"></i></div>
-            <div class="audit-kpi-body">
-                <div class="audit-kpi-value" id="kpi-circ-today">--</div>
-                <div class="audit-kpi-label">Lưu thông &amp; Mượn số DRM</div>
-            </div>
-        </div>
-    </div>
 
     <!-- MULTI-DIMENSIONAL FILTER TOOLBAR -->
     <div class="audit-filter-card">
@@ -564,17 +466,6 @@
             allowInput: true
         });
 
-        // 1. TẢI THỐNG KÊ DASHBOARD (KPIS)
-        function loadAuditStats() {
-            $.getJSON('audit-logs.pl?op=stats', function(data) {
-                if (data && data.success) {
-                    $('#kpi-total-today').text(Number(data.total_today || 0).toLocaleString('vi-VN'));
-                    $('#kpi-logins-today').text(Number(data.logins_today || 0).toLocaleString('vi-VN'));
-                    $('#kpi-mods-today').text(Number(data.mods_deletes_today || 0).toLocaleString('vi-VN'));
-                    $('#kpi-circ-today').text(Number(data.circ_today || 0).toLocaleString('vi-VN'));
-                }
-            });
-        }
 
         // 2. KHỞI TẠO DATATABLE VỚI SERVER-SIDE AJAX
         function initAuditDataTable() {
@@ -771,7 +662,6 @@
 
         // Làm mới dữ liệu
         $('#btnRefreshLogs').on('click', function() {
-            loadAuditStats();
             if (auditDataTable) {
                 auditDataTable.ajax.reload(null, false);
             }
@@ -837,7 +727,6 @@
 
         // KHỞI ĐỘNG
         $(document).ready(function() {
-            loadAuditStats();
             initAuditDataTable();
         });
 
