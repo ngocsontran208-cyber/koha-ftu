@@ -286,7 +286,7 @@
     <!-- PAGE HEADER -->
     <div class="audit-header">
         <div class="audit-header-title">
-            <h1><i class="fa fa-shield" style="color: #4338ca;"></i> System Audit &amp; Action Logs</h1>
+            <h1><i class="fa fa-shield"></i> System Audit &amp; Action Logs</h1>
             <p>Enterprise audit console: monitor who did what, when, across which interface and examine modifications across FTULIB.</p>
         </div>
         <div class="audit-header-actions">

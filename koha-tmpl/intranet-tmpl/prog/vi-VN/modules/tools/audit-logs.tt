@@ -286,7 +286,7 @@
     <!-- PAGE HEADER -->
     <div class="audit-header">
         <div class="audit-header-title">
-            <h1><i class="fa fa-shield" style="color: #4338ca;"></i> Nhật ký Hệ thống & Giám sát An ninh</h1>
+            <h1><i class="fa fa-shield"></i> Nhật ký Hệ thống &amp; Giám sát An ninh</h1>
             <p>Kiểm soát tập trung toàn bộ hoạt động: ai thực hiện, thực thi khi nào, qua giao diện nào và chi tiết thay đổi trên hệ thống thư viện FTU.</p>
         </div>
         <div class="audit-header-actions">

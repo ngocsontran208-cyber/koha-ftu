@@ -36,6 +36,7 @@
             [% IF ( CAN_user_tools_edit_patrons ) %]
                 <li><a href="/cgi-bin/koha/tools/modborrowers.pl">Batch patron modification</a></li>
             [% END %]
+            <li><a href="/cgi-bin/koha/tools/graduation.pl">Xét tốt nghiệp</a></li>
             [% IF ( CAN_user_tools_batch_extend_due_dates ) %]
                 <li><a href="/cgi-bin/koha/tools/batch_extend_due_dates.pl">Batch extend due dates</a></li>
             [% END %]
@@ -64,12 +65,12 @@
                 <li><a href="/cgi-bin/koha/tools/csv-profiles.pl">CSV profiles</a></li>
             [% END %]
             [% IF ( CAN_user_tools_view_system_logs ) %]
-                <li><a href="/cgi-bin/koha/tools/audit-logs.pl" style="font-weight: 700; color: #4338ca;"><i class="fa fa-shield"></i> System Audit &amp; Action Logs</a></li>
+                <li><a href="/cgi-bin/koha/tools/audit-logs.pl">System audit &amp; action logs</a></li>
                 <li><a href="/cgi-bin/koha/tools/viewlog.pl">Log viewer (Legacy)</a></li>
             [% END %]
             [% IF ( CAN_user_tools_edit_additional_contents ) %]
-                <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=news" style="font-weight: 700; color: #b91c1c;"><i class="fa fa-newspaper-o"></i> Tin tức &amp; Bảng tin</a></li>
-                <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=database" style="font-weight: 700; color: #1d4ed8;"><i class="fa fa-database"></i> Quản lý CSDL</a></li>
+                <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=news">Quản lý tin tức &amp; sự kiện</a></li>
+                <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=database">Quản lý cơ sở dữ liệu (CSDL)</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=news">News</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=html_customizations">HTML customizations</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=pages">Pages</a></li>
