@@ -61,11 +61,15 @@
  [% IF ( CAN_user_lists ) %]
  <a href="/cgi-bin/koha/virtualshelves/shelves.pl"><i class="fa fa-list-alt"></i> Danh sách</a>
  [% END %]
+ [% IF ( CAN_user_editauthorities ) %]
  <a href="/cgi-bin/koha/authorities/authorities-home.pl"><i class="fa fa-link"></i> Từ điển</a>
+ [% END %]
                  [% IF ( CAN_user_tools || CAN_user_clubs ) %]
                 <a href="/cgi-bin/koha/tools/tools-home.pl"><i class="fa fa-wrench"></i> Công cụ</a>
                 [% END %]
+                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools ) %]
                 <a href="/cgi-bin/koha/tools/portal-news.pl"><i class="fa fa-globe"></i> Quản lý trang công khai</a>
+                [% END %]
                 [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_parameters || CAN_user_editcatalogue_edit_catalogue ) %]
                 <a href="/cgi-bin/koha/admin/collections.pl"><i class="fa fa-layer-group"></i> Bộ sưu tập</a>
                 [% END %]

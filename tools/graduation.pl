@@ -36,7 +36,7 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
         query           => $cgi,
         type            => "intranet",
         authnotrequired => 0,
-        flagsrequired   => { tools => "moderate_comments" }, # Yêu cầu quyền thủ thư tools
+        flagsrequired   => [ { tools => "edit_patrons" }, { borrowers => "edit_borrowers" }, { tools => "*" } ],
     }
 );
 

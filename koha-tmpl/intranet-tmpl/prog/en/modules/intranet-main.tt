@@ -248,11 +248,13 @@
                 </a>
                 [% END %]
 
+                [% IF ( CAN_user_editauthorities ) %]
                 <a class="ftu-module-card" href="/cgi-bin/koha/authorities/authorities-home.pl">
                     <div class="module-icon mod-authorities"><i class="fa fa-link"></i></div>
                     <div class="module-name">Từ điển</div>
                     <div class="module-desc">Kiểm soát từ chuẩn</div>
                 </a>
+                [% END %]
 
                                 [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools ) %]
                 <a class="ftu-module-card" href="/cgi-bin/koha/tools/portal-news.pl">
@@ -286,11 +288,13 @@
                 </a>
                 [% END %]
 
+                [% IF ( CAN_user_tools_edit_patrons || CAN_user_borrowers || CAN_user_tools ) %]
                 <a class="ftu-module-card" href="/cgi-bin/koha/tools/graduation.pl">
                     <div class="module-icon mod-graduation" style="background: #0f172a; color: #ffffff;"><i class="fa fa-graduation-cap"></i></div>
                     <div class="module-name">Xét tốt nghiệp</div>
                     <div class="module-desc">Đối soát nợ sách &bull; Khóa thẻ &bull; Nhắc nhở</div>
                 </a>
+                [% END %]
 
             </div>
         </main>
