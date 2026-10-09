@@ -754,12 +754,27 @@ body#pat_member aside .patron_search_form {
                 <div class="d-flex align-items-center gap-2">
                     <!-- Nút thao tác tab SSO -->
                     <div id="sso-header-actions" class="d-inline-flex align-items-center gap-2">
-                        <button type="button" class="ftu-btn-primary" id="btn-open-add-sso" title="Thêm hồ sơ bạn đọc người học mới">
-                            + Thêm bạn đọc SSO
-                        </button>
-                        <button type="button" class="ftu-btn-secondary" id="btn-open-import-excel" title="Nạp danh sách bạn đọc từ file Excel">
-                            <i class="fa fa-file-excel-o" style="color:#16a34a;"></i> Nạp từ Excel
-                        </button>
+                        <!-- Dropdown 2 tùy chọn Thêm bạn đọc SSO -->
+                        <div class="btn-group">
+                            <button type="button" class="ftu-btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="btn-sso-add-dropdown">
+                                + Thêm bạn đọc SSO
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-1" style="min-width: 220px; font-size: 13px;">
+                                <li>
+                                    <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2" href="javascript:void(0)" id="btn-opt-add-manual">
+                                        <i class="fa fa-user-plus text-primary" style="width: 16px;"></i>
+                                        <span>1. Thêm thủ công</span>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2" href="javascript:void(0)" id="btn-opt-add-excel">
+                                        <i class="fa fa-file-excel-o text-success" style="width: 16px;"></i>
+                                        <span>2. Thêm bằng file Excel</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                         <button type="button" class="ftu-btn-secondary" id="btn-refresh-sso" title="Tải lại dữ liệu từ Cổng SSO">
                             Làm mới
                         </button>
@@ -1391,68 +1406,88 @@ body#pat_member aside .patron_search_form {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
-                <!-- Hướng dẫn & Tải file mẫu -->
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <div>
-                        <div class="fw-semibold text-dark mb-1" style="font-size:13px;">
-                            <i class="fa fa-info-circle text-primary me-1"></i> Định dạng file hỗ trợ: <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>
-                        </div>
-                        <div class="text-muted" style="font-size:12px;">
-                            Hệ thống tự động nhận diện thông minh các cột: <strong>Mã bạn đọc (MSSV), Họ tên, Email, Mật khẩu, Loại bạn đọc, Khoa/Đơn vị, Khóa, Lớp, Ngày sinh, CCCD, Điện thoại, Địa chỉ, Hạn thẻ</strong>.
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-success fw-semibold" id="btn-download-excel-tpl">
-                        <i class="fa fa-download me-1"></i> Tải file Excel mẫu (.xlsx)
-                    </button>
-                </div>
 
-                <!-- Dropzone / Input file -->
-                <div id="excel-drop-zone" class="p-4 text-center mb-3" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #ffffff; cursor: pointer; transition: all 0.2s;">
-                    <i class="fa fa-cloud-upload fa-3x mb-2" style="color: #94a3b8;"></i>
-                    <div class="fw-bold text-dark mb-1" style="font-size:14px;">Kéo thả file Excel vào đây hoặc bấm để chọn file</div>
-                    <div class="text-muted small">Hỗ trợ danh sách sinh viên, học viên sau đại học, cán bộ giảng viên (hàng loạt)</div>
-                    <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;" />
-                </div>
-
-                <!-- Preview Panel -->
-                <div id="excel-preview-panel" style="display: none;">
-                    <!-- Thống kê phân tích -->
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 p-2 px-3" style="background:#f1f5f9; border-radius:6px; font-size:12.5px;">
-                        <div>
-                            <span>Tổng số dòng: <strong id="excel-total-count" class="text-dark">0</strong></span>
-                            <span class="mx-2 text-muted">|</span>
-                            <span>Hợp lệ: <strong id="excel-valid-count" class="text-success">0</strong></span>
-                            <span class="mx-2 text-muted">|</span>
-                            <span>Thiếu thông tin: <strong id="excel-invalid-count" class="text-danger">0</strong></span>
+                <!-- MỤC 1: TẢI FILE MẪU -->
+                <div class="card mb-4 border" style="border-radius: 10px; overflow: hidden;">
+                    <div class="card-header py-2.5 px-3 bg-light d-flex align-items-center justify-content-between flex-wrap gap-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-pill px-2.5 py-1" style="font-size: 11.5px;">Mục 1</span>
+                            <strong class="text-dark" style="font-size: 13.5px;">Tải file mẫu Excel chuẩn FTU</strong>
                         </div>
-                        <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none p-0" id="btn-clear-excel-data">
-                            <i class="fa fa-trash-o me-1"></i> Hủy chọn file này
+                        <button type="button" class="btn btn-sm btn-success fw-semibold" id="btn-download-excel-tpl">
+                            <i class="fa fa-download me-1"></i> Tải file Excel mẫu (.xlsx)
                         </button>
                     </div>
-
-                    <!-- Bảng dữ liệu xem trước -->
-                    <div class="table-responsive" style="max-height: 340px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
-                        <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th style="width: 40px; text-align:center;">STT</th>
-                                    <th>Mã bạn đọc</th>
-                                    <th>Họ và tên</th>
-                                    <th>Email</th>
-                                    <th>Loại bạn đọc</th>
-                                    <th>Khoa / Đơn vị</th>
-                                    <th>Khóa · Lớp</th>
-                                    <th>Hạn thẻ</th>
-                                    <th style="width: 90px; text-align:center;">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody id="excel-preview-tbody"></tbody>
-                        </table>
+                    <div class="card-body p-3" style="background: #ffffff;">
+                        <div class="text-muted mb-2" style="font-size: 12.5px; line-height: 1.5;">
+                            Thủ thư tải file mẫu về máy tính, điền danh sách bạn đọc theo đúng định dạng các cột tiêu đề chuẩn:
+                        </div>
+                        <div class="p-2 px-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0; font-size: 12px; color: #334155;">
+                            <code>Mã bạn đọc (MSSV)</code> &bull; <code>Họ và tên</code> &bull; <code>Email</code> &bull; <code>Mật khẩu</code> &bull; <code>Loại bạn đọc</code> &bull; <code>Khoa / Đơn vị</code> &bull; <code>Khóa</code> &bull; <code>Lớp</code> &bull; <code>Ngày sinh</code> &bull; <code>Giới tính</code> &bull; <code>Số CCCD</code> &bull; <code>Điện thoại</code> &bull; <code>Địa chỉ</code> &bull; <code>Ngày hết hạn</code>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Alert trạng thái / tiến trình -->
-                <div id="excel-import-alert" class="alert mt-3" style="display: none; font-size: 12.5px;"></div>
+                <!-- MỤC 2: ĐƯA FILE VÀO -->
+                <div class="card border" style="border-radius: 10px; overflow: hidden;">
+                    <div class="card-header py-2.5 px-3 bg-light d-flex align-items-center justify-content-between border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success rounded-pill px-2.5 py-1" style="font-size: 11.5px;">Mục 2</span>
+                            <strong class="text-dark" style="font-size: 13.5px;">Đưa file Excel vào hệ thống</strong>
+                        </div>
+                        <small class="text-muted">Hỗ trợ định dạng: <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code></small>
+                    </div>
+                    <div class="card-body p-3" style="background: #ffffff;">
+                        <!-- Dropzone kéo thả file -->
+                        <div id="excel-drop-zone" class="p-4 text-center" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #fafbfc; cursor: pointer; transition: all 0.2s;">
+                            <i class="fa fa-cloud-upload fa-3x mb-2" style="color: #64748b;"></i>
+                            <div class="fw-bold text-dark mb-1" style="font-size:14px;">Kéo thả file Excel vào đây hoặc bấm để chọn file từ máy tính</div>
+                            <div class="text-muted small">Hỗ trợ danh sách sinh viên, học viên sau đại học, cán bộ giảng viên (nạp hàng loạt)</div>
+                            <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;" />
+                        </div>
+
+                        <!-- Preview Panel sau khi đưa file vào -->
+                        <div id="excel-preview-panel" style="display: none; margin-top: 14px;">
+                            <!-- Thanh thống kê -->
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 p-2 px-3" style="background:#f1f5f9; border-radius:6px; font-size:12.5px;">
+                                <div>
+                                    <span>Tổng số dòng: <strong id="excel-total-count" class="text-dark">0</strong></span>
+                                    <span class="mx-2 text-muted">|</span>
+                                    <span>Hợp lệ: <strong id="excel-valid-count" class="text-success">0</strong></span>
+                                    <span class="mx-2 text-muted">|</span>
+                                    <span>Thiếu thông tin: <strong id="excel-invalid-count" class="text-danger">0</strong></span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none p-0" id="btn-clear-excel-data">
+                                    <i class="fa fa-trash-o me-1"></i> Hủy chọn file này
+                                </button>
+                            </div>
+
+                            <!-- Bảng dữ liệu xem trước -->
+                            <div class="table-responsive" style="max-height: 320px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th style="width: 40px; text-align:center;">STT</th>
+                                            <th>Mã bạn đọc</th>
+                                            <th>Họ và tên</th>
+                                            <th>Email</th>
+                                            <th>Loại bạn đọc</th>
+                                            <th>Khoa / Đơn vị</th>
+                                            <th>Khóa · Lớp</th>
+                                            <th>Hạn thẻ</th>
+                                            <th style="width: 90px; text-align:center;">Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="excel-preview-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Alert trạng thái / tiến trình -->
+                        <div id="excel-import-alert" class="alert mt-3 mb-0" style="display: none; font-size: 12.5px;"></div>
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer border-top py-2 px-4 bg-light">
                 <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -2592,7 +2627,7 @@ body#pat_member aside .patron_search_form {
             });
 
             // Mở modal Thêm bạn đọc SSO mới
-            $('#btn-open-add-sso').on('click', function () {
+            $('#btn-opt-add-manual, #btn-open-add-sso').on('click', function () {
                 $('#form-sso-add-patron')[0].reset();
                 $('#add-sso-issuedate').val('01/10/2026');
                 $('#add-sso-status').val('ACTIVE');
@@ -2883,7 +2918,7 @@ body#pat_member aside .patron_search_form {
             let excelParsedRows = [];
 
             // Mở modal nạp Excel
-            $('#btn-open-import-excel, .btn-koha-import-excel').on('click', function () {
+            $('#btn-opt-add-excel, #btn-open-import-excel, .btn-koha-import-excel').on('click', function () {
                 clearExcelImport();
                 $('#excel-import-alert').hide();
                 showModal('modalSsoImportExcel');
