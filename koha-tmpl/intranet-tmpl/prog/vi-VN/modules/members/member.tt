@@ -3158,30 +3158,34 @@ body#pat_member aside .patron_search_form {
                             const row = rawRows[i];
                             if (!row || !row.length || !row.some(c => c !== undefined && c !== '')) continue;
 
-                            const uid = String(row[colUid] || '').trim();
-                            const fullName = String(row[colName] || '').trim();
-                            let email = colEmail !== -1 ? String(row[colEmail] || '').trim() : '';
-                            const password = colPass !== -1 ? String(row[colPass] || '123456').trim() : '123456';
-                            let role = colRole !== -1 ? String(row[colRole] || 'STUDENT').trim().toUpperCase() : 'STUDENT';
-                            const department = colDept !== -1 ? String(row[colDept] || 'Trường ĐH Ngoại Thương').trim() : 'Trường ĐH Ngoại Thương';
+                            const uid = colUid !== -1 ? String(row[colUid] || '').trim() : '';
+                            const fullName = colName !== -1 ? String(row[colName] || '').trim() : '';
+                            const email = colEmail !== -1 ? String(row[colEmail] || '').trim() : '';
+                            const password = colPass !== -1 ? String(row[colPass] || '').trim() : '';
+                            let role = colRole !== -1 ? String(row[colRole] || '').trim().toUpperCase() : '';
+                            const department = colDept !== -1 ? String(row[colDept] || '').trim() : '';
                             const cohort = colCohort !== -1 ? String(row[colCohort] || '').trim() : '';
                             const studentClass = colClass !== -1 ? String(row[colClass] || '').trim() : '';
-                            const dateOfBirth = colDob !== -1 ? formatExcelDate(row[colDob]) : '15/05/2004';
-                            const gender = colGender !== -1 ? String(row[colGender] || 'Nam').trim() : 'Nam';
+                            const dateOfBirth = colDob !== -1 ? formatExcelDate(row[colDob]) : '';
+                            const gender = colGender !== -1 ? String(row[colGender] || '').trim() : '';
                             const cccd = colCccd !== -1 ? String(row[colCccd] || '').trim() : '';
                             const phone = colPhone !== -1 ? String(row[colPhone] || '').trim() : '';
                             const address = colAddress !== -1 ? String(row[colAddress] || '').trim() : '';
-                            const expiryDate = colExpiry !== -1 ? formatExcelDate(row[colExpiry]) : '01/10/2027';
+                            const expiryDate = colExpiry !== -1 ? formatExcelDate(row[colExpiry]) : '';
 
-                            if (!email && uid) email = `${uid}@ftu.edu.vn`;
-                            const rNorm = removeVietnameseTones(role);
-                            if (rNorm.includes('sau dai hoc') || rNorm.includes('ncs') || rNorm.includes('thac si') || rNorm.includes('postgrad')) {
-                                role = 'POSTGRAD';
-                            } else if (rNorm.includes('giang vien') || rNorm.includes('can bo') || rNorm.includes('faculty')) {
-                                role = 'FACULTY';
-                            } else if (rNorm.includes('admin') || rNorm.includes('thu thu')) {
-                                role = 'ADMIN';
-                            } else {
+                            if (role) {
+                                const rNorm = removeVietnameseTones(role);
+                                if (rNorm.includes('sau dai hoc') || rNorm.includes('ncs') || rNorm.includes('thac si') || rNorm.includes('postgrad')) {
+                                    role = 'POSTGRAD';
+                                } else if (rNorm.includes('giang vien') || rNorm.includes('can bo') || rNorm.includes('faculty')) {
+                                    role = 'FACULTY';
+                                } else if (rNorm.includes('admin') || rNorm.includes('thu thu')) {
+                                    role = 'ADMIN';
+                                } else if (rNorm.includes('sinh vien') || rNorm.includes('student') || rNorm.includes('sv')) {
+                                    role = 'STUDENT';
+                                }
+                            }
+                            if (!role) {
                                 role = 'STUDENT';
                             }
 
@@ -3222,7 +3226,7 @@ body#pat_member aside .patron_search_form {
 
                 let html = '';
                 excelParsedRows.forEach((u, idx) => {
-                    const roleLabel = u.role === 'STUDENT' ? 'Sinh viên' : (u.role === 'POSTGRAD' ? 'Sau ĐH' : (u.role === 'FACULTY' ? 'Giảng viên' : u.role));
+                    const roleLabel = u.role === 'STUDENT' ? 'Sinh viên' : (u.role === 'POSTGRAD' ? 'Sau ĐH' : (u.role === 'FACULTY' ? 'Giảng viên' : (u.role === 'ADMIN' ? 'Thủ thư' : (u.role || '-'))));
                     const statusBadge = u.isValid 
                         ? '<span class="badge bg-success">Hợp lệ</span>' 
                         : '<span class="badge bg-danger">Thiếu mã/tên</span>';
@@ -3232,11 +3236,11 @@ body#pat_member aside .patron_search_form {
                             <td style="text-align:center;">${idx + 1}</td>
                             <td><code class="fw-bold text-dark">${u.uid || 'Thiếu'}</code></td>
                             <td><strong>${u.fullName || 'Thiếu'}</strong></td>
-                            <td>${u.email}</td>
+                            <td>${u.email || '<span class="text-muted fst-italic">Trống</span>'}</td>
                             <td><span class="badge bg-light text-dark border">${roleLabel}</span></td>
-                            <td>${u.department || '-'}</td>
-                            <td>${[u.cohort, u.studentClass].filter(Boolean).join(' · ') || '-'}</td>
-                            <td>${u.expiryDate || 'Mặc định'}</td>
+                            <td>${u.department || '<span class="text-muted fst-italic">Trống</span>'}</td>
+                            <td>${[u.cohort, u.studentClass].filter(Boolean).join(' · ') || '<span class="text-muted fst-italic">Trống</span>'}</td>
+                            <td>${u.expiryDate || '<span class="text-muted fst-italic">Trống</span>'}</td>
                             <td style="text-align:center;">${statusBadge}</td>
                         </tr>
                     `;

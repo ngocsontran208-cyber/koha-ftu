@@ -109,17 +109,15 @@ for my $u (@$users) {
     my $surname = $parts[0] || 'FTU';
     my $firstname = @parts > 1 ? join(' ', @parts[1..$#parts]) : $uid;
 
-    my $email = $u->{email} || "$uid\@ftu.edu.vn";
-    my $phone = $u->{phone} || '';
-    my $address = $u->{address} || '';
+    my $email = (defined $u->{email} && $u->{email} =~ /\S/) ? $u->{email} : undef;
+    my $phone = (defined $u->{phone} && $u->{phone} =~ /\S/) ? $u->{phone} : undef;
+    my $address = (defined $u->{address} && $u->{address} =~ /\S/) ? $u->{address} : undef;
     my $gender = $u->{gender} || '';
     my $sex = ($gender =~ /^(Nữ|F)/i) ? 'F' : (($gender =~ /^(Nam|M)/i) ? 'M' : undef);
 
     my $dob = parse_date_to_sql($u->{dateOfBirth}, undef);
-    my $dateenrolled = parse_date_to_sql($u->{issueDate}, $today_sql);
-
-    my $default_expiry = $is_staff ? '2099-12-31' : sprintf("%04d-06-30", $year + 1900 + ($role eq 'STUDENT' ? 4 : 3));
-    my $dateexpiry = $is_staff ? '2099-12-31' : parse_date_to_sql($u->{expiryDate}, $default_expiry);
+    my $dateenrolled = parse_date_to_sql($u->{issueDate}, undef);
+    my $dateexpiry = parse_date_to_sql($u->{expiryDate}, undef);
 
     my $debarred = undef;
     my $debarredcomment = undef;
@@ -146,16 +144,17 @@ for my $u (@$users) {
     my $sort2 = $u->{cccd} || undef;
 
     my @notes_parts;
+    push @notes_parts, "Khoa: " . $u->{department} if $u->{department};
     push @notes_parts, "CCCD: " . $u->{cccd} if $u->{cccd};
     push @notes_parts, "Trình độ: " . $u->{educationLevel} if $u->{educationLevel};
     push @notes_parts, "Nghề nghiệp: " . $u->{occupation} if $u->{occupation};
     push @notes_parts, "Dân tộc: " . $u->{ethnicity} if $u->{ethnicity};
     push @notes_parts, "Nơi làm việc: " . $u->{workplace} if $u->{workplace};
     push @notes_parts, $u->{notes} if $u->{notes};
-    my $borrowernotes = join(' | ', @notes_parts);
+    my $borrowernotes = @notes_parts ? join(' | ', @notes_parts) : undef;
 
-    my $raw_pass = $u->{password} || '123456';
-    my $hashed_pass = get_hash($raw_pass);
+    my $raw_pass = $u->{password};
+    my $hashed_pass = (defined $raw_pass && $raw_pass ne '') ? get_hash($raw_pass) : undef;
 
     my $res = eval {
         $sth->execute(
