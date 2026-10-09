@@ -443,51 +443,21 @@
             background: #fafbfc;
         }
 
-        /* Bìa sách thu nhỏ (Thumbnail Cover) */
-        .ftu-book-cover-cell {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .ftu-book-thumb {
-            width: 30px;
-            height: 42px;
-            flex-shrink: 0;
-            border-radius: 3px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-            background: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            font-size: 14px;
-        }
-        .ftu-book-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .ftu-book-thumb-red {
-            background: #b91c1c;
-            color: #ffffff;
-        }
-        .ftu-book-thumb-gold {
-            background: #d97706;
-            color: #ffffff;
-        }
-
         .ftu-book-title-text {
             color: #0f172a;
             font-weight: 600;
             text-decoration: none;
             display: block;
+            line-height: 1.35;
         }
         .ftu-book-title-text:hover {
             color: #0284c7;
+            text-decoration: underline;
         }
         .ftu-book-author-text {
             font-size: 11.5px;
             color: #64748b;
+            margin-top: 2px;
         }
 
         .ftu-status-tag-active {
@@ -513,7 +483,8 @@
         .ftu-row-actions-group {
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            gap: 6px;
         }
         .ftu-row-btn-renew {
             width: 28px;
@@ -526,12 +497,16 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
             transition: all 0.15s;
+            padding: 0;
         }
         .ftu-row-btn-renew:hover {
             background: #eff6ff;
             border-color: #0284c7;
+            color: #0369a1;
+        }
+        .ftu-row-btn-renew svg {
+            display: block;
         }
         .ftu-row-btn-return {
             height: 26px;
@@ -751,13 +726,13 @@
             <!-- 3 Nút thao tác dưới đáy thẻ bạn đọc -->
             <div class="ftu-left-actions-row">
                 <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% patron.borrowernumber | uri %]" target="_blank" class="ftu-card-action-btn">
-                    <i class="fa fa-file-text-o"></i> Hồ sơ chi tiết
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg> Hồ sơ chi tiết
                 </a>
                 <a href="/cgi-bin/koha/circ/circulation.pl" class="ftu-card-action-btn">
-                    <i class="fa fa-refresh"></i> Đổi bạn đọc
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Đổi bạn đọc
                 </a>
                 <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-card-action-btn">
-                    <i class="fa fa-search"></i> Tra cứu
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Tra cứu
                 </a>
             </div>
 
@@ -840,12 +815,12 @@
 
                     <div class="ftu-tbl-top-actions">
                         [% IF patron && patron.checkouts.count > 0 %]
-                            <a href="#" id="ftu-btn-renew-all" class="ftu-tbl-action-link"><i class="fa fa-calendar-check-o"></i> Gia hạn tất cả</a>
-                            <a href="#" id="ftu-btn-return-all" class="ftu-tbl-action-link"><i class="fa fa-trash-o"></i> Trả tất cả</a>
-                            <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-tbl-action-link"><i class="fa fa-print"></i> In phiếu mượn</a>
+                            <a href="#" id="ftu-btn-renew-all" class="ftu-tbl-action-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Gia hạn tất cả</a>
+                            <a href="#" id="ftu-btn-return-all" class="ftu-tbl-action-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Trả tất cả</a>
+                            <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-tbl-action-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> In phiếu mượn</a>
                         [% END %]
                         [% IF patron %]
-                            <a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | uri %]" target="_blank" class="ftu-tbl-action-link"><i class="fa fa-file-text-o"></i> Lịch sử phí phạt</a>
+                            <a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | uri %]" target="_blank" class="ftu-tbl-action-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Lịch sử phí phạt</a>
                         [% END %]
                     </div>
                 </div>
@@ -889,20 +864,11 @@
                                 <td style="color:#64748b; font-size:12px;">[% row_idx %]</td>
                                 <td style="font-weight:600; font-family:ui-monospace, monospace;">[% issue.item.barcode | html %]</td>
                                 <td>
-                                    <div class="ftu-book-cover-cell">
-                                        <!-- Thumbnail bìa sách màu đẹp chuẩn giao diện mẫu -->
-                                        <div class="ftu-book-thumb [% IF (row_idx % 2 == 1) %]ftu-book-thumb-red[% ELSE %]ftu-book-thumb-gold[% END %]">
-                                            [% IF Koha.Preference('LocalCoverImages') || Koha.Preference('OPACAmazonCoverImages') %]
-                                                <img src="/cgi-bin/koha/catalogue/image.pl?biblionumber=[% issue.item.biblio.biblionumber | uri %]&amp;thumbnail=1" alt="" onerror="this.style.display='none';" />
-                                            [% END %]
-                                            <i class="fa fa-book"></i>
-                                        </div>
-                                        <div>
-                                            <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank" class="ftu-book-title-text">[% issue.item.biblio.title | html %]</a>
-                                            [% IF issue.item.biblio.author %]
-                                                <div class="ftu-book-author-text">Tác giả: [% issue.item.biblio.author | html %]</div>
-                                            [% END %]
-                                        </div>
+                                    <div>
+                                        <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank" class="ftu-book-title-text">[% issue.item.biblio.title | html %]</a>
+                                        [% IF issue.item.biblio.author %]
+                                            <div class="ftu-book-author-text">Tác giả: [% issue.item.biblio.author | html %]</div>
+                                        [% END %]
                                     </div>
                                 </td>
                                 <td>[% issue.item.itemcallnumber || '—' | html %]</td>
@@ -918,7 +884,10 @@
                                 <td style="text-align: center;">
                                     <div class="ftu-row-actions-group">
                                         <button type="button" class="ftu-row-btn-renew ftu-btn-renew-one" data-issue-id="[% issue.issue_id | html %]" title="Gia hạn">
-                                            <i class="fa fa-pencil-square-o"></i>
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                            </svg>
                                         </button>
                                         <button type="button" class="ftu-row-btn-return ftu-btn-return-one" data-barcode="[% issue.item.barcode | html %]" data-title="[% issue.item.biblio.title | html %]">
                                             Trả sách
