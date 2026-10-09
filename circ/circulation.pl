@@ -253,13 +253,23 @@ if ( @$barcodes == 0 && $charges eq 'yes' ) {
 
 if ($findborrower) {
     Koha::Plugins->call( 'patron_barcode_transform', \$findborrower );
-    my $patron = Koha::Patrons->find( { cardnumber => $findborrower } );
-    if ($patron) {
-        $borrowernumber = $patron->borrowernumber;
+    my $searched_patron = Koha::Patrons->find( { cardnumber => $findborrower } );
+    if ( !$searched_patron ) {
+        $searched_patron = Koha::Patrons->find( { userid => $findborrower } );
+    }
+    if ( !$searched_patron && looks_like_number($findborrower) ) {
+        $searched_patron = Koha::Patrons->find($findborrower);
+    }
+    if ($searched_patron) {
+        $borrowernumber = $searched_patron->borrowernumber;
+        $patron         = $searched_patron;
     } else {
-        print $query->redirect( "/cgi-bin/koha/members/member.pl?quicksearch=1&circsearch=1&searchmember="
-                . uri_escape_utf8($findborrower) );
-        exit;
+        $borrowernumber = undef;
+        $patron         = undef;
+        $template->param(
+            patron_not_found => 1,
+            unknown_borrower => $findborrower,
+        );
     }
 }
 
