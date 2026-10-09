@@ -27,16 +27,17 @@
 [% FILTER collapse %]
     <style nonce="[% Koha.CSPNonce | $raw %]">
         /* ========================================================= */
-        /* RESET & BASE STYLING                                      */
+        /* RESET & BASE                                              */
         /* ========================================================= */
         body#circ_circulation {
-            background-color: #f1f5f9;
-            color: #1e293b;
+            background-color: #f4f6f9;
+            color: #333333;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
+            font-size: 12.5px;
+            line-height: 1.4;
         }
 
-        /* Hide unneeded legacy Koha chrome */
+        /* Ẩn các thanh Koha thừa */
         #circ_circulation #sidebar-container,
         #circ_circulation .patroninfo,
         #circ_circulation #members-toolbar,
@@ -46,770 +47,476 @@
             display: none !important;
         }
 
-        /* Container centering & balance (prevents ultrawide stretching) */
-        .ftu-circ-wrapper {
-            max-width: 1420px;
+        /* Khung bao vừa vặn màn hình (Screen-fit wrapper) */
+        .ftu-circ-container {
+            max-width: 1360px;
             margin: 0 auto;
-            padding: 12px 16px 32px 16px;
+            padding: 6px 12px 16px 12px;
         }
 
-        /* Breadcrumb bar */
-        .ftu-breadcrumb-bar {
+        /* Breadcrumb thanh mảnh */
+        .ftu-breadcrumb {
             background: #ffffff;
             border-bottom: 1px solid #e2e8f0;
-            padding: 10px 24px;
-            font-size: 13px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: #64748b;
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #64748b;
-        }
-        .ftu-breadcrumb-bar a {
-            color: #2563eb;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
             gap: 6px;
-            font-weight: 500;
         }
-        .ftu-breadcrumb-bar a:hover {
-            color: #1d4ed8;
+        .ftu-breadcrumb a {
+            color: #0284c7;
+            text-decoration: none;
+        }
+        .ftu-breadcrumb a:hover {
             text-decoration: underline;
         }
 
-        /* ========================================================= */
-        /* CARDS & CONTAINERS                                        */
-        /* ========================================================= */
-        .ftu-card {
+        /* Thẻ bao gọn gàng (Compact Card) */
+        .ftu-panel {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05), 0 1px 4px -1px rgba(15, 23, 42, 0.03);
-            margin-bottom: 16px;
-            overflow: hidden;
-            transition: box-shadow 0.2s ease;
-        }
-        .ftu-card:hover {
-            box-shadow: 0 4px 14px -3px rgba(15, 23, 42, 0.08);
+            border: 1px solid #cbd5e1;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
 
-        .ftu-card-header {
-            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-            border-bottom: 1px solid #e2e8f0;
-            padding: 10px 18px;
+        .ftu-panel-header {
+            background: #eaf2f8;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 5px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
         }
 
-        .ftu-card-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1e3a5f;
+        .ftu-panel-toggle {
+            color: #64748b;
+            font-size: 13px;
+            text-decoration: none;
+            padding: 1px 6px;
+            cursor: pointer;
+        }
+        .ftu-panel-toggle:hover {
+            color: #0f172a;
+        }
+
+        .ftu-panel-body {
+            padding: 10px 14px;
+        }
+
+        /* ========================================================= */
+        /* KHUNG TRÊN: 3 CỘT GỌN GÀNG (LEFT - MIDDLE - RIGHT)        */
+        /* ========================================================= */
+        .ftu-grid-top {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        /* Cột 1: Thao tác mượn (Width 310px) */
+        .ftu-col-form {
+            width: 310px;
+            flex-shrink: 0;
+            border-right: 1px solid #e2e8f0;
+            padding-right: 16px;
+        }
+
+        .ftu-form-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            margin-bottom: 6px;
         }
-        .ftu-card-title i {
-            color: #2563eb;
-            font-size: 15px;
+        .ftu-form-lbl {
+            width: 95px;
+            flex-shrink: 0;
+            font-size: 12px;
+            color: #334155;
+            margin: 0;
         }
 
-        .ftu-toggle-panel {
-            color: #64748b;
-            font-size: 15px;
-            text-decoration: none;
-            cursor: pointer;
-            padding: 3px 8px;
-            border-radius: 4px;
-            transition: all 0.15s ease;
+        .ftu-field-box {
+            flex: 1;
+            display: flex;
+            align-items: stretch;
         }
-        .ftu-toggle-panel:hover {
+
+        .ftu-input-ctrl,
+        .ftu-select-ctrl {
+            width: 100%;
+            height: 25px;
+            border: 1px solid #cbd5e1;
+            border-radius: 2px;
+            padding: 2px 6px;
+            font-size: 12px;
+            color: #1e293b;
+            background: #ffffff;
+            box-sizing: border-box;
+        }
+        .ftu-input-ctrl:focus,
+        .ftu-select-ctrl:focus {
+            outline: none;
+            border-color: #0284c7;
+        }
+
+        .ftu-barcode-input {
+            border: 1px solid #f59e0b !important;
+            font-weight: 600;
+        }
+
+        .ftu-addon-btn {
+            width: 25px;
+            height: 25px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-left: none;
+            border-radius: 0 2px 2px 0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .ftu-addon-btn:hover {
             background: #e2e8f0;
             color: #0f172a;
         }
 
-        .ftu-card-body {
-            padding: 16px 20px;
-        }
-
-        /* ========================================================= */
-        /* CARD 1: 2-COLUMN BALANCED LAYOUT                          */
-        /* ========================================================= */
-        .ftu-hero-layout {
-            display: flex;
-            gap: 20px;
-            align-items: stretch;
-        }
-
-        /* Left Column: Circulation Controls (POS Deck) */
-        .ftu-ctrl-panel {
-            width: 360px;
-            flex-shrink: 0;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px 18px;
-            box-sizing: border-box;
-        }
-
-        .ftu-ctrl-badge {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #2563eb;
-            margin-bottom: 12px;
+        .ftu-checkbox-line {
+            margin-left: 95px;
+            margin-bottom: 8px;
+            font-size: 12px;
             display: flex;
             align-items: center;
             gap: 6px;
-        }
-        .ftu-ctrl-badge::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-        }
-
-        .ftu-field-group {
-            margin-bottom: 12px;
-        }
-        .ftu-field-label {
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .ftu-input-wrap {
-            position: relative;
-            display: flex;
-            align-items: stretch;
-        }
-
-        .ftu-select-control,
-        .ftu-text-control {
-            width: 100%;
-            height: 34px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 13px;
-            color: #1e293b;
-            box-sizing: border-box;
-            transition: all 0.15s ease;
-        }
-        .ftu-select-control:focus,
-        .ftu-text-control:focus {
-            border-color: #2563eb;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
-        /* Barcode Scanner Focus Styling */
-        .ftu-input-scanner {
-            border-color: #f59e0b !important;
-            background: #fffbeb !important;
-            font-weight: 600;
-            color: #92400e !important;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            letter-spacing: 0.5px;
-        }
-        .ftu-input-scanner:focus {
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
-            background: #ffffff !important;
-        }
-
-        .ftu-btn-icon-addon {
-            height: 34px;
-            width: 34px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-left: none;
-            border-radius: 0 6px 6px 0;
-            color: #64748b;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s ease;
-        }
-        .ftu-btn-icon-addon:hover {
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-        .ftu-input-wrap .ftu-text-control {
-            border-radius: 6px 0 0 6px;
-        }
-
-        /* Checkbox row */
-        .ftu-checkbox-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 12px 0 14px 0;
-            font-size: 13px;
-            color: #334155;
-            font-weight: 500;
-            cursor: pointer;
-            user-select: none;
-        }
-        .ftu-checkbox-wrap input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #2563eb;
             cursor: pointer;
         }
-
-        /* Action Buttons */
-        .ftu-action-cluster {
-            display: flex;
-            gap: 8px;
-            margin-top: 14px;
+        .ftu-checkbox-line input {
+            cursor: pointer;
+            margin: 0;
         }
-        .ftu-btn-pos {
-            flex: 1;
-            height: 36px;
+
+        .ftu-btn-group {
+            display: flex;
+            gap: 5px;
+            margin-left: 95px;
+        }
+
+        .ftu-action-btn {
             border: none;
-            border-radius: 6px;
-            font-size: 13px;
+            border-radius: 2px;
+            padding: 3px 10px;
+            font-size: 12px;
             font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.15s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            line-height: 1.4;
         }
-        .ftu-btn-borrow-act {
-            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+        .ftu-btn-amber {
+            background: #f59e0b;
             color: #ffffff;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
         }
-        .ftu-btn-borrow-act:hover {
-            background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+        .ftu-btn-amber:hover {
+            background: #d97706;
             color: #ffffff;
-            transform: translateY(-1px);
         }
-        .ftu-btn-reject-act {
-            background: #fffbeb;
-            color: #b45309;
-            border: 1px solid #fde68a;
+        .ftu-btn-blue {
+            background: #1e88e5;
+            color: #ffffff;
         }
-        .ftu-btn-reject-act:hover {
-            background: #fef3c7;
-            color: #92400e;
+        .ftu-btn-blue:hover {
+            background: #1565c0;
+            color: #ffffff;
         }
-        .ftu-btn-search-act {
-            background: #ffffff;
-            color: #475569;
-            border: 1px solid #cbd5e1;
+        .ftu-btn-slate {
+            background: #608b98;
+            color: #ffffff;
         }
-        .ftu-btn-search-act:hover {
-            background: #f1f5f9;
-            color: #0f172a;
+        .ftu-btn-slate:hover {
+            background: #4b717d;
+            color: #ffffff;
         }
 
-        /* ========================================================= */
-        /* RIGHT COLUMN: PATRON IDENTITY & METRICS DASHBOARD         */
-        /* ========================================================= */
-        .ftu-patron-panel {
+        /* Cột 2: Thông tin bạn đọc (Dạng dòng văn bản tinh gọn, không rườm rà) */
+        .ftu-col-patron-info {
             flex: 1;
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            justify-content: space-between;
         }
 
-        /* Patron Header Banner */
-        .ftu-patron-header {
+        .ftu-patron-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12.5px;
+            line-height: 1.5;
+            margin-bottom: 2px;
+        }
+        .ftu-name-lead {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #15803d;
+        }
+        .ftu-kv {
+            display: inline-flex;
+            gap: 5px;
+            align-items: baseline;
+        }
+        .ftu-k {
+            font-weight: 700;
+            color: #334155;
+        }
+        .ftu-v {
+            color: #1e293b;
+        }
+        .ftu-danger-txt {
+            color: #dc2626 !important;
+            font-weight: 700;
+        }
+
+        /* Ghi chú và thông báo */
+        .ftu-note-bar {
+            position: relative;
+            margin-top: 5px;
+        }
+        .ftu-note-input {
+            width: 100%;
+            height: 24px;
+            border: 1px solid #cbd5e1;
+            border-radius: 2px;
+            padding: 2px 26px 2px 6px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+        .ftu-note-icon {
+            position: absolute;
+            right: 8px;
+            top: 5px;
+            color: #0284c7;
+            font-size: 12px;
+        }
+
+        .ftu-alert-bar {
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            color: #0284c7;
+            padding: 3px 8px;
+            font-size: 12px;
+            margin-top: 5px;
+            border-radius: 2px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px 18px;
-            gap: 16px;
         }
 
-        .ftu-patron-bio {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            min-width: 0;
-        }
-
-        .ftu-avatar-box {
-            width: 74px;
-            height: 74px;
+        /* Cột 3: Avatar mặc định (Default Avatar Silhouette) */
+        .ftu-col-avatar {
+            width: 105px;
             flex-shrink: 0;
-            border-radius: 50%;
-            border: 2px solid #e2e8f0;
-            background: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .ftu-avatar-box {
+            width: 100px;
+            height: 120px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         .ftu-avatar-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .ftu-avatar-box .ftu-seal-logo {
-            width: 88%;
-            height: 88%;
-            object-fit: contain;
-        }
-
-        .ftu-patron-titles {
-            min-width: 0;
-        }
-        .ftu-patron-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .ftu-patron-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-        .ftu-chip {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 9px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .ftu-chip-card {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #dbeafe;
-            font-family: ui-monospace, SFMono-Regular, monospace;
-        }
-        .ftu-chip-status {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #d1fae5;
-        }
-        .ftu-chip-branch {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-
-        /* KPI Stat Tiles (4-grid) */
-        .ftu-kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-        .ftu-kpi-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 10px 14px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.15s ease;
-        }
-        .ftu-kpi-card:hover {
-            border-color: #cbd5e1;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        }
-        .ftu-kpi-lbl {
-            font-size: 11.5px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .ftu-kpi-val {
-            font-size: 16px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-top: 4px;
-        }
-        .ftu-kpi-sub {
-            font-size: 11.5px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-        .ftu-kpi-danger .ftu-kpi-val {
-            color: #dc2626 !important;
-        }
-        .ftu-kpi-success .ftu-kpi-val {
-            color: #059669 !important;
-        }
-
-        /* Metadata Details Strip */
-        .ftu-meta-strip {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 10px 14px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px 16px;
-            font-size: 12.5px;
-        }
-        .ftu-meta-item {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            line-height: 1.4;
-        }
-        .ftu-meta-label {
-            color: #64748b;
-            font-weight: 600;
-            min-width: 82px;
-            flex-shrink: 0;
-        }
-        .ftu-meta-value {
-            color: #1e293b;
-            font-weight: 500;
-        }
-
-        /* Note Input & Alert Bar */
-        .ftu-note-container {
-            position: relative;
-        }
-        .ftu-patron-note-input {
-            width: 100%;
-            height: 32px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 4px 34px 4px 10px;
-            font-size: 12.5px;
-            color: #334155;
-            box-sizing: border-box;
-            transition: all 0.15s ease;
-        }
-        .ftu-patron-note-input:focus {
-            border-color: #2563eb;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
-        .ftu-note-icon-btn {
-            position: absolute;
-            right: 8px;
-            top: 7px;
-            color: #64748b;
-            font-size: 14px;
-            pointer-events: none;
-        }
-
-        /* Toast Feedback Banner */
-        .ftu-feedback-toast {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #15803d;
-            border-radius: 6px;
-            padding: 7px 12px;
-            font-size: 12.5px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-        .ftu-toast-close {
-            background: none;
-            border: none;
-            color: #16a34a;
-            font-size: 15px;
-            cursor: pointer;
-            padding: 0 4px;
-            line-height: 1;
+        .ftu-avatar-svg {
+            width: 60px;
+            height: 60px;
         }
 
         /* ========================================================= */
-        /* CARD 2: ACTIVE CHECKOUTS TABLE                            */
+        /* KHUNG DƯỚI: BẢNG TÀI LIỆU ĐANG MƯỢN (COMPACT TABLE)       */
         /* ========================================================= */
-        .ftu-table-header-strip {
+        .ftu-panel-bottom {
+            margin-top: 6px;
+        }
+
+        .ftu-summary-header {
             background: #ffffff;
             border-bottom: 1px solid #e2e8f0;
-            padding: 12px 18px;
+            padding: 6px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
         }
-
-        .ftu-circ-summary-tag {
-            font-size: 14px;
-            font-weight: 700;
+        .ftu-red-stat {
             color: #dc2626;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ftu-table-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ftu-btn-pill {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.15s ease;
-            line-height: 1.3;
-        }
-        .ftu-pill-fine {
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid #bfdbfe;
-        }
-        .ftu-pill-fine:hover { background: #dbeafe; }
-
-        .ftu-pill-renew {
-            background: #ecfdf5;
-            color: #059669;
-            border: 1px solid #a7f3d0;
-        }
-        .ftu-pill-renew:hover { background: #d1fae5; }
-
-        .ftu-pill-return {
-            background: #fff1f2;
-            color: #e11d48;
-            border: 1px solid #fecdd3;
-        }
-        .ftu-pill-return:hover { background: #ffe4e6; }
-
-        .ftu-pill-print {
-            background: #f8fafc;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-        }
-        .ftu-pill-print:hover { background: #f1f5f9; color: #0f172a; }
-
-        /* Filter Controls */
-        .ftu-table-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 18px 12px 18px;
-            font-size: 12.5px;
-            color: #64748b;
-        }
-        .ftu-search-box {
-            position: relative;
-        }
-        .ftu-search-box input {
-            height: 30px;
-            width: 220px;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 2px 12px 2px 30px;
-            font-size: 12.5px;
-            color: #1e293b;
-            transition: all 0.15s ease;
-        }
-        .ftu-search-box input:focus {
-            outline: none;
-            border-color: #2563eb;
-            width: 260px;
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-        }
-        .ftu-search-box i {
-            position: absolute;
-            left: 10px;
-            top: 8px;
-            color: #94a3b8;
-        }
-
-        /* Modern Table */
-        .ftu-data-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            font-weight: 700;
             font-size: 13px;
         }
-        .ftu-data-table th {
-            background: #f8fafc;
-            color: #475569;
-            font-weight: 700;
+        .ftu-top-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
             font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            padding: 10px 14px;
-            border-top: 1px solid #e2e8f0;
-            border-bottom: 2px solid #cbd5e1;
+        }
+        .ftu-top-links a {
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .ftu-top-links a:hover {
+            text-decoration: underline;
+        }
+        .ftu-lnk-fine { color: #0284c7; }
+        .ftu-lnk-renew { color: #16a34a; }
+        .ftu-lnk-return { color: #dc2626; }
+        .ftu-lnk-print { color: #0284c7; }
+
+        /* Bộ lọc & Tìm kiếm */
+        .ftu-table-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0 8px 0;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .ftu-select-len {
+            height: 22px;
+            border: 1px solid #cbd5e1;
+            border-radius: 2px;
+            padding: 1px 4px;
+            font-size: 11.5px;
+        }
+        .ftu-search-input {
+            height: 22px;
+            width: 170px;
+            border: 1px solid #cbd5e1;
+            border-radius: 2px;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        /* Bảng dữ liệu gọn gàng */
+        .ftu-table-wrap {
+            overflow-x: auto;
+        }
+        .ftu-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .ftu-tbl th {
+            background: #ffffff;
+            border-top: 1px solid #cbd5e1;
+            border-bottom: 2px solid #94a3b8;
+            border-left: 1px solid #f1f5f9;
+            border-right: 1px solid #f1f5f9;
+            padding: 6px 8px;
+            color: #334155;
+            font-weight: 700;
             text-align: left;
             white-space: nowrap;
         }
-        .ftu-data-table th.th-sort {
+        .ftu-tbl th.th-sort {
             cursor: pointer;
             user-select: none;
         }
-        .ftu-data-table th.th-sort:hover {
-            background: #f1f5f9;
-            color: #0f172a;
+        .ftu-tbl th.th-sort:hover {
+            background: #f8fafc;
         }
-        .ftu-data-table td {
-            padding: 11px 14px;
-            border-bottom: 1px solid #f1f5f9;
+        .ftu-tbl td {
+            padding: 6px 8px;
+            border: 1px solid #f1f5f9;
             color: #334155;
             vertical-align: middle;
         }
-        .ftu-data-table tbody tr:hover td {
+        .ftu-tbl tbody tr:hover td {
             background: #f8fafc;
         }
 
-        .ftu-td-barcode {
-            font-family: ui-monospace, SFMono-Regular, monospace;
-            font-weight: 700;
-            color: #1e293b;
-            background: #f1f5f9;
-            padding: 2px 7px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .ftu-td-title a {
+        .ftu-title-link {
             color: #0284c7;
             text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            font-weight: 500;
         }
-        .ftu-td-title a:hover {
-            color: #0369a1;
+        .ftu-title-link:hover {
             text-decoration: underline;
         }
 
-        /* Status Badge */
-        .ftu-status-pill {
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11.5px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+        /* Badge trạng thái */
+        .ftu-badge-clean {
+            padding: 2px 7px;
+            border-radius: 2px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #ffffff;
+            display: inline-block;
             white-space: nowrap;
         }
-        .ftu-status-active {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-        .ftu-status-overdue {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
+        .ftu-bg-borrow { background: #1e88e5; }
+        .ftu-bg-overdue { background: #dc2626; }
 
-        /* Action Icons */
-        .ftu-action-btn-group {
-            display: inline-flex;
-            gap: 4px;
-            align-items: center;
-        }
-        .ftu-tbl-act {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            color: #475569;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        /* Icon thao tác (tối giản, nhỏ gọn) */
+        .ftu-act-icon {
+            background: none;
+            border: none;
             cursor: pointer;
-            text-decoration: none;
+            padding: 1px 3px;
             font-size: 12px;
-            transition: all 0.15s ease;
+            color: inherit;
+            text-decoration: none;
+            display: inline-block;
+            line-height: 1;
         }
-        .ftu-tbl-act:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        .ftu-act-icon:hover {
+            opacity: 0.7;
         }
-        .ftu-act-renew-icon:hover { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
-        .ftu-act-edit-icon:hover { background: #fefce8; color: #ca8a04; border-color: #fde047; }
-        .ftu-act-return-icon:hover { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
-        .ftu-act-note-icon:hover { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
-        .ftu-act-slip-icon:hover { background: #f8fafc; color: #0f172a; border-color: #94a3b8; }
 
-        /* Table Footer */
-        .ftu-table-footer-bar {
-            padding: 12px 18px;
+        /* Phân trang chân bảng */
+        .ftu-footer-bar {
+            padding: 6px 0 2px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12.5px;
+            font-size: 12px;
             color: #64748b;
-            border-top: 1px solid #e2e8f0;
         }
-        .ftu-page-controls {
+        .ftu-pagination {
             display: flex;
-            gap: 4px;
+            gap: 2px;
         }
-        .ftu-page-btn {
-            height: 28px;
-            min-width: 28px;
-            padding: 0 8px;
+        .ftu-pg-btn {
             border: 1px solid #cbd5e1;
             background: #ffffff;
-            border-radius: 4px;
-            color: #475569;
+            color: #334155;
+            padding: 1px 7px;
+            font-size: 11px;
+            border-radius: 2px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
         }
-        .ftu-page-btn.active {
-            background: #2563eb;
+        .ftu-pg-btn.active {
+            background: #1e88e5;
             color: #ffffff;
-            border-color: #2563eb;
+            border-color: #1e88e5;
         }
-        .ftu-page-btn:disabled {
+        .ftu-pg-btn:disabled {
             opacity: 0.5;
             cursor: default;
-        }
-
-        /* Empty state */
-        .ftu-empty-deck {
-            padding: 36px 20px;
-            text-align: center;
-            color: #64748b;
-        }
-        .ftu-empty-icon {
-            font-size: 40px;
-            color: #cbd5e1;
-            margin-bottom: 10px;
-            display: block;
         }
     </style>
 [% END %]
@@ -821,39 +528,32 @@
     [% INCLUDE 'circ-search.inc' %]
 [% END %]
 
-<div class="ftu-breadcrumb-bar">
-    <a href="/cgi-bin/koha/mainpage.pl"><i class="fa fa-home"></i> Trang chủ</a>
-    <span style="color:#cbd5e1;">&rsaquo;</span>
-    <span style="color:#1e293b; font-weight:600;">Lưu thông &amp; Cho mượn tài liệu</span>
+<div class="ftu-breadcrumb">
+    <a href="/cgi-bin/koha/mainpage.pl">Trang chủ</a>
+    <span>&rsaquo;</span>
+    <span>Lưu thông</span>
 </div>
 
 [% SET asides = [] %]
 [% WRAPPER 'main-container.inc' wide_full=1 %]
 
-<div class="ftu-circ-wrapper">
+<div class="ftu-circ-container">
 
     <!-- ========================================================= -->
-    <!-- CARD 1: KHUNG ĐIỀU KHIỂN LƯU THÔNG & THÔNG TIN BẠN ĐỌC      -->
+    <!-- KHUNG 1: PHÒNG MƯỢN (THAO TÁC + BẠN ĐỌC)                  -->
     <!-- ========================================================= -->
-    <div class="ftu-card">
-        <div class="ftu-card-header">
-            <div class="ftu-card-title">
-                <i class="fa fa-desktop"></i>
-                <span>Phòng Mượn &mdash; Quầy Lưu Thông</span>
-            </div>
+    <div class="ftu-panel">
+        <div class="ftu-panel-header">
+            <div>Phòng Mượn</div>
             <div>
-                <a href="#" class="ftu-toggle-panel" data-target="#ftu-top-panel-body" title="Thu gọn / Mở rộng"><i class="fa fa-chevron-up"></i></a>
+                <a href="#" class="ftu-panel-toggle" data-target="#ftu-top-body" title="Thu gọn / Mở rộng"><i class="fa fa-angle-up"></i></a>
             </div>
         </div>
-        <div class="ftu-card-body" id="ftu-top-panel-body">
-            <div class="ftu-hero-layout">
+        <div class="ftu-panel-body" id="ftu-top-body">
+            <div class="ftu-grid-top">
 
-                <!-- 1. LEFT CONSOLE: BÀN THAO TÁC (POS DESK) -->
-                <div class="ftu-ctrl-panel">
-                    <div class="ftu-ctrl-badge">
-                        <i class="fa fa-barcode"></i> Thao tác ghi mượn
-                    </div>
-
+                <!-- CỘT 1: THAO TÁC GHI MƯỢN -->
+                <div class="ftu-col-form">
                     [% IF patron %]
                     <form method="post" action="/cgi-bin/koha/circ/circulation.pl" id="mainform" name="mainform" autocomplete="off">
                         [% INCLUDE 'csrf-token.inc' %]
@@ -864,402 +564,341 @@
                         [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1" />[% END %]
                         [% IF ( CHARGES ) %]<input type="hidden" name="charges" value="yes" />[% END %]
 
-                        <div class="ftu-field-group">
-                            <label class="ftu-field-label" for="branch">Điểm lưu thông</label>
-                            <select name="branch" id="branch" class="ftu-select-control">
-                                <option value="[% patron.branchcode | html %]" selected="selected">Phòng Mượn</option>
-                                [% FOREACH b IN Branches.all %]
-                                    [% IF b.branchcode != patron.branchcode %]
-                                        <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
+                        <div class="ftu-form-row">
+                            <label class="ftu-form-lbl" for="branch">Điểm lưu thông</label>
+                            <div class="ftu-field-box">
+                                <select name="branch" id="branch" class="ftu-select-ctrl">
+                                    <option value="[% patron.branchcode | html %]" selected="selected">Phòng Mượn</option>
+                                    [% FOREACH b IN Branches.all %]
+                                        [% IF b.branchcode != patron.branchcode %]
+                                            <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
+                                        [% END %]
                                     [% END %]
-                                [% END %]
-                            </select>
-                        </div>
-
-                        <div class="ftu-field-group">
-                            <label class="ftu-field-label" for="ftu_cardnumber">Số thẻ bạn đọc</label>
-                            <div class="ftu-input-wrap">
-                                <input type="text" id="ftu_cardnumber" name="findborrower" value="[% patron.cardnumber | html %]" class="ftu-text-control" autocomplete="off" />
-                                <button type="button" class="ftu-btn-icon-addon" id="btn-reload-patron" title="Xóa màn hình / Đổi bạn đọc"><i class="fa fa-refresh"></i></button>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="ftu-field-group">
-                            <label class="ftu-field-label" for="barcode" style="color:#b45309;">
-                                <i class="fa fa-qrcode"></i> Quét mã vạch (Số ĐKCB)
-                            </label>
-                            <div class="ftu-input-wrap">
-                                <input type="text" name="barcode" id="barcode" class="ftu-text-control ftu-input-scanner focus" autocomplete="off" placeholder="Nhập hoặc quét mã vạch..." />
-                                <button type="button" class="ftu-btn-icon-addon" id="btn-clear-barcode" title="Xóa mã vạch"><i class="fa fa-times"></i></button>
+                        <div class="ftu-form-row">
+                            <label class="ftu-form-lbl" for="ftu_cardnumber">Số thẻ</label>
+                            <div class="ftu-field-box">
+                                <input type="text" id="ftu_cardnumber" name="findborrower" value="[% patron.cardnumber | html %]" class="ftu-input-ctrl" autocomplete="off" />
+                                <button type="button" class="ftu-addon-btn" id="btn-reload-patron" title="Làm mới"><i class="fa fa-refresh"></i></button>
                             </div>
                         </div>
 
-                        <label class="ftu-checkbox-wrap">
+                        <div class="ftu-form-row">
+                            <label class="ftu-form-lbl" for="barcode">Số ĐKCB</label>
+                            <div class="ftu-field-box">
+                                <input type="text" name="barcode" id="barcode" class="ftu-input-ctrl ftu-barcode-input focus" autocomplete="off" placeholder="" />
+                                <button type="button" class="ftu-addon-btn" id="btn-clear-barcode" title="Xóa"><i class="fa fa-refresh"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="ftu-checkbox-line">
                             <input type="checkbox" id="calc_turn" name="calc_turn" checked="checked" />
-                            <span>Tính lượt lưu thông</span>
-                        </label>
+                            <label for="calc_turn" style="margin:0; font-weight:normal; cursor:pointer;">Tính lượt</label>
+                        </div>
 
-                        <div class="ftu-action-cluster">
-                            <button type="submit" class="ftu-btn-pos ftu-btn-borrow-act"><i class="fa fa-download"></i> Cho mượn</button>
-                            <a href="/cgi-bin/koha/circ/circulation.pl" class="ftu-btn-pos ftu-btn-reject-act"><i class="fa fa-ban"></i> Từ chối</a>
-                            <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-btn-pos ftu-btn-search-act"><i class="fa fa-search"></i> Tìm tên</a>
+                        <div class="ftu-btn-group">
+                            <a href="/cgi-bin/koha/circ/circulation.pl" class="ftu-action-btn ftu-btn-amber">Từ chối</a>
+                            <button type="submit" class="ftu-action-btn ftu-btn-blue">Mượn</button>
+                            <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-action-btn ftu-btn-slate">Tìm tên</a>
                         </div>
                     </form>
                     [% ELSE %]
                     <form action="/cgi-bin/koha/circ/circulation.pl" id="mainform" method="get" autocomplete="off">
-                        <div class="ftu-field-group">
-                            <label class="ftu-field-label" for="branch">Điểm lưu thông</label>
-                            <select name="branch" id="branch" class="ftu-select-control">
-                                <option value="CPL" selected="selected">Phòng Mượn</option>
-                                [% FOREACH b IN Branches.all %]
-                                    <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
-                                [% END %]
-                            </select>
-                        </div>
-
-                        <div class="ftu-field-group">
-                            <label class="ftu-field-label" for="findborrower_main">Số thẻ bạn đọc</label>
-                            <div class="ftu-input-wrap">
-                                <input type="text" id="findborrower_main" name="findborrower" class="ftu-text-control ftu-input-scanner focus" autocomplete="off" placeholder="Quét mã thẻ hoặc họ tên..." />
-                                <button type="submit" class="ftu-btn-icon-addon" title="Tìm bạn đọc"><i class="fa fa-search"></i></button>
+                        <div class="ftu-form-row">
+                            <label class="ftu-form-lbl" for="branch">Điểm lưu thông</label>
+                            <div class="ftu-field-box">
+                                <select name="branch" id="branch" class="ftu-select-ctrl">
+                                    <option value="CPL" selected="selected">Phòng Mượn</option>
+                                    [% FOREACH b IN Branches.all %]
+                                        <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
+                                    [% END %]
+                                </select>
                             </div>
                         </div>
 
-                        <div class="ftu-field-group">
-                            <label class="ftu-field-label" style="opacity:0.6;">Số ĐKCB (Mã vạch tài liệu)</label>
-                            <input type="text" class="ftu-text-control" disabled="disabled" placeholder="Vui lòng quét thẻ bạn đọc trước" style="background:#f1f5f9; cursor:not-allowed;" />
+                        <div class="ftu-form-row">
+                            <label class="ftu-form-lbl" for="findborrower_main">Số thẻ</label>
+                            <div class="ftu-field-box">
+                                <input type="text" id="findborrower_main" name="findborrower" class="ftu-input-ctrl ftu-barcode-input focus" autocomplete="off" placeholder="Nhập mã thẻ hoặc họ tên" />
+                                <button type="submit" class="ftu-addon-btn" title="Tìm"><i class="fa fa-search"></i></button>
+                            </div>
                         </div>
 
-                        <div class="ftu-action-cluster" style="margin-top:16px;">
-                            <button type="submit" class="ftu-btn-pos ftu-btn-borrow-act"><i class="fa fa-search"></i> Tìm bạn đọc</button>
-                            <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-btn-pos ftu-btn-search-act"><i class="fa fa-user"></i> Tìm kiếm nâng cao</a>
+                        <div class="ftu-form-row">
+                            <label class="ftu-form-lbl">Số ĐKCB</label>
+                            <div class="ftu-field-box">
+                                <input type="text" class="ftu-input-ctrl" disabled="disabled" placeholder="Vui lòng nhập thẻ trước" />
+                            </div>
+                        </div>
+
+                        <div class="ftu-checkbox-line">
+                            <input type="checkbox" id="calc_turn" name="calc_turn" checked="checked" />
+                            <label for="calc_turn" style="margin:0; font-weight:normal; cursor:pointer;">Tính lượt</label>
+                        </div>
+
+                        <div class="ftu-btn-group">
+                            <button type="submit" class="ftu-action-btn ftu-btn-blue">Tìm bạn đọc</button>
+                            <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-action-btn ftu-btn-slate">Tìm tên</a>
                         </div>
                     </form>
                     [% END %]
                 </div>
 
-                <!-- 2. RIGHT PANEL: BẠN ĐỌC & KPI METRICS DASHBOARD -->
-                <div class="ftu-patron-panel">
+                <!-- CỘT 2: THÔNG TIN BẠN ĐỌC (TINH GỌN, ÍT CHỮ) -->
+                <div class="ftu-col-patron-info">
                     [% IF patron %]
                     [% SET overdue_count = 0 %]
                     [% FOREACH chk IN patron.checkouts %]
                         [% IF chk.is_overdue %][% SET overdue_count = overdue_count + 1 %][% END %]
                     [% END %]
 
-                    <!-- Patron Profile Header Strip -->
-                    <div class="ftu-patron-header">
-                        <div class="ftu-patron-bio">
-                            <div class="ftu-avatar-box">
-                                [% IF Koha.Preference('patronimages') && patron.image %]
-                                    <img src="/cgi-bin/koha/members/patronimage.pl?borrowernumber=[% patron.borrowernumber | uri %]" alt="Ảnh bạn đọc" />
-                                [% ELSE %]
-                                    <img src="/intranet-tmpl/prog/img/ftu-logo.png" alt="FTU Seal" class="ftu-seal-logo" />
-                                [% END %]
-                            </div>
-                            <div class="ftu-patron-titles">
-                                <div class="ftu-patron-name">
-                                    [% patron.surname | html %] [% patron.firstname | html %]
-                                </div>
-                                <div class="ftu-patron-chips">
-                                    <span class="ftu-chip ftu-chip-card"><i class="fa fa-id-card-o"></i> [% patron.cardnumber | html %]</span>
-                                    <span class="ftu-chip ftu-chip-status"><i class="fa fa-check-circle"></i> Đang hoạt động</span>
-                                    <span class="ftu-chip ftu-chip-branch"><i class="fa fa-building-o"></i> Phân hiệu TP.HCM</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% patron.borrowernumber | uri %]" target="_blank" class="ftu-btn-pos ftu-btn-search-act" style="height:30px; font-size:12px; padding:0 10px;" title="Xem hồ sơ chi tiết">
-                                <i class="fa fa-external-link"></i> Hồ sơ đầy đủ
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- 4 KPI Stat Tiles -->
-                    <div class="ftu-kpi-grid">
-                        <div class="ftu-kpi-card">
-                            <div class="ftu-kpi-lbl"><i class="fa fa-book"></i> Đang mượn</div>
-                            <div class="ftu-kpi-val">[% patron.checkouts.count || 0 %] <span style="font-size:12px; font-weight:normal; color:#64748b;">/ 5 cuốn</span></div>
-                            <div class="ftu-kpi-sub">Hạn mức tối đa 5</div>
-                        </div>
-
-                        <div class="ftu-kpi-card [% IF overdue_count > 0 %]ftu-kpi-danger[% ELSE %]ftu-kpi-success[% END %]">
-                            <div class="ftu-kpi-lbl"><i class="fa fa-clock-o"></i> Quá hạn</div>
-                            <div class="ftu-kpi-val">[% overdue_count %] <span style="font-size:12px; font-weight:normal;">tài liệu</span></div>
-                            <div class="ftu-kpi-sub">[% IF overdue_count > 0 %]Cần xử lý phạt[% ELSE %]Không có nợ sách[% END %]</div>
-                        </div>
-
-                        <div class="ftu-kpi-card">
-                            <div class="ftu-kpi-lbl"><i class="fa fa-money"></i> Tiền phạt / cược</div>
-                            <div class="ftu-kpi-val">[% IF patron.account.balance && (patron.account.balance + 0) > 0 %][% patron.account.balance | $Price %][% ELSE %]0[% END %] <span style="font-size:12px; font-weight:normal; color:#64748b;">VNĐ</span></div>
-                            <div class="ftu-kpi-sub">Số dư tài khoản</div>
-                        </div>
-
-                        <div class="ftu-kpi-card">
-                            <div class="ftu-kpi-lbl"><i class="fa fa-calendar-check-o"></i> Hạn thẻ</div>
-                            <div class="ftu-kpi-val" style="font-size:14.5px;">
-                                [% IF patron.dateexpiry %]
-                                    [% patron.dateexpiry | $KohaDates dateformat => 'metric' %]
-                                [% ELSE %]
-                                    20/08/2035
-                                [% END %]
-                            </div>
-                            <div class="ftu-kpi-sub">Cấp lần: 1</div>
-                        </div>
-                    </div>
-
-                    <!-- Metadata Details Strip (Chỉ hiển thị các trường có dữ liệu) -->
-                    <div class="ftu-meta-strip">
+                    <!-- Dòng 1: Họ tên + Ngày sinh -->
+                    <div class="ftu-patron-line">
+                        <div class="ftu-name-lead">[% patron.cardnumber | html %]/ [% patron.surname | html %] [% patron.firstname | html %]</div>
                         [% IF patron.dateofbirth %]
-                        <div class="ftu-meta-item">
-                            <span class="ftu-meta-label"><i class="fa fa-birthday-cake" style="color:#eab308;"></i> Ngày sinh:</span>
-                            <span class="ftu-meta-value">[% patron.dateofbirth | $KohaDates dateformat => 'metric' %]</span>
-                        </div>
+                        <div class="ftu-kv"><span class="ftu-k">N.sinh:</span> <span class="ftu-v">[% patron.dateofbirth | $KohaDates dateformat => 'metric' %]</span></div>
                         [% END %]
+                    </div>
 
-                        [% IF patron.dateenrolled %]
-                        <div class="ftu-meta-item">
-                            <span class="ftu-meta-label"><i class="fa fa-calendar-plus-o" style="color:#3b82f6;"></i> Ngày cấp thẻ:</span>
-                            <span class="ftu-meta-value">[% patron.dateenrolled | $KohaDates dateformat => 'metric' %]</span>
+                    <!-- Dòng 2: Cấp thẻ + Hạn thẻ -->
+                    <div class="ftu-patron-line">
+                        <div class="ftu-kv">
+                            <span class="ftu-k">Cấp thẻ:</span> 
+                            <span class="ftu-v">[% IF patron.dateenrolled %][% patron.dateenrolled | $KohaDates dateformat => 'metric' %][% ELSE %]01/10/2026[% END %]</span>
                         </div>
-                        [% END %]
-
-                        [% IF patron.address || patron.city %]
-                        <div class="ftu-meta-item" style="grid-column: span 2;">
-                            <span class="ftu-meta-label"><i class="fa fa-map-marker" style="color:#ef4444;"></i> Địa chỉ:</span>
-                            <span class="ftu-meta-value">[% patron.address | html %][% IF patron.city %], [% patron.city | html %][% END %]</span>
-                        </div>
-                        [% END %]
-
-                        <div class="ftu-meta-item">
-                            <span class="ftu-meta-label"><i class="fa fa-history" style="color:#10b981;"></i> Mượn/Gia hạn:</span>
-                            <span class="ftu-meta-value">120 ngày / lượt</span>
-                        </div>
-
-                        <div class="ftu-meta-item">
-                            <span class="ftu-meta-label"><i class="fa fa-university" style="color:#6366f1;"></i> Đơn vị:</span>
-                            <span class="ftu-meta-value">Đại học Ngoại Thương TP.HCM</span>
+                        <div class="ftu-kv">
+                            <span class="ftu-k">Hạn thẻ:</span> 
+                            <span class="ftu-v [% IF patron.is_expired %]ftu-danger-txt[% END %]">[% IF patron.dateexpiry %][% patron.dateexpiry | $KohaDates dateformat => 'metric' %][% ELSE %]01/10/2027[% END %]</span>
                         </div>
                     </div>
 
-                    <!-- Quick Note -->
-                    <div class="ftu-note-container">
-                        <input type="text" id="ftu_patron_note" class="ftu-patron-note-input" value="[% patron.borrowernotes | html %]" placeholder="Ghi chú lưu thông cho bạn đọc này..." />
-                        <i class="fa fa-commenting-o ftu-note-icon-btn"></i>
+                    <!-- Dòng 3: Địa chỉ (chỉ hiển thị nếu có) -->
+                    [% IF patron.address || patron.city %]
+                    <div class="ftu-patron-line">
+                        <div class="ftu-kv" style="width:100%;">
+                            <span class="ftu-k">Địa chỉ:</span> 
+                            <span class="ftu-v">[% patron.address | html %][% IF patron.city %], [% patron.city | html %][% END %]</span>
+                        </div>
+                    </div>
+                    [% END %]
+
+                    <!-- Dòng 4: Cấp thẻ lần + Quá hạn + Tiền cược -->
+                    <div class="ftu-patron-line">
+                        <div class="ftu-kv">
+                            <span class="ftu-k">Cấp thẻ lần:</span> 1; 
+                            <span class="[% IF overdue_count > 0 %]ftu-danger-txt[% ELSE %]ftu-v[% END %]">Quá hạn: [% overdue_count %] tài liệu</span>
+                        </div>
+                        <div class="ftu-kv">
+                            <span class="ftu-k">Tiền cược:</span> 
+                            <span class="ftu-v">[% IF patron.account.balance && (patron.account.balance + 0) > 0 %][% patron.account.balance | $Price %][% ELSE %]0[% END %] (VNĐ)</span>
+                        </div>
                     </div>
 
-                    <!-- Checkout Feedback Toast (Real-time feedback bar) -->
-                    <div class="ftu-feedback-toast" id="ftu-feedback-bar" style="[% IF !issue && !was_renewed && !messages %]display:none;[% END %]">
+                    <!-- Dòng 5: Thời hạn + Số lượng mượn -->
+                    <div class="ftu-patron-line">
+                        <div class="ftu-kv">
+                            <span class="ftu-k">Ngày mượn/Gia hạn:</span> 
+                            <span class="ftu-v">120/ 120</span>
+                        </div>
+                        <div class="ftu-kv">
+                            <span class="ftu-k">Sách mượn/Gia hạn:</span> 
+                            <span class="ftu-v">[% patron.checkouts.count || 0 %]/ 5</span>
+                        </div>
+                    </div>
+
+                    <!-- Dòng 6: Ghi chú -->
+                    <div class="ftu-note-bar">
+                        <input type="text" id="ftu_patron_note" class="ftu-note-input" value="[% patron.borrowernotes | html %]" placeholder="" />
+                        <i class="fa fa-comment-o ftu-note-icon"></i>
+                    </div>
+
+                    <!-- Dòng 7: Thanh trạng thái -->
+                    <div class="ftu-alert-bar" id="ftu-feedback-bar">
                         <span id="ftu-feedback-text">
                             [% IF ( issue ) %]
-                                <i class="fa fa-check-circle"></i> Đã cho mượn thành công tài liệu: <strong>[% issue.item.biblio.title | html %]</strong> ([% issue.item.barcode | html %]). Hạn trả: [% issue.date_due | $KohaDates as_due_date => 1 dateformat => 'metric' %]
+                                Đã mượn thành công: [% issue.item.biblio.title | html %] ([% issue.item.barcode | html %]). Hạn trả: [% issue.date_due | $KohaDates as_due_date => 1 dateformat => 'metric' %]
                             [% ELSIF ( was_renewed ) %]
-                                <i class="fa fa-check-circle"></i> Tài khoản bạn đọc đã được gia hạn thành công.
+                                Đã gia hạn thành công.
                             [% ELSIF ( messages ) %]
                                 [% messages | html %]
                             [% ELSE %]
-                                Sẵn sàng phục vụ lưu thông.
+                                .
                             [% END %]
                         </span>
-                        <button type="button" class="ftu-toast-close" onclick="document.getElementById('ftu-feedback-bar').style.display='none';">&times;</button>
+                        <button type="button" style="background:none; border:none; color:#0284c7; cursor:pointer;" onclick="document.getElementById('ftu-feedback-bar').style.display='none';">&times;</button>
                     </div>
 
                     [% ELSE %]
-                    <div class="ftu-empty-deck">
-                        <i class="fa fa-id-card-o ftu-empty-icon"></i>
-                        <h3 style="font-size:16px; font-weight:700; color:#334155; margin-bottom:6px;">Chưa chọn bạn đọc</h3>
-                        <p style="font-size:13px; color:#64748b; margin:0;">Vui lòng quét mã thẻ bạn đọc hoặc nhập họ tên ở ô bên trái để mở phiên lưu thông.</p>
+                    <div style="padding:28px 10px; text-align:center; color:#64748b;">
+                        Nhập số thẻ bạn đọc hoặc quét mã để bắt đầu phiên lưu thông.
                     </div>
                     [% END %]
                 </div>
+
+                <!-- CỘT 3: AVATAR MẶC ĐỊNH (DEFAULT AVATAR) -->
+                <div class="ftu-col-avatar">
+                    <div class="ftu-avatar-box">
+                        [% IF Koha.Preference('patronimages') && patron.image %]
+                            <img src="/cgi-bin/koha/members/patronimage.pl?borrowernumber=[% patron.borrowernumber | uri %]" alt="Ảnh bạn đọc" />
+                        [% ELSE %]
+                            <!-- Avatar Silhouette mặc định chuẩn vector -->
+                            <svg viewBox="0 0 24 24" class="ftu-avatar-svg">
+                                <circle cx="12" cy="8" r="4.2" fill="#cbd5e1" />
+                                <path d="M4 19.5c0-3.5 3.5-6 8-6s8 2.5 8 6v1H4v-1z" fill="#cbd5e1" />
+                            </svg>
+                        [% END %]
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <!-- KHỐI XÁC NHẬN NẾU CÓ TRỞ NGẠI LƯU THÔNG -->
     [% IF ( NEEDSCONFIRMATION ) %]
-        <div id="circ_needsconfirmation" class="alert alert-warning" style="border-radius:8px; margin-bottom:16px; border-left:4px solid #f59e0b;">
-            <h4 style="font-size:15px; font-weight:700; margin-top:0;"><i class="fa fa-exclamation-triangle"></i> Xác nhận cho mượn tài liệu</h4>
-            <ul style="margin-bottom:12px; font-size:13px;">
-                [% IF ( RENEW_ISSUE ) %]
-                    <li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) hiện đang được mượn bởi bạn đọc này. Gia hạn?</li>
-                [% END %]
-                [% IF ( ISSUED_TO_ANOTHER ) %]
-                    <li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được mượn bởi <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% issued_borrowernumber | uri %]">[% issued_firstname | html %] [% issued_surname | html %]</a> ([% issued_cardnumber | html %]). Ghi trả và cho mượn lại?</li>
-                [% END %]
-                [% IF ( RESERVE_WAITING ) %]
-                    <li>Tài liệu đang chờ bạn đọc khác đặt trước.</li>
-                [% END %]
-                [% IF ( DEBT ) %]
-                    <li>Bạn đọc đang nợ tiền phạt: [% DEBT | $Price %].</li>
-                [% END %]
+        <div id="circ_needsconfirmation" class="alert alert-warning" style="margin-bottom:8px; border-radius:2px; padding:8px 12px;">
+            <strong style="display:block; margin-bottom:4px;">Vui lòng xác nhận cho mượn:</strong>
+            <ul style="margin:0 0 8px 16px; padding:0;">
+                [% IF ( RENEW_ISSUE ) %]<li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được mượn bởi bạn đọc này. Gia hạn?</li>[% END %]
+                [% IF ( ISSUED_TO_ANOTHER ) %]<li>Tài liệu đang được mượn bởi [% issued_firstname | html %] [% issued_surname | html %] ([% issued_cardnumber | html %]). Ghi trả và mượn lại?</li>[% END %]
+                [% IF ( RESERVE_WAITING ) %]<li>Tài liệu đang chờ bạn đọc khác đặt trước.</li>[% END %]
+                [% IF ( DEBT ) %]<li>Bạn đọc đang nợ tiền phạt: [% DEBT | $Price %].</li>[% END %]
             </ul>
-            <form method="post" action="/cgi-bin/koha/circ/circulation.pl" style="display:flex; gap:8px;">
+            <form method="post" action="/cgi-bin/koha/circ/circulation.pl" style="display:flex; gap:6px;">
                 [% INCLUDE 'csrf-token.inc' %]
                 <input type="hidden" name="op" value="cud-checkout" />
                 <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
                 <input type="hidden" name="barcode" value="[% barcode | html %]" />
                 <input type="hidden" name="issueconfirmed" value="1" />
                 <input type="hidden" name="debt_confirmed" value="1" />
-                <button type="submit" class="btn btn-warning"><i class="fa fa-check"></i> Xác nhận mượn</button>
-                <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="btn btn-default">Hủy bỏ</a>
+                <button type="submit" class="ftu-action-btn ftu-btn-amber">Xác nhận</button>
+                <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="ftu-action-btn ftu-btn-slate">Hủy</a>
             </form>
         </div>
     [% END %]
 
     [% IF ( IMPOSSIBLE ) %]
-        <div class="alert alert-danger" style="border-radius:8px; margin-bottom:16px; border-left:4px solid #ef4444;">
-            <h4 style="font-size:15px; font-weight:700; margin-top:0;"><i class="fa fa-times-circle"></i> Không thể cho mượn</h4>
-            <ul style="margin-bottom:10px; font-size:13px;">
-                [% IF ( UNKNOWN_BARCODE ) %]
-                    <li>Không tìm thấy tài liệu với mã vạch: <strong>[% barcode | html %]</strong></li>
-                [% END %]
-                [% IF ( NOT_FOR_LOAN ) %]
-                    <li>Tài liệu này không cho mượn về nhà.</li>
-                [% END %]
-                [% IF ( WTHDRAWN ) %]
-                    <li>Tài liệu đã được rút khỏi lưu thông.</li>
-                [% END %]
-                [% IF ( RESTRICTED ) %]
-                    <li>Tài liệu bị hạn chế lưu thông.</li>
-                [% END %]
+        <div class="alert alert-danger" style="margin-bottom:8px; border-radius:2px; padding:8px 12px;">
+            <strong style="display:block; margin-bottom:4px;">Không thể cho mượn:</strong>
+            <ul style="margin:0 0 8px 16px; padding:0;">
+                [% IF ( UNKNOWN_BARCODE ) %]<li>Không tìm thấy mã vạch: [% barcode | html %]</li>[% END %]
+                [% IF ( NOT_FOR_LOAN ) %]<li>Tài liệu này không cho mượn về nhà.</li>[% END %]
+                [% IF ( WTHDRAWN ) %]<li>Tài liệu đã rút khỏi lưu thông.</li>[% END %]
+                [% IF ( RESTRICTED ) %]<li>Tài liệu bị hạn chế lưu thông.</li>[% END %]
             </ul>
-            <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="btn btn-default">Quay lại</a>
+            <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="ftu-action-btn ftu-btn-slate">Quay lại</a>
         </div>
     [% END %]
 
     <!-- ========================================================= -->
-    <!-- CARD 2: BẢNG TÀI LIỆU ĐANG MƯỢN (ACTIVE CHECKOUTS)        -->
+    <!-- KHUNG 2: BẢNG TÀI LIỆU ĐANG MƯỢN (COMPACT TABLE)          -->
     <!-- ========================================================= -->
     [% IF patron %]
-    <div class="ftu-card">
-        <div class="ftu-table-header-strip">
-            <div class="ftu-circ-summary-tag">
-                <i class="fa fa-list-alt"></i>
-                <span>TỔNG ĐANG MƯỢN: <span id="ftu-total-count" style="font-size:16px;">[% patron.checkouts.count || 0 %]</span></span>
-                <span style="color:#94a3b8; font-weight:normal; margin:0 4px;">|</span>
-                <span style="font-size:13px; color:#475569; font-weight:600;">PLV.Mượn: 0</span>
-                <span style="color:#94a3b8; font-weight:normal; margin:0 4px;">|</span>
-                <span style="font-size:13px; color:#475569; font-weight:600;">PLV.Trả: 0</span>
+    <div class="ftu-panel ftu-panel-bottom">
+        <div class="ftu-summary-header">
+            <div class="ftu-red-stat">
+                Tổng đang mượn : <span id="ftu-total-count">[% patron.checkouts.count || 0 %]</span> | PLV.Mượn : 0 | PLV.Trả: 0
             </div>
-
-            <div class="ftu-table-actions">
-                <a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | uri %]" class="ftu-btn-pill ftu-pill-fine" target="_blank">
-                    <i class="fa fa-credit-card"></i> Cập nhật phạt
-                </a>
-                <a href="#" id="ftu-btn-renew-all" class="ftu-btn-pill ftu-pill-renew">
-                    <i class="fa fa-refresh"></i> Gia hạn tất cả
-                </a>
-                <a href="#" id="ftu-btn-return-all" class="ftu-btn-pill ftu-pill-return">
-                    <i class="fa fa-inbox"></i> Trả tất cả
-                </a>
-                <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-btn-pill ftu-pill-print">
-                    <i class="fa fa-print"></i> In danh sách
-                </a>
-                <a href="#" class="ftu-toggle-panel" data-target="#ftu-bottom-panel-body" title="Thu gọn / Mở rộng"><i class="fa fa-chevron-up"></i></a>
+            <div class="ftu-top-links">
+                <a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | uri %]" class="ftu-lnk-fine" target="_blank">Cập nhật phạt</a>
+                <a href="#" id="ftu-btn-renew-all" class="ftu-lnk-renew">Gia hạn tất cả</a>
+                <a href="#" id="ftu-btn-return-all" class="ftu-lnk-return">Trả tất cả</a>
+                <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-lnk-print">In danh sách</a>
+                <a href="#" class="ftu-panel-toggle" data-target="#ftu-bottom-body" title="Thu gọn / Mở rộng"><i class="fa fa-angle-up"></i></a>
             </div>
         </div>
+        <div class="ftu-panel-body" id="ftu-bottom-body" style="padding-top:6px;">
 
-        <div id="ftu-bottom-panel-body">
-            <!-- Toolbar: Length & Search -->
-            <div class="ftu-table-toolbar">
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <span>Hiển thị</span>
-                    <select id="ftu-page-length" class="ftu-select-control" style="width:70px; height:28px; padding:1px 6px;">
+            <!-- Bộ lọc & Tìm kiếm nhanh -->
+            <div class="ftu-table-bar">
+                <div>
+                    Hiển thị 
+                    <select id="ftu-page-length" class="ftu-select-len">
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                     </select>
-                    <span>bản ghi</span>
+                    bản ghi
                 </div>
-                <div class="ftu-search-box">
-                    <i class="fa fa-search"></i>
-                    <input type="text" id="ftu-search-table" placeholder="Lọc nhanh sách, tác giả..." />
+                <div>
+                    <input type="text" id="ftu-search-table" class="ftu-search-input" placeholder="" />
                 </div>
             </div>
 
-            <!-- Main Data Table -->
-            <div style="overflow-x:auto;">
-                <table id="ftu-checkouts-table" class="ftu-data-table">
+            <!-- Bảng dữ liệu -->
+            <div class="ftu-table-wrap">
+                <table id="ftu-checkouts-table" class="ftu-tbl">
                     <thead>
                         <tr>
-                            <th style="width: 36px; text-align: center;"><input type="checkbox" id="ftu-chk-all" style="accent-color:#2563eb;" /></th>
-                            <th class="th-sort" data-col="1" style="width: 120px;">Số ĐKCB <i class="fa fa-sort"></i></th>
+                            <th style="width: 28px; text-align: center;"><input type="checkbox" id="ftu-chk-all" /></th>
+                            <th class="th-sort" data-col="1" style="width: 100px;">Số ĐKCB <i class="fa fa-sort"></i></th>
                             <th class="th-sort" data-col="2">Nhan đề tài liệu <i class="fa fa-sort"></i></th>
-                            <th class="th-sort" data-col="3" style="width: 130px;">Môn loại <i class="fa fa-sort"></i></th>
-                            <th class="th-sort" data-col="4" style="width: 200px;">Tác giả <i class="fa fa-sort"></i></th>
-                            <th class="th-sort" data-col="5" style="width: 110px;">Ngày mượn <i class="fa fa-sort"></i></th>
-                            <th class="th-sort" data-col="6" style="width: 110px;">Hạn trả <i class="fa fa-sort"></i></th>
-                            <th style="text-align: center; width: 110px;">Trạng thái</th>
-                            <th style="text-align: center; width: 160px;">Thao tác</th>
+                            <th class="th-sort" data-col="3" style="width: 110px;">Môn loại <i class="fa fa-sort"></i></th>
+                            <th class="th-sort" data-col="4" style="width: 180px;">Tác giả <i class="fa fa-sort"></i></th>
+                            <th class="th-sort" data-col="5" style="width: 95px;">Ngày mượn <i class="fa fa-sort"></i></th>
+                            <th class="th-sort" data-col="6" style="width: 95px;">Hạn trả <i class="fa fa-sort"></i></th>
+                            <th style="text-align: center; width: 90px;">Trạng thái</th>
+                            <th style="text-align: center; width: 115px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         [% IF patron.checkouts.count > 0 %]
                             [% FOREACH issue IN patron.checkouts %]
                             <tr data-issue-id="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]">
-                                <td style="text-align: center;"><input type="checkbox" class="ftu-chk-item" value="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]" style="accent-color:#2563eb;" /></td>
+                                <td style="text-align: center;"><input type="checkbox" class="ftu-chk-item" value="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]" /></td>
+                                <td style="font-weight: 600;">[% issue.item.barcode | html %]</td>
                                 <td>
-                                    <span class="ftu-td-barcode">[% issue.item.barcode | html %]</span>
+                                    <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% issue.item.biblio.biblionumber | uri %]" class="ftu-title-link" target="_blank">[% issue.item.biblio.title | html %]</a>
                                 </td>
-                                <td class="ftu-td-title">
-                                    <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank">
-                                        <i class="fa fa-book" style="color:#64748b; font-size:12px;"></i> [% issue.item.biblio.title | html %]
-                                    </a>
-                                </td>
-                                <td><span style="font-weight:600; color:#475569;">[% issue.item.itemcallnumber | html %]</span></td>
+                                <td>[% issue.item.itemcallnumber | html %]</td>
                                 <td>[% issue.item.biblio.author | html %]</td>
-                                <td><i class="fa fa-calendar-o" style="color:#94a3b8; font-size:11px;"></i> [% issue.issuedate | $KohaDates dateformat => 'metric' %]</td>
-                                <td class="ftu-duedate-cell">
-                                    <i class="fa fa-calendar-check-o" style="color:#2563eb; font-size:11px;"></i> 
-                                    <span style="font-weight:600;">[% issue.date_due | $KohaDates dateformat => 'metric' %]</span>
-                                </td>
+                                <td>[% issue.issuedate | $KohaDates dateformat => 'metric' %]</td>
+                                <td class="ftu-duedate-cell">[% issue.date_due | $KohaDates dateformat => 'metric' %]</td>
                                 <td style="text-align: center;">
                                     [% IF issue.is_overdue %]
-                                        <span class="ftu-status-pill ftu-status-overdue"><i class="fa fa-exclamation-circle"></i> Quá hạn</span>
+                                        <span class="ftu-badge-clean ftu-bg-overdue">Quá hạn</span>
                                     [% ELSE %]
-                                        <span class="ftu-status-pill ftu-status-active"><i class="fa fa-check-circle"></i> Đang mượn</span>
+                                        <span class="ftu-badge-clean ftu-bg-borrow">Đang mượn</span>
                                     [% END %]
                                 </td>
                                 <td style="text-align: center; white-space: nowrap;">
-                                    <div class="ftu-action-btn-group">
-                                        <button type="button" class="ftu-tbl-act ftu-act-renew-icon ftu-btn-renew-one" data-issue-id="[% issue.issue_id | html %]" title="Gia hạn tài liệu"><i class="fa fa-refresh"></i></button>
-                                        <a href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% issue.itemnumber | uri %]&amp;biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank" class="ftu-tbl-act ftu-act-edit-icon" title="Chi tiết bản sách"><i class="fa fa-info-circle"></i></a>
-                                        <button type="button" class="ftu-tbl-act ftu-act-return-icon ftu-btn-return-one" data-barcode="[% issue.item.barcode | html %]" data-title="[% issue.item.biblio.title | html %]" title="Ghi trả sách"><i class="fa fa-inbox"></i></button>
-                                        <button type="button" class="ftu-tbl-act ftu-act-note-icon" title="Ghi chú cuốn sách"><i class="fa fa-comment-o"></i></button>
-                                        <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-tbl-act ftu-act-slip-icon" title="In phiếu mượn"><i class="fa fa-print"></i></a>
-                                    </div>
+                                    <button type="button" class="ftu-act-icon ftu-btn-renew-one" data-issue-id="[% issue.issue_id | html %]" title="Gia hạn"><i class="fa fa-calendar" style="color:#0284c7;"></i></button>
+                                    <a href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% issue.itemnumber | uri %]&amp;biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank" class="ftu-act-icon" title="Chi tiết bản sách"><i class="fa fa-pencil" style="color:#64748b;"></i></a>
+                                    <button type="button" class="ftu-act-icon ftu-btn-return-one" data-barcode="[% issue.item.barcode | html %]" data-title="[% issue.item.biblio.title | html %]" title="Trả tài liệu"><i class="fa fa-ban" style="color:#dc2626;"></i></button>
+                                    <button type="button" class="ftu-act-icon" title="Ghi chú"><i class="fa fa-comment-o" style="color:#0284c7;"></i></button>
+                                    <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-act-icon" title="In phiếu"><i class="fa fa-print" style="color:#ea580c;"></i></a>
                                 </td>
                             </tr>
                             [% END %]
                         [% ELSE %]
                             <tr class="ftu-row-empty">
-                                <td colspan="9" style="text-align: center; padding: 36px 14px; color: #64748b;">
-                                    <i class="fa fa-book" style="font-size:32px; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
-                                    Bạn đọc hiện không có tài liệu nào đang mượn.
-                                </td>
+                                <td colspan="9" style="text-align: center; padding: 20px 8px; color: #64748b;">Không có tài liệu nào đang mượn</td>
                             </tr>
                         [% END %]
                     </tbody>
                 </table>
             </div>
 
-            <!-- Table Footer -->
-            <div class="ftu-table-footer-bar">
+            <!-- Chân bảng: số lượng và phân trang -->
+            <div class="ftu-footer-bar">
                 <div id="ftu-footer-info">
                     Hiển thị 1 đến [% patron.checkouts.count || 0 %] trong [% patron.checkouts.count || 0 %] bản ghi
                 </div>
-                <div class="ftu-page-controls">
-                    <button type="button" class="ftu-page-btn" disabled>&lt;</button>
-                    <button type="button" class="ftu-page-btn active">1</button>
-                    <button type="button" class="ftu-page-btn" disabled>&gt;</button>
+                <div class="ftu-pagination">
+                    <button type="button" class="ftu-pg-btn" disabled>&lt;</button>
+                    <button type="button" class="ftu-pg-btn active">1</button>
+                    <button type="button" class="ftu-pg-btn" disabled>&gt;</button>
                 </div>
             </div>
+
         </div>
     </div>
     [% END %]
 
-</div> <!-- /.ftu-circ-wrapper -->
+</div> <!-- /.ftu-circ-container -->
 
 <!-- Hidden compatibility container for Koha scripts -->
 <div style="display:none;">
@@ -1274,7 +913,7 @@
     [% INCLUDE 'js-date-format.inc' %]
     <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready(function() {
-            // 1. Focus barcode input
+            // 1. Focus barcode
             setTimeout(function() {
                 var bc = $('#barcode');
                 if (bc.length) { bc.focus(); }
@@ -1295,15 +934,15 @@
             });
 
             // 4. Toggle Card Panels
-            $('.ftu-toggle-panel').on('click', function(e) {
+            $('.ftu-panel-toggle').on('click', function(e) {
                 e.preventDefault();
                 var target = $(this).data('target');
                 var icon = $(this).find('i');
-                $(target).slideToggle(180, function() {
+                $(target).slideToggle(160, function() {
                     if ($(this).is(':visible')) {
-                        icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                        icon.removeClass('fa-angle-down').addClass('fa-angle-up');
                     } else {
-                        icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                        icon.removeClass('fa-angle-up').addClass('fa-angle-down');
                     }
                 });
             });
@@ -1320,19 +959,19 @@
                 if (!container) {
                     container = document.createElement('div');
                     container.id = 'ftu-toast-container';
-                    container.style.cssText = 'position:fixed;top:70px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+                    container.style.cssText = 'position:fixed;top:60px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:6px;pointer-events:none;';
                     document.body.appendChild(container);
                 }
-                var colors = { success:'#10b981', error:'#ef4444', info:'#2563eb' };
+                var colors = { success:'#16a34a', error:'#dc2626', info:'#0284c7' };
                 var toast = document.createElement('div');
-                toast.style.cssText = 'pointer-events:auto;background:#fff;border-left:4px solid '+(colors[type]||'#2563eb')+';border-radius:6px;padding:10px 16px;box-shadow:0 4px 14px rgba(0,0,0,0.12);font-size:13px;max-width:340px;display:flex;gap:10px;align-items:center;';
-                toast.innerHTML = '<span style="color:'+(colors[type]||'#2563eb')+';font-size:16px;">'+(type==='success'?'<i class="fa fa-check-circle"></i>':(type==='error'?'<i class="fa fa-times-circle"></i>':'<i class="fa fa-info-circle"></i>'))+'</span><span style="color:#1e293b;font-weight:500;">'+msg+'</span>';
+                toast.style.cssText = 'pointer-events:auto;background:#ffffff;border-left:4px solid '+(colors[type]||'#0284c7')+';border-radius:2px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-size:12px;max-width:320px;';
+                toast.innerHTML = '<span style="color:'+(colors[type]||'#0284c7')+';font-weight:bold;margin-right:6px;">'+(type==='success'?'✓':(type==='error'?'✗':'ℹ'))+'</span><span>'+msg+'</span>';
                 container.appendChild(toast);
                 setTimeout(function(){
                     toast.style.opacity='0';
-                    toast.style.transition='opacity 0.3s';
-                    setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 300);
-                }, 3200);
+                    toast.style.transition='opacity 0.25s';
+                    setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 250);
+                }, 3000);
             }
 
             // 7. Update Table Counts
@@ -1341,7 +980,7 @@
                 var count = rows.length;
                 $('#ftu-total-count').text(count);
                 if (count === 0) {
-                    $('#ftu-checkouts-table tbody').html('<tr class="ftu-row-empty"><td colspan="9" style="text-align:center; padding:36px 14px; color:#64748b;"><i class="fa fa-book" style="font-size:32px; color:#cbd5e1; display:block; margin-bottom:8px;"></i>Bạn đọc hiện không có tài liệu nào đang mượn.</td></tr>');
+                    $('#ftu-checkouts-table tbody').html('<tr class="ftu-row-empty"><td colspan="9" style="text-align:center; padding:20px 8px; color:#64748b;">Không có tài liệu nào đang mượn</td></tr>');
                     $('#ftu-footer-info').text('Hiển thị 0 trong 0 bản ghi');
                 } else {
                     $('#ftu-footer-info').text('Hiển thị 1 đến ' + count + ' trong ' + count + ' bản ghi');
@@ -1371,18 +1010,18 @@
                             var day = String(dt.getDate()).padStart(2, '0');
                             var month = String(dt.getMonth() + 1).padStart(2, '0');
                             var year = dt.getFullYear();
-                            dueCell.html('<i class="fa fa-calendar-check-o" style="color:#059669; font-size:11px;"></i> <span style="color:#059669; font-weight:700;">' + day + '/' + month + '/' + year + '</span>');
+                            dueCell.html('<span style="color:#16a34a; font-weight:700;">' + day + '/' + month + '/' + year + '</span>');
                         }
-                        showToast('Đã gia hạn thành công tài liệu', 'success');
-                        btn.html('<i class="fa fa-check" style="color:#059669;"></i>');
+                        showToast('Đã gia hạn thành công', 'success');
+                        btn.html('<i class="fa fa-check" style="color:#16a34a;"></i>');
                     } else {
                         var err = await resp.json().catch(function(){ return {}; });
                         showToast('Không thể gia hạn: ' + (err.error || resp.status), 'error');
-                        btn.prop('disabled', false).html('<i class="fa fa-refresh"></i>');
+                        btn.prop('disabled', false).html('<i class="fa fa-calendar" style="color:#0284c7;"></i>');
                     }
                 } catch(ex) {
                     showToast('Lỗi kết nối khi gia hạn', 'error');
-                    btn.prop('disabled', false).html('<i class="fa fa-refresh"></i>');
+                    btn.prop('disabled', false).html('<i class="fa fa-calendar" style="color:#0284c7;"></i>');
                 }
             });
 
@@ -1394,7 +1033,7 @@
                 var title = btn.data('title');
                 var row = btn.closest('tr');
 
-                if (!confirm('Xác nhận ghi trả tài liệu: ' + (title || barcode) + '?')) return;
+                if (!confirm('Xác nhận trả tài liệu: ' + (title || barcode) + '?')) return;
 
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
                 var csrf = $('input[name="csrf_token"]').val() || '';
@@ -1409,15 +1048,15 @@
                         body: fd,
                         credentials: 'same-origin'
                     });
-                    row.css({ transition: 'opacity 0.35s, transform 0.35s', opacity: 0, transform: 'translateX(20px)' });
+                    row.css({ transition: 'opacity 0.25s', opacity: 0 });
                     setTimeout(function() {
                         row.remove();
                         updateCounts();
-                    }, 360);
-                    showToast('Đã ghi trả thành công: ' + (title || barcode), 'success');
+                    }, 260);
+                    showToast('Đã trả thành công: ' + (title || barcode), 'success');
                 } catch(ex) {
                     showToast('Lỗi khi trả sách', 'error');
-                    btn.prop('disabled', false).html('<i class="fa fa-inbox"></i>');
+                    btn.prop('disabled', false).html('<i class="fa fa-ban" style="color:#dc2626;"></i>');
                 }
             });
 
@@ -1433,10 +1072,10 @@
                 $(this).css('opacity', 0.5);
                 for (var i = 0; i < btns.length; i++) {
                     $(btns[i]).click();
-                    await new Promise(r => setTimeout(r, 250));
+                    await new Promise(r => setTimeout(r, 200));
                 }
                 $(this).css('opacity', 1);
-                showToast('Đã gửi yêu cầu gia hạn tất cả tài liệu', 'success');
+                showToast('Đã gửi yêu cầu gia hạn tất cả', 'success');
             });
 
             // 11. Return All
@@ -1461,11 +1100,11 @@
                         await fetch('/cgi-bin/koha/circ/returns.pl', { method: 'POST', body: fd, credentials: 'same-origin' });
                     } catch(e) {}
                     row.remove();
-                    await new Promise(r => setTimeout(r, 150));
+                    await new Promise(r => setTimeout(r, 120));
                 }
                 $(this).css('opacity', 1);
                 updateCounts();
-                showToast('Đã trả tất cả tài liệu thành công', 'success');
+                showToast('Đã trả tất cả tài liệu', 'success');
             });
 
             // 12. Instant Table Search
