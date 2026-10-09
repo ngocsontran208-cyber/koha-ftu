@@ -117,11 +117,11 @@
                             <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
                         </summary>
                         <ul class="ftu-footer-list">
-                            <li><a href="/cgi-bin/koha/opac-collections.pl" class="ftu-footer-link">Bộ sưu tập tài liệu số</a></li>
-                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="ftu-footer-link">Tìm kiếm theo Tác giả</a></li>
-                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="ftu-footer-link">Tìm kiếm theo Chủ đề</a></li>
-                            <li><a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-footer-link">Giáo trình &amp; Học phần</a></li>
-                            <li><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link">Kho tài liệu số DSpace <i class="fa fa-external-link-alt" style="font-size: 0.72rem; margin-left: 3px;"></i></a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link1 || '/cgi-bin/koha/opac-collections.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title1 || 'Bộ sưu tập tài liệu số' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link2 || '/cgi-bin/koha/opac-search.pl?idx=au' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title2 || 'Tìm kiếm theo Tác giả' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link3 || '/cgi-bin/koha/opac-search.pl?idx=su' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title3 || 'Tìm kiếm theo Chủ đề' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link4 || '/cgi-bin/koha/opac-course-reserves.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title4 || 'Giáo trình &amp; Học phần' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link5 || FTU_BRAND.link_dspace || '/elib' %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link">[% FTU_BRAND.footer_res_title5 || 'Kho tài liệu số DSpace' %] <i class="fa fa-external-link-alt" style="font-size: 0.72rem; margin-left: 3px;"></i></a></li>
                         </ul>
                     </details>
                 </div>
@@ -137,10 +137,10 @@
                             <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
                         </summary>
                         <ul class="ftu-footer-list">
-                            <li><a href="/cgi-bin/koha/opac-user.pl" class="ftu-footer-link">Tài khoản &amp; Gia hạn sách</a></li>
-                            <li><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="ftu-footer-link">Quy định bản quyền học thuật</a></li>
-                            <li><a href="/cgi-bin/koha/opac-news-detail.pl?id=5" class="ftu-footer-link">Thông báo &amp; Lịch phục vụ</a></li>
-                            <li><a href="/cgi-bin/koha/opac-reportproblem.pl" class="ftu-footer-link">Liên hệ Ban quản trị Thư viện</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link1 || '/cgi-bin/koha/opac-user.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title1 || 'Tài khoản &amp; Gia hạn sách' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link2 || (FTU_BRAND.link_dspace _ '/info/end-user-agreement') %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title2 || 'Quy định bản quyền học thuật' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link3 || '/cgi-bin/koha/opac-news-detail.pl?id=5' %]" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title3 || 'Thông báo &amp; Lịch phục vụ' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link4 || '/cgi-bin/koha/opac-reportproblem.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title4 || 'Liên hệ Ban quản trị Thư viện' %]</a></li>
                         </ul>
                     </details>
                 </div>

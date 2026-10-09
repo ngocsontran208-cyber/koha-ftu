@@ -1,20 +1,11 @@
-[%# ========================================================================= %]
-[%# FTU BRAND & CONTACT CONFIGURATION (TRUNG TÂM CẤU HÌNH THƯƠNG HIỆU & LIÊN HỆ) %]
-[%# ------------------------------------------------------------------------- %]
-[%# File này chứa toàn bộ thông tin nhận diện thương hiệu, tên trường, tên thư%]
-[%# viện, hotline, email, giờ mở cửa, địa chỉ các cơ sở, mạng xã hội...       %]
-[%#                                                                           %]
-[%# QUY TẮC SỬ DỤNG:                                                          %]
-[%# Mọi trang cần dùng thông tin thương hiệu chỉ cần gọi:                     %]
-[%#     PROCESS 'ftu-brand-config.inc'                                        %]
-[%# Sau đó sử dụng biến dạng:                                                 %]
-[%#     FTU_BRAND.library_name                                                %]
-[%#     FTU_BRAND.email_contact                                               %]
-[%#     FTU_BRAND.hotline_hcmc                                                %]
-[%#                                                                           %]
-[%# KHI CẦN THAY ĐỔI ĐỊA CHỈ, EMAIL, SỐ ĐIỆN THOẠI, LOGO HOẶC TÊN TRƯỜNG:     %]
-[%# BẠN CHỈ CẦN CHỈNH SỬA DUY NHẤT FILE NÀY! TẤT CẢ CÁC TRANG SẼ TỰ CẬP NHẬT.  %]
-[%# ========================================================================= %]
+[% USE raw %]
+[% USE Koha %]
+
+[%# ═══════════════════════════════════════════════════════════════════════════
+    FTU LIBRARY BRAND CONFIGURATION (THÔNG TIN THƯƠNG HIỆU & HỆ THỐNG FTULIB)
+    Cơ sở: Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh
+    Được cập nhật tự động từ trang: Quản trị > Công cụ > Cấu hình Chân trang (portal-news.pl?section=footer)
+    ═══════════════════════════════════════════════════════════════════════════ %]
 
 [% SET FTU_BRAND = {
     # ── 1. TÊN ĐƠN VỊ & PHÂN HIỆU ──────────────────────────────────────────
@@ -59,7 +50,7 @@
     hours_saturday         => "08:00 – 16:00 (Thứ 7)",
     hours_sunday           => "Nghỉ (Chủ nhật & Ngày Lễ)",
 
-    # ── 6. ĐỊA CHỈ & LIÊN HỆ CÁC CƠ SỞ FTU ──────────────────────────────────
+    # ── 6. ĐỊA CHỈ & LIÊN HỆ PHÂN HIỆU TP.HCM ───────────────────────────────
     campus_hcm_title       => "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
     campus_hcm_title_en    => "Foreign Trade University - Ho Chi Minh City Branch",
     campus_hcm_addr        => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
@@ -81,11 +72,11 @@
     # ── 7. ĐƯỜNG DẪN CỔNG THÔNG TIN & HỆ THỐNG LIÊN THÔNG ───────────────────
     link_portal            => "https://hcmc.ftu.edu.vn",
     link_portal_cs2        => "https://hcmc.ftu.edu.vn/",
-    link_dspace            => Koha.Preference('FTU_DSpaceBaseURL') || "/elib",
-    link_sso               => Koha.Preference('FTU_SSOBaseURL') || "/sso",
-    link_drm               => Koha.Preference('FTU_DRMBaseURL') || "/drm",
-    link_opac              => Koha.Preference('OPACBaseURL') || "",
-    link_staff             => Koha.Preference('staffClientBaseURL') || "",
+    link_dspace            => "/elib",
+    link_sso               => "/sso",
+    link_drm               => "/drm",
+    link_opac              => "",
+    link_staff             => "",
     link_facebook          => "https://www.facebook.com/ftu2.hcmc",
     link_facebook_cs2      => "https://www.facebook.com/ftu2.hcmc",
     link_youtube           => "https://www.youtube.com/@FTUChannel",
@@ -93,21 +84,43 @@
     link_search            => "/cgi-bin/ftu/opac-search.pl",
     link_passwd            => "/cgi-bin/ftu/opac-passwd.pl",
 
-    # ── 7b. LIÊN KẾT NHANH CHÂN TRANG (FOOTER QUICK LINKS) ─────────────────
-    title_home             => "Trang chủ Thư viện",
-    title_home_en          => "Library Home",
-    link_home              => "/cgi-bin/ftu/opac-main.pl",
-    title_advsearch        => "Tìm kiếm tài liệu nâng cao",
-    title_advsearch_en     => "Advanced Search",
-    link_advsearch         => "/cgi-bin/ftu/opac-search.pl",
-    title_databases        => "Cơ sở dữ liệu điện tử",
-    title_databases_en     => "Electronic Databases",
-    title_renew            => "Gia hạn sách trực tuyến",
-    title_renew_en         => "Online Book Renewal",
-    link_renew             => "/cgi-bin/ftu/opac-user.pl#opac-user-checkouts",
-    title_guide            => "Hướng dẫn sử dụng OPAC",
-    title_guide_en         => "OPAC User Guide",
-    link_guide             => "/cgi-bin/ftu/opac-news-detail.pl?id=1",
+    # ── 7b. CỘT 2: KHÁM PHÁ TÀI NGUYÊN (5 LIÊN KẾT) ────────────────────────
+    footer_res_title1      => "Bộ sưu tập tài liệu số",
+    footer_res_title1_en   => "Digital Collections",
+    footer_res_link1       => "/cgi-bin/koha/opac-collections.pl",
+
+    footer_res_title2      => "Tìm kiếm theo Tác giả",
+    footer_res_title2_en   => "Search by Author",
+    footer_res_link2       => "/cgi-bin/koha/opac-search.pl?idx=au",
+
+    footer_res_title3      => "Tìm kiếm theo Chủ đề",
+    footer_res_title3_en   => "Search by Subject",
+    footer_res_link3       => "/cgi-bin/koha/opac-search.pl?idx=su",
+
+    footer_res_title4      => "Giáo trình & Học phần",
+    footer_res_title4_en   => "Course Reserves",
+    footer_res_link4       => "/cgi-bin/koha/opac-course-reserves.pl",
+
+    footer_res_title5      => "Kho tài liệu số DSpace",
+    footer_res_title5_en   => "DSpace Digital Repository",
+    footer_res_link5       => "/elib",
+
+    # ── 7c. CỘT 3: HỖ TRỢ & DỊCH VỤ (4 LIÊN KẾT) ──────────────────────────
+    footer_srv_title1      => "Tài khoản & Gia hạn sách",
+    footer_srv_title1_en   => "Account & Renewals",
+    footer_srv_link1       => "/cgi-bin/koha/opac-user.pl",
+
+    footer_srv_title2      => "Quy định bản quyền học thuật",
+    footer_srv_title2_en   => "Academic Copyright Policy",
+    footer_srv_link2       => "/elib/info/end-user-agreement",
+
+    footer_srv_title3      => "Thông báo & Lịch phục vụ",
+    footer_srv_title3_en   => "News & Service Notices",
+    footer_srv_link3       => "/cgi-bin/koha/opac-news-detail.pl?id=5",
+
+    footer_srv_title4      => "Liên hệ Ban quản trị Thư viện",
+    footer_srv_title4_en   => "Contact Library Admin",
+    footer_srv_link4       => "/cgi-bin/koha/opac-reportproblem.pl",
 
     # ── 8. THÔNG TIN HỆ THỐNG & BẢN QUYỀN ────────────────────────────────────
     system_ils             => "Koha ILS 25.12",
@@ -117,21 +130,11 @@
     copyright_text_en      => "© 2026 Library of Foreign Trade University - Ho Chi Minh City Branch. All rights reserved."
 } %]
 
-[%# ── TỰ ĐỘNG BẢN ĐỊA HÓA CHO GIAO DIỆN TIẾNG ANH (EN) ────────────────────── %]
+[%# ── BẢN ĐỊA HÓA CHO GIAO DIỆN TIẾNG ANH (EN) ────────────────────────────── %]
 [% IF lang == 'en' %]
-    [% FTU_BRAND.library_name         = FTU_BRAND.library_name_en || FTU_BRAND.library_name %]
     [% FTU_BRAND.library_name_short   = "FTU Library" %]
-    [% FTU_BRAND.campus_current       = FTU_BRAND.campus_current_en || FTU_BRAND.campus_current %]
     [% FTU_BRAND.campus_current_short = "Ho Chi Minh City Branch" %]
     [% FTU_BRAND.logo_alt             = "FTU Library Logo - Foreign Trade University" %]
-    [% FTU_BRAND.hours_status         = FTU_BRAND.hours_status_en || FTU_BRAND.hours_status %]
-    [% FTU_BRAND.hours_summary        = FTU_BRAND.hours_summary_en || FTU_BRAND.hours_summary %]
-    [% FTU_BRAND.title_home           = FTU_BRAND.title_home_en || FTU_BRAND.title_home %]
-    [% FTU_BRAND.title_advsearch      = FTU_BRAND.title_advsearch_en || FTU_BRAND.title_advsearch %]
-    [% FTU_BRAND.title_databases      = FTU_BRAND.title_databases_en || FTU_BRAND.title_databases %]
-    [% FTU_BRAND.title_renew          = FTU_BRAND.title_renew_en || FTU_BRAND.title_renew %]
-    [% FTU_BRAND.title_guide          = FTU_BRAND.title_guide_en || FTU_BRAND.title_guide %]
-    [% FTU_BRAND.copyright_text       = FTU_BRAND.copyright_text_en || FTU_BRAND.copyright_text %]
 [% END %]
 
 [%# ── CÁC BIẾN TẮT THUẬN TIỆN TRUY XUẤT NHANH ────────────────────────────── %]
@@ -140,13 +143,12 @@
 [% SET FTU_UNI          = (lang == 'en' && FTU_BRAND.university_name_en) ? FTU_BRAND.university_name_en : FTU_BRAND.university_name %]
 [% SET FTU_CAMPUS       = FTU_BRAND.campus_current %]
 [% SET FTU_EMAIL        = FTU_BRAND.email_contact %]
-[% SET FTU_HOTLINE_HN   = FTU_BRAND.hotline_hanoi %]
-[% SET FTU_HOTLINE_HCM  = FTU_BRAND.hotline_hcmc %]
-[% SET FTU_ADDR_HCM     = (lang == 'en' && FTU_BRAND.campus_hcm_addr_en) ? FTU_BRAND.campus_hcm_addr_en : FTU_BRAND.campus_hcm_addr %]
-[% SET FTU_LOGO         = FTU_BRAND.logo_url %]
-[% SET FTU_LINK_DSPACE  = FTU_BRAND.link_dspace %]
-[% SET FTU_LINK_SSO     = FTU_BRAND.link_sso %]
-[% SET FTU_LINK_DRM     = FTU_BRAND.link_drm %]
-[% SET FTU_LINK_OPAC    = FTU_BRAND.link_opac %]
-[% SET FTU_LINK_STAFF   = FTU_BRAND.link_staff %]
-
+[% SET FTU_PHONE        = FTU_BRAND.hotline_hcmc %]
+[% SET FTU_ADDR         = FTU_BRAND.campus_hcm_addr %]
+[% SET FTU_HOURS        = FTU_BRAND.hours_summary %]
+[% SET FTU_PORTAL       = FTU_BRAND.link_portal %]
+[% SET FTU_DSPACE       = FTU_BRAND.link_dspace %]
+[% SET FTU_SSO          = FTU_BRAND.link_sso %]
+[% SET FTU_DRM          = FTU_BRAND.link_drm %]
+[% SET FTU_FACEBOOK     = FTU_BRAND.link_facebook %]
+[% SET FTU_YOUTUBE      = FTU_BRAND.link_youtube %]

@@ -1316,7 +1316,7 @@
                             <div>
                                 <div style="font-size: 1rem; font-weight: 700;">Đã lưu cấu hình chân trang thành công!</div>
                                 <div style="font-size: 0.88rem; font-weight: 400; color: #047857; margin-top: 2px;">
-                                    Tất cả nội dung (Liên kết nhanh, SĐT, Địa chỉ 3 cơ sở, Email, Facebook, YouTube) đã tự động cập nhật đồng bộ trên toàn bộ giao diện OPAC.
+                                    Tất cả nội dung chân trang (Thông tin liên hệ, Khám phá tài nguyên, Hỗ trợ & Dịch vụ, Bản quyền) đã được lưu vào hệ thống và cập nhật tức thì ngoài trang OPAC.
                                 </div>
                             </div>
                         </div>
@@ -1331,333 +1331,201 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #ffffff; padding: 18px 22px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 12px;">
                             <div>
                                 <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a;">
-                                    Cấu hình Chân trang &amp; Thông tin Liên hệ OPAC
+                                    Cấu hình Chân trang OPAC (Footer)
                                 </h3>
+                                <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">
+                                    Cấu hình chính xác 3 cột nội dung hiển thị ở chân trang Thư viện Phân hiệu TP.HCM và dòng bản quyền.
+                                </p>
                             </div>
                             <div style="display: flex; gap: 10px;">
                                 <a href="[% Koha.Preference('OPACBaseURL') || '/cgi-bin/koha/opac-main.pl' %]" target="_blank" class="btn btn-default ftu-opac-link" style="font-weight: 600; border-radius: 6px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
-                                    <i class="fa fa-external-link"></i> Xem thử OPAC
+                                    <i class="fa fa-external-link"></i> Xem thử ngoài OPAC
                                 </a>
                                 <button type="submit" class="btn btn-primary" style="font-weight: 700; border-radius: 6px; padding: 8px 22px; background: #b91c1c; border-color: #b91c1c; box-shadow: 0 4px 6px -1px rgba(185, 28, 28, 0.3); display: inline-flex; align-items: center; gap: 6px;">
-                                    <i class="fa fa-save"></i> Lưu Cấu hình Chân trang
+                                    <i class="fa fa-save"></i> Lưu Chân trang
                                 </button>
                             </div>
                         </div>
 
                         <div class="row">
-                            <!-- CỘT TRÁI: LIÊN KẾT NHANH & MẠNG XÃ HỘI -->
-                            <div class="col-md-6">
-                                
-                                <!-- CARD 1: LIÊN KẾT NHANH (5 LIÊN KẾT THEO YÊU CẦU) -->
+                            <!-- CỘT 1: THƯƠNG HIỆU & LIÊN HỆ PHÂN HIỆU TP.HCM (4/12) -->
+                            <div class="col-md-4">
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
-                                            1. Danh Mục "Liên Kết Nhanh" (Footer Quick Links)
+                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                            <i class="fa fa-university text-danger"></i> Cột 1: Thương hiệu &amp; Liên hệ
                                         </h4>
                                     </div>
-                                    <div class="panel-body" style="padding: 18px 20px;">
-                                        
-                                        <!-- Link 1: Trang chủ Thư viện -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
-                                                Liên kết 1: Trang chủ Thư viện
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên hiển thị:</label>
-                                                    <input type="text" name="title_home" class="form-control input-sm" value="[% footer_cfg.title_home || 'Trang chủ Thư viện' | html %]" required />
-                                                </div>
-                                                <div class="col-sm-7">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Đường dẫn (URL):</label>
-                                                    <input type="text" name="link_home" class="form-control input-sm" value="[% footer_cfg.link_home || '/cgi-bin/ftu/opac-main.pl' | html %]" required />
-                                                </div>
-                                            </div>
+                                    <div class="panel-body" style="padding: 16px 18px;">
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Tên Thư viện:</label>
+                                            <input type="text" name="library_name" class="form-control input-sm" value="[% footer_cfg.library_name | html %]" required />
                                         </div>
 
-                                        <!-- Link 2: Tìm kiếm tài liệu nâng cao -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
-                                                Liên kết 2: Tìm kiếm tài liệu nâng cao
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên hiển thị:</label>
-                                                    <input type="text" name="title_advsearch" class="form-control input-sm" value="[% footer_cfg.title_advsearch || 'Tìm kiếm tài liệu nâng cao' | html %]" required />
-                                                </div>
-                                                <div class="col-sm-7">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Đường dẫn (URL):</label>
-                                                    <input type="text" name="link_advsearch" class="form-control input-sm" value="[% footer_cfg.link_advsearch || '/cgi-bin/ftu/opac-search.pl' | html %]" required />
-                                                </div>
-                                            </div>
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Tên Đơn vị / Cơ sở:</label>
+                                            <input type="text" name="campus_current" class="form-control input-sm" value="[% footer_cfg.campus_current | html %]" required />
                                         </div>
 
-                                        <!-- Link 3: Cơ sở dữ liệu điện tử -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
-                                                Liên kết 3: Cơ sở dữ liệu điện tử
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên hiển thị:</label>
-                                                    <input type="text" name="title_databases" class="form-control input-sm" value="[% footer_cfg.title_databases || 'Cơ sở dữ liệu điện tử' | html %]" required />
-                                                </div>
-                                                <div class="col-sm-7">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Đường dẫn (URL):</label>
-                                                    <input type="text" name="link_databases" class="form-control input-sm" value="[% footer_cfg.link_databases || '/cgi-bin/ftu/opac-databases.pl' | html %]" required />
-                                                </div>
-                                            </div>
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Địa chỉ:</label>
+                                            <input type="text" name="campus_hcm_addr" class="form-control input-sm" value="[% footer_cfg.campus_hcm_addr | html %]" required />
                                         </div>
 
-                                        <!-- Link 4: Gia hạn sách trực tuyến -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
-                                                Liên kết 4: Gia hạn sách trực tuyến
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên hiển thị:</label>
-                                                    <input type="text" name="title_renew" class="form-control input-sm" value="[% footer_cfg.title_renew || 'Gia hạn sách trực tuyến' | html %]" required />
-                                                </div>
-                                                <div class="col-sm-7">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Đường dẫn (URL):</label>
-                                                    <input type="text" name="link_renew" class="form-control input-sm" value="[% footer_cfg.link_renew || '/cgi-bin/ftu/opac-user.pl#opac-user-checkouts' | html %]" required />
-                                                </div>
-                                            </div>
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Số điện thoại / Hotline:</label>
+                                            <input type="text" name="hotline_hcmc" class="form-control input-sm" value="[% footer_cfg.hotline_hcmc | html %]" required />
                                         </div>
 
-                                        <!-- Link 5: Hướng dẫn sử dụng OPAC -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 0;">
-                                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 0.88rem;">
-                                                Liên kết 5: Hướng dẫn sử dụng OPAC
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên hiển thị:</label>
-                                                    <input type="text" name="title_guide" class="form-control input-sm" value="[% footer_cfg.title_guide || 'Hướng dẫn sử dụng OPAC' | html %]" required />
-                                                </div>
-                                                <div class="col-sm-7">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Đường dẫn (URL):</label>
-                                                    <input type="text" name="link_guide" class="form-control input-sm" value="[% footer_cfg.link_guide || '/cgi-bin/ftu/opac-news-detail.pl?id=1' | html %]" required />
-                                                </div>
-                                            </div>
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Email liên hệ:</label>
+                                            <input type="email" name="email_contact" class="form-control input-sm" value="[% footer_cfg.email_contact | html %]" required />
                                         </div>
 
-                                    </div>
-                                </div>
-
-                                <!-- CARD 2: MẠNG XÃ HỘI & KÊNH TRUYỀN THÔNG (HIỂN THỊ CHÂN TRANG) -->
-                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-share-alt text-primary"></i> 2. Social Media &amp; Channels (Footer Icons)
-                                        </h4>
-                                        <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 600;">FB, YouTube, Web Icons</span>
-                                    </div>
-                                    <div class="panel-body" style="padding: 18px 20px;">
-                                        
-                                        <!-- Facebook -->
                                         <div class="form-group" style="margin-bottom: 14px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1877f2; color: #fff; font-size: 12px;">
-                                                    <i class="fa-brands fa-facebook-f fa fa-facebook-f"></i>
-                                                </span>
-                                                Facebook Fanpage Link:
-                                            </label>
-                                            <input type="url" name="link_facebook" class="form-control" value="[% footer_cfg.link_facebook || 'https://www.facebook.com/ftu2.hcmc' | html %]" placeholder="https://www.facebook.com/ftu2.hcmc" />
-                                            <small class="text-muted" style="display: block; margin-top: 3px;">Displays circular blue Facebook icon button in the footer</small>
+                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Khung giờ phục vụ:</label>
+                                            <input type="text" name="hours_summary" class="form-control input-sm" value="[% footer_cfg.hours_summary | html %]" required />
                                         </div>
 
-                                        <!-- YouTube -->
-                                        <div class="form-group" style="margin-bottom: 14px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #ef4444; color: #fff; font-size: 12px;">
-                                                    <i class="fa-brands fa-youtube fa fa-youtube-play"></i>
-                                                </span>
-                                                YouTube Channel Link:
+                                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 6px;">
+                                            <label style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: block;">
+                                                <i class="fa fa-share-alt text-danger"></i> Kênh kết nối mạng xã hội (Pill)
                                             </label>
-                                            <input type="url" name="link_youtube" class="form-control" value="[% footer_cfg.link_youtube || 'https://www.youtube.com/@FTUChannel' | html %]" placeholder="https://www.youtube.com/@FTUChannel" />
-                                            <small class="text-muted" style="display: block; margin-top: 3px;">Displays circular red YouTube icon button in the footer</small>
-                                        </div>
 
-                                        <!-- Cổng thông tin Website FTU -->
-                                        <div class="form-group" style="margin-bottom: 14px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #0284c7; color: #fff; font-size: 12px;">
-                                                    <i class="fa-solid fa-globe fa fa-globe"></i>
-                                                </span>
-                                                FTU Campus Portal Website Link:
-                                            </label>
-                                            <input type="url" name="link_portal" class="form-control" value="[% footer_cfg.link_portal || 'https://hcmc.ftu.edu.vn' | html %]" placeholder="https://hcmc.ftu.edu.vn" />
-                                            <small class="text-muted" style="display: block; margin-top: 3px;">Displays circular globe Web icon button in the footer</small>
-                                        </div>
+                                            <div class="form-group" style="margin-bottom: 10px;">
+                                                <label style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                                                    <i class="fa-brands fa-facebook-f fa fa-facebook-f text-primary"></i> Link Facebook Fanpage:
+                                                </label>
+                                                <input type="url" name="link_facebook" class="form-control input-sm" value="[% footer_cfg.link_facebook | html %]" />
+                                            </div>
 
-                                        <!-- Email -->
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #b91c1c; color: #fff; font-size: 12px;">
-                                                    <i class="fa fa-envelope"></i>
-                                                </span>
-                                                Primary Contact Email:
-                                            </label>
-                                            <input type="email" name="email_contact" class="form-control" value="[% footer_cfg.email_contact || 'tv.hcmc@ftu.edu.vn' | html %]" placeholder="tv.hcmc@ftu.edu.vn" />
+                                            <div class="form-group" style="margin-bottom: 10px;">
+                                                <label style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                                                    <i class="fa-brands fa-youtube fa fa-youtube-play text-danger"></i> Link Kênh YouTube:
+                                                </label>
+                                                <input type="url" name="link_youtube" class="form-control input-sm" value="[% footer_cfg.link_youtube | html %]" />
+                                            </div>
+
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                                                    <i class="fa-solid fa-globe fa fa-globe text-info"></i> Link Cổng thông tin Website:
+                                                </label>
+                                                <input type="url" name="link_portal" class="form-control input-sm" value="[% footer_cfg.link_portal | html %]" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- CARD 3: THÔNG TIN THƯƠNG HIỆU & BẢN QUYỀN -->
-                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
-                                            3. Tên Thư Viện &amp; Bản Quyền (Copyright)
-                                        </h4>
-                                    </div>
-                                    <div class="panel-body" style="padding: 18px 20px;">
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Tên Thư viện (Tiếng Việt):</label>
-                                            <input type="text" name="library_name_full" class="form-control" value="[% footer_cfg.library_name_full | html %]" />
-                                        </div>
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Tên Thư viện (Tiếng Anh):</label>
-                                            <input type="text" name="library_name_en" class="form-control" value="[% footer_cfg.library_name_en | html %]" />
-                                        </div>
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Đoạn giới thiệu thư viện (Footer column 1):</label>
-                                            <textarea name="library_description" class="form-control" rows="3">[% footer_cfg.library_description | html %]</textarea>
-                                        </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label style="font-size: 0.85rem; font-weight: 600; color: #1e293b;">Nội dung bản quyền (Copyright line):</label>
-                                            <input type="text" name="copyright_text" class="form-control" value="[% footer_cfg.copyright_text | html %]" />
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
 
-                            <!-- CỘT PHẢI: ĐỊA CHỈ 3 CƠ SỞ & HOTLINE -->
-                            <div class="col-md-6">
-                                
-                                <!-- CARD 4: ĐỊA CHỈ 3 CƠ SỞ ĐÀO TẠO -->
+                            <!-- CỘT 2: KHÁM PHÁ TÀI NGUYÊN (4/12) -->
+                            <div class="col-md-4">
                                 <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
                                     <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
-                                            4. Địa Chỉ &amp; SĐT 3 Cơ Sở Đào Tạo FTU
+                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                            <i class="fa fa-book text-primary"></i> Cột 2: Khám Phá Tài Nguyên (5 Liên Kết)
                                         </h4>
                                     </div>
-                                    <div class="panel-body" style="padding: 18px 20px;">
-                                        
-                                        <!-- Cơ sở 1: Hà Nội -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #b91c1c;">
-                                            <div style="font-weight: 700; color: #b91c1c; margin-bottom: 8px; font-size: 0.9rem;">
-                                                Cơ sở 1: Trụ sở chính Hà Nội
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên cơ sở:</label>
-                                                <input type="text" name="campus_hn_title" class="form-control input-sm" value="[% footer_cfg.campus_hn_title | html %]" />
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Địa chỉ:</label>
-                                                <input type="text" name="campus_hn_addr" class="form-control input-sm" value="[% footer_cfg.campus_hn_addr | html %]" />
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Số điện thoại / Hotline:</label>
-                                                <input type="text" name="campus_hn_phone" class="form-control input-sm" value="[% footer_cfg.campus_hn_phone | html %]" />
-                                            </div>
+                                    <div class="panel-body" style="padding: 16px 18px;">
+                                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+                                            Chỉnh sửa tên hiển thị và URL của 5 liên kết trong danh mục "Khám phá tài nguyên":
+                                        </p>
+
+                                        <!-- Link 1 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 1</span>
+                                            <input type="text" name="footer_res_title1" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title1 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_res_link1" class="form-control input-sm" value="[% footer_cfg.footer_res_link1 | html %]" placeholder="Đường dẫn URL" required />
                                         </div>
 
-                                        <!-- Phân hiệu: TP. Hồ Chí Minh -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #0284c7;">
-                                            <div style="font-weight: 700; color: #0284c7; margin-bottom: 8px; font-size: 0.9rem;">
-                                                Phân hiệu: Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên phân hiệu / cơ sở:</label>
-                                                <input type="text" name="campus_hcm_title" class="form-control input-sm" value="[% footer_cfg.campus_hcm_title | html %]" />
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Địa chỉ:</label>
-                                                <input type="text" name="campus_hcm_addr" class="form-control input-sm" value="[% footer_cfg.campus_hcm_addr | html %]" />
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Số điện thoại / Hotline:</label>
-                                                <input type="text" name="campus_hcm_phone" class="form-control input-sm" value="[% footer_cfg.campus_hcm_phone | html %]" />
-                                            </div>
+                                        <!-- Link 2 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 2</span>
+                                            <input type="text" name="footer_res_title2" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title2 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_res_link2" class="form-control input-sm" value="[% footer_cfg.footer_res_link2 | html %]" placeholder="Đường dẫn URL" required />
                                         </div>
 
-                                        <!-- Cơ sở 3: Quảng Ninh -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 0; border-left: 4px solid #059669;">
-                                            <div style="font-weight: 700; color: #059669; margin-bottom: 8px; font-size: 0.9rem;">
-                                                Cơ sở 3: Cơ sở Quảng Ninh
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Tên cơ sở:</label>
-                                                <input type="text" name="campus_qn_title" class="form-control input-sm" value="[% footer_cfg.campus_qn_title | html %]" />
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 8px;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Địa chỉ:</label>
-                                                <input type="text" name="campus_qn_addr" class="form-control input-sm" value="[% footer_cfg.campus_qn_addr | html %]" />
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Số điện thoại / Hotline:</label>
-                                                <input type="text" name="campus_qn_phone" class="form-control input-sm" value="[% footer_cfg.campus_qn_phone | html %]" />
-                                            </div>
+                                        <!-- Link 3 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 3</span>
+                                            <input type="text" name="footer_res_title3" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title3 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_res_link3" class="form-control input-sm" value="[% footer_cfg.footer_res_link3 | html %]" placeholder="Đường dẫn URL" required />
                                         </div>
 
-                                    </div>
-                                </div>
+                                        <!-- Link 4 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 4</span>
+                                            <input type="text" name="footer_res_title4" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title4 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_res_link4" class="form-control input-sm" value="[% footer_cfg.footer_res_link4 | html %]" placeholder="Đường dẫn URL" required />
+                                        </div>
 
-                                <!-- CARD 5: ĐƯỜNG DÂY NÓNG TOPBAR & GIỜ MỞ CỬA -->
-                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: #1e293b;">
-                                            5. Đường Dây Nóng Ribbon &amp; Giờ Mở Cửa
-                                        </h4>
-                                    </div>
-                                    <div class="panel-body" style="padding: 18px 20px;">
-                                        <div class="row">
-                                            <div class="col-sm-6">
-                                                <div class="form-group" style="margin-bottom: 12px;">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Hotline Hà Nội:</label>
-                                                    <input type="text" name="hotline_hanoi" class="form-control input-sm" value="[% footer_cfg.hotline_hanoi | html %]" />
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="form-group" style="margin-bottom: 12px;">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Máy lẻ Hà Nội:</label>
-                                                    <input type="text" name="hotline_hanoi_ext" class="form-control input-sm" value="[% footer_cfg.hotline_hanoi_ext | html %]" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-sm-6">
-                                                <div class="form-group" style="margin-bottom: 12px;">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Hotline CS2 (TP.HCM):</label>
-                                                    <input type="text" name="hotline_hcmc" class="form-control input-sm" value="[% footer_cfg.hotline_hcmc | html %]" />
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div class="form-group" style="margin-bottom: 12px;">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Hotline Quảng Ninh:</label>
-                                                    <input type="text" name="hotline_quangninh" class="form-control input-sm" value="[% footer_cfg.hotline_quangninh | html %]" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-sm-5">
-                                                <div class="form-group" style="margin-bottom: 0;">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Trạng thái giờ mở cửa:</label>
-                                                    <input type="text" name="hours_status" class="form-control input-sm" value="[% footer_cfg.hours_status | html %]" placeholder="Đang mở cửa" />
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-7">
-                                                <div class="form-group" style="margin-bottom: 0;">
-                                                    <label style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Khung giờ phục vụ tóm tắt:</label>
-                                                    <input type="text" name="hours_summary" class="form-control input-sm" value="[% footer_cfg.hours_summary | html %]" />
-                                                </div>
-                                            </div>
+                                        <!-- Link 5 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 0;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 5 (Kho số DSpace)</span>
+                                            <input type="text" name="footer_res_title5" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title5 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_res_link5" class="form-control input-sm" value="[% footer_cfg.footer_res_link5 | html %]" placeholder="Đường dẫn URL" required />
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
+                            <!-- CỘT 3: HỖ TRỢ & DỊCH VỤ (4/12) -->
+                            <div class="col-md-4">
+                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
+                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
+                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                            <i class="fa fa-life-ring text-success"></i> Cột 3: Hỗ Trợ &amp; Dịch Vụ (4 Liên Kết)
+                                        </h4>
+                                    </div>
+                                    <div class="panel-body" style="padding: 16px 18px;">
+                                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+                                            Chỉnh sửa tên hiển thị và URL của 4 liên kết trong danh mục "Hỗ trợ &amp; Dịch vụ":
+                                        </p>
+
+                                        <!-- Link 1 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 1</span>
+                                            <input type="text" name="footer_srv_title1" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title1 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_srv_link1" class="form-control input-sm" value="[% footer_cfg.footer_srv_link1 | html %]" placeholder="Đường dẫn URL" required />
+                                        </div>
+
+                                        <!-- Link 2 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 2</span>
+                                            <input type="text" name="footer_srv_title2" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title2 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_srv_link2" class="form-control input-sm" value="[% footer_cfg.footer_srv_link2 | html %]" placeholder="Đường dẫn URL" required />
+                                        </div>
+
+                                        <!-- Link 3 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 3</span>
+                                            <input type="text" name="footer_srv_title3" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title3 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_srv_link3" class="form-control input-sm" value="[% footer_cfg.footer_srv_link3 | html %]" placeholder="Đường dẫn URL" required />
+                                        </div>
+
+                                        <!-- Link 4 -->
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 0;">
+                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 4</span>
+                                            <input type="text" name="footer_srv_title4" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title4 | html %]" placeholder="Tên hiển thị" required />
+                                            <input type="text" name="footer_srv_link4" class="form-control input-sm" value="[% footer_cfg.footer_srv_link4 | html %]" placeholder="Đường dẫn URL" required />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KHUNG 4: THÔNG TIN BẢN QUYỀN (FULL WIDTH) -->
+                        <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
+                            <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
+                                <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa fa-copyright text-muted"></i> Dòng Thông tin Bản quyền Chân trang (Copyright Bar)
+                                </h4>
+                            </div>
+                            <div class="panel-body" style="padding: 16px 18px;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Nội dung bản quyền chân trang:</label>
+                                    <input type="text" name="copyright_text" class="form-control" value="[% footer_cfg.copyright_text | html %]" required />
+                                    <small class="text-muted" style="margin-top: 4px; display: block;">Hiển thị ở dòng thanh ngang xám dưới cùng của trang OPAC.</small>
+                                </div>
                             </div>
                         </div>
 
@@ -1665,7 +1533,7 @@
                         <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 22px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=footer" class="btn btn-default">Hủy bỏ / Khôi phục ban đầu</a>
                             <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 8px 24px; background: #b91c1c; border-color: #b91c1c; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(185, 28, 28, 0.3);">
-                                <i class="fa fa-save"></i> Lưu Cấu hình Chân trang
+                                <i class="fa fa-save"></i> Lưu Chân trang
                             </button>
                         </div>
                     </form>

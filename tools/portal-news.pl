@@ -313,56 +313,113 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
 }
 
 if (($op eq "save_footer" || $op eq "cud-save_footer")) {
-    my $cfg_file = "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc";
+    my $p_library_name      = $cgi->param("library_name") || "Thư viện Phân hiệu Trường Đại học Ngoại thương";
+    my $p_campus_current    = $cgi->param("campus_current") || "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh";
+    my $p_campus_hcm_addr   = $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh";
+    my $p_hotline_hcmc      = $cgi->param("hotline_hcmc") || "(028) 3512 7254";
+    my $p_email_contact     = $cgi->param("email_contact") || 'tv.hcmc@ftu.edu.vn';
+    my $p_hours_summary     = $cgi->param("hours_summary") || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00";
+    my $p_link_facebook     = $cgi->param("link_facebook") || "https://www.facebook.com/ftu2.hcmc";
+    my $p_link_youtube      = $cgi->param("link_youtube") || 'https://www.youtube.com/@FTUChannel';
+    my $p_link_portal       = $cgi->param("link_portal") || "https://hcmc.ftu.edu.vn";
+
+    my $p_footer_res_title1 = $cgi->param("footer_res_title1") || "Bộ sưu tập tài liệu số";
+    my $p_footer_res_link1  = $cgi->param("footer_res_link1") || "/cgi-bin/koha/opac-collections.pl";
+    my $p_footer_res_title2 = $cgi->param("footer_res_title2") || "Tìm kiếm theo Tác giả";
+    my $p_footer_res_link2  = $cgi->param("footer_res_link2") || "/cgi-bin/koha/opac-search.pl?idx=au";
+    my $p_footer_res_title3 = $cgi->param("footer_res_title3") || "Tìm kiếm theo Chủ đề";
+    my $p_footer_res_link3  = $cgi->param("footer_res_link3") || "/cgi-bin/koha/opac-search.pl?idx=su";
+    my $p_footer_res_title4 = $cgi->param("footer_res_title4") || "Giáo trình & Học phần";
+    my $p_footer_res_link4  = $cgi->param("footer_res_link4") || "/cgi-bin/koha/opac-course-reserves.pl";
+    my $p_footer_res_title5 = $cgi->param("footer_res_title5") || "Kho tài liệu số DSpace";
+    my $p_footer_res_link5  = $cgi->param("footer_res_link5") || "/elib";
+
+    my $p_footer_srv_title1 = $cgi->param("footer_srv_title1") || "Tài khoản & Gia hạn sách";
+    my $p_footer_srv_link1  = $cgi->param("footer_srv_link1") || "/cgi-bin/koha/opac-user.pl";
+    my $p_footer_srv_title2 = $cgi->param("footer_srv_title2") || "Quy định bản quyền học thuật";
+    my $p_footer_srv_link2  = $cgi->param("footer_srv_link2") || "/elib/info/end-user-agreement";
+    my $p_footer_srv_title3 = $cgi->param("footer_srv_title3") || "Thông báo & Lịch phục vụ";
+    my $p_footer_srv_link3  = $cgi->param("footer_srv_link3") || "/cgi-bin/koha/opac-news-detail.pl?id=5";
+    my $p_footer_srv_title4 = $cgi->param("footer_srv_title4") || "Liên hệ Ban quản trị Thư viện";
+    my $p_footer_srv_link4  = $cgi->param("footer_srv_link4") || "/cgi-bin/koha/opac-reportproblem.pl";
+
+    my $p_copyright_text    = $cgi->param("copyright_text") || "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền.";
+
+    # 1. Lưu vào từng System Preference trong DB
+    C4::Context->set_preference('FTU_Footer_LibraryName',   $p_library_name);
+    C4::Context->set_preference('FTU_Footer_CampusCurrent', $p_campus_current);
+    C4::Context->set_preference('FTU_Footer_Addr',          $p_campus_hcm_addr);
+    C4::Context->set_preference('FTU_Footer_Hotline',       $p_hotline_hcmc);
+    C4::Context->set_preference('FTU_Footer_Email',         $p_email_contact);
+    C4::Context->set_preference('FTU_Footer_Hours',         $p_hours_summary);
+    C4::Context->set_preference('FTU_Footer_Facebook',      $p_link_facebook);
+    C4::Context->set_preference('FTU_Footer_Youtube',       $p_link_youtube);
+    C4::Context->set_preference('FTU_Footer_Portal',        $p_link_portal);
+
+    C4::Context->set_preference('FTU_Footer_ResTitle1',     $p_footer_res_title1);
+    C4::Context->set_preference('FTU_Footer_ResLink1',      $p_footer_res_link1);
+    C4::Context->set_preference('FTU_Footer_ResTitle2',     $p_footer_res_title2);
+    C4::Context->set_preference('FTU_Footer_ResLink2',      $p_footer_res_link2);
+    C4::Context->set_preference('FTU_Footer_ResTitle3',     $p_footer_res_title3);
+    C4::Context->set_preference('FTU_Footer_ResLink3',      $p_footer_res_link3);
+    C4::Context->set_preference('FTU_Footer_ResTitle4',     $p_footer_res_title4);
+    C4::Context->set_preference('FTU_Footer_ResLink4',      $p_footer_res_link4);
+    C4::Context->set_preference('FTU_Footer_ResTitle5',     $p_footer_res_title5);
+    C4::Context->set_preference('FTU_Footer_ResLink5',      $p_footer_res_link5);
+
+    C4::Context->set_preference('FTU_Footer_SrvTitle1',     $p_footer_srv_title1);
+    C4::Context->set_preference('FTU_Footer_SrvLink1',      $p_footer_srv_link1);
+    C4::Context->set_preference('FTU_Footer_SrvTitle2',     $p_footer_srv_title2);
+    C4::Context->set_preference('FTU_Footer_SrvLink2',      $p_footer_srv_link2);
+    C4::Context->set_preference('FTU_Footer_SrvTitle3',     $p_footer_srv_title3);
+    C4::Context->set_preference('FTU_Footer_SrvLink3',      $p_footer_srv_link3);
+    C4::Context->set_preference('FTU_Footer_SrvTitle4',     $p_footer_srv_title4);
+    C4::Context->set_preference('FTU_Footer_SrvLink4',      $p_footer_srv_link4);
+
+    C4::Context->set_preference('FTU_Footer_Copyright',     $p_copyright_text);
+
     my %new_vals = (
-        # 1. Liên kết nhanh (5 liên kết theo yêu cầu)
-        title_home             => $cgi->param("title_home") || "Trang chủ Thư viện",
-        link_home              => $cgi->param("link_home") || "/cgi-bin/ftu/opac-main.pl",
-        title_advsearch        => $cgi->param("title_advsearch") || "Tìm kiếm tài liệu nâng cao",
-        link_advsearch         => $cgi->param("link_advsearch") || "/cgi-bin/ftu/opac-search.pl",
-        title_databases        => $cgi->param("title_databases") || "Cơ sở dữ liệu điện tử",
-        link_databases         => $cgi->param("link_databases") || "/cgi-bin/ftu/opac-databases.pl",
-        title_renew            => $cgi->param("title_renew") || "Gia hạn sách trực tuyến",
-        link_renew             => $cgi->param("link_renew") || "/cgi-bin/ftu/opac-user.pl#opac-user-checkouts",
-        title_guide            => $cgi->param("title_guide") || "Hướng dẫn sử dụng OPAC",
-        link_guide             => $cgi->param("link_guide") || "/cgi-bin/ftu/opac-news-detail.pl?id=1",
+        library_name           => $p_library_name,
+        campus_current         => $p_campus_current,
+        campus_hcm_addr        => $p_campus_hcm_addr,
+        hotline_hcmc           => $p_hotline_hcmc,
+        email_contact          => $p_email_contact,
+        hours_summary          => $p_hours_summary,
+        link_facebook          => $p_link_facebook,
+        link_youtube           => $p_link_youtube,
+        link_portal            => $p_link_portal,
 
-        # 2. Hotline & Giờ phục vụ
-        hotline_hanoi          => $cgi->param("hotline_hanoi") || "(024) 3835 6800",
-        hotline_hanoi_ext      => $cgi->param("hotline_hanoi_ext") || "Máy lẻ: 532 / 535",
-        hotline_hcmc           => $cgi->param("hotline_hcmc") || "(028) 3512 7254",
-        hotline_hcmc_sub       => $cgi->param("hotline_hcmc_sub") || "(028) 3512 7258",
-        hotline_quangninh      => $cgi->param("hotline_quangninh") || "(0203) 3850 411",
-        email_contact          => $cgi->param("email_contact") || 'tv.hcmc@ftu.edu.vn',
-        hours_status           => $cgi->param("hours_status") || "Đang mở cửa",
-        hours_summary          => $cgi->param("hours_summary") || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
+        footer_res_title1      => $p_footer_res_title1,
+        footer_res_link1       => $p_footer_res_link1,
+        footer_res_title2      => $p_footer_res_title2,
+        footer_res_link2       => $p_footer_res_link2,
+        footer_res_title3      => $p_footer_res_title3,
+        footer_res_link3       => $p_footer_res_link3,
+        footer_res_title4      => $p_footer_res_title4,
+        footer_res_link4       => $p_footer_res_link4,
+        footer_res_title5      => $p_footer_res_title5,
+        footer_res_link5       => $p_footer_res_link5,
 
-        # 3. Địa chỉ 3 cơ sở
-        campus_hn_title        => $cgi->param("campus_hn_title") || "Trụ sở chính Hà Nội",
-        campus_hn_addr         => $cgi->param("campus_hn_addr") || "91 Phố Chùa Láng, Phường Láng Thượng, Quận Đống Đa, TP. Hà Nội",
-        campus_hn_phone        => $cgi->param("campus_hn_phone") || "(024) 3835 6800 (Ext: 532, 535)",
+        footer_srv_title1      => $p_footer_srv_title1,
+        footer_srv_link1       => $p_footer_srv_link1,
+        footer_srv_title2      => $p_footer_srv_title2,
+        footer_srv_link2       => $p_footer_srv_link2,
+        footer_srv_title3      => $p_footer_srv_title3,
+        footer_srv_link3       => $p_footer_srv_link3,
+        footer_srv_title4      => $p_footer_srv_title4,
+        footer_srv_link4       => $p_footer_srv_link4,
 
-        campus_hcm_title       => $cgi->param("campus_hcm_title") || "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
-        campus_hcm_addr        => $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
-        campus_hcm_phone       => $cgi->param("campus_hcm_phone") || "(028) 3512 7254 - 3512 7258",
-
-        campus_qn_title        => $cgi->param("campus_qn_title") || "Cơ sở Quảng Ninh",
-        campus_qn_addr         => $cgi->param("campus_qn_addr") || "Số 260 Bạch Đằng, Phường Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh",
-        campus_qn_phone        => $cgi->param("campus_qn_phone") || "(0203) 3850 411",
-
-        # 4. Kênh Mạng xã hội & Truyền thông
-        link_facebook          => $cgi->param("link_facebook") || "https://www.facebook.com/ftu2.hcmc",
-        link_youtube           => $cgi->param("link_youtube") || 'https://www.youtube.com/@FTUChannel',
-        link_portal            => $cgi->param("link_portal") || "https://hcmc.ftu.edu.vn",
-        link_dspace            => $cgi->param("link_dspace") || "/elib",
-
-        # 5. Thông tin Thư viện & Bản quyền
-        library_name_full      => $cgi->param("library_name_full") || "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-        library_name_en        => $cgi->param("library_name_en") || "Library of Foreign Trade University - Ho Chi Minh City Branch",
-        library_description    => $cgi->param("library_description") || "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
-        copyright_text         => $cgi->param("copyright_text") || "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
+        copyright_text         => $p_copyright_text
     );
 
+    # 2. Ghi chuỗi JSON dự phòng vào FTU_FooterConfig
+    eval {
+        use JSON;
+        my $json_str = JSON::to_json(\%new_vals);
+        C4::Context->set_preference('FTU_FooterConfig', $json_str);
+    };
+
+    # 3. Ghi trực tiếp vào các file include cấu hình thương hiệu
     my @cfg_files = (
         "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc",
         "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/en/includes/ftu-brand-config.inc",
@@ -378,10 +435,8 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
                 my $v = $new_vals{$k};
                 $v =~ s/\\/\\\\/g;
                 $v =~ s/\"/\\"/g;
-                if ($content =~ /^\s*\Q$k\E\s*=>\s*"[^"\\]*(?:\\.[^"\\]*)*"/m) {
-                    $content =~ s/^(\s*\Q$k\E\s*=>\s*)"[^"\\]*(?:\\.[^"\\]*)*"/$1"$v"/m;
-                } else {
-                    $content =~ s/(\}\s*\%\])/    $k => "$v",\n$1/;
+                if ($content =~ /^\s*\Q$k\E\s*=>\s*.*?,?$/m) {
+                    $content =~ s/^\s*\Q$k\E\s*=>.*$/    $k => "$v",/m;
                 }
             }
             if (open(my $out, ">:encoding(UTF-8)", $f)) {
@@ -391,18 +446,13 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         }
     }
 
-    # Backup to systempreferences
-    eval {
-        use JSON;
-        my $json_str = JSON::to_json(\%new_vals);
-        C4::Context->set_preference('FTU_FooterConfig', $json_str);
-    };
-
-    # Flush template & system cache
     eval {
         require Koha::Caches;
         Koha::Caches->get_instance()->flush_all();
     };
+
+    # Đồng bộ sang /usr/share/koha và xóa compiled template cache để thay đổi có hiệu lực tức thì
+    system("cp /kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc 2>/dev/null; cp /kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/en/includes/ftu-brand-config.inc /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/includes/ftu-brand-config.inc 2>/dev/null; rm -rf /var/cache/koha/kohadev/templates/* 2>/dev/null");
 
     logaction( 'PORTAL_NEWS', 'MODIFY', 0, "Cập nhật cấu hình thông tin chân trang (Footer)" );
 
@@ -608,61 +658,53 @@ my $count_banner_active = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_porta
 my $count_banner_draft  = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'banner' AND status = 'draft'");
 my ($next_banner_order) = $dbh->selectrow_array("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM koha_portal_posts WHERE post_type = 'banner'");
 
-my $footer_cfg = {};
-my $cfg_file = "/kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc";
-if (open(my $fh, "<:encoding(UTF-8)", $cfg_file)) {
-    my $content = do { local $/; <$fh> };
-    close $fh;
-    while ($content =~ /^\s*([a-zA-Z0-9_]+)\s*=>\s*"([^"\\]*(?:\\.[^"\\]*)*)"/mg) {
-        my ($k, $v) = ($1, $2);
-        $v =~ s/\\"/\"/g;
-        $v =~ s/\\\\/\\/g;
-        $footer_cfg->{$k} = $v;
-    }
-}
+my $footer_cfg = {
+    library_name           => C4::Context->preference('FTU_Footer_LibraryName') || "Thư viện Phân hiệu Trường Đại học Ngoại thương",
+    campus_current         => C4::Context->preference('FTU_Footer_CampusCurrent') || "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    campus_hcm_addr        => C4::Context->preference('FTU_Footer_Addr') || "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
+    hotline_hcmc           => C4::Context->preference('FTU_Footer_Hotline') || "(028) 3512 7254",
+    email_contact          => C4::Context->preference('FTU_Footer_Email') || 'tv.hcmc@ftu.edu.vn',
+    hours_summary          => C4::Context->preference('FTU_Footer_Hours') || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
+    link_facebook          => C4::Context->preference('FTU_Footer_Facebook') || "https://www.facebook.com/ftu2.hcmc",
+    link_youtube           => C4::Context->preference('FTU_Footer_Youtube') || 'https://www.youtube.com/@FTUChannel',
+    link_portal            => C4::Context->preference('FTU_Footer_Portal') || "https://hcmc.ftu.edu.vn",
 
-# Đảm bảo toàn bộ các trường luôn có dữ liệu thực tế chuẩn xác
-my %default_footer_vals = (
-    title_home             => "Trang chủ Thư viện",
-    link_home              => "/cgi-bin/ftu/opac-main.pl",
-    title_advsearch        => "Tìm kiếm tài liệu nâng cao",
-    link_advsearch         => "/cgi-bin/ftu/opac-search.pl",
-    title_databases        => "Cơ sở dữ liệu điện tử",
-    link_databases         => "/cgi-bin/ftu/opac-databases.pl",
-    title_renew            => "Gia hạn sách trực tuyến",
-    link_renew             => "/cgi-bin/ftu/opac-user.pl#opac-user-checkouts",
-    title_guide            => "Hướng dẫn sử dụng OPAC",
-    link_guide             => "/cgi-bin/ftu/opac-news-detail.pl?id=1",
-    hotline_hanoi          => "(024) 3835 6800",
-    hotline_hanoi_ext      => "Máy lẻ: 532 / 535",
-    hotline_hcmc           => "(028) 3512 7254",
-    hotline_hcmc_sub       => "(028) 3512 7258",
-    hotline_quangninh      => "(0203) 3850 411",
-    email_contact          => 'tv.hcmc@ftu.edu.vn',
-    hours_status           => "Đang mở cửa",
-    hours_summary          => "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
-    campus_hn_title        => "Trụ sở chính Hà Nội",
-    campus_hn_addr         => "91 Phố Chùa Láng, Phường Láng Thượng, Quận Đống Đa, TP. Hà Nội",
-    campus_hn_phone        => "(024) 3835 6800 (Ext: 532, 535)",
-    campus_hcm_title       => "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hcm_addr        => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
-    campus_hcm_phone       => "(028) 3512 7254 - 3512 7258",
-    campus_qn_title        => "Cơ sở Quảng Ninh",
-    campus_qn_addr         => "Số 260 Bạch Đằng, Phường Nam Khê, TP. Uông Bí, Tỉnh Quảng Ninh",
-    campus_qn_phone        => "(0203) 3850 411",
-    link_facebook          => "https://www.facebook.com/ftu2.hcmc",
-    link_youtube           => 'https://www.youtube.com/@FTUChannel',
-    link_portal            => "https://hcmc.ftu.edu.vn",
-    library_name_full      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    library_name_en        => "Library of Foreign Trade University - Ho Chi Minh City Branch",
-    library_description    => "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
-    copyright_text         => "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
-);
-for my $k (keys %default_footer_vals) {
-    if (!defined $footer_cfg->{$k} || $footer_cfg->{$k} eq '') {
-        $footer_cfg->{$k} = $default_footer_vals{$k};
+    footer_res_title1      => C4::Context->preference('FTU_Footer_ResTitle1') || "Bộ sưu tập tài liệu số",
+    footer_res_link1       => C4::Context->preference('FTU_Footer_ResLink1') || "/cgi-bin/koha/opac-collections.pl",
+    footer_res_title2      => C4::Context->preference('FTU_Footer_ResTitle2') || "Tìm kiếm theo Tác giả",
+    footer_res_link2       => C4::Context->preference('FTU_Footer_ResLink2') || "/cgi-bin/koha/opac-search.pl?idx=au",
+    footer_res_title3      => C4::Context->preference('FTU_Footer_ResTitle3') || "Tìm kiếm theo Chủ đề",
+    footer_res_link3       => C4::Context->preference('FTU_Footer_ResLink3') || "/cgi-bin/koha/opac-search.pl?idx=su",
+    footer_res_title4      => C4::Context->preference('FTU_Footer_ResTitle4') || "Giáo trình & Học phần",
+    footer_res_link4       => C4::Context->preference('FTU_Footer_ResLink4') || "/cgi-bin/koha/opac-course-reserves.pl",
+    footer_res_title5      => C4::Context->preference('FTU_Footer_ResTitle5') || "Kho tài liệu số DSpace",
+    footer_res_link5       => C4::Context->preference('FTU_Footer_ResLink5') || (C4::Context->preference('FTU_DSpaceBaseURL') || "/elib"),
+
+    footer_srv_title1      => C4::Context->preference('FTU_Footer_SrvTitle1') || "Tài khoản & Gia hạn sách",
+    footer_srv_link1       => C4::Context->preference('FTU_Footer_SrvLink1') || "/cgi-bin/koha/opac-user.pl",
+    footer_srv_title2      => C4::Context->preference('FTU_Footer_SrvTitle2') || "Quy định bản quyền học thuật",
+    footer_srv_link2       => C4::Context->preference('FTU_Footer_SrvLink2') || ((C4::Context->preference('FTU_DSpaceBaseURL') || "/elib") . "/info/end-user-agreement"),
+    footer_srv_title3      => C4::Context->preference('FTU_Footer_SrvTitle3') || "Thông báo & Lịch phục vụ",
+    footer_srv_link3       => C4::Context->preference('FTU_Footer_SrvLink3') || "/cgi-bin/koha/opac-news-detail.pl?id=5",
+    footer_srv_title4      => C4::Context->preference('FTU_Footer_SrvTitle4') || "Liên hệ Ban quản trị Thư viện",
+    footer_srv_link4       => C4::Context->preference('FTU_Footer_SrvLink4') || "/cgi-bin/koha/opac-reportproblem.pl",
+
+    copyright_text         => C4::Context->preference('FTU_Footer_Copyright') || "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
+};
+
+# Bổ sung từ JSON FTU_FooterConfig hoặc file ftu-brand-config.inc nếu thiếu
+eval {
+    use JSON;
+    my $pref = C4::Context->preference('FTU_FooterConfig');
+    if ($pref) {
+        my $decoded = JSON::from_json($pref);
+        if (ref($decoded) eq 'HASH') {
+            for my $k (keys %$decoded) {
+                $footer_cfg->{$k} = $decoded->{$k} if (!defined $footer_cfg->{$k} || $footer_cfg->{$k} eq '');
+            }
+        }
     }
-}
+};
 
 $template->param(
     op                  => "list",

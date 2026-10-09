@@ -36,10 +36,10 @@
                             onerror="this.onerror=null; this.src='[% FTU_BRAND.logo_url %]'" />
                         <div>
                             <div class="ftu-footer-title" style="font-weight: 800; color: #0F172A; font-size: 0.98rem; line-height: 1.3; text-transform: uppercase;">
-                                [% FTU_BRAND.library_name_en %]
+                                [% FTU_BRAND.library_name %]
                             </div>
                             <div class="ftu-footer-sub" style="font-size: 0.78rem; color: #64748B; font-weight: 500; margin-top: 2px;">
-                                [% FTU_BRAND.campus_current_en %]
+                                [% FTU_BRAND.campus_current %]
                             </div>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
                             <i class="fa fa-location-dot" style="color: #b91c1c; font-size: 15px; margin-top: 3px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
                                 <strong style="color: #1E293B;">Address:</strong>
-                                <span> [% FTU_BRAND.campus_hcm_addr_en || 'No. 15, D5 St., Ward 25, Binh Thanh District, Ho Chi Minh City' %]</span>
+                                <span> [% FTU_BRAND.campus_hcm_addr %]</span>
                             </div>
                         </div>
 
@@ -116,11 +116,11 @@
                             <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
                         </summary>
                         <ul class="ftu-footer-list">
-                            <li><a href="/cgi-bin/koha/opac-collections.pl" class="ftu-footer-link">Digital Collections</a></li>
-                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=au" class="ftu-footer-link">Search by Author</a></li>
-                            <li><a href="/cgi-bin/koha/opac-search.pl?idx=su" class="ftu-footer-link">Search by Subject</a></li>
-                            <li><a href="/cgi-bin/koha/opac-course-reserves.pl" class="ftu-footer-link">Course Reserves</a></li>
-                            <li><a href="[% FTU_BRAND.link_dspace %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link">DSpace Digital Repository <i class="fa fa-external-link-alt" style="font-size: 0.72rem; margin-left: 3px;"></i></a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link1 || '/cgi-bin/koha/opac-collections.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title1 || 'Digital Collections' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link2 || '/cgi-bin/koha/opac-search.pl?idx=au' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title2 || 'Search by Author' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link3 || '/cgi-bin/koha/opac-search.pl?idx=su' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title3 || 'Search by Subject' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link4 || '/cgi-bin/koha/opac-course-reserves.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_res_title4 || 'Course Reserves' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_res_link5 || FTU_BRAND.link_dspace || '/elib' %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link ftu-dspace-link">[% FTU_BRAND.footer_res_title5 || 'DSpace Digital Repository' %] <i class="fa fa-external-link-alt" style="font-size: 0.72rem; margin-left: 3px;"></i></a></li>
                         </ul>
                     </details>
                 </div>
@@ -136,10 +136,10 @@
                             <i class="fa fa-chevron-down ftu-footer-chevron d-lg-none" aria-hidden="true"></i>
                         </summary>
                         <ul class="ftu-footer-list">
-                            <li><a href="/cgi-bin/koha/opac-user.pl" class="ftu-footer-link">Account &amp; Renewals</a></li>
-                            <li><a href="[% FTU_BRAND.link_dspace %]/info/end-user-agreement" target="_blank" rel="noopener noreferrer" class="ftu-footer-link">Academic Copyright Policy</a></li>
-                            <li><a href="/cgi-bin/koha/opac-news-detail.pl?id=5" class="ftu-footer-link">News &amp; Service Notices</a></li>
-                            <li><a href="/cgi-bin/koha/opac-reportproblem.pl" class="ftu-footer-link">Contact Library Admin</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link1 || '/cgi-bin/koha/opac-user.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title1 || 'Account &amp; Renewals' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link2 || (FTU_BRAND.link_dspace _ '/info/end-user-agreement') %]" target="_blank" rel="noopener noreferrer" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title2 || 'Academic Copyright Policy' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link3 || '/cgi-bin/koha/opac-news-detail.pl?id=5' %]" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title3 || 'News &amp; Service Notices' %]</a></li>
+                            <li><a href="[% FTU_BRAND.footer_srv_link4 || '/cgi-bin/koha/opac-reportproblem.pl' %]" class="ftu-footer-link">[% FTU_BRAND.footer_srv_title4 || 'Contact Library Admin' %]</a></li>
                         </ul>
                     </details>
                 </div>
