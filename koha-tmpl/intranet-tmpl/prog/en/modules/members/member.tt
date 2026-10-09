@@ -701,6 +701,16 @@ body#pat_member aside .patron_search_form {
     color: #475569;
     padding-top: 14px;
 }
+
+#modalSsoAddPatron .form-control::placeholder {
+    color: #94a3b8 !important;
+    opacity: 0.85 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+}
+#modalSsoAddPatron .form-control:focus::placeholder {
+    opacity: 0.4 !important;
+}
 </style>
 
 <div class="main container-fluid">
@@ -1163,7 +1173,7 @@ body#pat_member aside .patron_search_form {
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Ngày sinh <span class="text-danger">(*)</span></label>
-                            <input type="text" id="add-sso-dob" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="15/05/2004" required />
+                            <input type="text" id="add-sso-dob" class="form-control form-control-sm" placeholder="DD/MM/YYYY (vd: 15/05/2004)" required />
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Giới tính <span class="text-danger">(*)</span></label>
@@ -1260,23 +1270,23 @@ body#pat_member aside .patron_search_form {
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Nghề nghiệp</label>
-                            <input type="text" id="add-sso-occupation" class="form-control form-control-sm" value="Sinh viên" placeholder="vd: Sinh viên" />
+                            <input type="text" id="add-sso-occupation" class="form-control form-control-sm" placeholder="vd: Sinh viên" />
                         </div>
                         <div class="col-md-3" id="add-sso-cohort-wrap">
                             <label class="form-label small fw-bold mb-1">Khóa học</label>
-                            <input type="text" id="add-sso-cohort" class="form-control form-control-sm" value="K62" placeholder="vd: K62" />
+                            <input type="text" id="add-sso-cohort" class="form-control form-control-sm" placeholder="vd: K62" />
                         </div>
                         <div class="col-md-4" id="add-sso-dept-wrap">
                             <label class="form-label small fw-bold mb-1">Đơn vị / Khoa</label>
-                            <input type="text" id="add-sso-department" class="form-control form-control-sm" value="Khoa Kinh tế Quốc tế" placeholder="vd: Khoa Kinh tế Quốc tế" />
+                            <input type="text" id="add-sso-department" class="form-control form-control-sm" placeholder="vd: Khoa Kinh tế Quốc tế" />
                         </div>
                         <div class="col-md-2" id="add-sso-studyyear-wrap">
                             <label class="form-label small fw-bold mb-1">Năm thứ</label>
-                            <input type="text" id="add-sso-studyyear" class="form-control form-control-sm" value="Năm 3" placeholder="vd: Năm 3" />
+                            <input type="text" id="add-sso-studyyear" class="form-control form-control-sm" placeholder="vd: Năm 3" />
                         </div>
                         <div class="col-md-3" id="add-sso-class-wrap">
                             <label class="form-label small fw-bold mb-1">Lớp sinh viên</label>
-                            <input type="text" id="add-sso-class" class="form-control form-control-sm" value="K62-KTQT1" placeholder="vd: K62-KTQT1" />
+                            <input type="text" id="add-sso-class" class="form-control form-control-sm" placeholder="vd: K62-KTQT1" />
                         </div>
                     </div>
 
@@ -1294,16 +1304,16 @@ body#pat_member aside .patron_search_form {
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold mb-1">Ngày cấp thẻ <span class="text-danger">(*)</span></label>
-                            <input type="text" id="add-sso-issuedate" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="01/10/2026" required />
+                            <label class="form-label small fw-bold mb-1">Ngày cấp thẻ</label>
+                            <input type="text" id="add-sso-issuedate" class="form-control form-control-sm" placeholder="DD/MM/YYYY (mặc định: hôm nay)" />
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Hạn sử dụng thẻ</label>
-                            <input type="text" id="add-sso-expirydate" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="30/06/2028" />
+                            <input type="text" id="add-sso-expirydate" class="form-control form-control-sm" placeholder="DD/MM/YYYY (mặc định: tự động tính)" />
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Mật khẩu khởi tạo</label>
-                            <input type="password" id="add-sso-password" class="form-control form-control-sm" value="123456" placeholder="••••••" required />
+                            <input type="password" id="add-sso-password" class="form-control form-control-sm" placeholder="Mặc định: 123456" />
                         </div>
                     </div>
 
@@ -1322,7 +1332,7 @@ body#pat_member aside .patron_search_form {
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Nơi công tác / Học tập</label>
-                            <input type="text" id="add-sso-workplace" class="form-control form-control-sm" value="Trường Đại học Ngoại Thương" />
+                            <input type="text" id="add-sso-workplace" class="form-control form-control-sm" placeholder="vd: Trường Đại học Ngoại Thương" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold mb-1">Địa chỉ thường trú</label>
@@ -2652,10 +2662,10 @@ body#pat_member aside .patron_search_form {
                 const curY = now.getFullYear();
 
                 if (role === 'ADMIN') {
-                    $('#add-sso-department').val('Ban Quản trị Thư viện / TTCNTT');
-                    $('#add-sso-occupation').val('Quản trị viên / Thủ thư');
+                    $('#add-sso-department').attr('placeholder', 'vd: Ban Quản trị Thư viện / TTCNTT');
+                    $('#add-sso-occupation').attr('placeholder', 'vd: Quản trị viên / Thủ thư');
                     $('#add-sso-education').val('Đại học');
-                    $('#add-sso-expirydate').val('31/12/2099');
+                    $('#add-sso-expirydate').attr('placeholder', '31/12/2099');
                     cohortWrap.hide();
                     classWrap.hide();
                     studyYearWrap.hide();
@@ -2663,10 +2673,10 @@ body#pat_member aside .patron_search_form {
                     $('#add-sso-class').val('');
                     $('#add-sso-studyyear').val('');
                 } else if (role === 'FACULTY') {
-                    $('#add-sso-department').val('Khoa Quản trị Kinh doanh');
-                    $('#add-sso-occupation').val('Giảng viên');
+                    $('#add-sso-department').attr('placeholder', 'vd: Khoa Quản trị Kinh doanh');
+                    $('#add-sso-occupation').attr('placeholder', 'vd: Giảng viên');
                     $('#add-sso-education').val('Thạc sĩ');
-                    $('#add-sso-expirydate').val('31/12/' + (curY + 5));
+                    $('#add-sso-expirydate').attr('placeholder', '31/12/' + (curY + 5));
                     cohortWrap.hide();
                     classWrap.hide();
                     studyYearWrap.hide();
@@ -2677,24 +2687,24 @@ body#pat_member aside .patron_search_form {
                     cohortWrap.show();
                     classWrap.show();
                     studyYearWrap.show();
-                    $('#add-sso-department').val('Viện Đào tạo Sau Đại học');
-                    $('#add-sso-occupation').val('Học viên Sau ĐH & NCS');
+                    $('#add-sso-department').attr('placeholder', 'vd: Viện Đào tạo Sau Đại học');
+                    $('#add-sso-occupation').attr('placeholder', 'vd: Học viên Sau ĐH & NCS');
                     $('#add-sso-education').val('Thạc sĩ');
-                    $('#add-sso-cohort').val('K61');
-                    $('#add-sso-studyyear').val('Năm 1');
-                    $('#add-sso-class').val('K61-TCNH');
-                    $('#add-sso-expirydate').val('31/12/' + (curY + 3));
+                    $('#add-sso-cohort').attr('placeholder', 'vd: K61');
+                    $('#add-sso-studyyear').attr('placeholder', 'vd: Năm 1');
+                    $('#add-sso-class').attr('placeholder', 'vd: K61-TCNH');
+                    $('#add-sso-expirydate').attr('placeholder', '31/12/' + (curY + 3));
                 } else { // STUDENT
                     cohortWrap.show();
                     classWrap.show();
                     studyYearWrap.show();
-                    $('#add-sso-department').val('Khoa Kinh tế Quốc tế');
-                    $('#add-sso-occupation').val('Sinh viên');
+                    $('#add-sso-department').attr('placeholder', 'vd: Khoa Kinh tế Quốc tế');
+                    $('#add-sso-occupation').attr('placeholder', 'vd: Sinh viên');
                     $('#add-sso-education').val('Đại học');
-                    $('#add-sso-cohort').val('K62');
-                    $('#add-sso-studyyear').val('Năm 3');
-                    $('#add-sso-class').val('K62-KTQT1');
-                    $('#add-sso-expirydate').val('30/06/' + (curY + 4));
+                    $('#add-sso-cohort').attr('placeholder', 'vd: K62');
+                    $('#add-sso-studyyear').attr('placeholder', 'vd: Năm 3');
+                    $('#add-sso-class').attr('placeholder', 'vd: K62-KTQT1');
+                    $('#add-sso-expirydate').attr('placeholder', '30/06/' + (curY + 4));
                 }
             }
             $(document).on('change', '#add-sso-role', onSsoAddRoleChange);
@@ -2716,13 +2726,11 @@ body#pat_member aside .patron_search_form {
                 }
                 $('#form-sso-add-patron')[0].reset();
                 $('#add-sso-role').val('STUDENT');
-                $('#add-sso-issuedate').val('01/10/2026');
                 $('#add-sso-status').val('ACTIVE');
-                $('#add-sso-password').val('123456');
-                $('#add-sso-dob').val('15/05/2004');
                 $('#add-sso-gender').val('Nam');
                 $('#add-sso-ethnicity').val('Kinh');
-                $('#add-sso-workplace').val('Trường Đại học Ngoại Thương');
+                $('#add-sso-education').val('Đại học');
+                $('#modalSsoAddPatron input[type="text"], #modalSsoAddPatron input[type="password"], #modalSsoAddPatron input[type="email"]').val('');
                 onSsoAddRoleChange();
                 $('#add-sso-alert').hide();
                 showModal('modalSsoAddPatron');
@@ -2735,14 +2743,54 @@ body#pat_member aside .patron_search_form {
                 const dob = $('#add-sso-dob').val().trim();
                 const gender = $('#add-sso-gender').val();
                 const role = $('#add-sso-role').val();
-                const issueDate = $('#add-sso-issuedate').val().trim();
-                const password = $('#add-sso-password').val() || '123456';
+                let issueDate = $('#add-sso-issuedate').val().trim();
+                const password = $('#add-sso-password').val().trim() || '123456';
 
-                if (!uid || !fullName || !dob || !gender || !role || !issueDate || !password) {
+                if (!uid || !fullName || !dob || !gender || !role) {
                     $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
-                        .text('Vui lòng điền đủ các trường bắt buộc (*): Mã bạn đọc, Họ tên, Ngày sinh, Giới tính, Loại bạn đọc, Ngày cấp thẻ, Mật khẩu!').show();
+                        .text('Vui lòng điền đủ các trường bắt buộc (*): Mã bạn đọc, Họ tên, Ngày sinh!').show();
                     return;
                 }
+
+                const now = new Date();
+                const d = String(now.getDate()).padStart(2, '0');
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const curY = now.getFullYear();
+
+                if (!issueDate) {
+                    issueDate = `${d}/${m}/${curY}`;
+                }
+
+                let expiryDate = $('#add-sso-expirydate').val().trim();
+                if (!expiryDate) {
+                    if (role === 'ADMIN') {
+                        expiryDate = '31/12/2099';
+                    } else if (role === 'FACULTY') {
+                        expiryDate = '31/12/' + (curY + 5);
+                    } else if (role === 'POSTGRAD') {
+                        expiryDate = '31/12/' + (curY + 3);
+                    } else {
+                        expiryDate = '30/06/' + (curY + 4);
+                    }
+                }
+
+                let occupation = $('#add-sso-occupation').val().trim();
+                if (!occupation) {
+                    if (role === 'ADMIN') occupation = 'Cán bộ thư viện';
+                    else if (role === 'FACULTY') occupation = 'Giảng viên';
+                    else if (role === 'POSTGRAD') occupation = 'Học viên Sau ĐH & NCS';
+                    else occupation = 'Sinh viên';
+                }
+
+                let department = $('#add-sso-department').val().trim();
+                if (!department) {
+                    if (role === 'ADMIN') department = 'Ban Quản trị Thư viện / TTCNTT';
+                    else if (role === 'FACULTY') department = 'Khoa Quản trị Kinh doanh';
+                    else if (role === 'POSTGRAD') department = 'Viện Đào tạo Sau Đại học';
+                    else department = 'Khoa Kinh tế Quốc tế';
+                }
+
+                const workplace = $('#add-sso-workplace').val().trim() || 'Trường Đại học Ngoại Thương';
 
                 const payload = {
                     uid: uid,
@@ -2752,19 +2800,19 @@ body#pat_member aside .patron_search_form {
                     cccd: $('#add-sso-cccd').val().trim(),
                     role: role,
                     educationLevel: $('#add-sso-education').val() || 'Đại học',
-                    occupation: $('#add-sso-occupation').val().trim(),
+                    occupation: occupation,
                     issueDate: issueDate,
                     status: $('#add-sso-status').val() || 'ACTIVE',
-                    expiryDate: $('#add-sso-expirydate').val().trim() || '30/06/2028',
+                    expiryDate: expiryDate,
                     password: password,
                     cohort: $('#add-sso-cohort').val().trim(),
-                    department: $('#add-sso-department').val().trim(),
+                    department: department,
                     studyYear: $('#add-sso-studyyear').val().trim(),
                     studentClass: $('#add-sso-class').val().trim(),
                     phone: $('#add-sso-phone').val().trim(),
                     ethnicity: $('#add-sso-ethnicity').val().trim(),
                     address: $('#add-sso-address').val().trim(),
-                    workplace: $('#add-sso-workplace').val().trim(),
+                    workplace: workplace,
                     notes: $('#add-sso-notes').val().trim(),
                     email: $('#add-sso-email').val().trim() || (uid + '@ftu.edu.vn')
                 };
