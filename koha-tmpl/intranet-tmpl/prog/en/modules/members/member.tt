@@ -735,7 +735,7 @@ body#pat_member aside .patron_search_form {
                     <div class="ftu-segmented-control" role="tablist">
                         <button type="button" class="ftu-segmented-btn active" id="btn-show-sso" role="tab" aria-selected="true">
                             <i class="fa fa-graduation-cap"></i>
-                            <span>Người học tập trung (SSO)</span>
+                            <span>Bạn đọc tập trung (SSO)</span>
                             <span class="ftu-count-badge" id="sso-badge-count">--</span>
                         </button>
                         <button type="button" class="ftu-segmented-btn" id="btn-show-koha" role="tab" aria-selected="false">
@@ -828,9 +828,11 @@ body#pat_member aside .patron_search_form {
                 <div class="ftu-select-wrap">
                     <select id="ftu-quick-role" class="form-select">
                         <option value="">Tất cả loại bạn đọc</option>
-                        <optgroup label="Người học (SSO)">
+                        <optgroup label="Bạn đọc SSO">
                             <option value="STUDENT">Sinh viên Đại học</option>
                             <option value="POSTGRAD">Sau ĐH & Nghiên cứu sinh</option>
+                            <option value="FACULTY">Giảng viên & Cán bộ</option>
+                            <option value="ADMIN">Quản trị viên / Thủ thư</option>
                         </optgroup>
                         <optgroup label="Bạn đọc Koha">
                             [% FOREACH category IN categories %]
@@ -1135,8 +1137,8 @@ body#pat_member aside .patron_search_form {
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-bottom py-3 px-4" style="background: #ffffff;">
                 <div>
-                    <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Thêm bạn đọc người học mới</h5>
-                    <small class="text-muted">Đồng bộ tự động vào Hệ thống Định danh FTU SSO và Lưu hành Koha</small>
+                    <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Thêm mới hồ sơ bạn đọc SSO</h5>
+                    <small class="text-muted">Đồng bộ tự động vào Hệ thống Định danh FTU SSO (OpenLDAP) và CSDL Lưu thông Koha</small>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
@@ -1148,7 +1150,7 @@ body#pat_member aside .patron_search_form {
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold mb-1">Số thẻ <span class="text-danger">(*)</span></label>
+                            <label class="form-label small fw-bold mb-1">Mã bạn đọc / Số thẻ <span class="text-danger">(*)</span></label>
                             <input type="text" id="add-sso-uid" class="form-control form-control-sm" placeholder="vd: 221365" required />
                         </div>
                         <div class="col-md-5">
@@ -1235,53 +1237,60 @@ body#pat_member aside .patron_search_form {
 
                     <!-- 2. Loại bạn đọc & Quản lý đào tạo -->
                     <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
-                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">2. Loại bạn đọc & Quản lý đào tạo</h6>
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">2. Loại bạn đọc &amp; Quản lý đào tạo</h6>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Loại bạn đọc <span class="text-danger">(*)</span></label>
                             <select id="add-sso-role" class="form-select form-select-sm">
                                 <option value="STUDENT" selected>Sinh viên ĐH</option>
-                                <option value="POSTGRAD">Sau ĐH & NCS</option>
+                                <option value="POSTGRAD">Học viên Sau ĐH &amp; NCS</option>
+                                <option value="FACULTY">Giảng viên &amp; Cán bộ</option>
+                                <option value="ADMIN">Quản trị viên / Thủ thư</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Trình độ đào tạo</label>
-                            <input type="text" id="add-sso-education" class="form-control form-control-sm" value="Đại học" />
+                            <select id="add-sso-education" class="form-select form-select-sm">
+                                <option value="Đại học" selected>Đại học</option>
+                                <option value="Thạc sĩ">Thạc sĩ</option>
+                                <option value="Tiến sĩ">Tiến sĩ</option>
+                                <option value="Cao đẳng">Cao đẳng</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold mb-1">Nghề nghiệp</label>
-                            <input type="text" id="add-sso-occupation" class="form-control form-control-sm" value="Sinh viên" />
+                            <input type="text" id="add-sso-occupation" class="form-control form-control-sm" value="Sinh viên" placeholder="vd: Sinh viên" />
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="add-sso-cohort-wrap">
                             <label class="form-label small fw-bold mb-1">Khóa học</label>
-                            <input type="text" id="add-sso-cohort" class="form-control form-control-sm" value="K62" />
+                            <input type="text" id="add-sso-cohort" class="form-control form-control-sm" value="K62" placeholder="vd: K62" />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="add-sso-dept-wrap">
                             <label class="form-label small fw-bold mb-1">Đơn vị / Khoa</label>
-                            <input type="text" id="add-sso-department" class="form-control form-control-sm" value="Khoa Kinh tế Quốc tế" />
+                            <input type="text" id="add-sso-department" class="form-control form-control-sm" value="Khoa Kinh tế Quốc tế" placeholder="vd: Khoa Kinh tế Quốc tế" />
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-2" id="add-sso-studyyear-wrap">
                             <label class="form-label small fw-bold mb-1">Năm thứ</label>
-                            <input type="text" id="add-sso-studyyear" class="form-control form-control-sm" value="Năm 3" />
+                            <input type="text" id="add-sso-studyyear" class="form-control form-control-sm" value="Năm 3" placeholder="vd: Năm 3" />
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="add-sso-class-wrap">
                             <label class="form-label small fw-bold mb-1">Lớp sinh viên</label>
-                            <input type="text" id="add-sso-class" class="form-control form-control-sm" value="K62-KTQT1" />
+                            <input type="text" id="add-sso-class" class="form-control form-control-sm" value="K62-KTQT1" placeholder="vd: K62-KTQT1" />
                         </div>
                     </div>
 
                     <!-- 3. Hiệu lực thẻ & Thư viện / DRM -->
                     <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
-                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">3. Hiệu lực thẻ & Thư viện / DRM</h6>
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">3. Hiệu lực thẻ &amp; Thư viện / DRM</h6>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Tình trạng thẻ <span class="text-danger">(*)</span></label>
                             <select id="add-sso-status" class="form-select form-select-sm">
                                 <option value="ACTIVE" selected>Còn hoạt động</option>
-                                <option value="LOCKED">Đã khóa</option>
-                                <option value="EXPIRED">Hết hạn</option>
+                                <option value="LOCKED">Đã khóa thẻ</option>
+                                <option value="EXPIRED">Hết hạn thẻ</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -1290,17 +1299,17 @@ body#pat_member aside .patron_search_form {
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Hạn sử dụng thẻ</label>
-                            <input type="text" id="add-sso-expirydate" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="01/10/2027" />
+                            <input type="text" id="add-sso-expirydate" class="form-control form-control-sm" placeholder="DD/MM/YYYY" value="30/06/2028" />
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold mb-1">Mật khẩu khởi tạo</label>
-                            <input type="password" id="add-sso-password" class="form-control form-control-sm" value="123456" />
+                            <input type="password" id="add-sso-password" class="form-control form-control-sm" value="123456" placeholder="••••••" required />
                         </div>
                     </div>
 
                     <!-- 4. Liên hệ & Khác -->
                     <div class="d-flex align-items-center mb-2 pb-1 border-bottom">
-                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">4. Liên hệ & Khác</h6>
+                        <h6 class="mb-0 fw-bold text-secondary text-uppercase" style="font-size:12px; letter-spacing:0.04em;">4. Liên hệ &amp; Khác</h6>
                     </div>
                     <div class="row g-2">
                         <div class="col-md-4">
@@ -1330,8 +1339,8 @@ body#pat_member aside .patron_search_form {
             </div>
             <div class="modal-footer bg-light py-2 px-4 border-top">
                 <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="ftu-btn-primary" id="btn-submit-add-sso">
-                    <i class="fa fa-save me-1"></i> Lưu & Đồng bộ Koha
+                <button type="button" class="btn btn-sm btn-danger" id="btn-submit-add-sso" style="background:#8b1515; border-color:#8b1515; font-weight:600; padding:6px 16px;">
+                    Lưu &amp; Đồng bộ Koha
                 </button>
             </div>
         </div>
@@ -1719,12 +1728,12 @@ body#pat_member aside .patron_search_form {
                     </tr>
                 `);
 
-                const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users?role=LEARNER');
+                const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users');
                 const json = await res.json();
 
                 if (json.success && Array.isArray(json.data)) {
                     ssoRetryCount = 0;
-                    allLearners = json.data.filter(u => u.role === 'STUDENT' || u.role === 'POSTGRAD');
+                    allLearners = json.data;
 
                     const studentCount = allLearners.filter(u => u.role === 'STUDENT').length;
                     const postgradCount = allLearners.filter(u => u.role === 'POSTGRAD').length;
@@ -1988,7 +1997,14 @@ body#pat_member aside .patron_search_form {
 
             let html = '';
             pagedLearners.forEach(u => {
-                const isStudent = u.role === 'STUDENT';
+                const roleLabels = {
+                    'STUDENT': 'Sinh viên ĐH',
+                    'POSTGRAD': 'Sau ĐH & NCS',
+                    'FACULTY': 'Giảng viên & Cán bộ',
+                    'ADMIN': 'Quản trị / Thủ thư'
+                };
+                const displayRole = roleLabels[u.role] || u.roleName || 'Bạn đọc SSO';
+                const cohortClassText = [displayRole, u.cohort, u.studentClass].filter(Boolean).join(' · ');
                 
                 // Muted & Refined Status Pill
                 let statusPill = '<span class="ftu-badge-active"><span class="ftu-status-dot" style="background:#10b981;"></span>Còn hoạt động</span>';
@@ -2010,7 +2026,7 @@ body#pat_member aside .patron_search_form {
                         </td>
                         <td>
                             <div class="fw-semibold text-dark btn-action-detail" data-uid="${u.uid}" style="font-size:13.5px; cursor:pointer;" title="Bấm xem chi tiết hồ sơ">${u.fullName}</div>
-                            <div class="text-muted" style="font-size:11.5px;">${u.roleName || (isStudent ? 'Sinh viên ĐH' : 'Sau ĐH & NCS')} · ${u.cohort || 'K62'}</div>
+                            <div class="text-muted" style="font-size:11.5px;">${cohortClassText}</div>
                         </td>
                         <td>
                             <div class="text-dark" style="font-size:12.5px;">${u.dateOfBirth || '-'}</div>
@@ -2624,23 +2640,84 @@ body#pat_member aside .patron_search_form {
                 }
             });
 
+            // Xử lý động khi đổi Loại bạn đọc trong Form Thêm SSO
+            function onSsoAddRoleChange() {
+                const role = $('#add-sso-role').val();
+                const cohortWrap = $('#add-sso-cohort-wrap');
+                const classWrap = $('#add-sso-class-wrap');
+                const studyYearWrap = $('#add-sso-studyyear-wrap');
+                const now = new Date();
+                const curY = now.getFullYear();
+
+                if (role === 'ADMIN') {
+                    $('#add-sso-department').val('Ban Quản trị Thư viện / TTCNTT');
+                    $('#add-sso-occupation').val('Quản trị viên / Thủ thư');
+                    $('#add-sso-education').val('Đại học');
+                    $('#add-sso-expirydate').val('31/12/2099');
+                    cohortWrap.hide();
+                    classWrap.hide();
+                    studyYearWrap.hide();
+                    $('#add-sso-cohort').val('');
+                    $('#add-sso-class').val('');
+                    $('#add-sso-studyyear').val('');
+                } else if (role === 'FACULTY') {
+                    $('#add-sso-department').val('Khoa Quản trị Kinh doanh');
+                    $('#add-sso-occupation').val('Giảng viên');
+                    $('#add-sso-education').val('Thạc sĩ');
+                    $('#add-sso-expirydate').val('31/12/' + (curY + 5));
+                    cohortWrap.hide();
+                    classWrap.hide();
+                    studyYearWrap.hide();
+                    $('#add-sso-cohort').val('');
+                    $('#add-sso-class').val('');
+                    $('#add-sso-studyyear').val('');
+                } else if (role === 'POSTGRAD') {
+                    cohortWrap.show();
+                    classWrap.show();
+                    studyYearWrap.show();
+                    $('#add-sso-department').val('Viện Đào tạo Sau Đại học');
+                    $('#add-sso-occupation').val('Học viên Sau ĐH & NCS');
+                    $('#add-sso-education').val('Thạc sĩ');
+                    $('#add-sso-cohort').val('K61');
+                    $('#add-sso-studyyear').val('Năm 1');
+                    $('#add-sso-class').val('K61-TCNH');
+                    $('#add-sso-expirydate').val('31/12/' + (curY + 3));
+                } else { // STUDENT
+                    cohortWrap.show();
+                    classWrap.show();
+                    studyYearWrap.show();
+                    $('#add-sso-department').val('Khoa Kinh tế Quốc tế');
+                    $('#add-sso-occupation').val('Sinh viên');
+                    $('#add-sso-education').val('Đại học');
+                    $('#add-sso-cohort').val('K62');
+                    $('#add-sso-studyyear').val('Năm 3');
+                    $('#add-sso-class').val('K62-KTQT1');
+                    $('#add-sso-expirydate').val('30/06/' + (curY + 4));
+                }
+            }
+            $(document).on('change', '#add-sso-role', onSsoAddRoleChange);
+
+            // Tự động điền email theo mã bạn đọc
+            $(document).on('input blur', '#add-sso-uid', function () {
+                const uid = $(this).val().trim();
+                const curEmail = $('#add-sso-email').val().trim();
+                if (uid && (!curEmail || curEmail.endsWith('@ftu.edu.vn'))) {
+                    $('#add-sso-email').val(uid + '@ftu.edu.vn');
+                }
+            });
+
             // Mở modal Thêm bạn đọc SSO mới
             $('#btn-opt-add-manual, #btn-open-add-sso').on('click', function () {
                 $('#form-sso-add-patron')[0].reset();
+                $('#add-sso-role').val('STUDENT');
                 $('#add-sso-issuedate').val('01/10/2026');
                 $('#add-sso-status').val('ACTIVE');
-                $('#add-sso-expirydate').val('01/10/2027');
                 $('#add-sso-password').val('123456');
                 $('#add-sso-dob').val('15/05/2004');
                 $('#add-sso-gender').val('Nam');
                 $('#add-sso-ethnicity').val('Kinh');
-                $('#add-sso-education').val('Đại học');
-                $('#add-sso-occupation').val('Sinh viên');
-                $('#add-sso-cohort').val('K62');
-                $('#add-sso-department').val('Khoa Kinh tế Quốc tế');
-                $('#add-sso-studyyear').val('Năm 3');
-                $('#add-sso-class').val('K62-KTQT1');
                 $('#add-sso-workplace').val('Trường Đại học Ngoại Thương');
+                onSsoAddRoleChange();
                 $('#add-sso-alert').hide();
                 showModal('modalSsoAddPatron');
             });
@@ -2653,10 +2730,11 @@ body#pat_member aside .patron_search_form {
                 const gender = $('#add-sso-gender').val();
                 const role = $('#add-sso-role').val();
                 const issueDate = $('#add-sso-issuedate').val().trim();
+                const password = $('#add-sso-password').val() || '123456';
 
-                if (!uid || !fullName || !dob || !gender || !role || !issueDate) {
+                if (!uid || !fullName || !dob || !gender || !role || !issueDate || !password) {
                     $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
-                        .text('Vui lòng điền đủ các trường bắt buộc (*): Số thẻ, Họ tên, Ngày sinh, Giới tính, Loại bạn đọc, Ngày cấp thẻ!').show();
+                        .text('Vui lòng điền đủ các trường bắt buộc (*): Mã bạn đọc, Họ tên, Ngày sinh, Giới tính, Loại bạn đọc, Ngày cấp thẻ, Mật khẩu!').show();
                     return;
                 }
 
@@ -2667,12 +2745,12 @@ body#pat_member aside .patron_search_form {
                     gender: gender,
                     cccd: $('#add-sso-cccd').val().trim(),
                     role: role,
-                    educationLevel: $('#add-sso-education').val().trim(),
+                    educationLevel: $('#add-sso-education').val() || 'Đại học',
                     occupation: $('#add-sso-occupation').val().trim(),
                     issueDate: issueDate,
                     status: $('#add-sso-status').val() || 'ACTIVE',
-                    expiryDate: $('#add-sso-expirydate').val().trim() || '01/10/2027',
-                    password: $('#add-sso-password').val() || '123456',
+                    expiryDate: $('#add-sso-expirydate').val().trim() || '30/06/2028',
+                    password: password,
                     cohort: $('#add-sso-cohort').val().trim(),
                     department: $('#add-sso-department').val().trim(),
                     studyYear: $('#add-sso-studyyear').val().trim(),
@@ -2682,11 +2760,11 @@ body#pat_member aside .patron_search_form {
                     address: $('#add-sso-address').val().trim(),
                     workplace: $('#add-sso-workplace').val().trim(),
                     notes: $('#add-sso-notes').val().trim(),
-                    email: $('#add-sso-email').val().trim()
+                    email: $('#add-sso-email').val().trim() || (uid + '@ftu.edu.vn')
                 };
 
                 const btn = $(this);
-                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>Đang lưu...');
+                btn.prop('disabled', true).html('Đang lưu...');
                 try {
                     const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users', {
                         method: 'POST',
@@ -2706,11 +2784,11 @@ body#pat_member aside .patron_search_form {
                         }
 
                         $('#add-sso-alert').removeClass('alert-danger').addClass('alert-success')
-                            .text('Đã thêm bạn đọc [' + fullName + ' - ' + uid + '] thành công và đồng bộ vào Koha!').show();
+                            .text('Đã thêm bạn đọc [' + fullName + ' - ' + uid + '] thành công và đồng bộ đồng thời vào OpenLDAP (SSO) và CSDL Koha!').show();
                         setTimeout(() => {
                             hideModal('modalSsoAddPatron');
                             loadSsoLearners();
-                        }, 1000);
+                        }, 1200);
                     } else {
                         $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
                             .text(json.error || 'Có lỗi xảy ra khi thêm bạn đọc').show();
@@ -2719,7 +2797,7 @@ body#pat_member aside .patron_search_form {
                     $('#add-sso-alert').removeClass('alert-success').addClass('alert-danger')
                         .text('Lỗi kết nối SSO Portal: ' + err.message).show();
                 } finally {
-                    btn.prop('disabled', false).html('<i class="fa fa-save me-1"></i> Lưu & Đồng bộ Koha');
+                    btn.prop('disabled', false).html('Lưu &amp; Đồng bộ Koha');
                 }
             });
 
