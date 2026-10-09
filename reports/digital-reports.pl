@@ -40,8 +40,8 @@ my $op = $query->param('op') || 'view';
 
 # Kết nối cơ sở dữ liệu DRM (PostgreSQL 15)
 sub get_drm_dbh {
-    my $host = $ENV{DRM_DB_HOST} || '10.2.0.226';
-    my $port = $ENV{DRM_DB_PORT} || 5435;
+    my $host = $ENV{DRM_DB_HOST} || 'ftu-drm-db';
+    my $port = $ENV{DRM_DB_PORT} || 5432;
     my $dbname = $ENV{DRM_DB_NAME} || 'ftu_drm_db';
     my $user = $ENV{DRM_DB_USER} || 'drm_admin';
     my $pass = $ENV{DRM_DB_PASSWORD} || 'FtuDrmSecurePassword2026!';
@@ -49,7 +49,7 @@ sub get_drm_dbh {
     my $dbh;
     eval {
         $dbh = DBI->connect(
-            "dbi:Pg:dbname=$dbname;host=$host;port=$port",
+            "dbi:Pg:dbname=$dbname;host=$host;port=$port;connect_timeout=2",
             $user,
             $pass,
             {
@@ -138,7 +138,7 @@ sub get_dspace_dbh {
     my $dbh;
     eval {
         $dbh = DBI->connect(
-            "dbi:Pg:dbname=$dspace_name;host=$dspace_host;port=$dspace_port",
+            "dbi:Pg:dbname=$dspace_name;host=$dspace_host;port=$dspace_port;connect_timeout=2",
             $dspace_user,
             $dspace_pass,
             { RaiseError => 0, PrintError => 0, pg_enable_utf8 => 1, AutoCommit => 1 }

@@ -663,18 +663,27 @@ function loadReportData() {
         + '&to_date=' + encodeURIComponent(toDate)
         + '&branch=' + encodeURIComponent(branch);
 
-    fetch(apiUrl)
-        .then(function(res) { return res.json(); })
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timeoutId = controller ? setTimeout(function() { controller.abort(); }, 10000) : null;
+
+    fetch(apiUrl, controller ? { signal: controller.signal } : {})
+        .then(function(res) {
+            if (timeoutId) clearTimeout(timeoutId);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
         .then(function(data) {
             document.getElementById('loading_indicator').classList.add('d-none');
             document.getElementById('report_table').classList.remove('opacity-50');
             renderTable(data);
         })
         .catch(function(err) {
+            if (timeoutId) clearTimeout(timeoutId);
             document.getElementById('loading_indicator').classList.add('d-none');
             document.getElementById('report_table').classList.remove('opacity-50');
             console.error('Error fetching report:', err);
-            document.getElementById('report_table_body').innerHTML = '<tr><td colspan="10" class="text-center text-danger py-4">Lỗi nạp số liệu: ' + err.message + '</td></tr>';
+            var msg = (err && err.name === 'AbortError') ? 'Quá thời gian chờ phản hồi (Timeout)' : (err ? err.message : 'Không thể kết nối');
+            document.getElementById('report_table_body').innerHTML = '<tr><td colspan="10" class="text-center text-danger py-4">Lỗi nạp số liệu: ' + msg + '</td></tr>';
         });
 }
 
