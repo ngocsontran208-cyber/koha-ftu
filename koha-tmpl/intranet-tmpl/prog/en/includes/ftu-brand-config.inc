@@ -14,14 +14,14 @@
     university_short       => "FTU",
     campus_current         => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
     campus_current_short   => "Phân hiệu tại TP. Hồ Chí Minh",
-    campus_current_en      => "Foreign Trade University - Ho Chi Minh City Branch",
+    campus_current_en      => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
 
     # ── 2. TÊN THƯ VIỆN & KHẨU HIỆU ─────────────────────────────────────────
     library_name           => "Thư viện Phân hiệu Trường Đại học Ngoại thương",
     library_name_short     => "Thư viện FTU",
     library_name_full      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    library_name_en        => "Foreign Trade University Library",
-    library_sub_title      => "Foreign Trade University Library - Ho Chi Minh City Branch",
+    library_name_en        => "Thư viện Phân hiệu Trường Đại học Ngoại thương",
+    library_sub_title      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
     library_slogan         => "Không gian học tập & nghiên cứu hiện đại, kết nối cộng đồng giảng viên và sinh viên với kho tri thức toàn diện",
     library_description    => "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
     library_description_en => "A modern center for information and knowledge, connecting FTU faculty, researchers, and students with high-impact digital databases, comprehensive print collections, and world-class academic support.",
@@ -45,16 +45,16 @@
     hours_status           => "Đang mở cửa",
     hours_status_en        => "Open Now",
     hours_summary          => "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
-    hours_summary_en       => "Mon – Fri: 07:30 – 19:30 | Sat: 08:00 – 16:00",
+    hours_summary_en       => "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
     hours_weekdays         => "07:30 – 19:30 (Thứ 2 – Thứ 6)",
     hours_saturday         => "08:00 – 16:00 (Thứ 7)",
     hours_sunday           => "Nghỉ (Chủ nhật & Ngày Lễ)",
 
     # ── 6. ĐỊA CHỈ & LIÊN HỆ PHÂN HIỆU TP.HCM ───────────────────────────────
     campus_hcm_title       => "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hcm_title_en    => "Foreign Trade University - Ho Chi Minh City Branch",
+    campus_hcm_title_en    => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
     campus_hcm_addr        => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
-    campus_hcm_addr_en     => "No. 15, D5 St., Ward 25, Binh Thanh District, Ho Chi Minh City",
+    campus_hcm_addr_en     => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
     campus_hcm_phone       => "(028) 3512 7254 - 3512 7258",
 
     campus_hn_title        => "Trụ sở chính Hà Nội",
@@ -127,7 +127,7 @@
     system_sso             => "FTU Single Sign-On",
     copyright_year         => "2026",
     copyright_text         => "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền.",
-    copyright_text_en      => "© 2026 Library of Foreign Trade University - Ho Chi Minh City Branch. All rights reserved."
+    copyright_text_en      => "© 2026 Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh. Bảo lưu mọi quyền."
 } %]
 
 [%# ── BẢN ĐỊA HÓA CHO GIAO DIỆN TIẾNG ANH (EN) ────────────────────────────── %]

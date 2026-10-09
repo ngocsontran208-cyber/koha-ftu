@@ -748,13 +748,6 @@ HTTP_ACCEPT_LANGUAGE)
 sub getlanguage {
     my ($cgi) = @_;
 
-    my $memory_cache = Koha::Cache::Memory::Lite->get_instance();
-    my $cache_key    = "getlanguage";
-    unless ( $cgi and $cgi->param('language') ) {
-        my $cached = $memory_cache->get_from_cache($cache_key);
-        return $cached if $cached;
-    }
-
     my $interface = C4::Context->interface;
     my $theme     = '';
     my $language;
@@ -786,9 +779,17 @@ sub getlanguage {
             $language = $cgi_param_language;
         }
 
-        # cookie
+        # Choose language from cookie if explicitly set
         if ( not $language and my $cgi_cookie_language = $cgi->cookie('KohaOpacLanguage') ) {
-            ( $language = $cgi_cookie_language ) =~ s/[^a-zA-Z_-]*//;    # sanitize cookie
+            ( my $clean_cookie = $cgi_cookie_language ) =~ s/[^a-zA-Z_-]*//;
+            if ( $clean_cookie && any { $_ eq $clean_cookie } @languages ) {
+                $language = $clean_cookie;
+            }
+        }
+
+        # FTU Library: OPAC giao diện luôn mặc định là tiếng Việt (vi-VN) trừ khi người dùng chủ động chọn ngôn ngữ khác
+        if ( not $language and $interface eq 'opac' ) {
+            $language = 'vi-VN';
         }
     } else {
         @languages = map { $_->{rfc4646_subtag} } @{ getTranslatedLanguages( $interface, $theme ) };
@@ -813,13 +814,9 @@ sub getlanguage {
         $language = undef;
     }
 
-    # Pick the first selected syspref language
-    $language = shift @languages unless $language;
+    # Fall back to vi-VN first, then first selected syspref language
+    $language ||= 'vi-VN';
 
-    # Fall back to English if necessary
-    $language ||= 'en';
-
-    $memory_cache->set_in_cache( $cache_key, $language );
     return $language;
 }
 

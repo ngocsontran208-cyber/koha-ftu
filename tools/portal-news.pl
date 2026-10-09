@@ -407,9 +407,14 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         footer_srv_title3      => $p_footer_srv_title3,
         footer_srv_link3       => $p_footer_srv_link3,
         footer_srv_title4      => $p_footer_srv_title4,
-        footer_srv_link4       => $p_footer_srv_link4,
+        copyright_text         => $p_copyright_text,
 
-        copyright_text         => $p_copyright_text
+        # Đồng bộ luôn các biến _en để giao diện tiếng Anh cũng hiển thị đúng nội dung người dùng cấu hình
+        library_name_en        => $p_library_name,
+        campus_current_en      => $p_campus_current,
+        campus_hcm_addr_en     => $p_campus_hcm_addr,
+        hours_summary_en       => $p_hours_summary,
+        copyright_text_en      => $p_copyright_text
     );
 
     # 2. Ghi chuỗi JSON dự phòng vào FTU_FooterConfig
