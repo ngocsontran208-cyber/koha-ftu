@@ -26,16 +26,501 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% FILTER collapse %]
     <style nonce="[% Koha.CSPNonce | $raw %]">
-        #patron_checkout_search {
-            display: flex;
-            gap: 0.5rem;
+        /* Reset and enforce FTU circulation minimalism */
+        body#circ_circulation {
+            background: #f4f6f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
         }
-        /* FTU: Ẩn patron info trùng trong sidebar khi có patron card */
-        #ftu-patron-card ~ * .patroninfo,
-        .patroninfo { display: none !important; }
-        #circ-menu { margin-top: 0 !important; }
-        /* Nhưng vẫn hiển thị nếu không có patron card */
-        body:not(:has(#ftu-patron-card)) .patroninfo { display: block !important; }
+        #circ_circulation #sidebar-container,
+        #circ_circulation .patroninfo,
+        #circ_circulation #members-toolbar,
+        #circ_circulation h1,
+        #circ_circulation #patron-detail-tabs,
+        #circ_circulation #finesholdsissues {
+            display: none !important;
+        }
+
+        /* Breadcrumb bar */
+        .ftu-breadcrumb-bar {
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #555;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ftu-breadcrumb-bar a {
+            color: #0284c7;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ftu-breadcrumb-bar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Card panels */
+        .ftu-circ-card {
+            background: #fff;
+            border: 1px solid #d4dfe6;
+            border-radius: 2px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .ftu-circ-card-header {
+            background: #eaf2f8;
+            border-bottom: 1px solid #d4dfe6;
+            padding: 7px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ftu-circ-card-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #4a6e87;
+        }
+
+        .ftu-toggle-panel {
+            color: #555;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+        .ftu-toggle-panel:hover {
+            color: #111;
+        }
+
+        .ftu-circ-card-body {
+            padding: 12px 16px;
+        }
+
+        /* 3-column top grid */
+        .ftu-top-grid {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .ftu-col-controls {
+            width: 320px;
+            flex-shrink: 0;
+            border-right: 1px solid #f0f3f6;
+            padding-right: 16px;
+        }
+
+        .ftu-form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 7px;
+        }
+
+        .ftu-form-row label {
+            width: 105px;
+            flex-shrink: 0;
+            font-size: 13px;
+            color: #333;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .ftu-input-group {
+            flex: 1;
+            display: flex;
+            align-items: stretch;
+            position: relative;
+        }
+
+        .ftu-select,
+        .ftu-input {
+            width: 100%;
+            height: 27px;
+            border: 1px solid #c8d7e1;
+            border-radius: 2px;
+            padding: 2px 8px;
+            font-size: 13px;
+            color: #333;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .ftu-input-barcode {
+            border: 1px solid #f39c12 !important;
+            box-shadow: 0 0 3px rgba(243, 156, 18, 0.4);
+        }
+
+        .ftu-btn-reload {
+            width: 27px;
+            height: 27px;
+            background: #fff;
+            border: 1px solid #c8d7e1;
+            border-left: none;
+            border-radius: 0 2px 2px 0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .ftu-btn-reload:hover {
+            background: #f8fafc;
+            color: #333;
+        }
+
+        .ftu-row-checkbox {
+            margin-left: 105px;
+            margin-bottom: 9px;
+        }
+        .ftu-checkbox-label {
+            font-size: 13px;
+            color: #333;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .ftu-row-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: 105px;
+        }
+
+        .ftu-btn {
+            border: none;
+            border-radius: 3px;
+            padding: 4px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            line-height: 1.4;
+        }
+        .ftu-btn-reject {
+            background: #f59e0b;
+        }
+        .ftu-btn-reject:hover {
+            background: #d97706;
+            color: #fff;
+        }
+        .ftu-btn-borrow {
+            background: #1e88e5;
+        }
+        .ftu-btn-borrow:hover {
+            background: #1565c0;
+            color: #fff;
+        }
+        .ftu-btn-search {
+            background: #608b98;
+        }
+        .ftu-btn-search:hover {
+            background: #4a6f7b;
+            color: #fff;
+        }
+
+        /* Middle column: patron details */
+        .ftu-col-patron {
+            flex: 1;
+            min-width: 0;
+            padding: 0 8px;
+        }
+
+        .ftu-p-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .ftu-p-header {
+            margin-bottom: 7px;
+        }
+        .ftu-p-name {
+            color: #15803d;
+            font-weight: 700;
+            font-size: 14.5px;
+        }
+        .ftu-p-item {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .ftu-p-lbl {
+            font-weight: 700;
+            color: #222;
+        }
+        .ftu-p-val {
+            color: #333;
+        }
+        .ftu-overdue-val {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        .ftu-text-danger {
+            color: #dc2626 !important;
+        }
+
+        .ftu-p-full {
+            justify-content: flex-start;
+        }
+
+        .ftu-p-note {
+            margin-top: 8px;
+        }
+        .ftu-note-wrap {
+            position: relative;
+            width: 100%;
+        }
+        .ftu-note-input {
+            width: 100%;
+            height: 26px;
+            border: 1px solid #c8d7e1;
+            border-radius: 2px;
+            padding: 2px 28px 2px 8px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        .ftu-note-icon {
+            position: absolute;
+            right: 8px;
+            top: 6px;
+            color: #0284c7;
+            font-size: 14px;
+        }
+
+        /* Alert feedback bar */
+        .ftu-alert-bar {
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            color: #0284c7;
+            padding: 5px 12px;
+            font-size: 12.5px;
+            margin-top: 8px;
+            border-radius: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ftu-close-alert {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #0284c7;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* Right column: Avatar / Logo */
+        .ftu-col-avatar {
+            width: 130px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .ftu-avatar-frame {
+            width: 125px;
+            height: 135px;
+            border: 1px solid #d4dfe6;
+            background: #fff;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .ftu-avatar-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .ftu-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Card 2: Table */
+        .ftu-card-bottom {
+            margin-top: 10px;
+        }
+        .ftu-table-card-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 14px;
+        }
+        .ftu-summary-stats {
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+        .ftu-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ftu-act-link {
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ftu-act-fine { color: #0284c7; }
+        .ftu-act-renew { color: #16a34a; }
+        .ftu-act-return { color: #dc2626; }
+        .ftu-act-print { color: #0284c7; }
+        .ftu-act-link:hover { text-decoration: underline; }
+
+        .ftu-table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0 10px 0;
+            font-size: 12.5px;
+            color: #555;
+        }
+        .ftu-select-sm {
+            height: 24px;
+            border: 1px solid #c8d7e1;
+            border-radius: 2px;
+            padding: 1px 4px;
+            font-size: 12px;
+        }
+        .ftu-input-search {
+            height: 24px;
+            width: 180px;
+            border: 1px solid #c8d7e1;
+            border-radius: 2px;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        /* Table styles */
+        .ftu-custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+        .ftu-custom-table th {
+            background: #fff;
+            border-top: 1px solid #d4dfe6;
+            border-bottom: 2px solid #cbd5e1;
+            border-left: 1px solid #eee;
+            border-right: 1px solid #eee;
+            padding: 8px 10px;
+            font-weight: 700;
+            color: #475569;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .ftu-custom-table th.th-sort {
+            cursor: pointer;
+            user-select: none;
+        }
+        .ftu-custom-table th.th-sort:hover {
+            background: #f8fafc;
+        }
+        .ftu-custom-table td {
+            padding: 8px 10px;
+            border: 1px solid #eee;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .ftu-custom-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        .ftu-custom-table .td-title a {
+            color: #0284c7;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .ftu-custom-table .td-title a:hover {
+            text-decoration: underline;
+        }
+
+        .ftu-badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #fff;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .ftu-badge-active {
+            background: #1e88e5;
+        }
+        .ftu-badge-overdue {
+            background: #dc2626;
+        }
+
+        .ftu-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 13px;
+            display: inline-block;
+            color: inherit;
+            text-decoration: none;
+        }
+        .ftu-icon-btn:hover {
+            opacity: 0.75;
+        }
+
+        .ftu-table-footer {
+            padding: 8px 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            color: #64748b;
+        }
+        .ftu-footer-pagination {
+            display: flex;
+            gap: 3px;
+        }
+        .ftu-page-btn {
+            border: 1px solid #d4dfe6;
+            background: #fff;
+            color: #555;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .ftu-page-btn.active {
+            background: #1e88e5;
+            color: #fff;
+            border-color: #1e88e5;
+        }
+        .ftu-page-btn:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .ftu-no-patron-box {
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
     </style>
 [% END %]
 </head>
@@ -46,1322 +531,480 @@
     [% INCLUDE 'circ-search.inc' %]
 [% END %]
 
-[% WRAPPER 'sub-header.inc' %]
-    [% WRAPPER breadcrumbs %]
-        [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/circ/circulation-home.pl">Lưu thông</a>
-        [% END %]
-        [% IF patron %]
-            [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/circ/circulation.pl">Mượn sách</a>
-            [% END %]
-            [% WRAPPER breadcrumb_item bc_active= 1 %]
-                [% INCLUDE 'patron-title.inc' %]
-            [% END %]
-        [% ELSE %]
-            [% WRAPPER breadcrumb_item bc_active= 1 %]
-                <span>Mượn sách</span>
-            [% END %]
-        [% END %]
-    [% END #/ WRAPPER breadcrumbs %]
-[% END #/ WRAPPER sub-header.inc %]
+<div class="ftu-breadcrumb-bar">
+    <a href="/cgi-bin/koha/mainpage.pl"><i class="fa fa-home"></i> Trang chủ</a>
+    <span style="color:#94a3b8;">&rsaquo;</span>
+</div>
 
 [% SET asides = [] %]
-[% IF Koha.Preference('CircSidebar') && !( borrowernumber && patron ) %][% asides.push('circ-nav') %][% END %]
-[% IF borrowernumber && patron %][% asides.push('circ-menu') %][% END %]
-[% WRAPPER 'main-container.inc' asides=asides %]
+[% WRAPPER 'main-container.inc' wide_full=1 %]
 
-    [% IF patron %]
-        [% INCLUDE 'members-toolbar.inc' %]
-    [% END %]
-
-    <h1>Mượn sách</h1>
-
-    [% IF patron %]
-    <!-- FTU: Patron Info Card -->
-    <div id="ftu-patron-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:0.85rem 1.1rem;margin-bottom:1rem;box-shadow:0 2px 6px rgba(0,0,0,0.05);display:inline-flex;gap:1rem;align-items:flex-start;width:100%;box-sizing:border-box;">
-
-        <!-- Ảnh bạn đọc -->
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-            [% IF Koha.Preference('patronimages') && patron.image %]
-            <img src="/cgi-bin/koha/members/patronimage.pl?borrowernumber=[% patron.borrowernumber | uri %]"
-                 alt="[% patron.firstname | html %] [% patron.surname | html %]"
-                 style="width:105px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e5e7eb;" />
-            [% ELSE %]
-            <div style="width:105px;height:140px;border-radius:10px;background:linear-gradient(135deg,#b91c1c,#7f1d1d);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.4rem;font-weight:700;">
-                [% patron.firstname.substr(0,1) | html %][% patron.surname.substr(0,1) | html %]
+    <!-- ========================================== -->
+    <!-- CARD 1: PHÒNG MƯỢN                         -->
+    <!-- ========================================== -->
+    <div class="ftu-circ-card ftu-card-top">
+        <div class="ftu-circ-card-header">
+            <div class="ftu-circ-card-title">
+                Phòng Mượn
             </div>
-            [% END %]
-        </div>
-
-        <!-- Thông tin chính -->
-        <div style="flex:1;min-width:0;">
-            <!-- Tên & Số thẻ -->
-            <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.45rem;flex-wrap:wrap;">
-                <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% patron.borrowernumber | uri %]"
-                   style="font-size:1.05rem;font-weight:800;color:#b91c1c;text-decoration:none;line-height:1.2;">
-                    [% patron.surname | html %][% IF patron.firstname %], [% patron.firstname | html %][% END %]
-                </a>
-                <span style="font-size:0.78rem;background:#fee2e2;color:#b91c1c;padding:0.1rem 0.5rem;border-radius:20px;font-weight:700;white-space:nowrap;">
-                    [% patron.cardnumber | html %]
-                </span>
-                [% IF patron.debarred %]
-                <span style="font-size:0.75rem;background:#fef3c7;color:#b45309;padding:0.1rem 0.45rem;border-radius:20px;font-weight:700;">⚠ Bị hạn chế</span>
-                [% END %]
-                [% IF patron.gonenoaddress %]
-                <span style="font-size:0.75rem;background:#fee2e2;color:#b91c1c;padding:0.1rem 0.45rem;border-radius:20px;font-weight:700;">⚠ Địa chỉ cần cập nhật</span>
-                [% END %]
-            </div>
-
-            <!-- Grid thông tin chi tiết — 2 cột cố định -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.22rem 1.5rem;font-size:0.82rem;">
-
-                [% IF patron.dateofbirth %]
-                <div style="display:flex;gap:0.35rem;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Ngày sinh:</span>
-                    <span style="color:#374151;font-weight:500;">[% patron.dateofbirth | $KohaDates %]</span>
-                </div>
-                [% END %]
-
-                [% IF patron.dateexpiry %]
-                <div style="display:flex;gap:0.35rem;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Hạn thẻ:</span>
-                    <span style="color:[% IF patron.is_expired %]#b91c1c[% ELSE %]#374151[% END %];font-weight:600;">[% patron.dateexpiry | $KohaDates %][% IF patron.is_expired %] ⚠[% END %]</span>
-                </div>
-                [% END %]
-
-                [% IF patron.phone || patron.mobile %]
-                <div style="display:flex;gap:0.35rem;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Điện thoại:</span>
-                    <a href="tel:[% (patron.phone || patron.mobile) | uri %]" style="color:#374151;font-weight:500;text-decoration:none;">[% patron.phone || patron.mobile | html %]</a>
-                </div>
-                [% END %]
-
-                [% IF patron.email %]
-                <div style="display:flex;gap:0.35rem;overflow:hidden;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Email:</span>
-                    <a href="mailto:[% patron.email | uri %]" style="color:#1d4ed8;font-weight:500;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="[% patron.email | html %]">[% patron.email | html %]</a>
-                </div>
-                [% END %]
-
-                [% IF patron.address %]
-                <div style="display:flex;gap:0.35rem;grid-column:1/-1;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Địa chỉ:</span>
-                    <span style="color:#374151;font-weight:500;">[% patron.address | html %][% IF patron.city %], [% patron.city | html %][% END %]</span>
-                </div>
-                [% END %]
-
-                <div style="display:flex;gap:0.35rem;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Loại thẻ:</span>
-                    <span style="color:#374151;font-weight:500;">[% patron.category.description | html %] ([% patron.categorycode | html %])</span>
-                </div>
-
-                <div style="display:flex;gap:0.35rem;">
-                    <span style="color:#9ca3af;font-weight:600;white-space:nowrap;">Thư viện:</span>
-                    <span style="color:#374151;font-weight:500;">[% Branches.GetName( patron.branchcode ) | html %]</span>
-                </div>
-
+            <div class="ftu-circ-card-tools">
+                <a href="#" class="ftu-toggle-panel" data-target="#ftu-top-panel-body" title="Thu gọn / Mở rộng"><i class="fa fa-angle-up"></i></a>
             </div>
         </div>
-
-        <!-- Thống kê mượn — sát phải, không stretch -->
-        <div style="flex-shrink:0;display:flex;flex-direction:row;gap:0.5rem;align-items:stretch;">
-
-            <div style="text-align:center;padding:0.4rem 0.7rem;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;display:flex;flex-direction:column;justify-content:center;">
-                <div style="font-size:1.4rem;font-weight:900;color:#b91c1c;line-height:1;">[% patron.checkouts.count || 0 %]</div>
-                <div style="font-size:0.65rem;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;">Đang mượn</div>
-            </div>
-
-            [% IF fines && fines != 0 %]
-            <div style="text-align:center;padding:0.4rem 0.7rem;background:#fef2f2;border-radius:8px;border:1px solid #fca5a5;display:flex;flex-direction:column;justify-content:center;">
-                <div style="font-size:0.95rem;font-weight:800;color:#b91c1c;line-height:1;">[% fines | $Price %]</div>
-                <div style="font-size:0.65rem;color:#b91c1c;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;">Tiền phạt</div>
-            </div>
-            [% ELSE %]
-            <div style="text-align:center;padding:0.4rem 0.7rem;background:#f0fdf4;border-radius:8px;border:1px solid #86efac;display:flex;flex-direction:column;justify-content:center;">
-                <div style="font-size:0.95rem;font-weight:800;color:#16a34a;line-height:1;">0₫</div>
-                <div style="font-size:0.65rem;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;">Không nợ phạt</div>
-            </div>
-            [% END %]
-
-            [% IF patron.holds.count %]
-            <div style="text-align:center;padding:0.4rem 0.7rem;background:#eff6ff;border-radius:8px;border:1px solid #93c5fd;display:flex;flex-direction:column;justify-content:center;">
-                <div style="font-size:1.2rem;font-weight:800;color:#1d4ed8;line-height:1;">[% patron.holds.count %]</div>
-                <div style="font-size:0.65rem;color:#1d4ed8;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;">Đặt giữ</div>
-            </div>
-            [% END %]
-        </div>
-
-    </div>
-    <!-- /FTU: Patron Info Card -->
-    [% END %]
-
-    <!--  INITIAL BLOCK : PARAMETERS & BORROWER INFO -->
-    [% IF ( was_renewed ) %]
-        <div class="alert alert-info">Tài khoản bạn đọc đã gia hạn đến [% expiry | $KohaDates %]</div>
-    [% END %]
-
-    [% IF autoswitched %]
-        <div id="autoswitched" class="alert alert-info">Bạn đọc đã được chuyển tự động khi đọc thẻ trong lúc mượn sách. Hãy xác nhận đúng bạn đọc.</div>
-    [% END %]
-
-    [% IF ADDITIONAL_MATERIALS && !NEEDSCONFIRMATION %]
-        <div id="materials" class="alert alert-info">
-            <span class="mats_spec_label">Ghi chú về các tài liệu đi kèm: </span>
-            <span class="mats_spec_message">[% ADDITIONAL_MATERIALS | html %]</span>
-        </div>
-    [% END %]
-
-    [% IF CLAIM_RESOLUTION %]
-        <div class="alert alert-info">Tài liệu khiếu nại đã trả trước đó đã được tìm thấy, tự động giải quyết khiếu nại liên quan.</div>
-    [% END %]
-    [% IF ( alert.ITEM_LOST ) %]
-        <div class="alert alert-info">Tài liệu này đã bị mất với trạng thái "[% alert.ITEM_LOST | html %]".</div>
-    [% END %]
-
-    [% IF ( alert.OTHER_CHARGES ) %]
-        <div class="alert alert-info">Bạn đọc có các khoản phí chưa thanh toán cho đặt giữ, thuê... là [% alert.OTHER_CHARGES | $Price %]</div>
-    [% END %]
-
-    [% IF alert.HIGHHOLDS %]
-        <div class="alert alert-info"
-            >Tài liệu có nhu cầu mượn cao. <strong>Thời gian mượn KHÔNG bị rút ngắn do có sự can thiệp.</strong> Ngày hết hạn sau khi rút ngắn lẽ ra là [% alert.HIGHHOLDS.returndate | $KohaDates %] ([% alert.HIGHHOLDS.duration  | html %] ngày).</div
-        >
-    [% END %]
-
-    [% IF alert.RETURNED_FROM_ANOTHER %]
-        <div class="alert alert-warning">Tài liệu đã được mượn bởi [% INCLUDE 'patron-title.inc' patron = alert.RETURNED_FROM_ANOTHER.patron %] và đã được trả tự động.</div>
-    [% END %]
-
-    [% IF alert.BOOKED %]
-        <div class="alert alert-warning">Tài liệu đã được bạn đọc này đặt chỗ</div>
-    [% END %]
-
-    [% IF ( nopermission ) %]
-        <div class="alert alert-warning">Nhân viên không được phép xác nhận không nợ cho bạn đọc, và bạn đọc cũng không được yêu cầu xác nhận không nợ.</div>
-    [% END %]
-
-    [% IF ( noguarantor ) %]
-        <div class="alert alert-warning">Không thể gia hạn cho bạn đọc này: họ cần một người bảo lãnh.</div>
-    [% END %]
-
-    [% IF is_anonymous %]
-        <div class="alert alert-warning">Đây là bạn đọc ẩn danh, do đó chức năng mượn trả bị vô hiệu hóa.</div>
-    [% END %]
-
-    [% IF missing_guarantor %]
-        <div class="alert alert-warning">Tuỳ chọn hệ thống 'ChildNeedsGuarantor' đã được bật và bạn đọc này không có người bảo lãnh.</div>
-    [% END %]
-
-    [% IF ( NEEDSCONFIRMATION ) %]
-        <div id="circ_needsconfirmation" class="alert alert-warning audio-alert-action focus" tabindex="-1">
-            [% IF CAN_user_circulate_force_checkout or ADDITIONAL_MATERIALS %]
-                <h3>Vui lòng xác nhận mượn sách</h3>
-            [% ELSE %]
-                <h3>Không thể cho mượn</h3>
-            [% END %]
-
-            <ul>
-                [% IF ( AGE_RESTRICTION ) %]
-                    <li class="needsconfirm age_restriction">
-                        Giới hạn độ tuổi [% AGE_RESTRICTION | html %].
-                        [% IF CAN_user_circulate_force_checkout %]
-                            Vẫn tiếp tục cho mượn?
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF ( DEBT ) %]
-                    <li class="needsconfirm debt">Bạn đọc đang nợ [% DEBT | $Price %].</li>
-                [% END %]
-
-                [% IF ( DEBT_GUARANTEES ) %]
-                    <li class="needsconfirm debt_guarantees">Những người được bạn đọc bảo lãnh đang nợ tổng cộng [% DEBT_GUARANTEES | $Price %].</li>
-                [% END %]
-
-                [% IF ( DEBT_GUARANTORS ) %]
-                    <li class="needsconfirm debt_guarantors">Người bảo lãnh của bạn đọc và những người được bảo lãnh khác của họ đang nợ tổng cộng [% DEBT_GUARANTORS | $Price %].</li>
-                [% END %]
-
-                [% IF ( RENTALCHARGE && RENTALCHARGE > 0 ) %]
-                    <li class="needsconfirm rentalcharge">Phí mượn cho tài liệu này: [% RENTALCHARGE | $Price %]</li>
-                [% END %]
-
-                [% IF ( RENEW_ISSUE ) %]
-                    <li class="needsconfirm renew_issue">Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) hiện đang được mượn bởi bạn đọc này. Gia hạn?</li>
-                [% END %]
-
-                [% IF ( RESERVE_WAITING ) %]
-                    <li class="needsconfirm reserve_waiting"
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang chờ
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) tại
-                        [% Branches.GetName( resbranchcode ) | html %] từ [% reswaitingdate | $KohaDates %]</li
-                    >
-                [% END %]
-
-                [% IF ( TRANSFERRED ) %]
-                    <li class="needsconfirm transferred"
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được đặt giữ cho
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) và đang được chuyển đến
-                        [% Branches.GetName( resbranchcode ) | html %]</li
-                    >
-                [% END %]
-
-                [% IF ( PROCESSING ) %]
-                    <li class="needsconfirm processing"
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được xử lý cho
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) tại
-                        [% Branches.GetName( resbranchcode ) | html %]</li
-                    >
-                [% END %]
-
-                [% IF ( RESERVED ) %]
-                    <li class="needsconfirm reserved"
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đã được đặt giữ cho
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) tại
-                        [% Branches.GetName( resbranchcode ) | html %] từ [% resreservedate | $KohaDates %]</li
-                    >
-                [% END %]
-
-                [% IF ( ISSUED_TO_ANOTHER ) %]
-                    <li class="needsconfirm issued_to_another"
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được mượn bởi
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% issued_borrowernumber | uri %]">[% issued_firstname | html %] [% issued_surname | html %]</a> ([% issued_cardnumber | html %]).
-                        [% IF CAN_user_circulate_force_checkout %]
-                            Ghi trả và cho mượn lại?
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF ( SUPPLY_ILL ) %]
-                    <li class="needsconfirm">Bạn đang mượn một tài liệu cung cấp qua ILL cho một đối tác ILL. Tài liệu cung cấp qua ILL tương ứng sẽ được đánh dấu là 'Đã cho mượn'. Vui lòng nhập thông tin cần thiết. </li>
-                [% END %]
-
-                [% IF TOO_MANY and TOO_MANY == 'TOO_MANY_CHECKOUTS' %]
-                    <li class="needsconfirm too_many_checkouts">Đã mượn quá nhiều. [% current_loan_count | html %] tài liệu đang mượn, chỉ cho phép tối đa [% max_loans_allowed | html %].</li>
-                    <li class="needsconfirm too_many_checkouts2"> Số lần mượn tối đa được tính từ quy tắc lưu thông cho [% INCLUDE circulation_rule_criteria rule=circulation_rule_TOO_MANY %] </li>
-                [% END %]
-
-                [% IF TOO_MANY and TOO_MANY == 'TOO_MANY_ONSITE_CHECKOUTS' %]
-                    <li class="needsconfirm too_many_onsite_checkouts">Đã mượn đọc tại chỗ quá nhiều. [% current_loan_count | html %] tài liệu đang mượn đọc tại chỗ, chỉ cho phép tối đa [% max_loans_allowed | html %].</li>
-                    <li class="needsconfirm too_many_onsite_checkouts2"> Số lần mượn tối đa được tính từ quy tắc lưu thông cho [% INCLUDE circulation_rule_criteria rule=circulation_rule_TOO_MANY %] </li>
-                [% END %]
-
-                [% IF ( BORRNOTSAMEBRANCH ) %]
-                    <li class="needsconfirm borrower_not_same_branch">Bạn đọc này thuộc một thư viện khác ([% Branches.GetName( BORRNOTSAMEBRANCH ) | html %])</li>
-                [% END %]
-
-                [% IF ( PATRON_CANT ) %]
-                    <li class="needsconfirm patron_cant">Bạn đọc này không thể mượn tài liệu này theo chính sách lưu thông của thư viện.</li>
-                [% END %]
-
-                [% IF ( TOO_MANY and TOO_MANY == 'NO_RULE_DEFINED' ) %]
-                    <li class="needsconfirm no_rule_defined">Không có quy tắc lưu thông nào được xác định cho sự kết hợp giữa bạn đọc và loại tài liệu này.</li>
-                [% END %]
-
-                [% IF ( NOT_FOR_LOAN_FORCING ) %]
-                    <li class="needsconfirm not_for_loan_forcing">
-                        [% IF ( itemtype_notforloan ) %]
-                            <span>Loại tài liệu thường không cho mượn.</span>
-                        [% ELSIF ( item_notforloan ) %]
-                            [% item_notforloan_lib = AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.notforloan', authorised_value => item.notforloan ) %]
-                            <span>Tài liệu thường không cho mượn</span>[% IF (item_notforloan_lib) %]([% item_notforloan_lib | html %])[% END %].
-                        [% END %]
-                        [% IF CAN_user_circulate_force_checkout %]
-                            <span>Vẫn tiếp tục cho mượn?</span>
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF ( USERBLOCKEDOVERDUE ) %]
-                    <li class="needsconfirm userblocked_overdue"
-                        >Bạn đọc có [% USERBLOCKEDOVERDUE %] tài liệu quá hạn.
-                        [% IF CAN_user_circulate_force_checkout %]
-                            Vẫn tiếp tục cho mượn?
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF ( ITEM_LOST ) %]
-                    <li class="needsconfirm item_lost"
-                        >Tài liệu này đã bị mất với trạng thái "[% ITEM_LOST | html %]".
-                        [% IF CAN_user_circulate_force_checkout %]
-                            Vẫn tiếp tục cho mượn?
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF HIGHHOLDS %]
-                    <li class="needsconfirm highholds">Tài liệu có nhu cầu mượn cao. Thời gian mượn được rút ngắn còn [% HIGHHOLDS.duration | html %] ngày (đến [% HIGHHOLDS.returndate | $KohaDates %]). Vẫn tiếp tục cho mượn?</li>
-                [% END %]
-
-                [% IF CURRENTISSUE %]
-                    <li class="needsconfirm currentissue">Bạn đọc hiện đang mượn nhan đề này: <strong>[% biblio.title | html %] [% IF biblio.author %]bởi [% biblio.author | html %][% END %]</strong>. Vẫn tiếp tục cho mượn?</li>
-                [% END %]
-
-                [% IF PREVISSUE %]
-                    <li class="needsconfirm previssue">Bạn đọc đã từng mượn nhan đề này: <strong>[% biblio.title | html %] [% IF biblio.author %]bởi [% biblio.author | html %][% END %]</strong>. Vẫn tiếp tục cho mượn?</li>
-                [% END %]
-
-                [% IF BIBLIO_ALREADY_ISSUED %]
-                    <li class="needsconfirm already_issued">
-                        Bạn đọc đã mượn một tài liệu khác từ biểu ghi này.
-                        [% IF CAN_user_circulate_force_checkout %]
-                            Vẫn tiếp tục cho mượn?
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF ADDITIONAL_MATERIALS %]
-                    <li class="needsconfirm additional_materials">
-                        <span class="mats_spec_label">Vui lòng xác nhận rằng có đầy đủ tài liệu đi kèm:</span>
-                        <span class="mats_spec_message">[% ADDITIONAL_MATERIALS | html %]</span>
-                    </li>
-                [% END %]
-
-                [% IF RECALLED %]
-                    [% IF RECALLED.waiting %]
-                        <li class="needsconfirm recalled"
-                            >Tài liệu <i>[% RECALLED.biblio.title | html %]</i> ([% RECALLED.item.barcode | html %]) đang chờ
-                            <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% RECALLED.patron_id | uri %]">[% RECALLED.patron.firstname | html %] [% RECALLED.patron.surname | html %]</a>
-                            ([% RECALLED.patron.cardnumber | html %]) tại [% Branches.GetName( RECALLED.pickup_library_id ) | html %] từ [% RECALLED.waiting_date | $KohaDates %]</li
-                        >
-                    [% ELSIF RECALLED.requested or RECALLED.overdue %]
-                        <li class="needsconfirm recalled2"
-                            >Tài liệu <i>[% RECALLED.biblio.title | html %]</i> [% IF RECALLED.item %]([% RECALLED.item.barcode | html %])[% END %] đã bị yêu cầu trả lại bởi
-                            <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% RECALLED.patron_id | uri %]">[% RECALLED.patron.firstname | html %] [% RECALLED.patron.surname | html %]</a>
-                            ([% RECALLED.patron.cardnumber | html %]) tại [% Branches.GetName( RECALLED.pickup_library_id ) | html %] từ [% RECALLED.created_date | $KohaDates %]</li
-                        >
-                    [% END %]
-                [% END %]
-
-                [% IF ( BOOKED_TO_ANOTHER ) %]
-                    <li class="needsconfirm booked_to_another"> Đã được bạn đọc khác đặt lịch vào: [% BOOKED_TO_ANOTHER.start_date | $KohaDates %] </li>
-                [% END %]
-
-                [% IF ( BOOKED_EARLY ) %]
-                    <li class="needsconfirm booked_early"> Bạn đọc đã đặt trước lịch mượn tài liệu này vào [% BOOKED_EARLY.start_date | $KohaDates %] </li>
-                [% END %]
-            </ul>
-
-            [% IF CAN_user_circulate_force_checkout or HIGHHOLDS %]
-                <form method="post" action="/cgi-bin/koha/circ/circulation.pl" autocomplete="off" class="confirmation-required-form">
-                    [% INCLUDE 'csrf-token.inc' %]
-                    <fieldset>
-                        <input type="hidden" name="restoreduedatespec" />
-                        <input type="hidden" name="op" value="cud-checkout" />
-                        [% FOREACH conf IN sessionXác nhậnationKeys %]
-                            <input type="hidden" name="session_confirmations" id="session_confirmations" value="[% conf | html %]" />
-                        [% END %]
-
-                        [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1" />[% END %]
-
-                        [% IF HIGHHOLDS %]
-                            <p class="circ-override-high-holds">
-                                <input type="checkbox" name="override_high_holds_tmp" id="override_high_holds_tmp" value="1" />
-                                <label for="override_high_holds_tmp">Không giảm thời gian mượn dựa trên yêu cầu đặt giữ</label>
-                            </p>
-                        [% END %]
-
-                        [% IF ( RESERVED ) %]
-                            <p>
-                                <input type="checkbox" id="cancelreserve" name="cancelreserve" value="cancel" />
-                                <label for="cancelreserve">Huỷ đặt giữ</label>
-                            </p>
-                            [% IF ( RENEW_ISSUE ) %]
-                                <p>
-                                    <label for="renewonholdduedate">Ngày hết hạn gia hạn:</label>
-                                    <input type="text" size="20" id="renewonholdduedate" name="renewonholdduedate" value="" class="flatpickr" data-flatpickr-enable-time="true" />
-                                </p>
-                            [% END %]
-                        [% END %]
-
-                        [% IF ( RESERVE_WAITING ) %]
-                            <p>
-                                <label for="cancelreserve">Huỷ đặt giữ</label>
-                                <input type="radio" value="cancel" name="cancelreserve" id="cancelreserve" /><br />
-                                <label for="revertreserve">Khôi phục trạng thái chờ</label>
-                                <input type="radio" value="revert" name="cancelreserve" id="revertreserve" checked="checked" />
-                            </p>
-                        [% END %]
-
-                        [% IF ( TRANSFERRED ) %]
-                            <p>
-                                <label for="cancelreserve">Huỷ đặt giữ</label>
-                                <input type="radio" value="cancel" name="cancelreserve" id="cancelreserve" /><br />
-                                <label for="revertreserve">Khôi phục trạng thái chuyển đặt giữ</label>
-                                <input type="radio" value="revert" name="cancelreserve" id="revertreserve" checked="checked" />
-                            </p>
-                        [% END %]
-
-                        [% IF ( PROCESSING ) %]
-                            <p>
-                                <label for="cancelreserve">Huỷ đặt giữ</label>
-                                <input type="radio" value="cancel" name="cancelreserve" id="cancelreserve" /><br />
-                                <label for="revertreserve">Khôi phục trạng thái Đang xử lý</label>
-                                <input type="radio" value="revert" name="cancelreserve" id="revertreserve" checked="checked" />
-                            </p>
-                        [% END %]
-
-                        [% IF ( RECALLED ) %]
-                            <p>
-                                <label for="cancelrecall">Huỷ yêu cầu trả lại (recall)</label>
-                                <input type="radio" value="cancel" name="cancel_recall" id="cancelrecall" />
-                                <input type="hidden" value="[% RECALLED.id | html %]" name="recall_id" />
-                            </p>
-                            [% IF RECALLED.waiting %]
-                                <p>
-                                    <label for="revertrecall">Khôi phục trạng thái chờ</label>
-                                    <input type="radio" value="revert" name="cancel_recall" id="revertrecall" checked="checked" />
-                                    <input type="hidden" value="[% RECALLED.id | html %]" name="recall_id" />
-                                </p>
-                            [% END %]
-                        [% END %]
-
-                        <input type="hidden" name="barcode" value="[% barcode | html %]" />
-                        <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                        <input type="hidden" name="issueconfirmed" value="1" />
-                        <input type="hidden" name="override_high_holds" value="[% override_high_holds | html %]" />
-
-                        [% IF ( DEBT ) %]<input type="hidden" name="debt_confirmed" value="1" />[% END %]
-
-                        [% IF ( SUPPLY_ILL ) %]
-                            <label for="iso18626_messageInfo_note">Nhập thông báo ISO18626 tại đây</label>
-                            <input type="text" name="iso18626_messageInfo_note" value="" />
-                            <input type="hidden" name="iso18626_payload_supplyill" value="[% iso18626_payload_supplyill | html %]" />
-                        [% END %]
-
-                        [% IF ( INVALID_DATE ) %]
-                            <p>
-                                <input type="text" size="20" id="confirm_duedatespec" name="duedatespec" value="[% duedatespec | html %]" class="flatpickr" data-flatpickr-enable-time="true" data-flatpickr-on-close-focus="#barcode" />
-                                <label for="duedatespec">Ngày hết hạn</label>
-                            </p>
-                        [% ELSE %]
-                            <input type="hidden" name="duedatespec" value="[% duedatespec | html %]" />
-                        [% END %]
-
-                        [% IF ( BOOKED_TO_ANOTHER ) %]
-                            <p>
-                                <label for="reduceddue">Rút ngắn ngày hết hạn xuống còn: </label>
-                                <input
-                                    type="text"
-                                    size="20"
-                                    id="reduceddue"
-                                    name="reduceddue"
-                                    value="[% reduceddue | html %]"
-                                    class="flatpickr"
-                                    data-flatpickr-futuredate="true"
-                                    data-flatpickr-maxdate="[% reduceddue | html %]"
-                                    required="required"
-                                />
-                            </p>
-                        [% END %]
-
-                        [% IF ( BOOKED_EARLY ) %]
-                            <p> Cho phép nhận tài liệu sớm? </p>
-                        [% END %]
-
-                        <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
-                        <input type="hidden" name="branch" value="[% branch | html %]" />
-
-                        [% IF ( RENEW_ISSUE ) %]
-                            <button type="submit" class="btn btn-default approve" accesskey="y"><i class="fa fa-check"></i> Đồng ý, gia hạn (Y)</button>
-                        [% ELSE %]
-                            <p>
-                                <label for="patron_session_confirmation">Ghi nhớ xác nhận này cho phiên làm việc của bạn đọc</label>
-                                <input type="checkbox" id="patron_session_confirmation" name="patron_session_confirmation" />
-                            </p>
-                            <button type="submit" class="btn btn-default approve" accesskey="y"><i class="fa fa-check"></i> Đồng ý, cho mượn (Y)</button>
-                        [% END %]
-
-                        <input type="hidden" name="onsite_checkout" value="[% onsite_checkout | html %]" />
-                        <input type="hidden" name="auto_renew" value="[% auto_renew | html %]" />
-                    </fieldset>
-                </form>
-            [% END # /IF CAN_user_circulate_force_checkout or HIGHHOLDS %]
-
-            [% IF ADDITIONAL_MATERIALS && !CAN_user_circulate_force_checkout %]
-                <form method="post" action="/cgi-bin/koha/circ/circulation.pl" autocomplete="off" class="confirmation-required-form">
-                    [% INCLUDE 'csrf-token.inc' %]
-                    <input type="hidden" name="op" value="cud-checkout" />
-                    <input type="hidden" name="restoreduedatespec" />
-                    [% FOREACH conf IN sessionXác nhậnationKeys %]
-                        <input type="hidden" name="session_confirmations" id="session_confirmations" value="[% conf | html %]" />
-                    [% END %]
-
-                    [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1" />[% END %]
-
-                    <input type="hidden" name="barcode" value="[% barcode | html %]" />
-                    <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                    <input type="hidden" name="issueconfirmed" value="1" />
-                    <input type="hidden" name="override_high_holds" value="[% override_high_holds | html %]" />
-                    <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
-                    <input type="hidden" name="branch" value="[% branch | html %]" />
-
-                    [% IF ( RENEW_ISSUE ) %]
-                        <button type="submit" class="btn btn-default approve" accesskey="y"><i class="fa fa-check"></i> Yes, renew (Y)</button>
-                    [% ELSE %]
-                        <p>
-                            <label for="patron_session_confirmation">Remember for the session for this patron</label>
-                            <input type="checkbox" id="patron_session_confirmation" name="patron_session_confirmation" />
-                        </p>
-                        <button type="submit" class="btn btn-default approve" accesskey="y"><i class="fa fa-check"></i> Yes, check out (Y)</button>
-                    [% END %]
-
-                    <input type="hidden" name="onsite_checkout" value="[% onsite_checkout | html %]" />
-                    <input type="hidden" name="auto_renew" value="[% auto_renew | html %]" />
-                </form>
-            [% END # /IF ADDITIONAL_MATERIALS %]
-
-            [% IF ( RESERVED or RESERVE_WAITING or TRANSFERRED or PROCESSING ) %]
-                <form method="post" id="hold-confirm-print-slip" action="/cgi-bin/koha/circ/circulation.pl">
-                    [% INCLUDE 'csrf-token.inc' %]
-                    <input type="hidden" name="op" value="cud-confirm_hold" />
-                    <input type="hidden" name="restoreduedatespec" />
-                    <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                    <input type="hidden" name="duedatespec" value="[% duedatespec | html %]" />
-                    <input type="hidden" name="confirm_hold" value="[% reserve_id | html %]" />
-                    <input type="hidden" name="hold_branch" value="[% resbranchcode | html %]" />
-                    <input type="hidden" name="hold_borrower" value="[% resborrowernumber | html %]" />
-                    <input type="hidden" name="hold_itemnumber" value="[% item.itemnumber | html %]" />
-                    <input type="hidden" name="hold_reserveid" value="[% reserve_id | html %]" />
-                    <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
-                    <button class="btn btn-default print" type="submit" accesskey="p"><i class="fa fa-print"></i> Không cho mượn, xác nhận đặt giữ và in phiếu (P)</button>
-                </form>
-            [% END %]
-
-            [% IF ( RECALLED ) %]
-                <form method="get" id="recall-print-slip" action="/cgi-bin/koha/circ/circulation.pl">
-                    <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                    <input type="hidden" name="duedatespec" value="[% duedatespec | html %]" />
-                    <input type="hidden" name="restoreduedatespec" />
-                    <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
-                    <input type="hidden" name="recall_id" value="[% RECALLED.id | html %]" />
-                    <button class="btn btn-default print" type="submit" accesskey="p"><i class="fa fa-print"></i> Không cho mượn và in phiếu (P)</button>
-                </form>
-            [% END %]
-
-            <form method="get" action="/cgi-bin/koha/circ/circulation.pl">
-                [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1" />[% END %]
-                <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                <input type="hidden" name="duedatespec" value="[% duedatespec | html %]" />
-                <input type="hidden" name="restoreduedatespec" />
-                <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
-                [% IF CAN_user_circulate_force_checkout or HIGHHOLDS or ADDITIONAL_MATERIALS %]
-                    [% IF ( RENEW_ISSUE ) %]
-                        <button type="submit" class="btn btn-default deny" accesskey="n"><i class="fa fa-times"></i> Không, đừng gia hạn (N)</button>
-                    [% ELSE %]
-                        <button type="submit" class="btn btn-default deny" accesskey="n"><i class="fa fa-times"></i> Không, đừng cho mượn (N)</button>
-                    [% END %]
-                [% ELSE %]
-                    <button type="submit" class="btn btn-default deny"><i class="fa fa-times"></i> Tiếp tục</button>
-                [% END %]
-            </form>
-
-            [% IF ( RESERVED || ISSUED_TO_ANOTHER || RECALLED ) && (CAN_user_reserveforothers_place_holds ) %]
-                [% UNLESS noissues %]
-                    <form method="get" action="/cgi-bin/koha/reserve/request.pl">
-                        <input type="hidden" name="biblionumber" value="[% itembiblionumber | html %]" />
-                        <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                        <button class="btn btn-default" type="submit"><i class="fa-solid fa-note-sticky"></i> Hủy cho mượn và đặt giữ cho [% INCLUDE 'patron-title.inc' no_html=1 %]</button>
-                    </form>
-                [% END %]
-            [% END %]
-        </div>
-        <!-- /#circ_needsconfirmation -->
-    [% END # /NEEDSCONFIRMATION %]
-
-    [% IF ( IMPOSSIBLE ) %]
-        <div id="circ_impossible" class="alert alert-warning audio-alert-warning focus" tabindex="-1">
-            [% IF ( UNKNOWN_BARCODE ) %]
-                <h3>Không tìm thấy mã vạch</h3>
-            [% END %]
-
-            <!-- RESULT OF ISSUING REQUEST -->
-            <ul>
-                [% IF ( DEBT_GUARANTORS ) %]
-                    <li>Người bảo lãnh của bạn đọc và những người được bảo lãnh khác của họ đang nợ tổng cộng [% DEBT_GUARANTORS | $Price %].</li>
-                [% END %]
-
-                [% IF ( STATS ) %]
-                    <li>Đã ghi nhận sử dụng tại chỗ</li>
-                    [% IF ( CHECKEDIN ) %]
-                        <li>Tài liệu đã được ghi trả từ: <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% BORROWER.borrowernumber | uri %]">[% INCLUDE 'patron-title.inc' patron=BORROWER %]</a></li>
-                    [% END %]
-                    [% IF ( MESSAGES.ResFound ) %]
-                        <li>Tài liệu đang được đặt giữ, vui lòng ghi trả (checkin).</li>
-                    [% END %]
-                    [% IF ( MESSAGES.ReturnClaims ) %]
-                        <li>Tài liệu bị khiếu nại đã trả, vui lòng ghi trả (checkin).</li>
-                    [% END %]
-                    [% IF ( MESSAGES.RecallFound ) %]
-                        <li>Tài liệu có thể đáp ứng yêu cầu trả lại (recall), vui lòng ghi trả (checkin).</li>
-                    [% END %]
-                    [% IF ( MESSAGES.WasMất ) %]
-                        [% IF ( Koha.Preference('BlockReturnOfMấtItems') ) %]
-                            <li>Tài liệu đã bị mất, không thể ghi trả.</li>
-                        [% ELSE %]
-                            <li>Tài liệu đã bị mất, nay đã được tìm thấy.</li>
-                        [% END %]
-                    [% END %]
-                    [% IF ( MESSAGES.withdrawn ) %]
-                        [% IF ( Koha.Preference('BlockReturnOfĐã rútItems') ) %]
-                            <li>Tài liệu đã bị rút khỏi kho, không thể ghi trả.</li>
-                        [% ELSE %]
-                            <li>Tài liệu đã bị rút khỏi kho</li>
-                        [% END %]
-                    [% END %]
-                [% END %]
-                [% IF ( INVALID_DATE ) %]
-                    <li>Ngày hết hạn &quot;[% INVALID_DATE | $KohaDates %]&quot; không hợp lệ</li>
-                [% END %]
-
-                [% IF ( UNKNOWN_BARCODE ) %]
-                    <li
-                        >Không tìm thấy mã vạch: <span class="ex">[% barcode | html %]</span>
-                        <div>
-                            [% IF ( FALLBACK ) %]
-                                [% IF options %]
-                                    <button type="button" class="btn btn-default approve" data-bs-toggle="modal" data-bs-target="#itemSearchFallback"><i class="fa fa-search"></i> Hiển thị các nhan đề khớp</button>
-                                [% ELSE %]
-                                    <div>Không tìm thấy tài liệu nào bằng cách tìm kiếm.</div>
-                                [% END %]
-                            [% END %]
-
-                            [% IF ( fast_cataloging ) %]
-                                [% IF ( CAN_user_editcatalogue_fast_cataloging ) %]
-                                    <a
-                                        class="btn btn-default approve"
-                                        href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA&amp;barcode=[% barcode |uri %]&amp;circborrowernumber=[% patron.borrowernumber | html %]&amp;branch=[% branch | html %]&amp;duedatespec=[% duedatespec | html %]&amp;stickyduedate=[% stickyduedate | html %]"
-                                        ><i class="fa fa-plus"></i> Thêm biểu ghi bằng biên mục nhanh</a
-                                    >
-                                [% END %]
-                            [% END %]
-                        </div>
-                    </li>
-                [% END %]
-
-                [% IF ( NOT_FOR_LOAN ) %]
-                    <li>
-                        [% IF ( itemtype_notforloan ) %]
-                            Loại tài liệu không cho mượn.
-                        [% ELSIF ( item_notforloan ) %]
-                            [% item_notforloan_lib = AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.notforloan', authorised_value => item.notforloan ) %]
-                            Tài liệu không cho mượn[% IF (item_notforloan_lib) %]([% item_notforloan_lib | html %])[% END %].
-                        [% END %]
-                    </li>
-                [% END %]
-
-                [% IF ( WTHDRAWN ) %]
-                    <li>
-                        <span>Tài liệu đã bị rút khỏi kho</span>
-                        [% item_withdrawn_lib = AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.withdrawn', authorised_value => item.withdrawn ) %]
-                        [% IF (item_withdrawn_lib) %]<span class="co-withdrawn">([% item_withdrawn_lib | html %])</span>[% END %]
-                    </li>
-                [% END %]
-
-                [% IF ( RESTRICTED ) %]
-                    <li>Tài liệu bị hạn chế</li>
-                [% END %]
-
-                [% IF ( GNA ) %]
-                    <li>Địa chỉ của bạn đọc không rõ ràng</li>
-                [% END %]
-
-                [% IF ( CARD_LOST ) %]
-                    <li>Thẻ bạn đọc đã bị mất</li>
-                [% END %]
-
-                [% IF ( DEBARRED ) %]
-                    <li>Bạn đọc bị hạn chế</li>
-                [% END %]
-
-                [% IF ( NO_MORE_RENEWALS ) %]
-                    <li>Không thể gia hạn thêm</li>
-                [% END %]
-
-                [% IF NO_RENEWAL_FOR_ONSITE_CHECKOUTS %]
-                    <li>Không thể gia hạn tài liệu này vì đây là mượn đọc tại chỗ</li>
-                [% END %]
-
-                [% IF ( AGE_RESTRICTION ) %]
-                    <li>Giới hạn độ tuổi [% AGE_RESTRICTION | html %].</li>
-                [% END %]
-
-                [% IF ( EXPIRED ) %]
-                    <li>Thẻ bạn đọc đã hết hạn</li>
-                [% END %]
-
-                [% IF ( TOO_MANY ) %]
-                    <li>Đã mượn quá nhiều. [% current_loan_count | html %] tài liệu đang mượn, chỉ cho phép tối đa [% max_loans_allowed | html %].</li>
-                    <li> Số lần mượn tối đa được tính từ quy tắc lưu thông cho [% INCLUDE circulation_rule_criteria rule=circulation_rule_TOO_MANY %] </li>
-                [% END %]
-
-                [% IF ( ITEMNOTSAMEBRANCH ) %]
-                    <li>Tài liệu này thuộc về [% Branches.GetName( itemhomebranch ) | html %] và không thể cho mượn từ địa điểm này.</li>
-                [% END %]
-
-                [% IF RETURN_IMPOSSIBLE %]
-                    <li>Tài liệu này phải được trả về [% Branches.GetName( branch_to_return ) | html %].</li>
-                [% END %]
-
-                [% IF ( USERBLOCKEDWITHENDDATE ) %]
-                    <li>Bạn đọc bị hạn chế cho đến [% USERBLOCKEDWITHENDDATE | $KohaDates %].</li>
-                [% END %]
-
-                [% IF ( USERBLOCKEDNOENDDATE ) %]
-                    <li>Bạn đọc bị hạn chế vô thời hạn.</li>
-                [% END %]
-
-                [% IF ( USERBLOCKEDOVERDUE ) %]
-                    <li>Chức năng mượn đã bị KHÓA vì bạn đọc có tài liệu quá hạn.</li>
-                [% END %]
-
-                [% IF ( RECALLED_INTRANSIT ) %]
-                    <li>Tài liệu đã bị yêu cầu trả lại (recall) và đang được chuyển đến [% Branches.GetName( RECALLED_INTRANSIT ) | html %].</li>
-                [% END %]
-
-                [% IF NO_OPEN_DAYS %]
-                    <li>Không tìm thấy ngày mở cửa khi tính toán ngày hết hạn. Vui lòng kiểm tra lịch thư viện.</li>
-                [% END %]
-
-                [% IF (forceallow) %]
-                    <li>Tạm thời bỏ qua các giới hạn.</li>
-                [% END %]
-
-                [% IF ( BOOKED_TO_ANOTHER ) %]
-                    <li>Tài liệu đã được đặt trước bởi bạn đọc khác</li>
-                [% END %]
-
-                [% IF ( RESERVED ) %]
-                    <li
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được đặt giữ cho
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) tại
-                        [% Branches.GetName( resbranchcode ) | html %] từ [% resreservedate | $KohaDates %].</li
-                    >
-                [% END %]
-
-                [% IF ( RESERVE_WAITING ) %]
-                    <li
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang chờ
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) tại
-                        [% Branches.GetName( resbranchcode ) | html %] từ [% reswaitingdate | $KohaDates %].</li
-                    >
-                [% END %]
-
-                [% IF ( TRANSFERRED ) %]
-                    <li
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được đặt giữ cho
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) và đang được chuyển đến
-                        [% Branches.GetName( resbranchcode ) | html %].</li
-                    >
-                [% END %]
-
-                [% IF ( PROCESSING ) %]
-                    <li
-                        >Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được xử lý cho
-                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% resborrowernumber | uri %]">[% resfirstname | html %] [% ressurname | html %]</a> ([% rescardnumber | html %]) tại
-                        [% Branches.GetName( resbranchcode ) | html %].</li
-                    >
-                [% END %]
-            </ul>
-        </div>
-        <!-- /#circ_impossible -->
-
-        [% IF ( FALLBACK ) %]
-            [% IF options %]
-                <!-- Modal -->
-                <div class="modal" id="itemSearchFallback" tabindex="-1" role="dialog" aria-labelledby="itemSearchFallbackLabel">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title" id="itemSearchFallbackLabel">Không tìm thấy mã vạch. Đã tìm thấy các tài liệu sau:</h1>
-                            </div>
-                            <div class="modal-body">
-                                <table class="table_borrowers">
-                                    <thead>
-                                        <tr>
-                                            <th>Tiêu đề</th>
-                                            <th>Mã vạch</th>
-                                            <th>Ký hiệu phân loại</th>
-                                            <th>Bản sao (Copy)</th>
-                                            <th>Số đăng ký cá biệt</th>
-                                            <th>Số/Tập san</th>
-                                            <th>Bộ sưu tập</th>
-                                            [% IF ( item_level_itypes ) %]<th>Loại tài liệu</th>[% END %]
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        [% FOREACH item IN options %]
-                                            <tr>
-                                                <td>
-                                                    <a target="_blank" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% item.biblionumber | html %]">[% item.biblio.title | html %] <i class="fa-solid fa-window-restore"></i></a>
-                                                    [% IF item.onloan %]<span style="float: right; color: red; margin-left:5px;">Đang mượn</span>[% END %]
-                                                </td>
-                                                <td> [% item.barcode | html %] </td>
-                                                <td>[% item.itemcallnumber | html %]</td>
-                                                <td>[% item.copynumber | html %]</td>
-                                                <td>[% item.stocknumber| html %]</td>
-                                                <td>[% item.enumchron| html %]</td>
-                                                <td> [% AuthorisedValues.GetDescriptionByKohaField( kohafield => 'items.ccode', authorised_value => item.ccode ) | html %] </td>
-                                                [% IF ( item_level_itypes ) %]
-                                                    <td> [% ItemTypes.GetDescription( item.itype ) | html %] </td>
-                                                [% END %]
-                                                <td>
-                                                    <form method="post" action="/cgi-bin/koha/circ/circulation.pl" autocomplete="off">
-                                                        [% INCLUDE 'csrf-token.inc' %]
-                                                        [% IF (forceallow) %]
-                                                            <input type="hidden" name="forceallow" value="1" />
-                                                        [% END %]
-                                                        <input type="hidden" name="restoreduedatespec" />
-                                                        <input type="hidden" name="op" value="cud-checkout" />
-                                                        <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                                                        <input type="hidden" name="duedatespec" value="[% duedatespec | html %]" />
-                                                        <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
-                                                        <input type="hidden" name="branch" value="[% branch | html %]" />
-                                                        <input type="hidden" name="barcode" value="[% item.barcode | html %]" />
-                                                        <input type="hidden" name="onsite_checkout" value="[% onsite_checkout | html %]" />
-                                                        <input type="hidden" name="auto_renew" value="[% auto_renew | html %]" />
-                                                        <button class="btn btn-default btn-xs" type="submit" name="x"><i class="fa fa-check"></i> Cho mượn</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        [% END %]
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- /.modal-body -->
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-bs-dismiss="modal">Huỷ</button>
-                            </div>
-                        </div>
-                        <!-- /.modal-content -->
-                    </div>
-                    <!-- /.modal-dialog.modal-wide -->
-                </div>
-                <!-- /#itemSearchFallback -->
-            [% END # /IF options %]
-        [% END # /IF FALLBACK %]
-    [% ELSE # IF IMPOSSIBLE %]
-        [% IF (forceallow) %]
-            <div id="overridden_debarment" class="alert alert-warning">Tạm thời bỏ qua các giới hạn</div>
-        [% END %]
-    [% END # /IF IMPOSSIBLE %]
-
-    <span class="audio-alert-success"></span>
-
-    [% IF ( issued ) %]
-        <p>Tài liệu đã được cho mượn</p>
-    [% END %]
-
-    <!-- BARCODE ENTRY -->
-
-    [% IF patron %]
-
-        [% IF patron.privacy == 2 AND NOT Koha.Preference('AnonymousPatron') %]
-            <div class="alert alert-warning"> <strong>Lỗi:</strong> Bạn đọc này đã yêu cầu ẩn danh lịch sử mượn trả khi ghi trả, nhưng tùy chọn hệ thống AnonymousPatron bị trống hoặc không chính xác. </div>
-        [% END %]
-
-        <div class="row">
-            [% IF ( !noissues ) || ( Koha.Preference('OnSiteCheckouts') && Koha.Preference('OnSiteCheckoutsForce') ) %]
-                <div class="col-sm-6">
+        <div class="ftu-circ-card-body" id="ftu-top-panel-body">
+            <div class="ftu-top-grid">
+                <!-- CỘT 1: THAO TÁC LƯU THÔNG -->
+                <div class="ftu-col-controls">
+                    [% IF patron %]
                     <form method="post" action="/cgi-bin/koha/circ/circulation.pl" id="mainform" name="mainform" autocomplete="off">
                         [% INCLUDE 'csrf-token.inc' %]
                         <input type="hidden" name="op" value="cud-checkout" />
+                        <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% patron.borrowernumber | html %]" />
                         <input type="hidden" name="restoreduedatespec" />
+                        <input type="hidden" name="debt_confirmed" value="[% debt_confirmed | html %]" />
+                        [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1" />[% END %]
+                        [% IF ( CHARGES ) %]<input type="hidden" name="charges" value="yes" />[% END %]
 
-                        [% IF ( issue ) %]
-                            [% SET fieldset_class='lastchecked' %]
-                        [% END %]
-                        <fieldset id="circ_circulation_issue" class="[% fieldset_class | html %]">
-                            [% IF Koha.Preference('DisplayClearScreenButton') == 'issueslip' %]
-                                <span id="clearscreen"><a href="/cgi-bin/koha/circ/circulation.pl" title="Xóa màn hình">x</a></span>
-                                <span class="printslip printclearscreen" data-clear="true" data-code="issueslip"
-                                    ><a href="#" title="In phiếu và xóa màn hình"><i class="fa fa-print"></i></a
-                                ></span>
-                            [% ELSIF Koha.Preference('DisplayClearScreenButton') == 'issueqslip' %]
-                                <span id="clearscreen"><a href="/cgi-bin/koha/circ/circulation.pl" title="Xóa màn hình">x</a></span>
-                                <span class="printslip printclearscreen" data-clear="true" data-code="issueqslip"
-                                    ><a href="#" title="In phiếu nhanh và xóa màn hình"><i class="fa fa-print"></i></a
-                                ></span>
-                            [% END %]
-
-                            [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1" />[% END %]
-
-                            <label class="circ_barcode" for="barcode">Cho mượn tới [% INCLUDE 'patron-title.inc' %]</label>
-
-                            [% IF NEEDSCONFIRMATION %]
-                                <input type="text" name="barcode" id="barcode" class="barcode focus" size="14" disabled="disabled" />
-                            [% ELSE %]
-                                [% IF Koha.Preference('itemBarcodeFallbackSearch') %]
-                                    <input type="text" name="barcode" id="barcode" class="barcode focus" size="14" placeholder="Nhập mã vạch tài liệu hoặc từ khóa" />
-                                [% ELSE %]
-                                    <input type="text" name="barcode" id="barcode" class="barcode focus" size="14" placeholder="Nhập mã vạch tài liệu" />
-                                [% END %]
-                            [% END %]
-
-                            <div id="show-circ-settings">
-                                <a href="#" title="Cài đặt cho mượn"><i class="fa-solid fa-sliders"></i></a>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Mượn sách</button>
-
-                            <div class="circ-settings">
-                                [% UNLESS ( noissues && Koha.Preference('OnSiteCheckoutsForce') ) %]
-                                    [% IF ( SpecifyDueDate ) %]
-                                        <div id="specify-due-date" class="circ-setting">
-                                            <div class="hint">Chỉ định ngày hết hạn [% INCLUDE 'date-format.inc' %]: </div>
-                                            [% IF ( duedatespec ) %]
-                                                <input
-                                                    type="text"
-                                                    size="20"
-                                                    id="duedatespec"
-                                                    name="duedatespec"
-                                                    value="[% duedatespec | html %]"
-                                                    class="flatpickr"
-                                                    data-flatpickr-enable-time="true"
-                                                    data-flatpickr-on-close-focus="#barcode"
-                                                />
-                                            [% ELSE %]
-                                                <input type="text" size="20" id="duedatespec" name="duedatespec" value="" class="flatpickr" data-flatpickr-enable-time="true" data-flatpickr-on-close-focus="#barcode" />
-                                            [% END %]
-                                            <label for="stickyduedate"> Ghi nhớ trong phiên làm việc:</label>
-                                            [% IF ( stickyduedate ) %]
-                                                <input type="checkbox" id="stickyduedate" name="stickyduedate" checked="checked" />
-                                            [% ELSE %]
-                                                <input type="checkbox" id="stickyduedate" name="stickyduedate" />
-                                            [% END %]
-                                        </div>
-                                    [% END %]
-                                [% END %]
-
-                                [% UNLESS ( noissues ) %]
-                                    [% IF Koha.Preference('AllowSetAutomaticRenewal') %]
-                                        <div id="set-automatic-renewal" class="circ-setting">
-                                            [% IF NEEDSCONFIRMATION %]
-                                                [% IF auto_renew %]
-                                                    [% IF patron.autorenew_checkouts %]
-                                                        <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" disabled="disabled" title="Bạn đọc đã từ chối gia hạn tự động" />
-                                                    [% ELSE %]
-                                                        <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" disabled="disabled" checked="checked" />
-                                                    [% END %]
-                                                [% ELSE %]
-                                                    <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" disabled="disabled" />
-                                                [% END %]
-                                            [% ELSE %]
-                                                [% IF ( auto_renew && patron.autorenew_checkouts ) %]
-                                                    <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" class="circ_setting" checked="checked" />
-                                                [% ELSIF patron.autorenew_checkouts %]
-                                                    <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" class="circ_setting" />
-                                                [% ELSE %]
-                                                    <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" disabled="disabled" title="Bạn đọc đã từ chối gia hạn tự động" />
-                                                [% END %]
-                                            [% END %]
-
-                                            <label for="auto_renew">Gia hạn tự động</label>
-                                        </div>
-                                    [% END %]
-                                    [% IF Koha.Preference('decreaseLoanHighHolds') %]
-                                        <div id="set_high_holds_overrride" class="circ-setting">
-                                            [% IF NEEDSCONFIRMATION %]
-                                                [% IF override_high_holds %]
-                                                    <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" disabled="disabled" checked="checked" />
-                                                [% ELSE %]
-                                                    <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" disabled="disabled" />
-                                                [% END %]
-                                            [% ELSE %]
-                                                [% IF override_high_holds %]
-                                                    <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" class="circ_setting" checked="checked" />
-                                                [% ELSE %]
-                                                    <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" class="circ_setting" />
-                                                [% END %]
-                                            [% END %]
-                                            <label for="override_high_holds">Không giảm thời gian mượn dựa trên yêu cầu đặt giữ</label>
-                                        </div>
-                                    [% END %]
-                                [% END %]
-
-                                [% IF Koha.Preference('OnSiteCheckouts') %]
-                                    <div id="onsite_checkout-select" class="circ-setting">
-                                        [% IF noissues %]
-                                            <div class="onsite-checkout-only">
-                                                <input type="checkbox" id="onsite_checkout" name="onsite_checkout_forced" checked="checked" disabled="disabled" />
-                                                <label for="onsite_checkout">Chỉ mượn tại chỗ. Ngày hết hạn tự động: </label>
-                                                <input
-                                                    type="text"
-                                                    name="duedatespec"
-                                                    id="duedatespec"
-                                                    class="flatpickr"
-                                                    data-flatpickr-enable-time="true"
-                                                    data-flatpickr-on-close-focus="#barcode"
-                                                    value="[% today_due_date_and_time | $KohaDates dateformat => 'iso', with_hours => 1 %]"
-                                                />
-                                                <input type="hidden" name="onsite_checkout" checked="checked" value="1" />
-                                            </div>
-                                        [% ELSE %]
-                                            [% IF Koha.Preference('OnSiteCheckoutAutoCheck') && onsite_checkout == "on" %]
-                                                <input type="checkbox" id="onsite_checkout" name="onsite_checkout" class="circ_setting" checked="checked" /> <label for="onsite_checkout">Mượn tại chỗ</label>
-                                            [% ELSE %]
-                                                <input type="checkbox" id="onsite_checkout" name="onsite_checkout" class="circ_setting" /> <label for="onsite_checkout">Mượn tại chỗ</label>
-                                            [% END %]
+                        <div class="ftu-form-row">
+                            <label for="branch">Điểm lưu thông</label>
+                            <div class="ftu-input-group">
+                                <select name="branch" id="branch" class="ftu-select">
+                                    <option value="[% patron.branchcode | html %]" selected="selected">Phòng Mượn</option>
+                                    [% FOREACH b IN Branches.all %]
+                                        [% IF b.branchcode != patron.branchcode %]
+                                            <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
                                         [% END %]
-                                    </div>
-                                [% END %]
-                            </div>
-                            <!-- /.circ-settings -->
-
-                            <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% patron.borrowernumber | html %]" />
-                            <input type="hidden" name="branch" value="[% branch | html %]" />
-                            <input type="hidden" name="debt_confirmed" value="[% debt_confirmed | html %]" />
-                            [% IF ( CHARGES ) %]
-                                <input type="hidden" name="charges" value="yes" />
-                            [% END %]
-                        </fieldset>
-                        <!-- /#circ_circulation_issue -->
-
-                        [% IF ( issue ) %]
-                            <div class="lastchecked">
-                                <p>
-                                    <strong>Đã cho mượn: </strong>
-                                    [% issue.item.biblio.title | html %] ([% issue.item.barcode | html %]).
-                                    [% IF issue.item.is_bundle %]
-                                        [% SET bundle_items_count = issue.item.bundle_items.count %]
-                                        [% tnx('Tập hợp gồm {count} tài liệu', 'Tập hợp gồm {count} tài liệu', bundle_items_count, { count = bundle_items_count }) | html %].
                                     [% END %]
-                                    Hạn trả vào [% issue.date_due | $KohaDates as_due_date => 1 %]
-                                </p>
+                                </select>
                             </div>
-                        [% END %]
+                        </div>
+
+                        <div class="ftu-form-row">
+                            <label for="ftu_cardnumber">Số thẻ</label>
+                            <div class="ftu-input-group">
+                                <input type="text" id="ftu_cardnumber" name="findborrower" value="[% patron.cardnumber | html %]" class="ftu-input" autocomplete="off" />
+                                <button type="button" class="ftu-btn-reload" id="btn-reload-patron" title="Xóa màn hình / Quét thẻ mới"><i class="fa fa-refresh"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="ftu-form-row">
+                            <label for="barcode">Số ĐKCB</label>
+                            <div class="ftu-input-group">
+                                <input type="text" name="barcode" id="barcode" class="ftu-input ftu-input-barcode focus" autocomplete="off" placeholder="" />
+                                <button type="button" class="ftu-btn-reload" id="btn-clear-barcode" title="Xóa mã vạch"><i class="fa fa-refresh"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="ftu-form-row ftu-row-checkbox">
+                            <label class="ftu-checkbox-label">
+                                <input type="checkbox" id="calc_turn" name="calc_turn" checked="checked" />
+                                <span>Tính lượt</span>
+                            </label>
+                        </div>
+
+                        <div class="ftu-form-row ftu-row-actions">
+                            <a href="/cgi-bin/koha/circ/circulation.pl" class="ftu-btn ftu-btn-reject"><i class="fa fa-ban"></i> Từ chối</a>
+                            <button type="submit" class="ftu-btn ftu-btn-borrow"><i class="fa fa-download"></i> Mượn</button>
+                            <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-btn ftu-btn-search"><i class="fa fa-user"></i> Tìm tên</a>
+                        </div>
                     </form>
-                    <!-- /#mainform -->
-                </div>
-                <!-- /.col-sm-6 -->
-            [% END #/IF !noissues %]
-
-            [% SET div_class = '' %]
-            [% IF ( noissues ) %]
-                [% IF ( Koha.Preference('OnSiteCheckouts') && Koha.Preference('OnSiteCheckoutsForce') ) %]
-                    [% div_class = 'col-sm-6' %]
-                [% END %]
-            [% ELSE %]
-                [% div_class = 'col-sm-6' %]
-            [% END %]
-            <div class="[% div_class | html %]">
-                [% SET div_id = '' %]
-                [% div_class = '' %]
-                [% IF ( noissues ) %]
-                    [% IF ( Koha.Preference('OnSiteCheckouts') && Koha.Preference('OnSiteCheckoutsForce') ) %]
-                        [% div_class = 'circmessage attention' %]
-                        [% div_id = 'circmessages' %]
                     [% ELSE %]
-                        <h4>Cho mượn tới [% INCLUDE 'patron-title.inc' %]</h4>
-                        [% div_class = 'circmessage warning' %]
-                        [% div_id = 'circmessages' %]
-                    [% END %]
-                [% ELSE %]
-                    [% div_class = 'circmessage attention' %]
-                    [% div_id = 'circmessages' %]
-                [% END %]
+                    <form action="/cgi-bin/koha/circ/circulation.pl" id="mainform" method="get" autocomplete="off">
+                        <div class="ftu-form-row">
+                            <label for="branch">Điểm lưu thông</label>
+                            <div class="ftu-input-group">
+                                <select name="branch" id="branch" class="ftu-select">
+                                    <option value="CPL" selected="selected">Phòng Mượn</option>
+                                    [% FOREACH b IN Branches.all %]
+                                        <option value="[% b.branchcode | html %]">[% b.branchname | html %]</option>
+                                    [% END %]
+                                </select>
+                            </div>
+                        </div>
 
-                <div id="[% circmessages | html %]" class="[% div_class | html %]">
-                    [% IF noissues %]
-                        <h3>
-                            Không thể cho mượn!
-                            [% IF ( Koha.Preference('OnSiteCheckouts') && Koha.Preference('OnSiteCheckoutsForce') ) %]
-                                <span class="circ-hlt">Chỉ cho phép mượn tại chỗ</span>
+                        <div class="ftu-form-row">
+                            <label for="findborrower_main">Số thẻ</label>
+                            <div class="ftu-input-group">
+                                <input type="text" id="findborrower_main" name="findborrower" class="ftu-input ftu-input-barcode focus" autocomplete="off" placeholder="Nhập mã thẻ hoặc họ tên" />
+                                <button type="submit" class="ftu-btn-reload" title="Tìm kiếm"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="ftu-form-row">
+                            <label>Số ĐKCB</label>
+                            <div class="ftu-input-group">
+                                <input type="text" class="ftu-input" disabled="disabled" placeholder="Vui lòng nhập thẻ trước" />
+                            </div>
+                        </div>
+
+                        <div class="ftu-form-row ftu-row-checkbox">
+                            <label class="ftu-checkbox-label">
+                                <input type="checkbox" id="calc_turn" name="calc_turn" checked="checked" />
+                                <span>Tính lượt</span>
+                            </label>
+                        </div>
+
+                        <div class="ftu-form-row ftu-row-actions">
+                            <button type="submit" class="ftu-btn ftu-btn-borrow"><i class="fa fa-search"></i> Tìm bạn đọc</button>
+                            <a href="/cgi-bin/koha/members/members-home.pl" class="ftu-btn ftu-btn-search"><i class="fa fa-user"></i> Tìm tên</a>
+                        </div>
+                    </form>
+                    [% END %]
+                </div>
+
+                <!-- CỘT 2: THÔNG TIN BẠN ĐỌC -->
+                <div class="ftu-col-patron">
+                    [% IF patron %]
+                    [% SET overdue_count = 0 %]
+                    [% FOREACH chk IN patron.checkouts %]
+                        [% IF chk.is_overdue %][% SET overdue_count = overdue_count + 1 %][% END %]
+                    [% END %]
+                    <div class="ftu-patron-details">
+                        <!-- Hàng 1: Họ tên + N.sinh -->
+                        <div class="ftu-p-row ftu-p-header">
+                            <div class="ftu-p-name">[% patron.cardnumber | html %]/ [% patron.surname | html %] [% patron.firstname | html %]</div>
+                            [% IF patron.dateofbirth %]
+                            <div class="ftu-p-item"><span class="ftu-p-lbl">N.sinh:</span> <span class="ftu-p-val">[% patron.dateofbirth | $KohaDates dateformat => 'metric' %]</span></div>
                             [% END %]
-                        </h3>
+                        </div>
+
+                        <!-- Hàng 2: Cấp thẻ + Hạn thẻ -->
+                        <div class="ftu-p-row">
+                            [% IF patron.dateenrolled %]
+                            <div class="ftu-p-item"><span class="ftu-p-lbl">Cấp thẻ:</span> <span class="ftu-p-val">[% patron.dateenrolled | $KohaDates dateformat => 'metric' %]</span></div>
+                            [% ELSE %]
+                            <div class="ftu-p-item"><span class="ftu-p-lbl">Cấp thẻ:</span> <span class="ftu-p-val">01/11/2022</span></div>
+                            [% END %]
+                            [% IF patron.dateexpiry %]
+                            <div class="ftu-p-item"><span class="ftu-p-lbl">Hạn thẻ:</span> <span class="ftu-p-val [% IF patron.is_expired %]ftu-text-danger[% END %]">[% patron.dateexpiry | $KohaDates dateformat => 'metric' %]</span></div>
+                            [% END %]
+                        </div>
+
+                        <!-- Hàng 3: Địa chỉ (chỉ hiển thị khi có dữ liệu) -->
+                        [% IF patron.address || patron.city %]
+                        <div class="ftu-p-row ftu-p-full">
+                            <div class="ftu-p-item"><span class="ftu-p-lbl">Địa chỉ:</span> <span class="ftu-p-val">[% patron.address | html %][% IF patron.city %], [% patron.city | html %][% END %]</span></div>
+                        </div>
+                        [% END %]
+
+                        <!-- Hàng 4: Cấp thẻ lần + Quá hạn + Tiền cược -->
+                        <div class="ftu-p-row">
+                            <div class="ftu-p-item">
+                                <span class="ftu-p-lbl">Cấp thẻ lần:</span> 1; 
+                                <span class="ftu-overdue-val">Quá hạn: [% overdue_count %] tài liệu</span>
+                            </div>
+                            <div class="ftu-p-item">
+                                <span class="ftu-p-lbl">Tiền cược:</span> <span class="ftu-p-val">[% IF patron.account.balance && (patron.account.balance + 0) > 0 %][% patron.account.balance | $Price %][% ELSE %]0[% END %] (VNĐ)</span>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 5: Ngày mượn/Gia hạn + Sách mượn/Gia hạn -->
+                        <div class="ftu-p-row">
+                            <div class="ftu-p-item">
+                                <span class="ftu-p-lbl">Ngày mượn/Gia hạn:</span> <span class="ftu-p-val">120/ 120</span>
+                            </div>
+                            <div class="ftu-p-item">
+                                <span class="ftu-p-lbl">Sách mượn/Gia hạn:</span> <span class="ftu-p-val">[% patron.checkouts.count || 0 %]/ 5</span>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 6: Note input -->
+                        <div class="ftu-p-row ftu-p-full ftu-p-note">
+                            <div class="ftu-note-wrap">
+                                <input type="text" id="ftu_patron_note" class="ftu-note-input" value="[% patron.borrowernotes | html %]" placeholder="" />
+                                <i class="fa fa-comment-o ftu-note-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 7: Thanh thông báo / Alert bar -->
+                        <div class="ftu-alert-bar" id="ftu-feedback-bar">
+                            <span id="ftu-feedback-text">
+                                [% IF ( issue ) %]
+                                    Đã cho mượn thành công tài liệu: [% issue.item.biblio.title | html %] ([% issue.item.barcode | html %]). Hạn trả: [% issue.date_due | $KohaDates as_due_date => 1 dateformat => 'metric' %]
+                                [% ELSIF ( was_renewed ) %]
+                                    Tài khoản bạn đọc đã được gia hạn thành công.
+                                [% ELSIF ( messages ) %]
+                                    [% messages | html %]
+                                [% ELSE %]
+                                    .
+                                [% END %]
+                            </span>
+                            <button type="button" class="ftu-close-alert" onclick="document.getElementById('ftu-feedback-bar').style.display='none';">&times;</button>
+                        </div>
+                    </div>
+                    [% ELSE %]
+                    <div class="ftu-no-patron-box">
+                        <i class="fa fa-id-card-o" style="font-size:32px; color:#cbd5e1; margin-bottom:8px; display:block;"></i>
+                        Vui lòng nhập số thẻ bạn đọc hoặc quét mã thẻ để bắt đầu mượn sách.
+                    </div>
                     [% END %]
-                    [% INCLUDE 'patron_messages.inc' %]
                 </div>
-                <!-- /#circmessages -->
-            </div>
-            <!-- /div or div.col-sm-6 -->
-        </div>
-        <!-- /.row -->
 
-        [% INCLUDE 'patron-detail-tabs.inc' patronpage = "circ" %]
-    [% ELSIF borrowernumber # IF patron %]
-        <div class="alert alert-info">Không tìm thấy bạn đọc. <a href="/cgi-bin/koha/members/members-home.pl">Quay lại tìm kiếm</a></div>
-    [% ELSE %]
-        <form action="/cgi-bin/koha/circ/circulation.pl" id="patronsearch" method="get">
-            <fieldset id="patron_checkout_search">
-                <input autocomplete="off" id="findborrower_main" class="patron_autocomplete" name="findborrower" type="text" placeholder="Nhập mã bạn đọc hoặc họ tên" size="40" />
-                [% IF ( stickyduedate ) %]
-                    <input type="hidden" name="duedatespec" value="[% duedatespec | html %]" />
-                    <input type="hidden" name="stickyduedate" value="[% stickyduedate | html %]" />
+                <!-- CỘT 3: ẢNH / LOGO FTU (Dùng đường dẫn tương đối để Nginx rewrite thành /staff/intranet-tmpl/...) -->
+                <div class="ftu-col-avatar">
+                    <div class="ftu-avatar-frame">
+                        [% IF Koha.Preference('patronimages') && patron.image %]
+                            <img src="/cgi-bin/koha/members/patronimage.pl?borrowernumber=[% patron.borrowernumber | uri %]" alt="Ảnh bạn đọc" class="ftu-avatar-img" />
+                        [% ELSE %]
+                            <img src="/intranet-tmpl/prog/img/ftu-logo.png" alt="FTU Seal" class="ftu-avatar-logo" />
+                        [% END %]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỐI XÁC NHẬN / CẢNH BÁO NẾU CÓ TRỞ NGẠI LƯU THÔNG -->
+    [% IF ( NEEDSCONFIRMATION ) %]
+        <div id="circ_needsconfirmation" class="alert alert-warning" style="margin-bottom:12px; border-radius:3px;">
+            <h3>Vui lòng xác nhận cho mượn</h3>
+            <ul>
+                [% IF ( RENEW_ISSUE ) %]
+                    <li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) hiện đang được mượn bởi bạn đọc này. Gia hạn?</li>
                 [% END %]
+                [% IF ( ISSUED_TO_ANOTHER ) %]
+                    <li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được mượn bởi <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% issued_borrowernumber | uri %]">[% issued_firstname | html %] [% issued_surname | html %]</a> ([% issued_cardnumber | html %]). Ghi trả và cho mượn lại?</li>
+                [% END %]
+                [% IF ( RESERVE_WAITING ) %]
+                    <li>Tài liệu đang chờ bạn đọc khác đặt trước.</li>
+                [% END %]
+                [% IF ( DEBT ) %]
+                    <li>Bạn đọc đang nợ tiền phạt: [% DEBT | $Price %].</li>
+                [% END %]
+            </ul>
+            <form method="post" action="/cgi-bin/koha/circ/circulation.pl">
+                [% INCLUDE 'csrf-token.inc' %]
+                <input type="hidden" name="op" value="cud-checkout" />
+                <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
+                <input type="hidden" name="barcode" value="[% barcode | html %]" />
+                <input type="hidden" name="issueconfirmed" value="1" />
+                <input type="hidden" name="debt_confirmed" value="1" />
+                <button type="submit" class="btn btn-warning"><i class="fa fa-check"></i> Xác nhận mượn</button>
+                <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="btn btn-default">Hủy bỏ</a>
+            </form>
+        </div>
+    [% END %]
 
-                <button class="btn btn-primary" type="submit" aria-label="Search">Tìm kiếm</button>
-            </fieldset>
-        </form>
-    [% END # /IF patron %]
-[% END %]
-[% IF Koha.Preference('ClaimReturnedLostValue') || Koha.Preference('BundleLostValue') %]
-    [% INCLUDE 'modals/resolve_return_claim.inc' %]
-[% END %]
+    [% IF ( IMPOSSIBLE ) %]
+        <div class="alert alert-danger" style="margin-bottom:12px; border-radius:3px;">
+            <h3>Không thể cho mượn</h3>
+            <ul>
+                [% IF ( UNKNOWN_BARCODE ) %]
+                    <li>Không tìm thấy tài liệu với mã vạch: [% barcode | html %]</li>
+                [% END %]
+                [% IF ( NOT_FOR_LOAN ) %]
+                    <li>Tài liệu này không cho mượn về nhà.</li>
+                [% END %]
+                [% IF ( WTHDRAWN ) %]
+                    <li>Tài liệu đã được rút khỏi lưu thông.</li>
+                [% END %]
+                [% IF ( RESTRICTED ) %]
+                    <li>Tài liệu bị hạn chế lưu thông.</li>
+                [% END %]
+            </ul>
+            <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="btn btn-default">Quay lại</a>
+        </div>
+    [% END %]
 
-<!-- Modal -->
-<div id="barcodeSubmittedModal" class="modal" tabindex="-1" role="dialog" aria-labelledby="barcodeSubmittedModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title" id="barcodeSubmittedModalLabel">Đã gửi mã vạch</h1>
+    <!-- ========================================== -->
+    <!-- CARD 2: BẢNG TÀI LIỆU ĐANG MƯỢN            -->
+    <!-- ========================================== -->
+    [% IF patron %]
+    <div class="ftu-circ-card ftu-card-bottom">
+        <div class="ftu-circ-card-header ftu-table-card-header">
+            <div class="ftu-summary-stats">
+                Tổng đang mượn : <span id="ftu-total-count">[% patron.checkouts.count || 0 %]</span> | PLV.Mượn : 0 | PLV.Trả: 0
             </div>
-            <div class="modal-body">
-                <p>Bạn đã gửi mã vạch, vui lòng chờ hệ thống xử lý thao tác cho mượn...</p>
+            <div class="ftu-header-actions">
+                <a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% patron.borrowernumber | uri %]" class="ftu-act-link ftu-act-fine" target="_blank"><i class="fa fa-pencil-square-o"></i> Cập nhật phạt</a>
+                <a href="#" id="ftu-btn-renew-all" class="ftu-act-link ftu-act-renew"><i class="fa fa-calendar"></i> Gia hạn tất cả</a>
+                <a href="#" id="ftu-btn-return-all" class="ftu-act-link ftu-act-return"><i class="fa fa-pencil"></i> Trả tất cả</a>
+                <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-act-link ftu-act-print"><i class="fa fa-list-alt"></i> In danh sách</a>
+                <a href="#" class="ftu-toggle-panel" data-target="#ftu-bottom-panel-body" title="Thu gọn / Mở rộng"><i class="fa fa-angle-up"></i></a>
             </div>
         </div>
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-</div>
-<!-- /#barcodeSubmittedModal -->
+        <div class="ftu-circ-card-body" id="ftu-bottom-panel-body">
+            <!-- Filter & Search Controls -->
+            <div class="ftu-table-controls">
+                <div class="ftu-ctrl-length">
+                    Hiển thị 
+                    <select id="ftu-page-length" class="ftu-select-sm">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                    bản ghi
+                </div>
+                <div class="ftu-ctrl-search">
+                    <input type="text" id="ftu-search-table" class="ftu-input-search" placeholder="" />
+                </div>
+            </div>
 
-[% IF waiting_holds.count && waiting_holds.count > 0 %]
-    <div id="circ-warnwaitingholds-modal" class="modal audio-alert-action block">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">Bạn đọc này có tài liệu đặt giữ đang chờ lấy</h1>
+            <!-- Clean Checked-out Table -->
+            <table id="ftu-checkouts-table" class="ftu-custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30px; text-align: center;"><input type="checkbox" id="ftu-chk-all" /></th>
+                        <th class="th-sort" data-col="1">Số ĐKCB <i class="fa fa-sort"></i></th>
+                        <th class="th-sort" data-col="2">Nhan đề tài liệu <i class="fa fa-sort"></i></th>
+                        <th class="th-sort" data-col="3">Môn loại <i class="fa fa-sort"></i></th>
+                        <th class="th-sort" data-col="4">Tác giả <i class="fa fa-sort"></i></th>
+                        <th class="th-sort" data-col="5">Ngày mượn <i class="fa fa-sort"></i></th>
+                        <th class="th-sort" data-col="6">Hạn trả <i class="fa fa-sort"></i></th>
+                        <th style="text-align: center;">Trạng thái</th>
+                        <th style="text-align: center; width: 140px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    [% IF patron.checkouts.count > 0 %]
+                        [% FOREACH issue IN patron.checkouts %]
+                        <tr data-issue-id="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]">
+                            <td style="text-align: center;"><input type="checkbox" class="ftu-chk-item" value="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]" /></td>
+                            <td style="font-weight: 600;">[% issue.item.barcode | html %]</td>
+                            <td class="td-title">
+                                <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank">[% issue.item.biblio.title | html %]</a>
+                            </td>
+                            <td>[% issue.item.itemcallnumber | html %]</td>
+                            <td>[% issue.item.biblio.author | html %]</td>
+                            <td>[% issue.issuedate | $KohaDates dateformat => 'metric' %]</td>
+                            <td class="ftu-duedate-cell">[% issue.date_due | $KohaDates dateformat => 'metric' %]</td>
+                            <td style="text-align: center;">
+                                [% IF issue.is_overdue %]
+                                    <span class="ftu-badge ftu-badge-overdue">Quá hạn</span>
+                                [% ELSE %]
+                                    <span class="ftu-badge ftu-badge-active">Đang mượn</span>
+                                [% END %]
+                            </td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <button type="button" class="ftu-icon-btn ftu-btn-renew-one" data-issue-id="[% issue.issue_id | html %]" title="Gia hạn"><i class="fa fa-calendar" style="color: #0284c7;"></i></button>
+                                <a href="/cgi-bin/koha/catalogue/moredetail.pl?itemnumber=[% issue.itemnumber | uri %]&amp;biblionumber=[% issue.item.biblio.biblionumber | uri %]" target="_blank" class="ftu-icon-btn" title="Chi tiết bản sách"><i class="fa fa-pencil" style="color: #64748b;"></i></a>
+                                <button type="button" class="ftu-icon-btn ftu-btn-return-one" data-barcode="[% issue.item.barcode | html %]" data-title="[% issue.item.biblio.title | html %]" title="Trả tài liệu"><i class="fa fa-ban" style="color: #dc2626;"></i></button>
+                                <button type="button" class="ftu-icon-btn" title="Ghi chú"><i class="fa fa-comment-o" style="color: #0284c7;"></i></button>
+                                <a href="/cgi-bin/koha/members/printslip.pl?borrowernumber=[% patron.borrowernumber | uri %]&amp;print=issueslip" target="_blank" class="ftu-icon-btn" title="In phiếu"><i class="fa fa-pencil-square-o" style="color: #ea580c;"></i></a>
+                            </td>
+                        </tr>
+                        [% END %]
+                    [% ELSE %]
+                        <tr class="ftu-row-empty">
+                            <td colspan="9" style="text-align: center; padding: 22px; color: #64748b;">Không có tài liệu nào đang mượn</td>
+                        </tr>
+                    [% END %]
+                </tbody>
+            </table>
+
+            <!-- Table Footer -->
+            <div class="ftu-table-footer">
+                <div class="ftu-footer-info" id="ftu-footer-info">
+                    Hiển thị 1 đến [% patron.checkouts.count || 0 %] trong [% patron.checkouts.count || 0 %] bản ghi
                 </div>
-                <div class="modal-body">
-                    <ul>
-                        <li> Bạn đọc này có tài liệu đặt giữ đang chờ lấy và đã sẵn sàng cho mượn </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đồng ý</button>
+                <div class="ftu-footer-pagination">
+                    <button type="button" class="ftu-page-btn" disabled>&lt;</button>
+                    <button type="button" class="ftu-page-btn active">1</button>
+                    <button type="button" class="ftu-page-btn" disabled>&gt;</button>
                 </div>
             </div>
         </div>
     </div>
-[% END %]
-[% INCLUDE modals/cancel_booking.inc %]
+    [% END %]
 
-[% INCLUDE 'hold-group-modal.inc' %]
+    <!-- Hidden compatibility container for Koha scripts -->
+    <div style="display:none;">
+        <table id="issues-table"></table>
+    </div>
+
+[% END # /WRAPPER main-container.inc %]
 
 [% MACRO jsinclude BLOCK %]
     [% INCLUDE 'datatables.inc' %]
     [% INCLUDE 'select2.inc' %]
-    [% PROCESS 'modal-claims.inc' %]
-    [% PROCESS 'modal-claims-js' %]
     [% INCLUDE 'js-date-format.inc' %]
-    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
-        /* Set some variable needed in circulation.js */
-        const LoadCheckoutsTableDelay = [% Koha.Preference('LoadCheckoutsTableDelay') || 0 | html %];
-        const AlwaysLoadCheckoutsTable = [% Koha.Preference('AlwaysLoadCheckoutsTable') || 0 | html %];
-        var logged_in_user_borrowernumber = "[% logged_in_user.borrowernumber | html %]";
-        var ClaimReturnedLostValue = "[% Koha.Preference('ClaimReturnedLostValue') | html %]";
-        var ClaimReturnedChargeFee = "[% Koha.Preference('ClaimReturnedChargeFee') | html %]";
-        var UnseenRenewals = "[% Koha.Preference('UnseenRenewals') | html %]";
-        var ClaimReturnedWarningThreshold = "[% Koha.Preference('ClaimReturnedWarningThreshold') || 0 | html %]";
-        var interface = "[% interface | html %]";
-        var theme = "[% theme | html %]";
-        var borrowernumber = "[% patron.borrowernumber | html %]";
-        var branchcode = "[% branch | html %]";
-        var exports_enabled = [% Koha.Preference('ExportCircHistory') ? 1 : 0 | html %];
-        var AllowRenewalLimitOverride = [% (CAN_user_circulate_override_renewals && Koha.Preference('AllowRenewalLimitOverride') )? 1: 0 | html %];
-        var AllowRenewalOnHoldOverride = [% (CAN_user_circulate_override_renewals && Koha.Preference('AllowRenewalOnHoldOverride') )? 1: 0 | html %];
-        var AllowFineOverrideRenewing = [% (CAN_user_circulate_override_renewals && Koha.Preference('AllowFineOverrideRenewing') )? 1: 0 | html %];
-        var AllowCirculate = [% (CAN_user_circulate_circulate_remaining_permissions)? 1 : 0 | html %];
-        var script = "circulation";
-        var relatives_borrowernumbers = new Array();
-        [% FOREACH b IN relatives_borrowernumbers %]
-            relatives_borrowernumbers.push("[% b | html %]");
-        [% END %]
-        var SuspendHoldsIntranet = [% ( Koha.Preference('SuspendHoldsIntranet') ) ? 1 : 0 | html %];
-        var DisplayAddHoldGroups = [% ( Koha.Preference('DisplayAddHoldGroups') ) ? 1 : 0 | html %];
-
-        Koha.addPrefs({
-            OnSiteCheckoutAutoCheck: [% Koha.Preference("OnSiteCheckoutAutoCheck") ? 1 : 0 | html %],
-        });
-        const table_settings_issues_table = [% TablesSettings.GetTableSettings( 'circ', 'circulation', 'issues-table', 'json' ) | $raw %];
-        // Bổ sung các cột custom vào cấu hình để DataTables không bị crash khi áp dụng visibility
-        table_settings_issues_table.columns.push(
-            { columnname: 'ftu_status', is_hidden: 0, cannot_be_toggled: 0 },
-            { columnname: 'ftu_action', is_hidden: 0, cannot_be_toggled: 0 }
-        );
-        const table_settings_relatives_issues_table = [% TablesSettings.GetTableSettings( 'circ', 'circulation', 'relatives-issues-table', 'json' ) | $raw %];
-        const table_settings_holds_table = [% TablesSettings.GetTableSettings( 'circ', 'circulation', 'holds-table', 'json' ) | $raw %];
-        const table_settings_bookings_table = [% TablesSettings.GetTableSettings( 'members', 'moremember', 'bookings-table', 'json' ) | $raw %];
-        const CAN_user_circulate_manage_bookings = [% CAN_user_circulate_manage_bookings || 0 | $raw %];
-        const patron_borrowernumber = [% patron.borrowernumber || 'null' | $raw %];
-        const has_patron = [% borrowernumber && patron ? 1 : 0 | html %];
-        const CircAutoPrintQuickSlip = "[% CircAutoPrintQuickSlip | html %]";
-        const amountlimit = "[% Koha.Preference('FineNoRenewals') | html %]";
-        const fines = "[% fines | $Price %]";
-        const today_due_date_and_time = "[% today_due_date_and_time | $KohaDates dateformat => 'iso', with_hours => 1 %]";
-        const duedatespec = "[% duedatespec | html %]";
-        const override_high_holds = [% override_high_holds ? 1 : 0 | html %];
-        const HIGHHOLDS = [% HIGHHOLDS ? 1 : 0 | html %];
-        const HIGHHOLDS_returndate = "[% HIGHHOLDS.returndate | $KohaDates %]";
-        const waiting_holds_barcodes = new Array();
-        [% FOREACH wh IN waiting_holds %]
-            waiting_holds_barcodes.push("[% wh.item.barcode | html %]");
-        [% END %]
-        const onsite_checkout = "[% onsite_checkout | html %]";
-    </script>
-    [% Asset.js("js/pages/circulation.js") | $raw %]
-    [% IF Koha.Preference('ClaimReturnedLostValue') || Koha.Preference('BundleLostValue') %]
-        [% Asset.js("js/resolve_claim_modal.js") | $raw %]
-    [% END %]
-    [% Asset.js("js/holds.js") | $raw %]
-    [% INCLUDE 'calendar.inc' %]
-    [% Asset.js("js/additional-filters.js") | $raw %]
-    [% Asset.js("js/cancel_booking_modal.js") | $raw %]
-    [% Asset.js("js/combobox.js") | $raw %]
-    [% INCLUDE 'js-biblio-format.inc' %]
-    [% Asset.js("js/hold-group.js") | $raw %]
     <script nonce="[% Koha.CSPNonce | $raw %]">
-        if (has_patron) {
-            if (Cookies.get("holdfor") != patron_borrowernumber) {
-                Cookies.remove("holdfor", { path: "/", SameSite: "Lax" });
-            }
-        } else {
-            Cookies.remove("holdfor", { path: "/", SameSite: "Lax" });
-        }
+        $(document).ready(function() {
+            // 1. Focus barcode scanner target
+            setTimeout(function() {
+                var bc = $('#barcode');
+                if (bc.length) { bc.focus(); }
+                var fb = $('#findborrower_main');
+                if (fb.length) { fb.focus(); }
+            }, 100);
 
-        // ================================================================
-        // FTU: Gộp Mượn–Trả–Gia hạn (fully JS-injected, no HTML deps)
-        // ================================================================
-        (function() {
-            'use strict';
-            if (!has_patron) return; // chỉ chạy khi có bạn đọc
+            // 2. Clear barcode input
+            $('#btn-clear-barcode').on('click', function(e) {
+                e.preventDefault();
+                $('#barcode').val('').focus();
+            });
 
-            var batchBar = null; // tham chiếu đến batch bar được inject
+            // 3. Clear/Reload patron screen
+            $('#btn-reload-patron').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = '/cgi-bin/koha/circ/circulation.pl';
+            });
 
-            // ── Toast notification ──────────────────────────────────────
+            // 4. Toggle Card Panels
+            $('.ftu-toggle-panel').on('click', function(e) {
+                e.preventDefault();
+                var target = $(this).data('target');
+                var icon = $(this).find('i');
+                $(target).slideToggle(180, function() {
+                    if ($(this).is(':visible')) {
+                        icon.removeClass('fa-angle-down').addClass('fa-angle-up');
+                    } else {
+                        icon.removeClass('fa-angle-up').addClass('fa-angle-down');
+                    }
+                });
+            });
+
+            // 5. Select all checkboxes
+            $('#ftu-chk-all').on('change', function() {
+                var isChecked = $(this).prop('checked');
+                $('.ftu-chk-item').prop('checked', isChecked);
+            });
+
+            // 6. Toast Notification
             function showToast(msg, type) {
                 var container = document.getElementById('ftu-toast-container');
                 if (!container) {
                     container = document.createElement('div');
                     container.id = 'ftu-toast-container';
-                    container.style.cssText = 'position:fixed;top:72px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+                    container.style.cssText = 'position:fixed;top:70px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
                     document.body.appendChild(container);
                 }
-                var colors = { success:'#16a34a', error:'#b91c1c', info:'#1d4ed8', warn:'#b45309' };
-                var icons  = { success:'✓', error:'✗', info:'ℹ', warn:'⚠' };
+                var colors = { success:'#16a34a', error:'#dc2626', info:'#0284c7' };
                 var toast = document.createElement('div');
-                toast.style.cssText = 'pointer-events:auto;background:#fff;border-left:4px solid '+colors[type||'info']+';border-radius:8px;padding:0.65rem 1rem;box-shadow:0 4px 16px rgba(0,0,0,0.13);font-size:0.88rem;font-family:"Be Vietnam Pro",sans-serif;max-width:340px;display:flex;gap:0.6rem;align-items:flex-start;';
-                toast.innerHTML = '<span style="color:'+colors[type||'info']+';font-size:1.1rem;line-height:1;">'+icons[type||'info']+'</span><span>'+msg+'</span>';
+                toast.style.cssText = 'pointer-events:auto;background:#fff;border-left:4px solid '+(colors[type]||'#0284c7')+';border-radius:4px;padding:8px 14px;box-shadow:0 3px 12px rgba(0,0,0,0.15);font-size:13px;max-width:320px;display:flex;gap:8px;align-items:center;';
+                toast.innerHTML = '<span style="color:'+(colors[type]||'#0284c7')+';font-weight:bold;">'+(type==='success'?'✓':(type==='error'?'✗':'ℹ'))+'</span><span>'+msg+'</span>';
                 container.appendChild(toast);
-                setTimeout(function(){ toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 300); }, 3500);
+                setTimeout(function(){
+                    toast.style.opacity='0';
+                    toast.style.transition='opacity 0.3s';
+                    setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 300);
+                }, 3200);
             }
 
-            // ── CSRF ────────────────────────────────────────────────────
-            function getCSRFToken() {
-                var el = document.querySelector('input[name="csrf_token"]');
-                return el ? el.value : '';
+            // 7. Update Table Counts
+            function updateCounts() {
+                var rows = $('#ftu-checkouts-table tbody tr[data-issue-id]');
+                var count = rows.length;
+                $('#ftu-total-count').text(count);
+                if (count === 0) {
+                    $('#ftu-checkouts-table tbody').html('<tr class="ftu-row-empty"><td colspan="9" style="text-align:center; padding:22px; color:#64748b;">Không có tài liệu nào đang mượn</td></tr>');
+                    $('#ftu-footer-info').text('Hiển thị 0 trong 0 bản ghi');
+                } else {
+                    $('#ftu-footer-info').text('Hiển thị 1 đến ' + count + ' trong ' + count + ' bản ghi');
+                }
             }
 
-            // ── Gia hạn 1 bản mượn ─────────────────────────────────────
-            async function renewOne(checkoutId, dueDateCell, btnRenew) {
-                btnRenew.disabled = true;
-                btnRenew.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            // 8. Single Item Renew
+            $(document).on('click', '.ftu-btn-renew-one', async function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var issueId = btn.data('issue-id');
+                var row = btn.closest('tr');
+                var dueCell = row.find('.ftu-duedate-cell');
+
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
                 try {
-                    var resp = await fetch('/api/v1/checkouts/' + checkoutId + '/renewals', {
+                    var resp = await fetch('/api/v1/checkouts/' + issueId + '/renewals', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'x-koha-override': 'debt_limit' },
                         body: '{}',
@@ -1369,526 +1012,144 @@
                     });
                     if (resp.ok) {
                         var data = await resp.json();
-                        if (data.due_date && dueDateCell) {
+                        if (data.due_date) {
                             var dt = new Date(data.due_date);
-                            dueDateCell.innerHTML = '<span style="color:#16a34a;font-weight:700;">'
-                                + String(dt.getDate()).padStart(2,'0') + '/'
-                                + String(dt.getMonth()+1).padStart(2,'0') + '/'
-                                + dt.getFullYear() + '</span>';
+                            var day = String(dt.getDate()).padStart(2, '0');
+                            var month = String(dt.getMonth() + 1).padStart(2, '0');
+                            var year = dt.getFullYear();
+                            dueCell.html('<span style="color:#16a34a; font-weight:700;">' + day + '/' + month + '/' + year + '</span>');
                         }
                         showToast('Đã gia hạn thành công', 'success');
-                        btnRenew.innerHTML = '<i class="fa fa-check"></i> Đã gia hạn';
-                        btnRenew.style.cssText += ';background:#f0fdf4;border-color:#86efac;color:#16a34a;';
+                        btn.html('<i class="fa fa-check" style="color:#16a34a;"></i>');
                     } else {
                         var err = await resp.json().catch(function(){ return {}; });
                         showToast('Không thể gia hạn: ' + (err.error || resp.status), 'error');
-                        btnRenew.disabled = false;
-                        btnRenew.innerHTML = '<i class="fa fa-retweet"></i> Gia hạn';
+                        btn.prop('disabled', false).html('<i class="fa fa-calendar" style="color:#0284c7;"></i>');
                     }
-                } catch(e) {
+                } catch(ex) {
                     showToast('Lỗi kết nối khi gia hạn', 'error');
-                    btnRenew.disabled = false;
-                    btnRenew.innerHTML = '<i class="fa fa-retweet"></i> Gia hạn';
+                    btn.prop('disabled', false).html('<i class="fa fa-calendar" style="color:#0284c7;"></i>');
                 }
-            }
+            });
 
-            // ── Trả 1 bản mượn ─────────────────────────────────────────
-            async function returnOne(barcode, title, row, btnReturn) {
-                btnReturn.disabled = true;
-                btnReturn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+            // 9. Single Item Return
+            $(document).on('click', '.ftu-btn-return-one', async function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var barcode = btn.data('barcode');
+                var title = btn.data('title');
+                var row = btn.closest('tr');
+
+                if (!confirm('Xác nhận trả tài liệu: ' + (title || barcode) + '?')) return;
+
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                var csrf = $('input[name="csrf_token"]').val() || '';
                 var fd = new FormData();
                 fd.append('op', 'cud-checkin');
                 fd.append('barcode', barcode);
-                fd.append('csrf_token', getCSRFToken());
+                fd.append('csrf_token', csrf);
+
                 try {
-                    var resp = await fetch('/cgi-bin/koha/circ/returns.pl', {
-                        method: 'POST', body: fd, credentials: 'same-origin'
+                    await fetch('/cgi-bin/koha/circ/returns.pl', {
+                        method: 'POST',
+                        body: fd,
+                        credentials: 'same-origin'
                     });
-                    var html = await resp.text();
-                    
-                    // Thêm thông báo nếu có đặt trước hoặc chuyển kho (nhưng không chuyển trang)
-                    var msg = 'Đã trả: ' + (title || barcode);
-                    if (html.includes('hold-found1')) msg += ' (Có đặt trước)';
-                    else if (html.includes('item-transfer-modal')) msg += ' (Cần chuyển kho)';
-
-                    row.style.transition = 'opacity 0.35s, transform 0.35s';
-                    row.style.opacity = '0';
-                    row.style.transform = 'translateX(30px)';
-                    setTimeout(function(){
-                        if (row.parentNode) row.remove();
-                        updateBatchBar();
-                    }, 380);
-                    showToast(msg, 'success');
-                } catch(e) {
+                    row.css({ transition: 'opacity 0.35s, transform 0.35s', opacity: 0, transform: 'translateX(20px)' });
+                    setTimeout(function() {
+                        row.remove();
+                        updateCounts();
+                    }, 360);
+                    showToast('Đã trả thành công: ' + (title || barcode), 'success');
+                } catch(ex) {
                     showToast('Lỗi khi trả sách', 'error');
-                    btnReturn.disabled = false;
-                    btnReturn.innerHTML = '<i class="fa fa-times-circle"></i>';
+                    btn.prop('disabled', false).html('<i class="fa fa-ban" style="color:#dc2626;"></i>');
                 }
-            }
+            });
 
-                                 // ── Inject / cập nhật Batch Bar ─────────────────────────────
-            function updateBatchBar() {
-                var bar = document.getElementById('ftu-batch-bar');
-                if (!bar) return;
-                var rows = document.querySelectorAll('#issues-table tbody tr:not([style*="opacity: 0"])');
-                var count = rows.length;
-                bar.querySelector('#ftu-total-out').textContent = 'Tổng đang mượn : ' + count + ' | PLV.Mượn : 0 | PLV.Trả: 0';
-            }
+            // 10. Renew All
+            $('#ftu-btn-renew-all').on('click', async function(e) {
+                e.preventDefault();
+                var btns = $('.ftu-btn-renew-one:not(:disabled)');
+                if (!btns.length) {
+                    showToast('Không có tài liệu nào để gia hạn', 'info');
+                    return;
+                }
+                if (!confirm('Xác nhận gia hạn tất cả ' + btns.length + ' tài liệu?')) return;
+                $(this).css('opacity', 0.5);
+                for (var i = 0; i < btns.length; i++) {
+                    $(btns[i]).click();
+                    await new Promise(r => setTimeout(r, 250));
+                }
+                $(this).css('opacity', 1);
+                showToast('Đã gửi yêu cầu gia hạn tất cả tài liệu', 'success');
+            });
 
-            function injectBatchBar() {
-                if (document.getElementById('ftu-batch-bar')) return;
-                var tableWrapper = document.getElementById('issues-table_wrapper');
-                if (!tableWrapper) return; // Wait for DataTables to create the wrapper
-
-                var bar = document.createElement('div');
-                bar.id = 'ftu-batch-bar';
-                bar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:0;padding:0.6rem 0.8rem;background:#f9f9f9;border:1px solid #ddd;border-bottom:none;border-radius:4px 4px 0 0;';
-                bar.innerHTML = [
-                    '<div style="color:#d32f2f;font-weight:bold;font-size:14px;" id="ftu-total-out">Tổng đang mượn : 0 | PLV.Mượn : 0 | PLV.Trả: 0</div>',
-                    '<div style="display:flex;gap:10px;align-items:center;">',
-                    '  <a href="#" style="color:#1976d2;text-decoration:none;font-size:13px;"><i class="fa fa-edit"></i> Cập nhật phạt</a>',
-                    '  <a href="#" id="ftu-renew-all" style="color:#388e3c;text-decoration:none;font-size:13px;"><i class="fa fa-calendar"></i> Gia hạn tất cả</a>',
-                    '  <a href="#" id="ftu-return-all" style="color:#d32f2f;text-decoration:none;font-size:13px;"><i class="fa fa-times"></i> Trả tất cả</a>',
-                    '  <a href="#" style="color:#1976d2;text-decoration:none;font-size:13px;"><i class="fa fa-bar-chart"></i> In danh sách</a>',
-                    '  <a href="#" style="color:#666;text-decoration:none;font-size:16px;margin-left:10px;"><i class="fa fa-chevron-up"></i></a>',
-                    '</div>'
-                ].join('');
-
-                // Gắn events
-                bar.querySelector('#ftu-renew-all').addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    var btns = document.querySelectorAll('#issues-table .ftu-btn-renew:not(:disabled)');
-                    if (!btns.length) { showToast('Không có bản mượn nào có thể gia hạn', 'info'); return; }
-                    if (!confirm('Xác nhận gia hạn tất cả ' + btns.length + ' tài liệu?')) return;
-                    this.style.opacity = '0.5';
-                    for (var btn of btns) {
-                        if (btn.renewAction) btn.renewAction();
-                        await new Promise(r => setTimeout(r, 300));
-                    }
-                    this.style.opacity = '1';
-                    showToast('Đã gửi yêu cầu gia hạn ' + btns.length + ' tài liệu', 'info');
-                });
-                bar.querySelector('#ftu-return-all').addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    var btns = document.querySelectorAll('#issues-table .ftu-btn-return:not(:disabled)');
-                    if (!btns.length) { showToast('Không có tài liệu nào đang mượn', 'info'); return; }
-                    if (!confirm('Xác nhận trả tất cả ' + btns.length + ' tài liệu?')) return;
-                    this.style.opacity = '0.5';
-                    for (var btn of btns) {
-                        if (btn.returnAction) btn.returnAction();
-                        await new Promise(r => setTimeout(r, 700));
-                    }
-                    this.style.opacity = '1';
-                });
-
-                tableWrapper.parentNode.insertBefore(bar, tableWrapper);
-                tableWrapper.style.borderTop = 'none';
-                tableWrapper.style.marginTop = '0';
-            }
-
-            // ── Inject nút Thao tác vào mỗi hàng ──────────────────────
-            var btnStyle = 'background:none;border:none;padding:0 4px;font-size:14px;cursor:pointer;display:inline-block;';
-
-            function injectRowButtons(table) {
-                var rows = table.querySelectorAll('tbody tr');
-                rows.forEach(function(row) {
-                    if (row.querySelector('.ftu-circ-cell')) return;
-                    if (row.querySelector('.dataTables_empty')) return;
-
-                    // Tìm checkout_id
-                    var checkoutId = null;
-                    var barcode = '';
-                    var titleText = '';
-                    var dueDateCell = null;
-
-                    checkoutId = row.getAttribute('data-checkout-id') || row.getAttribute('data-issue-id');
-
-                    // Ưu tiên lấy issue_id và barcode từ DataTables row data (chính xác nhất)
+            // 11. Return All
+            $('#ftu-btn-return-all').on('click', async function(e) {
+                e.preventDefault();
+                var rows = $('#ftu-checkouts-table tbody tr[data-barcode]');
+                if (!rows.length) {
+                    showToast('Không có tài liệu nào đang mượn', 'info');
+                    return;
+                }
+                if (!confirm('Xác nhận trả tất cả ' + rows.length + ' tài liệu?')) return;
+                $(this).css('opacity', 0.5);
+                var csrf = $('input[name="csrf_token"]').val() || '';
+                for (var i = 0; i < rows.length; i++) {
+                    var row = $(rows[i]);
+                    var bc = row.data('barcode');
+                    var fd = new FormData();
+                    fd.append('op', 'cud-checkin');
+                    fd.append('barcode', bc);
+                    fd.append('csrf_token', csrf);
                     try {
-                        var dt = $('#issues-table').DataTable();
-                        if (dt && dt.row) {
-                            var rowData = dt.row(row).data();
-                            if (rowData) {
-                                if (rowData.issue_id) checkoutId = String(rowData.issue_id);
-                                if (rowData.barcode) barcode = rowData.barcode;
-                            }
-                        }
+                        await fetch('/cgi-bin/koha/circ/returns.pl', { method: 'POST', body: fd, credentials: 'same-origin' });
                     } catch(e) {}
-
-                    // Fallback: lấy từ row ID
-                    if (!checkoutId && row.id && row.id.match(/^issue-(\d+)$/)) {
-                        checkoutId = row.id.match(/^issue-(\d+)$/)[1];
-                    }
-                    if (!checkoutId) {
-                        var el = row.querySelector('[data-checkout-id]');
-                        if (el) checkoutId = el.getAttribute('data-checkout-id');
-                    }
-
-                    var barcodeInput = row.querySelector('input[name="barcode"]');
-                    if (barcodeInput && barcodeInput.value) barcode = barcodeInput.value;
-
-                    var titleLink = row.querySelector('td a');
-                    if (titleLink) titleText = titleLink.textContent.trim();
-
-                    var tds = Array.from(row.querySelectorAll('td'));
-                    tds.forEach(function(td) {
-                        if (td.classList.contains('date-due') || (td.getAttribute('data-order') && /^\d{4}/.test(td.getAttribute('data-order')))) {
-                            dueDateCell = td;
-                        }
-                        if (!barcode) {
-                            var links = td.querySelectorAll('a');
-                            links.forEach(function(a) {
-                                var href = a.getAttribute('href') || '';
-                                var txt = a.textContent.trim();
-                                if (!barcode && (href.includes('barcode=') || href.includes('moredetail.pl?itemnumber=')) && txt && txt.length >= 4) {
-                                    barcode = txt;
-                                }
-                            });
-                            var txt = td.textContent.trim();
-                            if (!barcode && /^[A-Za-z0-9-]{5,30}$/.test(txt) && !txt.includes(' ')) {
-                                barcode = txt;
-                            }
-                        }
-                    });
-
-                    var tdAction = row.querySelector('.ftu-action-td');
-                    if (tdAction) {
-                        tdAction.innerHTML = ''; // Xóa nội dung cũ
-                        tdAction.style.cssText = 'white-space:nowrap;vertical-align:middle;padding:8px;text-align:center;';
-
-                        var cid = checkoutId || (row.id ? row.id.replace('issue-', '') : '');
-                        var ddc = dueDateCell;
-                        var btnRenew = document.createElement('button');
-                        btnRenew.className = 'ftu-btn-renew';
-                        btnRenew.innerHTML = '<i class="fa fa-calendar"></i>';
-                        btnRenew.style.cssText = btnStyle + 'color:#1976d2;';
-                        btnRenew.title = 'Gia hạn';
-                        btnRenew.renewAction = function() { renewOne(cid, ddc, btnRenew); };
-                        btnRenew.addEventListener('click', function(e){ 
-                            e.preventDefault(); 
-                            if (!confirm('Xác nhận gia hạn tài liệu này?')) return;
-                            btnRenew.renewAction(); 
-                        }); 
-                        tdAction.appendChild(btnRenew);
-
-                        if (barcode) {
-                            var bc = barcode;
-                            var tt = titleText;
-                            var r  = row;
-                            var btnReturn = document.createElement('button');
-                            btnReturn.className = 'ftu-btn-return';
-                            btnReturn.innerHTML = '<i class="fa fa-times-circle"></i>';
-                            btnReturn.style.cssText = btnStyle + 'color:#d32f2f;';
-                            btnReturn.title = 'Trả tài liệu';
-                            btnReturn.returnAction = function() { returnOne(bc, tt, r, btnReturn); };
-                            btnReturn.addEventListener('click', function(e){
-                                e.preventDefault();
-                                if (!confirm('Xác nhận trả: ' + (tt || bc) + '?')) return;
-                                btnReturn.returnAction();
-                            });
-                            tdAction.appendChild(btnReturn);
-                        }
-                    }
-                });
-            }
-
-            // ── Hàm chính: inject sau khi bảng load ────────────────────
-            function trySetup() {
-                var table = document.getElementById('issues-table');
-                if (!table) return false;
-                var rows = table.querySelectorAll('tbody tr');
-                if (!rows.length) return false;
-                injectBatchBar();
-                injectRowButtons(table);
-                updateBatchBar();
-                return true;
-            }
-
-            // Retry pattern
-            var retries = 0;
-            function retrySetup() {
-                if (trySetup() || retries++ > 15) return;
-                setTimeout(retrySetup, 500);
-            }
-            document.addEventListener('DOMContentLoaded', function(){ setTimeout(retrySetup, 800); });
-
-            // Lắng nghe DataTables draw event
-            $(document).on('draw.dt', '#issues-table', function() {
-                injectBatchBar();
-                injectRowButtons(this);
-                updateBatchBar();
-                
-                // Định dạng dữ liệu các hàng (thêm Trạng thái)
-                var rows = document.querySelectorAll('#issues-table tbody tr');
-                rows.forEach(function(row) {
-                    var emptyCell = row.querySelector('.dataTables_empty');
-                    if (emptyCell) return;
-
-                    // Thêm nhãn trạng thái "Đang mượn"
-                    var statusTd = row.querySelector('.ftu-status-td');
-                    if (statusTd && !statusTd.querySelector('.ftu-status-badge')) {
-                        statusTd.style.cssText = 'vertical-align:middle;padding:8px;text-align:center;';
-                        statusTd.innerHTML = '<span class="ftu-status-badge">Đang mượn</span>';
-                    }
-                });
+                    row.remove();
+                    await new Promise(r => setTimeout(r, 150));
+                }
+                $(this).css('opacity', 1);
+                updateCounts();
+                showToast('Đã trả tất cả tài liệu thành công', 'success');
             });
 
-            // Ẩn các cột native của Koha bằng DataTables API
-            $(document).on('init.dt', '#issues-table', function(e, settings) {
-                var api = new $.fn.dataTable.Api(settings);
-                var hideCols = [];
-                api.columns().every(function(idx) {
-                    var colName = this.header() ? this.header().getAttribute('data-colname') : null;
-                    if (['renew', 'checkin', 'export', 'claims_returned', 'record_type', 'item_type', 'collection', 'location', 'homebranch', 'checkout_from', 'charge', 'fine', 'price'].includes(colName)) {
-                        hideCols.push(idx);
-                    }
-                });
-                if (hideCols.length > 0) {
-                    api.columns(hideCols).visible(false);
-                }
-            });
-
-        })();
-
-        // CSS animation cho toast và CSS cho DataTable
-        (function(){
-            var style = document.createElement('style');
-            style.textContent = `
-            @keyframes ftuSlideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-            
-            /* DataTables Custom Styling */
-            #issues-table_wrapper {
-                border: 1px solid #ddd;
-                border-top: none;
-                background: #fff;
-                padding: 0;
-                margin-top: 0;
-            }
-            #issues-table_wrapper .row:first-child {
-                background: #f5f6f8;
-                padding: 10px;
-                border-bottom: 1px solid #ddd;
-                margin: 0;
-            }
-            #issues-table_wrapper .row:last-child {
-                background: #f5f6f8;
-                padding: 10px;
-                border-top: 1px solid #ddd;
-                margin: 0;
-            }
-            #issues-table {
-                margin: 0 !important;
-                border: none;
-                width: 100% !important;
-            }
-            #issues-table thead th {
-                background: #fff;
-                color: #555;
-                font-weight: bold;
-                border-bottom: 1px solid #ddd;
-                font-size: 13px;
-                padding: 12px 10px;
-            }
-            #issues-table tbody td {
-                font-size: 13px;
-                color: #666;
-                padding: 10px;
-                border-bottom: 1px solid #eee;
-                vertical-align: middle;
-            }
-            #issues-table tbody td a {
-                color: #2196f3;
-                text-decoration: none;
-            }
-            
-            /* Trạng thái Đang mượn */
-            .ftu-status-badge {
-                background: #317f9b;
-                color: white;
-                padding: 3px 8px;
-                border-radius: 3px;
-                font-size: 12px;
-                position: relative;
-            }
-            .ftu-status-badge::before {
-                content: '';
-                position: absolute;
-                left: -6px;
-                top: 50%;
-                transform: translateY(-50%);
-                border-width: 6px 6px 6px 0;
-                border-style: solid;
-                border-color: transparent #317f9b transparent transparent;
-            }
-
-            /* Custom Pagination */
-            .dataTables_paginate .paginate_button {
-                padding: 5px 10px !important;
-                margin: 0 !important;
-                border: 1px solid #ddd !important;
-                background: #fff !important;
-                color: #666 !important;
-            }
-            .dataTables_paginate .paginate_button.current {
-                background: #5dade2 !important;
-                color: white !important;
-                border-color: #5dade2 !important;
-            }
-
-            /* Hide column visibility dropdown in Toolbar, native action bar, and load checkbox */
-            .dt_button_clear_filter, #issues-table-actions, label[for="issues-table-load-immediately"], #issues-table-load-immediately { display: none !important; }
-            `;
-            document.head.appendChild(style);
-        })();
-
-        if (!borrowernumber) {
-            window.onload = function () {
-                $("#findborrower").focus();
-            };
-        }
-
-        var MSG_CONFIRM_RENEW = _("The patron has a debt of %s").format(fines);
-        MSG_CONFIRM_RENEW += _("Bạn có chắc muốn renew checkout(s)?");
-
-        // Mượn tại chỗ
-        function toggle_onsite_checkout() {
-            const duedatespec = document.querySelector("#duedatespec");
-            if (duedatespec) {
-                const duedatespec_fp = duedatespec._flatpickr;
-                if ($("#onsite_checkout").prop("checked")) {
-                    duedatespec_fp.setDate(today_due_date_and_time);
-                } else {
-                    duedatespec_fp.setDate("");
-                }
-            }
-        }
-
-        $(document).ready(function () {
-            let barcodeSubmitInFlight = false;
-            $("#barcode")
-                .off("keypress.preventDouble")
-                .on("keypress.preventDouble", function (e) {
-                    if (barcodeSubmitInFlight) {
-                        $("#barcodeSubmittedModal").modal("show");
-                        e.preventDefault();
-                    }
-                });
-            window.addEventListener("pageshow", function (event) {
-                if (event.persisted) {
-                    barcodeSubmitInFlight = false;
-                }
-            });
-            if (waiting_holds_barcodes.length > 0) {
-                $("#circ-warnwaitingholds-modal .btn-primary").on("click", function () {
-                    $("#mainform").submit();
-                });
-
-                $("#mainform").on("submit", function () {
-                    if ($("#checkout_confirmed").length > 0) {
-                        return true;
-                    }
-                    if (waiting_holds_barcodes.includes($("#barcode").val().trim())) {
-                        return true;
+            // 12. Instant Table Search
+            $('#ftu-search-table').on('keyup', function() {
+                var term = $(this).val().toLowerCase().trim();
+                var rows = $('#ftu-checkouts-table tbody tr[data-issue-id]');
+                var visibleCount = 0;
+                rows.each(function() {
+                    var rowText = $(this).text().toLowerCase();
+                    if (rowText.indexOf(term) > -1) {
+                        $(this).show();
+                        visibleCount++;
                     } else {
-                        $("#circ-warnwaitingholds-modal").modal("show");
-                        return false;
+                        $(this).hide();
                     }
                 });
-                $("#circ-warnwaitingholds-modal").on("hidden.bs.modal", function () {
-                    $("#mainform").append('<input type="hidden" id="checkout_confirmed" value=1>').submit();
+                $('#ftu-footer-info').text('Hiển thị 1 đến ' + visibleCount + ' trong ' + rows.length + ' bản ghi');
+            });
+
+            // 13. Column Sorting
+            $('.th-sort').on('click', function() {
+                var colIdx = $(this).index();
+                var table = $('#ftu-checkouts-table');
+                var rows = table.find('tbody tr[data-issue-id]').toArray();
+                var asc = !$(this).data('asc');
+                $(this).data('asc', asc);
+                $('.th-sort i').removeClass('fa-sort-asc fa-sort-desc').addClass('fa-sort');
+                $(this).find('i').removeClass('fa-sort').addClass(asc ? 'fa-sort-asc' : 'fa-sort-desc');
+
+                rows.sort(function(a, b) {
+                    var aVal = $(a).find('td').eq(colIdx).text().trim();
+                    var bVal = $(b).find('td').eq(colIdx).text().trim();
+                    return asc ? aVal.localeCompare(bVal, 'vi', { numeric: true }) : bVal.localeCompare(aVal, 'vi', { numeric: true });
                 });
-            }
-
-            $("#mainform").on("submit", function () {
-                if ($("#barcode").length && $("#barcode").val()) {
-                    barcodeSubmitInFlight = true;
-                }
-            });
-
-            // listen submit to trigger qslip on empty checkout
-            $("#mainform").bind("submit", function () {
-                if ($("#barcode").val() == "") {
-                    // Không cho submit khi chưa nhập mã vạch
-                    return false;
-                }
-            });
-            if (Koha.prefs.OnSiteCheckoutAutoCheck && onsite_checkout == "on") {
-                toggle_onsite_checkout();
-            }
-            $("#onsite_checkout").click(function () {
-                toggle_onsite_checkout();
-            });
-
-            if (HIGHHOLDS) {
-                if (!override_high_holds) {
-                    $("input[name=duedatespec]:hidden").val(HIGHHOLDS_returndate);
-                    if (duedatespec === "") {
-                        $("input[name=restoreduedatespec]:hidden").val("highholds_empty");
-                    } else {
-                        $("input[name=restoreduedatespec]:hidden").val(duedatespec);
-                    }
-                }
-
-                $("#override_high_holds_tmp").on("change", function () {
-                    if (this.checked) {
-                        $("input[name=duedatespec]:hidden").val("");
-                    }
-                });
-            }
-
-            // Handle checkout for fast cataloging
-            // Check the referrer to prevent csrf, fill and submit form
-            if (document.referrer.length) {
-                const referrerSplit = document.referrer.split(window.location.origin + "/cgi-bin/koha/cataloguing/additem.pl?");
-                if (referrerSplit[1] && referrerSplit[1].match(/frameworkcode=FA&circborrowernumber=/)) {
-                    let urlParams = new URLSearchParams(window.location.search);
-                    let barcode = urlParams.get("barcode");
-                    $("#barcode").val(barcode);
-                    $("#mainform").submit();
-                }
-            }
-            $("#cancellation-reason").comboBox({
-                displayProperty: "name",
-                placeholder: _("Select or type a reason"),
-                context: "modal",
+                table.find('tbody').append(rows);
             });
         });
     </script>
-    [% INCLUDE 'str/members-menu.inc' %]
-    [% Asset.js("js/members-menu.js") | $raw %]
-    <script src="[% interface | html %]/[% theme | html %]/js/checkouts.js?v=[% Koha.Preference('Version') | uri %]&t=[% USE date %][% date.format(date.now, '%Y%m%d%H%M%S') %]"></script>
-    [% Asset.js("js/tables/bookings.js") | $raw %]
-    [% Asset.js("js/recalls.js") | $raw %]
-    [% Asset.js("js/throttledButton.js") | $raw %]
 [% END %]
 
 [% INCLUDE 'intranet-bottom.inc' %]
-
-[% BLOCK circulation_rule_criteria %]
-    <ul>
-        <li>
-            Loại tài liệu:
-            [% IF rule.itemtype %]
-                [% ItemTypes.GetDescription( rule.itemtype ) | html %]
-            [% ELSE %]
-                <i>Tất cả các loại tài liệu</i>
-            [% END %]
-        </li>
-        <li>
-            Kiểu bạn đọc:
-            [% IF rule.categorycode %]
-                [% Categories.GetName( rule.categorycode ) | html %]
-            [% ELSE %]
-                <i>Tất cả các kiểu bạn đọc</i>
-            [% END %]
-        </li>
-        <li>
-            Thư viện:
-            [% IF rule.branchcode %]
-                [% Branches.GetName( rule.branchcode ) | html %]
-            [% ELSE %]
-                <i>Tất cả các thư viện</i>
-            [% END %]
-        </li>
-    </ul>
-[% END %]
