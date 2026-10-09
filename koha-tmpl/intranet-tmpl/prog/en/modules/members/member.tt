@@ -1455,11 +1455,16 @@ body#pat_member aside .patron_search_form {
                         <small class="text-muted">Hỗ trợ định dạng: <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code></small>
                     </div>
                     <div class="card-body p-3" style="background: #ffffff;">
-                        <!-- Dropzone kéo thả file -->
+                        <!-- Dropzone kéo thả & click chọn file -->
                         <div id="excel-drop-zone" class="p-4 text-center" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #fafbfc; cursor: pointer; transition: all 0.2s;">
-                            <i class="fa fa-cloud-upload fa-3x mb-2" style="color: #64748b;"></i>
-                            <div class="fw-bold text-dark mb-1" style="font-size:14px;">Kéo thả file Excel vào đây hoặc bấm để chọn file từ máy tính</div>
-                            <div class="text-muted small">Hỗ trợ danh sách sinh viên, học viên sau đại học, cán bộ giảng viên (nạp hàng loạt)</div>
+                            <i class="fa fa-cloud-upload fa-3x mb-2 text-primary" style="pointer-events: none;"></i>
+                            <div class="fw-bold text-dark mb-1" style="font-size: 14.5px; pointer-events: none;">Kéo thả file Excel vào đây hoặc bấm để chọn file từ máy tính</div>
+                            <div class="text-muted small mb-3" style="pointer-events: none;">Hỗ trợ danh sách sinh viên, học viên sau đại học, cán bộ giảng viên (nạp hàng loạt)</div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold px-3 py-1.5" id="btn-browse-excel" style="border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                    <i class="fa fa-folder-open-o me-1"></i> Chọn file từ máy tính
+                                </button>
+                            </div>
                             <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;" />
                         </div>
 
@@ -3056,22 +3061,51 @@ body#pat_member aside .patron_search_form {
                 showModal('modalSsoImportExcel');
             });
 
-            // Click vào dropzone
-            $('#excel-drop-zone').on('click', function () {
-                $('#excel-file-input').trigger('click');
+            function openExcelFileDialog() {
+                var input = document.getElementById('excel-file-input');
+                if (input) {
+                    input.value = '';
+                    input.click();
+                }
+            }
+
+            // Click vào bất kỳ vùng nào trong dropzone để mở hộp thoại chọn file từ máy tính
+            $('#excel-drop-zone').on('click', function (e) {
+                if (e.target && e.target.id === 'excel-file-input') return;
+                openExcelFileDialog();
+            });
+
+            // Click vào nút "Chọn file từ máy tính"
+            $('#btn-browse-excel').on('click', function (e) {
+                e.stopPropagation();
+                openExcelFileDialog();
+            });
+
+            // Hiệu ứng rê chuột (Hover)
+            $('#excel-drop-zone').on('mouseenter', function () {
+                $(this).css({ 'background': '#f0f7ff', 'border-color': '#2563eb' });
+            }).on('mouseleave', function () {
+                if (!$(this).hasClass('dragover-active')) {
+                    $(this).css({ 'background': '#fafbfc', 'border-color': '#cbd5e1' });
+                }
             });
 
             // Kéo thả file
-            $('#excel-drop-zone').on('dragover', function (e) {
+            $('#excel-drop-zone').on('dragover dragenter', function (e) {
                 e.preventDefault();
-                $(this).css({ 'background': '#f0fdf4', 'border-color': '#16a34a' });
+                e.stopPropagation();
+                $(this).addClass('dragover-active').css({ 'background': '#eff6ff', 'border-color': '#1d4ed8' });
             });
-            $('#excel-drop-zone').on('dragleave drop', function (e) {
+            $('#excel-drop-zone').on('dragleave dragend drop', function (e) {
                 e.preventDefault();
-                $(this).css({ 'background': '#ffffff', 'border-color': '#cbd5e1' });
+                e.stopPropagation();
+                $(this).removeClass('dragover-active').css({ 'background': '#fafbfc', 'border-color': '#cbd5e1' });
             });
             $('#excel-drop-zone').on('drop', function (e) {
-                const files = e.originalEvent.dataTransfer.files;
+                e.preventDefault();
+                e.stopPropagation();
+                const dt = e.originalEvent && e.originalEvent.dataTransfer;
+                const files = dt ? dt.files : null;
                 if (files && files.length > 0) {
                     processExcelFile(files[0]);
                 }
