@@ -40,8 +40,8 @@ my $op = $query->param('op') || 'view';
 
 # Kết nối cơ sở dữ liệu DRM (PostgreSQL 15)
 sub get_drm_dbh {
-    my $host = $ENV{DRM_DB_HOST} || 'ftu-drm-db';
-    my $port = $ENV{DRM_DB_PORT} || 5432;
+    my $host = $ENV{DRM_DB_HOST} || '10.2.0.228';
+    my $port = $ENV{DRM_DB_PORT} || 5435;
     my $dbname = $ENV{DRM_DB_NAME} || 'ftu_drm_db';
     my $user = $ENV{DRM_DB_USER} || 'drm_admin';
     my $pass = $ENV{DRM_DB_PASSWORD} || 'FtuDrmSecurePassword2026!';
@@ -129,7 +129,7 @@ sub get_patron_branch_map {
 
 # Kết nối cơ sở dữ liệu DSpace 7 (PostgreSQL 15)
 sub get_dspace_dbh {
-    my $dspace_host = $ENV{DSPACE_DB_HOST} || '10.2.0.226';
+    my $dspace_host = $ENV{DSPACE_DB_HOST} || '10.2.0.228';
     my $dspace_port = $ENV{DSPACE_DB_PORT} || 5434;
     my $dspace_name = $ENV{DSPACE_DB_NAME} || 'dspace';
     my $dspace_user = $ENV{DSPACE_DB_USER} || 'dspace';
@@ -310,23 +310,34 @@ sub fetch_report_data {
         if ($drm_dbh) {
             my $sql = qq{
                 SELECT 
-                    TO_CHAR(l.issued_at, 'YYYY-MM-DD') as access_date,
-                    COUNT(DISTINCT l.license_id) as total_sessions,
-                    COUNT(DISTINCT l.patron_id) as unique_users,
-                    COUNT(DISTINCT l.bitstream_uuid) as unique_docs,
-                    COUNT(DISTINCT dl.lending_id) as total_loans,
-                    COALESCE((
-                        SELECT COUNT(*) 
-                        FROM ftu_drm.drm_audit_logs al 
-                        WHERE al.event_type = 'VIEW_PAGE' 
-                          AND TO_CHAR(al.event_time, 'YYYY-MM-DD') = TO_CHAR(l.issued_at, 'YYYY-MM-DD')
-                    ), 0) as real_pageviews
-                FROM ftu_drm.drm_licenses l
-                LEFT JOIN ftu_drm.drm_digital_lending dl 
-                    ON l.patron_id = dl.patron_id AND TO_CHAR(l.issued_at, 'YYYY-MM-DD') = TO_CHAR(dl.checkout_time, 'YYYY-MM-DD')
-                WHERE l.issued_at >= ? AND l.issued_at <= ?
-                GROUP BY TO_CHAR(l.issued_at, 'YYYY-MM-DD')
-                ORDER BY access_date DESC
+                    sub.access_date,
+                    sub.total_sessions,
+                    sub.unique_users,
+                    sub.unique_docs,
+                    sub.total_loans,
+                    COALESCE(al.real_pageviews, 0) as real_pageviews
+                FROM (
+                    SELECT 
+                        TO_CHAR(l.issued_at, 'YYYY-MM-DD') as access_date,
+                        COUNT(DISTINCT l.license_id) as total_sessions,
+                        COUNT(DISTINCT l.patron_id) as unique_users,
+                        COUNT(DISTINCT l.bitstream_uuid) as unique_docs,
+                        COUNT(DISTINCT dl.lending_id) as total_loans
+                    FROM ftu_drm.drm_licenses l
+                    LEFT JOIN ftu_drm.drm_digital_lending dl 
+                        ON l.patron_id = dl.patron_id AND TO_CHAR(l.issued_at, 'YYYY-MM-DD') = TO_CHAR(dl.checkout_time, 'YYYY-MM-DD')
+                    WHERE l.issued_at >= ? AND l.issued_at <= ?
+                    GROUP BY TO_CHAR(l.issued_at, 'YYYY-MM-DD')
+                ) sub
+                LEFT JOIN (
+                    SELECT 
+                        TO_CHAR(event_time, 'YYYY-MM-DD') as log_date,
+                        COUNT(*) as real_pageviews
+                    FROM ftu_drm.drm_audit_logs
+                    WHERE event_type = 'VIEW_PAGE'
+                    GROUP BY TO_CHAR(event_time, 'YYYY-MM-DD')
+                ) al ON sub.access_date = al.log_date
+                ORDER BY sub.access_date DESC
             };
             my $sth = $drm_dbh->prepare($sql);
             $sth->execute($from_ts, $to_ts);
@@ -1533,13 +1544,13 @@ sub fetch_report_data {
 
             my $sql = qq{
                 SELECT 
-                    COALESCE(NULLIF(LOWER(TRIM(bi.language)), ''), 'vie') as lang_code,
+                    COALESCE(NULLIF(LOWER(TRIM(SUBSTRING(ExtractValue(bm.metadata, '//controlfield[\@tag="008"]'), 36, 3))), ''), 'vie') as lang_code,
                     COUNT(DISTINCT b.biblionumber) as title_count,
                     COUNT(i.itemnumber) as item_count,
                     SUM(COALESCE(i.price, 0)) as total_val
                 FROM items i
                 JOIN biblio b ON i.biblionumber = b.biblionumber
-                LEFT JOIN biblioitems bi ON i.biblioitemnumber = bi.biblioitemnumber
+                LEFT JOIN biblio_metadata bm ON b.biblionumber = bm.biblionumber
                 GROUP BY lang_code
                 ORDER BY item_count DESC, title_count DESC
             };
@@ -1870,16 +1881,16 @@ sub fetch_report_data {
             if ($has_portal_posts) {
                 my $sql = qq{
                     SELECT 
-                        post_id as id,
+                        id,
                         title,
-                        COALESCE(category_name, 'Tin tức & Thông báo') as cat_name,
+                        COALESCE(classification, post_type, 'Tin tức & Thông báo') as cat_name,
                         'Trang chủ OPAC' as location,
-                        DATE_FORMAT(COALESCE(published_at, created_at), '%d/%m/%Y') as pub_date,
-                        COALESCE(view_count, 0) as views,
-                        GREATEST(1, ROUND(COALESCE(view_count, 0) * 0.75)) as unique_readers,
-                        CASE WHEN is_published = 1 THEN 'Đang hiển thị' ELSE 'Bản nháp' END as status
+                        DATE_FORMAT(created_at, '%d/%m/%Y') as pub_date,
+                        COALESCE(views_count, 0) as views,
+                        GREATEST(1, ROUND(COALESCE(views_count, 0) * 0.75)) as unique_readers,
+                        CASE WHEN status = 'published' THEN 'Đang hiển thị' ELSE 'Bản nháp' END as status
                     FROM koha_portal_posts
-                    ORDER BY views DESC, post_id DESC
+                    ORDER BY views_count DESC, id DESC
                     LIMIT 50
                 };
                 my $sth = $koha_dbh->prepare($sql);
