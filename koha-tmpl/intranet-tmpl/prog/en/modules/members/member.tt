@@ -23,6 +23,7 @@
  [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
+    <script src="/intranet-tmpl/prog/js/xlsx.full.min.js"></script>
 </head>
 
 <body id="pat_member" class="pat">
@@ -756,6 +757,9 @@ body#pat_member aside .patron_search_form {
                         <button type="button" class="ftu-btn-primary" id="btn-open-add-sso" title="Thêm hồ sơ bạn đọc người học mới">
                             + Thêm bạn đọc SSO
                         </button>
+                        <button type="button" class="ftu-btn-secondary" id="btn-open-import-excel" title="Nạp danh sách bạn đọc từ file Excel">
+                            <i class="fa fa-file-excel-o" style="color:#16a34a;"></i> Nạp từ Excel
+                        </button>
                         <button type="button" class="ftu-btn-secondary" id="btn-refresh-sso" title="Tải lại dữ liệu từ Cổng SSO">
                             Làm mới
                         </button>
@@ -787,6 +791,9 @@ body#pat_member aside .patron_search_form {
                             Danh sách bạn đọc
                         </a>
                         [% END %]
+                        <button type="button" class="ftu-btn-secondary btn-koha-import-excel" title="Nạp danh sách bạn đọc từ file Excel">
+                            <i class="fa fa-file-excel-o" style="color:#16a34a;"></i> Nạp từ Excel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1361,6 +1368,97 @@ body#pat_member aside .patron_search_form {
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-sm btn-danger" id="btn-submit-reset-pwd" style="background: #990000; border-color: #990000;">Lưu mật khẩu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Nạp Danh sách Bạn đọc từ Excel (Đồng bộ OpenLDAP & Koha) -->
+<div class="modal fade" id="modalSsoImportExcel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header border-bottom py-3 px-4" style="background: #ffffff;">
+                <div class="d-flex align-items-center gap-3">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:8px; background:#ecfdf5; color:#16a34a; font-size:18px;">
+                        <i class="fa fa-file-excel-o"></i>
+                    </span>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Nạp danh sách bạn đọc từ file Excel</h5>
+                        <small class="text-muted">Tự động đồng bộ đồng thời vào Hệ thống Định danh tập trung (OpenLDAP / SSO) và CSDL Lưu thông Koha</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                <!-- Hướng dẫn & Tải file mẫu -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div>
+                        <div class="fw-semibold text-dark mb-1" style="font-size:13px;">
+                            <i class="fa fa-info-circle text-primary me-1"></i> Định dạng file hỗ trợ: <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>
+                        </div>
+                        <div class="text-muted" style="font-size:12px;">
+                            Hệ thống tự động nhận diện thông minh các cột: <strong>Mã bạn đọc (MSSV), Họ tên, Email, Mật khẩu, Loại bạn đọc, Khoa/Đơn vị, Khóa, Lớp, Ngày sinh, CCCD, Điện thoại, Địa chỉ, Hạn thẻ</strong>.
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-success fw-semibold" id="btn-download-excel-tpl">
+                        <i class="fa fa-download me-1"></i> Tải file Excel mẫu (.xlsx)
+                    </button>
+                </div>
+
+                <!-- Dropzone / Input file -->
+                <div id="excel-drop-zone" class="p-4 text-center mb-3" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #ffffff; cursor: pointer; transition: all 0.2s;">
+                    <i class="fa fa-cloud-upload fa-3x mb-2" style="color: #94a3b8;"></i>
+                    <div class="fw-bold text-dark mb-1" style="font-size:14px;">Kéo thả file Excel vào đây hoặc bấm để chọn file</div>
+                    <div class="text-muted small">Hỗ trợ danh sách sinh viên, học viên sau đại học, cán bộ giảng viên (hàng loạt)</div>
+                    <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;" />
+                </div>
+
+                <!-- Preview Panel -->
+                <div id="excel-preview-panel" style="display: none;">
+                    <!-- Thống kê phân tích -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 p-2 px-3" style="background:#f1f5f9; border-radius:6px; font-size:12.5px;">
+                        <div>
+                            <span>Tổng số dòng: <strong id="excel-total-count" class="text-dark">0</strong></span>
+                            <span class="mx-2 text-muted">|</span>
+                            <span>Hợp lệ: <strong id="excel-valid-count" class="text-success">0</strong></span>
+                            <span class="mx-2 text-muted">|</span>
+                            <span>Thiếu thông tin: <strong id="excel-invalid-count" class="text-danger">0</strong></span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none p-0" id="btn-clear-excel-data">
+                            <i class="fa fa-trash-o me-1"></i> Hủy chọn file này
+                        </button>
+                    </div>
+
+                    <!-- Bảng dữ liệu xem trước -->
+                    <div class="table-responsive" style="max-height: 340px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 40px; text-align:center;">STT</th>
+                                    <th>Mã bạn đọc</th>
+                                    <th>Họ và tên</th>
+                                    <th>Email</th>
+                                    <th>Loại bạn đọc</th>
+                                    <th>Khoa / Đơn vị</th>
+                                    <th>Khóa · Lớp</th>
+                                    <th>Hạn thẻ</th>
+                                    <th style="width: 90px; text-align:center;">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="excel-preview-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alert trạng thái / tiến trình -->
+                <div id="excel-import-alert" class="alert mt-3" style="display: none; font-size: 12.5px;"></div>
+            </div>
+            <div class="modal-footer border-top py-2 px-4 bg-light">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-sm btn-success fw-semibold" id="btn-submit-excel-import" disabled>
+                    <i class="fa fa-cloud-upload me-1"></i> Tiến hành nạp vào OpenLDAP & Koha
+                </button>
             </div>
         </div>
     </div>
@@ -2778,6 +2876,292 @@ body#pat_member aside .patron_search_form {
             });
         });
     })();
- </script>
+ 
+            // =========================================================================
+            // EXCEL BULK IMPORT HANDLER (SSO OPENLDAP & KOHA UNIFIED)
+            // =========================================================================
+            let excelParsedRows = [];
+
+            // Mở modal nạp Excel
+            $('#btn-open-import-excel, .btn-koha-import-excel').on('click', function () {
+                clearExcelImport();
+                $('#excel-import-alert').hide();
+                showModal('modalSsoImportExcel');
+            });
+
+            // Click vào dropzone
+            $('#excel-drop-zone').on('click', function () {
+                $('#excel-file-input').trigger('click');
+            });
+
+            // Kéo thả file
+            $('#excel-drop-zone').on('dragover', function (e) {
+                e.preventDefault();
+                $(this).css({ 'background': '#f0fdf4', 'border-color': '#16a34a' });
+            });
+            $('#excel-drop-zone').on('dragleave drop', function (e) {
+                e.preventDefault();
+                $(this).css({ 'background': '#ffffff', 'border-color': '#cbd5e1' });
+            });
+            $('#excel-drop-zone').on('drop', function (e) {
+                const files = e.originalEvent.dataTransfer.files;
+                if (files && files.length > 0) {
+                    processExcelFile(files[0]);
+                }
+            });
+
+            $('#excel-file-input').on('change', function () {
+                if (this.files && this.files.length > 0) {
+                    processExcelFile(this.files[0]);
+                }
+            });
+
+            function clearExcelImport() {
+                excelParsedRows = [];
+                $('#excel-file-input').val('');
+                $('#excel-preview-panel').hide();
+                $('#excel-drop-zone').show();
+                $('#btn-submit-excel-import').prop('disabled', true).html('<i class="fa fa-cloud-upload me-1"></i> Tiến hành nạp vào OpenLDAP & Koha');
+            }
+
+            $('#btn-clear-excel-data').on('click', function () {
+                clearExcelImport();
+            });
+
+            function formatExcelDate(cellVal) {
+                if (!cellVal) return '';
+                if (typeof cellVal === 'number') {
+                    const utc_days = Math.floor(cellVal - 25569);
+                    const utc_value = utc_days * 86400;
+                    const date_info = new Date(utc_value * 1000);
+                    const d = String(date_info.getUTCDate()).padStart(2, '0');
+                    const m = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+                    const y = date_info.getUTCFullYear();
+                    return `${d}/${m}/${y}`;
+                }
+                const str = String(cellVal).trim();
+                if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+                    const [y, m, d] = str.split('-');
+                    return `${d}/${m}/${y}`;
+                }
+                return str;
+            }
+
+            function processExcelFile(file) {
+                if (typeof XLSX === 'undefined') {
+                    alert('Thư viện xử lý Excel chưa sẵn sàng. Vui lòng tải lại trang!');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[firstSheetName];
+                        const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                        if (!rawRows || rawRows.length < 2) {
+                            alert('File Excel không có dữ liệu hoặc chỉ có dòng tiêu đề!');
+                            return;
+                        }
+
+                        const headers = rawRows[0].map(h => removeVietnameseTones(String(h || '').trim().toLowerCase()));
+                        const findCol = (keys) => headers.findIndex(h => keys.some(k => h.includes(k)));
+
+                        const colUid = findCol(['ma ban doc', 'mssv', 'so the', 'ma sinh vien', 'uid', 'cardnumber']) !== -1 
+                            ? findCol(['ma ban doc', 'mssv', 'so the', 'ma sinh vien', 'uid', 'cardnumber']) : 0;
+                        const colName = findCol(['ho va ten', 'ho ten', 'ten', 'fullname', 'name']) !== -1 
+                            ? findCol(['ho va ten', 'ho ten', 'ten', 'fullname', 'name']) : 1;
+                        const colEmail = findCol(['email', 'thu dien tu', 'mail']);
+                        const colPass = findCol(['mat khau', 'password', 'pass']);
+                        const colRole = findCol(['loai ban doc', 'vai tro', 'role', 'doi tuong']);
+                        const colDept = findCol(['khoa', 'don vi', 'department', 'khoa / don vi', 'nganh']);
+                        const colCohort = findCol(['khoa hoc', 'khoa', 'cohort']);
+                        const colClass = findCol(['lop', 'studentclass', 'class', 'lop sinh hoat']);
+                        const colDob = findCol(['ngay sinh', 'dateofbirth', 'dob', 'sinh ngay']);
+                        const colGender = findCol(['gioi tinh', 'gender', 'sex']);
+                        const colCccd = findCol(['cccd', 'so cccd', 'cmnd', 'dinh danh']);
+                        const colPhone = findCol(['dien thoai', 'sdt', 'phone', 'telephone', 'mobile']);
+                        const colAddress = findCol(['dia chi', 'address', 'noi o']);
+                        const colExpiry = findCol(['ngay het han', 'han the', 'expirydate', 'het han']);
+
+                        const parsed = [];
+                        for (let i = 1; i < rawRows.length; i++) {
+                            const row = rawRows[i];
+                            if (!row || !row.length || !row.some(c => c !== undefined && c !== '')) continue;
+
+                            const uid = String(row[colUid] || '').trim();
+                            const fullName = String(row[colName] || '').trim();
+                            let email = colEmail !== -1 ? String(row[colEmail] || '').trim() : '';
+                            const password = colPass !== -1 ? String(row[colPass] || '123456').trim() : '123456';
+                            let role = colRole !== -1 ? String(row[colRole] || 'STUDENT').trim().toUpperCase() : 'STUDENT';
+                            const department = colDept !== -1 ? String(row[colDept] || 'Trường ĐH Ngoại Thương').trim() : 'Trường ĐH Ngoại Thương';
+                            const cohort = colCohort !== -1 ? String(row[colCohort] || '').trim() : '';
+                            const studentClass = colClass !== -1 ? String(row[colClass] || '').trim() : '';
+                            const dateOfBirth = colDob !== -1 ? formatExcelDate(row[colDob]) : '15/05/2004';
+                            const gender = colGender !== -1 ? String(row[colGender] || 'Nam').trim() : 'Nam';
+                            const cccd = colCccd !== -1 ? String(row[colCccd] || '').trim() : '';
+                            const phone = colPhone !== -1 ? String(row[colPhone] || '').trim() : '';
+                            const address = colAddress !== -1 ? String(row[colAddress] || '').trim() : '';
+                            const expiryDate = colExpiry !== -1 ? formatExcelDate(row[colExpiry]) : '01/10/2027';
+
+                            if (!email && uid) email = `${uid}@ftu.edu.vn`;
+                            const rNorm = removeVietnameseTones(role);
+                            if (rNorm.includes('sau dai hoc') || rNorm.includes('ncs') || rNorm.includes('thac si') || rNorm.includes('postgrad')) {
+                                role = 'POSTGRAD';
+                            } else if (rNorm.includes('giang vien') || rNorm.includes('can bo') || rNorm.includes('faculty')) {
+                                role = 'FACULTY';
+                            } else if (rNorm.includes('admin') || rNorm.includes('thu thu')) {
+                                role = 'ADMIN';
+                            } else {
+                                role = 'STUDENT';
+                            }
+
+                            const isValid = Boolean(uid && fullName);
+                            parsed.push({
+                                uid, fullName, email, password, role,
+                                department, cohort, studentClass, dateOfBirth,
+                                gender, cccd, phone, address, expiryDate,
+                                status: 'ACTIVE', isValid
+                            });
+                        }
+
+                        excelParsedRows = parsed;
+                        renderExcelPreview();
+                    } catch (err) {
+                        alert('Lỗi khi đọc file Excel: ' + err.message);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            function renderExcelPreview() {
+                const validRows = excelParsedRows.filter(r => r.isValid);
+                const invalidRows = excelParsedRows.filter(r => !r.isValid);
+
+                $('#excel-total-count').text(excelParsedRows.length);
+                $('#excel-valid-count').text(validRows.length);
+                $('#excel-invalid-count').text(invalidRows.length);
+
+                if (excelParsedRows.length === 0) {
+                    $('#excel-preview-panel').hide();
+                    $('#btn-submit-excel-import').prop('disabled', true);
+                    return;
+                }
+
+                $('#excel-drop-zone').hide();
+                $('#excel-preview-panel').show();
+
+                let html = '';
+                excelParsedRows.forEach((u, idx) => {
+                    const roleLabel = u.role === 'STUDENT' ? 'Sinh viên' : (u.role === 'POSTGRAD' ? 'Sau ĐH' : (u.role === 'FACULTY' ? 'Giảng viên' : u.role));
+                    const statusBadge = u.isValid 
+                        ? '<span class="badge bg-success">Hợp lệ</span>' 
+                        : '<span class="badge bg-danger">Thiếu mã/tên</span>';
+
+                    html += `
+                        <tr style="${!u.isValid ? 'background: #fef2f2;' : ''}">
+                            <td style="text-align:center;">${idx + 1}</td>
+                            <td><code class="fw-bold text-dark">${u.uid || 'Thiếu'}</code></td>
+                            <td><strong>${u.fullName || 'Thiếu'}</strong></td>
+                            <td>${u.email}</td>
+                            <td><span class="badge bg-light text-dark border">${roleLabel}</span></td>
+                            <td>${u.department || '-'}</td>
+                            <td>${[u.cohort, u.studentClass].filter(Boolean).join(' · ') || '-'}</td>
+                            <td>${u.expiryDate || 'Mặc định'}</td>
+                            <td style="text-align:center;">${statusBadge}</td>
+                        </tr>
+                    `;
+                });
+
+                $('#excel-preview-tbody').html(html);
+
+                if (validRows.length > 0) {
+                    $('#btn-submit-excel-import')
+                        .prop('disabled', false)
+                        .html(`<i class="fa fa-cloud-upload me-1"></i> Tiến hành nạp (${validRows.length} bạn đọc) vào OpenLDAP & Koha`);
+                } else {
+                    $('#btn-submit-excel-import').prop('disabled', true).html('Không có dữ liệu hợp lệ');
+                }
+            }
+
+            function downloadExcelTemplate() {
+                if (typeof XLSX === 'undefined') {
+                    alert('Thư viện Excel chưa sẵn sàng!');
+                    return;
+                }
+                const headers = [
+                    "Mã bạn đọc", "Họ và tên", "Email", "Mật khẩu", "Loại bạn đọc",
+                    "Khoa / Đơn vị", "Khóa", "Lớp", "Ngày sinh", "Giới tính",
+                    "Số CCCD", "Điện thoại", "Địa chỉ", "Ngày hết hạn"
+                ];
+                const samples = [
+                    ["221391", "Trần Minh Quân", "221391@ftu.edu.vn", "123456", "Sinh viên", "Khoa Kinh tế Quốc tế", "K62", "K62-KTQT1", "15/05/2004", "Nam", "001204015678", "0912345678", "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM", "30/06/2028"],
+                    ["221392", "Phạm Thu Hương", "221392@ftu.edu.vn", "123456", "Sinh viên", "Khoa Quản trị Kinh doanh", "K62", "K62-QTH1", "20/09/2004", "Nữ", "001204018899", "0987654321", "Số 15, Đường D5, P. Thạnh Mỹ Tây, TP. HCM", "30/06/2028"],
+                    ["221393", "Lê Hoàng Long", "221393@ftu.edu.vn", "123456", "Sau đại học", "Khoa Tài chính Ngân hàng", "K61", "K61-TCNH", "10/03/2000", "Nam", "001200014523", "0903123456", "Quận 1, TP. Hồ Chí Minh", "31/12/2027"]
+                ];
+
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...samples]);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Mau_Ban_Doc_FTU");
+                XLSX.writeFile(wb, "Mau_Danh_Sach_Ban_Doc_FTU_SSO.xlsx");
+            }
+
+            $('#btn-download-excel-tpl').on('click', function () {
+                downloadExcelTemplate();
+            });
+
+            $('#btn-submit-excel-import').on('click', async function () {
+                const validRows = excelParsedRows.filter(r => r.isValid);
+                if (!validRows.length) {
+                    alert('Không có dữ liệu hợp lệ để nạp!');
+                    return;
+                }
+
+                if (!confirm(`Xác nhận nạp ${validRows.length} bạn đọc vào OpenLDAP và CSDL Koha?`)) return;
+
+                const btn = $(this);
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i> Đang nạp vào OpenLDAP & Koha...');
+                $('#excel-import-alert').hide();
+
+                try {
+                    const res = await ssoFetch(ssoBaseUrl + '/api/v1/sso/users/bulk-import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ users: validRows })
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        $('#excel-import-alert')
+                            .removeClass('alert-danger')
+                            .addClass('alert-success')
+                            .html(`<strong><i class="fa fa-check-circle me-1"></i>Thành công!</strong> ${json.message}<br><small>Đã đồng bộ OpenLDAP: ${json.ldapSynced || validRows.length}, Koha: ${json.kohaSynced || validRows.length} bản ghi.</small>`)
+                            .show();
+
+                        btn.html('<i class="fa fa-check me-1"></i> Đã hoàn thành');
+                        setTimeout(async function () {
+                            hideModal('modalSsoImportExcel');
+                            await loadSsoLearners();
+                        }, 1800);
+                    } else {
+                        $('#excel-import-alert')
+                            .removeClass('alert-success')
+                            .addClass('alert-danger')
+                            .html(`<strong><i class="fa fa-exclamation-triangle me-1"></i>Lỗi nạp dữ liệu:</strong> ${json.error || 'Thao tác không thành công'}`)
+                            .show();
+                        btn.prop('disabled', false).html('<i class="fa fa-cloud-upload me-1"></i> Thử lại');
+                    }
+                } catch (err) {
+                    $('#excel-import-alert')
+                        .removeClass('alert-success')
+                        .addClass('alert-danger')
+                        .html(`<strong><i class="fa fa-exclamation-triangle me-1"></i>Lỗi kết nối:</strong> ${err.message}`)
+                        .show();
+                    btn.prop('disabled', false).html('<i class="fa fa-cloud-upload me-1"></i> Thử lại');
+                }
+            });
+
+</script>
 [% END %]
 [% INCLUDE 'intranet-bottom.inc' %]
