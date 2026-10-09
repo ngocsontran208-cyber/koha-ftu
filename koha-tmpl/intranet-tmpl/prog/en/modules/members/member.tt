@@ -2519,6 +2519,8 @@ body#pat_member aside .patron_search_form {
                 $('.modal-backdrop').remove();
                 $('body').removeClass('modal-open');
             }
+            window.showModal = showModal;
+            window.hideModal = hideModal;
 
             // Đóng modal khi bấm các nút đóng
             $(document).on('click', '[data-bs-dismiss="modal"]', function () {
@@ -2707,7 +2709,11 @@ body#pat_member aside .patron_search_form {
             });
 
             // Mở modal Thêm bạn đọc SSO mới
-            $('#btn-opt-add-manual, #btn-open-add-sso').on('click', function () {
+            $(document).on('click', '#btn-opt-add-manual, #btn-open-add-sso', function (e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
                 $('#form-sso-add-patron')[0].reset();
                 $('#add-sso-role').val('STUDENT');
                 $('#add-sso-issuedate').val('01/10/2026');
@@ -2985,16 +2991,18 @@ body#pat_member aside .patron_search_form {
                     btn.prop('disabled', false).text('Lưu mật khẩu');
                 }
             });
-        });
-    })();
- 
+
             // =========================================================================
             // EXCEL BULK IMPORT HANDLER (SSO OPENLDAP & KOHA UNIFIED)
             // =========================================================================
             let excelParsedRows = [];
 
-            // Mở modal nạp Excel
-            $('#btn-opt-add-excel, #btn-open-import-excel, .btn-koha-import-excel').on('click', function () {
+            // Mở modal nạp Excel (Event delegation đảm bảo luôn nhận sự kiện từ dropdown)
+            $(document).on('click', '#btn-opt-add-excel, #btn-open-import-excel, .btn-koha-import-excel', function (e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
                 clearExcelImport();
                 $('#excel-import-alert').hide();
                 showModal('modalSsoImportExcel');
@@ -3273,6 +3281,8 @@ body#pat_member aside .patron_search_form {
                 }
             });
 
+        });
+    })();
 </script>
 [% END %]
 [% INCLUDE 'intranet-bottom.inc' %]
