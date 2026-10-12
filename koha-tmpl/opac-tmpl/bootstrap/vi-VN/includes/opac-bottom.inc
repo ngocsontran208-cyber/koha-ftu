@@ -523,6 +523,13 @@
     var kohaUser = '[% loggedinusername | html %]';
     if (!kohaUser) return;
 
+    // Thiết lập cookie chia sẻ cấp domain để DSpace và các phân hệ nhận diện được bạn đọc ngay lập tức
+    document.cookie = "ftu_sso_user=" + encodeURIComponent(kohaUser) + "; Path=/; Max-Age=86400; SameSite=Lax";
+    try {
+        sessionStorage.removeItem("ftu_just_logged_out");
+        sessionStorage.removeItem("ftu_koha_sso_bounced");
+    } catch(e) {}
+
     var ssoHost = '[% FTU_BRAND.link_sso %]' || '/sso';
     ssoHost = ssoHost.replace(/\/+$/, '');
     var ssoEndpoint = ssoHost.endsWith('/sso') ? (ssoHost + '/koha-to-dspace') : (ssoHost + '/sso/koha-to-dspace');
@@ -572,6 +579,61 @@
             }
         }
     });
+
+    // Bắt sự kiện Đăng xuất (Single Logout - SLO)
+    $(document).on('click', 'a.logout, a[href*="/opac/logout"], #logout', function() {
+        try {
+            sessionStorage.setItem('ftu_just_logged_out', '1');
+            document.cookie = 'dsAuthInfo=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+            document.cookie = 'ftu_sso_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+            document.cookie = 'sso_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+            document.cookie = 'ftu_sso_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+            if (window.fetch) {
+                fetch('/sso/logout?mode=json', { credentials: 'include' }).catch(function(){});
+            }
+        } catch(e) {}
+    });
+})();
+</script>
+[% ELSE %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+(function() {
+    var cookies = document.cookie || '';
+    var hasDsAuth = cookies.indexOf('dsAuthInfo=') !== -1;
+    var userMatch = cookies.match(/(?:ftu_sso_user|sso_user)=([^;]+)/);
+    var ftuUser = userMatch ? decodeURIComponent(userMatch[1]).trim() : '';
+    var hasSso = hasDsAuth || !!ftuUser || cookies.indexOf('sso_token=') !== -1;
+
+    // Tránh redirect loop nếu người dùng vừa bấm Đăng xuất
+    var isLoggingOut = window.location.pathname.indexOf('/logout') !== -1 || 
+                       window.location.search.indexOf('logout') !== -1;
+    var justLoggedOut = false;
+    try {
+        justLoggedOut = !!sessionStorage.getItem('ftu_just_logged_out');
+    } catch(e) {}
+
+    if (isLoggingOut || justLoggedOut) {
+        return;
+    }
+
+    if (hasSso) {
+        var bounced = false;
+        try {
+            bounced = !!sessionStorage.getItem('ftu_koha_sso_bounced');
+        } catch(e) {}
+
+        if (!bounced) {
+            try {
+                sessionStorage.setItem('ftu_koha_sso_bounced', '1');
+            } catch(e) {}
+            var curTarget = window.location.pathname + window.location.search;
+            var ssoBridge = '/sso/dspace-to-koha?target=' + encodeURIComponent(curTarget);
+            if (ftuUser) {
+                ssoBridge += '&user=' + encodeURIComponent(ftuUser);
+            }
+            window.location.replace(ssoBridge);
+        }
+    }
 })();
 </script>
 [% END %]
