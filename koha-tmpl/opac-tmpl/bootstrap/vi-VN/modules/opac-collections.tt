@@ -199,6 +199,78 @@
         gap: 4px;
         box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
     }
+    .ftu-bst-badge-sub {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+    .ftu-bst-sub-box {
+        margin-top: 12px;
+        margin-bottom: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 12px;
+    }
+    .ftu-bst-sub-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ftu-bst-sub-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .ftu-sub-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #1e293b;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+    }
+    .ftu-sub-chip:hover {
+        background: #b91c1c;
+        border-color: #b91c1c;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(185, 28, 28, 0.25);
+    }
+    .ftu-sub-chip .chip-count {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .ftu-sub-chip:hover .chip-count {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+    }
     .ftu-bst-badge-code {
         position: absolute;
         bottom: 12px;
@@ -355,28 +427,63 @@
                 <div class="ftu-bst-grid" id="bstGrid">
                     [% IF collections.size > 0 %]
                         [% FOREACH col IN collections %]
-                            <div class="ftu-bst-card" data-featured="[% col.is_featured | html %]" data-code="[% col.code | lower | html %]" data-title="[% col.title | lower | html %]" data-desc="[% col.description | lower | html %]">
+                            <div class="ftu-bst-card" data-featured="[% col.is_featured | html %]" data-code="[% col.code | lower | html %]" data-title="[% col.title | lower | html %]" data-desc="[% col.description | lower | html %]" data-children="[% col.children_search_terms | lower | html %]">
                                 <div class="ftu-bst-thumb-wrap">
                                     <img src="[% col.image_url | html %]" alt="[% col.title | html %]" class="ftu-bst-thumb" loading="eager" />
                                     <div class="ftu-bst-badge-count">
                                         <i class="fa fa-book" aria-hidden="true"></i>
-                                        <span>[% col.item_count | html %] tài liệu</span>
+                                        <span>[% col.total_item_count | html %] tài liệu</span>
                                     </div>
-                                    [% IF col.is_featured %]
-                                        <div class="ftu-bst-badge-featured">
-                                            <i class="fa fa-star" aria-hidden="true"></i>
-                                            <span>Nổi bật</span>
+                                    [% IF col.has_children %]
+                                        <div class="ftu-bst-badge-sub">
+                                            <i class="fa fa-folder-open" aria-hidden="true"></i>
+                                            <span>[% col.children.size %] BST con</span>
                                         </div>
+                                        [% IF col.is_featured %]
+                                            <div class="ftu-bst-badge-featured" style="right: auto; left: 12px; top: 48px;">
+                                                <i class="fa fa-star" aria-hidden="true"></i>
+                                                <span>Nổi bật</span>
+                                            </div>
+                                        [% END %]
+                                    [% ELSE %]
+                                        [% IF col.is_featured %]
+                                            <div class="ftu-bst-badge-featured">
+                                                <i class="fa fa-star" aria-hidden="true"></i>
+                                                <span>Nổi bật</span>
+                                            </div>
+                                        [% END %]
                                     [% END %]
                                     <div class="ftu-bst-badge-code">[% col.code | html %]</div>
                                 </div>
                                 <div class="ftu-bst-body">
                                     <h3 class="ftu-bst-name">[% col.title | html %]</h3>
                                     <p class="ftu-bst-desc">[% col.description | html %]</p>
-                                    <a href="/cgi-bin/koha/opac-search.pl?limit=mc-ccode:[% col.code | uri %]" class="ftu-bst-link">
-                                        <span>Khám phá bộ sưu tập</span>
-                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                                    </a>
+                                    
+                                    [% IF col.has_children %]
+                                        <div class="ftu-bst-sub-box">
+                                            <div class="ftu-bst-sub-label">
+                                                <i class="fa fa-sitemap" style="color: #2563eb;" aria-hidden="true"></i>
+                                                <span>Các khóa / BST trực thuộc:</span>
+                                            </div>
+                                            <div class="ftu-bst-sub-chips">
+                                                [% FOREACH child IN col.children %]
+                                                    <a href="/cgi-bin/koha/opac-search.pl?limit=mc-ccode:[% child.code | uri %]" class="ftu-sub-chip" title="Khám phá [% child.title | html %]">
+                                                        <span>[% child.title | html %]</span>
+                                                        <span class="chip-count">[% child.item_count | html %]</span>
+                                                    </a>
+                                                [% END %]
+                                            </div>
+                                        </div>
+                                        <a href="/cgi-bin/koha/opac-search.pl?[% col.combined_search_url %]" class="ftu-bst-link">
+                                            <span>Khám phá toàn bộ [% col.total_item_count %] tài liệu</span>
+                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                        </a>
+                                    [% ELSE %]
+                                        <a href="/cgi-bin/koha/opac-search.pl?limit=mc-ccode:[% col.code | uri %]" class="ftu-bst-link">
+                                            <span>Khám phá bộ sưu tập</span>
+                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                        </a>
+                                    [% END %]
                                 </div>
                             </div>
                         [% END %]
@@ -419,9 +526,10 @@
                 var title = ($card.data("title") || "").toString();
                 var desc = ($card.data("desc") || "").toString();
                 var code = ($card.data("code") || "").toString();
+                var children = ($card.data("children") || "").toString();
                 var isFeatured = ($card.data("featured") == 1);
 
-                var matchesKeyword = !keyword || title.indexOf(keyword) !== -1 || desc.indexOf(keyword) !== -1 || code.indexOf(keyword) !== -1;
+                var matchesKeyword = !keyword || title.indexOf(keyword) !== -1 || desc.indexOf(keyword) !== -1 || code.indexOf(keyword) !== -1 || children.indexOf(keyword) !== -1;
                 var matchesFilter = (currentFilter === "all") || (currentFilter === "featured" && isFeatured);
 
                 if (matchesKeyword && matchesFilter) {

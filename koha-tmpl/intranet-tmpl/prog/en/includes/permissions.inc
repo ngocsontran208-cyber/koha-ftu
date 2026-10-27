@@ -504,6 +504,9 @@
     [%- CASE 'portal_footer' -%]
         <span class="sub_permission portal_footer_subpermission"> Manage footer copyright, contacts and social links </span>
         <span class="permissioncode">([% name | html %])</span>
+    [%- CASE 'portal_review' -%]
+        <span class="sub_permission portal_review_subpermission"> Write and manage book introductions (librarians, readers) </span>
+        <span class="permissioncode">([% name | html %])</span>
     [%# FTULIB: Audit logs & security permissions %]
     [%- CASE 'audit_logs' -%]
         <span class="sub_permission audit_logs_subpermission"> View system audit logs and security monitoring dashboard </span>

@@ -16,6 +16,8 @@ use C4::Auth   qw( get_template_and_user );
 use C4::Context;
 use C4::Output qw( output_html_with_http_headers );
 
+use URI::Escape qw( uri_escape_utf8 );
+
 my $query = CGI->new;
 my $dbh   = C4::Context->dbh;
 
@@ -28,10 +30,13 @@ eval {
             image_url VARCHAR(500) NULL,
             is_featured TINYINT(1) DEFAULT 1,
             sort_order INT(11) DEFAULT 99,
+            parent_ccode VARCHAR(80) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_parent_ccode (parent_ccode)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+    $dbh->do("ALTER TABLE koha_collection_meta ADD COLUMN IF NOT EXISTS parent_ccode VARCHAR(80) DEFAULT NULL AFTER sort_order");
 };
 
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
@@ -56,6 +61,7 @@ my $sql = "
         COALESCE(m.image_url, av.imageurl, '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg') AS image_url,
         COALESCE(m.is_featured, 1) AS is_featured,
         COALESCE(m.sort_order, 99) AS sort_order,
+        COALESCE(m.parent_ccode, '') AS parent_ccode,
         COALESCE(item_stats.item_count, 0) AS item_count,
         COALESCE(item_stats.biblio_count, 0) AS biblio_count
     FROM authorised_values av
@@ -85,18 +91,66 @@ $sql .= " ORDER BY COALESCE(m.sort_order, 99) ASC, av.lib ASC";
 my $sth = $dbh->prepare($sql);
 $sth->execute(@params);
 
-my @collections;
+my @all_collections;
+my %by_code;
 while ( my $row = $sth->fetchrow_hashref ) {
-    push @collections, $row;
+    $row->{children} = [];
+    $by_code{$row->{code}} = $row;
+    push @all_collections, $row;
 }
 
-# Count totals for filter tabs
-my ($count_all) = $dbh->selectrow_array("SELECT COUNT(*) FROM authorised_values WHERE category = 'CCODE'");
-my ($count_feat) = $dbh->selectrow_array("
-    SELECT COUNT(*) FROM authorised_values av 
-    LEFT JOIN koha_collection_meta m ON av.authorised_value = m.ccode 
-    WHERE av.category = 'CCODE' AND COALESCE(m.is_featured, 1) = 1
-");
+# Attach children collections to their parent
+for my $col (@all_collections) {
+    if ( $col->{parent_ccode} && exists $by_code{$col->{parent_ccode}} ) {
+        push @{ $by_code{$col->{parent_ccode}}->{children} }, $col;
+        $col->{is_child} = 1;
+    } else {
+        $col->{is_child} = 0;
+    }
+}
+
+# Build top-level collections array
+my @collections;
+for my $col (@all_collections) {
+    # Skip child collections at top-level grid unless user is searching explicitly
+    if ( $col->{is_child} && length($search_q) == 0 ) {
+        next;
+    }
+
+    my $children = $col->{children} || [];
+    if ( @$children ) {
+        $col->{has_children} = 1;
+        $col->{children_count} = scalar(@$children);
+        
+        my $total_items = $col->{item_count} || 0;
+        my @child_titles;
+        for my $child (@$children) {
+            $total_items += ($child->{item_count} || 0);
+            push @child_titles, $child->{title};
+        }
+        $col->{total_item_count} = $total_items;
+        $col->{children_search_terms} = join(' ', @child_titles);
+
+        # Build combined search URL
+        my @all_codes = ( $col->{code}, map { $_->{code} } @$children );
+        $col->{combined_search_url} = join('&amp;', map { "limit=mc-ccode:" . uri_escape_utf8($_) } @all_codes);
+    } else {
+        $col->{has_children} = 0;
+        $col->{children_count} = 0;
+        $col->{total_item_count} = $col->{item_count} || 0;
+        $col->{children_search_terms} = '';
+        $col->{combined_search_url} = "limit=mc-ccode:" . uri_escape_utf8($col->{code});
+    }
+
+    push @collections, $col;
+}
+
+# Count totals for filter tabs (based on top-level collections)
+my $count_all = scalar(@collections);
+my $count_feat = 0;
+for my $c (@collections) {
+    $count_feat++ if $c->{is_featured};
+}
 
 # Check if public virtual shelves exist
 my $sth_shelves = $dbh->prepare("
@@ -116,8 +170,8 @@ while ( my $sh = $sth_shelves->fetchrow_hashref ) {
 $template->param(
     collections       => \@collections,
     collections_count => scalar(@collections),
-    count_all         => $count_all || scalar(@collections),
-    count_featured    => $count_feat || 0,
+    count_all         => $count_all,
+    count_featured    => $count_feat,
     public_shelves    => \@public_shelves,
     shelves_count     => scalar(@public_shelves),
     filter_type       => $filter_type,

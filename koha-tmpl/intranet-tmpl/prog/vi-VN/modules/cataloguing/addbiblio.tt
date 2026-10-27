@@ -918,23 +918,40 @@ body#cat_addbiblio h1:not(.ftu-clean-title) {
             "Instruction": "Hướng dẫn thực hiện"
         };
 
+        function ftuCleanLabel(txt) {
+            if (!txt) return txt;
+            var s = txt.trim();
+            while (/^Trường\s+\d{3}\s*\(/i.test(s) && s.slice(-1) === ")") {
+                s = s.replace(/^Trường\s+\d{3}\s*\(/i, "").slice(0, -1).trim();
+            }
+            if (ftu_marc_dict[s]) {
+                s = ftu_marc_dict[s];
+            }
+            return s;
+        }
+
         function ftuTranslateMARC() {
             $(".expandfield").each(function() {
                 var txt = $(this).text().trim();
-                if (ftu_marc_dict[txt]) {
-                    $(this).text(ftu_marc_dict[txt]);
+                var cleaned = ftuCleanLabel(txt);
+                if (cleaned !== txt) {
+                    $(this).text(cleaned);
                 }
             });
             $(".labelsubfield").each(function() {
                 var txt = $(this).text().trim();
-                if (ftu_marc_dict[txt]) {
-                    $(this).text(ftu_marc_dict[txt]);
+                var cleaned = ftuCleanLabel(txt);
+                if (cleaned !== txt) {
+                    $(this).text(cleaned);
                 }
             });
             $(".tagnum").each(function() {
                 var title = $(this).attr("title");
-                if (title && ftu_marc_dict[title]) {
-                    $(this).attr("title", ftu_marc_dict[title]);
+                if (title) {
+                    var cleaned = ftuCleanLabel(title);
+                    if (cleaned !== title) {
+                        $(this).attr("title", cleaned);
+                    }
                 }
             });
 

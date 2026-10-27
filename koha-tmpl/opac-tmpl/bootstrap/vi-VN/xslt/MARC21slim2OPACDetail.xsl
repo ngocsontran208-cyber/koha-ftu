@@ -194,7 +194,7 @@
 
  <xsl:if test="$DisplayOPACiconsXSLT!='0'">
  <xsl:if test="$materialTypeCode!=''">
- <span class="results_summary type"><span class="label">Material type: </span>
+ <span class="results_summary type"><span class="label">Loại tài liệu: </span>
  <xsl:element name="img">
  <xsl:attribute name="src">/opac-tmpl/lib/famfamfam/<xsl:value-of select="$materialTypeCode"/>.png</xsl:attribute>
  <xsl:attribute name="alt"></xsl:attribute>
@@ -411,7 +411,7 @@
  <xsl:with-param name="basetags">260,264</xsl:with-param>
  <xsl:with-param name="codes">abcg</xsl:with-param>
  <xsl:with-param name="class">results_summary publisher</xsl:with-param>
- <xsl:with-param name="label">Publication details: </xsl:with-param>
+ <xsl:with-param name="label">Thông tin xuất bản: </xsl:with-param>
  </xsl:call-template>
  </xsl:if>
 
@@ -423,7 +423,7 @@
  </xsl:call-template>
  </xsl:when>
  <xsl:when test="marc:datafield[@tag=260]">
- <span class="results_summary publisher"><span class="label">Publication details: </span>
+ <span class="results_summary publisher"><span class="label">Thông tin xuất bản: </span>
  <xsl:for-each select="marc:datafield[@tag=260]">
  <xsl:for-each select="marc:subfield">
  <xsl:if test="@code='a'">
@@ -1979,9 +1979,9 @@
  <xsl:choose>
  <xsl:when test="position()&gt;1"/>
  <!-- #13383 -->
- <xsl:when test="@tag&lt;700"><span class="byAuthor">Liệt kê theo: </span></xsl:when>
+ <xsl:when test="@tag&lt;700"><span class="byAuthor">Tác giả: </span></xsl:when>
  <!--#13382 Changed Additional author to contributor -->
- <xsl:otherwise>Contributor(s): </xsl:otherwise>
+ <xsl:otherwise><span class="byAuthor">Người đóng góp: </span></xsl:otherwise>
  </xsl:choose>
  </xsl:for-each>
  <ul class="resource_list">

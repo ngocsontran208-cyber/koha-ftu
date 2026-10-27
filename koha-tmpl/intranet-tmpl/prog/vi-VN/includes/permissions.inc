@@ -504,6 +504,9 @@
  [%- CASE 'portal_footer' -%]
  <span class="sub_permission portal_footer_subpermission"> Quản lý thông tin liên hệ & bản quyền chân trang </span>
  <span class="permissioncode">([% name | html %])</span>
+ [%- CASE 'portal_review' -%]
+ <span class="sub_permission portal_review_subpermission"> Viết và quản lý Lời giới thiệu sách (thủ thư, bạn đọc) </span>
+ <span class="permissioncode">([% name | html %])</span>
  [%# FTULIB: Phân hệ Nhật ký Kiểm toán & Giám sát An ninh %]
  [%- CASE 'audit_logs' -%]
  <span class="sub_permission audit_logs_subpermission"> Xem nhật ký kiểm toán hệ thống & giám sát an ninh </span>

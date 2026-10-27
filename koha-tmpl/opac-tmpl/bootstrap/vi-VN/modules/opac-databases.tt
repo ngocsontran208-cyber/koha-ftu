@@ -228,21 +228,50 @@
         line-height: 1.35;
         margin-bottom: 0.35rem;
     }
+    .db-title-link {
+        color: #0f172a;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .db-title-link:hover {
+        color: #0284c7;
+        text-decoration: underline;
+    }
+    .db-title-link i {
+        font-size: 0.78rem;
+        color: #64748b;
+        transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .db-title-link:hover i {
+        color: #0284c7;
+        transform: translate(1px, -1px);
+    }
     .db-excerpt {
         color: #475569;
-        font-size: 0.88rem;
-        line-height: 1.45;
-        margin-bottom: 0.4rem;
+        font-size: 0.86rem;
+        line-height: 1.4;
+        margin-bottom: 0.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     .db-instruction {
-        color: #334155;
-        font-size: 0.85rem;
+        color: #64748b;
+        font-size: 0.8rem;
         background: #f8fafc;
-        border-left: 3px solid #94a3b8;
-        padding: 0.35rem 0.65rem;
+        border-left: 2px solid #cbd5e1;
+        padding: 0.2rem 0.55rem;
         border-radius: 0 4px 4px 0;
-        margin-top: 0.4rem;
-        line-height: 1.4;
+        margin-top: 0.25rem;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     /* Subdued Classification Badges */
@@ -817,7 +846,7 @@
 
                 <div class="db-search-box">
                     <i class="fa fa-search db-search-icon" aria-hidden="true"></i>
-                    <input type="text" id="db-search-input" class="db-search-input" placeholder="Tìm kiếm theo tên CSDL, từ khóa..." value="[% search_query | html %]" autocomplete="off" />
+                    <input type="text" id="db-search-input" class="db-search-input" placeholder="Tìm tên CSDL, từ khóa..." value="[% search_query | html %]" autocomplete="off" />
                     <button type="button" id="db-search-clear" class="db-search-clear" title="Xóa tìm kiếm">
                         <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
@@ -829,12 +858,12 @@
                 <table class="db-table" id="dbTable">
                     <thead>
                         <tr>
-                            <th class="col-stt">Thứ tự</th>
-                            <th class="col-title">Nguồn / Tên CSDL</th>
+                            <th class="col-stt">TT</th>
+                            <th class="col-title">Tên CSDL &amp; Mô tả</th>
                             <th class="col-class">Phân loại</th>
-                            <th class="col-user">Tên đăng nhập</th>
+                            <th class="col-user">Tài khoản</th>
                             <th class="col-pass">Mật khẩu</th>
-                            <th class="col-link">Link hỗ trợ</th>
+                            <th class="col-link">Truy cập</th>
                         </tr>
                     </thead>
                     <tbody id="dbTableBody">
@@ -845,12 +874,20 @@
                                         [% db.sort_order || loop.count %]
                                     </td>
                                     <td class="col-title">
-                                        <div class="db-name">[% db.title | html %]</div>
+                                        <div class="db-name">
+                                            [% IF db.db_url || db.support_link %]
+                                                <a href="[% db.db_url || db.support_link | url %]" target="_blank" rel="noopener noreferrer" class="db-title-link" title="Truy cập [% db.title | html %]">
+                                                    <span>[% db.title | html %]</span>
+                                                </a>
+                                            [% ELSE %]
+                                                [% db.title | html %]
+                                            [% END %]
+                                        </div>
                                         [% IF db.excerpt %]
-                                            <div class="db-excerpt">[% db.excerpt | html %]</div>
+                                            <div class="db-excerpt" title="[% db.excerpt | html %]">[% db.excerpt | html %]</div>
                                         [% END %]
                                         [% IF db.access_instructions %]
-                                            <div class="db-instruction">
+                                            <div class="db-instruction" title="[% db.access_instructions | html %]">
                                                 [% db.access_instructions | html %]
                                             </div>
                                         [% END %]
@@ -870,12 +907,12 @@
                                         [% IF db.db_user %]
                                             <div class="cred-container">
                                                 <span class="cred-val" id="u-[% db.id %]">[% db.db_user | html %]</span>
-                                                <button type="button" class="btn-cred-action" title="Sao chép tên đăng nhập" onclick="copyCred('u-[% db.id %]', this)">
+                                                <button type="button" class="btn-cred-action" title="Sao chép" onclick="copyCred('u-[% db.id %]', this)">
                                                     <i class="fa fa-copy" aria-hidden="true"></i>
                                                 </button>
                                             </div>
                                         [% ELSE %]
-                                            <span class="text-empty-val">Xác thực IP</span>
+                                            <span class="text-empty-val">Theo IP</span>
                                         [% END %]
                                     </td>
                                     <td class="col-pass">
@@ -884,16 +921,16 @@
                                                 <div class="cred-container">
                                                     <span class="cred-pass-masked" id="pass-mask-[% db.id %]">••••••••</span>
                                                     <span class="cred-val d-none" id="pass-val-[% db.id %]">[% db.db_pass | html %]</span>
-                                                    <button type="button" class="btn-cred-action" title="Hiện / ẩn mật khẩu" onclick="togglePass('[% db.id %]', this)">
+                                                    <button type="button" class="btn-cred-action" title="Hiện / ẩn" onclick="togglePass('[% db.id %]', this)">
                                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                                     </button>
-                                                    <button type="button" class="btn-cred-action" title="Sao chép mật khẩu" onclick="copyCred('pass-val-[% db.id %]', this)">
+                                                    <button type="button" class="btn-cred-action" title="Sao chép" onclick="copyCred('pass-val-[% db.id %]', this)">
                                                         <i class="fa fa-copy" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
                                             [% ELSE %]
-                                                <a href="/opac/login" class="btn-login-to-view" title="Đăng nhập tài khoản thư viện để xem và sao chép mật khẩu">
-                                                    <i class="fa fa-lock" aria-hidden="true"></i> Đăng nhập để xem
+                                                <a href="/opac/login" class="btn-login-to-view" title="Đăng nhập để xem mật khẩu">
+                                                    Đăng nhập
                                                 </a>
                                             [% END %]
                                         [% ELSE %]
@@ -901,9 +938,9 @@
                                         [% END %]
                                     </td>
                                     <td class="col-link">
-                                        [% IF db.support_link %]
-                                            <a href="[% db.support_link | url %]" target="_blank" rel="noopener noreferrer" class="btn-open-db" title="Mở trang cơ sở dữ liệu">
-                                                [Mở link] <i class="fa fa-external-link" aria-hidden="true"></i>
+                                        [% IF db.support_link || db.db_url %]
+                                            <a href="[% db.support_link || db.db_url | url %]" target="_blank" rel="noopener noreferrer" class="btn-open-db" title="Mở CSDL">
+                                                Truy cập
                                             </a>
                                         [% ELSE %]
                                             <span class="text-empty-val">—</span>
@@ -915,9 +952,7 @@
                             <tr id="server-empty-row">
                                 <td colspan="6">
                                     <div class="db-empty-state">
-                                        <i class="fa fa-database" aria-hidden="true"></i>
                                         <div class="db-empty-title">Chưa có cơ sở dữ liệu nào</div>
-                                        <p class="mb-0">Danh mục cơ sở dữ liệu đang được cập nhật.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -926,9 +961,7 @@
                         <tr id="client-empty-row" style="display: none;">
                             <td colspan="6">
                                 <div class="db-empty-state">
-                                    <i class="fa fa-search" aria-hidden="true"></i>
-                                    <div class="db-empty-title">Không tìm thấy cơ sở dữ liệu phù hợp</div>
-                                    <p class="mb-0">Vui lòng thử lại với từ khóa khác hoặc bỏ chọn bộ lọc.</p>
+                                    <div class="db-empty-title">Không tìm thấy CSDL phù hợp</div>
                                 </div>
                             </td>
                         </tr>
@@ -945,7 +978,7 @@
     </div>
 </main>
 
-<div id="db-toast"><i class="fa fa-check me-1"></i> <span id="db-toast-msg">Đã chép vào clipboard!</span></div>
+<div id="db-toast"><span id="db-toast-msg">Đã sao chép</span></div>
 
 [% INCLUDE 'opac-bottom.inc' %]
 
@@ -1085,7 +1118,7 @@
 
                 if (totalMatched > 0) {
                     paginationContainer.show();
-                    paginationInfo.html('Hiển thị <strong>' + (startIndex + 1) + '</strong> - <strong>' + endIndex + '</strong> trong tổng số <strong>' + totalMatched + '</strong> cơ sở dữ liệu');
+                    paginationInfo.html('<strong>' + (startIndex + 1) + '–' + endIndex + '</strong> / <strong>' + totalMatched + '</strong> CSDL');
 
                     if (totalPages > 1) {
                         var navHtml = '';

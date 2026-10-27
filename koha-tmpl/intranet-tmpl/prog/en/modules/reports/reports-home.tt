@@ -4,172 +4,150 @@
 [% USE AdditionalContents %]
 [% PROCESS 'i18n.inc' %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title
-    >[% FILTER collapse %]
- [% t("Reports") | html %]
- &rsaquo; FTU - HCM LIB
- [% END %]</title
->
+<title>[% FILTER collapse %]
+    Báo cáo &rsaquo; FTU - HCM LIB
+[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+.ftu-rep-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 20px; height: 100%; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-rep-card h3 {
+    font-size: 15px; font-weight: 700; color: #0f172a;
+    margin: 0 0 14px 0; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;
+}
+.ftu-rep-group {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748b; margin: 14px 0 6px 0;
+}
+.ftu-rep-group:first-of-type { margin-top: 0; }
+.ftu-rep-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ftu-rep-list li { margin: 0; padding: 0; }
+.ftu-rep-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: #334155; text-decoration: none;
+    transition: all 0.15s ease;
+}
+.ftu-rep-link:hover {
+    background: #fef2f2; border-color: #fecaca; color: #8B1E1E; text-decoration: none;
+}
+.ftu-rep-search {
+    display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;
+}
+.ftu-rep-search input[type="text"] {
+    flex: 1; padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;
+}
+.ftu-rep-search input[type="submit"] {
+    background: #8B1E1E; color: #ffffff; border: 1px solid #8B1E1E; border-radius: 8px;
+    padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+</style>
 </head>
 <body id="rep_reports-home" class="rep">
 [% WRAPPER 'header.inc' %]
- [% INCLUDE 'circ-search.inc' %]
+    [% INCLUDE 'circ-search.inc' %]
 [% END %]
 
 [% WRAPPER 'sub-header.inc' %]
- [% WRAPPER breadcrumbs %]
- [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span>Báo cáo</span>
- [% END %]
- [% END #/ WRAPPER breadcrumbs %]
-[% END #/ WRAPPER sub-header.inc %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item bc_active= 1 %]
+            <span>Báo cáo</span>
+        [% END %]
+    [% END %]
+[% END %]
 
 <div class="main container-fluid">
- <div class="row">
- <div class="col-12">
- [% INCLUDE 'messages.inc' %]
- <h1 class="h2 mb-3" style="font-weight: 700; color: #1e293b;">Báo cáo</h1>
+    <div class="row">
+        <div class="col-12">
+            [% INCLUDE 'messages.inc' %]
+            <h1 class="h3 mb-3" style="font-weight: 700; color: #0f172a;">Báo cáo &amp; Thống kê</h1>
 
- [% WRAPPER tabs id= "reports_tabs" %]
-  [% WRAPPER tabs_nav %]
-   [% WRAPPER tab_item tabname= "predefined" bt_active= (active_tab == 'predefined' || !active_tab) %]
-    <span>Báo cáo có sẵn</span>
-   [% END %]
-   [% WRAPPER tab_item tabname= "standard" bt_active= (active_tab == 'standard') %]
-    <span>Báo cáo chuẩn FTU - HCM LIB & SQL</span>
-   [% END %]
-  [% END # /WRAPPER tabs_nav %]
+            [% WRAPPER tabs id= "reports_tabs" %]
+                [% WRAPPER tabs_nav %]
+                    [% WRAPPER tab_item tabname= "predefined" bt_active= (active_tab == 'predefined' || !active_tab) %]
+                        <span>Báo cáo nghiệp vụ</span>
+                    [% END %]
+                    [% WRAPPER tab_item tabname= "standard" bt_active= (active_tab == 'standard') %]
+                        <span>Báo cáo tùy chỉnh &amp; SQL</span>
+                    [% END %]
+                [% END %]
 
-  [% WRAPPER tab_panels %]
-   [% WRAPPER tab_panel tabname="predefined" bt_active= (active_tab == 'predefined' || !active_tab) %]
-    [% PROCESS 'reports-predefined-body.inc' %]
-   [% END %]
+                [% WRAPPER tab_panels %]
+                    [% WRAPPER tab_panel tabname="predefined" bt_active= (active_tab == 'predefined' || !active_tab) %]
+                        [% PROCESS 'reports-predefined-body.inc' %]
+                    [% END %]
 
-   [% WRAPPER tab_panel tabname="standard" bt_active= (active_tab == 'standard') %]
-    <div class="row pt-3">
-     <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2">
-      <div class="row">
-       <div class="col-6">
-        [% IF ( CAN_user_reports_execute_reports || CAN_user_reports_create_reports || CAN_user_reports_delete_own_reports || CAN_user_reports_delete_all_reports ) %]
-        <fieldset class="brief">
-         <h2>Hướng dẫn tạo báo cáo</h2>
-         [% IF ( CAN_user_reports_create_reports ) %]
-         <p>
-         <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form"><i class="fa-solid fa-code-branch"></i> Create guided report</a>
-         </p>
-         <p>
-         <a href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form_sql"><i class="fa fa-plus"></i> Tạo báo cáo từ SQL</a>
-         </p>
-         [% END %]
-         <p>
-         <a href="/cgi-bin/koha/reports/guided_reports.pl?op=list"><i class="fa fa-list"></i> View saved</a>
-         </p>
-         <form action="/cgi-bin/koha/reports/guided_reports.pl" method="get">
-         <input name="op" value="list" type="hidden" />
-         <input name="filter_set" value="1" type="hidden" />
-         <label for="filter_keyword">Search by keyword:</label>
-         <input id="filter_keyword" name="filter_keyword" value="" size="16" type="text" />
-         <input class="btn btn-primary" type="submit" value="Tìm kiếm" />
-         </form>
-        </fieldset>
-        [% END %]
+                    [% WRAPPER tab_panel tabname="standard" bt_active= (active_tab == 'standard') %]
+                        <div class="row g-4 pt-3">
+                            <!-- CỘT 1: BÁO CÁO SQL & ĐÃ LƯU -->
+                            <div class="col-12 col-lg-4 col-md-6">
+                                <div class="ftu-rep-card">
+                                    <h3>Báo cáo SQL &amp; Đã lưu</h3>
+                                    [% IF ( CAN_user_reports_execute_reports || CAN_user_reports_create_reports || CAN_user_reports_delete_own_reports || CAN_user_reports_delete_all_reports ) %]
+                                    <div class="ftu-rep-group">Khởi tạo &amp; Quản lý</div>
+                                    <ul class="ftu-rep-list">
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/guided_reports.pl?op=list"><span>Danh sách báo cáo đã lưu</span></a></li>
+                                        [% IF ( CAN_user_reports_create_reports ) %]
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form_sql"><span>Tạo báo cáo từ câu lệnh SQL</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/guided_reports.pl?op=add_form"><span>Trình thuật sĩ tạo báo cáo</span></a></li>
+                                        [% END %]
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/dictionary.pl"><span>Từ điển định nghĩa báo cáo</span></a></li>
+                                    </ul>
+                                    <form action="/cgi-bin/koha/reports/guided_reports.pl" method="get" class="ftu-rep-search">
+                                        <input name="op" value="list" type="hidden" />
+                                        <input name="filter_set" value="1" type="hidden" />
+                                        <input id="filter_keyword" name="filter_keyword" value="" type="text" placeholder="Tìm báo cáo đã lưu..." />
+                                        <input type="submit" value="Tìm" />
+                                    </form>
+                                    [% END %]
+                                </div>
+                            </div>
 
-        <div class="rep_dictionary">
-         <h2>Từ điển báo cáo</h2>
-         <ul>
-         <li><a href="/cgi-bin/koha/reports/dictionary.pl">Xem từ điển</a></li>
-         </ul>
+                            <!-- CỘT 2: THỐNG KÊ THEO PHÂN HỆ -->
+                            <div class="col-12 col-lg-4 col-md-6">
+                                <div class="ftu-rep-card">
+                                    <h3>Thống kê theo phân hệ</h3>
+                                    <div class="ftu-rep-group">Số liệu tổng hợp</div>
+                                    <ul class="ftu-rep-list">
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/issues_stats.pl"><span>Thống kê Lưu thông</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/borrowers_stats.pl"><span>Thống kê Bạn đọc</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/catalogue_stats.pl"><span>Thống kê Tài liệu &amp; Kho</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/acquisitions_stats.pl"><span>Thống kê Bổ sung</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/serials_stats.pl"><span>Thống kê Ấn phẩm định kỳ</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/reserves_stats.pl"><span>Thống kê Đặt giữ</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/cash_register_stats.pl"><span>Thống kê Thu ngân</span></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- CỘT 3: XẾP HẠNG & KIỂM KÊ -->
+                            <div class="col-12 col-lg-4 col-md-6">
+                                <div class="ftu-rep-card">
+                                    <h3>Xếp hạng &amp; Rà soát</h3>
+                                    <div class="ftu-rep-group">Hoạt động lưu thông</div>
+                                    <ul class="ftu-rep-list">
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/bor_issues_top.pl"><span>Bạn đọc mượn nhiều nhất</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/cat_issues_top.pl"><span>Tài liệu mượn nhiều nhất</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/borrowers_out.pl"><span>Bạn đọc chưa phát sinh lượt mượn</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/catalogue_out.pl"><span>Tài liệu chưa từng lưu thông</span></a></li>
+                                    </ul>
+
+                                    <div class="ftu-rep-group">Rà soát kho &amp; Quỹ</div>
+                                    <ul class="ftu-rep-list">
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/catalog_by_itemtype.pl"><span>Số bản theo loại tài liệu</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/itemslost.pl"><span>Danh mục tài liệu báo mất</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/orders_by_fund.pl"><span>Đơn đặt mua theo quỹ</span></a></li>
+                                        <li><a class="ftu-rep-link" href="/cgi-bin/koha/reports/issues_avg_stats.pl"><span>Thời gian mượn trung bình</span></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    [% END %]
+                [% END %]
+            [% END %]
         </div>
-
-        <div class="rep_wizards">
-         <h2>Báo cáo phân hệ</h2>
-         <ul>
-         <li><a href="/cgi-bin/koha/reports/acquisitions_stats.pl">Phân hệ bổ sung</a></li>
-         <li><a href="/cgi-bin/koha/reports/borrowers_stats.pl">Bạn đọc</a></li>
-         <li><a href="/cgi-bin/koha/reports/catalogue_stats.pl">Mục tra cứu</a></li>
-         <li><a href="/cgi-bin/koha/reports/issues_stats.pl">Phân hệ lưu thông</a></li>
-         <li><a href="/cgi-bin/koha/reports/serials_stats.pl">Ấn phẩm định kỳ</a></li>
-         <li><a href="/cgi-bin/koha/reports/cash_register_stats.pl">Cash register</a></li>
-         <li><a href="/cgi-bin/koha/reports/reserves_stats.pl">Đặt mượn</a></li>
-         </ul>
-        </div>
-
-        [% IF ( plugins_enabled && CAN_user_plugins_report ) %]
-        <div class="rep_plugins">
-         <h2>Report plugins</h2>
-         <ul>
-         <li><a href="/cgi-bin/koha/plugins/plugins-home.pl?method=report">Report plugins</a></li>
-         </ul>
-        </div>
-        [% END %]
-       </div>
-
-       <div class="col-sm-12 col-md-6">
-        <div class="rep_top">
-         <h2>Lưu thông nhiều nhất</h2>
-         <ul>
-         <li><a href="/cgi-bin/koha/reports/bor_issues_top.pl">Bạn đọc ghi mượn nhiều nhất</a></li>
-         <li><a href="/cgi-bin/koha/reports/cat_issues_top.pl">Tài liệu lưu thông nhiều nhất</a></li>
-         </ul>
-        </div>
-
-        <div class="rep_inactive">
-         <h2>Dừng hoạt động</h2>
-         <ul>
-         <li><a href="/cgi-bin/koha/reports/borrowers_out.pl">Bạn đọc không ghi mượn</a></li>
-         <li><a href="/cgi-bin/koha/reports/catalogue_out.pl">Tài liệu không lưu thông</a></li>
-         </ul>
-        </div>
-
-        <div class="rep_other">
-         <h2>Báo cáo khác</h2>
-         <ul>
-         <li><a href="/cgi-bin/koha/reports/itemslost.pl">Tài liệu bị mất</a></li>
-         <li><a href="/cgi-bin/koha/reports/orders_by_fund.pl">Orders by fund</a></li>
-         <li><a href="/cgi-bin/koha/reports/catalog_by_itemtype.pl">Số bản tài liệu</a></li>
-         <li><a href="/cgi-bin/koha/reports/issues_avg_stats.pl">Thời gian ghi mượn trung bình</a></li>
-         [% SET koha_version = Koha.Version %]
-         [% IF koha_version.development %]
-         <li><a href="https://schema.koha-community.org/main" target="blank">Sơ đồ dữ liệu FTU - HCM LIB</a></li>
-         [% ELSE %]
-         <li><a href="https://schema.koha-community.org/[% koha_version.major | uri %]_[% koha_version.minor | uri %]" target="blank">Sơ đồ dữ liệu FTU - HCM LIB</a></li>
-         [% END %]
-         <li><a href="https://wiki.koha-community.org/wiki/SQL_Reports_Library" target="blank">Báo cáo mẫu FTU - HCM LIB</a></li>
-         </ul>
-        </div>
-
-        [% IF ( Koha.Preference('Mana') == 2 ) %]
-        <div class="alert alert-info" style="margin:15px 0 0 0" ;>
-         <strong>Knowledgebase</strong>
-         <p> You haven't decided if you want to activate Mana Knowledge Base. <a href="/cgi-bin/koha/admin/share_content.pl">Change your Mana KB settings</a>.</p>
-        </div>
-        [% END %]
-       </div>
-      </div>
-      <!-- /.row -->
-
-      [% SET StaffReportsHome = AdditionalContents.get( location => "StaffReportsHome", lang => lang, library => Branches.GetLoggedInBranchcode || default_branch ) %]
-      [% IF ( StaffReportsHome.content && StaffReportsHome.content.count > 0 ) %]
-      <div class="row">
-       <div class="col-sm-12">
-        <div id="[% StaffReportsHome.location | html %]">
-        [% FOREACH n IN StaffReportsHome.content %]
-        <div class="[% n.lang | html %]_item">
-        <div class="[% n.lang | html %]_body">[% n.content | $raw %]</div>
-        </div>
-        [% END %]
-        </div>
-       </div>
-      </div>
-      [% END # /IF StaffReportsHome %]
-     </div>
     </div>
-   [% END %]
-  [% END # /WRAPPER tab_panels %]
- [% END # /WRAPPER tabs %]
-
- </div>
- </div>
 </div>
 [% INCLUDE 'intranet-bottom.inc' %]

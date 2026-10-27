@@ -641,7 +641,7 @@
 <main class="main">
  [% WRAPPER breadcrumbs %]
  [% WRAPPER breadcrumb_item bc_active= 1 %]
- <span class="d-none d-sm-inline">Chi tiết về: </span>[% INCLUDE 'biblio-title.inc' %]
+ [% INCLUDE 'biblio-title.inc' %]
  [% END %]
  [% END #/ WRAPPER breadcrumbs %]
 
@@ -650,12 +650,15 @@
  <div class="col-lg-9">
  <div id="catalogue_detail_biblio" class="maincontent" data-biblionumber="[% biblio.biblionumber | html %]">
  <div id="views">
- <span class="view current-view"><span id="Normalview"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> <span class="d-none d-sm-inline">Chế độ xem </span>Thông thường</span></span>
+ <span class="view current-view"><span id="Normalview">Thông thường</span></span>
  <span class="view">
- <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> <span class="d-none d-sm-inline">Chế độ xem </span>MARC</a>
+ <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]">MARC</a>
  </span>
  [% IF ( ISBD ) %]
- <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> <span class="d-none d-sm-inline">Chế độ xem </span>ISBD</a></span>
+ <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]">ISBD</a></span>
+ [% END %]
+ [% IF ( ftu_intro_count ) %]
+ <span class="view"><a id="Introview" class="btn btn-link" href="/cgi-bin/koha/opac-intro.pl?biblionumber=[% biblio.biblionumber | html %]">Lời giới thiệu ([% ftu_intro_count | html %])</a></span>
  [% END %]
  </div>
  <div class="bookcover">
@@ -753,7 +756,6 @@
  [% END %]
 
  [% IF ( LibraryThingForLibrariesID ) %]
- <!-- This puts the LTFL reviews in, and if TabbedView is not set, puts the remaining content above the Tabs instead of in them -->
  [% UNLESS ( LibraryThingForLibrariesTabbedView ) %]
  <div class="results_summary"><div id="ltfl_related" class="ltfl"></div></div>
  <div class="results_summary"><div id="ltfl_similars" class="ltfl"></div></div>
@@ -766,9 +768,8 @@
  [% END # / LibraryThingForLibrariesID %]
 
  [% IF shelves.count %]
- <!--This grabs all of the lists a bib record appears in -->
  <span class="results_summary lists"
-                            ><span class="label">Danh sách có chứa tài liệu này: </span>
+                            ><span class="label">Danh sách: </span>
  [% FOREACH s IN shelves %]
  <a href="/cgi-bin/koha/opac-shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber | uri %]">[% s.shelfname | html %]</a>
  [% IF ( loop.last ) %][% ELSE %]|[% END %]
@@ -776,10 +777,10 @@
  </span>
  [% END %]
 
- [% IF ( TagsShowEnabled ) %]
+ [% IF ( TagsShowEnabled && ( TagLoop || ( TagsInputEnabled && loggedinusername ) ) ) %]
  <div class="results_summary tags">
  [% IF ( TagLoop ) %]
- <span class="label">Thẻ từ thư viện này:</span>
+ <span class="label">Từ khóa:</span>
  <ul id="tagslist">
  [% FOREACH TagLoo IN TagLoop %]
  <li
@@ -788,24 +789,10 @@
  </li>
  [% END %]
  </ul>
- [% ELSE %]
- <span class="label">Thẻ từ thư viện này:</span>
- <span class="notags">Thư viện này chưa có thẻ nào cho nhan đề này.</span>
  [% END # / IF ( TagLoop ) %]
- [% IF ( TagsInputEnabled ) %]
- [% IF ( loggedinusername ) %]
- <a class="tag_add btn btn-sm btn-link" id="tag_add[% biblio.biblionumber | html %]" href="#"><i class="fa fa-tag" aria-hidden="true"></i> Thêm thẻ</a>
- [% ELSE %]
- <span class="login4tags">
- [% IF Koha.Preference('casAuthentication') %]
- [%# CAS authentication is too complicated for modal window %]
- <a href="/cgi-bin/koha/opac-user.pl">Đăng nhập để thêm thẻ.</a>
- [% ELSE %]
- <a class="loginModal-trigger" data-bs-toggle="modal" role="button" href="/cgi-bin/koha/opac-user.pl">Đăng nhập để thêm thẻ.</a>
+ [% IF ( TagsInputEnabled && loggedinusername ) %]
+ <a class="tag_add btn btn-sm btn-link" id="tag_add[% biblio.biblionumber | html %]" href="#">+ Thêm thẻ</a>
  [% END %]
- </span>
- [% END # / IF ( loggedinusername ) %]
- [% END # / IF ( TagsInputEnabled ) %]
  </div>
  <!-- /.results_summary.tags -->
  [% END # /IF TagsShowEnabled %]
@@ -817,7 +804,7 @@
  <legend class="visually-hidden">Thẻ</legend>
  <div class="form-row">
  <div class="col-3">
- <label for="newtag[% biblio.biblionumber | html %]">Nhập thẻ mới, ngăn cách bằng dấu phẩy:</label>
+ <label for="newtag[% biblio.biblionumber | html %]">Nhập thẻ (cách bằng dấu phẩy):</label>
  </div>
  <!-- /.col-3 -->
  <div class="col-6">
@@ -829,8 +816,8 @@
  <div class="col-auto">
  <input type="hidden" name="op" value="cud-add" />
  <input class="btn btn-sm btn-primary tagbutton" name="tagbutton" title="[% biblio.biblionumber | html %]" type="submit" value="Thêm" />
- <a class="cancel_tag_add" id="cancel[% biblio.biblionumber | html %]" href="#">(hoàn thành)</a>
- <span id="newtag[% biblio.biblionumber | html %]_status" class="tagstatus" style="display:none;"> Trạng thái thẻ tại đây. </span>
+ <a class="cancel_tag_add" id="cancel[% biblio.biblionumber | html %]" href="#">(đóng)</a>
+ <span id="newtag[% biblio.biblionumber | html %]_status" class="tagstatus" style="display:none;"></span>
  </div>
  <!-- /.col-auto -->
  </div>
@@ -842,12 +829,12 @@
  [% IF ( SyndeticsEnabled ) %]
  [% IF ( SyndeticsSeries && SyndeticsSERIES1Exists ) %]
  <span class="results_summary">
- <span class="label">Thông tin nhan đề bộ:</span>
+ <span class="label">Tùng thư:</span>
  <a
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/ffseries.aspx?isbn=[% normalized_isbn | uri %]&amp;type=series&amp;num=1&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]"
-                                    >Nhấp để mở trong cửa sổ mới</a
+                                    >Mở liên kết</a
                                 >
  </span>
  [% END # / IF SyndeticsSeries && SyndeticsSERIES1Exists %]
@@ -858,19 +845,19 @@
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/avprofile.html&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]&amp;type=xw10"
-                                    >Nhấp để mở trong cửa sổ mới</a
+                                    >Mở liên kết</a
                                 >
  </span>
  [% END # / IF SyndeticsAVPROFILEExists %]
 
  [% IF ( SyndeticsFICTIONExists ) %]
  <span class="results_summary">
- <span class="label">Ghi chú về tiểu thuyết:</span>
+ <span class="label">Ghi chú:</span>
  <a
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/fiction.html&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]&amp;type=xw10"
-                                    >Nhấp để mở trong cửa sổ mới</a
+                                    >Mở liên kết</a
                                 >
  </span>
  [% END # / IF SyndeticsFICTIONExists %]
@@ -882,7 +869,7 @@
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/ffawards.aspx?isbn=[% normalized_isbn | uri %]&amp;type=awards&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]"
-                                    >Nhấp để mở trong cửa sổ mới</a
+                                    >Mở liên kết</a
                                 >
  </span>
  [% END # / IF SyndeticsAwards && SyndeticsAWARDS1Exists %]
@@ -894,12 +881,12 @@
  [% IF ( OpacStarRatings != 'disable' ) %]
  <form method="post" action="/cgi-bin/koha/opac-ratings.pl">
  [% INCLUDE 'csrf-token.inc' %]
- <legend class="visually-hidden">Điểm đánh giá của bạn</legend>
+ <legend class="visually-hidden">Đánh giá</legend>
  <div class="results_summary ratings" id="rating-[% biblio.biblionumber | html %]">
  [% SET rating_avg = ratings.get_avg_rating() %]
  [% rating_avg_int = BLOCK %][% rating_avg | format("%.0f") %][% END %]
 
- <label for="star_rating" class="sr-only">Rate this title from 1 to 5 stars</label>
+ <label for="star_rating" class="sr-only">Đánh giá từ 1 đến 5 sao</label>
  <select
                                     id="star_rating"
                                     class="star_rating"
@@ -920,26 +907,24 @@
  </select>
  <img id="rating-loading" class="rating-loading" style="display:none" src="[% interface | html %]/[% theme | html %]/images/spinner-small.gif" alt="" />
 
- <!-- define some hidden vars for ratings -->
-
  <input type="hidden" name="op" value="cud-add" />
  <input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />
  <input type="hidden" name="rating_value" id="rating_value" class="rating_value" value="[% my_rating.rating_value | html %]" />
 
- [% UNLESS ( rating_readonly ) %]&nbsp; <input name="rate_button" type="submit" value="Cho tôi xin đánh giá của bạn" />[% END %]&nbsp;
+ [% UNLESS ( rating_readonly ) %]&nbsp; <input name="rate_button" type="submit" value="Đánh giá" />[% END %]&nbsp;
  [% IF my_rating %]
- <span id="rating_value_text" class="rating_value_text">Đánh giá của bạn: [% my_rating.rating_value | html %].</span>
+ <span id="rating_value_text" class="rating_value_text">Bạn chọn: [% my_rating.rating_value | html %] sao.</span>
  <span id="cancel_rating_text" class="cancel_rating_text"
-                                        ><a href="#" data-context="star_rating"><i class="fa fa-times" aria-hidden="true"></i> Hủy đánh giá.</a></span
+                                        ><a href="#" data-context="star_rating">Hủy</a></span
                                     >
  [% ELSE %]
  <span id="rating_value_text" class="rating_value_text"></span>
  <span id="cancel_rating_text" class="cancel_rating_text" style="display: none;"
-                                        ><a href="#" data-context="star_rating"><i class="fa fa-times" aria-hidden="true"></i> Hủy đánh giá.</a></span
+                                        ><a href="#" data-context="star_rating">Hủy</a></span
                                     >
  [% END %]
 
- <span id="rating_text" class="rating_text">Đánh giá trung bình: [% rating_avg | html %] ([% ratings.count | html %] lượt bình chọn)</span>
+ <span id="rating_text" class="rating_text">Trung bình: [% rating_avg | html %] ([% ratings.count | html %])</span>
  </div>
  </form>
  [% END # / IF OpacStarRatings != 'disable' %]
@@ -947,7 +932,7 @@
  [% IF ( NovelistSelectProfile && (normalized_isbn || normalized_upc) ) %]
  [% IF ( NovelistSelectView == 'above') %]
  <span class="results_summary NovelistSelect" style="display:none;">
- <span class="label">Dịch vụ gợi ý NoveList Select: </span>
+ <span class="label">Gợi ý NoveList: </span>
  <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
  </span>
  [% END %]
@@ -968,22 +953,22 @@
  [% WRAPPER tab_item tabname= "holdings" %]
  [% BLOCK holding_tab_title %]
  [% IF SeparateHoldings %]
- <span>[% Branches.GetLoggedInBranchname | html %] bản tài liệu</span>
+ <span>[% Branches.GetLoggedInBranchname | html %]</span>
  [% ELSE %]
  [% IF specific_item %]
- <span>Chi tiết tài liệu</span>
+ <span>Chi tiết bản sách</span>
  [% ELSE %]
  <span>Bản tài liệu</span>
  [% END %]
  [% END %]
  [% END %]
  [% PROCESS holding_tab_title %]
- [% UNLESS too_many_items OR specific_item %][% ' ( ' _ (itemloop.size || 0) _ ' )' | html %][% END %]
+ [% UNLESS too_many_items OR specific_item %][% ' (' _ (itemloop.size || 0) _ ')' | html %][% END %]
  [% END %]
 
  [% IF (SeparateHoldings) %]
  [% WRAPPER tab_item tabname= "otherholdings" %]
- <span>Các bản tài liệu khác [% ' ( ' _ (otheritemloop.size || 0) _ ' )' | html %]</span>
+ <span>Thư viện khác [% '(' _ (otheritemloop.size || 0) _ ')' | html %]</span>
  [% END %]
  [% END %]
 
@@ -994,13 +979,13 @@
  [% SET title_notes_count = MARCNOTES.size %]
  [% END %]
  [% IF SYNDETICS_SUMMARY %][% SET title_notes_count = title_notes_count + 1 %][% END %]
- <span>Ghi chú nhan đề ( [% title_notes_count | html %] )</span>
+ <span>Mô tả ([% title_notes_count | html %])</span>
  [% END %]
  [% END %]
 
  [% IF ComponentParts && ComponentParts.size %]
  [% WRAPPER tab_item tabname= "components" %]
- <span>Bộ phận cấu thành ([% ComponentParts.size | html %])</span>
+ <span>Thành phần ([% ComponentParts.size | html %])</span>
  [% END %]
  [% END %]
 
@@ -1781,8 +1766,8 @@
  <div id="libraryInfo"></div>
  </div>
  <div class="modal-footer">
- <a id="libraryInfoLink" href="" class="btn btn-primary">Visit website</a>
- <button type="button" class="btn btn-default" data-bs-dismiss="modal">Thoát</button>
+ <a id="libraryInfoLink" href="" class="btn btn-primary">Trang web</a>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Đóng</button>
  </div>
  </div>
  <!-- /.modal-content -->
@@ -1802,23 +1787,23 @@
  <thead>
  <tr>
  <th id="item_cover" data-colname="item_cover">Ảnh bìa</th>
- <th id="item_itemtype" data-colname="item_itemtype" class="itype">Kiểu tài liệu</th>
- <th id="item_current_location" data-colname="item_current_location" class="item_location">Thư viện hiện tại</th>
- <th id="item_home_location" data-colname="item_home_location" class="item_location">Thư viện chủ quản</th>
+ <th id="item_itemtype" data-colname="item_itemtype" class="itype">Loại hình</th>
+ <th id="item_current_location" data-colname="item_current_location" class="item_location">Thư viện</th>
+ <th id="item_home_location" data-colname="item_home_location" class="item_location">Đơn vị quản lý</th>
  <th id="item_ccode" data-colname="item_ccode" class="collection">Bộ sưu tập</th>
- <th id="item_shelving_location" data-colname="item_shelving_location" class="shelving_location">Kho tài liệu</th>
- <th id="item_callnumber" data-colname="item_callnumber" class="call_no">Số phân loại</th>
- <th id="item_materials" data-colname="item_materials" class="materials">Tài liệu chi tiết</th>
- <th id="item_enumchron" data-colname="item_enumchron" class="vol_info">Thông tin tập</th>
- <th id="item_url" data-colname="item_url" class="url">URL</th>
+ <th id="item_shelving_location" data-colname="item_shelving_location" class="shelving_location">Kho</th>
+ <th id="item_callnumber" data-colname="item_callnumber" class="call_no">Ký hiệu xếp giá</th>
+ <th id="item_materials" data-colname="item_materials" class="materials">Chi tiết</th>
+ <th id="item_enumchron" data-colname="item_enumchron" class="vol_info">Tập/Số</th>
+ <th id="item_url" data-colname="item_url" class="url">Liên kết</th>
  <th id="item_copy" data-colname="item_copy" class="copynumber">Bản số</th>
  <th id="item_status" data-colname="item_status" class="status">Trạng thái</th>
  <th id="item_notes" data-colname="item_notes" class="notes">Ghi chú</th>
- <th id="item_datedue" data-colname="item_datedue" class="date_due">Ngày hết hạn</th>
+ <th id="item_datedue" data-colname="item_datedue" class="date_due">Hạn trả</th>
  <th id="item_barcode" data-colname="item_barcode" class="barcode">Mã ĐKCB</th>
- <th id="item_holds" data-colname="item_holds">Lượt đặt mượn tài liệu</th>
- <th id="item_priority" data-colname="item_priority">Thứ tự ưu tiên trong hàng chờ đặt mượn</th>
- <th id="item_coursereserves" data-colname="item_coursereserves">Tài liệu học phần</th>
+ <th id="item_holds" data-colname="item_holds">Đặt mượn</th>
+ <th id="item_priority" data-colname="item_priority">Ưu tiên</th>
+ <th id="item_coursereserves" data-colname="item_coursereserves">Học phần</th>
  <th class="dtr-control-col"></th>
  </tr>
  </thead>
@@ -1858,7 +1843,6 @@
  <td></td>
  [% END %]
  [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' ) %]
- [%# Show opac_info or branchurl from holding library %]
  [% SET holding_library_name = Branches.GetName( ITEM_RESULT.holdingbranch ) %]
  [% SET holding_library_url = Branches.GetURL( ITEM_RESULT.holdingbranch ) %]
  <td class="location" property="seller" data-order="[% holding_library_name | html %]">
@@ -1866,7 +1850,7 @@
  <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut" />
  [% IF ( ITEM_RESULT.holding_library_info ) %]
  <a href="[% holding_library_url | url %]" class="library_info" data-index="[% loop.index | html %]" data-name="[% holding_library_name | html %]">
- <i class="fa fa-info-circle" aria-hidden="true"></i> [% holding_library_name | html %][% my_library_info | html %]
+ [% holding_library_name | html %][% my_library_info | html %]
  </a>
  [% ELSIF holding_library_url %]
  <a href="[% holding_library_url | url %]"> [% holding_library_name | html %] </a>
@@ -1886,7 +1870,6 @@
  [% END %]
 
  [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
- [%# Show opac_info or branchurl from home library %]
  [% SET home_library_name = Branches.GetName( ITEM_RESULT.homebranch ) %]
  [% SET home_library_url = Branches.GetURL( ITEM_RESULT.homebranch ) %]
  <td class="location" property="seller" data-order="[% home_library_name | html %]">
@@ -1895,7 +1878,7 @@
 
  [% IF ( ITEM_RESULT.home_library_info ) %]
  <a href="[% home_library_url | url %]" class="library_info" data-index="[% loop.index | html %]" data-name="[% home_library_name | html %]">
- <i class="fa fa-info-circle" aria-hidden="true"></i> [% home_library_name | html %]
+ [% home_library_name | html %]
  </a>
  [% ELSIF home_library_url %]
  <a href="[% home_library_url | url %]"> [% home_library_name | html %] </a>
@@ -1937,14 +1920,14 @@
  <a
  class="close_shelf shelfbrowser-link"
  href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | html %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | html %]#[% tab | html %]"
- aria-label="Browse the shelf for items near [% title | html %]"
- ><i class="fa fa-cubes"></i> Duyệt giá sách<span class="visually-hidden">(Mở ở bên dưới)</span></a>
+ aria-label="Duyệt giá sách [% title | html %]"
+ >Duyệt kệ<span class="visually-hidden">(Mở ở bên dưới)</span></a>
  [% ELSE %]
  <a
  class="shelfbrowser-link"
  href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | uri %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | uri %]#[% tab | uri %]"
- aria-label="Browse the shelf for items near [% title | html %]"
- ><i class="fa fa-cubes"></i> Duyệt giá sách<span class="visually-hidden">(Mở ở bên dưới)</span></a>
+ aria-label="Duyệt giá sách [% title | html %]"
+ >Duyệt kệ<span class="visually-hidden">(Mở ở bên dưới)</span></a>
  [% END %]
  [% END %]
  [% END %]
@@ -1987,11 +1970,9 @@
  [% IF ( itemdata_uri ) %]
  <td class="url">
  [% IF ITEM_RESULT.uri %]
- [%# Initialize two helper vars %]
  [% SET target_attr = ''; SET rel_attr = '' %]
  [% IF Koha.Preference('OPACURLOpenInNewWindow') %][% SET target_attr = '_blank'; SET rel_attr = 'noreferrer' %][% END %]
 
- [%# Check if there are multiple URIs; in the single case we only use pref URLLinkText or Link to resource %]
  [% SET uris = ITEM_RESULT.uri.split(' \| ') %]
  [% IF uris.size > 1 %]
  [% FOREACH uri IN uris %]
@@ -2015,11 +1996,11 @@
                                             href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | uri %]&amp;biblionumber=[% biblio.biblionumber | html %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | html %]"
                                             property="url"
                                         >
- [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Link to resource[% END %]
+ [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Mở liên kết[% END %]
  </a>
  [% ELSE %]
  <a target="[% target_attr | html %]" rel="[% rel_attr | html %]" href="[% ITEM_RESULT.uri | safe_url %]" property="url">
- [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Link to resource[% END %]
+ [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Mở liên kết[% END %]
  </a>
  [% END %]
  [% END %]

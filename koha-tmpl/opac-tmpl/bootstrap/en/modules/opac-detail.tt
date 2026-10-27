@@ -14,41 +14,41 @@
 [% SET TagsInputEnabled = ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'TagsEnabled' ) == 1 ) && TagsInputOnDetail ) %]
 [% SET CoverImagePlugins = KohaPlugins.get_plugins_opac_cover_images %]
 [% IF Koha.Preference('AmazonAssocTag') %]
-    [% AmazonAssocTag = '?tag=' _ Koha.Preference('AmazonAssocTag') %]
+ [% AmazonAssocTag = '?tag=' _ Koha.Preference('AmazonAssocTag') %]
 [% ELSE %]
-    [% AmazonAssocTag = '' %]
+ [% AmazonAssocTag = '' %]
 [% END %]
 
 [% ShowCourseReservesHeader = 0 %]
 [% IF Koha.Preference( 'UseCourseReserves' ) == 1 %]
-    [% FOREACH ITEM_RESULT IN itemloop %]
-        [% IF ITEM_RESULT.course_reserves %]
-            [% FOREACH r IN ITEM_RESULT.course_reserves %]
-                [% IF r.course.enabled == 'yes' %]
-                    [% ShowCourseReservesHeader = 1 %]
-                [% END %]
-            [% END %]
-        [% END %]
-    [% END %]
+ [% FOREACH ITEM_RESULT IN itemloop %]
+ [% IF ITEM_RESULT.course_reserves %]
+ [% FOREACH r IN ITEM_RESULT.course_reserves %]
+ [% IF r.course.enabled == 'yes' %]
+ [% ShowCourseReservesHeader = 1 %]
+ [% END %]
+ [% END %]
+ [% END %]
+ [% END %]
 [% END %]
 
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        [% title_in_title = INCLUDE 'biblio-title-head.inc' %]
-        [% tx("Details for {title}", { title = title_in_title }) | html %]
-        &rsaquo; [% PROCESS 'library_name_title' %]
-    [% END %]</title
+ [% title_in_title = INCLUDE 'biblio-title-head.inc' %]
+ [% tx("Details for {title}", { title = title_in_title }) | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
 >
 <link rel="canonical" href="[% OPACBaseURL | url %]/bib/[% biblio.biblionumber | url %]" />
 [% Asset.css("lib/emoji-picker/css/emoji.css") | $raw %]
 [% IF ( Koha.Preference('OPACShowMusicalInscripts') ) %]
-    [% Asset.css("lib/verovio/midiplayer.css") | $raw %]
+ [% Asset.css("lib/verovio/midiplayer.css") | $raw %]
 [% END %]
 [% Asset.css("lib/Chocolat/css/chocolat.css") | $raw %]
 [% INCLUDE 'doc-head-close.inc' %]
 [% FILTER collapse %]
-    <style nonce="[% Koha.CSPNonce | $raw %]">
+ <style nonce="[% Koha.CSPNonce | $raw %]">
         .component_part {
             padding: 0.5rem 0.9rem;
             border-bottom: 1px solid #bcbcbc;
@@ -58,10 +58,10 @@
         }
 
         /* ========================================================
-           MOBILE-FIRST OPAC DETAIL DESIGN (ENG)
+           THIẾT KẾ GIAO DIỆN DI ĐỘNG (MOBILE-FIRST OPAC DETAIL)
            ======================================================== */
         @media (max-width: 991px) {
-            /* 1. Flat modern card for book details header */
+            /* 1. Header chi tiết tài liệu dạng thẻ phẳng sang trọng */
             #catalogue_detail_biblio {
                 background: #ffffff !important;
                 border: 1px solid #e2e8f0 !important;
@@ -73,7 +73,7 @@
                 flex-direction: column !important;
             }
 
-            /* Center book cover */
+            /* Bìa sách căn giữa nổi bật, cân đối tỷ lệ vàng */
             #catalogue_detail_biblio .bookcover {
                 order: 1 !important;
                 float: none !important;
@@ -103,7 +103,7 @@
                 border: 1px solid rgba(0, 0, 0, 0.08) !important;
             }
 
-            /* Title & author */
+            /* Tiêu đề & tác giả */
             #catalogue_detail_biblio h1.title,
             #catalogue_detail_biblio .title {
                 order: 2 !important;
@@ -134,7 +134,7 @@
                 text-decoration: none !important;
             }
 
-            /* View selector (Segmented Control) */
+            /* Bộ chọn chế độ xem tinh giản dạng Segmented Control */
             #catalogue_detail_biblio #views {
                 order: 4 !important;
                 display: inline-flex !important;
@@ -219,7 +219,7 @@
                 color: #990000 !important;
             }
 
-            /* Metadata Cards */
+            /* Khối trường siêu dữ liệu định dạng Thẻ Thông Tin (Metadata Cards) */
             #catalogue_detail_biblio .record {
                 order: 5 !important;
                 display: flex !important;
@@ -265,7 +265,7 @@
                 text-decoration: none !important;
             }
 
-            /* 2. Quick Action Toolbar */
+            /* 2. Thanh thao tác nhanh (Quick Action Toolbar) */
             #ulactioncontainer {
                 background: #ffffff !important;
                 border: 1px solid #e2e8f0 !important;
@@ -286,7 +286,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            /* Place Hold (Reserve) full width */
+            /* Đặt mượn (Reserve) nổi bật toàn chiều rộng */
             #action li:has(.reserve),
             #action li:first-child {
                 grid-column: span 2 !important;
@@ -321,7 +321,7 @@
                 transform: scale(0.98) !important;
             }
 
-            /* 3. Holdings transformed into Item Cards */
+            /* 3. Bảng bản tài liệu lưu thông chuyển đổi thành Thẻ Di Động (Item Cards) */
             .table-responsive.ftu-table-scroller,
             .table-responsive:has(#holdingst),
             .table-responsive:has(#otherholdingst),
@@ -418,8 +418,8 @@
                 overflow-wrap: break-word !important;
             }
 
-            /* Display order for fields in Mobile Cards */
-            /* 1. Item Status */
+            /* Thứ tự hiển thị các trường trong Thẻ Di Động */
+            /* 1. Trạng thái bản sách */
             #holdingst tbody td.status,
             #otherholdingst tbody td.status {
                 order: 1 !important;
@@ -442,7 +442,7 @@
                 border: 1px solid #bbf7d0 !important;
             }
 
-            /* 2. Due date (if checked out) */
+            /* 2. Ngày hết hạn mượn (nếu có) */
             #holdingst tbody td.date_due,
             #otherholdingst tbody td.date_due {
                 order: 2 !important;
@@ -455,12 +455,12 @@
             }
             #holdingst tbody td.date_due::before,
             #otherholdingst tbody td.date_due::before {
-                content: "Due date:";
+                content: "Hạn trả:";
                 color: #64748b !important;
                 font-weight: 500 !important;
             }
 
-            /* 3. Call number */
+            /* 3. Số phân loại */
             #holdingst tbody td.call_no,
             #otherholdingst tbody td.call_no {
                 order: 3 !important;
@@ -477,13 +477,13 @@
             }
             #holdingst tbody td.call_no::before,
             #otherholdingst tbody td.call_no::before {
-                content: "Call number:";
+                content: "Số phân loại:";
                 font-size: 0.8rem !important;
                 font-weight: 600 !important;
                 color: #64748b !important;
             }
 
-            /* 4. Barcode */
+            /* 4. Mã ĐKCB Barcode */
             #holdingst tbody td.barcode,
             #otherholdingst tbody td.barcode {
                 order: 4 !important;
@@ -494,7 +494,7 @@
             }
             #holdingst tbody td.barcode::before,
             #otherholdingst tbody td.barcode::before {
-                content: "Barcode:";
+                content: "Mã ĐKCB:";
                 font-size: 0.8rem !important;
                 font-weight: 600 !important;
                 color: #64748b !important;
@@ -510,7 +510,7 @@
                 font-size: 0.82rem !important;
             }
 
-            /* 5. Library Location */
+            /* 5. Vị trí thư viện */
             #holdingst tbody td.location,
             #otherholdingst tbody td.location {
                 order: 5 !important;
@@ -542,7 +542,7 @@
                 color: #64748b !important;
             }
 
-            /* 6. Item Type */
+            /* 6. Kiểu tài liệu */
             #holdingst tbody td.itype,
             #otherholdingst tbody td.itype {
                 order: 6 !important;
@@ -558,7 +558,7 @@
                 max-height: 16px !important;
             }
 
-            /* 7. Digital resource URL */
+            /* 7. Đường dẫn tài nguyên số / URL */
             #holdingst tbody td.url,
             #otherholdingst tbody td.url {
                 order: 7 !important;
@@ -581,7 +581,7 @@
                 text-decoration: none !important;
             }
 
-            /* 8. Shelfbrowser link */
+            /* 8. Nút Duyệt giá sách */
             #holdingst .shelfbrowser-link,
             #otherholdingst .shelfbrowser-link {
                 display: inline-flex !important;
@@ -597,7 +597,7 @@
                 text-decoration: none !important;
             }
 
-            /* 4. Tab navigation */
+            /* 4. Tab điều hướng cuộn ngang mượt mà */
             #bibliodescriptions .nav-tabs {
                 display: flex !important;
                 flex-wrap: nowrap !important;
@@ -625,7 +625,7 @@
                 color: #b91c1c !important;
             }
 
-            /* Bottom dock spacing */
+            /* Khoảng đệm an toàn trên thanh Dock */
             main.main {
                 padding-bottom: calc(var(--ftu-dock-height, 65px) + 2rem) !important;
             }
@@ -639,1201 +639,1140 @@
 
 [% SET hidden_columns_force = {} %]
 <main class="main">
-    [% WRAPPER breadcrumbs %]
-        [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span class="d-none d-sm-inline">Details for: </span>[% INCLUDE 'biblio-title.inc' %]
-        [% END %]
-    [% END #/ WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ [% INCLUDE 'biblio-title.inc' %]
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-9">
-                <div id="catalogue_detail_biblio" class="maincontent" data-biblionumber="[% biblio.biblionumber | html %]">
-                    <div id="views">
-                        <span class="view current-view"
-                            ><span id="Normalview"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Normal<span class="d-none d-sm-inline"> view</span></span></span
-                        >
-                        <span class="view">
-                            <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> MARC<span class="d-none d-sm-inline"> view</span></a>
-                        </span>
-                        [% IF ( ISBD ) %]
-                            <span class="view"
-                                ><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> ISBD<span class="d-none d-sm-inline"> view</span></a></span
-                            >
-                        [% END %]
-                    </div>
-                    <div class="bookcover">
-                        <div id="biblio-cover-slider" class="cover-slider cover-slides" data-isbn="[% normalized_isbn | html %]">
-                            [% IF ( OPACLocalCoverImages ) %]
-                                [% IF localimages.count %]
-                                    [% FOREACH image IN localimages %]
-                                        <div class="cover-image local-coverimg">
-                                            <a href="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" title="Local cover image">
-                                                <img
-                                                    src="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]"
-                                                    alt="Local cover image"
-                                                    data-link="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblionumber | uri %]&amp;imagenumber=[% image.imagenumber | uri %]"
-                                                />
-                                            </a>
-                                        </div>
-                                    [% END %]
-                                [% END %]
-                            [% END %]
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-9">
+ <div id="catalogue_detail_biblio" class="maincontent" data-biblionumber="[% biblio.biblionumber | html %]">
+ <div id="views">
+ <span class="view current-view"><span id="Normalview">Thông thường</span></span>
+ <span class="view">
+ <a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]">MARC</a>
+ </span>
+ [% IF ( ISBD ) %]
+ <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]">ISBD</a></span>
+ [% END %]
+ [% IF ( ftu_intro_count ) %]
+ <span class="view"><a id="Introview" class="btn btn-link" href="/cgi-bin/koha/opac-intro.pl?biblionumber=[% biblio.biblionumber | html %]">Lời giới thiệu ([% ftu_intro_count | html %])</a></span>
+ [% END %]
+ </div>
+ <div class="bookcover">
+ <div id="biblio-cover-slider" class="cover-slider cover-slides" data-isbn="[% normalized_isbn | html %]">
+ [% IF ( OPACLocalCoverImages ) %]
+ [% IF localimages.count %]
+ [% FOREACH image IN localimages %]
+ <div class="cover-image local-coverimg">
+ <a href="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" title="Ảnh bìa cục bộ">
+ <img alt="Ảnh bìa cục bộ" data-link="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblionumber | uri %]&imagenumber=[% image.imagenumber | uri %]" src="/cgi-bin/koha/opac-image.pl?imagenumber=[% image.imagenumber | uri %]" />
+ </a>
+ </div>
+ [% END %]
+ [% END %]
+ [% END %]
 
-                            [% IF ( OPACAmazonCoverImages && normalized_isbn) %]
-                                <div class="cover-image" id="amazon-bookcoverimg">
-                                    <a href="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn | uri %].01.LZZZZZZZ.jpg" title="Amazon cover image">
-                                        <img
-                                            src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn | uri %].01.MZZZZZZZ.jpg"
-                                            alt="Amazon cover image"
-                                            data-link="http://www.amazon[% AmazonTld | uri %]/gp/reader/[% normalized_isbn | uri %][% AmazonAssocTag | uri %]#reader-link"
-                                        />
-                                    </a>
-                                    <div class="hint">Image from Amazon.com</div>
-                                </div>
-                            [% END %]
+ [% IF ( OPACAmazonCoverImages && normalized_isbn) %]
+ <div class="cover-image" id="amazon-bookcoverimg">
+ <a href="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn | uri %].01.LZZZZZZZ.jpg" title="Ảnh bìa lấy từ Amazon">
+ <img alt="Ảnh bìa lấy từ Amazon" data-link="http://www.amazon[% AmazonTld | uri %]/gp/reader/[% normalized_isbn | uri %][% AmazonAssocTag | uri %]#reader-link" src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn | uri %].01.MZZZZZZZ.jpg" />
+ </a>
+ <div class="hint">Ảnh từ Amazon.com</div>
+ </div>
+ [% END %]
 
-                            [% IF ( SyndeticsEnabled && SyndeticsCoverImages ) %]
-                                [% IF ( content_identifier_exists ) %]
-                                    <div class="cover-image" id="syndetics-coverimg">
-                                        <a
-                                            href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/[% SyndeticsCoverImageSize | uri %].GIF&amp;client=[% SyndeticsClientCode | uri %]&amp;type=xw10&amp;upc=[% normalized_upc | uri %]&amp;oclc=[% normalized_oclc | uri %]"
-                                            title="Syndetics cover image"
-                                        >
-                                            <img
-                                                src="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/[% SyndeticsCoverImageSize | uri %].GIF&amp;client=[% SyndeticsClientCode | uri %]&amp;type=xw10&amp;upc=[% normalized_upc | uri %]&amp;oclc=[% normalized_oclc | uri %]"
-                                                alt="Syndetics cover image"
-                                            />
-                                        </a>
-                                        <div class="hint">Image from Syndetics</div>
-                                    </div>
-                                [% END %]
-                            [% END %]
+ [% IF ( SyndeticsEnabled && SyndeticsCoverImages ) %]
+ [% IF ( content_identifier_exists ) %]
+ <div class="cover-image" id="syndetics-coverimg">
+ <a href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/[% SyndeticsCoverImageSize | uri %].GIF&client=[% SyndeticsClientCode | uri %]&type=xw10&upc=[% normalized_upc | uri %]&oclc=[% normalized_oclc | uri %]" title="Ảnh bìa lấy từ Syndetics">
+ <img alt="Ảnh bìa lấy từ Syndetics" src="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/[% SyndeticsCoverImageSize | uri %].GIF&client=[% SyndeticsClientCode | uri %]&type=xw10&upc=[% normalized_upc | uri %]&oclc=[% normalized_oclc | uri %]" />
+ </a>
+ <div class="hint">Ảnh từ Syndetics</div>
+ </div>
+ [% END %]
+ [% END %]
 
-                            [% IF ( GoogleJackets ) %]
-                                <div class="cover-image" id="googlejacket-coverimg">
-                                    <div title="[% img_title | html %]" class="[% normalized_isbn | html %]" id="gbs-thumbnail-preview" data-use-data-link="1"></div>
-                                    <div class="hint">Image from Google Jackets</div>
-                                </div>
-                            [% END %]
+ [% IF ( GoogleJackets ) %]
+ <div class="cover-image" id="googlejacket-coverimg">
+ <div title="[% img_title | html %]" class="[% normalized_isbn | html %]" id="gbs-thumbnail-preview" data-use-data-link="1"></div>
+ <div class="hint">Ảnh từ Google Jackets</div>
+ </div>
+ [% END %]
 
-                            [% IF ( Koha.Preference('OPACCoce') && Koha.Preference('CoceProviders') && normalized_isbn ) %]
-                                [% coce_id = normalized_ean || normalized_isbn %]
-                                <div class="cover-image coce-coverimg">
-                                    [% IF ( coce_id ) %]
-                                        <a title="Image from Coce" class="[% coce_id | html %]" id="coce-thumbnail-preview"></a>
-                                    [% END %]
-                                    <div class="hint">Image from Coce</div>
-                                </div>
-                            [% END %]
+ [% IF ( Koha.Preference('OPACCoce') && Koha.Preference('CoceProviders') && normalized_isbn ) %]
+ [% coce_id = normalized_ean || normalized_isbn %]
+ <div class="cover-image coce-coverimg">
+ [% IF ( coce_id ) %]
+ <a class="[% coce_id | html %]" id="coce-thumbnail-preview" title="Ảnh từ Coce"></a>
+ [% END %]
+ <div class="hint">Ảnh từ Coce</div>
+ </div>
+ [% END %]
 
-                            [% IF OpenLibraryCovers %]
-                                <div class="cover-image" id="openlibrary-coverimg">
-                                    <div title="[% img_title | html %]" class="[% normalized_isbn | html %]" id="openlibrary-thumbnail-preview" data-use-data-link="1"></div>
-                                    <div class="hint">Image from OpenLibrary</div>
-                                </div>
-                            [% END %]
+ [% IF OpenLibraryCovers %]
+ <div class="cover-image" id="openlibrary-coverimg">
+ <div title="[% img_title | html %]" class="[% normalized_isbn | html %]" id="openlibrary-thumbnail-preview" data-use-data-link="1"></div>
+ <div class="hint">Ảnh từ OpenLibrary</div>
+ </div>
+ [% END %]
 
-                            [% IF Koha.Preference('OPACCustomCoverImages') && Koha.Preference('CustomCoverImagesURL') %]
-                                [% SET custom_cover_image_url = biblio.custom_cover_image_url %]
-                                [% IF custom_cover_image_url %]
-                                    <div class="cover-image" id="custom-coverimg">
-                                        <a class="custom_cover_image" href="[% custom_cover_image_url | url %]" title="Custom cover image">
-                                            <img id="custom-img" alt="Custom cover image" src="[% custom_cover_image_url | url %]" />
-                                        </a>
-                                        <div class="hint">Custom cover image</div>
-                                    </div>
-                                [% END %]
-                            [% END %]
-                        </div>
-                        <!-- /.cover-slider --> </div
+ [% IF Koha.Preference('OPACCustomCoverImages') && Koha.Preference('CustomCoverImagesURL') %]
+ [% SET custom_cover_image_url = biblio.custom_cover_image_url %]
+ [% IF custom_cover_image_url %]
+ <div class="cover-image" id="custom-coverimg">
+ <a class="custom_cover_image" href="[% custom_cover_image_url | url %]" title="Ảnh bìa tùy chỉnh">
+ <img alt="Ảnh bìa tùy chỉnh" id="custom-img" src="[% custom_cover_image_url | url %]" />
+ </a>
+ <div class="hint">Ảnh bìa tùy chỉnh</div>
+ </div>
+ [% END %]
+ [% END %]
+ </div>
+ <!-- /.cover-slider --> </div
                     ><!-- / .bookcover -->
 
-                    <abbr class="unapi-id" title="koha:biblionumber:[% biblio.biblionumber | html %]"><!-- unAPI --></abbr>
-                    [% IF ( ocoins ) # COinS / Openurl %]
-                        <span class="Z3988" title="[% ocoins | html %]"></span>
-                    [% END %]
+ <abbr class="unapi-id" title="koha:biblionumber:[% biblio.biblionumber | html %]"><!-- unAPI --></abbr>
+ [% IF ( ocoins ) # COinS / Openurl %]
+ <span class="Z3988" title="[% ocoins | html %]"></span>
+ [% END %]
 
-                    [% XSLTBloc | $raw %]
+ [% XSLTBloc | $raw %]
 
-                    [% IF ( !item_level_itypes || Koha.Preference('BiblioItemtypeInfo') ) %]
-                        <span class="results_summary itemtype"
-                            ><span class="label">Item type: </span>
-                            [% IF ( imageurl && !Koha.Preference('OpacNoItemTypeImages') ) %]
-                                <img class="itemtype-image" src="[% imageurl | html %]" alt="" />
-                            [% END %]
-                            [% IF ( description ) %]
-                                <span class="itypetext">[% description | html %]</span>
-                            [% ELSE %]
-                                <span class="itypetext">[% itemtype | html %]</span>
-                            [% END %]
-                        </span>
-                    [% END %]
+ [% IF ( !item_level_itypes || Koha.Preference('BiblioItemtypeInfo') ) %]
+ <span class="results_summary itemtype"
+                            ><span class="label">Kiểu tài liệu: </span>
+ [% IF ( imageurl && !Koha.Preference('OpacNoItemTypeImages') ) %]
+ <img class="itemtype-image" src="[% imageurl | html %]" alt="" />
+ [% END %]
+ [% IF ( description ) %]
+ <span class="itypetext">[% description | html %]</span>
+ [% ELSE %]
+ <span class="itypetext">[% itemtype | html %]</span>
+ [% END %]
+ </span>
+ [% END %]
 
-                    [% IF ( LibraryThingForLibrariesID ) %]
-                        <!-- This puts the LTFL reviews in, and if TabbedView is not set, puts the remaining content above the Tabs instead of in them -->
-                        [% UNLESS ( LibraryThingForLibrariesTabbedView ) %]
-                            <div class="results_summary"><div id="ltfl_related" class="ltfl"></div></div>
-                            <div class="results_summary"><div id="ltfl_similars" class="ltfl"></div></div>
-                            <div class="results_summary"><div id="ltfl_tagbrowse" class="ltfl"></div></div>
-                        [% END %]
-                        <span class="results_summary">
-                            <span class="label">Reviews from LibraryThing.com:</span>
-                            <span style="display: block;" class="ltfl_reviews"></span>
-                        </span>
-                    [% END # / LibraryThingForLibrariesID %]
+ [% IF ( LibraryThingForLibrariesID ) %]
+ [% UNLESS ( LibraryThingForLibrariesTabbedView ) %]
+ <div class="results_summary"><div id="ltfl_related" class="ltfl"></div></div>
+ <div class="results_summary"><div id="ltfl_similars" class="ltfl"></div></div>
+ <div class="results_summary"><div id="ltfl_tagbrowse" class="ltfl"></div></div>
+ [% END %]
+ <span class="results_summary">
+ <span class="label">Đánh giá từ LibraryThing.com:</span>
+ <span style="display: block;" class="ltfl_reviews"></span>
+ </span>
+ [% END # / LibraryThingForLibrariesID %]
 
-                    [% IF shelves.count %]
-                        <!--This grabs all of the lists a bib record appears in -->
-                        <span class="results_summary lists"
-                            ><span class="label">List(s) this item appears in: </span>
-                            [% FOREACH s IN shelves %]
-                                <a href="/cgi-bin/koha/opac-shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber | uri %]">[% s.shelfname | html %]</a>
-                                [% IF ( loop.last ) %][% ELSE %]|[% END %]
-                            [% END %]
-                        </span>
-                    [% END %]
+ [% IF shelves.count %]
+ <span class="results_summary lists"
+                            ><span class="label">Danh sách: </span>
+ [% FOREACH s IN shelves %]
+ <a href="/cgi-bin/koha/opac-shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber | uri %]">[% s.shelfname | html %]</a>
+ [% IF ( loop.last ) %][% ELSE %]|[% END %]
+ [% END %]
+ </span>
+ [% END %]
 
-                    [% IF ( TagsShowEnabled ) %]
-                        <div class="results_summary tags">
-                            [% IF ( TagLoop ) %]
-                                <span class="label">Tags from this library:</span>
-                                <ul id="tagslist">
-                                    [% FOREACH TagLoo IN TagLoop %]
-                                        <li
+ [% IF ( TagsShowEnabled && ( TagLoop || ( TagsInputEnabled && loggedinusername ) ) ) %]
+ <div class="results_summary tags">
+ [% IF ( TagLoop ) %]
+ <span class="label">Từ khóa:</span>
+ <ul id="tagslist">
+ [% FOREACH TagLoo IN TagLoop %]
+ <li
                                             ><a href="/cgi-bin/koha/opac-search.pl?tag=[% TagLoo.term | uri %]&amp;q=[% TagLoo.term | uri %]">[% TagLoo.term | html %]</a> <span class="weight">([% TagLoo.weight_total | html %])</span>
-                                            [% IF ( loop.last ) %][% ELSE %],[% END %]
-                                        </li>
-                                    [% END %]
-                                </ul>
-                            [% ELSE %]
-                                <span class="label">Tags from this library:</span>
-                                <span class="notags">No tags from this library for this title.</span>
-                            [% END # / IF ( TagLoop ) %]
-                            [% IF ( TagsInputEnabled ) %]
-                                [% IF ( loggedinusername ) %]
-                                    <a class="tag_add btn btn-sm btn-link" id="tag_add[% biblio.biblionumber | html %]" href="#"><i class="fa fa-tag" aria-hidden="true"></i> Add tag(s)</a>
-                                [% ELSE %]
-                                    <span class="login4tags">
-                                        [% IF Koha.Preference('casAuthentication') %]
-                                            [%# CAS authentication is too complicated for modal window %]
-                                            <a href="/cgi-bin/koha/opac-user.pl">Log in to add tags.</a>
-                                        [% ELSE %]
-                                            <a class="loginModal-trigger" data-bs-toggle="modal" role="button" href="/cgi-bin/koha/opac-user.pl">Log in to add tags.</a>
-                                        [% END %]
-                                    </span>
-                                [% END # / IF ( loggedinusername ) %]
-                            [% END # / IF ( TagsInputEnabled ) %]
-                        </div>
-                        <!-- /.results_summary.tags -->
-                    [% END # /IF TagsShowEnabled %]
+ [% IF ( loop.last ) %][% ELSE %],[% END %]
+ </li>
+ [% END %]
+ </ul>
+ [% END # / IF ( TagLoop ) %]
+ [% IF ( TagsInputEnabled && loggedinusername ) %]
+ <a class="tag_add btn btn-sm btn-link" id="tag_add[% biblio.biblionumber | html %]" href="#">+ Thêm thẻ</a>
+ [% END %]
+ </div>
+ <!-- /.results_summary.tags -->
+ [% END # /IF TagsShowEnabled %]
 
-                    [% IF ( TagsInputEnabled ) %]
-                        [% IF ( loggedinusername ) %]
-                            <form id="tagform[% biblio.biblionumber | html %]" method="post" action="/cgi-bin/koha/opac-tags.pl" style="display:none;">
-                                [% INCLUDE 'csrf-token.inc' %]
-                                <legend class="visually-hidden">Tags</legend>
-                                <div class="form-row">
-                                    <div class="col-3">
-                                        <label for="newtag[% biblio.biblionumber | html %]">New tag(s), separated by a comma:</label>
-                                    </div>
-                                    <!-- /.col-3 -->
-                                    <div class="col-6">
-                                        <p class="emoji-picker-container">
-                                            <input name="newtag[% biblio.biblionumber | html %]" id="newtag[% biblio.biblionumber | html %]" type="text" maxlength="100" data-emojiable="true" data-emoji-input="unicode" />
-                                        </p>
-                                    </div>
-                                    <!-- /.col-6 -->
-                                    <div class="col-auto">
-                                        <input type="hidden" name="op" value="cud-add" />
-                                        <input name="tagbutton" class="btn btn-sm btn-primary tagbutton" title="[% biblio.biblionumber | html %]" type="submit" value="Add" />
-                                        <a class="cancel_tag_add" id="cancel[% biblio.biblionumber | html %]" href="#">(done)</a>
-                                        <span id="newtag[% biblio.biblionumber | html %]_status" class="tagstatus" style="display:none;"> Tag status here. </span>
-                                    </div>
-                                    <!-- /.col-auto -->
-                                </div>
-                                <!-- /.form-row -->
-                            </form>
-                        [% END # / IF ( loggedinusername ) %]
-                    [% END # / IF TagsInputEnabled %]
+ [% IF ( TagsInputEnabled ) %]
+ [% IF ( loggedinusername ) %]
+ <form id="tagform[% biblio.biblionumber | html %]" method="post" action="/cgi-bin/koha/opac-tags.pl" style="display:none;">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Thẻ</legend>
+ <div class="form-row">
+ <div class="col-3">
+ <label for="newtag[% biblio.biblionumber | html %]">Nhập thẻ (cách bằng dấu phẩy):</label>
+ </div>
+ <!-- /.col-3 -->
+ <div class="col-6">
+ <p class="emoji-picker-container">
+ <input name="newtag[% biblio.biblionumber | html %]" id="newtag[% biblio.biblionumber | html %]" type="text" maxlength="100" data-emojiable="true" data-emoji-input="unicode" />
+ </p>
+ </div>
+ <!-- /.col-6 -->
+ <div class="col-auto">
+ <input type="hidden" name="op" value="cud-add" />
+ <input class="btn btn-sm btn-primary tagbutton" name="tagbutton" title="[% biblio.biblionumber | html %]" type="submit" value="Thêm" />
+ <a class="cancel_tag_add" id="cancel[% biblio.biblionumber | html %]" href="#">(đóng)</a>
+ <span id="newtag[% biblio.biblionumber | html %]_status" class="tagstatus" style="display:none;"></span>
+ </div>
+ <!-- /.col-auto -->
+ </div>
+ <!-- /.form-row -->
+ </form>
+ [% END # / IF ( loggedinusername ) %]
+ [% END # / IF TagsInputEnabled %]
 
-                    [% IF ( SyndeticsEnabled ) %]
-                        [% IF ( SyndeticsSeries && SyndeticsSERIES1Exists ) %]
-                            <span class="results_summary">
-                                <span class="label">Series information:</span>
-                                <a
+ [% IF ( SyndeticsEnabled ) %]
+ [% IF ( SyndeticsSeries && SyndeticsSERIES1Exists ) %]
+ <span class="results_summary">
+ <span class="label">Tùng thư:</span>
+ <a
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/ffseries.aspx?isbn=[% normalized_isbn | uri %]&amp;type=series&amp;num=1&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]"
-                                    >Click to open in new window</a
+                                    >Mở liên kết</a
                                 >
-                            </span>
-                        [% END # / IF SyndeticsSeries && SyndeticsSERIES1Exists %]
-                        [% IF ( SyndeticsAVPROFILEExists ) %]
-                            <span class="results_summary">
-                                <span class="label">Audiovisual profile:</span>
-                                <a
+ </span>
+ [% END # / IF SyndeticsSeries && SyndeticsSERIES1Exists %]
+ [% IF ( SyndeticsAVPROFILEExists ) %]
+ <span class="results_summary">
+ <span class="label">Hồ sơ nghe nhìn:</span>
+ <a
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/avprofile.html&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]&amp;type=xw10"
-                                    >Click to open in new window</a
+                                    >Mở liên kết</a
                                 >
-                            </span>
-                        [% END # / IF SyndeticsAVPROFILEExists %]
+ </span>
+ [% END # / IF SyndeticsAVPROFILEExists %]
 
-                        [% IF ( SyndeticsFICTIONExists ) %]
-                            <span class="results_summary">
-                                <span class="label">Fiction notes:</span>
-                                <a
+ [% IF ( SyndeticsFICTIONExists ) %]
+ <span class="results_summary">
+ <span class="label">Ghi chú:</span>
+ <a
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/index.aspx?isbn=[% normalized_isbn | uri %]/fiction.html&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]&amp;type=xw10"
-                                    >Click to open in new window</a
+                                    >Mở liên kết</a
                                 >
-                            </span>
-                        [% END # / IF SyndeticsFICTIONExists %]
+ </span>
+ [% END # / IF SyndeticsFICTIONExists %]
 
-                        [% IF ( SyndeticsAwards && SyndeticsAWARDS1Exists ) %]
-                            <span class="results_summary">
-                                <span class="label">Awards:</span>
-                                <a
+ [% IF ( SyndeticsAwards && SyndeticsAWARDS1Exists ) %]
+ <span class="results_summary">
+ <span class="label">Giải thưởng:</span>
+ <a
                                     target="_blank"
                                     rel="noreferrer"
                                     href="https://secure.syndetics.com/ffawards.aspx?isbn=[% normalized_isbn | uri %]&amp;type=awards&amp;client=[% SyndeticsClientCode | uri %][% IF ( normalized_upc ) %]&amp;upc=[% normalized_upc | uri %][% END %][% IF ( normalized_oclc ) %]&amp;oclc=[% normalized_oclc | uri %][% END %]"
-                                    >Click to open in new window</a
+                                    >Mở liên kết</a
                                 >
-                            </span>
-                        [% END # / IF SyndeticsAwards && SyndeticsAWARDS1Exists %]
-                    [% END # / IF SyndeticsEnabled %]
+ </span>
+ [% END # / IF SyndeticsAwards && SyndeticsAWARDS1Exists %]
+ [% END # / IF SyndeticsEnabled %]
 
-                    [%# Following on one line due to translation issues %]
-                    [% INCLUDE "openlibrary-readapi.inc" bib = { normalized_isbn => normalized_isbn,lccn => lccn, normalized_oclc => normalized_oclc } %]
+ [%# Following on one line due to translation issues %]
+ [% INCLUDE "openlibrary-readapi.inc" bib = { normalized_isbn => normalized_isbn,lccn => lccn, normalized_oclc => normalized_oclc } %]
 
-                    [% IF ( OpacStarRatings != 'disable' ) %]
-                        <form method="post" action="/cgi-bin/koha/opac-ratings.pl">
-                            [% INCLUDE 'csrf-token.inc' %]
-                            <legend class="visually-hidden">Star ratings</legend>
-                            <div class="results_summary ratings" id="rating-[% biblio.biblionumber | html %]">
-                                [% SET rating_avg = ratings.get_avg_rating() %]
-                                [% rating_avg_int = BLOCK %][% rating_avg | format("%.0f") %][% END %]
+ [% IF ( OpacStarRatings != 'disable' ) %]
+ <form method="post" action="/cgi-bin/koha/opac-ratings.pl">
+ [% INCLUDE 'csrf-token.inc' %]
+ <legend class="visually-hidden">Đánh giá</legend>
+ <div class="results_summary ratings" id="rating-[% biblio.biblionumber | html %]">
+ [% SET rating_avg = ratings.get_avg_rating() %]
+ [% rating_avg_int = BLOCK %][% rating_avg | format("%.0f") %][% END %]
 
-                                <label for="star_rating" class="sr-only">Rate this title from 1 to 5 stars</label>
-                                <select
+ <label for="star_rating" class="sr-only">Đánh giá từ 1 đến 5 sao</label>
+ <select
                                     id="star_rating"
                                     class="star_rating"
                                     name="rating"
                                     [% IF borrowernumber %]data-biblionumber="[% biblio.biblionumber | html %]" data-context="rating-[% biblio.biblionumber | html %]"[% END %]
                                     autocomplete="off"
                                 >
-                                    [% IF ( rating_avg_int == 0 ) %]
-                                        <option value="" selected="selected"></option>
-                                    [% END %]
-                                    [% FOREACH i IN [ 1 2 3 4 5  ] %]
-                                        [% IF rating_avg_int == i %]
-                                            <option value="[% i | html %]" selected="selected">[% i | html %]</option>
-                                        [% ELSE %]
-                                            <option value="[% i | html %]">[% i | html %]</option>
-                                        [% END %]
-                                    [% END %]
-                                </select>
-                                <img id="rating-loading" class="rating-loading" style="display:none" src="[% interface | html %]/[% theme | html %]/images/spinner-small.gif" alt="" />
+ [% IF ( rating_avg_int == 0 ) %]
+ <option value="" selected="selected"></option>
+ [% END %]
+ [% FOREACH i IN [ 1 2 3 4 5  ] %]
+ [% IF rating_avg_int == i %]
+ <option value="[% i | html %]" selected="selected">[% i | html %]</option>
+ [% ELSE %]
+ <option value="[% i | html %]">[% i | html %]</option>
+ [% END %]
+ [% END %]
+ </select>
+ <img id="rating-loading" class="rating-loading" style="display:none" src="[% interface | html %]/[% theme | html %]/images/spinner-small.gif" alt="" />
 
-                                <!-- define some hidden vars for ratings -->
+ <input type="hidden" name="op" value="cud-add" />
+ <input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />
+ <input type="hidden" name="rating_value" id="rating_value" class="rating_value" value="[% my_rating.rating_value | html %]" />
 
-                                <input type="hidden" name="op" value="cud-add" />
-                                <input type="hidden" name="biblionumber" value="[% biblio.biblionumber | html %]" />
-                                <input type="hidden" name="rating_value" id="rating_value" class="rating_value" value="[% my_rating.rating_value | html %]" />
-
-                                [% UNLESS ( rating_readonly ) %]&nbsp; <input name="rate_button" type="submit" value="Rate me" />[% END %]&nbsp;
-                                [% IF my_rating %]
-                                    <span id="rating_value_text" class="rating_value_text">Your rating: [% my_rating.rating_value | html %].</span>
-                                    <span id="cancel_rating_text" class="cancel_rating_text"
-                                        ><a href="#" data-context="star_rating"><i class="fa fa-times" aria-hidden="true"></i> Cancel rating.</a></span
+ [% UNLESS ( rating_readonly ) %]&nbsp; <input name="rate_button" type="submit" value="Đánh giá" />[% END %]&nbsp;
+ [% IF my_rating %]
+ <span id="rating_value_text" class="rating_value_text">Bạn chọn: [% my_rating.rating_value | html %] sao.</span>
+ <span id="cancel_rating_text" class="cancel_rating_text"
+                                        ><a href="#" data-context="star_rating">Hủy</a></span
                                     >
-                                [% ELSE %]
-                                    <span id="rating_value_text" class="rating_value_text"></span>
-                                    <span id="cancel_rating_text" class="cancel_rating_text" style="display: none;"
-                                        ><a href="#" data-context="star_rating"><i class="fa fa-times" aria-hidden="true"></i> Cancel rating.</a></span
+ [% ELSE %]
+ <span id="rating_value_text" class="rating_value_text"></span>
+ <span id="cancel_rating_text" class="cancel_rating_text" style="display: none;"
+                                        ><a href="#" data-context="star_rating">Hủy</a></span
                                     >
-                                [% END %]
+ [% END %]
 
-                                <span id="rating_text" class="rating_text">Average rating: [% rating_avg | html %] ([% ratings.count | html %] votes)</span>
-                            </div>
-                        </form>
-                    [% END # / IF OpacStarRatings != 'disable' %]
+ <span id="rating_text" class="rating_text">Trung bình: [% rating_avg | html %] ([% ratings.count | html %])</span>
+ </div>
+ </form>
+ [% END # / IF OpacStarRatings != 'disable' %]
 
-                    [% IF ( NovelistSelectProfile && (normalized_isbn || normalized_upc) ) %]
-                        [% IF ( NovelistSelectView == 'above') %]
-                            <span class="results_summary NovelistSelect" style="display:none;">
-                                <span class="label">Novelist Select: </span>
-                                <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
-                            </span>
-                        [% END %]
-                    [% END # / IF NovelistSelectProfile %]
+ [% IF ( NovelistSelectProfile && (normalized_isbn || normalized_upc) ) %]
+ [% IF ( NovelistSelectView == 'above') %]
+ <span class="results_summary NovelistSelect" style="display:none;">
+ <span class="label">Gợi ý NoveList: </span>
+ <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
+ </span>
+ [% END %]
+ [% END # / IF NovelistSelectProfile %]
 
-                    [% IF ( Babeltheque ) %]
-                        <input type="hidden" name="BW_id_isbn" id="BW_id_isbn" value="[% normalized_isbn | html %]" />
-                        <div id="BW_notes"></div>
-                        <div id="BW_critiques"></div>
-                        <div id="BW_critiques_pro"></div>
-                        <div id="BW_citations"></div>
-                    [% END # / IF Babeltheque %]
-                </div>
-                <!-- / #catalogue_detail_biblio -->
+ [% IF ( Babeltheque ) %]
+ <input type="hidden" name="BW_id_isbn" id="BW_id_isbn" value="[% normalized_isbn | html %]" />
+ <div id="BW_notes"></div>
+ <div id="BW_critiques"></div>
+ <div id="BW_critiques_pro"></div>
+ <div id="BW_citations"></div>
+ [% END # / IF Babeltheque %]
+ </div>
+ <!-- / #catalogue_detail_biblio -->
 
-                [% WRAPPER tabs id= "bibliodescriptions" %]
-                    [% WRAPPER tabs_nav %]
-                        [% WRAPPER tab_item tabname= "holdings" %]
-                            [% BLOCK holding_tab_title %]
-                                [% IF SeparateHoldings %]
-                                    <span>[% Branches.GetLoggedInBranchname | html %] holdings</span>
-                                [% ELSE %]
-                                    [% IF specific_item %]
-                                        <span>Item details</span>
-                                    [% ELSE %]
-                                        <span>Holdings</span>
-                                    [% END %]
-                                [% END %]
-                            [% END %]
-                            [% PROCESS holding_tab_title %]
-                            [% UNLESS too_many_items OR specific_item %][% ' ( ' _ (itemloop.size || 0) _ ' )' | html %][% END %]
-                        [% END %]
+ [% WRAPPER tabs id= "bibliodescriptions" %]
+ [% WRAPPER tabs_nav %]
+ [% WRAPPER tab_item tabname= "holdings" %]
+ [% BLOCK holding_tab_title %]
+ [% IF SeparateHoldings %]
+ <span>[% Branches.GetLoggedInBranchname | html %]</span>
+ [% ELSE %]
+ [% IF specific_item %]
+ <span>Chi tiết bản sách</span>
+ [% ELSE %]
+ <span>Bản tài liệu</span>
+ [% END %]
+ [% END %]
+ [% END %]
+ [% PROCESS holding_tab_title %]
+ [% UNLESS too_many_items OR specific_item %][% ' (' _ (itemloop.size || 0) _ ')' | html %][% END %]
+ [% END %]
 
-                        [% IF (SeparateHoldings) %]
-                            [% WRAPPER tab_item tabname= "otherholdings" %]
-                                <span>Other holdings [% ' ( ' _ (otheritemloop.size || 0) _ ' )' | html %]</span>
-                            [% END %]
-                        [% END %]
+ [% IF (SeparateHoldings) %]
+ [% WRAPPER tab_item tabname= "otherholdings" %]
+ <span>Thư viện khác [% '(' _ (otheritemloop.size || 0) _ ')' | html %]</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( MARCNOTES || ( SyndeticsEnabled && SyndeticsSummary && SYNDETICS_SUMMARY )) %]
-                            [% WRAPPER tab_item tabname= "descriptions" %]
-                                [% SET title_notes_count = 0 %]
-                                [% IF MARCNOTES %]
-                                    [% SET title_notes_count = MARCNOTES.size %]
-                                [% END %]
-                                [% IF SYNDETICS_SUMMARY %][% SET title_notes_count = title_notes_count + 1 %][% END %]
-                                <span>Title notes ( [% title_notes_count | html %] )</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( MARCNOTES || ( SyndeticsEnabled && SyndeticsSummary && SYNDETICS_SUMMARY )) %]
+ [% WRAPPER tab_item tabname= "descriptions" %]
+ [% SET title_notes_count = 0 %]
+ [% IF MARCNOTES %]
+ [% SET title_notes_count = MARCNOTES.size %]
+ [% END %]
+ [% IF SYNDETICS_SUMMARY %][% SET title_notes_count = title_notes_count + 1 %][% END %]
+ <span>Mô tả ([% title_notes_count | html %])</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ComponentParts && ComponentParts.size %]
-                            [% WRAPPER tab_item tabname= "components" %]
-                                <span>Components ([% ComponentParts.size | html %])</span>
-                            [% END %]
-                        [% END %]
+ [% IF ComponentParts && ComponentParts.size %]
+ [% WRAPPER tab_item tabname= "components" %]
+ <span>Thành phần ([% ComponentParts.size | html %])</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( SYNDETICS_TOC ) %]
-                            [% WRAPPER tab_item tabname= "toc" %]
-                                <span>TOC</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( SYNDETICS_TOC ) %]
+ [% WRAPPER tab_item tabname= "toc" %]
+ <span>Mục lục</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( SyndeticsEnabled ) %]
-                            [% IF ( SyndeticsExcerpt && SYNDETICS_EXCERPT ) %]
-                                [% WRAPPER tab_item tabname= "excerpt" %]
-                                    <span>Excerpt</span>
-                                [% END %]
-                            [% END %]
-                            [% IF ( ( SyndeticsReviews && SYNDETICS_REVIEWS ) || ( LibraryThingForLibrariesTabbedView && LibraryThingForLibrariesID) ) %]
-                                [% WRAPPER tab_item tabname= "reviews" %]
-                                    <span>Reviews</span>
-                                [% END %]
-                                [% IF ( LibraryThingForLibrariesID ) %]
-                                    <li id="tab_LTFLreviews">
-                                        <script src="https://www.librarything.com/forlibraries/widget.js?id=[% LibraryThingForLibrariesID | html %]">
+ [% IF ( SyndeticsEnabled ) %]
+ [% IF ( SyndeticsExcerpt && SYNDETICS_EXCERPT ) %]
+ [% WRAPPER tab_item tabname= "excerpt" %]
+ <span>Đoạn trích</span>
+ [% END %]
+ [% END %]
+ [% IF ( ( SyndeticsReviews && SYNDETICS_REVIEWS ) || ( LibraryThingForLibrariesTabbedView && LibraryThingForLibrariesID) ) %]
+ [% WRAPPER tab_item tabname= "reviews" %]
+ <span>Bài phê bình</span>
+ [% END %]
+ [% IF ( LibraryThingForLibrariesID ) %]
+ <li id="tab_LTFLreviews">
+ <script src="https://www.librarything.com/forlibraries/widget.js?id=[% LibraryThingForLibrariesID | html %]">
 </script>
-                                        <noscript
-                                            >This page contains enriched content visible when JavaScript is enabled or by clicking
-                                            <a href="https://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID | uri %]&amp;accessibility=1">here</a>.</noscript
+ <noscript
+                                            >Trang này chứa nội dung bổ sung, hiển thị khi JavaScript được bật hoặc bằng cách nhấp vào <a href="https://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID | uri %]&amp;accessibility=1">tại đây</a>.</noscript
                                         >
-                                    </li>
-                                [% END %]
-                            [% END %]
-                            [% IF ( SyndeticsAuthorNotes && SYNDETICS_ANOTES ) %]
-                                [% WRAPPER tab_item tabname= "anotes" %]
-                                    <span>About the author</span>
-                                [% END %]
-                            [% END %]
-                        [% END # / IF SyndeticsEnabled %]
+ </li>
+ [% END %]
+ [% END %]
+ [% IF ( SyndeticsAuthorNotes && SYNDETICS_ANOTES ) %]
+ [% WRAPPER tab_item tabname= "anotes" %]
+ <span>Về tác giả</span>
+ [% END %]
+ [% END %]
+ [% END # / IF SyndeticsEnabled %]
 
-                        [% IF ( LibraryThingForLibrariesID && LibraryThingForLibrariesTabbedView ) %]
-                            [% WRAPPER tab_item tabname= "LFTLSimilarItems" %]
-                                <span>Similar items</span>
-                            [% END %]
-                            [% WRAPPER tab_item tabname= "LTFLTagBrowse" %]
-                                <span>Tag browser</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( LibraryThingForLibrariesID && LibraryThingForLibrariesTabbedView ) %]
+ [% WRAPPER tab_item tabname= "LFTLSimilarItems" %]
+ <span>Tài liệu tương tự</span>
+ [% END %]
+ [% WRAPPER tab_item tabname= "LTFLTagBrowse" %]
+ <span>Duyệt theo thẻ</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( subscriptionsnumber ) %]
-                            [% WRAPPER tab_item tabname= "subscriptions" %]
-                                <span>Subscriptions ( [% subscriptionsnumber | html %] )</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( subscriptionsnumber ) %]
+ [% WRAPPER tab_item tabname= "subscriptions" %]
+ <span>Đăng ký mua ( [% subscriptionsnumber | html %] )</span>
+ [% END %]
+ [% END %]
 
-                        [% IF Koha.Preference( 'OPACComments' ) == 1 %]
-                            [% WRAPPER tab_item tabname= "comments" %]
-                                <span>Comments[% ' ( ' _ (reviews.size || 0) _ ' )' | html %]</span>
-                            [% END %]
-                        [% END %]
+ [% IF Koha.Preference( 'OPACComments' ) == 1 %]
+ [% WRAPPER tab_item tabname= "comments" %]
+ <span>Bình luận[% ' ( ' _ (reviews.size || 0) _ ' )' | html %]</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( NovelistSelectProfile && (normalized_isbn || normalized_upc) ) %]
-                            [% IF ( NovelistSelectView == 'tab') %]
-                                [% WRAPPER tab_item tabname= "NovelistSelect" %]
-                                    <span>Novelist Select</span>
-                                [% END %]
-                            [% END %]
-                        [% END %]
+ [% IF ( NovelistSelectProfile && (normalized_isbn || normalized_upc) ) %]
+ [% IF ( NovelistSelectView == 'tab') %]
+ [% WRAPPER tab_item tabname= "NovelistSelect" %]
+ <span>Novelist Select</span>
+ [% END %]
+ [% END %]
+ [% END %]
 
-                        [% IF ( OPACFRBRizeEditions && XISBNS ) %]
-                            [% WRAPPER tab_item tabname= "editions" %]
-                                <span>Editions</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( OPACFRBRizeEditions && XISBNS ) %]
+ [% WRAPPER tab_item tabname= "editions" %]
+ <span>Các phiên bản xuất bản</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( serialcollection ) %]
-                            [% WRAPPER tab_item tabname= "serialcollection" %]
-                                <span>Serial collection</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( serialcollection ) %]
+ [% WRAPPER tab_item tabname= "serialcollection" %]
+ <span>Bộ sưu tập ấn phẩm định kỳ</span>
+ [% END %]
+ [% END %]
 
-                        [% IF ( OPACLocalCoverImages && localimages.count ) %]
-                            [% WRAPPER tab_item tabname= "images" %]
-                                <span>Images</span>
-                            [% END %]
-                        [% END %]
+ [% IF ( OPACLocalCoverImages && localimages.count ) %]
+ [% WRAPPER tab_item tabname= "images" %]
+ <span>Hình ảnh</span>
+ [% END %]
+ [% END %]
 
-                        [% IF HTML5MediaEnabled && HTML5MediaSets.size %]
-                            [% WRAPPER tab_item tabname= "html5media" %]
-                                <span>Play media</span>
-                            [% END %]
-                        [% END %]
+ [% IF HTML5MediaEnabled && HTML5MediaSets.size %]
+ [% WRAPPER tab_item tabname= "html5media" %]
+ <span>Phát tập tin phương tiện</span>
+ [% END %]
+ [% END %]
 
-                        [% IF Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ) && author_information.size %]
-                            [% WRAPPER tab_item tabname= "author_identifiers_info" %]
-                                [% IF Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ) && author_information.size %]
-                                    <span>Author information</span>
-                                [% END %]
-                            [% END %]
-                        [% END %]
-                    [% END # /WRAPPER tabs_nav %]
+ [% IF Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ) && author_information.size %]
+ [% WRAPPER tab_item tabname= "author_identifiers_info" %]
+ [% IF Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ) && author_information.size %]
+ <span>Thông tin tác giả</span>
+ [% END %]
+ [% END %]
+ [% END %]
+ [% END # /WRAPPER tabs_nav %]
 
-                    [% WRAPPER tab_panels %]
-                        [% IF ( serialcollection ) %]
-                            [% WRAPPER tab_panel tabname="serialcollection" %]
-                                <table id="serialcollectiont" class="table table-bordered table-striped">
-                                    <caption class="visually-hidden">Serial collections</caption>
-                                    <thead>
-                                        <tr>
-                                            <th id="serial_library">Library</th>
-                                            <th id="serial_collection">Serial collection</th>
-                                            <th id="serial_itemcallnumber">Item call number</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        [% FOREACH serialcollection IN serialcollections %]
-                                            <tr>
-                                                <td>[% serialcollection.branch | html %]</td>
-                                                <td>[% serialcollection.text | html %]</td>
-                                                <td>[% serialcollection.itemcallnumber | html %]</td>
-                                            </tr>
-                                        [% END %]
-                                    </tbody>
-                                </table>
-                            [% END # /tab_panel#serialcollection %]
-                        [% END # / IF serialcollection %]
+ [% WRAPPER tab_panels %]
+ [% IF ( serialcollection ) %]
+ [% WRAPPER tab_panel tabname="serialcollection" %]
+ <table id="serialcollectiont" class="table table-bordered table-striped">
+ <caption class="visually-hidden">Các bộ sưu tập ấn phẩm định kỳ</caption>
+ <thead>
+ <tr>
+ <th id="serial_library">Thư viện</th>
+ <th id="serial_collection">Bộ sưu tập ấn phẩm định kỳ</th>
+ <th id="serial_itemcallnumber">Ký hiệu xếp giá tài liệu</th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH serialcollection IN serialcollections %]
+ <tr>
+ <td>[% serialcollection.branch | html %]</td>
+ <td>[% serialcollection.text | html %]</td>
+ <td>[% serialcollection.itemcallnumber | html %]</td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
+ [% END # /tab_panel#serialcollection %]
+ [% END # / IF serialcollection %]
 
-                        [% WRAPPER tab_panel tabname="holdings" %]
-                            [% IF too_many_items %]
-                                <p>This record has many physical items ([% items_count | html %]). <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;viewallitems=1">View all the physical items.</a></p>
-                            [% ELSIF ( itemloop.size ) %]
-                                [% INCLUDE items_table items=itemloop tab="holdings" table_id="holdingst" %]
-                                [% IF specific_item %]
-                                    <p><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Show all items</a></p>
-                                [% ELSE %]
-                                    [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
-                                        [% IF acquisition_details.total_quantity == 1 %]
-                                            <span>1 item is on order.</span>
-                                        [% ELSE %]
-                                            <span>[% acquisition_details.total_quantity | html %] items are on order.</span>
-                                        [% END %]
-                                    [% END %]
-                                    [% IF holds_count.defined || priority %]
-                                        <div id="bib_holds">
-                                            [% IF holds_count.defined %]
-                                                <span>Total holds: [% holds_count | html %]</span>
-                                            [% END %]
-                                            [% IF priority %]
-                                                [% IF holds_count.defined %]
-                                                    <span>(priority [% priority | html %])</span>
-                                                [% ELSE %]
-                                                    <span>Overall queue priority: [% priority | html %]</span>
-                                                [% END %]
-                                            [% END %]
-                                        </div>
-                                    [% END %]
-                                [% END # /IF specific_item %]
-                            [% ELSE %]
-                                [% IF ( ALTERNATEHOLDINGS ) %]
-                                    [% FOREACH ALTERNATEHOLDING IN ALTERNATEHOLDINGS %]
-                                        <div id="alternateholdings"><span class="holdings_label">Holdings:</span> [% ALTERNATEHOLDING.holding | html %]</div>
-                                    [% END %]
-                                [% ELSE %]
-                                    [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
-                                        [% IF acquisition_details.total_quantity == 1 %]
-                                            <span>1 item is on order.</span>
-                                        [% ELSE %]
-                                            <span>[% acquisition_details.total_quantity | html %] items are on order.</span>
-                                        [% END %]
-                                    [% ELSE %]
-                                        <div id="noitems">No physical items for this record</div>
-                                    [% END %]
-                                [% END %]
-                            [% END # IF itemloop.size %]
-                            [% PROCESS 'shelfbrowser.inc' %]
-                            [% INCLUDE shelfbrowser tab='holdings' %]
-                        [% END # /tab_panel#holdings %]
+ [% WRAPPER tab_panel tabname="holdings" %]
+ [% IF too_many_items %]
+ <p>Biểu ghi này có nhiều bản tài liệu vật lý ([% items_count | html %]). <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;viewallitems=1">Xem tất cả các bản tài liệu vật lý.</a></p>
+ [% ELSIF ( itemloop.size ) %]
+ [% INCLUDE items_table items=itemloop tab="holdings" table_id="holdingst" %]
+ [% IF specific_item %]
+ <p><a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">Hiển thị tất cả tài liệu</a></p>
+ [% ELSE %]
+ [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
+ [% IF acquisition_details.total_quantity == 1 %]
+ <span>1 tài liệu đang được đặt mua.</span>
+ [% ELSE %]
+ <span>[% acquisition_details.total_quantity | html %] tài liệu đang được đặt mua.</span>
+ [% END %]
+ [% END %]
+ [% IF holds_count.defined || priority %]
+ <div id="bib_holds">
+ [% IF holds_count.defined %]
+ <span>Tổng số lượt đặt mượn: [% holds_count | html %]</span>
+ [% END %]
+ [% IF priority %]
+ [% IF holds_count.defined %]
+ <span>(thứ tự ưu tiên [% priority | html %])</span>
+ [% ELSE %]
+ <span>Thứ tự ưu tiên trong hàng chờ tổng thể: [% priority | html %]</span>
+ [% END %]
+ [% END %]
+ </div>
+ [% END %]
+ [% END # /IF specific_item %]
+ [% ELSE %]
+ [% IF ( ALTERNATEHOLDINGS ) %]
+ [% FOREACH ALTERNATEHOLDING IN ALTERNATEHOLDINGS %]
+ <div id="alternateholdings"><span class="holdings_label">Bản tài liệu hiện có:</span> [% ALTERNATEHOLDING.holding | html %]</div>
+ [% END %]
+ [% ELSE %]
+ [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
+ [% IF acquisition_details.total_quantity == 1 %]
+ <span>1 tài liệu đang được đặt mua.</span>
+ [% ELSE %]
+ <span>[% acquisition_details.total_quantity | html %] tài liệu đang được đặt mua.</span>
+ [% END %]
+ [% ELSE %]
+ <div id="noitems">Không có bản tài liệu vật lý nào cho biểu ghi này</div>
+ [% END %]
+ [% END %]
+ [% END # IF itemloop.size %]
+ [% PROCESS 'shelfbrowser.inc' %]
+ [% INCLUDE shelfbrowser tab='holdings' %]
+ [% END # /tab_panel#holdings %]
 
-                        [% IF (SeparateHoldings) %]
-                            [% WRAPPER tab_panel tabname="otherholdings" %]
-                                [% IF (otheritemloop.size) %]
-                                    [% INCLUDE items_table items=otheritemloop tab="otherholdings" table_id="otherholdingst" %]
-                                [% ELSE %]
-                                    <span>No other items.</span>
-                                [% END %]
-                                [% INCLUDE shelfbrowser tab='otherholdings' %]
-                            [% END # /tab_panel#otherholdings %]
-                        [% END # / SeparateHoldings %]
+ [% IF (SeparateHoldings) %]
+ [% WRAPPER tab_panel tabname="otherholdings" %]
+ [% IF (otheritemloop.size) %]
+ [% INCLUDE items_table items=otheritemloop tab="otherholdings" table_id="otherholdingst" %]
+ [% ELSE %]
+ <span>Không có tài liệu khác.</span>
+ [% END %]
+ [% INCLUDE shelfbrowser tab='otherholdings' %]
+ [% END # /tab_panel#otherholdings %]
+ [% END # / SeparateHoldings %]
 
-                        [% IF ( MARCNOTES || ( SyndeticsEnabled && SyndeticsSummary && SYNDETICS_SUMMARY )) %]
-                            [% WRAPPER tab_panel tabname="descriptions" %]
-                                <div class="content_set">
-                                    [% IF ( SyndeticsEnabled && SyndeticsSummary && SYNDETICS_SUMMARY ) %]
-                                        <h2>Enhanced descriptions from Syndetics:</h2>
-                                        <p>[% SYNDETICS_SUMMARY | $raw %]</p>
-                                    [% END %]
+ [% IF ( MARCNOTES || ( SyndeticsEnabled && SyndeticsSummary && SYNDETICS_SUMMARY )) %]
+ [% WRAPPER tab_panel tabname="descriptions" %]
+ <div class="content_set">
+ [% IF ( SyndeticsEnabled && SyndeticsSummary && SYNDETICS_SUMMARY ) %]
+ <h2>Mô tả bổ sung từ Syndetics:</h2>
+ <p>[% SYNDETICS_SUMMARY | $raw %]</p>
+ [% END %]
 
-                                    [% IF ( MARCNOTES ) %]
-                                        <div id="marcnotes">
-                                            [% FOREACH MARCNOTE IN MARCNOTES %]
-                                                <p class="marcnote marcnote-[% MARCNOTE.tag | html %]" id="marcnote-[% MARCNOTE.tag | html %]-[% loop.count | html %]">
-                                                    [% IF MARCNOTE.marcnote.match('^https?://\S+$') %]
-                                                        <a href="[% MARCNOTE.marcnote | url %]">[% MARCNOTE.marcnote | html %]</a>
-                                                    [% ELSE %]
-                                                        [% MARCNOTE.marcnote | html | html_line_break %]
-                                                    [% END %]
-                                                </p>
-                                            [% END %]
-                                        </div>
-                                    [% END %]
-                                </div>
-                                <!-- /.content_set -->
-                            [% END # /tab_panel#descriptions %]
-                        [% END # / IF MARCNOTES %]
+ [% IF ( MARCNOTES ) %]
+ <div id="marcnotes">
+ [% FOREACH MARCNOTE IN MARCNOTES %]
+ <p class="marcnote marcnote-[% MARCNOTE.tag | html %]" id="marcnote-[% MARCNOTE.tag | html %]-[% loop.count | html %]">
+ [% IF MARCNOTE.marcnote.match('^https?://\S+$') %]
+ <a href="[% MARCNOTE.marcnote | url %]">[% MARCNOTE.marcnote | html %]</a>
+ [% ELSE %]
+ [% MARCNOTE.marcnote | html | html_line_break %]
+ [% END %]
+ </p>
+ [% END %]
+ </div>
+ [% END %]
+ </div>
+ <!-- /.content_set -->
+ [% END # /tab_panel#descriptions %]
+ [% END # / IF MARCNOTES %]
 
-                        [% IF ComponentParts && ComponentParts.size %]
-                            [% WRAPPER tab_panel tabname="components" %]
-                                <div class="content_set">
-                                    [% FOR PART IN ComponentParts %]
-                                        <div class="component_part"> [% PART | $raw %] </div>
-                                    [% END %]
-                                    [% IF ComponentParts.size == Koha.Preference('MaxComponentRecords') %]
-                                        <p>Only [% ComponentParts.size | html %] results are shown: <a href="/cgi-bin/koha/opac-search.pl?q=[% ComponentPartsQuery | url %]">show all component parts</a></p>
-                                    [% END %]
-                                </div>
-                            [% END # /tab_panel#components %]
-                        [% END %]
+ [% IF ComponentParts && ComponentParts.size %]
+ [% WRAPPER tab_panel tabname="components" %]
+ <div class="content_set">
+ [% FOR PART IN ComponentParts %]
+ <div class="component_part"> [% PART | $raw %] </div>
+ [% END %]
+ [% IF ComponentParts.size == Koha.Preference('MaxComponentRecords') %]
+ <p>Chỉ hiển thị [% ComponentParts.size | html %] kết quả: <a href="/cgi-bin/koha/opac-search.pl?q=[% ComponentPartsQuery | url %]">hiển thị tất cả các bộ phận cấu thành</a></p>
+ [% END %]
+ </div>
+ [% END # /tab_panel#components %]
+ [% END %]
 
-                        [% IF ( SyndeticsEnabled ) %]
-                            [% IF ( SyndeticsTOC && SYNDETICS_TOC ) %]
-                                [% WRAPPER tab_panel tabname="toc" %]
-                                    <div class="content_set">
-                                        <h2>Table of contents provided by Syndetics</h2>
-                                        <ul>
-                                            [% FOREACH SYNDETICS_TO IN SYNDETICS_TOC %]
-                                                <li><strong>[% SYNDETICS_TO.l | html %] [% SYNDETICS_TO.t | html %]</strong>[% IF ( SYNDETICS_TO.p ) %]([% SYNDETICS_TO.p | $raw %])[% END %]</li>
-                                            [% END %]
-                                        </ul>
-                                    </div>
-                                [% END # /tab_panel#toc %]
-                            [% END # / IF SyndeticsTOC && SYNDETICS_TOC %]
+ [% IF ( SyndeticsEnabled ) %]
+ [% IF ( SyndeticsTOC && SYNDETICS_TOC ) %]
+ [% WRAPPER tab_panel tabname="toc" %]
+ <div class="content_set">
+ <h2>Mục lục do Syndetics cung cấp</h2>
+ <ul>
+ [% FOREACH SYNDETICS_TO IN SYNDETICS_TOC %]
+ <li><strong>[% SYNDETICS_TO.l | html %] [% SYNDETICS_TO.t | html %]</strong>[% IF ( SYNDETICS_TO.p ) %]([% SYNDETICS_TO.p | $raw %])[% END %]</li>
+ [% END %]
+ </ul>
+ </div>
+ [% END # /tab_panel#toc %]
+ [% END # / IF SyndeticsTOC && SYNDETICS_TOC %]
 
-                            [% IF ( SyndeticsExcerpt && SYNDETICS_EXCERPT ) %]
-                                [% WRAPPER tab_panel tabname="excerpt" %]
-                                    <div class="content_set">
-                                        <h2>Excerpt provided by Syndetics</h2>
-                                        [% SYNDETICS_EXCERPT | $raw %]
-                                    </div>
-                                [% END # /tab_panel#excerpt %]
-                            [% END # / IF SyndeticsExcerpt && SYNDETICS_EXCERPT %]
+ [% IF ( SyndeticsExcerpt && SYNDETICS_EXCERPT ) %]
+ [% WRAPPER tab_panel tabname="excerpt" %]
+ <div class="content_set">
+ <h2>Trích đoạn do Syndetics cung cấp</h2>
+ [% SYNDETICS_EXCERPT | $raw %]
+ </div>
+ [% END # /tab_panel#excerpt %]
+ [% END # / IF SyndeticsExcerpt && SYNDETICS_EXCERPT %]
 
-                            [% IF ( SyndeticsReviews && SYNDETICS_REVIEWS ) %]
-                                [% WRAPPER tab_panel tabname="reviews" %]
-                                    <div class="content_set">
-                                        <h2>Reviews provided by Syndetics</h2>
-                                        [% FOREACH SYNDETICS_REVIEW IN SYNDETICS_REVIEWS %]
-                                            [% IF ( SYNDETICS_REVIEW.title ) %]
-                                                <h3>[% SYNDETICS_REVIEW.title | html %]</h3>
-                                                [% FOREACH review IN SYNDETICS_REVIEW.reviews %]
+ [% IF ( SyndeticsReviews && SYNDETICS_REVIEWS ) %]
+ [% WRAPPER tab_panel tabname="reviews" %]
+ <div class="content_set">
+ <h2>Đánh giá do Syndetics cung cấp</h2>
+ [% FOREACH SYNDETICS_REVIEW IN SYNDETICS_REVIEWS %]
+ [% IF ( SYNDETICS_REVIEW.title ) %]
+ <h3>[% SYNDETICS_REVIEW.title | html %]</h3>
+ [% FOREACH review IN SYNDETICS_REVIEW.reviews %]
 
-                                                    [% IF ( review.content ) %]
-                                                        [% review.content | $raw %]
-                                                    [% END %]
-                                                [% END %]
-                                            [% END %]
-                                        [% END %]
-                                    </div>
-                                [% END # /tab_panel#reviews %]
-                            [% END # / IF SyndeticsReviews && SYNDETICS_REVIEWS %]
+ [% IF ( review.content ) %]
+ [% review.content | $raw %]
+ [% END %]
+ [% END %]
+ [% END %]
+ [% END %]
+ </div>
+ [% END # /tab_panel#reviews %]
+ [% END # / IF SyndeticsReviews && SYNDETICS_REVIEWS %]
 
-                            [% IF ( SyndeticsAuthorNotes && SYNDETICS_ANOTES ) %]
-                                [% WRAPPER tab_panel tabname="anotes" %]
-                                    <div class="content_set">
-                                        <h2>Author notes provided by Syndetics</h2>
-                                        [% FOREACH SYNDETICS_ANOTE IN SYNDETICS_ANOTES %]
-                                            [% IF ( SYNDETICS_ANOTE.content ) %]
-                                                [% SYNDETICS_ANOTE.content | $raw %]
-                                            [% END %]
-                                        [% END %]
-                                    </div>
-                                [% END # /tab_panel#anotes %]
-                            [% END # / IF SyndeticsReviews && SYNDETICS_REVIEWS %]
-                        [% END # / IF SyndeticsEnabled %]
+ [% IF ( SyndeticsAuthorNotes && SYNDETICS_ANOTES ) %]
+ [% WRAPPER tab_panel tabname="anotes" %]
+ <div class="content_set">
+ <h2>Ghi chú tác giả do Syndetics cung cấp</h2>
+ [% FOREACH SYNDETICS_ANOTE IN SYNDETICS_ANOTES %]
+ [% IF ( SYNDETICS_ANOTE.content ) %]
+ [% SYNDETICS_ANOTE.content | $raw %]
+ [% END %]
+ [% END %]
+ </div>
+ [% END # /tab_panel#anotes %]
+ [% END # / IF SyndeticsReviews && SYNDETICS_REVIEWS %]
+ [% END # / IF SyndeticsEnabled %]
 
-                        [% IF ( NovelistSelectProfile && NovelistSelectView == 'tab' && (normalized_isbn || normalized_upc) ) %]
-                            [% WRAPPER tab_panel tabname="NovelistSelect" %]
-                                <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
-                            [% END # /tab_panel#NovelistSelect %]
-                        [% END # / IF NovelistSelectProfile && NovelistSelectView == 'tab' %]
+ [% IF ( NovelistSelectProfile && NovelistSelectView == 'tab' && (normalized_isbn || normalized_upc) ) %]
+ [% WRAPPER tab_panel tabname="NovelistSelect" %]
+ <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
+ [% END # /tab_panel#NovelistSelect %]
+ [% END # / IF NovelistSelectProfile && NovelistSelectView == 'tab' %]
 
-                        [% IF ( subscriptionsnumber ) %]
-                            [% WRAPPER tab_panel tabname="subscriptions" %]
-                                <h2>This is a serial</h2>
-                                <p class="subscription_count">There are [% subscriptionsnumber | html %] subscription(s) associated with this title.</p>
-                                [% FOREACH subscription IN subscriptions %]
-                                    <div class="subscription">
-                                        [% IF ( subscription.branchcode ) %]
-                                            <h3>At library: [% Branches.GetName( subscription.branchcode ) | html %]</h3>
-                                        [% ELSE %]
-                                            [% IF ( subscription.branchcode ) %]
-                                                <h3>At library: [% subscription.branchcode | html %]</h3>
-                                            [% END %]
-                                        [% END %]
-                                        [% IF ( subscription.closed ) %]
-                                            <p class="subscription_closed">This subscription is closed.</p>
-                                        [% END %]
-                                        [% IF ( subscription.location ) %]
-                                            <p class="subscription_location">Location: [% AuthorisedValues.GetByCode( 'LOC', subscription.location, 1 ) | html %] </p>
-                                        [% END %]
-                                        [% IF ( subscription.callnumber ) %]
-                                            <p class="subscription_callnumber">Call number: [% subscription.callnumber | html %]</p>
-                                        [% END %]
-                                        [% IF ( subscription.subscriptionnotes ) %]
-                                            <p class="subscription_notes">[% subscription.subscriptionnotes | html | html_line_break %] </p>
-                                        [% END %]
-                                        <p class="subscription_dates"
+ [% IF ( subscriptionsnumber ) %]
+ [% WRAPPER tab_panel tabname="subscriptions" %]
+ <h2>Đây là ấn phẩm định kỳ</h2>
+ <p class="subscription_count">Có [% subscriptionsnumber | html %] lượt đăng ký mua liên quan đến nhan đề này.</p>
+ [% FOREACH subscription IN subscriptions %]
+ <div class="subscription">
+ [% IF ( subscription.branchcode ) %]
+ <h3>Tại thư viện: [% Branches.GetName( subscription.branchcode ) | html %]</h3>
+ [% ELSE %]
+ [% IF ( subscription.branchcode ) %]
+ <h3>Tại thư viện: [% subscription.branchcode | html %]</h3>
+ [% END %]
+ [% END %]
+ [% IF ( subscription.closed ) %]
+ <p class="subscription_closed">Đợt đăng ký mua này đã đóng.</p>
+ [% END %]
+ [% IF ( subscription.location ) %]
+ <p class="subscription_location">Location: [% AuthorisedValues.GetByCode( 'LOC', subscription.location, 1 ) | html %] </p>
+ [% END %]
+ [% IF ( subscription.callnumber ) %]
+ <p class="subscription_callnumber">Ký hiệu xếp giá: [% subscription.callnumber | html %]</p>
+ [% END %]
+ [% IF ( subscription.subscriptionnotes ) %]
+ <p class="subscription_notes">[% subscription.subscriptionnotes | html | html_line_break %] </p>
+ [% END %]
+ <p class="subscription_dates"
                                             >Subscription from: [% subscription.histstartdate | $KohaDates %] to:[% IF ( subscription.histenddate ) %][% subscription.histenddate | $KohaDates %][% ELSE %]now (current)[% END %]</p
                                         >
-                                        [% IF ( subscription.letter ) %]
-                                            <span class="email_notifications">
-                                                [% IF ( loggedinusername ) %]
-                                                    [% IF ( subscription.hasalert ) %]
-                                                        <span>You have subscribed to email notification on new issues. </span
-                                                        ><a
-                                                            class="btn btn-secondary"
-                                                            title="Cancel email notification"
-                                                            href="/cgi-bin/koha/opac-alert-subscribe.pl?op=cancel&amp;subscriptionid=[% subscription.subscriptionid | html %]&amp;biblionumber=[% subscription.biblionumber | html %]"
-                                                            >Cancel email notification</a
+ [% IF ( subscription.letter ) %]
+ <span class="email_notifications">
+ [% IF ( loggedinusername ) %]
+ [% IF ( subscription.hasalert ) %]
+ <span>Bạn đã đăng ký nhận thông báo qua email khi có số mới. </span
+                                                        ><a class="btn btn-secondary" href="/cgi-bin/koha/opac-alert-subscribe.pl?op=cancel&subscriptionid=[% subscription.subscriptionid | html %]&biblionumber=[% subscription.biblionumber | html %]" title="Hủy thông báo qua email">Hủy thông báo qua email</a
                                                         >
-                                                    [% ELSE %]
-                                                        <a
-                                                            class="btn btn-secondary"
-                                                            title="Subscribe to email notification on new issues"
-                                                            href="/cgi-bin/koha/opac-alert-subscribe.pl?subscriptionid=[% subscription.subscriptionid | html %]&amp;biblionumber=[% subscription.biblionumber | html %]"
-                                                            >Subscribe to email notification on new issues</a
+ [% ELSE %]
+ <a class="btn btn-secondary" href="/cgi-bin/koha/opac-alert-subscribe.pl?subscriptionid=[% subscription.subscriptionid | html %]&biblionumber=[% subscription.biblionumber | html %]" title="Đăng ký nhận thông báo qua email khi có số mới">Đăng ký nhận thông báo qua email khi có số mới</a
                                                         >
-                                                    [% END %]
-                                                [% ELSE %]
-                                                    <span>You must log in if you want to subscribe to email notification on new issues</span>
-                                                [% END %]
-                                            </span>
-                                        [% END %]
-                                        [% IF ( subscription.missinglist ) %]
-                                            <p class="subscription_missing">Missing issues: [% subscription.missinglist | html | html_line_break %] </p>
-                                        [% END %]
-                                        [% IF ( subscription.opacnote ) %]
-                                            <p class="subscription_opacnote">[% subscription.opacnote | html | html_line_break %]</p>
-                                        [% END %]
-                                        [% IF ( subscription.latestserials ) %]
-                                            <p class="subscription_latestissues"> The [% subscription.opacdisplaycount | html %] latest issues for this subscription:</p>
-                                            <table class="table table-bordered table-striped subscriptionst">
-                                                <caption class="visually-hidden">Latest serials</caption>
-                                                <thead>
-                                                    <tr>
-                                                        <th id="serial_serialseq" data-colname="serial_serialseq">Issue #</th>
-                                                        <th id="serial_publisheddate" data-colname="serial_publisheddate">Publication date</th>
-                                                        <th id="serial_publisheddatetext" data-colname="serial_publisheddatetext">Publication date (text)</th>
-                                                        <th id="serial_planneddate" data-colname="serial_planneddate">Received date</th>
-                                                        <th id="serial_status" data-colname="serial_status">Status</th>
-                                                        <th id="serial_notes" data-colname="serial_notes">Note</th>
-                                                        <th class="dtr-control-col"></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    [% FOREACH latestserial IN subscription.latestserials %]
-                                                        <tr>
-                                                            <td class="serialseq">[% latestserial.serialseq | html %]</td>
-                                                            <td class="publisheddate" data-order="[% latestserial.publisheddate | html %]">[% latestserial.publisheddate | $KohaDates %]</td>
-                                                            <td class="publisheddatetext" data-order="[% latestserial.publisheddatetext | html %]">[% latestserial.publisheddatetext | html %]</td>
-                                                            <td class="planneddate" data-order="[% latestserial.planneddate | html %]">[% latestserial.planneddate | $KohaDates %]</td>
-                                                            <td class="serial_status"> [% INCLUDE 'serial-status.inc' serial = latestserial %] </td>
-                                                            <td class="serial_notes">[% latestserial.notes | html %]</td>
-                                                            <td></td>
-                                                        </tr>
-                                                    [% END # / FOREACH latestserials %]
-                                                </tbody>
-                                            </table>
-                                        [% END # / IF subscription.latestserials %]
-                                    </div>
-                                [% END # / FOREACH subscriptions %]
-                                <p class="subscription_moredetails"><a href="opac-serial-issues.pl?biblionumber=[% biblio.biblionumber | uri %]">More details</a></p>
-                            [% END # /tab_panel#subscriptions %]
-                        [% END # IF subscriptionsnumber %]
+ [% END %]
+ [% ELSE %]
+ <span>Bạn phải đăng nhập nếu muốn đăng ký nhận thông báo qua email khi có số mới</span>
+ [% END %]
+ </span>
+ [% END %]
+ [% IF ( subscription.missinglist ) %]
+ <p class="subscription_missing">Các số thiếu: [% subscription.missinglist | html | html_line_break %] </p>
+ [% END %]
+ [% IF ( subscription.opacnote ) %]
+ <p class="subscription_opacnote">[% subscription.opacnote | html | html_line_break %]</p>
+ [% END %]
+ [% IF ( subscription.latestserials ) %]
+ <p class="subscription_latestissues"> [% subscription.opacdisplaycount | html %] số mới nhất thuộc đợt đăng ký mua này:</p>
+ <table class="table table-bordered table-striped subscriptionst">
+ <caption class="visually-hidden">Các ấn phẩm định kỳ mới nhất</caption>
+ <thead>
+ <tr>
+ <th id="serial_serialseq" data-colname="serial_serialseq">Số phát hành #</th>
+ <th id="serial_publisheddate" data-colname="serial_publisheddate">Ngày xuất bản</th>
+ <th id="serial_publisheddatetext" data-colname="serial_publisheddatetext">Publication date (text)</th>
+ <th id="serial_planneddate" data-colname="serial_planneddate">Ngày nhận</th>
+ <th id="serial_status" data-colname="serial_status">Trạng thái</th>
+ <th id="serial_notes" data-colname="serial_notes">Ghi chú</th>
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH latestserial IN subscription.latestserials %]
+ <tr>
+ <td class="serialseq">[% latestserial.serialseq | html %]</td>
+ <td class="publisheddate" data-order="[% latestserial.publisheddate | html %]">[% latestserial.publisheddate | $KohaDates %]</td>
+ <td class="publisheddatetext" data-order="[% latestserial.publisheddatetext | html %]">[% latestserial.publisheddatetext | html %]</td>
+ <td class="planneddate" data-order="[% latestserial.planneddate | html %]">[% latestserial.planneddate | $KohaDates %]</td>
+ <td class="serial_status"> [% INCLUDE 'serial-status.inc' serial = latestserial %] </td>
+ <td class="serial_notes">[% latestserial.notes | html %]</td>
+ <td></td>
+ </tr>
+ [% END # / FOREACH latestserials %]
+ </tbody>
+ </table>
+ [% END # / IF subscription.latestserials %]
+ </div>
+ [% END # / FOREACH subscriptions %]
+ <p class="subscription_moredetails"><a href="opac-serial-issues.pl?biblionumber=[% biblio.biblionumber | uri %]">Chi tiết hơn</a></p>
+ [% END # /tab_panel#subscriptions %]
+ [% END # IF subscriptionsnumber %]
 
-                        [% IF ( LibraryThingForLibrariesID && LibraryThingForLibrariesTabbedView ) %]
-                            <!-- Library Thing for Libraries Content -->
-                            [% WRAPPER tab_panel tabname="LFTLSimilarItems" %]
-                                <div class="content_set">
-                                    <div id="ltfl_related"></div>
-                                    <div id="ltfl_similars"></div>
-                                </div>
-                            [% END # /tab_panel#LFTLSimilarItems %]
-                            [% WRAPPER tab_panel tabname="LTFLTagBrowse" %]
-                                <div class="content_set">
-                                    <div id="ltfl_tagbrowse" class="ltfl"></div>
-                                </div>
-                            [% END # /tab_panel#LTFLTagBrowse %]
-                        [% END # / IF LibraryThingForLibrariesID && LibraryThingForLibrariesTabbedView %]
+ [% IF ( LibraryThingForLibrariesID && LibraryThingForLibrariesTabbedView ) %]
+ <!-- Library Thing for Libraries Content -->
+ [% WRAPPER tab_panel tabname="LFTLSimilarItems" %]
+ <div class="content_set">
+ <div id="ltfl_related"></div>
+ <div id="ltfl_similars"></div>
+ </div>
+ [% END # /tab_panel#LFTLSimilarItems %]
+ [% WRAPPER tab_panel tabname="LTFLTagBrowse" %]
+ <div class="content_set">
+ <div id="ltfl_tagbrowse" class="ltfl"></div>
+ </div>
+ [% END # /tab_panel#LTFLTagBrowse %]
+ [% END # / IF LibraryThingForLibrariesID && LibraryThingForLibrariesTabbedView %]
 
-                        [% IF Koha.Preference( 'OPACComments' ) == 1 %]
-                            [% WRAPPER tab_panel tabname="comments" %]
-                                <div id="newcomment"></div>
-                                [% IF ( reviews ) %]
-                                    [% FOREACH review IN reviews %]
-                                        [% IF borrowernumber && review.borrowernumber == borrowernumber %]
-                                            <div class="commentline yours" id="c[% review.reviewid | html %]">
-                                                [% IF ( review.avatarurl ) %]
-                                                    <img class="avatar" src="[% review.avatarurl | html %]" height="80" width="80" alt="" />
-                                                [% END %]
-                                                [% IF review.approved %]
-                                                    <h2 id="comment">Your comment</h2>
-                                                [% ELSE %]
-                                                    <h2 id="comment">Your comment (preview, pending approval)</h2>
-                                                [% END %]
-                                                <small>[% review.datereviewed | $KohaDates %]</small>
-                                                <p>
-                                                    [% FILTER html_break %]
-                                                        [% review.review | html %]
-                                                    [% END %]
-                                                    <a href="/cgi-bin/koha/opac-review.pl?biblionumber=[% review.biblionumber | uri %]&amp;reviewid=[% review.reviewid | uri %]" class="edit_comment">Edit</a>
-                                                </p>
-                                            </div>
-                                        [% ELSE %]
-                                            <div class="commentline">
-                                                [% IF ( ShowReviewer != "none" && review.patron) %]
+ [% IF Koha.Preference( 'OPACComments' ) == 1 %]
+ [% WRAPPER tab_panel tabname="comments" %]
+ <div id="newcomment"></div>
+ [% IF ( reviews ) %]
+ [% FOREACH review IN reviews %]
+ [% IF borrowernumber && review.borrowernumber == borrowernumber %]
+ <div class="commentline yours" id="c[% review.reviewid | html %]">
+ [% IF ( review.avatarurl ) %]
+ <img class="avatar" src="[% review.avatarurl | html %]" height="80" width="80" alt="" />
+ [% END %]
+ [% IF review.approved %]
+ <h2 id="comment">Bình luận của bạn</h2>
+ [% ELSE %]
+ <h2 id="comment">Bình luận của bạn (xem trước, đang chờ duyệt)</h2>
+ [% END %]
+ <small>[% review.datereviewed | $KohaDates %]</small>
+ <p>
+ [% FILTER html_break %]
+ [% review.review | html %]
+ [% END %]
+ <a href="/cgi-bin/koha/opac-review.pl?biblionumber=[% review.biblionumber | uri %]&amp;reviewid=[% review.reviewid | uri %]" class="edit_comment">Sửa</a>
+ </p>
+ </div>
+ [% ELSE %]
+ <div class="commentline">
+ [% IF ( ShowReviewer != "none" && review.patron) %]
 
-                                                    [% IF ( review.avatarurl ) %]
-                                                        <img class="avatar" src="[% review.avatarurl | html %]" height="80" width="80" alt="" />
-                                                    [% END %]
-                                                    [% SWITCH ShowReviewer %]
-                                                    [% CASE 'full' %]
-                                                        <h2 id="comment">Comment by [% review.patron.title | html %] [% review.patron.firstname | html %] [% review.patron.surname | html %]</h2>
-                                                    [% CASE 'first' %]
-                                                        <h2 id="comment">Comment by [% review.patron.firstname | html %]</h2>
-                                                    [% CASE 'surname' %]
-                                                        <h2 id="comment">Comment by [% review.patron.surname | html %]</h2>
-                                                    [% CASE 'firstandinitial' %]
-                                                        <h2 id="comment">Comment by [% review.patron.firstname | html %] [% review.patron.surname|truncate(2,'.') | html %]</h2>
-                                                    [% CASE 'username' %]
-                                                        <h2 id="comment">Comment by [% review.patron.userid | html %]</h2>
-                                                    [% END %]
+ [% IF ( review.avatarurl ) %]
+ <img class="avatar" src="[% review.avatarurl | html %]" height="80" width="80" alt="" />
+ [% END %]
+ [% SWITCH ShowReviewer %]
+ [% CASE 'full' %]
+ <h2 id="comment">Bình luận bởi [% review.patron.title | html %] [% review.patron.firstname | html %] [% review.patron.surname | html %]</h2>
+ [% CASE 'first' %]
+ <h2 id="comment">Bình luận bởi [% review.patron.firstname | html %]</h2>
+ [% CASE 'surname' %]
+ <h2 id="comment">Bình luận bởi [% review.patron.surname | html %]</h2>
+ [% CASE 'firstandinitial' %]
+ <h2 id="comment">Bình luận bởi [% review.patron.firstname | html %] [% review.patron.surname|truncate(2,'.') | html %]</h2>
+ [% CASE 'username' %]
+ <h2 id="comment">Bình luận bởi [% review.patron.userid | html %]</h2>
+ [% END %]
 
-                                                    <small>[% review.datereviewed | $KohaDates %]</small>
-                                                [% ELSE %]
-                                                    <h2 id="comment">Patron comment on [% review.datereviewed | $KohaDates %]</h2>
-                                                [% END # / IF ShowReviewer != "none" && review.patron %]
-                                                <p>
-                                                    [% FILTER html_break %]
-                                                        [% review.review | html %]
-                                                    [% END %]
-                                                </p>
-                                            </div>
-                                            <!-- / .commentline -->
-                                        [% END %]
-                                    [% END # / FOREACH reviews %]
-                                [% ELSE %]
-                                    <p>There are no comments on this title.</p>
-                                [% END # / IF reviews %]
+ <small>[% review.datereviewed | $KohaDates %]</small>
+ [% ELSE %]
+ <h2 id="comment">Bình luận của bạn đọc vào ngày [% review.datereviewed | $KohaDates %]</h2>
+ [% END # / IF ShowReviewer != "none" && review.patron %]
+ <p>
+ [% FILTER html_break %]
+ [% review.review | html %]
+ [% END %]
+ </p>
+ </div>
+ <!-- / .commentline -->
+ [% END %]
+ [% END # / FOREACH reviews %]
+ [% ELSE %]
+ <p>Không có bình luận nào cho nhan đề này.</p>
+ [% END # / IF reviews %]
 
-                                [% IF ( loggedinusername ) %]
-                                    [% UNLESS ( loggedincommenter ) %]
-                                        <div id="addcomment">
-                                            <a href="/cgi-bin/koha/opac-review.pl?biblionumber=[% biblio.biblionumber | uri %]" class="edit_comment"> Post your comments on this title. </a>
-                                        </div>
-                                    [% END %]
-                                [% ELSE %]
-                                    <div id="addcomment">
-                                        <a class="login-link loginModal-trigger" role="button" data-bs-toggle="modal" data-return="true" data-tab="comment" href="/cgi-bin/koha/opac-user.pl">Log in to your account</a> to post a comment.
-                                    </div>
-                                [% END # / IF loggedinusername %]
-                            [% END # /tab_panel#newcomment %]
-                        [% END # / IF OPACComments %]
+ [% IF ( loggedinusername ) %]
+ [% UNLESS ( loggedincommenter ) %]
+ <div id="addcomment">
+ <a href="/cgi-bin/koha/opac-review.pl?biblionumber=[% biblio.biblionumber | uri %]" class="edit_comment"> Đăng bình luận của bạn về nhan đề này. </a>
+ </div>
+ [% END %]
+ [% ELSE %]
+ <div id="addcomment">
+ <a class="login-link loginModal-trigger" role="button" data-bs-toggle="modal" data-return="true" data-tab="comment" href="/cgi-bin/koha/opac-user.pl">Đăng nhập vào tài khoản của bạn</a> để đăng bình luận. </div>
+ [% END # / IF loggedinusername %]
+ [% END # /tab_panel#newcomment %]
+ [% END # / IF OPACComments %]
 
-                        [% IF ( OPACFRBRizeEditions && XISBNS ) %]
-                            [% WRAPPER tab_panel tabname="editions" %]
-                                <h2>Other editions of this work</h2>
-                                <table class="table table-bordered table-striped">
-                                    <caption class="visually-hidden">Other editions</caption>
-                                    [% FOREACH XISBN IN XISBNS %]
-                                        <tr>
-                                            <td>
-                                                [% IF ( OPACAmazonCoverImages ) %]
-                                                    <img src="https://images-na.ssl-images-amazon.com/images/P/[% XISBN.normalized_isbn | html %].01._AA75_PU_PU-5_.jpg" alt="" />
-                                                [% END %]
+ [% IF ( OPACFRBRizeEditions && XISBNS ) %]
+ [% WRAPPER tab_panel tabname="editions" %]
+ <h2>Các phiên bản xuất bản khác của tác phẩm này</h2>
+ <table class="table table-bordered table-striped">
+ <caption class="visually-hidden">Các phiên bản xuất bản khác</caption>
+ [% FOREACH XISBN IN XISBNS %]
+ <tr>
+ <td>
+ [% IF ( OPACAmazonCoverImages ) %]
+ <img src="https://images-na.ssl-images-amazon.com/images/P/[% XISBN.normalized_isbn | html %].01._AA75_PU_PU-5_.jpg" alt="" />
+ [% END %]
 
-                                                [% IF ( SyndeticsEnabled && SyndeticsCoverImages ) %]
-                                                    [% IF ( XISBN.content_identifier_exists ) %]
-                                                        <img
+ [% IF ( SyndeticsEnabled && SyndeticsCoverImages ) %]
+ [% IF ( XISBN.content_identifier_exists ) %]
+ <img
                                                             src="https://secure.syndetics.com/index.aspx?isbn=[% XISBN.browser_normalized_isbn | uri %]/[% SyndeticsCoverImageSize | uri %].GIF&amp;client=[% SyndeticsClientCode | uri %][% IF ( XISBN.browser_normalized_upc ) %]&amp;upc=[% XISBN.browser_normalized_upc | uri %][% END %][% IF ( XISBN.browser_normalized_oclc ) %]&amp;oclc=[% XISBN.browser_normalized_oclc | uri %][% END %]&amp;type=xw10"
                                                             alt=""
                                                         />
-                                                    [% ELSE %]
-                                                        <span class="no-image">No cover image available</span>
-                                                    [% END # / IF  XISBN.content_identifier_exists %]
-                                                [% END # / IF SyndeticsEnabled && SyndeticsCoverImages %]
-                                            </td>
+ [% ELSE %]
+ <span class="no-image">Không có ảnh bìa</span>
+ [% END # / IF  XISBN.content_identifier_exists %]
+ [% END # / IF SyndeticsEnabled && SyndeticsCoverImages %]
+ </td>
 
-                                            [% UNLESS ( item_level_itypes ) %]
-                                                <td>[% XISBN.description | html %]</td>
-                                            [% END %]
-                                            <td>
-                                                <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% XISBN.biblionumber | uri %]">[% XISBN.title | html %]</a>
-                                                [% IF ( XISBN.author ) %]<span> by </span>[% XISBN.author | html %][% END %]
-                                                [% IF ( XISBN.copyrightdate ) %]<span> &copy;</span>[% XISBN.copyrightdate | html %][% END %]
-                                                [% IF ( XISBN.publishercode ) %]
-                                                    <p
+ [% UNLESS ( item_level_itypes ) %]
+ <td>[% XISBN.description | html %]</td>
+ [% END %]
+ <td>
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% XISBN.biblionumber | uri %]">[% XISBN.title | html %]</a>
+ [% IF ( XISBN.author ) %]<span> bởi </span>[% XISBN.author | html %][% END %]
+ [% IF ( XISBN.copyrightdate ) %]<span> &copy;</span>[% XISBN.copyrightdate | html %][% END %]
+ [% IF ( XISBN.publishercode ) %]
+ <p
                                                         >[% XISBN.publishercode | html %]
-                                                        [% IF ( XISBN.place ) %]([% XISBN.place | html %])[% END %]
-                                                        [% IF ( XISBN.publicationyear ) %][% ', ' _ XISBN.publicationyear | html %][% END %]
-                                                        [% IF ( XISBN.pages ) %][% XISBN.pages | html %] [% XISBN.illus | html %] [% XISBN.size | html %][% END %]
-                                                    </p>
-                                                [% END %]
-                                            </td>
-                                        </tr>
-                                    [% END # / FOREACH XISBNS %]
-                                </table>
-                            [% END # /tab_panel#editions %]
-                        [% END # / IF OPACFRBRizeEditions && XISBNS %]
+ [% IF ( XISBN.place ) %]([% XISBN.place | html %])[% END %]
+ [% IF ( XISBN.publicationyear ) %][% ', ' _ XISBN.publicationyear | html %][% END %]
+ [% IF ( XISBN.pages ) %][% XISBN.pages | html %] [% XISBN.illus | html %] [% XISBN.size | html %][% END %]
+ </p>
+ [% END %]
+ </td>
+ </tr>
+ [% END # / FOREACH XISBNS %]
+ </table>
+ [% END # /tab_panel#editions %]
+ [% END # / IF OPACFRBRizeEditions && XISBNS %]
 
-                        [% IF ( HTML5MediaEnabled ) %]
-                            [% WRAPPER tab_panel tabname="html5media" %]
-                                [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
-                                    <p>
-                                        [% IF HTML5MediaSet.is_youtube %]
-                                            <iframe id="player" type="text/html" width="640" height="360" src="[% HTML5MediaSet.srcblock | url %]" frameborder="0"></iframe>
-                                        [% ELSE %]
-                                            [% SET ctrl_preload = ' controls preload=none' #translatability %]
-                                            <!-- prettier-ignore-start -->
-                                            <[% HTML5MediaParent _ ctrl_preload | html %] >
-                                            <[% HTML5MediaSet.child | html %] src="[% HTML5MediaSet.srcblock | url %]" [% HTML5MediaSet.typeblock | html %] />
-                                            <span>[[% HTML5MediaParent | html %] tag not supported by your browser.]</span>
-                                            </[% HTML5MediaParent | html %]>
-                                            <!-- prettier-ignore-end -->
-                                        [% END %]
-                                    </p>
-                                [% END %]
-                            [% END # /tab_panel#html5media %]
-                        [% END # / IF HTML5MediaEnabled %]
+ [% IF ( HTML5MediaEnabled ) %]
+ [% WRAPPER tab_panel tabname="html5media" %]
+ [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
+ <p>
+ [% IF HTML5MediaSet.is_youtube %]
+ <iframe id="player" type="text/html" width="640" height="360" src="[% HTML5MediaSet.srcblock | url %]" frameborder="0"></iframe>
+ [% ELSE %]
+ [% SET ctrl_preload = ' controls preload=none' #translatability %]
+ <!-- prettier-ignore-start -->
+ <[% HTML5MediaParent _ ctrl_preload | html %] >
+ <[% HTML5MediaSet.child | html %] src="[% HTML5MediaSet.srcblock | url %]" [% HTML5MediaSet.typeblock | html %] />
+ <span>[Thẻ [% HTML5MediaParent | html %] không được trình duyệt của bạn hỗ trợ.]</span>
+ </[% HTML5MediaParent | html %]>
+ <!-- prettier-ignore-end -->
+ [% END %]
+ </p>
+ [% END %]
+ [% END # /tab_panel#html5media %]
+ [% END # / IF HTML5MediaEnabled %]
 
-                        [% IF ( OPACLocalCoverImages && localimages.count ) %]
-                            [% WRAPPER tab_panel tabname="images" %]
-                                <p>Click on an image to view it in the image viewer</p>
-                                [% FOREACH image IN localimages %]
-                                    <a href="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblio.biblionumber | uri %]&amp;imagenumber=[% image.imagenumber | uri %]" title="Local cover image">
-                                        <img src="/cgi-bin/koha/opac-image.pl?thumbnail=1&amp;imagenumber=[% image.imagenumber | uri %]" alt="Local cover image" />
-                                    </a>
-                                [% END %]
-                            [% END # /tab_panel#images %]
-                        [% END # / IF OPACLocalCoverImages && localimages.size %]
+ [% IF ( OPACLocalCoverImages && localimages.count ) %]
+ [% WRAPPER tab_panel tabname="images" %]
+ <p>Nhấp vào ảnh để xem trong trình xem ảnh</p>
+ [% FOREACH image IN localimages %]
+ <a href="/cgi-bin/koha/opac-imageviewer.pl?biblionumber=[% biblio.biblionumber | uri %]&imagenumber=[% image.imagenumber | uri %]" title="Ảnh bìa cục bộ">
+ <img alt="Ảnh bìa cục bộ" src="/cgi-bin/koha/opac-image.pl?thumbnail=1&imagenumber=[% image.imagenumber | uri %]" />
+ </a>
+ [% END %]
+ [% END # /tab_panel#images %]
+ [% END # / IF OPACLocalCoverImages && localimages.size %]
 
-                        [% IF Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ) && author_information.size %]
-                            [% WRAPPER tab_panel tabname="author_identifiers_info" %]
-                                [% FOR author IN author_information %]
-                                    <div class="author_information">
-                                        <span class="author_name"><a href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% author.authid | uri %]">[% author.name | html %]</a></span>
-                                        <ul>
-                                            [% FOR info IN Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ).split(',') %]
-                                                [% NEXT IF author.information.keys.grep(info).size <= 0 %]
-                                                [% PROCESS "authority-information.inc" information => author.information.$info, info_type => info %]
-                                            [% END %]
-                                        </ul>
-                                    </div>
-                                [% END %]
-                            [% END # /tab_panel#author_identifiers_info %]
-                        [% END %]
+ [% IF Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ) && author_information.size %]
+ [% WRAPPER tab_panel tabname="author_identifiers_info" %]
+ [% FOR author IN author_information %]
+ <div class="author_information">
+ <span class="author_name"><a href="/cgi-bin/koha/opac-authoritiesdetail.pl?authid=[% author.authid | uri %]">[% author.name | html %]</a></span>
+ <ul>
+ [% FOR info IN Koha.Preference( 'OPACAuthorIdentifiersAndInformation' ).split(',') %]
+ [% NEXT IF author.information.keys.grep(info).size <= 0 %]
+ [% PROCESS "authority-information.inc" information => author.information.$info, info_type => info %]
+ [% END %]
+ </ul>
+ </div>
+ [% END %]
+ [% END # /tab_panel#author_identifiers_info %]
+ [% END %]
 
-                        [% IF ( NovelistSelectProfile && NovelistSelectView == 'below' && ( normalized_isbn || normalized_upc ) ) %]
-                            <span class="results_summary NovelistSelect" style="display:none;">
-                                <span class="label">Novelist Select: </span>
-                                <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
-                            </span>
-                        [% END %]
-                    [% END # /WRAPPER tab_panels %]
-                [% END # /WRAPPER tabs#bibliodescriptions %]
+ [% IF ( NovelistSelectProfile && NovelistSelectView == 'below' && ( normalized_isbn || normalized_upc ) ) %]
+ <span class="results_summary NovelistSelect" style="display:none;">
+ <span class="label">Dịch vụ gợi ý NoveList Select: </span>
+ <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
+ </span>
+ [% END %]
+ [% END # /WRAPPER tab_panels %]
+ [% END # /WRAPPER tabs#bibliodescriptions %]
 
-                [% IF ( Babeltheque ) %]
-                    <div>
-                        <div id="BW_etiquettes"></div>
-                        <div id="BW_suggestions"></div>
-                    </div>
-                    <div class="clearfix"></div>
-                    <div>
-                        <div id="BW_podcasts"></div>
-                    </div>
-                    <div class="clearfix"></div>
-                    <div>
-                        <div id="BW_videos"></div>
-                    </div>
-                [% END # / IF Babeltheque %]
-            </div>
-            <!-- /.col-lg-10 -->
+ [% IF ( Babeltheque ) %]
+ <div>
+ <div id="BW_etiquettes"></div>
+ <div id="BW_suggestions"></div>
+ </div>
+ <div class="clearfix"></div>
+ <div>
+ <div id="BW_podcasts"></div>
+ </div>
+ <div class="clearfix"></div>
+ <div>
+ <div id="BW_videos"></div>
+ </div>
+ [% END # / IF Babeltheque %]
+ </div>
+ <!-- /.col-lg-10 -->
 
-            <div class="col-lg-3">
-                <div id="ulactioncontainer">
-                    [% IF ( Koha.Preference('OpacBrowseResults') && busc ) %]
-                        <div class="nav_results">
-                            <div class="l_Results" style="display:none;">
-                                [% IF ( listResults ) %]
-                                    <a href="#" id="a_listResults"><i class="fa fa-bars" aria-hidden="true"></i> Browse results</a>
-                                [% ELSE %]
-                                    <span><i class="fa fa-bars" aria-hidden="true"></i> Browse results</span>
-                                [% END %]
-                                <a href="#" class="close_pagination"><i class="fa fa-times" aria-hidden="true"></i> Close</a>
-                            </div>
+ <div class="col-lg-3">
+ <div id="ulactioncontainer">
+ [% IF ( Koha.Preference('OpacBrowseResults') && busc ) %]
+ <div class="nav_results">
+ <div class="l_Results" style="display:none;">
+ [% IF ( listResults ) %]
+ <a href="#" id="a_listResults"><i class="fa fa-bars" aria-hidden="true"></i> Duyệt kết quả</a>
+ [% ELSE %]
+ <span><i class="fa fa-bars" aria-hidden="true"></i> Duyệt kết quả</span>
+ [% END %]
+ <a href="#" class="close_pagination"><i class="fa fa-times" aria-hidden="true"></i> Thoát</a>
+ </div>
 
-                            <div class="pg_menu">
-                                <div class="pg_link left_results">
-                                    [% IF ( previousBiblionumber ) %]
-                                        <a
-                                            href="opac-detail.pl?biblionumber=[% previousBiblionumber | uri %][% IF ( query_desc && OpacHighlightedWords ) %]&query_desc=[% query_desc |uri %][% END %]"
-                                            title="See: [% IF ( previousTitle ) %][% previousTitle | html %][% ELSE %]previous biblio[% END %]"
-                                            ><i class="fa fa-angle-double-left" aria-hidden="true"></i> Previous</a
+ <div class="pg_menu">
+ <div class="pg_link left_results">
+ [% IF ( previousBiblionumber ) %]
+ <a href="opac-detail.pl?biblionumber=[% previousBiblionumber | uri %][% IF ( query_desc && OpacHighlightedWords ) %]&query_desc=[% query_desc |uri %][% END %]" title="Xem: [% IF ( previousTitle ) %][% previousTitle | html %][% ELSE %]biểu ghi trước[% END %]"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Trước</a
                                         >
-                                    [% ELSE %]
-                                        <span>Previous</span>
-                                    [% END %]
-                                </div>
-                                [%# busc is already URI encoded %]
-                                <div class="pg_link back_results">
-                                    <a href="opac-search.pl?[% busc | $raw %]" title="Back to the results search list">Back to results</a>
-                                </div>
-                                <div class="pg_link right_results">
-                                    [% IF ( nextBiblionumber ) %]
-                                        <a
-                                            href="opac-detail.pl?biblionumber=[% nextBiblionumber | uri %][% IF ( query_desc && OpacHighlightedWords ) %]&query_desc=[% query_desc |uri %][% END %]"
-                                            title="See: [% IF ( nextTitle ) %][% nextTitle | html %][% ELSE %]next biblio[% END %]"
-                                            >Next <i class="fa fa-angle-double-right" aria-hidden="true"></i
+ [% ELSE %]
+ <span>Trước</span>
+ [% END %]
+ </div>
+ [%# busc is already URI encoded %]
+ <div class="pg_link back_results">
+ <a href="opac-search.pl?[% busc | $raw %]" title="Quay lại danh sách kết quả tìm kiếm">Quay lại kết quả</a>
+ </div>
+ <div class="pg_link right_results">
+ [% IF ( nextBiblionumber ) %]
+ <a href="opac-detail.pl?biblionumber=[% nextBiblionumber | uri %][% IF ( query_desc && OpacHighlightedWords ) %]&query_desc=[% query_desc |uri %][% END %]" title="Xem: [% IF ( nextTitle ) %][% nextTitle | html %][% ELSE %]biểu ghi tiếp theo[% END %]">Tiếp <i class="fa fa-angle-double-right" aria-hidden="true"></i
                                         ></a>
-                                    [% ELSE %]
-                                        <span>Next</span>
-                                    [% END %]
-                                </div>
-                            </div>
-                            <!-- /.pg_menu -->
+ [% ELSE %]
+ <span>Tiếp theo</span>
+ [% END %]
+ </div>
+ </div>
+ <!-- /.pg_menu -->
 
-                            [% IF ( listResults ) %]
-                                <div class="results-pagination">
-                                    <div class="nav_pages">
-                                        <ul id="listResults">
-                                            [% FOREACH listitem IN listResults %]
-                                                [% SET li_class = 'li_pag_' _ loop.count %]
-                                                [% IF ( listitem.biblionumber == biblionumber ) %]
-                                                    [% li_class = li_class _ ' highlight' %]
-                                                [% END %]
-                                                <li class="[% li_class | html %]">
-                                                    [% IF ( listitem.biblionumber == biblionumber ) %]
-                                                        <a
-                                                            href="opac-detail.pl?biblionumber=[% biblionumber | uri %]&amp;query_desc=[% query_desc |uri %]"
-                                                            title='View record "[%- title | html -%] [%- part_number | html -%] [%- part_name | html -%]"'
-                                                            class="a_pag"
-                                                            id="a_pag_[% loop.count | html %]"
-                                                            >[% loop.count + offset | html %]</a
+ [% IF ( listResults ) %]
+ <div class="results-pagination">
+ <div class="nav_pages">
+ <ul id="listResults">
+ [% FOREACH listitem IN listResults %]
+ [% SET li_class = 'li_pag_' _ loop.count %]
+ [% IF ( listitem.biblionumber == biblionumber ) %]
+ [% li_class = li_class _ ' highlight' %]
+ [% END %]
+ <li class="[% li_class | html %]">
+ [% IF ( listitem.biblionumber == biblionumber ) %]
+ <a class="a_pag" href="opac-detail.pl?biblionumber=[% biblionumber | uri %]&query_desc=[% query_desc |uri %]" id="a_pag_[% loop.count | html %]" title="Xem biểu ghi "[%- title | html -%] [%- part_number | html -%] [%- part_name | html -%]"">[% loop.count + offset | html %]</a
                                                         >
-                                                    [% ELSE %]
-                                                        <a
-                                                            href="opac-detail.pl?biblionumber=[% listitem.biblionumber | uri %]&amp;query_desc=[% query_desc |uri %]"
-                                                            title='View record "[% listitem.title | html %] [% listitem.part_number | html %] [% listitem.part_name | html %]"'
-                                                            class="a_pag"
-                                                            id="a_pag_[% loop.count | html %]"
-                                                            >[% loop.count + offset | html %]</a
+ [% ELSE %]
+ <a class="a_pag" href="opac-detail.pl?biblionumber=[% listitem.biblionumber | uri %]&query_desc=[% query_desc |uri %]" id="a_pag_[% loop.count | html %]" title="Xem biểu ghi "[% listitem.title | html %] [% listitem.part_number | html %] [% listitem.part_name | html %]"">[% loop.count + offset | html %]</a
                                                         >
-                                                    [% END # /IF listitem.biblionumber %]
-                                                </li>
-                                            [% END # /FOREACH listitem %]
-                                        </ul>
-                                        <!-- /#listResults -->
-                                    </div>
-                                    <!-- /.nav_pages -->
-                                    <div class="pagination_list">
-                                        <ul id="ul_pagination_lists">
-                                            [% FOREACH listitem IN listResults %]
-                                                [% IF ( listitem.biblionumber == biblionumber ) %]
-                                                    <li id="li_pag_[% loop.count | html %]" class="highlight" title="Go to detail">
-                                                        <span class="li_pag_index"><i class="fa fa-arrow-left" aria-hidden="true"></i> [% loop.count  + offset | html %]</span>
-                                                        <a href="opac-detail.pl?biblionumber=[% biblionumber | uri %]&amp;query_desc=[% query_desc |uri %]">[% title | html %] [% part_number | html %] [% part_name | html %]</a><br />
-                                                        [% IF ( author ) %]<span>by</span> [% author | html %][% END %]
-                                                    </li>
-                                                [% ELSE %]
-                                                    <li id="li_pag_[% loop.count | html %]" title="Go to detail">
-                                                        <span class="li_pag_index">[% loop.count + offset | html %]</span>
-                                                        <a href="opac-detail.pl?biblionumber=[% listitem.biblionumber | uri %]&amp;query_desc=[% query_desc |uri %]"
+ [% END # /IF listitem.biblionumber %]
+ </li>
+ [% END # /FOREACH listitem %]
+ </ul>
+ <!-- /#listResults -->
+ </div>
+ <!-- /.nav_pages -->
+ <div class="pagination_list">
+ <ul id="ul_pagination_lists">
+ [% FOREACH listitem IN listResults %]
+ [% IF ( listitem.biblionumber == biblionumber ) %]
+ <li class="highlight" id="li_pag_[% loop.count | html %]" title="Đi đến chi tiết">
+ <span class="li_pag_index"><i class="fa fa-arrow-left" aria-hidden="true"></i> [% loop.count  + offset | html %]</span>
+ <a href="opac-detail.pl?biblionumber=[% biblionumber | uri %]&amp;query_desc=[% query_desc |uri %]">[% title | html %] [% part_number | html %] [% part_name | html %]</a><br />
+ [% IF ( author ) %]<span>bởi</span> [% author | html %][% END %]
+ </li>
+ [% ELSE %]
+ <li id="li_pag_[% loop.count | html %]" title="Đi đến chi tiết">
+ <span class="li_pag_index">[% loop.count + offset | html %]</span>
+ <a href="opac-detail.pl?biblionumber=[% listitem.biblionumber | uri %]&amp;query_desc=[% query_desc |uri %]"
                                                             >[% listitem.title | html %] [% listitem.part_number | html %] [% listitem.part_name | html %]</a
                                                         ><br />
-                                                        [% IF ( listitem.author ) %]<span>by</span> [% listitem.author | html %][% END %]
-                                                    </li>
-                                                [% END # /IF listitem.biblionumber %]
-                                            [% END # /FOREACH listitem %]
-                                        </ul>
-                                        <!-- /#ul_pagination_list -->
-                                    </div>
-                                    <!-- /.pagination_list -->
-                                </div>
-                                <!-- /.results-pagination -->
-                            [% END # /IF ( listResults ) %]
-                            <div class="pagination_footer">
-                                <a href="#" class="close_pagination"><i class="fa fa-times" aria-hidden="true"></i> Close</a>
-                            </div>
-                        </div>
-                        <!-- /.nav_results -->
-                    [% END # / IF OpacBrowseResults && busc %]
+ [% IF ( listitem.author ) %]<span>bởi</span> [% listitem.author | html %][% END %]
+ </li>
+ [% END # /IF listitem.biblionumber %]
+ [% END # /FOREACH listitem %]
+ </ul>
+ <!-- /#ul_pagination_list -->
+ </div>
+ <!-- /.pagination_list -->
+ </div>
+ <!-- /.results-pagination -->
+ [% END # /IF ( listResults ) %]
+ <div class="pagination_footer">
+ <a href="#" class="close_pagination"><i class="fa fa-times" aria-hidden="true"></i> Thoát</a>
+ </div>
+ </div>
+ <!-- /.nav_results -->
+ [% END # / IF OpacBrowseResults && busc %]
 
-                    [% INCLUDE 'opac-detail-sidebar.inc' %]
+ [% INCLUDE 'opac-detail-sidebar.inc' %]
 
-                    [% IF ( NovelistSelectProfile && NovelistSelectView == 'right' && ( normalized_isbn || normalized_upc ) ) %]
-                        <div id="NovelistSelect">
-                            <h2>Novelist Select</h2>
-                            <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
-                        </div>
-                    [% END %]
+ [% IF ( NovelistSelectProfile && NovelistSelectView == 'right' && ( normalized_isbn || normalized_upc ) ) %]
+ <div id="NovelistSelect">
+ <h2>Novelist Select</h2>
+ <div data-novelist-novelistselect="[% IF normalized_isbn %][% normalized_isbn | html %][% ELSE %][% normalized_upc | html %][% END %]"></div>
+ </div>
+ [% END %]
 
-                    [% IF ( Babeltheque ) %]
-                        <div class="babeltheque_adds">
-                            <div id="BW_critiques_aj"></div>
-                            <div id="BW_citations_aj"></div>
-                        </div>
-                    [% END %]
+ [% IF ( Babeltheque ) %]
+ <div class="babeltheque_adds">
+ <div id="BW_critiques_aj"></div>
+ <div id="BW_citations_aj"></div>
+ </div>
+ [% END %]
 
-                    [% IF ( Koha.Preference('SocialNetworks') ) %]
-                        <div id="social_networks" class="clearfix">
-                            <span>Share</span>
-                            [% SET SocialNetworks = Koha.Preference('SocialNetworks') %]
-                            [% FOREACH network IN SocialNetworks.split(",") %]
-                                [% SWITCH network -%]
-                                [% CASE "facebook" -%]
-                                    <div
-                                        ><a id="facebook" href="https://www.facebook.com/sharer.php?u=[% current_url |url %]&amp;t=[% title |url %]" title="Share on Facebook"><i class="fa-brands fa-facebook" aria-hidden="true"></i></a
+ [% IF ( Koha.Preference('SocialNetworks') ) %]
+ <div id="social_networks" class="clearfix">
+ <span>Chia sẻ</span>
+ [% SET SocialNetworks = Koha.Preference('SocialNetworks') %]
+ [% FOREACH network IN SocialNetworks.split(",") %]
+ [% SWITCH network -%]
+ [% CASE "facebook" -%]
+ <div
+                                        ><a href="https://www.facebook.com/sharer.php?u=[% current_url |url %]&t=[% title |url %]" id="facebook" title="Chia sẻ trên Facebook"><i class="fa-brands fa-facebook" aria-hidden="true"></i></a
                                     ></div>
-                                [% CASE "linkedin" -%]
-                                    <div
-                                        ><a id="linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=[% current_url |url %]&amp;title=[% title |url %]" title="Share on LinkedIn"
-                                            ><i class="fab fa-linkedin" aria-hidden="true"></i></a
+ [% CASE "linkedin" -%]
+ <div
+                                        ><a href="https://www.linkedin.com/shareArticle?mini=true&url=[% current_url |url %]&title=[% title |url %]" id="linkedin" title="Chia sẻ trên LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a
                                     ></div>
-                                [% CASE "email" -%]
-                                    <div
-                                        ><a id="email" href="mailto:?subject=[% title |url %]&amp;body=[% title |url %]%20([% current_url |url %])" title="Share by email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a
+ [% CASE "email" -%]
+ <div
+                                        ><a href="mailto:?subject=[% title |url %]&body=[% title |url %]%20([% current_url |url %])" id="email" title="Chia sẻ qua email"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a
                                     ></div>
-                                [% END # /SWITCH network -%]
-                            [% END # /FOREACH network %]
-                        </div>
-                        <!-- /#social_networks -->
-                    [% END # /IF SocialNetworks %]
-                </div>
-                <!-- / .ulactioncontainer -->
-            </div>
-            <!-- / .col-lg-3 -->
-        </div>
-        <!-- / .row -->
-        <div class="row">
-            [% IF ( LibraryThingForLibrariesID ) %]
-                <script src="https://ltfl.librarything.com/forlibraries/widget.js?systype=koha&amp;id=[% LibraryThingForLibrariesID | html %]">
+ [% END # /SWITCH network -%]
+ [% END # /FOREACH network %]
+ </div>
+ <!-- /#social_networks -->
+ [% END # /IF SocialNetworks %]
+ </div>
+ <!-- / .ulactioncontainer -->
+ </div>
+ <!-- / .col-lg-3 -->
+ </div>
+ <!-- / .row -->
+ <div class="row">
+ [% IF ( LibraryThingForLibrariesID ) %]
+ <script src="https://ltfl.librarything.com/forlibraries/widget.js?systype=koha&amp;id=[% LibraryThingForLibrariesID | html %]">
 </script>
-                <noscript
-                    >This page contains enriched content visible when JavaScript is enabled or by clicking
-                    <a href="https://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID | uri %]&amp;accessibility=1">here</a>.</noscript
+ <noscript
+                    >Trang này chứa nội dung bổ sung, hiển thị khi JavaScript được bật hoặc bằng cách nhấp vào <a href="https://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID | uri %]&amp;accessibility=1">tại đây</a>.</noscript
                 >
-            [% END %]
+ [% END %]
 
-            [% IF ( NovelistSelectProfile && ( normalized_isbn || normalized_upc ) ) %]
-                <script src="https://imageserver.ebscohost.com/novelistselect/ns2init.js">
+ [% IF ( NovelistSelectProfile && ( normalized_isbn || normalized_upc ) ) %]
+ <script src="https://imageserver.ebscohost.com/novelistselect/ns2init.js">
 </script>
-            [% END %]
+ [% END %]
 
-            [% IF ( Babeltheque && Babeltheque_url_js ) %]
-                <script src="[% Babeltheque_url_js | html %]">
+ [% IF ( Babeltheque && Babeltheque_url_js ) %]
+ <script src="[% Babeltheque_url_js | html %]">
 </script>
-            [% END %]
-        </div>
-        <!-- / .row -->
-    </div>
-    <!-- / .container-fluid -->
+ [% END %]
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
 </main>
 <!-- / .main -->
 
 [% IF ( OPACPopupAuthorsSearch  ) %]
-    <!-- Modal -->
-    <div class="modal" id="multiSearch" tabindex="-1" role="dialog" aria-labelledby="multiSearchLabel">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 id="multiSearchLabel">Select the item(s) to search</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <a href="#" class="check_all btn btn-link btn-sm"><i class="fa fa-check" aria-hidden="true"></i> Select all</a> <span class="sep">|</span>
-                    <a href="#" class="check_none btn btn-link btn-sm"><i class="fa fa-times" aria-hidden="true"></i> Select none</a>
-                    <ul id="termsList"> </ul>
-                </div>
-                <div class="modal-footer">
-                    <button id="validMultiSearch" class="btn btn-primary">Search</button>
-                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-            <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-    </div>
-    <!-- /#myModal -->
+ <!-- Modal -->
+ <div class="modal" id="multiSearch" tabindex="-1" role="dialog" aria-labelledby="multiSearchLabel">
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 id="multiSearchLabel">Chọn (các) tài liệu để tìm kiếm</h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <a href="#" class="check_all btn btn-link btn-sm"><i class="fa fa-check" aria-hidden="true"></i> Chọn tất cả</a> <span class="sep">|</span>
+ <a href="#" class="check_none btn btn-link btn-sm"><i class="fa fa-times" aria-hidden="true"></i> Bỏ chọn tất cả</a>
+ <ul id="termsList"> </ul>
+ </div>
+ <div class="modal-footer">
+ <button id="validMultiSearch" class="btn btn-primary">Tìm kiếm</button>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Hủy bỏ</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
+ </div>
+ <!-- /#myModal -->
 [% END %]
 
 <!-- Library Info Modal -->
 <div class="modal" id="libraryInfoModal" tabindex="-1" aria-labelledby="libraryInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title" id="libraryInfoModalLabel"></h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="libraryInfo"></div>
-            </div>
-            <div class="modal-footer">
-                <a id="libraryInfoLink" href="" class="btn btn-primary">Visit website</a>
-                <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
+ <div class="modal-dialog">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h1 class="modal-title" id="libraryInfoModalLabel"></h1>
+ <button aria-label="Thoát" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+ </div>
+ <div class="modal-body">
+ <div id="libraryInfo"></div>
+ </div>
+ <div class="modal-footer">
+ <a id="libraryInfoLink" href="" class="btn btn-primary">Trang web</a>
+ <button type="button" class="btn btn-default" data-bs-dismiss="modal">Đóng</button>
+ </div>
+ </div>
+ <!-- /.modal-content -->
+ </div>
+ <!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
 
@@ -1842,364 +1781,359 @@
 [%# End of template %]
 
 [% BLOCK items_table %]
-    [% SET hidden_columns_force.$table_id = [] %]
-    <table class="table table-bordered table-striped" id="[% table_id | html %]">
-        <caption class="visually-hidden">Holdings</caption>
-        <thead>
-            <tr>
-                <th id="item_cover" data-colname="item_cover">Cover image</th>
-                <th id="item_itemtype" data-colname="item_itemtype" class="itype">Item type</th>
-                <th id="item_current_location" data-colname="item_current_location" class="item_location">Current library</th>
-                <th id="item_home_location" data-colname="item_home_location" class="item_location">Home library</th>
-                <th id="item_ccode" data-colname="item_ccode" class="collection">Collection</th>
-                <th id="item_shelving_location" data-colname="item_shelving_location" class="shelving_location">Shelving location</th>
-                <th id="item_callnumber" data-colname="item_callnumber" class="call_no">Call number</th>
-                <th id="item_materials" data-colname="item_materials" class="materials">Materials specified</th>
-                <th id="item_enumchron" data-colname="item_enumchron" class="vol_info">Vol info</th>
-                <th id="item_url" data-colname="item_url" class="url">URL</th>
-                <th id="item_copy" data-colname="item_copy" class="copynumber">Copy number</th>
-                <th id="item_status" data-colname="item_status" class="status">Status</th>
-                <th id="item_notes" data-colname="item_notes" class="notes">Notes</th>
-                <th id="item_datedue" data-colname="item_datedue" class="date_due">Date due</th>
-                <th id="item_barcode" data-colname="item_barcode" class="barcode">Barcode</th>
-                <th id="item_holds" data-colname="item_holds">Item holds</th>
-                <th id="item_priority" data-colname="item_priority">Item hold queue priority</th>
-                <th id="item_coursereserves" data-colname="item_coursereserves">Course reserves</th>
-                <th class="dtr-control-col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            [% FOREACH ITEM_RESULT IN items %]
-                <tr vocab="http://schema.org/" typeof="Offer">
-                    [% IF Koha.Preference('OPACLocalCoverImages') && ( tab == 'holdings' && itemloop_has_images || tab == 'otherholdings' && otheritemloop_has_images ) %]
-                        <td class="cover">
-                            <div class="bookcover">
-                                <div class="cover-slider cover-slides">
-                                    [% FOR image IN ITEM_RESULT.cover_images %]
-                                        <div class="cover-image local-coverimg">
-                                            <a href="/cgi-bin/koha/opac-image.pl?itemnumber=[% image.itemnumber | uri %]&amp;imagenumber=[% image.imagenumber | uri %]" title="Local cover image">
-                                                <img src="/cgi-bin/koha/opac-image.pl?thumbnail=1&amp;imagenumber=[% image.imagenumber | uri %]" alt="Local cover image" />
-                                            </a>
-                                        </div>
-                                    [% END %]
-                                </div>
-                            </div>
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_cover') %]
-                        <td></td>
-                    [% END %]
+ [% SET hidden_columns_force.$table_id = [] %]
+ <table class="table table-bordered table-striped" id="[% table_id | html %]">
+ <caption class="visually-hidden">Bản tài liệu</caption>
+ <thead>
+ <tr>
+ <th id="item_cover" data-colname="item_cover">Ảnh bìa</th>
+ <th id="item_itemtype" data-colname="item_itemtype" class="itype">Loại hình</th>
+ <th id="item_current_location" data-colname="item_current_location" class="item_location">Thư viện</th>
+ <th id="item_home_location" data-colname="item_home_location" class="item_location">Đơn vị quản lý</th>
+ <th id="item_ccode" data-colname="item_ccode" class="collection">Bộ sưu tập</th>
+ <th id="item_shelving_location" data-colname="item_shelving_location" class="shelving_location">Kho</th>
+ <th id="item_callnumber" data-colname="item_callnumber" class="call_no">Ký hiệu xếp giá</th>
+ <th id="item_materials" data-colname="item_materials" class="materials">Chi tiết</th>
+ <th id="item_enumchron" data-colname="item_enumchron" class="vol_info">Tập/Số</th>
+ <th id="item_url" data-colname="item_url" class="url">Liên kết</th>
+ <th id="item_copy" data-colname="item_copy" class="copynumber">Bản số</th>
+ <th id="item_status" data-colname="item_status" class="status">Trạng thái</th>
+ <th id="item_notes" data-colname="item_notes" class="notes">Ghi chú</th>
+ <th id="item_datedue" data-colname="item_datedue" class="date_due">Hạn trả</th>
+ <th id="item_barcode" data-colname="item_barcode" class="barcode">Mã ĐKCB</th>
+ <th id="item_holds" data-colname="item_holds">Đặt mượn</th>
+ <th id="item_priority" data-colname="item_priority">Ưu tiên</th>
+ <th id="item_coursereserves" data-colname="item_coursereserves">Học phần</th>
+ <th class="dtr-control-col"></th>
+ </tr>
+ </thead>
+ <tbody>
+ [% FOREACH ITEM_RESULT IN items %]
+ <tr vocab="http://schema.org/" typeof="Offer">
+ [% IF Koha.Preference('OPACLocalCoverImages') && ( tab == 'holdings' && itemloop_has_images || tab == 'otherholdings' && otheritemloop_has_images ) %]
+ <td class="cover">
+ <div class="bookcover">
+ <div class="cover-slider cover-slides">
+ [% FOR image IN ITEM_RESULT.cover_images %]
+ <div class="cover-image local-coverimg">
+ <a href="/cgi-bin/koha/opac-image.pl?itemnumber=[% image.itemnumber | uri %]&imagenumber=[% image.imagenumber | uri %]" title="Ảnh bìa cục bộ">
+ <img alt="Ảnh bìa cục bộ" src="/cgi-bin/koha/opac-image.pl?thumbnail=1&imagenumber=[% image.imagenumber | uri %]" />
+ </a>
+ </div>
+ [% END %]
+ </div>
+ </div>
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_cover') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( item_level_itypes ) %]
-                        <td class="itype">
-                            [% UNLESS ( Koha.Preference('OpacNoItemTypeImages') ) %]
-                                [% IF ( ITEM_RESULT.imageurl ) %]
-                                    <img class="itemtype-image" src="[% ITEM_RESULT.imageurl | html %]" title="[% ITEM_RESULT.description | html %]" alt="" />
-                                [% END %]
-                            [% END %]
-                            <span class="itypetext">[% ITEM_RESULT.description | html %]</span>
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_itemtype') %]
-                        <td></td>
-                    [% END %]
-                    [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' ) %]
-                        [%# Show opac_info or branchurl from holding library %]
-                        [% SET holding_library_name = Branches.GetName( ITEM_RESULT.holdingbranch ) %]
-                        [% SET holding_library_url = Branches.GetURL( ITEM_RESULT.holdingbranch ) %]
-                        <td class="location" property="seller" data-order="[% holding_library_name | html %]">
-                            <link property="itemOffered" href="#record" />
-                            <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut" />
-                            [% IF ( ITEM_RESULT.holding_library_info ) %]
-                                <a href="[% holding_library_url | url %]" class="library_info" data-index="[% loop.index | html %]" data-name="[% holding_library_name | html %]">
-                                    <i class="fa fa-info-circle" aria-hidden="true"></i> [% holding_library_name | html %][% my_library_info | html %]
-                                </a>
-                            [% ELSIF holding_library_url %]
-                                <a href="[% holding_library_url | url %]"> [% holding_library_name | html %] </a>
-                            [% ELSE %]
-                                <span>[% holding_library_name | html %]</span>
-                            [% END %]
+ [% IF ( item_level_itypes ) %]
+ <td class="itype">
+ [% UNLESS ( Koha.Preference('OpacNoItemTypeImages') ) %]
+ [% IF ( ITEM_RESULT.imageurl ) %]
+ <img class="itemtype-image" src="[% ITEM_RESULT.imageurl | html %]" title="[% ITEM_RESULT.description | html %]" alt="" />
+ [% END %]
+ [% END %]
+ <span class="itypetext">[% ITEM_RESULT.description | html %]</span>
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_itemtype') %]
+ <td></td>
+ [% END %]
+ [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' ) %]
+ [% SET holding_library_name = Branches.GetName( ITEM_RESULT.holdingbranch ) %]
+ [% SET holding_library_url = Branches.GetURL( ITEM_RESULT.holdingbranch ) %]
+ <td class="location" property="seller" data-order="[% holding_library_name | html %]">
+ <link property="itemOffered" href="#record" />
+ <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut" />
+ [% IF ( ITEM_RESULT.holding_library_info ) %]
+ <a href="[% holding_library_url | url %]" class="library_info" data-index="[% loop.index | html %]" data-name="[% holding_library_name | html %]">
+ [% holding_library_name | html %][% my_library_info | html %]
+ </a>
+ [% ELSIF holding_library_url %]
+ <a href="[% holding_library_url | url %]"> [% holding_library_name | html %] </a>
+ [% ELSE %]
+ <span>[% holding_library_name | html %]</span>
+ [% END %]
 
-                            [% IF ( Koha.Preference('OpacLocationOnDetail') == 'holding' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
-                                [% IF ( ITEM_RESULT.location_description ) %]
-                                    <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
-                                [% END %]
-                            [% END %]
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_current_location') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( Koha.Preference('OpacLocationOnDetail') == 'holding' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
+ [% IF ( ITEM_RESULT.location_description ) %]
+ <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
+ [% END %]
+ [% END %]
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_current_location') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
-                        [%# Show opac_info or branchurl from home library %]
-                        [% SET home_library_name = Branches.GetName( ITEM_RESULT.homebranch ) %]
-                        [% SET home_library_url = Branches.GetURL( ITEM_RESULT.homebranch ) %]
-                        <td class="location" property="seller" data-order="[% home_library_name | html %]">
-                            <link property="itemOffered" href="#record" />
-                            <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut" />
+ [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
+ [% SET home_library_name = Branches.GetName( ITEM_RESULT.homebranch ) %]
+ [% SET home_library_url = Branches.GetURL( ITEM_RESULT.homebranch ) %]
+ <td class="location" property="seller" data-order="[% home_library_name | html %]">
+ <link property="itemOffered" href="#record" />
+ <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut" />
 
-                            [% IF ( ITEM_RESULT.home_library_info ) %]
-                                <a href="[% home_library_url | url %]" class="library_info" data-index="[% loop.index | html %]" data-name="[% home_library_name | html %]">
-                                    <i class="fa fa-info-circle" aria-hidden="true"></i> [% home_library_name | html %]
-                                </a>
-                            [% ELSIF home_library_url %]
-                                <a href="[% home_library_url | url %]"> [% home_library_name | html %] </a>
-                            [% ELSE %]
-                                <span>[% home_library_name | html %]</span>
-                            [% END %]
+ [% IF ( ITEM_RESULT.home_library_info ) %]
+ <a href="[% home_library_url | url %]" class="library_info" data-index="[% loop.index | html %]" data-name="[% home_library_name | html %]">
+ [% home_library_name | html %]
+ </a>
+ [% ELSIF home_library_url %]
+ <a href="[% home_library_url | url %]"> [% home_library_name | html %] </a>
+ [% ELSE %]
+ <span>[% home_library_name | html %]</span>
+ [% END %]
 
-                            [% IF ( Koha.Preference('OpacLocationOnDetail') == 'home' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
-                                [% IF ( ITEM_RESULT.location_description ) %]
-                                    <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
-                                [% END %]
-                            [% END %]
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_home_location') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( Koha.Preference('OpacLocationOnDetail') == 'home' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
+ [% IF ( ITEM_RESULT.location_description ) %]
+ <div class="shelvingloc-wrap"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></div>
+ [% END %]
+ [% END %]
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_home_location') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( itemdata_ccode ) %]
-                        <td class="collection">[% ITEM_RESULT.ccode | html %]</td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_ccode') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_ccode ) %]
+ <td class="collection">[% ITEM_RESULT.ccode | html %]</td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_ccode') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( Koha.Preference('OpacLocationOnDetail') == 'column' && itemdata_location ) %]
-                        <td class="shelving_location"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_shelving_location') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( Koha.Preference('OpacLocationOnDetail') == 'column' && itemdata_location ) %]
+ <td class="shelving_location"><span class="shelvingloc">[% ITEM_RESULT.location_description | html %]</span></td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_shelving_location') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( itemdata_itemcallnumber ) %]
-                        <td class="call_no" property="sku">
-                            [% IF ( ITEM_RESULT.itemcallnumber ) %]
-                                [% ITEM_RESULT.itemcallnumber | html %]
-                                [% IF ( OPACShelfBrowser ) %]
-                                    [% IF ( ITEM_RESULT.itemnumber == starting_itemnumber ) %]
-                                        (<a
-                                            class="close_shelf"
-                                            href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | html %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | html %]#[% tab | html %]"
-                                            aria-label="Browse the shelf for items near [% title | html %]"
-                                            >Browse shelf<span class="visually-hidden">(Opens below)</span></a
-                                        >)
-                                    [% ELSE %]
-                                        (<a
-                                            href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | uri %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | uri %]#[% tab | uri %]"
-                                            aria-label="Browse the shelf for items near [% title | html %]"
-                                            >Browse shelf<span class="visually-hidden">(Opens below)</span></a
-                                        >)
-                                    [% END %]
-                                [% END %]
-                            [% END %]
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_callnumber') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_itemcallnumber ) %]
+ <td class="call_no" property="sku">
+ [% IF ( ITEM_RESULT.itemcallnumber ) %]
+ [% ITEM_RESULT.itemcallnumber | html %]
+ [% IF ( OPACShelfBrowser ) %]
+ [% IF ( ITEM_RESULT.itemnumber == starting_itemnumber ) %]
+ <a
+ class="close_shelf shelfbrowser-link"
+ href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | html %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | html %]#[% tab | html %]"
+ aria-label="Duyệt giá sách [% title | html %]"
+ >Duyệt kệ<span class="visually-hidden">(Mở ở bên dưới)</span></a>
+ [% ELSE %]
+ <a
+ class="shelfbrowser-link"
+ href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ITEM_RESULT.biblionumber | uri %]&amp;shelfbrowse_itemnumber=[% ITEM_RESULT.itemnumber | uri %]#[% tab | uri %]"
+ aria-label="Duyệt giá sách [% title | html %]"
+ >Duyệt kệ<span class="visually-hidden">(Mở ở bên dưới)</span></a>
+ [% END %]
+ [% END %]
+ [% END %]
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_callnumber') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( itemdata_materials ) %]
-                        <td class="materials">[% ITEM_RESULT.materials | html %]</td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_materials') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_materials ) %]
+ <td class="materials">[% ITEM_RESULT.materials | html %]</td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_materials') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( itemdata_enumchron ) %]
-                        [% SET serial = ITEM_RESULT.serial %]
-                        <td class="vol_info">
-                            [% IF ITEM_RESULT.enumchron && serial.serialseq %]
-                                <span class="enum">[% ITEM_RESULT.enumchron | html %]</span>
-                                [% IF ( serial.serialseq && ITEM_RESULT.enumchron!=serial.serialseq ) %]
-                                    <span class="sep"> -- </span>
-                                    <span class="serialseq">[% serial.serialseq | html %]</span>
-                                [% END %]
-                            [% ELSIF ITEM_RESULT.enumchron %]
-                                <span class="enum">[% ITEM_RESULT.enumchron | html %]</span>
-                            [% ELSIF serial.serialseq %]
-                                <span class="serialseq">[% serial.serialseq | html %]</span>
-                            [% END %]
-                            [% IF ( Koha.Preference('DisplayPublishedDate') && serial.publisheddate ) %]
-                                <span class="pubdate">([% serial.publisheddate | $KohaDates %])</span>
-                            [% END %]
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_enumchron') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_enumchron ) %]
+ [% SET serial = ITEM_RESULT.serial %]
+ <td class="vol_info">
+ [% IF ITEM_RESULT.enumchron && serial.serialseq %]
+ <span class="enum">[% ITEM_RESULT.enumchron | html %]</span>
+ [% IF ( serial.serialseq && ITEM_RESULT.enumchron!=serial.serialseq ) %]
+ <span class="sep"> -- </span>
+ <span class="serialseq">[% serial.serialseq | html %]</span>
+ [% END %]
+ [% ELSIF ITEM_RESULT.enumchron %]
+ <span class="enum">[% ITEM_RESULT.enumchron | html %]</span>
+ [% ELSIF serial.serialseq %]
+ <span class="serialseq">[% serial.serialseq | html %]</span>
+ [% END %]
+ [% IF ( Koha.Preference('DisplayPublishedDate') && serial.publisheddate ) %]
+ <span class="pubdate">([% serial.publisheddate | $KohaDates %])</span>
+ [% END %]
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_enumchron') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( itemdata_uri ) %]
-                        <td class="url">
-                            [% IF ITEM_RESULT.uri %]
-                                [%# Initialize two helper vars %]
-                                [% SET target_attr = ''; SET rel_attr = '' %]
-                                [% IF Koha.Preference('OPACURLOpenInNewWindow') %][% SET target_attr = '_blank'; SET rel_attr = 'noreferrer' %][% END %]
+ [% IF ( itemdata_uri ) %]
+ <td class="url">
+ [% IF ITEM_RESULT.uri %]
+ [% SET target_attr = ''; SET rel_attr = '' %]
+ [% IF Koha.Preference('OPACURLOpenInNewWindow') %][% SET target_attr = '_blank'; SET rel_attr = 'noreferrer' %][% END %]
 
-                                [%# Check if there are multiple URIs; in the single case we only use pref URLLinkText or Link to resource %]
-                                [% SET uris = ITEM_RESULT.uri.split(' \| ') %]
-                                [% IF uris.size > 1 %]
-                                    [% FOREACH uri IN uris %]
-                                        [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
-                                            <a
+ [% SET uris = ITEM_RESULT.uri.split(' \| ') %]
+ [% IF uris.size > 1 %]
+ [% FOREACH uri IN uris %]
+ [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
+ <a
                                                 target="[% target_attr | html %]"
                                                 rel="[% rel_attr | html %]"
                                                 href="/cgi-bin/koha/tracklinks.pl?uri=[% uri | uri %]&amp;biblionumber=[% biblio.biblionumber | html %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | html %]"
                                                 property="url"
                                                 >[% uri | html %]</a
                                             >
-                                        [% ELSE %]
-                                            <a target="[% target_attr | html %]" rel="[% rel_attr | html %]" href="[% uri | safe_url %]" property="url">[% uri | html %]</a>
-                                        [% END %]
-                                    [% END %]
-                                [% ELSE %]
-                                    [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
-                                        <a
+ [% ELSE %]
+ <a target="[% target_attr | html %]" rel="[% rel_attr | html %]" href="[% uri | safe_url %]" property="url">[% uri | html %]</a>
+ [% END %]
+ [% END %]
+ [% ELSE %]
+ [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
+ <a
                                             target="[% target_attr | html %]"
                                             rel="[% rel_attr | html %]"
                                             href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | uri %]&amp;biblionumber=[% biblio.biblionumber | html %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | html %]"
                                             property="url"
                                         >
-                                            [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Link to resource[% END %]
-                                        </a>
-                                    [% ELSE %]
-                                        <a target="[% target_attr | html %]" rel="[% rel_attr | html %]" href="[% ITEM_RESULT.uri | safe_url %]" property="url">
-                                            [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Link to resource[% END %]
-                                        </a>
-                                    [% END %]
-                                [% END %]
-                            [% END %]
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_url') %]
-                        <td></td>
-                    [% END # /IF itemdata_uri %]
+ [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Mở liên kết[% END %]
+ </a>
+ [% ELSE %]
+ <a target="[% target_attr | html %]" rel="[% rel_attr | html %]" href="[% ITEM_RESULT.uri | safe_url %]" property="url">
+ [% IF Koha.Preference('URLLinkText') %][% Koha.Preference('URLLinkText') | html %][% ELSE %]Mở liên kết[% END %]
+ </a>
+ [% END %]
+ [% END %]
+ [% END %]
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_url') %]
+ <td></td>
+ [% END # /IF itemdata_uri %]
 
-                    [% IF ( itemdata_copynumber ) %]
-                        <td class="copynumber">[% ITEM_RESULT.copynumber | html %]</td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_copy') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_copynumber ) %]
+ <td class="copynumber">[% ITEM_RESULT.copynumber | html %]</td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_copy') %]
+ <td></td>
+ [% END %]
 
-                    <td class="status">[% INCLUDE 'item-status.inc' item = ITEM_RESULT.object include_schema_org = 1 %]</td>
+ <td class="status">[% INCLUDE 'item-status.inc' item = ITEM_RESULT.object include_schema_org = 1 %]</td>
 
-                    [% IF ( itemdata_itemnotes ) %]
-                        <td class="notes" property="description">[% ITEM_RESULT.itemnotes | $raw %]</td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_notes') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_itemnotes ) %]
+ <td class="notes" property="description">[% ITEM_RESULT.itemnotes | $raw %]</td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_notes') %]
+ <td></td>
+ [% END %]
 
-                    [% IF item_checkouts %]
-                        <td class="date_due" data-order="[% ITEM_RESULT.checkout.date_due | html %]">[% ITEM_RESULT.checkout.date_due | $KohaDates as_due_date => 1 %]</td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_datedue') %]
-                        <td></td>
-                    [% END %]
+ [% IF item_checkouts %]
+ <td class="date_due" data-order="[% ITEM_RESULT.checkout.date_due | html %]">[% ITEM_RESULT.checkout.date_due | $KohaDates as_due_date => 1 %]</td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_datedue') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ( itemdata_barcode ) %]
-                        <td class="barcode" property="serialNumber"><span class="barcode-pill">[% ITEM_RESULT.barcode | html %]</span></td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_barcode') %]
-                        <td></td>
-                    [% END %]
+ [% IF ( itemdata_barcode ) %]
+ <td class="barcode" property="serialNumber"><span class="barcode-pill">[% ITEM_RESULT.barcode | html %]</span></td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_barcode') %]
+ <td></td>
+ [% END %]
 
-                    [% IF item_level_holds > 0 %]
-                        <td class="holds_count">
-                            [% IF holds_count.defined %][% ITEM_RESULT.holds_count | html %][% END %]
-                            [% IF ITEM_RESULT.priority %]
-                                [% IF holds_count.defined %]
-                                    <span>(priority [% ITEM_RESULT.priority | html %])</span>
-                                [% ELSE %]
-                                    <span>[% ITEM_RESULT.priority | html %]</span>
-                                [% END %]
-                            [% END %]
-                        </td>
-                        [% hidden_columns_force.$table_id.push('item_priority') %]
-                        <td></td>
-                    [% ELSIF show_priority %]
-                        [% hidden_columns_force.$table_id.push('item_holds') %]
-                        <td></td>
-                        <td class="holds_priority">[% priority | html %]</td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_holds') %]
-                        <td></td>
-                        [% hidden_columns_force.$table_id.push('item_priority') %]
-                        <td></td>
-                    [% END %]
+ [% IF item_level_holds > 0 %]
+ <td class="holds_count">
+ [% IF holds_count.defined %][% ITEM_RESULT.holds_count | html %][% END %]
+ [% IF ITEM_RESULT.priority %]
+ [% IF holds_count.defined %]
+ <span>(thứ tự ưu tiên [% ITEM_RESULT.priority | html %])</span>
+ [% ELSE %]
+ <span>[% ITEM_RESULT.priority | html %]</span>
+ [% END %]
+ [% END %]
+ </td>
+ [% hidden_columns_force.$table_id.push('item_priority') %]
+ <td></td>
+ [% ELSIF show_priority %]
+ [% hidden_columns_force.$table_id.push('item_holds') %]
+ <td></td>
+ <td class="holds_priority">[% priority | html %]</td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_holds') %]
+ <td></td>
+ [% hidden_columns_force.$table_id.push('item_priority') %]
+ <td></td>
+ [% END %]
 
-                    [% IF ShowCourseReservesHeader %]
-                        <td>
-                            [% IF ITEM_RESULT.course_reserves %]
-                                [% FOREACH r IN ITEM_RESULT.course_reserves %]
-                                    [% IF r.course.enabled == 'yes' %]
-                                        <p>
-                                            <a href="opac-course-details.pl?course_id=[% r.course.course_id | uri %]">
-                                                [% r.course.course_name | html %]
-                                                <!--[% IF r.course.course_number %][% r.course.course_number | html %][% END %]-->
-                                                [% IF r.course.section %][% r.course.section | html %][% END %]
-                                                [% IF r.course.term %][% AuthorisedValues.GetByCode( 'TERM', r.course.term, 1 ) | html %][% END %]
-                                            </a>
-                                        </p>
-                                    [% END %]
-                                [% END %]
-                            [% END %]
-                        </td>
-                    [% ELSE %]
-                        [% hidden_columns_force.$table_id.push('item_coursereserves') %]
-                        <td></td>
-                    [% END  # /IF ShowCourseReservesHeader %]
-                    <td></td>
-                </tr>
-            [% END %]
-        </tbody>
-    </table>
+ [% IF ShowCourseReservesHeader %]
+ <td>
+ [% IF ITEM_RESULT.course_reserves %]
+ [% FOREACH r IN ITEM_RESULT.course_reserves %]
+ [% IF r.course.enabled == 'yes' %]
+ <p>
+ <a href="opac-course-details.pl?course_id=[% r.course.course_id | uri %]">
+ [% r.course.course_name | html %]
+ <!--[% IF r.course.course_number %][% r.course.course_number | html %][% END %]-->
+ [% IF r.course.section %][% r.course.section | html %][% END %]
+ [% IF r.course.term %][% AuthorisedValues.GetByCode( 'TERM', r.course.term, 1 ) | html %][% END %]
+ </a>
+ </p>
+ [% END %]
+ [% END %]
+ [% END %]
+ </td>
+ [% ELSE %]
+ [% hidden_columns_force.$table_id.push('item_coursereserves') %]
+ <td></td>
+ [% END  # /IF ShowCourseReservesHeader %]
+ <td></td>
+ </tr>
+ [% END %]
+ </tbody>
+ </table>
 
-    [% FOREACH ITEM_RESULT IN items %]
-        [% IF ( ITEM_RESULT.holding_library_info ) %]
-            <div style="display:none" id="library_info_[% loop.index | html %]">
-                [% FOREACH info IN ITEM_RESULT.holding_library_info %]
-                    <div id="library_description_[% info.additional_content_id | $raw %]" class="library-description">[% info.content | $raw %]</div>
-                [% END %]
-            </div>
-        [% END %]
-    [% END %]
+ [% FOREACH ITEM_RESULT IN items %]
+ [% IF ( ITEM_RESULT.holding_library_info ) %]
+ <div style="display:none" id="library_info_[% loop.index | html %]">
+ [% FOREACH info IN ITEM_RESULT.holding_library_info %]
+ <div id="library_description_[% info.additional_content_id | $raw %]" class="library-description">[% info.content | $raw %]</div>
+ [% END %]
+ </div>
+ [% END %]
+ [% END %]
 [% END %][%# end of items_table block %]
 
 [% IF Koha.Preference('OpacCatalogConcerns') %]
-    [% INCLUDE 'modals/catalog_concern.inc' %]
+ [% INCLUDE 'modals/catalog_concern.inc' %]
 [% END %]
 
 [% BLOCK jsinclude %]
-    [% IF Koha.Preference('OpacCatalogConcerns') %]
-        [% Asset.js("js/modals/catalog_concern.js") | $raw %]
-    [% END %]
-    [% INCLUDE 'datatables.inc' %]
-    [% IF ( Koha.Preference('IdRef') ) %]
-        [% INCLUDE greybox.inc %]
-    [% END %]
-    [% IF ( OpacStarRatings != 'disable' ) %]
-        [% Asset.js("lib/jquery/plugins/jquery.barrating.min.js") | $raw %]
-        [% Asset.js("js/ratings.js") | $raw %]
-    [% END %]
+ [% IF Koha.Preference('OpacCatalogConcerns') %]
+ [% Asset.js("js/modals/catalog_concern.js") | $raw %]
+ [% END %]
+ [% INCLUDE 'datatables.inc' %]
+ [% IF ( Koha.Preference('IdRef') ) %]
+ [% INCLUDE greybox.inc %]
+ [% END %]
+ [% IF ( OpacStarRatings != 'disable' ) %]
+ [% Asset.js("lib/jquery/plugins/jquery.barrating.min.js") | $raw %]
+ [% Asset.js("js/ratings.js") | $raw %]
+ [% END %]
 
-    [% CoverImagePlugins | $raw %]
+ [% CoverImagePlugins | $raw %]
 
-    [% IF ( OpacHighlightedWords ) %][% Asset.js("lib/jquery/plugins/jquery.highlight-5.js") | $raw %][% END %]
-    [% IF ( Koha.Preference('OPACDetailQRCode') ) %]
-        [% Asset.js("lib/kjua/kjua.min.js") | $raw %]
-    [% END %]
+ [% IF ( OpacHighlightedWords ) %][% Asset.js("lib/jquery/plugins/jquery.highlight-5.js") | $raw %][% END %]
+ [% IF ( Koha.Preference('OPACDetailQRCode') ) %]
+ [% Asset.js("lib/kjua/kjua.min.js") | $raw %]
+ [% END %]
 
-    [% Asset.js("lib/Chocolat/js/chocolat.js") | $raw %]
+ [% Asset.js("lib/Chocolat/js/chocolat.js") | $raw %]
 
-    [% Asset.js("lib/emoji-picker/js/emoji-picker-all.min.js") | $raw %]
-    [% IF OpenLibraryCovers || OpenLibrarySearch %]
-        [% Asset.js("js/openlibrary.js") | $raw %]
-    [% END %]
-    <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
+ [% Asset.js("lib/emoji-picker/js/emoji-picker-all.min.js") | $raw %]
+ [% IF OpenLibraryCovers || OpenLibrarySearch %]
+ [% Asset.js("js/openlibrary.js") | $raw %]
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]" data-tt-allowed="true">
         const interface = "[% interface | html %]";
         Koha.addPrefs({
             OpacHighlightedWords: "[% Koha.Preference('OpacHighlightedWords') | html %]",
@@ -2259,10 +2193,10 @@
             var normalized_upc = "[% normalized_upc | html %]";
         [% END %]
     </script>
-    [% IF ( Koha.Preference('OPACShowMusicalInscripts') ) %]
-        [% Asset.js("js/verovio.js") | $raw %]
-    [% END %]
-    <script nonce="[% Koha.CSPNonce | $raw %]">
+ [% IF ( Koha.Preference('OPACShowMusicalInscripts') ) %]
+ [% Asset.js("js/verovio.js") | $raw %]
+ [% END %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
         window.emojiPicker = new EmojiPicker({
             emojiable_selector: "[data-emojiable=true]",
             assetsPath: `${interface}/lib/emoji-picker/img/`,
@@ -2327,7 +2261,7 @@
                                         // Remove the container
                                         div.remove();
                                     } else {
-                                        lightbox_descriptions.push(_("Amazon cover image (<a href='%s'>see the original image</a>)").format($(img).data("link")));
+                                        lightbox_descriptions.push(_("Ảnh bìa Amazon (<a href='%s'>xem ảnh gốc</a>)").format($(img).data("link")));
                                     }
                                 } else if (div.attr("id") == "custom-coverimg") {
                                     if ((img.complete != null && !img.complete) || img.naturalHeight == 0) {
@@ -2335,30 +2269,30 @@
                                         // Remove the container
                                         div.remove();
                                     } else {
-                                        lightbox_descriptions.push(_("Custom cover image"));
+                                        lightbox_descriptions.push(_("Ảnh bìa tùy chỉnh"));
                                     }
                                 } else if (div.attr("id") == "syndetics-coverimg") {
-                                    lightbox_descriptions.push(_("Image from Syndetics"));
+                                    lightbox_descriptions.push(_("Ảnh từ Syndetics"));
                                 } else if (div.attr("id") == "googlejacket-coverimg") {
-                                    lightbox_descriptions.push(_("Image from Google Books (<a href='%s'>see the original image</a>)").format($(img).data("link")));
+                                    lightbox_descriptions.push(_("Ảnh từ Google Books (<a href='%s'>xem ảnh gốc</a>)").format($(img).data("link")));
                                 } else if (div.attr("id") == "openlibrary-coverimg") {
-                                    lightbox_descriptions.push(_("Image from OpenLibrary (<a href='%s'>see the original image</a>)").format($(img).data("link")));
+                                    lightbox_descriptions.push(_("Ảnh từ OpenLibrary (<a href='%s'>xem ảnh gốc</a>)").format($(img).data("link")));
                                 } else if (div.hasClass("coce-coverimg")) {
                                     // Identify which service's image is being loaded by Coce
                                     var coce_description;
                                     if ($(img).attr("src").indexOf("amazon.com") >= 0) {
-                                        coce_description = _("Coce image from Amazon.com");
+                                        coce_description = _("Ảnh Coce từ Amazon.com");
                                     } else if ($(img).attr("src").indexOf("google.com") >= 0) {
-                                        coce_description = _("Coce image from Google Books");
+                                        coce_description = _("Ảnh Coce từ Google Books");
                                     } else if ($(img).attr("src").indexOf("openlibrary.org") >= 0) {
-                                        coce_description = _("Coce image from Open Library");
+                                        coce_description = _("Ảnh Coce từ Open Library");
                                     }
                                     div.find(".hint").html(coce_description);
                                     lightbox_descriptions.push(coce_description);
                                 } else if (div.attr("class") == "cover-image local-coverimg") {
-                                    lightbox_descriptions.push(_("Local cover image"));
+                                    lightbox_descriptions.push(_("Ảnh bìa cục bộ"));
                                 } else {
-                                    lightbox_descriptions.push(_("Cover image source unknown"));
+                                    lightbox_descriptions.push(_("Không rõ nguồn ảnh bìa"));
                                 }
                             }
                         } else {
@@ -2612,7 +2546,7 @@
                     var thisid = $(this).attr("title");
                     var tag = $("#newtag" + thisid).val();
                     if (!tag || tag == "") {
-                        alert(_("No tag was specified."));
+                        alert(_("Không có thẻ nào được chỉ định."));
                         return false;
                     }
                     KOHA.Tags.add_tag_button(thisid, tag);
@@ -2842,8 +2776,8 @@
             }
         }
     </script>
-    [% IF ( NovelistSelectProfile && ( normalized_isbn || normalized_upc ) ) %]
-        <script nonce="[% Koha.CSPNonce | $raw %]">
+ [% IF ( NovelistSelectProfile && ( normalized_isbn || normalized_upc ) ) %]
+ <script nonce="[% Koha.CSPNonce | $raw %]">
             $(document).ready(function () {
                 novSelect.loadContentForQuery(
                     {
@@ -2862,5 +2796,5 @@
                 );
             });
         </script>
-    [% END %]
+ [% END %]
 [% END %]

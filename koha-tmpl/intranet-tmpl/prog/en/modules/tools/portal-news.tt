@@ -656,6 +656,8 @@
                 <div class="alert alert-info">Đã xóa thành công.</div>
             [% ELSIF msg == "status_updated" %]
                 <div class="alert alert-success">Trạng thái đã được cập nhật thành công.</div>
+            [% ELSIF msg == "forbidden" %]
+                <div class="alert alert-warning">Bạn không có quyền thao tác mục này.</div>
             [% END %]
 
             [% IF op == "list" %]
@@ -668,39 +670,52 @@
                     </div>
                     <div>
                         [% IF section == "database" %]
-                            <button type="button" onclick="openAddDatabaseModal()" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa fa-plus text-muted"></i> Thêm CSDL mới
+                            <button type="button" onclick="openAddDatabaseModal()" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px;">
+                                Thêm CSDL
                             </button>
                         [% ELSIF section == "banner" %]
-                            <button type="button" onclick="openAddBannerModal()" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa fa-plus text-muted"></i> Thêm Banner mới
+                            <button type="button" onclick="openAddBannerModal()" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px;">
+                                Thêm Banner
                             </button>
                         [% ELSIF section == "footer" %]
-                            <a href="[% Koha.Preference('OPACBaseURL') || '/cgi-bin/koha/opac-main.pl' %]" target="_blank" class="btn btn-default ftu-opac-link" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa fa-external-link text-primary"></i> Xem giao diện OPAC
+                            <a href="[% Koha.Preference('OPACBaseURL') || '/cgi-bin/koha/opac-main.pl' %]" target="_blank" class="btn btn-default ftu-opac-link" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px;">
+                                Xem OPAC
+                            </a>
+                        [% ELSIF section == "intro" %]
+                            <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&default_type=intro_librarian&section=intro" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px;">
+                                Viết lời giới thiệu
                             </a>
                         [% ELSE %]
-                            <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&default_type=news&section=news" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa fa-plus text-muted"></i> Viết bài mới
+                            <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&default_type=news&section=news" class="btn btn-default" style="font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 14px;">
+                                Viết bài mới
                             </a>
                         [% END %]
                     </div>
                 </div>
 
-                <!-- 4 TABS CHÍNH: 1. TIN TỨC & BẢNG TIN | 2. CƠ SỞ DỮ LIỆU | 3. BANNER TRANG CHỦ | 4. CẤU HÌNH CHÂN TRANG -->
+                <!-- 4 TABS CHÍNH -->
                 <div class="portal-main-tabs" style="display: flex; gap: 8px; margin: 16px 0 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap;">
-                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=news" class="btn [% IF section != 'database' && section != 'banner' && section != 'footer' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; [% IF section != 'database' && section != 'banner' && section != 'footer' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
-                        <i class="fa fa-newspaper-o"></i> Tin tức &amp; Bảng tin ([% count_news_group %])
+                    [% IF can_portal_other %]
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=news" class="btn [% IF section != 'database' && section != 'banner' && section != 'footer' && section != 'intro' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; [% IF section != 'database' && section != 'banner' && section != 'footer' && section != 'intro' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
+                        Tin tức ([% count_news_group %])
                     </a>
-                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn [% IF section == 'database' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; [% IF section == 'database' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
-                        <i class="fa fa-database"></i> Cơ sở dữ liệu (CSDL) ([% count_database %])
+                    [% END %]
+                    [% IF can_portal_review %]
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=intro" class="btn [% IF section == 'intro' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; [% IF section == 'intro' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
+                        Lời giới thiệu ([% count_intro %])
                     </a>
-                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner" class="btn [% IF section == 'banner' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; [% IF section == 'banner' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
-                        <i class="fa fa-picture-o"></i> Banner trang chủ OPAC ([% count_banner %])
+                    [% END %]
+                    [% IF can_portal_other %]
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn [% IF section == 'database' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; [% IF section == 'database' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
+                        Cơ sở dữ liệu ([% count_database %])
                     </a>
-                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=footer" class="btn [% IF section == 'footer' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; [% IF section == 'footer' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
-                        <i class="fa fa-sliders"></i> Cấu hình Chân trang (Footer)
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner" class="btn [% IF section == 'banner' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; [% IF section == 'banner' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
+                        Banner OPAC ([% count_banner %])
                     </a>
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=footer" class="btn [% IF section == 'footer' %]btn-primary[% ELSE %]btn-default[% END %]" style="font-weight: 600; font-size: 0.9rem; border-radius: 4px; padding: 6px 16px; [% IF section == 'footer' %]background: #334155; border-color: #334155; color: #ffffff;[% END %]">
+                        Chân trang
+                    </a>
+                    [% END %]
                 </div>
 
                 [% IF section == "database" %]
@@ -708,33 +723,33 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
                         <div class="wp-tabs" style="margin-bottom: 0;">
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=database&status=all" class="wp-tab [% IF filter_status == 'all' && filter_class == 'all' %]active[% END %]">
-                                Tất cả CSDL ([% count_database %])
+                                Tất cả ([% count_database %])
                             </a>
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=database&class=CSDL+THƯƠNG+MẠI" class="wp-tab [% IF filter_class == 'CSDL THƯƠNG MẠI' %]active[% END %]">
-                                CSDL Thương mại ([% count_db_commercial %])
+                                Thương mại ([% count_db_commercial %])
                             </a>
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=database&class=CSDL+NGUỒN+MỞ" class="wp-tab [% IF filter_class == 'CSDL NGUỒN MỞ' || filter_class == 'NGUỒN MỞ' %]active[% END %]">
                                 Nguồn mở ([% count_db_opensource %])
                             </a>
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=database&status=published" class="wp-tab [% IF filter_status == 'published' && filter_class == 'all' %]active[% END %]">
-                                Đang hiển thị ([% count_db_active %])
+                                Hiển thị ([% count_db_active %])
                             </a>
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=database&status=draft" class="wp-tab [% IF filter_status == 'draft' && filter_class == 'all' %]active[% END %]">
                                 Đang ẩn ([% count_db_draft %])
                             </a>
                         </div>
 
-                        <!-- Ô tìm kiếm CSDL & Nút Thêm mới -->
+                        <!-- Ô tìm kiếm CSDL -->
                         <form action="/cgi-bin/koha/tools/portal-news.pl" method="get" style="display: flex; gap: 8px; align-items: center; margin: 0;">
                             <input type="hidden" name="section" value="database" />
-                            <div class="input-group" style="width: 300px;">
-                                <input type="text" name="q" value="[% search_q | html %]" class="form-control" placeholder="Tìm theo tên CSDL, tài khoản..." style="border-radius: 6px 0 0 6px; font-size: 0.9rem;" />
+                            <div class="input-group" style="width: 280px;">
+                                <input type="text" name="q" value="[% search_q | html %]" class="form-control" placeholder="Tìm tên CSDL, tài khoản..." style="border-radius: 6px 0 0 6px; font-size: 0.9rem;" />
                                 <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" style="border-radius: 0 6px 6px 0;"><i class="fa fa-search"></i></button>
+                                    <button type="submit" class="btn btn-default" style="border-radius: 0 6px 6px 0;">Tìm</button>
                                 </span>
                             </div>
                             [% IF search_q %]
-                                <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn btn-default" title="Xóa tìm kiếm"><i class="fa fa-times"></i></a>
+                                <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn btn-default" title="Xóa tìm kiếm">Xóa</a>
                             [% END %]
                         </form>
                     </div>
@@ -744,47 +759,49 @@
                         <table class="table table-bordered table-striped csdl-table" style="vertical-align: middle; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); width: 100%;">
                             <thead>
                                 <tr>
-                                    <th style="width: 70px; text-align: center;">Thứ tự</th>
-                                    <th>Nguồn / Tên CSDL</th>
-                                    <th style="width: 170px; text-align: center;">Phân loại</th>
-                                    <th style="width: 160px;">Tên đăng nhập</th>
-                                    <th style="width: 180px;">Mật khẩu</th>
-                                    <th style="width: 120px; text-align: center;">Link hỗ trợ</th>
-                                    <th style="width: 110px; text-align: center;">Trạng thái</th>
-                                    <th style="width: 140px; text-align: center;">Thao tác</th>
+                                    <th style="width: 60px; text-align: center;">TT</th>
+                                    <th>Tên CSDL &amp; Mô tả</th>
+                                    <th style="width: 150px; text-align: center;">Phân loại</th>
+                                    <th style="width: 150px;">Tài khoản</th>
+                                    <th style="width: 170px;">Mật khẩu</th>
+                                    <th style="width: 100px; text-align: center;">Liên kết</th>
+                                    <th style="width: 100px; text-align: center;">Trạng thái</th>
+                                    <th style="width: 120px; text-align: center;">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 [% IF posts.size %]
                                     [% FOREACH p IN posts %]
                                     <tr id="row-csdl-[% p.id %]">
-                                        <!-- 1. Thứ tự -->
-                                        <!-- 1. Thứ tự -->
                                         <td style="text-align: center;">
                                             <span class="csdl-order-badge">[% p.sort_order %]</span>
                                         </td>
 
-                                        <!-- 2. Nguồn / Tên CSDL (BỎ LOGO, GỌN GÀNG, ÍT MÀU) -->
                                         <td>
-                                            <div style="font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 3px;">
-                                                <a href="javascript:void(0)" onclick="openEditDatabaseModal(document.getElementById('btn-edit-db-[% p.id %]'), [% p.id %])" style="color: #1e293b; text-decoration: underline;" title="Sửa thông tin CSDL">
-                                                    [% p.title | html %]
-                                                </a>
+                                            <div style="font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 2px;">
+                                                [% IF p.db_url || p.support_link %]
+                                                    <a href="[% p.db_url || p.support_link | html %]" target="_blank" rel="noopener noreferrer" style="color: #0369a1; text-decoration: none;" title="Truy cập CSDL: [% p.db_url || p.support_link | html %]">
+                                                        [% p.title | html %]
+                                                    </a>
+                                                [% ELSE %]
+                                                    <span style="color: #1e293b;">[% p.title | html %]</span>
+                                                [% END %]
                                                 [% IF p.is_featured %]
                                                     <span class="badge" style="font-size: 0.68rem; padding: 2px 5px; font-weight: normal; margin-left: 5px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569;">Ghim</span>
                                                 [% END %]
                                             </div>
-                                            <div style="font-size: 0.85rem; color: #475569; line-height: 1.4; margin-bottom: 4px;">
-                                                [% p.excerpt || p.content | html %]
-                                            </div>
+                                            [% IF p.excerpt || p.content %]
+                                                <div style="font-size: 0.84rem; color: #475569; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;" title="[% p.excerpt || p.content | html %]">
+                                                    [% p.excerpt || p.content | html %]
+                                                </div>
+                                            [% END %]
                                             [% IF p.access_instructions %]
-                                                <div style="font-size: 0.8rem; color: #334155; background: #f8fafc; border-left: 3px solid #94a3b8; padding: 3px 8px; border-radius: 2px; line-height: 1.35; display: inline-block;">
-                                                    [% p.access_instructions | html | html_line_break %]
+                                                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;" title="[% p.access_instructions | html %]">
+                                                    [% p.access_instructions | html %]
                                                 </div>
                                             [% END %]
                                         </td>
 
-                                        <!-- 3. Phân loại -->
                                         <td style="text-align: center;">
                                             [% IF p.classification && (p.classification.search('NGUỒN MỞ') || p.classification.search('OPEN SOURCE')) %]
                                                 <span class="csdl-badge-class csdl-badge-opensource">[% p.classification | html %]</span>
@@ -799,63 +816,58 @@
                                             [% END %]
                                         </td>
 
-                                        <!-- 4. Tên đăng nhập -->
                                         <td>
                                             [% IF p.db_user %]
                                                 <div class="csdl-credential-box">
                                                     <code class="csdl-code">[% p.db_user | html %]</code>
-                                                    <button type="button" class="btn btn-xs btn-default btn-copy-icon" onclick="copyTextDirect('[% p.db_user | html %]', this)" title="Sao chép tên đăng nhập">
-                                                        <i class="fa fa-copy"></i>
+                                                    <button type="button" class="btn btn-xs btn-default btn-copy-icon" onclick="copyTextDirect('[% p.db_user | html %]', this)" title="Sao chép">
+                                                        Chép
                                                     </button>
                                                 </div>
                                             [% ELSE %]
-                                                <span class="text-muted" style="font-size: 0.8rem; font-style: italic;">(IP Mạng trường)</span>
+                                                <span class="text-muted" style="font-size: 0.8rem;">Theo IP</span>
                                             [% END %]
                                         </td>
 
-                                        <!-- 5. Mật khẩu -->
                                         <td>
                                             [% IF p.db_pass %]
                                                 <div class="csdl-credential-box">
                                                     <span class="csdl-pass-dots" id="pass-dots-[% p.id %]">••••••••</span>
                                                     <span class="csdl-pass-text" id="pass-text-[% p.id %]" style="display: none;">[% p.db_pass | html %]</span>
-                                                    <button type="button" class="btn btn-xs btn-default btn-eye-icon" onclick="togglePasswordView([% p.id %], this)" title="Hiện / Ẩn mật khẩu">
-                                                        <i class="fa fa-eye"></i>
+                                                    <button type="button" class="btn btn-xs btn-default btn-eye-icon" onclick="togglePasswordView([% p.id %], this)" title="Hiện / Ẩn">
+                                                        Hiện
                                                     </button>
-                                                    <button type="button" class="btn btn-xs btn-default btn-copy-icon" onclick="copyTextDirect('[% p.db_pass | html %]', this)" title="Sao chép mật khẩu">
-                                                        <i class="fa fa-copy"></i>
+                                                    <button type="button" class="btn btn-xs btn-default btn-copy-icon" onclick="copyTextDirect('[% p.db_pass | html %]', this)" title="Sao chép">
+                                                        Chép
                                                     </button>
                                                 </div>
                                             [% ELSE %]
-                                                <span class="text-muted" style="font-size: 0.8rem; font-style: italic;">Không yêu cầu</span>
+                                                <span class="text-muted" style="font-size: 0.8rem;">—</span>
                                             [% END %]
                                         </td>
 
-                                        <!-- 6. Link hỗ trợ -->
                                         <td style="text-align: center;">
                                             [% IF p.support_link || p.event_reg_link %]
                                                 <a href="[% p.support_link || p.event_reg_link | html %]" target="_blank" class="csdl-link-btn" title="Mở liên kết CSDL">
-                                                    <span>Mở link</span> <i class="fa fa-external-link"></i>
+                                                    Mở link
                                                 </a>
                                             [% ELSE %]
-                                                <span class="text-muted" style="font-size: 0.8rem;">Chưa có link</span>
+                                                <span class="text-muted" style="font-size: 0.8rem;">—</span>
                                             [% END %]
                                         </td>
 
-                                        <!-- 7. Trạng thái -->
                                         <td style="text-align: center;">
                                             [% IF p.status == "published" %]
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=database" class="csdl-status-btn csdl-status-active" title="Đang hiển thị - Nhấp để chuyển sang Ẩn">
-                                                    <i class="fa fa-check"></i> Hiển thị
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=database" class="csdl-status-btn csdl-status-active" title="Nhấp để ẩn">
+                                                    Hiển thị
                                                 </a>
                                             [% ELSE %]
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=database" class="csdl-status-btn csdl-status-draft" title="Đang ẩn - Nhấp để chuyển sang Hiển thị">
-                                                    <i class="fa fa-eye-slash"></i> Ẩn
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=database" class="csdl-status-btn csdl-status-draft" title="Nhấp để hiển thị">
+                                                    Ẩn
                                                 </a>
                                             [% END %]
                                         </td>
 
-                                        <!-- 8. Thao tác -->
                                         <td style="text-align: center;">
                                             <div style="display: flex; gap: 4px; justify-content: center;">
                                                 <button type="button" class="btn btn-xs btn-default btn-edit-db"
@@ -868,13 +880,14 @@
                                                     data-instructions="[% p.access_instructions | html %]"
                                                     data-user="[% p.db_user | html %]"
                                                     data-pass="[% p.db_pass | html %]"
-                                                    data-link="[% p.support_link || p.event_reg_link | html %]"
+                                                    data-url="[% p.db_url || p.support_link | html %]"
+                                                    data-link="[% p.support_link | html %]"
                                                     data-status="[% p.status | html %]"
                                                     onclick="openEditDatabaseModal(this, [% p.id %])"
                                                     title="Sửa CSDL">
                                                     Sửa
                                                 </button>
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=database" class="btn btn-xs btn-default text-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa CSDL [% p.title | html %] không?');" title="Xóa CSDL">
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=database" class="btn btn-xs btn-default text-danger" onclick="return confirm('Xóa CSDL [% p.title | html %]?');" title="Xóa CSDL">
                                                     Xóa
                                                 </a>
                                             </div>
@@ -883,11 +896,10 @@
                                     [% END %]
                                 [% ELSE %]
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted" style="padding: 2.5rem;">
-                                            <div style="font-size: 2.2rem; color: #94a3b8; margin-bottom: 8px;"><i class="fa fa-database"></i></div>
-                                            <div>Chưa có cơ sở dữ liệu nào trong danh mục.</div>
-                                            <button type="button" onclick="openAddDatabaseModal()" class="btn btn-sm btn-default" style="margin-top: 10px; font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1;">
-                                                <i class="fa fa-plus text-muted"></i> Thêm CSDL đầu tiên
+                                        <td colspan="8" class="text-center text-muted" style="padding: 2rem;">
+                                            <div>Chưa có cơ sở dữ liệu nào.</div>
+                                            <button type="button" onclick="openAddDatabaseModal()" class="btn btn-sm btn-default" style="margin-top: 8px; font-weight: 600;">
+                                                Thêm CSDL đầu tiên
                                             </button>
                                         </td>
                                     </tr>
@@ -899,11 +911,11 @@
                     [% IF total_pages > 1 %]
                     <div class="portal-pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding: 0.75rem 1rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px;">
                         <div style="font-size: 0.85rem; color: #64748b;">
-                            Showing <strong>[% page_start %]</strong> - <strong>[% page_end %]</strong> of <strong>[% total_rows %]</strong> databases
+                            <strong>[% page_start %]</strong> - <strong>[% page_end %]</strong> / <strong>[% total_rows %]</strong> CSDL
                         </div>
                         <ul class="pagination pagination-sm" style="margin: 0; display: inline-flex; gap: 4px; list-style: none; padding-left: 0;">
                             <li class="page-item [% UNLESS has_prev %]disabled[% END %]">
-                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% prev_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">« Prev</a>
+                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% prev_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">« Trước</a>
                             </li>
                             [% FOREACH p IN pages_loop %]
                                 <li class="page-item [% IF p.is_active %]active[% END %]">
@@ -911,7 +923,7 @@
                                 </li>
                             [% END %]
                             <li class="page-item [% UNLESS has_next %]disabled[% END %]">
-                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% next_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">Next »</a>
+                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% next_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">Sau »</a>
                             </li>
                         </ul>
                     </div>
@@ -930,7 +942,7 @@
 
                                     <div class="modal-header" style="background: #ffffff; color: #1e293b; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
                                         <h4 class="modal-title" id="databaseModalLabel" style="margin: 0; font-weight: 600; font-size: 1.1rem; color: #1e293b;">
-                                            <i class="fa fa-database"></i> Thêm Cơ sở dữ liệu mới
+                                            Thêm Cơ sở dữ liệu
                                         </h4>
                                         <button type="button" class="btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close" onclick="hideDatabaseModal()" style="font-size: 1.2rem; cursor: pointer; border: none; background: transparent; color: #64748b;">
                                             <span aria-hidden="true">&times;</span>
@@ -939,18 +951,24 @@
 
                                     <div class="modal-body" style="padding: 20px; background: #ffffff;">
                                         <div class="row">
-                                            <!-- Cột trái: Tên CSDL, Phân loại, Mô tả, Hướng dẫn truy cập -->
                                             <div class="col-md-7">
                                                 <div class="form-group" style="margin-bottom: 14px;">
                                                     <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                        Tên Cơ sở dữ liệu (Nguồn / Tên CSDL) <span class="text-danger">*</span>
+                                                        Tên CSDL <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="text" name="title" id="modal_db_title" required class="form-control" placeholder="Ví dụ: IEEE Xplore Digital Library" style="border-radius: 4px; font-weight: 600;" />
+                                                    <input type="text" name="title" id="modal_db_title" required class="form-control" placeholder="VD: IEEE Xplore Digital Library" style="border-radius: 4px; font-weight: 600;" />
                                                 </div>
 
                                                 <div class="form-group" style="margin-bottom: 14px;">
                                                     <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                        Phân loại CSDL <span class="text-danger">*</span>
+                                                        URL truy cập <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="url" name="db_url" id="modal_db_url" required class="form-control" placeholder="https://ieeexplore.ieee.org/" style="border-radius: 4px;" />
+                                                </div>
+
+                                                <div class="form-group" style="margin-bottom: 14px;">
+                                                    <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
+                                                        Phân loại <span class="text-danger">*</span>
                                                     </label>
                                                     <div style="display: flex; gap: 8px;">
                                                         <select name="classification" id="modal_db_class" class="form-control" style="border-radius: 4px; font-weight: 600;" onchange="checkCustomClass(this.value)">
@@ -967,20 +985,19 @@
 
                                                 <div class="form-group" style="margin-bottom: 14px;">
                                                     <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                        Mô tả / Tóm tắt CSDL
+                                                        Mô tả ngắn
                                                     </label>
-                                                    <textarea name="excerpt" id="modal_db_excerpt" rows="3" class="form-control" placeholder="Cơ sở dữ liệu toàn văn hàng đầu thế giới về Khoa học Máy tính..." style="border-radius: 4px; font-size: 0.88rem;"></textarea>
+                                                    <textarea name="excerpt" id="modal_db_excerpt" rows="2" class="form-control" placeholder="Tóm tắt nội dung CSDL..." style="border-radius: 4px; font-size: 0.88rem;"></textarea>
                                                 </div>
 
                                                 <div class="form-group" style="margin-bottom: 0;">
                                                     <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                        Ghi chú hướng dẫn truy cập / Đặc điểm nổi bật
+                                                        Hướng dẫn truy cập
                                                     </label>
-                                                    <textarea name="access_instructions" id="modal_db_instructions" rows="2" class="form-control" placeholder="Ví dụ: • Xác thực IP mạng trường hoặc đăng nhập tài khoản thư viện cấp" style="border-radius: 4px; font-size: 0.85rem; color: #334155; background: #f8fafc; border-color: #cbd5e1;"></textarea>
+                                                    <textarea name="access_instructions" id="modal_db_instructions" rows="2" class="form-control" placeholder="VD: Xác thực IP mạng trường hoặc dùng tài khoản cấp sẵn" style="border-radius: 4px; font-size: 0.85rem; color: #334155; background: #f8fafc; border-color: #cbd5e1;"></textarea>
                                                 </div>
                                             </div>
 
-                                            <!-- Cột phải: Thứ tự, Trạng thái, Tài khoản, Mật khẩu, Link -->
                                             <div class="col-md-5">
                                                 <div class="row" style="margin-bottom: 14px;">
                                                     <div class="col-6">
@@ -1002,10 +1019,9 @@
 
                                                 <div class="form-group" style="margin-bottom: 14px;">
                                                     <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                        Tên đăng nhập (Tài khoản)
+                                                        Tài khoản
                                                     </label>
-                                                    <input type="text" name="db_user" id="modal_db_user" class="form-control" placeholder="Ví dụ: uit_ieee_member" style="border-radius: 4px;" />
-                                                    <small class="text-muted">Để trống nếu truy cập qua IP trường</small>
+                                                    <input type="text" name="db_user" id="modal_db_user" class="form-control" placeholder="Để trống nếu theo IP" style="border-radius: 4px;" />
                                                 </div>
 
                                                 <div class="form-group" style="margin-bottom: 14px;">
@@ -1013,23 +1029,22 @@
                                                         Mật khẩu
                                                     </label>
                                                     <input type="text" name="db_pass" id="modal_db_pass" class="form-control" placeholder="Nhập mật khẩu (nếu có)" style="border-radius: 4px;" />
-                                                    <small class="text-muted">Được ẩn dạng •••••••• trên bảng</small>
                                                 </div>
 
                                                 <div class="form-group" style="margin-bottom: 0;">
                                                     <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                        Link hỗ trợ / URL CSDL <span class="text-danger">*</span>
+                                                        Link hỗ trợ
                                                     </label>
-                                                    <input type="url" name="support_link" id="modal_db_link" class="form-control" placeholder="https://ieeexplore.ieee.org/" style="border-radius: 4px;" />
+                                                    <input type="url" name="support_link" id="modal_db_link" class="form-control" placeholder="https://..." style="border-radius: 4px;" />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: flex-end; gap: 8px;">
-                                        <button type="button" class="btn btn-default" data-bs-dismiss="modal" data-dismiss="modal" onclick="hideDatabaseModal()">Hủy bỏ</button>
+                                        <button type="button" class="btn btn-default" data-bs-dismiss="modal" data-dismiss="modal" onclick="hideDatabaseModal()">Hủy</button>
                                         <button type="submit" class="btn btn-primary" style="font-weight: 600; padding: 6px 16px;">
-                                            <i class="fa fa-check"></i> Lưu Cơ sở dữ liệu
+                                            Lưu CSDL
                                         </button>
                                     </div>
                                 </form>
@@ -1038,31 +1053,31 @@
                     </div>
 
                 [% ELSIF section == "banner" %]
-                    <!-- Bộ lọc & Thao tác Banner trang chủ -->
+                    <!-- Bộ lọc & Thao tác Banner -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
                         <div class="wp-tabs" style="margin-bottom: 0;">
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner&status=all" class="wp-tab [% IF filter_status == 'all' %]active[% END %]">
-                                Tất cả Banner ([% count_banner %])
+                                Tất cả ([% count_banner %])
                             </a>
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner&status=published" class="wp-tab [% IF filter_status == 'published' %]active[% END %]">
-                                Đang hiển thị ([% count_banner_active %])
+                                Hiển thị ([% count_banner_active %])
                             </a>
                             <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner&status=draft" class="wp-tab [% IF filter_status == 'draft' %]active[% END %]">
                                 Đang ẩn ([% count_banner_draft %])
                             </a>
                         </div>
 
-                        <!-- Ô tìm kiếm Banner & Nút Thêm mới -->
+                        <!-- Ô tìm kiếm Banner -->
                         <form action="/cgi-bin/koha/tools/portal-news.pl" method="get" style="display: flex; gap: 8px; align-items: center; margin: 0;">
                             <input type="hidden" name="section" value="banner" />
-                            <div class="input-group" style="width: 280px;">
-                                <input type="text" name="q" value="[% search_q | html %]" class="form-control" placeholder="Tìm theo tiêu đề banner..." style="border-radius: 6px 0 0 6px; font-size: 0.9rem;" />
+                            <div class="input-group" style="width: 260px;">
+                                <input type="text" name="q" value="[% search_q | html %]" class="form-control" placeholder="Tìm tiêu đề banner..." style="border-radius: 6px 0 0 6px; font-size: 0.9rem;" />
                                 <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" style="border-radius: 0 6px 6px 0;"><i class="fa fa-search"></i></button>
+                                    <button type="submit" class="btn btn-default" style="border-radius: 0 6px 6px 0;">Tìm</button>
                                 </span>
                             </div>
                             [% IF search_q %]
-                                <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner" class="btn btn-default" title="Xóa tìm kiếm"><i class="fa fa-times"></i></a>
+                                <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner" class="btn btn-default" title="Xóa tìm kiếm">Xóa</a>
                             [% END %]
                         </form>
                     </div>
@@ -1072,90 +1087,81 @@
                         <table class="table table-hover csdl-table" style="margin-bottom: 0;">
                             <thead>
                                 <tr>
-                                    <th style="width: 70px; text-align: center;">Thứ tự</th>
-                                    <th style="width: 160px; text-align: center;">Hình ảnh Banner</th>
-                                    <th>Tiêu đề &amp; Nội dung giới thiệu</th>
-                                    <th style="width: 180px; text-align: center;">Liên kết khi nhấp</th>
-                                    <th style="width: 110px; text-align: center;">Trạng thái</th>
-                                    <th style="width: 130px; text-align: center;">Thao tác</th>
+                                    <th style="width: 60px; text-align: center;">TT</th>
+                                    <th style="width: 160px; text-align: center;">Hình ảnh</th>
+                                    <th>Tiêu đề &amp; Mô tả</th>
+                                    <th style="width: 160px; text-align: center;">Liên kết</th>
+                                    <th style="width: 100px; text-align: center;">Trạng thái</th>
+                                    <th style="width: 120px; text-align: center;">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 [% IF posts.size %]
                                     [% FOREACH p IN posts %]
                                     <tr id="row-banner-[% p.id %]">
-                                        <!-- 1. Thứ tự -->
                                         <td style="text-align: center; vertical-align: middle;">
                                             <span class="csdl-order-badge">[% p.sort_order %]</span>
                                         </td>
 
-                                        <!-- 2. Ảnh Banner -->
                                         <td style="text-align: center; vertical-align: middle;">
                                             [% IF p.featured_image %]
-                                                <div style="width: 140px; height: 50px; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; margin: 0 auto; background: #0f172a; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+                                                <div style="width: 140px; height: 50px; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; margin: 0 auto; background: #0f172a;">
                                                     <img src="[% p.featured_image | html %]" alt="[% p.title | html %]" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/opac-tmpl/bootstrap/images/ftu-library-hero.jpg';" />
                                                 </div>
                                             [% ELSE %]
-                                                <span class="text-muted" style="font-size: 0.8rem; font-style: italic;">Chưa có ảnh</span>
+                                                <span class="text-muted" style="font-size: 0.8rem;">Chưa có ảnh</span>
                                             [% END %]
                                         </td>
 
-                                        <!-- 3. Tiêu đề & Mô tả -->
                                         <td style="vertical-align: middle;">
                                             <div style="font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 2px;">
-                                                <a href="javascript:void(0)" onclick="openEditBannerModal(document.getElementById('btn-edit-banner-[% p.id %]'), [% p.id %])" style="color: #1e293b; text-decoration: underline;" title="Sửa thông tin Banner">
-                                                    [% IF p.title && p.title != '.' %][% p.title | html %][% ELSE %]<em>(Banner không tiêu đề)</em>[% END %]
+                                                <a href="javascript:void(0)" onclick="openEditBannerModal(document.getElementById('btn-edit-banner-[% p.id %]'), [% p.id %])" style="color: #1e293b; text-decoration: none;" title="Sửa Banner">
+                                                    [% IF p.title && p.title != '.' %][% p.title | html %][% ELSE %]<em>(Không tiêu đề)</em>[% END %]
                                                 </a>
                                                 [% IF p.classification %]
                                                     <span class="badge" style="font-size: 0.68rem; padding: 2px 6px; font-weight: 600; margin-left: 6px; background: #fee2e2; color: #b91c1c; border-radius: 4px;">[% p.classification | html %]</span>
                                                 [% END %]
                                             </div>
                                             [% IF p.excerpt %]
-                                                <div style="font-size: 0.84rem; color: #475569; line-height: 1.4; margin-bottom: 4px;">
+                                                <div style="font-size: 0.84rem; color: #475569; line-height: 1.35; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
                                                     [% p.excerpt | html %]
                                                 </div>
                                             [% END %]
                                             <div style="margin-top: 4px;">
                                                 [% IF p.content == 'show_text' || p.is_featured == 1 %]
-                                                    <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_banner_text&id=[% p.id %]&section=banner" class="badge" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.74rem; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Đang hiển thị chữ - Nhấp để chuyển sang Ẩn chữ (Chỉ hiện ảnh)">
-                                                        <i class="fa fa-font"></i> Đang hiển thị chữ đè
+                                                    <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_banner_text&id=[% p.id %]&section=banner" class="badge" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.74rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-decoration: none;">
+                                                        Hiện chữ
                                                     </a>
                                                 [% ELSE %]
-                                                    <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_banner_text&id=[% p.id %]&section=banner" class="badge" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.74rem; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Đang ẩn chữ - Nhấp để chuyển sang Hiển thị chữ">
-                                                        <i class="fa fa-picture-o"></i> Ảnh thuần (Không chữ đè)
+                                                    <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_banner_text&id=[% p.id %]&section=banner" class="badge" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.74rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-decoration: none;">
+                                                        Chỉ hiện ảnh
                                                     </a>
                                                 [% END %]
                                             </div>
                                         </td>
 
-                                        <!-- 4. Link liên kết -->
                                         <td style="text-align: center; vertical-align: middle;">
                                             [% IF p.support_link %]
-                                                <a href="[% p.support_link | html %]" target="_blank" class="csdl-link-btn" title="Mở liên kết">
-                                                    <span>Mở link</span> <i class="fa fa-external-link"></i>
+                                                <a href="[% p.support_link | html %]" target="_blank" class="csdl-link-btn" title="[% p.support_link | html %]">
+                                                    Mở link
                                                 </a>
-                                                <div style="font-size: 0.72rem; color: #94a3b8; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px;" title="[% p.support_link | html %]">
-                                                    [% p.support_link | html %]
-                                                </div>
                                             [% ELSE %]
                                                 <span class="text-muted" style="font-size: 0.8rem;">Mặc định</span>
                                             [% END %]
                                         </td>
 
-                                        <!-- 5. Trạng thái -->
                                         <td style="text-align: center; vertical-align: middle;">
                                             [% IF p.status == "published" %]
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=banner" class="csdl-status-btn csdl-status-active" title="Đang hiển thị - Nhấp để chuyển sang Ẩn">
-                                                    <i class="fa fa-check"></i> Hiển thị
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=banner" class="csdl-status-btn csdl-status-active">
+                                                    Hiển thị
                                                 </a>
                                             [% ELSE %]
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=banner" class="csdl-status-btn csdl-status-draft" title="Đang ẩn - Nhấp để chuyển sang Hiển thị">
-                                                    <i class="fa fa-eye-slash"></i> Ẩn
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=banner" class="csdl-status-btn csdl-status-draft">
+                                                    Ẩn
                                                 </a>
                                             [% END %]
                                         </td>
 
-                                        <!-- 6. Thao tác -->
                                         <td style="text-align: center; vertical-align: middle;">
                                             <div style="display: flex; gap: 4px; justify-content: center;">
                                                 <button type="button" class="btn btn-xs btn-default btn-edit-banner"
@@ -1173,7 +1179,7 @@
                                                     title="Chỉnh sửa Banner">
                                                     Sửa
                                                 </button>
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=banner" class="btn btn-xs btn-default text-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa Banner [% p.title | html %] không?');" title="Xóa Banner">
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=banner" class="btn btn-xs btn-default text-danger" onclick="return confirm('Xóa Banner [% p.title | html %]?');" title="Xóa Banner">
                                                     Xóa
                                                 </a>
                                             </div>
@@ -1182,11 +1188,10 @@
                                     [% END %]
                                 [% ELSE %]
                                     <tr>
-                                        <td colspan="6" style="text-align: center; padding: 35px 20px; color: #64748b;">
-                                            <i class="fa fa-picture-o fa-2x" style="color: #cbd5e1; margin-bottom: 8px;"></i>
-                                            <p style="margin: 0; font-size: 0.95rem;">Chưa có Banner nào được tạo.</p>
-                                            <button type="button" onclick="openAddBannerModal()" class="btn btn-sm btn-default" style="margin-top: 10px; font-weight: 600; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1;">
-                                                <i class="fa fa-plus"></i> Thêm Banner đầu tiên
+                                        <td colspan="6" style="text-align: center; padding: 30px 20px; color: #64748b;">
+                                            <p style="margin: 0; font-size: 0.92rem;">Chưa có Banner nào.</p>
+                                            <button type="button" onclick="openAddBannerModal()" class="btn btn-sm btn-default" style="margin-top: 8px; font-weight: 600;">
+                                                Thêm Banner đầu tiên
                                             </button>
                                         </td>
                                     </tr>
@@ -1197,7 +1202,7 @@
 
                     <!-- MODAL THÊM / CHỈNH SỬA BANNER TRANG CHỦ -->
                     <div class="modal fade" id="bannerModal" tabindex="-1" role="dialog" aria-labelledby="bannerModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" role="document" style="max-width: 780px;">
+                        <div class="modal-dialog modal-lg" role="document" style="max-width: 760px;">
                             <div class="modal-content" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
                                 <form action="/cgi-bin/koha/tools/portal-news.pl" method="post" id="bannerModalForm">
                                     [% INCLUDE 'csrf-token.inc' %]
@@ -1208,7 +1213,7 @@
 
                                     <div class="modal-header" style="background: #ffffff; color: #1e293b; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
                                         <h4 class="modal-title" id="bannerModalLabel" style="margin: 0; font-weight: 600; font-size: 1.1rem; color: #1e293b;">
-                                            <i class="fa fa-picture-o"></i> Thêm Banner mới
+                                            Thêm Banner
                                         </h4>
                                         <button type="button" class="btn-close close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close" onclick="hideBannerModal()" style="font-size: 1.2rem; cursor: pointer; border: none; background: transparent; color: #64748b;">
                                             <span aria-hidden="true">&times;</span>
@@ -1218,22 +1223,21 @@
                                     <div class="modal-body" style="padding: 20px; background: #ffffff;">
                                         <div class="form-group" style="margin-bottom: 14px;">
                                             <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                Tên / Tiêu đề Banner (Quản lý nội bộ)
-                                                <span class="text-muted" style="font-weight: normal; font-size: 0.8rem; margin-left: 4px;">(Không bắt buộc - Chỉ hiển thị trên banner khi tick chọn bên dưới)</span>
+                                                Tiêu đề Banner
                                             </label>
-                                            <input type="text" name="title" id="modal_banner_title" class="form-control" placeholder="Ví dụ: Banner Chào mừng tân sinh viên (hoặc để trống)" style="border-radius: 4px; font-weight: 600;" />
+                                            <input type="text" name="title" id="modal_banner_title" class="form-control" placeholder="Nhập tiêu đề (tùy chọn)" style="border-radius: 4px; font-weight: 600;" />
                                         </div>
 
                                         <div class="row" style="margin-bottom: 14px;">
                                             <div class="col-md-6">
                                                 <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                    Nhãn / Tag hiển thị
+                                                    Nhãn hiển thị
                                                 </label>
-                                                <input type="text" name="classification" id="modal_banner_tag" class="form-control" placeholder="Ví dụ: THƯ VIỆN FTU, HỌC LIỆU SỐ, THÔNG BÁO..." style="border-radius: 4px;" />
+                                                <input type="text" name="classification" id="modal_banner_tag" class="form-control" placeholder="VD: THƯ VIỆN FTU, HỌC LIỆU SỐ..." style="border-radius: 4px;" />
                                             </div>
                                             <div class="col-md-3">
                                                 <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                    Thứ tự chạy <span class="text-danger">*</span>
+                                                    Thứ tự <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" name="sort_order" id="modal_banner_sort_order" min="1" value="[% next_banner_order || 1 %]" class="form-control" style="border-radius: 4px; font-weight: 600; text-align: center;" />
                                             </div>
@@ -1242,65 +1246,55 @@
                                                     Trạng thái
                                                 </label>
                                                 <select name="status" id="modal_banner_status" class="form-control" style="border-radius: 4px; font-weight: 600;">
-                                                    <option value="published">Đang chạy</option>
-                                                    <option value="draft">Tạm ẩn</option>
+                                                    <option value="published">Hiển thị</option>
+                                                    <option value="draft">Đang ẩn</option>
                                                 </select>
                                             </div>
                                         </div>
 
                                         <div class="form-group" style="margin-bottom: 14px;">
                                             <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                Mô tả / Lời dẫn ngắn trên Banner
+                                                Mô tả ngắn
                                             </label>
-                                            <textarea name="excerpt" id="modal_banner_excerpt" rows="2" class="form-control" placeholder="Ví dụ: Không gian học tập & nghiên cứu hiện đại, kết nối cộng đồng với kho tri thức toàn diện..." style="border-radius: 4px; font-size: 0.88rem;"></textarea>
+                                            <textarea name="excerpt" id="modal_banner_excerpt" rows="2" class="form-control" placeholder="Lời dẫn hiển thị trên banner..." style="border-radius: 4px; font-size: 0.88rem;"></textarea>
                                         </div>
 
                                         <div class="form-group" style="margin-bottom: 14px;">
                                             <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                Hình ảnh Banner (URL hoặc Tải ảnh lên) <span class="text-danger">*</span>
+                                                Hình ảnh Banner (1160 × 400 px) <span class="text-danger">*</span>
                                             </label>
-                                            <div style="margin-bottom: 8px; padding: 8px 12px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 0.85rem; color: #1e40af; display: flex; align-items: center; gap: 8px;">
-                                                <i class="fa fa-info-circle" style="font-size: 1.1rem; color: #3b82f6;"></i>
-                                                <span><strong>Standard Banner Size:</strong> <code>1160px × 400px</code> (Ratio 2.9:1). Banner will be displayed as 3 layers (left - center - right) on the OPAC home page.</span>
-                                            </div>
                                             <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                                <input type="text" name="featured_image" id="modal_banner_image" required class="form-control" placeholder="/opac-tmpl/bootstrap/images/ftu-library-hero.jpg hoặc link ảnh" style="border-radius: 4px;" oninput="updateBannerModalPreview(this.value)" />
+                                                <input type="text" name="featured_image" id="modal_banner_image" required class="form-control" placeholder="/opac-tmpl/bootstrap/images/ftu-library-hero.jpg" style="border-radius: 4px;" oninput="updateBannerModalPreview(this.value)" />
                                                 <label class="btn btn-default" style="margin: 0; cursor: pointer; white-space: nowrap; font-weight: 600;">
-                                                    <i class="fa fa-upload"></i> Tải ảnh lên
+                                                    Tải ảnh lên
                                                     <input type="file" id="modal_banner_file_input" accept="image/*" style="display: none;" onchange="handleBannerFileUpload(this)" />
                                                 </label>
                                             </div>
-                                            <!-- Preview khung ảnh banner chuẩn tỉ lệ 1160:400 -->
-                                            <div id="modal_banner_preview_box" style="width: 100%; aspect-ratio: 1160 / 400; height: 160px; border-radius: 8px; overflow: hidden; background: #0f172a; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; position: relative;">
+                                            <div id="modal_banner_preview_box" style="width: 100%; aspect-ratio: 1160 / 400; height: 150px; border-radius: 8px; overflow: hidden; background: #0f172a; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; position: relative;">
                                                 <img id="modal_banner_preview_img" src="/opac-tmpl/bootstrap/images/ftu-library-hero.jpg" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;" />
-                                                <span id="modal_banner_uploading" style="display: none; position: absolute; background: rgba(0,0,0,0.7); color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 0.85rem;"><i class="fa fa-spinner fa-spin"></i> Đang tải ảnh lên...</span>
+                                                <span id="modal_banner_uploading" style="display: none; position: absolute; background: rgba(0,0,0,0.7); color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 0.85rem;">Đang tải lên...</span>
                                             </div>
                                         </div>
 
-                                        <div class="form-group" style="margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px;">
-                                            <label style="font-weight: 700; color: #1e293b; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0;">
-                                                <input type="checkbox" name="content" id="modal_banner_show_text" value="show_text" style="width: 18px; height: 18px; cursor: pointer;" />
-                                                <span>Hiển thị tiêu đề & mô tả chữ đè lên banner</span>
+                                        <div class="form-group" style="margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+                                            <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0;">
+                                                <input type="checkbox" name="content" id="modal_banner_show_text" value="show_text" style="width: 16px; height: 16px; cursor: pointer;" />
+                                                <span>Hiển thị tiêu đề &amp; mô tả đè lên ảnh banner</span>
                                             </label>
-                                            <div style="font-size: 0.82rem; color: #64748b; margin-top: 6px; margin-left: 26px; line-height: 1.45;">
-                                                • <strong>Được tick chọn:</strong> Hệ thống sẽ hiển thị tiêu đề (chữ trắng viền tối nổi bật), nhãn tag, lời dẫn và nút <em>"Khám phá ngay"</em> đè lên ảnh.<br />
-                                                • <strong>Không tick chọn (Khuyến nghị khi tải ảnh tự thiết kế sẵn):</strong> Banner sẽ hiển thị trọn vẹn toàn bộ hình ảnh gốc chuẩn 100%, không bị che khuất bởi chữ và không có lớp phủ tối.
-                                            </div>
                                         </div>
 
                                         <div class="form-group" style="margin-bottom: 0;">
                                             <label style="font-weight: 600; color: #1e293b; font-size: 0.88rem;">
-                                                Đường dẫn khi nhấp vào Banner (Target Link URL)
+                                                Liên kết khi nhấp (URL)
                                             </label>
-                                            <input type="text" name="support_link" id="modal_banner_link" class="form-control" placeholder="/cgi-bin/koha/opac-search.pl hoặc liên kết ngoài" style="border-radius: 4px;" />
-                                            <small class="text-muted">Nhập đường dẫn trang web để khi người đọc bấm vào banner sẽ chuyển đến</small>
+                                            <input type="text" name="support_link" id="modal_banner_link" class="form-control" placeholder="/cgi-bin/koha/opac-search.pl hoặc URL ngoài" style="border-radius: 4px;" />
                                         </div>
                                     </div>
 
                                     <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: flex-end; gap: 8px;">
-                                        <button type="button" class="btn btn-default" data-bs-dismiss="modal" data-dismiss="modal" onclick="hideBannerModal()">Hủy bỏ</button>
+                                        <button type="button" class="btn btn-default" data-bs-dismiss="modal" data-dismiss="modal" onclick="hideBannerModal()">Hủy</button>
                                         <button type="submit" class="btn btn-primary" style="font-weight: 600; padding: 6px 18px; background: #b91c1c; border-color: #b91c1c;">
-                                            <i class="fa fa-check"></i> Lưu Banner
+                                            Lưu Banner
                                         </button>
                                     </div>
                                 </form>
@@ -1309,16 +1303,10 @@
                     </div>
 
                 [% ELSIF section == "footer" %]
-                    <!-- ==================== CẤU HÌNH CHÂN TRANG & THÔNG TIN LIÊN HỆ OPAC ==================== -->
+                    <!-- ==================== CẤU HÌNH CHÂN TRANG OPAC ==================== -->
                     [% IF msg == 'footer_saved' %]
-                        <div class="alert alert-success" style="border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 24px; padding: 14px 20px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;">
-                            <i class="fa fa-check-circle" style="font-size: 1.4rem; color: #059669;"></i>
-                            <div>
-                                <div style="font-size: 1rem; font-weight: 700;">Đã lưu cấu hình chân trang thành công!</div>
-                                <div style="font-size: 0.88rem; font-weight: 400; color: #047857; margin-top: 2px;">
-                                    Tất cả nội dung chân trang (Thông tin liên hệ, Khám phá tài nguyên, Hỗ trợ & Dịch vụ, Bản quyền) đã được lưu vào hệ thống và cập nhật tức thì ngoài trang OPAC.
-                                </div>
-                            </div>
+                        <div class="alert alert-success" style="border-radius: 8px; font-weight: 600; margin-bottom: 16px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;">
+                            Đã lưu cấu hình chân trang OPAC.
                         </div>
                     [% END %]
 
@@ -1327,89 +1315,73 @@
                         <input type="hidden" name="op" value="cud-save_footer" />
                         <input type="hidden" name="section" value="footer" />
 
-                        <!-- Header Bar Cấu hình -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #ffffff; padding: 18px 22px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: #ffffff; padding: 14px 18px; border-radius: 8px; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 12px;">
                             <div>
-                                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a;">
-                                    Cấu hình Chân trang OPAC (Footer)
+                                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #0f172a;">
+                                    Cấu hình Chân trang OPAC
                                 </h3>
-                                <p style="margin: 4px 0 0 0; font-size: 0.86rem; color: #64748b;">
-                                    Cấu hình chính xác 3 cột nội dung hiển thị ở chân trang Thư viện Phân hiệu TP.HCM và dòng bản quyền.
-                                </p>
                             </div>
-                            <div style="display: flex; gap: 10px;">
-                                <a href="[% Koha.Preference('OPACBaseURL') || '/cgi-bin/koha/opac-main.pl' %]" target="_blank" class="btn btn-default ftu-opac-link" style="font-weight: 600; border-radius: 6px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px;">
-                                    <i class="fa fa-external-link"></i> Xem thử ngoài OPAC
+                            <div style="display: flex; gap: 8px;">
+                                <a href="[% Koha.Preference('OPACBaseURL') || '/cgi-bin/koha/opac-main.pl' %]" target="_blank" class="btn btn-default ftu-opac-link" style="font-weight: 600; border-radius: 6px; padding: 6px 14px;">
+                                    Xem OPAC
                                 </a>
-                                <button type="submit" class="btn btn-primary" style="font-weight: 700; border-radius: 6px; padding: 8px 22px; background: #b91c1c; border-color: #b91c1c; box-shadow: 0 4px 6px -1px rgba(185, 28, 28, 0.3); display: inline-flex; align-items: center; gap: 6px;">
-                                    <i class="fa fa-save"></i> Lưu Chân trang
+                                <button type="submit" class="btn btn-primary" style="font-weight: 700; border-radius: 6px; padding: 6px 18px; background: #b91c1c; border-color: #b91c1c;">
+                                    Lưu Chân trang
                                 </button>
                             </div>
                         </div>
 
                         <div class="row">
-                            <!-- CỘT 1: THƯƠNG HIỆU & LIÊN HỆ PHÂN HIỆU TP.HCM (4/12) -->
+                            <!-- CỘT 1 -->
                             <div class="col-md-4">
-                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-university text-danger"></i> Cột 1: Thương hiệu &amp; Liên hệ
+                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 18px; overflow: hidden;">
+                                    <div class="panel-heading" style="background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+                                        <h4 style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
+                                            Cột 1: Thông tin liên hệ
                                         </h4>
                                     </div>
-                                    <div class="panel-body" style="padding: 16px 18px;">
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Tên Thư viện:</label>
+                                    <div class="panel-body" style="padding: 14px 16px;">
+                                        <div class="form-group" style="margin-bottom: 10px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600; color: #334155;">Tên Thư viện</label>
                                             <input type="text" name="library_name" class="form-control input-sm" value="[% footer_cfg.library_name | html %]" required />
                                         </div>
 
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Tên Đơn vị / Cơ sở:</label>
+                                        <div class="form-group" style="margin-bottom: 10px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600; color: #334155;">Đơn vị / Phân hiệu</label>
                                             <input type="text" name="campus_current" class="form-control input-sm" value="[% footer_cfg.campus_current | html %]" required />
                                         </div>
 
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Địa chỉ:</label>
+                                        <div class="form-group" style="margin-bottom: 10px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600; color: #334155;">Địa chỉ</label>
                                             <input type="text" name="campus_hcm_addr" class="form-control input-sm" value="[% footer_cfg.campus_hcm_addr | html %]" required />
                                         </div>
 
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Số điện thoại / Hotline:</label>
+                                        <div class="form-group" style="margin-bottom: 10px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600; color: #334155;">Điện thoại</label>
                                             <input type="text" name="hotline_hcmc" class="form-control input-sm" value="[% footer_cfg.hotline_hcmc | html %]" required />
                                         </div>
 
-                                        <div class="form-group" style="margin-bottom: 12px;">
-                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Email liên hệ:</label>
+                                        <div class="form-group" style="margin-bottom: 10px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600; color: #334155;">Email</label>
                                             <input type="email" name="email_contact" class="form-control input-sm" value="[% footer_cfg.email_contact | html %]" required />
                                         </div>
 
-                                        <div class="form-group" style="margin-bottom: 14px;">
-                                            <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Khung giờ phục vụ:</label>
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600; color: #334155;">Giờ phục vụ</label>
                                             <input type="text" name="hours_summary" class="form-control input-sm" value="[% footer_cfg.hours_summary | html %]" required />
                                         </div>
 
-                                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 6px;">
-                                            <label style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: block;">
-                                                <i class="fa fa-share-alt text-danger"></i> Kênh kết nối mạng xã hội (Pill)
-                                            </label>
-
-                                            <div class="form-group" style="margin-bottom: 10px;">
-                                                <label style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
-                                                    <i class="fa-brands fa-facebook-f fa fa-facebook-f text-primary"></i> Link Facebook Fanpage:
-                                                </label>
+                                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                                            <div class="form-group" style="margin-bottom: 8px;">
+                                                <label style="font-size: 0.8rem; color: #475569;">Facebook URL</label>
                                                 <input type="url" name="link_facebook" class="form-control input-sm" value="[% footer_cfg.link_facebook | html %]" />
                                             </div>
-
-                                            <div class="form-group" style="margin-bottom: 10px;">
-                                                <label style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
-                                                    <i class="fa-brands fa-youtube fa fa-youtube-play text-danger"></i> Link Kênh YouTube:
-                                                </label>
+                                            <div class="form-group" style="margin-bottom: 8px;">
+                                                <label style="font-size: 0.8rem; color: #475569;">YouTube URL</label>
                                                 <input type="url" name="link_youtube" class="form-control input-sm" value="[% footer_cfg.link_youtube | html %]" />
                                             </div>
-
                                             <div class="form-group" style="margin-bottom: 0;">
-                                                <label style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px;">
-                                                    <i class="fa-solid fa-globe fa fa-globe text-info"></i> Link Cổng thông tin Website:
-                                                </label>
+                                                <label style="font-size: 0.8rem; color: #475569;">Website URL</label>
                                                 <input type="url" name="link_portal" class="form-control input-sm" value="[% footer_cfg.link_portal | html %]" />
                                             </div>
                                         </div>
@@ -1417,126 +1389,200 @@
                                 </div>
                             </div>
 
-                            <!-- CỘT 2: KHÁM PHÁ TÀI NGUYÊN (4/12) -->
+                            <!-- CỘT 2 -->
                             <div class="col-md-4">
-                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-book text-primary"></i> Cột 2: Khám Phá Tài Nguyên (5 Liên Kết)
+                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 18px; overflow: hidden;">
+                                    <div class="panel-heading" style="background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+                                        <h4 style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
+                                            Cột 2: Khám phá tài nguyên
                                         </h4>
                                     </div>
-                                    <div class="panel-body" style="padding: 16px 18px;">
-                                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
-                                            Chỉnh sửa tên hiển thị và URL của 5 liên kết trong danh mục "Khám phá tài nguyên":
-                                        </p>
-
-                                        <!-- Link 1 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 1</span>
+                                    <div class="panel-body" style="padding: 14px 16px;">
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 1</span>
                                             <input type="text" name="footer_res_title1" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title1 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_res_link1" class="form-control input-sm" value="[% footer_cfg.footer_res_link1 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_res_link1" class="form-control input-sm" value="[% footer_cfg.footer_res_link1 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 2 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 2</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 2</span>
                                             <input type="text" name="footer_res_title2" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title2 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_res_link2" class="form-control input-sm" value="[% footer_cfg.footer_res_link2 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_res_link2" class="form-control input-sm" value="[% footer_cfg.footer_res_link2 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 3 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 3</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 3</span>
                                             <input type="text" name="footer_res_title3" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title3 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_res_link3" class="form-control input-sm" value="[% footer_cfg.footer_res_link3 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_res_link3" class="form-control input-sm" value="[% footer_cfg.footer_res_link3 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 4 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 4</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 4</span>
                                             <input type="text" name="footer_res_title4" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title4 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_res_link4" class="form-control input-sm" value="[% footer_cfg.footer_res_link4 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_res_link4" class="form-control input-sm" value="[% footer_cfg.footer_res_link4 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 5 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 0;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 5 (Kho số DSpace)</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 0;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #0369a1; display: block; margin-bottom: 4px;">Liên kết 5 (DSpace)</span>
                                             <input type="text" name="footer_res_title5" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_res_title5 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_res_link5" class="form-control input-sm" value="[% footer_cfg.footer_res_link5 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_res_link5" class="form-control input-sm" value="[% footer_cfg.footer_res_link5 | html %]" placeholder="URL" required />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- CỘT 3: HỖ TRỢ & DỊCH VỤ (4/12) -->
+                            <!-- CỘT 3 -->
                             <div class="col-md-4">
-                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                                    <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                            <i class="fa fa-life-ring text-success"></i> Cột 3: Hỗ Trợ &amp; Dịch Vụ (4 Liên Kết)
+                                <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 18px; overflow: hidden;">
+                                    <div class="panel-heading" style="background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+                                        <h4 style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
+                                            Cột 3: Hỗ trợ &amp; Dịch vụ
                                         </h4>
                                     </div>
-                                    <div class="panel-body" style="padding: 16px 18px;">
-                                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
-                                            Chỉnh sửa tên hiển thị và URL của 4 liên kết trong danh mục "Hỗ trợ &amp; Dịch vụ":
-                                        </p>
-
-                                        <!-- Link 1 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 1</span>
+                                    <div class="panel-body" style="padding: 14px 16px;">
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 1</span>
                                             <input type="text" name="footer_srv_title1" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title1 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_srv_link1" class="form-control input-sm" value="[% footer_cfg.footer_srv_link1 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_srv_link1" class="form-control input-sm" value="[% footer_cfg.footer_srv_link1 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 2 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 2</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 2</span>
                                             <input type="text" name="footer_srv_title2" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title2 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_srv_link2" class="form-control input-sm" value="[% footer_cfg.footer_srv_link2 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_srv_link2" class="form-control input-sm" value="[% footer_cfg.footer_srv_link2 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 3 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 3</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 3</span>
                                             <input type="text" name="footer_srv_title3" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title3 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_srv_link3" class="form-control input-sm" value="[% footer_cfg.footer_srv_link3 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_srv_link3" class="form-control input-sm" value="[% footer_cfg.footer_srv_link3 | html %]" placeholder="URL" required />
                                         </div>
-
-                                        <!-- Link 4 -->
-                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 0;">
-                                            <span style="font-weight: 700; font-size: 0.78rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 4</span>
+                                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 0;">
+                                            <span style="font-weight: 700; font-size: 0.76rem; color: #047857; display: block; margin-bottom: 4px;">Liên kết 4</span>
                                             <input type="text" name="footer_srv_title4" class="form-control input-sm" style="margin-bottom: 4px;" value="[% footer_cfg.footer_srv_title4 | html %]" placeholder="Tên hiển thị" required />
-                                            <input type="text" name="footer_srv_link4" class="form-control input-sm" value="[% footer_cfg.footer_srv_link4 | html %]" placeholder="Đường dẫn URL" required />
+                                            <input type="text" name="footer_srv_link4" class="form-control input-sm" value="[% footer_cfg.footer_srv_link4 | html %]" placeholder="URL" required />
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- KHUNG 4: THÔNG TIN BẢN QUYỀN (FULL WIDTH) -->
-                        <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.03); margin-bottom: 22px; overflow: hidden;">
-                            <div class="panel-heading" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px 18px; border-bottom: 1px solid #e2e8f0;">
-                                <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fa fa-copyright text-muted"></i> Dòng Thông tin Bản quyền Chân trang (Copyright Bar)
+                        <!-- KHUNG 4: BẢN QUYỀN -->
+                        <div class="panel panel-default" style="border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 18px; overflow: hidden;">
+                            <div class="panel-heading" style="background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+                                <h4 style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #0f172a;">
+                                    Dòng bản quyền chân trang
                                 </h4>
                             </div>
-                            <div class="panel-body" style="padding: 16px 18px;">
+                            <div class="panel-body" style="padding: 14px 16px;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-size: 0.83rem; font-weight: 600; color: #334155;">Nội dung bản quyền chân trang:</label>
                                     <input type="text" name="copyright_text" class="form-control" value="[% footer_cfg.copyright_text | html %]" required />
-                                    <small class="text-muted" style="margin-top: 4px; display: block;">Hiển thị ở dòng thanh ngang xám dưới cùng của trang OPAC.</small>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Sticky Footer Save Button -->
-                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 22px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                            <a href="/cgi-bin/koha/tools/portal-news.pl?section=footer" class="btn btn-default">Hủy bỏ / Khôi phục ban đầu</a>
-                            <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 8px 24px; background: #b91c1c; border-color: #b91c1c; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(185, 28, 28, 0.3);">
-                                <i class="fa fa-save"></i> Lưu Chân trang
+                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 18px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+                            <a href="/cgi-bin/koha/tools/portal-news.pl?section=footer" class="btn btn-default">Khôi phục</a>
+                            <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 6px 20px; background: #b91c1c; border-color: #b91c1c; border-radius: 6px;">
+                                Lưu Chân trang
                             </button>
                         </div>
                     </form>
+
+                [% ELSIF section == "intro" %]
+                    <!-- ==================== LỜI GIỚI THIỆU SÁCH (THỦ THƯ & BẠN ĐỌC) ==================== -->
+                    <div class="wp-tabs">
+                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=intro" class="wp-tab [% IF filter_type == 'all' && filter_status == 'all' %]active[% END %]">
+                            Tất cả ([% count_intro %])
+                        </a>
+                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=intro&type=intro_librarian" class="wp-tab [% IF filter_type == 'intro_librarian' %]active[% END %]">
+                            Thủ thư viết ([% count_intro_librarian %])
+                        </a>
+                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=intro&type=intro_reader" class="wp-tab [% IF filter_type == 'intro_reader' %]active[% END %]">
+                            Bạn đọc viết ([% count_intro_reader %])
+                        </a>
+                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=intro&status=draft" class="wp-tab [% IF filter_status == 'draft' %]active[% END %]">
+                            Bản nháp ([% count_intro_draft %])
+                        </a>
+                    </div>
+
+                    <form action="/cgi-bin/koha/tools/portal-news.pl" method="get" style="display: flex; gap: 8px; align-items: center; margin: 0 0 12px 0;">
+                        <input type="hidden" name="section" value="intro" />
+                        <input type="text" name="q" value="[% search_q | html %]" class="form-control" placeholder="Tìm theo tiêu đề, người viết..." style="max-width: 320px;" />
+                        <button type="submit" class="btn btn-default">Tìm</button>
+                        [% IF search_q %]<a href="/cgi-bin/koha/tools/portal-news.pl?section=intro" class="btn btn-default">Xóa</a>[% END %]
+                    </form>
+
+                    <div class="page-section">
+                        <table class="table table-bordered table-striped" style="vertical-align: middle;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="width: 70px;">Ảnh</th>
+                                    <th>Tiêu đề</th>
+                                    <th style="width: 230px;">Sách được giới thiệu</th>
+                                    <th style="width: 160px;">Người viết</th>
+                                    <th style="width: 110px; text-align: center;">Trạng thái</th>
+                                    <th style="width: 80px; text-align: center;">Lượt xem</th>
+                                    <th style="width: 100px;">Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                [% IF posts.size %]
+                                    [% FOREACH p IN posts %]
+                                    <tr>
+                                        <td>
+                                            [% IF p.featured_image %]
+                                                <img src="[% p.featured_image | html %]" style="width: 60px; height: 42px; object-fit: cover; border-radius: 4px;" alt="" />
+                                            [% ELSE %]
+                                                <div style="width: 60px; height: 42px; background: #f1f5f9; border-radius: 4px;"></div>
+                                            [% END %]
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 700; font-size: 0.98rem; color: #0f172a;">
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&id=[% p.id %]&section=intro">[% p.title | html %]</a>
+                                                [% IF p.is_featured %]<span class="badge badge-warning text-dark" style="margin-left: 5px;">Ghim</span>[% END %]
+                                            </div>
+                                            <div class="wp-action-links" style="margin-top: 4px;">
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&id=[% p.id %]&section=intro" style="color: #0284c7;">Sửa</a>
+                                                | <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% p.id %]" target="_blank" class="ftu-opac-link" style="color: #10b981;">Xem OPAC</a>
+                                                | <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=intro" style="color: #64748b;">[% IF p.status == 'published' %]Ẩn[% ELSE %]Xuất bản[% END %]</a>
+                                                | <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=intro" class="delete" onclick="return confirm('Xóa lời giới thiệu này?');">Xóa</a>
+                                            </div>
+                                        </td>
+                                        <td style="font-size: 0.85rem;">
+                                            [% IF p.books.size %]
+                                                [% FOREACH bk IN p.books %]
+                                                    <div style="margin-bottom: 2px;"><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% bk.biblionumber | uri %]" target="_blank">[% bk.title | html %]</a></div>
+                                                [% END %]
+                                            [% ELSE %]
+                                                <span class="text-danger">Chưa gắn sách</span>
+                                            [% END %]
+                                        </td>
+                                        <td>
+                                            <div style="font-size: 0.88rem; font-weight: 600;">[% p.author_name | html %]</div>
+                                            <div style="font-size: 0.78rem; color: #64748b;">[% IF p.post_type == 'intro_reader' %]Bạn đọc[% IF p.classification %] &middot; [% p.classification | html %][% END %][% ELSE %]Thủ thư[% END %]</div>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            [% IF p.status == "published" %]
+                                                <span class="wp-badge wp-badge-pub">Đã đăng</span>
+                                            [% ELSE %]
+                                                <span class="wp-badge wp-badge-draft">Nháp</span>
+                                            [% END %]
+                                        </td>
+                                        <td style="text-align: center;">[% p.views_count %]</td>
+                                        <td><small>[% p.formatted_date %]</small></td>
+                                    </tr>
+                                    [% END %]
+                                [% ELSE %]
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted" style="padding: 2rem;">Chưa có lời giới thiệu nào.</td>
+                                    </tr>
+                                [% END %]
+                            </tbody>
+                        </table>
+                    </div>
+
+                    [% IF total_pages > 1 %]
+                    <ul class="pagination pagination-sm" style="margin: 1rem 0 0; display: inline-flex; gap: 4px; list-style: none; padding-left: 0;">
+                        [% FOREACH pg IN pages_loop %]
+                            <li class="page-item [% IF pg.is_active %]active[% END %]"><a class="page-link" href="?section=intro&type=[% filter_type | uri %]&status=[% filter_status | uri %]&q=[% search_q | uri %]&page=[% pg.page_num %]">[% pg.page_num %]</a></li>
+                        [% END %]
+                    </ul>
+                    [% END %]
 
                 [% ELSE %]
                     <!-- Tabs lọc tin tức & sự kiện -->
@@ -1548,7 +1594,7 @@
                             Tin tức ([% count_news %])
                         </a>
                         <a href="/cgi-bin/koha/tools/portal-news.pl?section=news&type=event" class="wp-tab [% IF filter_type == 'event' %]active[% END %]">
-                            Sự kiện &amp; Workshop ([% count_event %])
+                            Sự kiện ([% count_event %])
                         </a>
                         <a href="/cgi-bin/koha/tools/portal-news.pl?section=news&status=draft" class="wp-tab [% IF filter_status == 'draft' %]active[% END %]">
                             Bản nháp ([% count_news_draft %])
@@ -1562,12 +1608,12 @@
                                 <tr style="background: #f8fafc;">
                                     <th style="width: 70px;">Ảnh</th>
                                     <th>Tiêu đề bài viết</th>
-                                    <th style="width: 140px;">Chuyên mục</th>
-                                    <th style="width: 160px;">Tác giả</th>
-                                    <th style="width: 200px;">Chi tiết Sự kiện</th>
-                                    <th style="width: 120px; text-align: center;">Trạng thái</th>
+                                    <th style="width: 130px;">Chuyên mục</th>
+                                    <th style="width: 140px;">Tác giả</th>
+                                    <th style="width: 180px;">Sự kiện</th>
+                                    <th style="width: 110px; text-align: center;">Trạng thái</th>
                                     <th style="width: 80px; text-align: center;">Lượt xem</th>
-                                    <th style="width: 110px;">Ngày tạo</th>
+                                    <th style="width: 100px;">Ngày tạo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1576,15 +1622,15 @@
                                     <tr>
                                         <td>
                                             [% IF p.featured_image %]
-                                                <img src="[% p.featured_image | html %]" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px;" alt="thumb" />
+                                                <img src="[% p.featured_image | html %]" style="width: 60px; height: 42px; object-fit: cover; border-radius: 4px;" alt="thumb" />
                                             [% ELSE %]
-                                                <div style="width: 60px; height: 45px; background: #f1f5f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.75rem;">
+                                                <div style="width: 60px; height: 42px; background: #f1f5f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.72rem;">
                                                     Ảnh
                                                 </div>
                                             [% END %]
                                         </td>
                                         <td>
-                                            <div style="font-weight: 700; font-size: 1.05rem; color: #0f172a;">
+                                            <div style="font-weight: 700; font-size: 0.98rem; color: #0f172a;">
                                                 <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&id=[% p.id %]&section=news">
                                                     [% p.title | html %]
                                                 </a>
@@ -1592,14 +1638,16 @@
                                                     <span class="badge badge-warning text-dark" style="margin-left: 5px;">Ghim</span>
                                                 [% END %]
                                             </div>
-                                            <div class="text-muted" style="font-size: 0.85rem; margin-top: 3px;">
-                                                [% p.excerpt | html | truncate(80) %]
-                                            </div>
-                                            <div class="wp-action-links" style="margin-top: 6px;">
-                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&id=[% p.id %]&section=news" style="color: #0284c7;">Chỉnh sửa</a>
-                                                | <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% p.id %]" target="_blank" style="color: #10b981;">Xem ngoài OPAC</a>
+                                            [% IF p.excerpt %]
+                                                <div class="text-muted" style="font-size: 0.83rem; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                                                    [% p.excerpt | html %]
+                                                </div>
+                                            [% END %]
+                                            <div class="wp-action-links" style="margin-top: 4px;">
+                                                <a href="/cgi-bin/koha/tools/portal-news.pl?op=add_form&id=[% p.id %]&section=news" style="color: #0284c7;">Sửa</a>
+                                                | <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% p.id %]" target="_blank" style="color: #10b981;">Xem OPAC</a>
                                                 | <a href="/cgi-bin/koha/tools/portal-news.pl?op=toggle_status&id=[% p.id %]&section=news" style="color: #64748b;">Đổi trạng thái</a>
-                                                | <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=news" class="delete" onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này không?');">Xóa</a>
+                                                | <a href="/cgi-bin/koha/tools/portal-news.pl?op=delete&id=[% p.id %]&section=news" class="delete" onclick="return confirm('Xóa bài viết này?');">Xóa</a>
                                             </div>
                                         </td>
                                         <td>
@@ -1614,8 +1662,8 @@
                                         <td><small>[% p.author_name | html %]</small></td>
                                         <td>
                                             [% IF p.post_type == "event" %]
-                                                <div style="font-size: 0.85rem;">
-                                                    <div>[% IF p.event_date && p.event_time %][% p.event_date %] lúc [% p.event_time %][% ELSE %][% p.formatted_event %][% END %]</div>
+                                                <div style="font-size: 0.82rem;">
+                                                    <div>[% IF p.event_date && p.event_time %][% p.event_date %] [% p.event_time %][% ELSE %][% p.formatted_event %][% END %]</div>
                                                     <div class="text-muted">[% p.event_location | html %]</div>
                                                 </div>
                                             [% ELSE %]
@@ -1626,17 +1674,17 @@
                                             [% IF p.status == "published" %]
                                                 <span class="wp-badge wp-badge-pub">Đã đăng</span>
                                             [% ELSE %]
-                                                <span class="wp-badge wp-badge-draft">Bản nháp</span>
+                                                <span class="wp-badge wp-badge-draft">Nháp</span>
                                             [% END %]
                                         </td>
-                                        <td style="text-align: center;"><span class="badge badge-light text-dark" style="font-size: 0.85rem; padding: 4px 8px; border: 1px solid #cbd5e1;">[% p.views_count %]</span></td>
+                                        <td style="text-align: center;"><span class="badge badge-light text-dark" style="font-size: 0.82rem; padding: 3px 7px; border: 1px solid #cbd5e1;">[% p.views_count %]</span></td>
                                         <td><small>[% p.formatted_date %]</small></td>
                                     </tr>
                                     [% END %]
                                 [% ELSE %]
                                     <tr>
                                         <td colspan="8" class="text-center text-muted" style="padding: 2rem;">
-                                            Không tìm thấy bài viết nào.
+                                            Chưa có bài viết nào.
                                         </td>
                                     </tr>
                                 [% END %]
@@ -1647,11 +1695,11 @@
                     [% IF total_pages > 1 %]
                     <div class="portal-pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding: 0.75rem 1rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px;">
                         <div style="font-size: 0.85rem; color: #64748b;">
-                            Showing <strong>[% page_start %]</strong> - <strong>[% page_end %]</strong> of <strong>[% total_rows %]</strong> articles
+                            Hiển thị <strong>[% page_start %]</strong> - <strong>[% page_end %]</strong> trong tổng số <strong>[% total_rows %]</strong> bài viết
                         </div>
                         <ul class="pagination pagination-sm" style="margin: 0; display: inline-flex; gap: 4px; list-style: none; padding-left: 0;">
                             <li class="page-item [% UNLESS has_prev %]disabled[% END %]">
-                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% prev_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">« Prev</a>
+                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% prev_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">« Trước</a>
                             </li>
                             [% FOREACH p IN pages_loop %]
                                 <li class="page-item [% IF p.is_active %]active[% END %]">
@@ -1659,7 +1707,7 @@
                                 </li>
                             [% END %]
                             <li class="page-item [% UNLESS has_next %]disabled[% END %]">
-                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% next_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">Next »</a>
+                                <a class="page-link" href="?section=[% section %]&type=[% filter_type %]&status=[% filter_status %]&class=[% filter_class | uri %]&q=[% search_q | uri %]&page=[% next_page %]" style="color: #334155; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; text-decoration: none; font-size: 0.82rem; font-weight: 500;">Sau »</a>
                             </li>
                         </ul>
                     </div>
@@ -1670,19 +1718,20 @@
                 <!-- ==================== SCREEN 2: BẢNG SOẠN THẢO CHUẨN WORDPRESS ==================== -->
                 <form action="/cgi-bin/koha/tools/portal-news.pl" method="post" id="post-editor-form" class="validated">
                     [% INCLUDE 'csrf-token.inc' %]
+                    [% SET is_intro = ( post.post_type == 'intro_librarian' || post.post_type == 'intro_reader' || section == 'intro' ) %]
                     <input type="hidden" name="op" value="cud-save" />
                     <input type="hidden" name="id" id="post-id" value="[% post.id %]" />
 
                     <div class="wp-header">
                         <div>
                             <h1 style="margin: 0; font-weight: 800; color: #0f172a;">
-                                [% IF post.id %]Chỉnh sửa [% IF post.post_type == 'database' %]Cơ sở dữ liệu[% ELSE %]bài viết[% END %] #[% post.id %][% ELSE %][% IF post.post_type == 'database' || section == 'database' %]Thêm Cơ sở dữ liệu mới[% ELSE %]Viết bài mới[% END %][% END %]
+                                [% IF post.id %]Chỉnh sửa [% IF post.post_type == 'database' %]Cơ sở dữ liệu[% ELSIF is_intro %]lời giới thiệu[% ELSE %]bài viết[% END %] #[% post.id %][% ELSE %][% IF post.post_type == 'database' || section == 'database' %]Thêm Cơ sở dữ liệu mới[% ELSIF is_intro %]Viết lời giới thiệu[% ELSE %]Viết bài mới[% END %][% END %]
                             </h1>
                         </div>
                         <div style="display:flex; gap: 8px;">
-                            <a href="/cgi-bin/koha/tools/portal-news.pl?op=list[% IF post.post_type == 'database' || section == 'database' %]&section=database[% END %]" class="btn btn-default">Quay lại danh sách</a>
+                            <a href="/cgi-bin/koha/tools/portal-news.pl?op=list[% IF post.post_type == 'database' || section == 'database' %]&section=database[% ELSIF is_intro %]&section=intro[% END %]" class="btn btn-default">Quay lại danh sách</a>
                             <button type="button" class="btn btn-outline-info" onclick="openLivePreviewModal()">Xem trước</button>
-                            <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 0.5rem 1.5rem;">[% IF post.post_type == 'database' || section == 'database' %]Lưu CSDL[% ELSE %]Lưu bài viết[% END %]</button>
+                            <button type="submit" class="btn btn-primary" style="font-weight: 700; padding: 0.5rem 1.5rem;">[% IF post.post_type == 'database' || section == 'database' %]Lưu CSDL[% ELSIF is_intro %]Lưu lời giới thiệu[% ELSE %]Lưu bài viết[% END %]</button>
                         </div>
                     </div>
 
@@ -1707,6 +1756,89 @@
                             <input type="text" name="title" id="post-title" class="wp-title-input" placeholder="Nhập tiêu đề bài viết tại đây..." value="[% post.title | html %]" required />
 
                             <!-- Chọn loại bài viết -->
+                            [% IF is_intro %]
+                            <div class="wp-box" style="padding: 0.85rem 1.25rem;">
+                                <label style="font-weight: 700; margin-right: 15px; color: #1e293b;">Người viết là:</label>
+                                <label style="margin-right: 15px; cursor: pointer;">
+                                    <input type="radio" name="post_type" value="intro_librarian" [% IF post.post_type != 'intro_reader' %]checked[% END %] onchange="toggleEventBox()" /> Thủ thư
+                                </label>
+                                <label style="cursor: pointer;">
+                                    <input type="radio" name="post_type" value="intro_reader" [% IF post.post_type == 'intro_reader' %]checked[% END %] onchange="toggleEventBox()" /> Bạn đọc
+                                </label>
+                            </div>
+
+                            <!-- SÁCH ĐƯỢC GIỚI THIỆU (mỗi bài gắn đúng 1 cuốn) -->
+                            <div class="wp-box" id="intro-book-box" style="border: 2px solid #A31A24;">
+                                <h3 class="wp-box-title" style="color: #7F1019;">Sách được giới thiệu <span class="text-danger">*</span></h3>
+                                <input type="hidden" name="biblionumbers" id="intro-biblionumbers" value="[% IF linked_biblios.size %][% linked_biblios.0.biblionumber | html %][% END %]" />
+
+                                <div id="intro-book-selected">
+                                    [% IF linked_biblios.size %][% SET lb = linked_biblios.0 %]
+                                    <div class="intro-book-card">
+                                        <div class="intro-book-card-main">
+                                            <div class="intro-book-card-title">[% lb.title | html %][% IF lb.subtitle %] <span>[% lb.subtitle | html %]</span>[% END %]</div>
+                                            <div class="intro-book-card-meta">
+                                                [% IF lb.author %]<span>[% lb.author | html %]</span>[% END %]
+                                                [% IF lb.publishercode || lb.publicationyear %]<span>[% lb.publishercode | html %][% IF lb.publishercode && lb.publicationyear %], [% END %][% lb.publicationyear | html %]</span>[% END %]
+                                            </div>
+                                            <div class="intro-book-card-ids">
+                                                <span>Biểu ghi #[% lb.biblionumber | html %]</span>
+                                                [% IF lb.isbn %]<span>ISBN [% lb.isbn | html %]</span>[% END %]
+                                                [% IF lb.callnumber %]<span>KHXG [% lb.callnumber | html %]</span>[% END %]
+                                                <span>[% lb.items_count || 0 | html %] bản</span>
+                                            </div>
+                                        </div>
+                                        <div class="intro-book-card-actions">
+                                            <a class="btn btn-xs btn-default" target="_blank" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% lb.biblionumber | uri %]">Xem biểu ghi</a>
+                                            <button type="button" class="btn btn-xs btn-link text-danger" onclick="introClearBook()">Đổi sách</button>
+                                        </div>
+                                    </div>
+                                    [% END %]
+                                </div>
+
+                                <div id="intro-book-search-wrap" [% IF linked_biblios.size %]style="display: none;"[% END %]>
+                                    <div class="intro-search-row">
+                                        <select id="intro-book-field" class="form-control" onchange="introSearchBooks(document.getElementById('intro-book-search').value, true)">
+                                            <option value="all">Tất cả</option>
+                                            <option value="title">Nhan đề</option>
+                                            <option value="author">Tác giả</option>
+                                            <option value="isbn">ISBN / ISSN</option>
+                                            <option value="barcode">Mã ĐKCB</option>
+                                            <option value="callnumber">Ký hiệu xếp giá</option>
+                                            <option value="biblionumber">Số biểu ghi</option>
+                                        </select>
+                                        <div style="position: relative; flex: 1;">
+                                            <input type="text" id="intro-book-search" class="form-control" autocomplete="off" placeholder="Nhập nhan đề, tác giả, ISBN hoặc quét mã ĐKCB..." oninput="introSearchBooks(this.value)" onkeydown="introSearchKey(event)" />
+                                            <div id="intro-book-results"></div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Quét mã vạch ĐKCB rồi nhấn Enter để chọn nhanh.</small>
+                                </div>
+
+                                <div class="form-group" id="intro-reader-class" style="margin: 14px 0 0; [% IF post.post_type != 'intro_reader' %]display: none;[% END %]">
+                                    <label style="font-weight: 600;">Lớp / Khoa của bạn đọc:</label>
+                                    <input type="text" name="classification" class="form-control" value="[% post.classification | html %]" placeholder="VD: K62 Kinh tế đối ngoại" />
+                                </div>
+                            </div>
+                            <style>
+                                #intro-book-box .intro-search-row { display: flex; gap: 8px; margin-bottom: 6px; }
+                                #intro-book-box #intro-book-field { flex: 0 0 170px; }
+                                #intro-book-results { display: none; position: absolute; z-index: 50; left: 0; right: 0; top: 100%; max-height: 340px; overflow-y: auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 10px 24px rgba(15,23,42,0.12); }
+                                .intro-book-option { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+                                .intro-book-option:hover, .intro-book-option.is-active { background: #fdf2f2; }
+                                .intro-book-option .t { font-weight: 600; color: #0f172a; }
+                                .intro-book-option .m { font-size: .8rem; color: #64748b; margin-top: 2px; }
+                                .intro-book-option .hit { color: #A31A24; font-weight: 600; }
+                                .intro-book-card { display: flex; justify-content: space-between; gap: 14px; padding: 12px 14px; background: #fbf7ef; border-left: 4px solid #A31A24; border-radius: 0 6px 6px 0; }
+                                .intro-book-card-title { font-weight: 700; color: #0f172a; font-size: 1.05rem; }
+                                .intro-book-card-title span { font-weight: 400; color: #475569; }
+                                .intro-book-card-meta, .intro-book-card-ids { font-size: .85rem; color: #475569; margin-top: 3px; }
+                                .intro-book-card-meta span + span::before, .intro-book-card-ids span + span::before { content: " · "; color: #C9A227; }
+                                .intro-book-card-ids { color: #7F1019; }
+                                .intro-book-card-actions { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; white-space: nowrap; }
+                                @media (max-width: 640px) { #intro-book-box .intro-search-row { flex-direction: column; } #intro-book-box #intro-book-field { flex-basis: auto; } }
+                            </style>
+                            [% ELSE %]
                             <div class="wp-box" style="padding: 0.85rem 1.25rem;">
                                 <label style="font-weight: 700; margin-right: 15px; color: #1e293b;">Loại nội dung:</label>
                                 <label style="margin-right: 15px; cursor: pointer;">
@@ -1722,6 +1854,7 @@
                                     <input type="radio" name="post_type" value="database" [% IF post.post_type == "database" || section == "database" %]checked[% END %] onchange="toggleEventBox()" /> <span class="wp-badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;"><i class="fa fa-database"></i> Cơ sở dữ liệu (CSDL)</span>
                                 </label>
                             </div>
+                            [% END %]
 
                             <!-- Đoạn tóm tắt (Excerpt) -->
                             <div class="wp-box">
@@ -1793,6 +1926,9 @@
 
                                 <!-- Khung Textarea chính để TinyMCE gắn vào -->
                                 <textarea name="content" id="post-content" rows="18" class="form-control" style="width: 100%; border-radius: 6px;">[% post.content | html %]</textarea>
+                                <!-- Chế độ Mã nguồn HTML: gửi nguyên văn HTML, không để TinyMCE ghi đè khi lưu -->
+                                <input type="hidden" name="content_mode" id="post-content-mode" value="visual" />
+                                <input type="hidden" name="content_raw" id="post-content-raw" value="" />
 
                                 <!-- Thanh trạng thái số từ, thời gian đọc và Auto-save -->
                                 <div class="wp-status-bar">
@@ -1823,9 +1959,14 @@
                                     </select>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 1rem;">
+                                [% IF is_intro %]
+                                    <label style="font-weight: 600;">Người viết <span class="text-danger">*</span></label>
+                                    <input type="text" name="author_name" id="post-author" class="form-control" value="[% post.author_name | html %]" placeholder="Họ tên thủ thư hoặc bạn đọc" required />
+                                [% ELSE %]
                                     <label style="font-weight: 600;">Tác giả / Ban biên tập:</label>
                                     <input type="text" name="author_name" id="post-author" class="form-control" value="[% post.author_name || 'Thư viện Phân hiệu' | html %]" placeholder="VD: Thư viện Phân hiệu, Ban Thư viện..." />
                                     <small class="text-muted">Tên tác giả hiển thị ngoài trang chủ (mặc định: Thư viện Phân hiệu).</small>
+                                [% END %]
                                 </div>
                                 <div class="form-group" style="margin-bottom: 1rem;">
                                     <label style="font-weight: 600;">Lượt xem bài viết:</label>
@@ -1896,6 +2037,7 @@
                                 </div>
                             </div>
 
+                            [% UNLESS is_intro %]
                             <!-- HỘP THÔNG TIN SỰ KIỆN (EVENT METADATA) -->
                             <div class="wp-box" id="event-meta-box" style="border: 2px solid #38bdf8; background: #f0f9ff; [% IF post.post_type != 'event' %]display: none;[% END %]">
                                 <h3 class="wp-box-title" style="color: #0369a1; border-color: #bae6fd;">
@@ -2001,6 +2143,7 @@
                                     <input type="text" name="author_name" id="post-db-vendor" class="form-control" placeholder="VD: IEEE, ACM, Elsevier..." value="[% post.author_name | html %]" />
                                 </div>
                             </div>
+                            [% END %]
                         </div>
                     </div>
                 </form>
@@ -2495,8 +2638,12 @@ $(document).ready(function() {
         startAutoSaveRoutine();
         
         $('#post-editor-form').on('submit', function() {
-            if (typeof tinyMCE !== 'undefined' && tinyMCE.get('post-content')) {
-                tinyMCE.get('post-content').save();
+            var ed = (typeof tinyMCE !== 'undefined') ? tinyMCE.get('post-content') : null;
+            if ($('#post-content-mode').val() === 'text' || (ed && ed.isHidden())) {
+                // Đang ở chế độ Mã nguồn HTML: giữ nguyên HTML người dùng gõ
+                $('#post-content-mode').val('text');
+            } else if (ed) {
+                ed.save();
             }
             localStorage.removeItem(draftStorageKey);
         });
@@ -2519,7 +2666,6 @@ function initPortalTinyMce() {
         convert_urls: false,
         relative_urls: false,
         verify_html: false,
-        custom_elements: "style,link,~link",
         extended_valid_elements: "*[*]",
         valid_children: "+body[style]",
         content_style: "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1e293b; padding: 15px; } img { max-width: 100%; height: auto; } figure { margin: 0; }",
@@ -2553,6 +2699,11 @@ function updateWordCount() {
     $('#wp-reading-time').text('~ ' + minutes + ' phút đọc');
 }
 
+function syncRawHtml() {
+    var raw = document.getElementById('post-content-raw');
+    if (raw) raw.value = $('#post-content').val();
+}
+
 function switchEditorMode(mode) {
     if (!editorInitialized || typeof tinyMCE === 'undefined') return;
     var editor = tinyMCE.get('post-content');
@@ -2562,16 +2713,23 @@ function switchEditorMode(mode) {
         editor.save();
         editor.hide();
         $('#post-content').show();
+        $('#post-content-mode').val('text');
+        syncRawHtml();
         $('#btn-mode-text').addClass('active');
         $('#btn-mode-visual').removeClass('active');
     } else {
         editor.show();
         editor.load();
+        $('#post-content-mode').val('visual');
         $('#btn-mode-visual').addClass('active');
         $('#btn-mode-text').removeClass('active');
     }
     updateWordCount();
 }
+
+$(document).on('input change keyup paste', '#post-content', function () {
+    if ($('#post-content-mode').val() === 'text') { syncRawHtml(); updateWordCount(); }
+});
 
 function toggleFullscreenEditor() {
     var box = $('#wp-content-box');
@@ -2664,6 +2822,7 @@ function restoreSavedDraft() {
         } else {
             $('#post-content').val(draft.content || "");
         }
+        syncRawHtml();
         updateWordCount();
         $('#draft-alert-banner').hide();
         alert("Bản nháp đã được khôi phục thành công!");
@@ -2692,6 +2851,7 @@ function insertEditorHtml(html) {
             }
         }
     }
+    syncRawHtml();
     updateWordCount();
 }
 
@@ -3235,6 +3395,166 @@ function toggleEventBox() {
             titleInput.placeholder = 'Nhập tiêu đề bài viết tại đây...';
         }
     }
+    var readerClass = document.getElementById('intro-reader-class');
+    if (readerClass) {
+        readerClass.style.display = (val === 'intro_reader') ? 'block' : 'none';
+    }
+}
+
+/* ---------- LỜI GIỚI THIỆU: CHỌN SÁCH ĐƯỢC GIỚI THIỆU ---------- */
+var introSearchTimer = null;
+function introEscape(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+}
+function introCleanTitle(t) {
+    return String(t || '').replace(/[\s\/:;,.]+$/, '');
+}
+function introSelectedIds() {
+    var el = document.getElementById('intro-biblionumbers');
+    return el && el.value ? el.value.split(',').filter(function (x) { return x; }) : [];
+}
+var introLastRows = [];
+var introActiveIdx = -1;
+function introStripIsbn(s) {
+    return String(s || '').split('|')[0].trim();
+}
+function introBookCardHtml(r) {
+    var meta = [], ids = [];
+    if (r.author) meta.push('<span>' + introEscape(r.author) + '</span>');
+    var pub = [r.publishercode, r.publicationyear].filter(function (x) { return x; }).join(', ');
+    if (pub) meta.push('<span>' + introEscape(pub) + '</span>');
+    ids.push('<span>Biểu ghi #' + introEscape(r.biblionumber) + '</span>');
+    if (r.isbn) ids.push('<span>ISBN ' + introEscape(introStripIsbn(r.isbn)) + '</span>');
+    if (r.callnumber) ids.push('<span>KHXG ' + introEscape(r.callnumber) + '</span>');
+    if (r.matched_barcode) ids.push('<span>ĐKCB ' + introEscape(r.matched_barcode) + '</span>');
+    ids.push('<span>' + introEscape(r.items_count || 0) + ' bản</span>');
+    return '<div class="intro-book-card">' +
+        '<div class="intro-book-card-main">' +
+            '<div class="intro-book-card-title">' + introEscape(introCleanTitle(r.title)) + (r.subtitle ? ' <span>' + introEscape(introCleanTitle(r.subtitle)) + '</span>' : '') + '</div>' +
+            '<div class="intro-book-card-meta">' + meta.join('') + '</div>' +
+            '<div class="intro-book-card-ids">' + ids.join('') + '</div>' +
+        '</div>' +
+        '<div class="intro-book-card-actions">' +
+            '<a class="btn btn-xs btn-default" target="_blank" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=' + encodeURIComponent(r.biblionumber) + '">Xem biểu ghi</a>' +
+            '<button type="button" class="btn btn-xs btn-link text-danger" onclick="introClearBook()">Đổi sách</button>' +
+        '</div>' +
+    '</div>';
+}
+function introSelectBook(r) {
+    document.getElementById('intro-biblionumbers').value = String(r.biblionumber);
+    document.getElementById('intro-book-selected').innerHTML = introBookCardHtml(r);
+    document.getElementById('intro-book-search-wrap').style.display = 'none';
+    var box = document.getElementById('intro-book-results');
+    box.style.display = 'none';
+    document.getElementById('intro-book-search').value = '';
+}
+function introClearBook() {
+    document.getElementById('intro-biblionumbers').value = '';
+    document.getElementById('intro-book-selected').innerHTML = '';
+    document.getElementById('intro-book-search-wrap').style.display = '';
+    document.getElementById('intro-book-search').focus();
+}
+function introHighlight(text, q) {
+    var t = introEscape(text);
+    if (!q) return t;
+    var qe = introEscape(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    try { return t.replace(new RegExp('(' + qe + ')', 'ig'), '<span class="hit">$1</span>'); } catch (e) { return t; }
+}
+function introRenderResults(rows, q) {
+    var box = document.getElementById('intro-book-results');
+    introLastRows = rows || [];
+    introActiveIdx = introLastRows.length ? 0 : -1;
+    if (!introLastRows.length) {
+        box.innerHTML = '<div style="padding: 10px 12px; color: #64748b;">Không tìm thấy sách phù hợp.</div>';
+    } else {
+        box.innerHTML = introLastRows.map(function (r, i) {
+            var m = [];
+            if (r.author) m.push(introHighlight(r.author, q));
+            var pub = [r.publishercode, r.publicationyear].filter(function (x) { return x; }).join(', ');
+            if (pub) m.push(introEscape(pub));
+            if (r.isbn) m.push('ISBN ' + introHighlight(introStripIsbn(r.isbn), q));
+            if (r.callnumber) m.push('KHXG ' + introEscape(r.callnumber));
+            if (r.matched_barcode) m.push('<span class="hit">ĐKCB ' + introEscape(r.matched_barcode) + '</span>');
+            m.push((r.items_count || 0) + ' bản');
+            m.push('#' + introEscape(r.biblionumber));
+            return '<div class="intro-book-option' + (i === 0 ? ' is-active' : '') + '" data-idx="' + i + '">' +
+                '<div class="t">' + introHighlight(introCleanTitle(r.title), q) + (r.subtitle ? ' <span style="font-weight:400;color:#475569;">' + introEscape(introCleanTitle(r.subtitle)) + '</span>' : '') + '</div>' +
+                '<div class="m">' + m.join(' · ') + '</div>' +
+            '</div>';
+        }).join('');
+    }
+    box.style.display = 'block';
+}
+function introSearchBooks(q, immediate, cb) {
+    var box = document.getElementById('intro-book-results');
+    var field = (document.getElementById('intro-book-field') || {}).value || 'all';
+    clearTimeout(introSearchTimer);
+    q = (q || '').trim();
+    var minLen = (field === 'all' || field === 'title' || field === 'author') ? 2 : 1;
+    if (q.length < minLen) { box.style.display = 'none'; introLastRows = []; return; }
+    introSearchTimer = setTimeout(function () {
+        $.getJSON('portal-news.pl', { op: 'search_biblio', q: q, field: field }, function (rows) {
+            var cur = (document.getElementById('intro-book-search').value || '').trim();
+            if (cur !== q) return;
+            introRenderResults(rows, q);
+            if (cb) cb(rows);
+        });
+    }, immediate ? 0 : 250);
+}
+function introSetActive(i) {
+    var opts = document.querySelectorAll('#intro-book-results .intro-book-option');
+    if (!opts.length) return;
+    introActiveIdx = (i + opts.length) % opts.length;
+    opts.forEach(function (o, k) { o.classList.toggle('is-active', k === introActiveIdx); });
+    opts[introActiveIdx].scrollIntoView({ block: 'nearest' });
+}
+function introSearchKey(e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); introSetActive(introActiveIdx + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); introSetActive(introActiveIdx - 1); }
+    else if (e.key === 'Escape') { document.getElementById('intro-book-results').style.display = 'none'; }
+    else if (e.key === 'Enter') {
+        e.preventDefault();
+        var q = (e.target.value || '').trim();
+        var box = document.getElementById('intro-book-results');
+        if (box.style.display === 'block' && introLastRows.length && introActiveIdx >= 0) {
+            introSelectBook(introLastRows[introActiveIdx]);
+            return;
+        }
+        // Quét mã vạch: tìm ngay, nếu chỉ có 1 kết quả thì chọn luôn
+        introSearchBooks(q, true, function (rows) {
+            if (rows && rows.length === 1) introSelectBook(rows[0]);
+        });
+    }
+}
+document.addEventListener('click', function (e) {
+    var opt = e.target.closest ? e.target.closest('.intro-book-option') : null;
+    var box = document.getElementById('intro-book-results');
+    if (opt) {
+        var r = introLastRows[parseInt(opt.getAttribute('data-idx'), 10)];
+        if (r) introSelectBook(r);
+    } else if (box && !e.target.closest('#intro-book-box')) {
+        box.style.display = 'none';
+    }
+});
+function introBindSubmitGuard() {
+    var form = document.getElementById('post-editor-form');
+    if (!form || !document.getElementById('intro-book-box') || form.dataset.introGuard) return;
+    form.dataset.introGuard = '1';
+    form.addEventListener('submit', function (e) {
+        if (!introSelectedIds().length) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            alert('Vui lòng chọn cuốn sách được giới thiệu.');
+            var w = document.getElementById('intro-book-search-wrap'); if (w) w.style.display = ''; document.getElementById('intro-book-search').focus();
+        }
+    }, true);
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', introBindSubmitGuard);
+} else {
+    introBindSubmitGuard();
 }
 
 function handleFeaturedFileUpload(event) {
@@ -3359,6 +3679,7 @@ function removeThumb() {
     $('#manual-url-input').val('');
     $('#thumb-preview').attr('src', '');
     $('#thumb-preview-wrap').hide();
+    $('#thumb-upload-dropzone').show();
 }
 /* ==================== CSDL MANAGEMENT FUNCTIONS ==================== */
 function showDatabaseModal() {
@@ -3467,6 +3788,8 @@ function openAddDatabaseModal() {
     if (idInput) idInput.value = '0';
     var titleInput = document.getElementById('modal_db_title');
     if (titleInput) titleInput.value = '';
+    var urlInput = document.getElementById('modal_db_url');
+    if (urlInput) urlInput.value = '';
     var sortInput = document.getElementById('modal_db_sort_order');
     if (sortInput) sortInput.value = '[% next_db_order || 1 %]';
     var classSelect = document.getElementById('modal_db_class');
@@ -3486,7 +3809,7 @@ function openAddDatabaseModal() {
     var statusSelect = document.getElementById('modal_db_status');
     if (statusSelect) statusSelect.value = 'published';
     var label = document.getElementById('databaseModalLabel');
-    if (label) label.innerHTML = '<i class="fa fa-database"></i> Thêm Cơ sở dữ liệu mới';
+    if (label) label.innerHTML = 'Thêm Cơ sở dữ liệu';
     
     showDatabaseModal();
 }
@@ -3508,6 +3831,7 @@ function openEditDatabaseModal(btn, id) {
             access_instructions: btn.dataset.instructions || '',
             db_user: btn.dataset.user || '',
             db_pass: btn.dataset.pass || '',
+            db_url: btn.dataset.url || btn.dataset.link || '',
             support_link: btn.dataset.link || '',
             status: btn.dataset.status || 'published'
         };
@@ -3523,6 +3847,7 @@ function openEditDatabaseModal(btn, id) {
                 access_instructions: rowBtn.dataset.instructions || '',
                 db_user: rowBtn.dataset.user || '',
                 db_pass: rowBtn.dataset.pass || '',
+                db_url: rowBtn.dataset.url || rowBtn.dataset.link || '',
                 support_link: rowBtn.dataset.link || '',
                 status: rowBtn.dataset.status || 'published'
             };
@@ -3555,6 +3880,8 @@ function fillAndShowModal(data) {
     if (idInput) idInput.value = data.id || '0';
     var titleInput = document.getElementById('modal_db_title');
     if (titleInput) titleInput.value = data.title || '';
+    var urlInput = document.getElementById('modal_db_url');
+    if (urlInput) urlInput.value = data.db_url || data.support_link || '';
     var sortInput = document.getElementById('modal_db_sort_order');
     if (sortInput) sortInput.value = data.sort_order || 1;
     
@@ -3585,12 +3912,12 @@ function fillAndShowModal(data) {
     var passInput = document.getElementById('modal_db_pass');
     if (passInput) passInput.value = data.db_pass || '';
     var linkInput = document.getElementById('modal_db_link');
-    if (linkInput) linkInput.value = data.support_link || data.event_reg_link || '';
+    if (linkInput) linkInput.value = data.support_link || '';
     var statusSelect = document.getElementById('modal_db_status');
     if (statusSelect) statusSelect.value = data.status || 'published';
     
     var label = document.getElementById('databaseModalLabel');
-    if (label) label.innerHTML = '<i class="fa fa-database"></i> Chỉnh sửa CSDL #' + data.id + ' - ' + (data.title || '');
+    if (label) label.innerHTML = 'Sửa CSDL #' + data.id + ' — ' + (data.title || '');
     
     showDatabaseModal();
 }
@@ -3598,17 +3925,16 @@ function fillAndShowModal(data) {
 function togglePasswordView(id, btn) {
     var dots = document.getElementById('pass-dots-' + id);
     var text = document.getElementById('pass-text-' + id);
-    var icon = btn.querySelector('i');
     if (!dots || !text) return;
     if (dots.style.display === 'none') {
         dots.style.display = 'inline-block';
         text.style.display = 'none';
-        if (icon) icon.className = 'fa fa-eye';
+        btn.textContent = 'Hiện';
         btn.title = 'Hiện mật khẩu';
     } else {
         dots.style.display = 'none';
         text.style.display = 'inline-block';
-        if (icon) icon.className = 'fa fa-eye-slash';
+        btn.textContent = 'Ẩn';
         btn.title = 'Ẩn mật khẩu';
     }
 }
@@ -3638,11 +3964,13 @@ function fallbackCopy(str, btn) {
 
 function showCopyFeedback(btn) {
     var oldHtml = btn.innerHTML;
-    btn.innerHTML = '<i class="fa fa-check" style="color: #16a34a;"></i>';
+    btn.textContent = 'Đã chép';
     btn.style.borderColor = '#16a34a';
+    btn.style.color = '#16a34a';
     setTimeout(function() {
         btn.innerHTML = oldHtml;
         btn.style.borderColor = '';
+        btn.style.color = '';
     }, 1500);
 }
 
@@ -3770,12 +4098,12 @@ function openAddBannerModal() {
     var statusSelect = document.getElementById('modal_banner_status');
     if (statusSelect) statusSelect.value = 'published';
     var showTextCheckbox = document.getElementById('modal_banner_show_text');
-    if (showTextCheckbox) showTextCheckbox.checked = false; // Mặc định không che chữ để tôn vinh banner thiết kế 1160x400
+    if (showTextCheckbox) showTextCheckbox.checked = false;
     
     updateBannerModalPreview('/opac-tmpl/bootstrap/images/ftu-library-hero.jpg');
     
     var label = document.getElementById('bannerModalLabel');
-    if (label) label.innerHTML = '<i class="fa fa-picture-o"></i> Thêm Banner mới (Chuẩn 1160px × 400px)';
+    if (label) label.innerHTML = 'Thêm Banner (1160 × 400 px)';
     
     showBannerModal();
 }
@@ -3860,7 +4188,7 @@ function fillAndShowBannerModal(data) {
     updateBannerModalPreview(data.featured_image || '');
     
     var label = document.getElementById('bannerModalLabel');
-    if (label) label.innerHTML = '<i class="fa fa-picture-o"></i> Chỉnh sửa Banner #' + data.id + ' - ' + (data.title || '');
+    if (label) label.innerHTML = 'Sửa Banner #' + data.id + ' — ' + (data.title || '');
     
     var bannerForm = document.getElementById('bannerModalForm');
     if (bannerForm && !bannerForm._hasDefaultTitleHandler) {

@@ -103,6 +103,36 @@
         background: #fee2e2;
         color: #b91c1c;
     }
+    .ftu-badge-intro {
+        background: #A31A24;
+        color: #fff;
+        border-bottom: 2px solid #C9A227;
+    }
+    .ftu-intro-books {
+        border-left: 3px solid #A31A24;
+        background: #fbf7ef;
+        padding: 0.9rem 1.1rem;
+        margin: 0 0 1.5rem;
+        border-radius: 0 8px 8px 0;
+    }
+    .ftu-intro-books-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #7F1019;
+        margin-bottom: 0.4rem;
+    }
+    .ftu-intro-book {
+        display: block;
+        padding: 0.35rem 0;
+        color: #1e293b;
+        text-decoration: none;
+    }
+    .ftu-intro-book + .ftu-intro-book { border-top: 1px dashed #e5d9bf; }
+    .ftu-intro-book strong { font-weight: 600; }
+    .ftu-intro-book span { display: block; font-size: 0.85rem; color: #64748b; }
+    .ftu-intro-book:hover strong { color: #A31A24; }
     .ftu-badge-event {
         background: #e0f2fe;
         color: #0369a1;
@@ -604,7 +634,12 @@
     <div class="ftu-article-container">
         <div class="ftu-breadcrumb">
             <a href="/"><i class="fa fa-home"></i> Home</a> &rsaquo; 
+            [% IF is_intro && intro_books.size %]
+            <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% intro_books.0.biblionumber | uri %]">[% intro_books.0.title | html %]</a> &rsaquo; 
+            <a href="/cgi-bin/koha/opac-intro.pl?biblionumber=[% intro_books.0.biblionumber | uri %]">Introductions</a> &rsaquo; 
+            [% ELSE %]
             <a href="/#news-section">News & Events</a> &rsaquo; 
+            [% END %]
             <span>[% IF post %][% post.title | html %][% ELSE %]Article not found[% END %]</span>
         </div>
 
@@ -613,7 +648,11 @@
             <!-- CỘT CHÍNH: NỘI DUNG BÀI VIẾT -->
             <article class="ftu-article-card">
                 <div>
-                    [% IF post.post_type == "event" %]
+                    [% IF post.post_type == "intro_librarian" %]
+                        <span class="ftu-badge-type ftu-badge-intro">LIBRARIAN'S PICK</span>
+                    [% ELSIF post.post_type == "intro_reader" %]
+                        <span class="ftu-badge-type ftu-badge-intro">READER'S PICK</span>
+                    [% ELSIF post.post_type == "event" %]
                         <span class="ftu-badge-type ftu-badge-event"><i class="fa fa-calendar-check"></i> EVENT & WORKSHOP</span>
                     [% ELSIF post.post_type == "notice" %]
                         <span class="ftu-badge-type ftu-badge-notice"><i class="fa fa-bell"></i> IMPORTANT NOTICE</span>
@@ -625,7 +664,7 @@
                 <h1 class="ftu-article-title">[% post.title | html %]</h1>
 
                 <div class="ftu-article-meta">
-                    <span><i class="fa fa-user-edit"></i> [% post.author_name | html %]</span>
+                    <span><i class="fa fa-user-edit"></i> [% post.author_name | html %][% IF post.post_type == "intro_reader" && post.classification %] &middot; [% post.classification | html %][% END %]</span>
                     <span><i class="fa fa-calendar-alt"></i> [% post.formatted_date | html %]</span>
                     <span><i class="fa fa-eye"></i> [% post.views_count %] views</span>
                 </div>
@@ -689,6 +728,17 @@
                 <!-- MỤC LỤC BÀI VIẾT TỰ ĐỘNG SINH (NẾU CÓ ĐỀ MỤC) -->
                 <div id="ftu-toc-container" style="display:none;"></div>
 
+                [% IF is_intro && intro_books.size %]
+                    <div class="ftu-intro-books">
+                        <div class="ftu-intro-books-label">Featured book</div>
+                        [% FOREACH bk IN intro_books %]
+                        <a class="ftu-intro-book" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% bk.biblionumber | uri %]">
+                            <strong>[% bk.title | html %]</strong>[% IF bk.author %]<span>[% bk.author | html %]</span>[% END %]
+                        </a>
+                        [% END %]
+                    </div>
+                [% END %]
+
                 [% IF post.excerpt %]
                     <div class="ftu-article-excerpt">
                         [% post.excerpt | html %]
@@ -707,6 +757,11 @@
                             <span class="ftu-post-nav-label"><i class="fa fa-arrow-left"></i> Previous article</span>
                             <span class="ftu-post-nav-title">[% prev_post.title | html %]</span>
                         </a>
+                    [% ELSIF is_intro && intro_books.size %]
+                        <a href="/cgi-bin/koha/opac-intro.pl?biblionumber=[% intro_books.0.biblionumber | uri %]" class="ftu-post-nav-card">
+                            <span class="ftu-post-nav-label">Introductions</span>
+                            <span class="ftu-post-nav-title">[% intro_books.0.title | html %]</span>
+                        </a>
                     [% ELSE %]
                         <a href="/#news-section" class="ftu-post-nav-card">
                             <span class="ftu-post-nav-label"><i class="fa fa-th-large"></i> Library Announcements</span>
@@ -718,6 +773,11 @@
                         <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% next_post.id %]" class="ftu-post-nav-card" style="text-align: right;">
                             <span class="ftu-post-nav-label" style="justify-content: flex-end;">Next article <i class="fa fa-arrow-right"></i></span>
                             <span class="ftu-post-nav-title">[% next_post.title | html %]</span>
+                        </a>
+                    [% ELSIF is_intro && intro_books.size %]
+                        <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% intro_books.0.biblionumber | uri %]" class="ftu-post-nav-card" style="text-align: right;">
+                            <span class="ftu-post-nav-label" style="justify-content: flex-end;">View book</span>
+                            <span class="ftu-post-nav-title">[% intro_books.0.title | html %]</span>
                         </a>
                     [% ELSE %]
                         <a href="/#news-section" class="ftu-post-nav-card" style="text-align: right;">
@@ -736,7 +796,7 @@
             <!-- CỘT PHẢI: BÀI VIẾT KHÁC -->
             <aside>
                 <div class="ftu-sidebar-box">
-                    <h4 class="ftu-sidebar-title">LATEST POSTS</h4>
+                    <h4 class="ftu-sidebar-title">[% IF is_intro %]MORE INTRODUCTIONS[% ELSE %]LATEST POSTS[% END %]</h4>
                     [% FOREACH r IN recent_posts %]
                         [% NEXT IF r.post_type == 'database' %]
                         <a href="/cgi-bin/koha/opac-news-detail.pl?id=[% r.id %]" class="ftu-sidebar-post">

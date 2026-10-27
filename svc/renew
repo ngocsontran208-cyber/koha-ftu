@@ -31,24 +31,48 @@ use Koha::DateUtils qw(output_pref dt_from_string);
 
 my $input = CGI->new;
 
-my ($auth_status) = check_cookie_auth(
-    $input->cookie('CGISESSID'),
-    { circulate => 'circulate_remaining_permissions' }
-);
-
-if ( $auth_status ne "ok" ) {
-    exit 0;
-}
-
 binmode STDOUT, ":encoding(UTF-8)";
 print $input->header( -type => 'application/json', -charset => 'UTF-8' );
 
+# Hỗ trợ xác thực đa phiên (tránh xung đột khi mở song song tab OPAC và Staff trên cùng cổng Gateway)
+my @candidate_sids = ();
+if ( my $explicit_sid = $input->param('koha_session_id') ) {
+    push @candidate_sids, $explicit_sid;
+}
+if ( $ENV{HTTP_COOKIE} ) {
+    while ( $ENV{HTTP_COOKIE} =~ /CGISESSID=([^;\s]+)/g ) {
+        push @candidate_sids, $1;
+    }
+}
+if ( my $cookie_sid = $input->cookie('CGISESSID') ) {
+    push @candidate_sids, $cookie_sid;
+}
+
+my $auth_status = 'failed';
+foreach my $sid (@candidate_sids) {
+    next unless $sid;
+    my ($st) = check_cookie_auth(
+        $sid,
+        { circulate => 'circulate_remaining_permissions' }
+    );
+    if ( $st && $st eq 'ok' ) {
+        $auth_status = 'ok';
+        last;
+    }
+}
+
+if ( $auth_status ne "ok" ) {
+    print to_json( { renew_okay => 0, error => 'auth_failed' } );
+    exit 0;
+}
+
+my $issue_id       = $input->param('issue_id');
 my $itemnumber     = $input->param('itemnumber');
 my $borrowernumber = $input->param('borrowernumber');
 my $override_limit = $input->param('override_limit');
 my $override_debt  = $input->param('override_debt');
 my $branchcode     = $input->param('branchcode')
-    || C4::Context->userenv->{'branch'};
+    || ( C4::Context->userenv ? C4::Context->userenv->{'branch'} : undef );
 my $seen = $input->param('seen');
 my $date_due;
 
@@ -56,40 +80,78 @@ if ( $input->param('date_due') ) {
     $date_due = dt_from_string( scalar $input->param('date_due') );
 }
 
-my $data;
-$data->{itemnumber}     = $itemnumber;
-$data->{borrowernumber} = $borrowernumber;
-$data->{branchcode}     = $branchcode;
+my $checkout;
+if ($issue_id) {
+    $checkout = Koha::Checkouts->find($issue_id);
+    if ($checkout) {
+        $itemnumber     ||= $checkout->itemnumber;
+        $borrowernumber ||= $checkout->borrowernumber;
+    }
+}
 
-my $patron = Koha::Patrons->find($borrowernumber);
-my $item   = Koha::Items->find($itemnumber);
+my $patron = $borrowernumber ? Koha::Patrons->find($borrowernumber) : undef;
+my $item   = $itemnumber     ? Koha::Items->find($itemnumber)       : undef;
+$checkout ||= $item ? $item->checkout : undef;
+
+if ( !$patron || !$item || !$checkout ) {
+    print to_json(
+        {
+            renew_okay     => 0,
+            error          => 'no_checkout',
+            itemnumber     => $itemnumber,
+            borrowernumber => $borrowernumber,
+        }
+    );
+    exit 0;
+}
+
+$branchcode ||= $checkout->branchcode || $patron->branchcode;
+
+my $data = {
+    issue_id       => $checkout->issue_id,
+    itemnumber     => $itemnumber,
+    borrowernumber => $borrowernumber,
+    branchcode     => $branchcode,
+};
 
 my $confirmations;
 ( $data->{renew_okay}, $data->{error} ) =
-    CanBookBeRenewed( $patron, $item->checkout, $override_limit );
+    CanBookBeRenewed( $patron, $checkout, $override_limit );
 
 # If we're allowing reserved items to be renewed...
-if ( $data->{error} && $data->{error} eq 'on_reserve' && C4::Context->preference('AllowRenewalOnHoldOverride') ) {
+if ( $data->{error} && $data->{error} eq 'on_reserve' && ( C4::Context->preference('AllowRenewalOnHoldOverride') || $override_limit ) ) {
     $data->{renew_okay} = 1;
     $data->{error}      = undef;
     push @{$confirmations}, 'ON_RESERVE';
 }
 
-if ( $data->{error} && $data->{error} eq 'too_many' && C4::Context->preference('AllowRenewalLimitOverride') ) {
-    $data->{renew_okay} = 1;
-    $data->{error}      = undef;
-    push @{$confirmations}, 'RENEWAL_LIMIT' if $override_limit;
+if ( $data->{error} && $data->{error} eq 'too_many' && ( C4::Context->preference('AllowRenewalLimitOverride') || $override_limit ) ) {
+    if ($override_limit) {
+        $data->{renew_okay} = 1;
+        $data->{error}      = undef;
+        push @{$confirmations}, 'RENEWAL_LIMIT';
+    }
 }
 
-if ( $data->{error} && ( $data->{error} eq 'too_much_owing' or $data->{error} eq 'auto_too_much_owing' ) ) {
-    if ( $override_debt && C4::Context->preference('AllowFineOverrideRenewing') ) {
+if ( $data->{error} && ( $data->{error} eq 'too_much_owing' or $data->{error} eq 'auto_too_much_owing' or $data->{error} eq 'overdue' or $data->{error} eq 'restriction' ) ) {
+    if ( $override_debt || $override_limit ) {
         $data->{renew_okay} = 1;
         $data->{error}      = undef;
     }
 }
 
-if ( $data->{renew_okay} || ( $seen && $data->{error} eq 'too_unseen' ) ) {
+if ( $data->{renew_okay} || ( $seen && $data->{error} && $data->{error} eq 'too_unseen' ) ) {
     try {
+        # Nếu hạn trả hiện tại đang ở tương lai, cộng dồn thời gian gia hạn vào hạn trả hiện tại để ngày hẹn trả thực sự được kéo dài thêm
+        if ( !$date_due && $checkout->date_due ) {
+            my $cur_due = eval { dt_from_string( $checkout->date_due, 'sql' ) };
+            my $now_dt  = dt_from_string();
+            if ( $cur_due && $cur_due > $now_dt ) {
+                my $circ_branch = C4::Circulation::_GetCircControlBranch( $item, $patron );
+                $date_due = C4::Circulation::CalcDateDue( $cur_due, $item->effective_itemtype, $circ_branch, $patron, 'is a renewal' );
+            }
+        }
+
         $date_due = AddRenewal(
             {
                 borrowernumber => $borrowernumber,
@@ -100,18 +162,25 @@ if ( $data->{renew_okay} || ( $seen && $data->{error} eq 'too_unseen' ) ) {
                 confirmations  => $confirmations
             }
         );
-        $data->{date_due}   = output_pref( { dt => $date_due, as_due_date => 1 } );
-        $data->{renew_okay} = 1;
-        $data->{error}      = undef;
+        my $updated_issue = Koha::Checkouts->find( $checkout->issue_id );
+        $data->{date_due}       = output_pref( { dt => $date_due, as_due_date => 1 } );
+        $data->{date_due_iso}   = $date_due ? $date_due->strftime('%d/%m/%Y') : $data->{date_due};
+        $data->{renewals_count} = $updated_issue ? ( $updated_issue->renewals_count || 0 ) : ( ( $checkout->renewals_count || 0 ) + 1 );
+        $data->{renew_okay}     = 1;
+        $data->{error}          = undef;
     } catch {
+        $data->{renew_okay} = 0;
         if ( ref($_) eq 'Koha::Exceptions::Checkout::FailedRenewal' ) {
             $data->{error} = 'renewal_failed';
         } elsif ( ref($_) eq 'Koha::Exceptions::Calendar::NoOpenDays' ) {
             $data->{error} = 'no_open_days';
         } else {
-            $_->rethrow;
+            $data->{error} = "$_" || 'renewal_failed';
         }
     };
+} else {
+    $data->{renewals_count} = $checkout->renewals_count || 0;
 }
 
 print to_json($data);
+

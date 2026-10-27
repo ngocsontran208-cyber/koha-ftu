@@ -3,13 +3,63 @@
 [% USE Branches %]
 [% PROCESS 'i18n.inc' %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title
-    >[% FILTER collapse %]
-        [% t("Circulation") | html %]
-        &rsaquo; [% t("Koha") | html %]
-    [% END %]</title
->
+<title>[% FILTER collapse %]
+    Lưu thông &rsaquo; Koha
+[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+body#circ_circulation-home { background-color: #f8fafc; }
+body#circ_circulation-home .main.container-fluid {
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 !important; padding: 20px 32px 48px 32px !important;
+    background-color: #f8fafc; box-sizing: border-box;
+}
+body#circ_circulation-home .main.container-fluid > .row > div {
+    width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; padding: 0 !important;
+}
+.ftu-circ-header {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px 24px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-circ-header h1 { font-size: 20px; font-weight: 700; color: #0f172a; margin: 0; border: none !important; padding: 0 !important; }
+.ftu-circ-quick-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ftu-circ-btn-primary {
+    background: #8B1E1E; color: #ffffff !important; border: 1px solid #8B1E1E;
+    border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.ftu-circ-btn-primary:hover { background: #731818; text-decoration: none; }
+.ftu-circ-btn-secondary {
+    background: #ffffff; color: #334155 !important; border: 1px solid #cbd5e1;
+    border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.ftu-circ-btn-secondary:hover { background: #f1f5f9; color: #0f172a !important; text-decoration: none; }
+.ftu-circ-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 20px; height: 100%; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-circ-card h3 {
+    font-size: 15px; font-weight: 700; color: #0f172a;
+    margin: 0 0 14px 0; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;
+}
+.ftu-circ-group {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748b; margin: 14px 0 6px 0;
+}
+.ftu-circ-group:first-of-type { margin-top: 0; }
+.ftu-circ-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ftu-circ-list li { margin: 0; padding: 0; }
+.ftu-circ-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: #334155; text-decoration: none;
+    transition: all 0.15s ease;
+}
+.ftu-circ-link:hover {
+    background: #fef2f2; border-color: #fecaca; color: #8B1E1E; text-decoration: none;
+}
+</style>
 </head>
 <body id="circ_circulation-home" class="circ">
 [% WRAPPER 'header.inc' %]
@@ -21,189 +71,119 @@
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             <span>Lưu thông</span>
         [% END %]
-    [% END #/ WRAPPER breadcrumbs %]
-[% END #/ WRAPPER sub-header.inc %]
+    [% END %]
+[% END %]
 
-[% WRAPPER 'main-container.inc' %]
-    <h1>Lưu thông</h1>
+[% WRAPPER 'main-container.inc' wide_full => 1 %]
+    <div class="ftu-circ-header">
+        <h1>Phân hệ Lưu thông</h1>
+        <div class="ftu-circ-quick-actions">
+            <a class="ftu-circ-btn-primary" href="/cgi-bin/koha/circ/circulation.pl">Mượn sách</a>
+            <a class="ftu-circ-btn-secondary" href="/cgi-bin/koha/circ/returns.pl">Trả sách</a>
+            <a class="ftu-circ-btn-secondary" href="/cgi-bin/koha/circ/renew.pl">Gia hạn</a>
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-12 col-sm-4 circulation-actions">
-            <h3>Lưu thông</h3>
+    <div class="row g-4">
+        <!-- CỘT 1: MƯỢN TRẢ & QUẦY PHỤC VỤ -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-circ-card">
+                <h3>Mượn trả &amp; Quầy phục vụ</h3>
 
-            <ul class="buttons-list">
-                <li>
-                    <a class="circ-button checkout" href="/cgi-bin/koha/circ/circulation.pl"><i class="fa fa-upload"></i> Mượn sách</a>
-                </li>
-                <li>
-                    <a class="circ-button checkin" href="/cgi-bin/koha/circ/returns.pl"><i class="fa fa-download"></i> Trả sách</a>
-                </li>
-                <li>
-                    <a class="circ-button renew" href="/cgi-bin/koha/circ/renew.pl"><i class="fa fa-retweet"></i> Gia hạn</a>
-                </li>
-                [% IF ( CAN_user_superlibrarian || CAN_user_loggedinlibrary ) %]
-                    <li>
-                        [% IF Koha.Preference('UseCirculationDesks') %]
-                            <a class="circ-button set-library-desk" href="/cgi-bin/koha/circ/set-library.pl"><i class="fa fa-home"></i> Đặt thư viện & quầy</a>
-                        [% ELSE %]
-                            <a class="circ-button set-library" href="/cgi-bin/koha/circ/set-library.pl"><i class="fa fa-home"></i> Đặt thư viện</a>
-                        [% END %]
-                    </li>
-                [% ELSIF Koha.Preference('UseCirculationDesks') %]
-                    <li>
-                        <a class="circ-button set-desk" href="/cgi-bin/koha/circ/set-library.pl"><i class="fa fa-home"></i> Đặt quầy</a>
-                    </li>
-                [% END %]
-                [% IF ( fast_cataloging ) %]
-                    [% IF ( CAN_user_editcatalogue_fast_cataloging ) %]
-                        <li>
-                            <a class="circ-button fastadd" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA"><i class="fa fa-plus"></i> Biên mục nhanh</a>
-                        </li>
+                <div class="ftu-circ-group">Tác vụ chính</div>
+                <ul class="ftu-circ-list">
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/circulation.pl"><span>Ghi mượn (Checkout)</span></a></li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/returns.pl"><span>Ghi trả (Checkin)</span></a></li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/renew.pl"><span>Gia hạn tài liệu</span></a></li>
+                    [% IF ( CAN_user_superlibrarian || CAN_user_loggedinlibrary ) %]
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/set-library.pl"><span>Chọn thư viện / Quầy trực</span></a></li>
+                    [% ELSIF Koha.Preference('UseCirculationDesks') %]
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/set-library.pl"><span>Chọn quầy trực</span></a></li>
                     [% END %]
-                [% END %]
-                [% IF ( Koha.Preference('AllowCheckoutNotes') && CAN_user_circulate_manage_checkout_notes ) %]
-                    <li>
-                        <a class="circ-button checkout-notes" href="/cgi-bin/koha/circ/checkout-notes.pl"><i class="fa fa-sticky-note"></i> Ghi chú mượn</a>
-                    </li>
-                [% END %]
-                [% IF Koha.Preference('OnSiteCheckouts') %]
-                    <li>
-                        <a class="circ-button pending-onsite" href="/cgi-bin/koha/circ/on-site_checkouts.pl"><i class="fa-solid fa-location-dot"></i> Mượn tại chỗ đang chờ</a>
-                    </li>
-                [% END %]
-            </ul>
+                    [% IF ( fast_cataloging && CAN_user_editcatalogue_fast_cataloging ) %]
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA"><span>Biên mục nhanh</span></a></li>
+                    [% END %]
+                    [% IF ( Koha.Preference('AllowCheckoutNotes') && CAN_user_circulate_manage_checkout_notes ) %]
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/checkout-notes.pl"><span>Ghi chú lượt mượn</span></a></li>
+                    [% END %]
+                    [% IF Koha.Preference('OnSiteCheckouts') %]
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/on-site_checkouts.pl"><span>Đọc tại chỗ đang mở</span></a></li>
+                    [% END %]
+                </ul>
+
+                <div class="ftu-circ-group">Ngoại tuyến</div>
+                <ul class="ftu-circ-list">
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/offline_circ/process_koc.pl"><span>Nạp tệp ngoại tuyến (.koc)</span></a></li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/offline_circ/list.pl"><span>Giao dịch ngoại tuyến chờ duyệt</span></a></li>
+                </ul>
+            </div>
         </div>
 
-        <div class="col-12 col-sm-4">
-            <div class="holds-bookings">
-                <h3>Holds [% IF Koha.Preference('EnableBooking') %]và đặt chỗ[% END %]</h3>
+        <!-- CỘT 2: ĐẶT GIỮ & YÊU CẦU -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-circ-card">
+                <h3>Đặt giữ &amp; Yêu cầu</h3>
 
-                <ul class="buttons-list">
+                <div class="ftu-circ-group">Quản lý đặt giữ (Holds)</div>
+                <ul class="ftu-circ-list">
                     <li>
                         [% IF Koha.Preference('UseHoldsQueueFilterOptions') %]
-                            <a class="circ-button holds-queue" href="/cgi-bin/koha/circ/view_holdsqueue.pl?branchlimit=[% Branches.GetLoggedInBranchcode | uri %]"><i class="fa fa-tasks"></i> Hàng đợi đặt giữ</a>
+                        <a class="ftu-circ-link" href="/cgi-bin/koha/circ/view_holdsqueue.pl?branchlimit=[% Branches.GetLoggedInBranchcode | uri %]"><span>Hàng đợi đặt giữ</span></a>
                         [% ELSE %]
-                            <a class="circ-button holds-queue" href="/cgi-bin/koha/circ/view_holdsqueue.pl?branchlimit=[% Branches.GetLoggedInBranchcode | uri %]&run_report=1"><i class="fa fa-tasks"></i> Hàng đợi đặt giữ</a>
+                        <a class="ftu-circ-link" href="/cgi-bin/koha/circ/view_holdsqueue.pl?branchlimit=[% Branches.GetLoggedInBranchcode | uri %]&run_report=1"><span>Hàng đợi đặt giữ</span></a>
                         [% END %]
                     </li>
-                    <li>
-                        <a class="circ-button holds-to-pull" href="/cgi-bin/koha/circ/pendingreserves.pl"><i class="fa-solid fa-hand-back-fist"></i> Đặt giữ cần lấy</a>
-                    </li>
-                    <li>
-                        <a class="circ-button holds-awaiting" href="/cgi-bin/koha/circ/waitingreserves.pl"><i class="fa-solid fa-calendar-days"></i> Đặt giữ chờ nhận</a>
-                    </li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/pendingreserves.pl"><span>Sách đặt giữ cần lấy khỏi kệ</span></a></li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/waitingreserves.pl"><span>Sách đặt giữ chờ bạn đọc nhận</span></a></li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/reserveratios.pl"><span>Tỷ lệ đặt giữ trên bản sao</span></a></li>
                     [% IF ( Koha.Preference('CurbsidePickup') && CAN_user_circulate_manage_curbside_pickups ) %]
-                        <li>
-                            <a class="circ-button curbside" href="/cgi-bin/koha/circ/curbside_pickups.pl"><i class="fa-solid fa-rotate"></i> Nhận tại quầy</a>
-                        </li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/curbside_pickups.pl"><span>Nhận sách tại điểm hẹn</span></a></li>
                     [% END %]
-                    <li>
-                        <a class="circ-button holds-ratio" href="/cgi-bin/koha/circ/reserveratios.pl"><i class="fa-solid fa-chart-line"></i> Tỷ lệ đặt giữ</a>
-                    </li>
                     [% IF Koha.Preference('EnableBooking') %]
-                        <li>
-                            <a class="circ-button bookings-to-collect" href="/cgi-bin/koha/circ/pendingbookings.pl"><i class="fa-solid fa-calendar-days"></i> Đặt chỗ cần lấy</a>
-                        </li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/pendingbookings.pl"><span>Lịch đặt trước cần chuẩn bị</span></a></li>
                     [% END %]
                 </ul>
+
+                [% IF Koha.Preference('ArticleRequests') %]
+                <div class="ftu-circ-group">Yêu cầu trích lục</div>
+                <ul class="ftu-circ-list">
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/article-requests.pl"><span>Yêu cầu bài báo / Trích lục</span></a></li>
+                </ul>
+                [% END %]
             </div>
-
-            [% IF Koha.Preference('UseRecalls') and CAN_user_recalls %]
-                <div class="recalls">
-                    <h3>Thu hồi</h3>
-
-                    <ul class="buttons-list">
-                        <li
-                            ><a class="circ-button recalls-queue" href="/cgi-bin/koha/recalls/recalls_queue.pl" title="All active recalls"><i class="fa fa-tasks"></i> Hàng đợi thu hồi</a></li
-                        >
-                        <li
-                            ><a class="circ-button recalls-to-pull" href="/cgi-bin/koha/recalls/recalls_to_pull.pl" title="Recalls that could be filled but have not been set waiting"
-                                ><i class="fa-solid fa-hand-back-fist"></i> Recalls to pull</a
-                            ></li
-                        >
-                        <li
-                            ><a class="circ-button overdue-recalls" href="/cgi-bin/koha/recalls/recalls_overdue.pl" title="Recalled items that are overdue to be returned"><i class="fa-solid fa-clock"></i> Thu hồi quá hạn</a></li
-                        >
-                        <li
-                            ><a class="circ-button recalls-awaiting" href="/cgi-bin/koha/recalls/recalls_waiting.pl" title="Recalled items awaiting pickup"><i class="fa-solid fa-calendar-days"></i> Thu hồi chờ nhận</a></li
-                        >
-                        <li
-                            ><a class="circ-button old-recalls" href="/cgi-bin/koha/recalls/recalls_old_queue.pl" title="Inactive recalls"><i class="fa fa-tasks"></i> Thu hồi cũ</a></li
-                        >
-                    </ul>
-                </div>
-            [% END %]
         </div>
 
-        <div class="col-12 col-sm-4">
-            [% IF Koha.Preference('ArticleRequests') %]
-                <div class="patron-request">
-                    <h3>Yêu cầu bạn đọc</h3>
-                    <ul class="buttons-list">
-                        <li>
-                            <a class="circ-button article-request" href="/cgi-bin/koha/circ/article-requests.pl" title="Article requests"><i class="fa-solid fa-newspaper"></i> Yêu cầu bài báo</a>
-                        </li>
-                    </ul>
-                </div>
-            [% END %]
+        <!-- CỘT 3: CHUYỂN KHO & QUÁ HẠN -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-circ-card">
+                <h3>Chuyển kho &amp; Quá hạn</h3>
 
-            <div class="transfers">
-                <h3>Chuyển kho</h3>
-
-                <ul class="buttons-list">
+                <div class="ftu-circ-group">Luân chuyển giữa các kho</div>
+                <ul class="ftu-circ-list">
                     [% IF !Koha.Preference('IndependentBranchesTransfers') || CAN_user_superlibrarian %]
-                        <li>
-                            <a class="circ-button transfer" href="/cgi-bin/koha/circ/branchtransfers.pl"><i class="fa-solid fa-right-left"></i> Chuyển kho</a>
-                        </li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/branchtransfers.pl"><span>Tạo phiếu chuyển kho</span></a></li>
                     [% END %]
                     [% IF Koha.Preference('StockRotation') %]
-                        <li>
-                            <a class="circ-button transfers-to-send" href="/cgi-bin/koha/circ/transfers_to_send.pl"><i class="fa-solid fa-right-from-bracket"></i> Chuyển đi</a>
-                        </li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/transfers_to_send.pl"><span>Tài liệu chờ chuyển đi</span></a></li>
                     [% END %]
-                    <li>
-                        <a class="circ-button transfers-to-receive" href="/cgi-bin/koha/circ/transferstoreceive.pl"><i class="fa-solid fa-right-to-bracket"></i> Nhận về</a>
-                    </li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/transferstoreceive.pl"><span>Tài liệu chờ tiếp nhận</span></a></li>
                 </ul>
-            </div>
 
-            [% IF ( CAN_user_circulate_overdues_report ) %]
-                <div class="overdues">
-                    <h3>Quá hạn</h3>
-
-                    <ul class="buttons-list">
-                        <li>
-                            <a class="circ-button overdues-report" href="/cgi-bin/koha/circ/overdue.pl" title="Warning: This report is very resource intensive on systems with large numbers of overdue items."
-                                ><i class="fa-solid fa-clock"></i> Quá hạn</a
-                            >
-                        </li>
-                        <li>
-                            <a class="circ-button overdues-fines" href="/cgi-bin/koha/circ/branchoverdues.pl" title="Limited to your library.  See report help for other details."><i class="fa-solid fa-clock"></i> Quá hạn có phạt</a>
-                        </li>
-                    </ul>
-                </div>
-            [% END %]
-        </div>
-    </div>
-    <div class="row" id="intranet-circulation-home-html">
-        <div class="col-md-12"> [% Koha.Preference('IntranetCirculationHomeHTML') | $raw %] </div>
-    </div>
-    <div class="row" id="offline-circulation">
-        <div class="col-md-12">
-            <h4>Lưu thông ngoại tuyến</h4>
-            <div class="col-sm-5 col-md-3">
-                <p><a href="/cgi-bin/koha/offline_circ/process_koc.pl" class="offline-circ-upload">Tải lên file ngoại tuyến (.koc)</a></p>
-                <p><a href="/cgi-bin/koha/offline_circ/list.pl" class="offline-circ-pending">Hành động ngoại tuyến chờ</a></p>
-            </div>
-            <div class="col-sm-5 col-md-3">
-                <p
-                    ><a href="https://github.com/bywatersolutions/koha-offline-circulation/releases" class="offline-desktop-app"><i class="fa-solid fa-window-maximize"></i> Tải ứng dụng máy tính</a></p
-                >
-                <p
-                    ><a href="https://addons.mozilla.org/[% lang | uri %]/firefox/addon/koct/" class="offline-firefox-addon"><i class="fa-brands fa-firefox"></i> Tải tiện ích Firefox</a></p
-                >
+                [% IF ( CAN_user_circulate_overdues_report ) %]
+                <div class="ftu-circ-group">Theo dõi quá hạn</div>
+                <ul class="ftu-circ-list">
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/overdue.pl"><span>Danh sách mượn quá hạn</span></a></li>
+                    <li><a class="ftu-circ-link" href="/cgi-bin/koha/circ/branchoverdues.pl"><span>Quá hạn kèm phí phạt</span></a></li>
+                </ul>
+                [% END %]
             </div>
         </div>
     </div>
+
+    [% IF Koha.Preference('IntranetCirculationHomeHTML') %]
+    <div class="row mt-4" id="intranet-circulation-home-html">
+        <div class="col-md-12">[% Koha.Preference('IntranetCirculationHomeHTML') | $raw %]</div>
+    </div>
+    [% END %]
 [% END %]
 [% INCLUDE 'intranet-bottom.inc' %]

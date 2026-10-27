@@ -2857,6 +2857,16 @@ td.covercol .hint,
   display: none !important;
 }
 
+/* Ẩn hoàn toàn Nguồn trực tuyến / Truy cập toàn văn số khi chưa đăng nhập */
+body.not-logged-in .results_summary.online_resources,
+body.not-logged-in .online_resources,
+body.not-logged-in .ftu-opac-digital-badge,
+body.not-logged-in .ftu-digital-direct-btn,
+body.not-logged-in .ftu-digital-read-btn,
+body.not-logged-in .ftu-dspace-link {
+    display: none !important;
+}
+
 /* Integration: DSpace 856 URL Styling */
 .online_resources a,
 span.online_resources a,

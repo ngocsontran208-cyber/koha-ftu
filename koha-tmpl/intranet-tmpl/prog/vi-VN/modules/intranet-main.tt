@@ -62,24 +62,24 @@
 
          <!-- Sidebar -->
         <aside id="ftu-sidebar">
+            [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer ) %]
             <div class="ftu-sidebar-card">
-                <div class="sidebar-card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Quản lý trang công khai</span>
+                <div class="sidebar-card-header">
+                    <span>Cổng thông tin OPAC</span>
                 </div>
-                <div style="padding: 10px 0;">
-                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Quản lý nội dung xuất bản cổng OPAC Thư viện FTU: Tin tức &amp; Bảng tin và Cơ sở dữ liệu.</p>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=news" class="btn btn-sm btn-default" style="font-weight: 600; color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; text-align: left; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
-                            <span>Tin tức &amp; Bảng tin</span>
-                            <span class="badge" style="background: #dbeafe; color: #1e40af;">Quản lý</span>
-                        </a>
-                        <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn btn-sm btn-default" style="font-weight: 600; color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; text-align: left; display: flex; align-items: center; gap: 8px; justify-content: space-between;">
-                            <span>Cơ sở dữ liệu (CSDL)</span>
-                            <span class="badge" style="background: #dbeafe; color: #1e40af;">Quản lý</span>
-                        </a>
-                    </div>
+                <div style="padding: 8px 0 2px 0; display: flex; flex-direction: column; gap: 6px;">
+                    [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news ) %]
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=news" class="btn btn-sm btn-default" style="font-weight: 600; color: #1e293b; border-color: #e2e8f0; background: #f8fafc; text-align: left;">Tin tức &amp; Sự kiện</a>
+                    [% END %]
+                    [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_database ) %]
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=database" class="btn btn-sm btn-default" style="font-weight: 600; color: #1e293b; border-color: #e2e8f0; background: #f8fafc; text-align: left;">Cơ sở dữ liệu</a>
+                    [% END %]
+                    [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_banner ) %]
+                    <a href="/cgi-bin/koha/tools/portal-news.pl?section=banner" class="btn btn-sm btn-default" style="font-weight: 600; color: #1e293b; border-color: #e2e8f0; background: #f8fafc; text-align: left;">Banner trang chủ</a>
+                    [% END %]
                 </div>
             </div>
+            [% END %]
  [% IF ( koha_news.count ) %]
  <div class="ftu-sidebar-card">
  <div class="sidebar-card-header">
@@ -164,7 +164,7 @@
  <a class="ftu-module-card" href="/cgi-bin/koha/circ/circulation-home.pl">
  <div class="module-icon mod-circulation"><i class="fa fa-exchange"></i></div>
  <div class="module-name">Lưu thông</div>
- <div class="module-desc">Mượn &bull; Trả &bull; Gia hạn</div>
+ <div class="module-desc">Mượn &bull; Trả</div>
  </a>
  [% END %]
 
@@ -172,15 +172,15 @@
  <a class="ftu-module-card" href="/cgi-bin/koha/members/members-home.pl">
  <div class="module-icon mod-patrons"><i class="fa fa-id-card"></i></div>
  <div class="module-name">Bạn đọc</div>
- <div class="module-desc">Quản lý thành viên</div>
+ <div class="module-desc">Hồ sơ thẻ</div>
  </a>
  [% END %]
 
  [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || can_see_cataloguing_module ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/cataloguing/records.pl">
  <div class="module-icon mod-cataloging"><i class="fa fa-book"></i></div>
- <div class="module-name">Quản lý biểu ghi</div>
- <div class="module-desc">Tài liệu &bull; ĐKCB &bull; Ảnh bìa</div>
+ <div class="module-name">Biểu ghi &amp; ĐKCB</div>
+ <div class="module-desc">Danh mục tài liệu</div>
  </a>
  [% END %]
 
@@ -188,31 +188,31 @@
  <a class="ftu-module-card" href="/cgi-bin/koha/cataloguing/cataloging-home.pl">
  <div class="module-icon mod-cataloging"><i class="fa fa-tag"></i></div>
  <div class="module-name">Biên mục</div>
- <div class="module-desc">Nhập &bull; Chỉnh sửa biểu ghi</div>
+ <div class="module-desc">MARC21 &bull; Lô</div>
  </a>
  [% END %]
 
- [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_parameters || CAN_user_editcatalogue_edit_catalogue ) %]
+ [% IF ( CAN_user_parameters_manage_auth_values || CAN_user_editcatalogue_edit_catalogue ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/admin/collections.pl">
  <div class="module-icon mod-collections" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff;"><i class="fa fa-layer-group"></i></div>
  <div class="module-name">Bộ sưu tập</div>
- <div class="module-desc">Quản lý chuyên đề &bull; CCODE &bull; OPAC</div>
+ <div class="module-desc">Chuyên đề OPAC</div>
  </a>
  [% END %]
 
- [% IF ( CAN_user_parameters || CAN_user_parameters_manage_circ_rules || CAN_user_parameters_manage_auth_values || CAN_user_circulate ) %]
+ [% IF ( CAN_user_parameters_manage_circ_rules || CAN_user_parameters_manage_auth_values || CAN_user_circulate_circulate_remaining_permissions ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/admin/warehouses.pl">
  <div class="module-icon mod-warehouse" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff;"><i class="fa fa-cubes"></i></div>
  <div class="module-name">Quản lý kho</div>
- <div class="module-desc">Kho tài liệu &bull; Quy tắc mượn</div>
+ <div class="module-desc">Kho &bull; Quy tắc</div>
  </a>
  [% END %]
 
  [% IF ( CAN_user_catalogue ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/catalogue/search.pl">
  <div class="module-icon mod-search"><i class="fa fa-search"></i></div>
- <div class="module-name">Tìm kiếm nâng cao</div>
- <div class="module-desc">Tìm tài liệu &bull; Vật phẩm</div>
+ <div class="module-name">Tra cứu</div>
+ <div class="module-desc">Tìm kiếm nâng cao</div>
  </a>
  [% END %]
 
@@ -220,7 +220,7 @@
  <a class="ftu-module-card" href="/cgi-bin/koha/reports/reports-home.pl">
  <div class="module-icon mod-reports"><i class="fa fa-pie-chart"></i></div>
  <div class="module-name">Báo cáo</div>
- <div class="module-desc">Thống kê &bull; Xuất dữ liệu</div>
+ <div class="module-desc">Số liệu &bull; SQL</div>
  </a>
  [% END %]
 
@@ -228,47 +228,47 @@
  <a class="ftu-module-card" href="/cgi-bin/koha/acqui/acqui-home.pl">
  <div class="module-icon mod-acquisitions"><i class="fa fa-shopping-cart"></i></div>
  <div class="module-name">Bổ sung</div>
- <div class="module-desc">Đặt mua &bull; Ngân sách</div>
+ <div class="module-desc">Đặt mua &bull; Quỹ</div>
  </a>
  [% END %]
 
  [% IF ( CAN_user_serials ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/serials/serials-home.pl">
  <div class="module-icon mod-serials"><i class="fa fa-newspaper-o"></i></div>
- <div class="module-name">Báo – Tạp chí</div>
- <div class="module-desc">Quản lý ấn phẩm định kỳ</div>
+ <div class="module-name">Ấn phẩm định kỳ</div>
+ <div class="module-desc">Báo &bull; Tạp chí</div>
  </a>
  [% END %]
 
  [% IF ( CAN_user_lists ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/virtualshelves/shelves.pl">
  <div class="module-icon mod-lists"><i class="fa fa-list-alt"></i></div>
- <div class="module-name">Danh sách</div>
- <div class="module-desc">Giá sách ảo</div>
+ <div class="module-name">Giá sách ảo</div>
+ <div class="module-desc">Danh sách chọn</div>
  </a>
  [% END %]
 
  [% IF ( CAN_user_editauthorities ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/authorities/authorities-home.pl">
  <div class="module-icon mod-authorities"><i class="fa fa-link"></i></div>
- <div class="module-name">Từ điển</div>
- <div class="module-desc">Kiểm soát từ chuẩn</div>
+ <div class="module-name">Từ chuẩn</div>
+ <div class="module-desc">Kiểm soát đề mục</div>
  </a>
  [% END %]
 
-                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools ) %]
-                <a class="ftu-module-card" href="/cgi-bin/koha/tools/portal-news.pl">
-                    <div class="module-icon mod-portal-news" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #ffffff;"><i class="fa fa-globe"></i></div>
-                    <div class="module-name">Quản lý trang công khai</div>
-                    <div class="module-desc">Tin tức &amp; Bảng tin &bull; Cơ sở dữ liệu</div>
-                </a>
-                [% END %]
+ [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer ) %]
+ <a class="ftu-module-card" href="/cgi-bin/koha/tools/portal-news.pl">
+ <div class="module-icon mod-portal-news" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #ffffff;"><i class="fa fa-globe"></i></div>
+ <div class="module-name">Trang công khai</div>
+ <div class="module-desc">Tin tức &bull; CSDL</div>
+ </a>
+ [% END %]
 
-                [% IF ( CAN_user_tools || CAN_user_clubs ) %]
+ [% IF ( CAN_user_tools || CAN_user_clubs ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/tools/tools-home.pl">
  <div class="module-icon mod-tools"><i class="fa fa-wrench"></i></div>
  <div class="module-name">Công cụ</div>
- <div class="module-desc">Tiện ích &bull; Nhập/Xuất</div>
+ <div class="module-desc">Tiện ích vận hành</div>
  </a>
  [% END %]
 
@@ -276,23 +276,23 @@
  <a class="ftu-module-card" href="/cgi-bin/koha/admin/admin-home.pl">
  <div class="module-icon mod-admin"><i class="fa fa-gears"></i></div>
  <div class="module-name">Quản trị</div>
- <div class="module-desc">Cấu hình hệ thống</div>
+ <div class="module-desc">Tham số hệ thống</div>
  </a>
  [% END %]
 
- [% IF UseCourseReserves %]
+ [% IF ( UseCourseReserves && ( CAN_user_coursereserves_add_reserves || CAN_user_coursereserves_delete_reserves || CAN_user_coursereserves_manage_courses ) ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/course_reserves/course-reserves.pl">
  <div class="module-icon mod-course"><i class="fa fa-graduation-cap"></i></div>
- <div class="module-name">Tài liệu học phần</div>
- <div class="module-desc">Tài liệu học phần</div>
+ <div class="module-name">Học phần</div>
+ <div class="module-desc">Tài liệu môn học</div>
  </a>
  [% END %]
 
-                [% IF ( CAN_user_tools_graduation_view || CAN_user_tools_graduation_manage || CAN_user_tools_graduation_remind || CAN_user_tools_edit_patrons || CAN_user_borrowers || CAN_user_tools ) %]
+ [% IF ( CAN_user_tools_graduation_view || CAN_user_tools_graduation_manage || CAN_user_tools_graduation_remind || CAN_user_tools_edit_patrons ) %]
  <a class="ftu-module-card" href="/cgi-bin/koha/tools/graduation.pl">
  <div class="module-icon mod-graduation" style="background: #0f172a; color: #ffffff;"><i class="fa fa-graduation-cap"></i></div>
  <div class="module-name">Xét tốt nghiệp</div>
- <div class="module-desc">Đối soát nợ sách &bull; Khóa thẻ &bull; Nhắc nhở</div>
+ <div class="module-desc">Đối soát công nợ</div>
  </a>
  [% END %]
 

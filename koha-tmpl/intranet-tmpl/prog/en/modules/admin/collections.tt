@@ -6,13 +6,13 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>
     [% IF op == 'add_form' %]
-        New collection &rsaquo; Collection management
+        Thêm mới bộ sưu tập &rsaquo; Quản lý Bộ sưu tập
     [% ELSIF op == 'edit_form' %]
-        Modify collection '[% collection.lib | html %]' &rsaquo; Collection management
+        Chỉnh sửa bộ sưu tập '[% collection.lib | html %]' &rsaquo; Quản lý Bộ sưu tập
     [% ELSE %]
-        Collection management
+        Quản lý Bộ sưu tập
     [% END %]
-    &rsaquo; Administration &rsaquo; Koha
+    &rsaquo; Quản trị hệ thống &rsaquo; Koha
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
 <style>
@@ -28,8 +28,8 @@
 }
 .ftu-filter-grid {
     display: grid;
-    grid-template-columns: minmax(220px, 2fr) minmax(160px, 1.2fr) minmax(170px, 1.2fr) minmax(200px, 1.5fr) auto;
-    gap: 16px;
+    grid-template-columns: minmax(190px, 1.8fr) minmax(130px, 1fr) minmax(150px, 1.1fr) minmax(140px, 1fr) minmax(180px, 1.2fr) auto;
+    gap: 14px;
     align-items: flex-end;
 }
 @media (max-width: 1200px) {
@@ -218,6 +218,39 @@
     padding: 0;
     cursor: pointer;
 }
+.badge-parent-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+.badge-child-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 500;
+    margin-top: 4px;
+}
+.badge-child-indent {
+    display: inline-block;
+    color: #b91c1c;
+    margin-right: 6px;
+    font-size: 16px;
+    font-weight: bold;
+}
 </style>
 </head>
 
@@ -229,25 +262,25 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a>
+            <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
         [% END %]
         [% IF op == 'add_form' %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/admin/collections.pl">Collection management</a>
+                <a href="/cgi-bin/koha/admin/collections.pl">Quản lý Bộ sưu tập</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>New collection</span>
+                <span>Thêm mới bộ sưu tập</span>
             [% END %]
         [% ELSIF op == 'edit_form' %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/admin/collections.pl">Collection management</a>
+                <a href="/cgi-bin/koha/admin/collections.pl">Quản lý Bộ sưu tập</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>Modify: [% collection.lib | html %]</span>
+                <span>Chỉnh sửa: [% collection.lib | html %]</span>
             [% END %]
         [% ELSE %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>Collection management</span>
+                <span>Quản lý Bộ sưu tập</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -258,21 +291,21 @@
     [% FOR m IN messages %]
         <div class="alert alert-[% m.type | html %] alert-dismissible fade show" role="alert">
             [% IF m.code == 'success_update' %]
-                <i class="fa fa-check-circle"></i> Collection <strong>'[% m.lib | html %]'</strong> (<code>[% m.ccode | html %]</code>) updated successfully.
+                <i class="fa fa-check-circle"></i> Đã cập nhật bộ sưu tập <strong>'[% m.lib | html %]'</strong> (<code>[% m.ccode | html %]</code>) thành công.
             [% ELSIF m.code == 'success_add' %]
-                <i class="fa fa-check-circle"></i> Collection <strong>'[% m.lib | html %]'</strong> (<code>[% m.ccode | html %]</code>) created successfully.
+                <i class="fa fa-check-circle"></i> Đã tạo mới bộ sưu tập <strong>'[% m.lib | html %]'</strong> (<code>[% m.ccode | html %]</code>) thành công.
             [% ELSIF m.code == 'success_delete' %]
-                <i class="fa fa-check-circle"></i> Collection <code>[% m.ccode | html %]</code> deleted successfully.
+                <i class="fa fa-check-circle"></i> Đã xóa bộ sưu tập <code>[% m.ccode | html %]</code> thành công.
             [% ELSIF m.code == 'success_toggle' %]
-                <i class="fa fa-check-circle"></i> Featured status for collection <code>[% m.ccode | html %]</code> updated.
+                <i class="fa fa-check-circle"></i> Đã thay đổi trạng thái nổi bật cho bộ sưu tập <code>[% m.ccode | html %]</code>.
             [% ELSIF m.code == 'error_has_items' %]
-                <i class="fa fa-exclamation-triangle"></i> Cannot delete collection <code>[% m.ccode | html %]</code> because <strong>[% m.items_count | html %] items</strong> are currently assigned.
+                <i class="fa fa-exclamation-triangle"></i> Không thể xóa bộ sưu tập <code>[% m.ccode | html %]</code> vì hiện có <strong>[% m.items_count | html %] tài liệu</strong> đang được gắn mã này. Vui lòng chuyển các tài liệu sang bộ sưu tập khác trước khi xóa.
             [% ELSIF m.code == 'error_duplicate_ccode' %]
-                <i class="fa fa-exclamation-triangle"></i> Collection code <code>[% m.ccode | html %]</code> already exists.
+                <i class="fa fa-exclamation-triangle"></i> Mã bộ sưu tập <code>[% m.ccode | html %]</code> đã tồn tại trong hệ thống. Vui lòng chọn mã khác.
             [% ELSIF m.code == 'error_missing_ccode' %]
-                <i class="fa fa-exclamation-triangle"></i> Collection code (CCODE) is required.
+                <i class="fa fa-exclamation-triangle"></i> Mã bộ sưu tập (CCODE) không được để trống.
             [% ELSIF m.code == 'error_missing_lib' %]
-                <i class="fa fa-exclamation-triangle"></i> Collection title is required.
+                <i class="fa fa-exclamation-triangle"></i> Tên bộ sưu tập không được để trống.
             [% ELSE %]
                 [% m.text | html %]
             [% END %]
@@ -282,9 +315,9 @@
 
     [% IF op == 'add_form' || op == 'edit_form' %]
         [% IF is_add %]
-            <h1>New collection</h1>
+            <h1>Thêm mới Bộ sưu tập</h1>
         [% ELSE %]
-            <h1>Modify collection: [% collection.lib | html %]</h1>
+            <h1>Chỉnh sửa Bộ sưu tập: [% collection.lib | html %]</h1>
         [% END %]
 
         <form action="/cgi-bin/koha/admin/collections.pl" method="post" id="collection-form" class="validated" enctype="multipart/form-data">
@@ -293,51 +326,55 @@
             <input type="hidden" name="is_new" value="[% is_add ? 1 : 0 %]" />
 
             <fieldset class="rows">
-                <legend>Basic information</legend>
+                <legend>Thông tin cơ bản</legend>
                 <ol>
                     <li>
-                        <label for="ccode" class="required">Collection code (CCODE): </label>
+                        <label for="ccode" class="required">Mã bộ sưu tập (CCODE): </label>
                         [% IF is_add %]
-                            <input type="text" name="ccode" id="ccode" value="[% collection.ccode | html %]" maxlength="80" required="required" placeholder="e.g. BST_BUSINESS" style="text-transform: uppercase;" />
-                            <span class="required">Required</span>
-                            <div class="hint">Unique identifier used by Koha catalog items (items.ccode). Use uppercase letters and underscores only.</div>
+                            <input type="text" name="ccode" id="ccode" value="[% collection.ccode | html %]" maxlength="80" required="required" placeholder="VD: BST_KINH_TE (In hoa, không dấu)" style="text-transform: uppercase;" />
+                            <span class="required">Bắt buộc</span>
                         [% ELSE %]
                             <input type="hidden" name="ccode" value="[% collection.ccode | html %]" />
                             <span class="badge-ccode">[% collection.ccode | html %]</span>
-                            <span class="hint" style="margin-left: 10px;">(Code cannot be changed after creation to maintain catalog integrity)</span>
                         [% END %]
                     </li>
                     <li>
-                        <label for="lib" class="required">Collection title: </label>
-                        <input type="text" name="lib" id="lib" value="[% collection.lib | html %]" size="60" required="required" placeholder="e.g. Economics & Management" />
-                        <span class="required">Required</span>
-                        <div class="hint">Display title on OPAC portal and in cataloguing dropdowns.</div>
+                        <label for="lib" class="required">Tên bộ sưu tập: </label>
+                        <input type="text" name="lib" id="lib" value="[% collection.lib | html %]" size="60" required="required" placeholder="VD: Kinh tế học & Quản trị Kinh doanh" />
+                        <span class="required">Bắt buộc</span>
                     </li>
                     <li>
-                        <label for="description">Summary description: </label>
-                        <textarea name="description" id="description" rows="3" cols="60" placeholder="Brief summary of the collection displayed on the OPAC card...">[% collection.description | html %]</textarea>
+                        <label for="parent_ccode">Bộ sưu tập cha: </label>
+                        <select name="parent_ccode" id="parent_ccode" class="form-control" style="max-width: 480px;">
+                            <option value="">-- Bộ sưu tập gốc (Độc lập) --</option>
+                            [% FOREACH p IN parent_candidates %]
+                                <option value="[% p.ccode | html %]" [% IF p.ccode == collection.parent_ccode %]selected="selected"[% END %]>
+                                    [% p.lib | html %] ([% p.ccode | html %])
+                                </option>
+                            [% END %]
+                        </select>
+                    </li>
+                    <li>
+                        <label for="description">Mô tả ngắn: </label>
+                        <textarea name="description" id="description" rows="2" cols="60" placeholder="Mô tả ngắn hiển thị ngoài OPAC...">[% collection.description | html %]</textarea>
                     </li>
                 </ol>
             </fieldset>
 
             <fieldset class="rows">
-                <legend>Cover Image & Display</legend>
+                <legend>Ảnh bìa &amp; Hiển thị</legend>
                 <ol>
                     <li>
-                        <label for="upload_image">Cover image: </label>
+                        <label for="upload_image">Ảnh bìa: </label>
                         <div style="float: left; max-width: 600px;">
-                            <!-- 1. Upload from computer -->
                             <div class="ftu-upload-zone" id="upload-zone" onclick="document.getElementById('upload_image').click()">
                                 <input type="file" name="upload_image" id="upload_image" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;" onchange="handleImageFile(this)" />
-                                <div style="font-size: 32px; color: #b91c1c; margin-bottom: 6px;"><i class="fa fa-cloud-upload"></i></div>
-                                <div style="font-weight: 700; font-size: 14px; color: #1e293b;">Click here to upload a new cover image from your computer</div>
-                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Drag and drop or browse files (Supports JPG, PNG, WebP &bull; 16:9 ratio recommended)</div>
-                                <div id="upload-status" style="margin-top: 8px; font-weight: 600; color: #15803d; font-size: 12px; display: none;"></div>
+                                <div style="font-weight: 600; font-size: 13px; color: #1e293b;">Bấm hoặc kéo thả tệp ảnh bìa (JPG, PNG, WebP)</div>
+                                <div id="upload-status" style="margin-top: 6px; font-weight: 600; color: #15803d; font-size: 12px; display: none;"></div>
                             </div>
 
-                            <!-- 2. Preset images -->
-                            <div style="margin-top: 14px; margin-bottom: 6px;">
-                                <span style="font-weight: 600; font-size: 13px; color: #334155;">Or choose a preset collection banner:</span>
+                            <div style="margin-top: 12px; margin-bottom: 6px;">
+                                <span style="font-weight: 600; font-size: 12.5px; color: #334155;">Ảnh mẫu có sẵn:</span>
                             </div>
                             <div class="preset-img-picker">
                                 [% FOREACH img IN preset_images %]
@@ -348,122 +385,131 @@
                                 [% END %]
                             </div>
 
-                            <!-- 3. Custom URL -->
-                            <div style="margin-top: 12px; margin-bottom: 12px;">
-                                <span style="font-weight: 600; font-size: 13px; color: #334155; display: block; margin-bottom: 4px;">Or enter custom image URL:</span>
-                                <input type="text" name="image_url" id="image_url" value="[% collection.image_url | html %]" size="60" style="max-width: 480px;" placeholder="/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg" oninput="updatePreview(this.value)" />
+                            <div style="margin-top: 10px; margin-bottom: 10px;">
+                                <input type="text" name="image_url" id="image_url" value="[% collection.image_url | html %]" size="60" style="max-width: 480px;" placeholder="Hoặc nhập đường dẫn URL ảnh..." oninput="updatePreview(this.value)" />
                             </div>
 
-                            <!-- 4. Preview -->
                             <div class="preview-box">
-                                <span style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px;">
-                                    <i class="fa fa-eye"></i> OPAC COVER PREVIEW:
-                                </span>
                                 <img id="img-preview" src="[% collection.image_url || '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg' | html %]" onerror="this.src='/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg'" alt="Preview" />
                             </div>
                         </div>
                     </li>
                     <li>
-                        <label for="is_featured">Featured collection: </label>
+                        <label for="is_featured">Nổi bật: </label>
                         <input type="checkbox" name="is_featured" id="is_featured" value="1" [% IF collection.is_featured %]checked="checked"[% END %] />
-                        <label for="is_featured" style="float: none; font-weight: normal;">Mark as <strong>⭐ Featured collection</strong> (Highlighted with a star badge and shown at the top)</label>
+                        <label for="is_featured" style="float: none; font-weight: normal;">Ưu tiên hiển thị đầu trang OPAC</label>
                     </li>
                     <li>
-                        <label for="sort_order">Sort order: </label>
+                        <label for="sort_order">Thứ tự: </label>
                         <input type="number" name="sort_order" id="sort_order" value="[% collection.sort_order || 1 | html %]" size="5" min="1" max="999" />
-                        <div class="hint">Lower numbers are displayed first (1, 2, 3...)</div>
                     </li>
                 </ol>
             </fieldset>
 
             <fieldset class="action">
-                <input type="submit" class="btn btn-primary" value="Save collection" />
-                <a class="cancel" href="/cgi-bin/koha/admin/collections.pl">Cancel</a>
+                <input type="submit" class="btn btn-primary" value="Lưu bộ sưu tập" />
+                <a class="cancel" href="/cgi-bin/koha/admin/collections.pl">Hủy</a>
             </fieldset>
         </form>
 
     [% ELSE %]
         <div id="toolbar" class="btn-toolbar">
             <a class="btn btn-default" id="newcollection" href="/cgi-bin/koha/admin/collections.pl?op=add_form">
-                <i class="fa fa-plus"></i> New collection
+                + Thêm bộ sưu tập
             </a>
             <a class="btn btn-default" target="_blank" href="/cgi-bin/ftu/opac-collections.pl">
-                <i class="fa fa-external-link"></i> View OPAC portal
+                Xem trên OPAC
             </a>
             <a class="btn btn-link" href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=CCODE">
-                <i class="fa fa-cog"></i> Open native CCODE table
+                Danh mục CCODE
             </a>
         </div>
 
-        <h1>Collection Management</h1>
+        <h1>Quản lý Bộ sưu tập</h1>
 
         <!-- Filter & Sort Toolbar -->
         <div class="ftu-filter-card">
             <div class="ftu-filter-grid">
-                <!-- Quick Search -->
                 <div class="ftu-filter-item">
-                    <label for="filter_search"><i class="fa fa-search"></i> Quick search</label>
+                    <label for="filter_search">Tìm kiếm</label>
                     <div class="input-group">
-                        <input type="text" id="filter_search" class="form-control" placeholder="Search by name, CCODE, description..." autocomplete="off">
+                        <input type="text" id="filter_search" class="form-control" placeholder="Tên BST, mã CCODE..." autocomplete="off">
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" id="btn_clear_search" title="Clear search"><i class="fa fa-times"></i></button>
+                            <button class="btn btn-default" type="button" id="btn_clear_search" title="Xóa">&times;</button>
                         </span>
                     </div>
                 </div>
 
-                <!-- Status Filter -->
                 <div class="ftu-filter-item">
-                    <label for="filter_status"><i class="fa fa-star"></i> Status</label>
+                    <label for="filter_status">Trạng thái</label>
                     <select id="filter_status" class="form-control">
-                        <option value="all">All statuses</option>
-                        <option value="featured">★ Featured only</option>
-                        <option value="normal">Standard only</option>
+                        <option value="all">Tất cả</option>
+                        <option value="featured">Nổi bật</option>
+                        <option value="normal">Thường</option>
                     </select>
                 </div>
 
-                <!-- Items Count Filter -->
                 <div class="ftu-filter-item">
-                    <label for="filter_items"><i class="fa fa-book"></i> Catalogued items</label>
+                    <label for="filter_hierarchy">Cấp bậc</label>
+                    <select id="filter_hierarchy" class="form-control">
+                        <option value="all">Tất cả</option>
+                        <option value="root">BST Gốc</option>
+                        <option value="parent">BST Cha</option>
+                        <option value="child">BST Con</option>
+                    </select>
+                </div>
+
+                <div class="ftu-filter-item">
+                    <label for="filter_items">Tài liệu</label>
                     <select id="filter_items" class="form-control">
-                        <option value="all">All collections</option>
-                        <option value="has_items">With items (&gt; 0 items)</option>
-                        <option value="no_items">No items (0 items)</option>
+                        <option value="all">Tất cả</option>
+                        <option value="has_items">Có tài liệu</option>
+                        <option value="no_items">Chưa có tài liệu</option>
                     </select>
                 </div>
 
-                <!-- Sort Dropdown -->
                 <div class="ftu-filter-item">
-                    <label for="sort_by"><i class="fa fa-sort"></i> Sort by</label>
+                    <label for="sort_by">Sắp xếp</label>
                     <select id="sort_by" class="form-control">
-                        <option value="order_asc">Display order (Ascending - Default)</option>
-                        <option value="order_desc">Display order (Descending)</option>
-                        <option value="name_asc">Collection title (A &rarr; Z)</option>
-                        <option value="name_desc">Collection title (Z &rarr; A)</option>
-                        <option value="items_desc">Number of items (Most first)</option>
-                        <option value="items_asc">Number of items (Least first)</option>
-                        <option value="ccode_asc">CCODE (A &rarr; Z)</option>
-                        <option value="featured_first">Featured collections first</option>
+                        <option value="order_asc">Thứ tự tăng dần</option>
+                        <option value="order_desc">Thứ tự giảm dần</option>
+                        <option value="name_asc">Tên (A &rarr; Z)</option>
+                        <option value="name_desc">Tên (Z &rarr; A)</option>
+                        <option value="items_desc">Nhiều tài liệu nhất</option>
+                        <option value="items_asc">Ít tài liệu nhất</option>
+                        <option value="ccode_asc">Mã CCODE</option>
+                        <option value="featured_first">Nổi bật lên trước</option>
                     </select>
                 </div>
 
-                <!-- Actions -->
                 <div class="ftu-filter-item">
                     <label>&nbsp;</label>
                     <div>
-                        <button type="button" id="btn_reset_filters" class="btn btn-default btn-reset-filters" title="Reset all filters to default">
-                            <i class="fa fa-refresh"></i> Reset
+                        <button type="button" id="btn_reset_filters" class="btn btn-default btn-reset-filters">
+                            Đặt lại
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Summary counter -->
             <div class="ftu-filter-summary">
-                <span class="ftu-count-badge">
-                    <i class="fa fa-folder-open"></i> Showing: <strong id="visible_count">[% total_count | html %]</strong> / <strong id="total_count">[% total_count | html %]</strong> collections
-                </span>
-                <span id="active_filters_notice" class="text-muted" style="display: none; font-size: 13px;">
-                    <i class="fa fa-info-circle text-primary"></i> Active custom filters
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <span class="ftu-count-badge">
+                        Hiển thị <strong id="visible_count">[% total_count | html %]</strong> / <strong id="total_count">[% total_count | html %]</strong>
+                    </span>
+                    [% IF parent_count %]
+                        <span class="ftu-count-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">
+                            <strong>[% parent_count | html %]</strong> BST Cha
+                        </span>
+                    [% END %]
+                    [% IF child_count %]
+                        <span class="ftu-count-badge" style="background: #f8fafc; color: #475569; border-color: #cbd5e1;">
+                            <strong>[% child_count | html %]</strong> BST Con
+                        </span>
+                    [% END %]
+                </div>
+                <span id="active_filters_notice" class="text-muted" style="display: none; font-size: 12.5px;">
+                    Đang lọc
                 </span>
             </div>
         </div>
@@ -473,19 +519,19 @@
             <table id="collections_table" class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th style="width: 85px;">Cover</th>
-                        <th>Code (CCODE)</th>
-                        <th>Collection Title</th>
-                        <th>Summary</th>
-                        <th style="text-align: center; width: 110px;">Items</th>
-                        <th style="text-align: center; width: 120px;">Status</th>
-                        <th style="text-align: center; width: 70px;">Order</th>
-                        <th style="width: 170px; text-align: center;">Actions</th>
+                        <th style="width: 75px;">Ảnh</th>
+                        <th>Mã CCODE</th>
+                        <th>Tên Bộ sưu tập</th>
+                        <th>Mô tả</th>
+                        <th style="text-align: center; width: 100px;">Tài liệu</th>
+                        <th style="text-align: center; width: 100px;">Hiển thị</th>
+                        <th style="text-align: center; width: 65px;">Thứ tự</th>
+                        <th style="width: 150px; text-align: center;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     [% FOREACH col IN collections %]
-                        <tr>
+                        <tr data-hierarchy="[% IF col.parent_ccode %]child[% ELSIF col.children_count > 0 %]parent[% ELSE %]root[% END %]">
                             <td style="text-align: center;">
                                 <img src="[% col.image_url | html %]" class="ftu-thumb-img" alt="[% col.lib | html %]" onerror="this.src='/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg'" />
                             </td>
@@ -493,25 +539,30 @@
                                 <span class="badge-ccode">[% col.ccode | html %]</span>
                             </td>
                             <td data-order="[% col.lib | html %]">
+                                [% IF col.parent_ccode %]
+                                    <span class="badge-child-indent">↳</span>
+                                [% END %]
                                 <strong>[% col.lib | html %]</strong>
-                                [% IF col.lib_opac && col.lib_opac != col.lib %]
-                                    <br /><small class="text-muted">OPAC: [% col.lib_opac | html %]</small>
+                                [% IF col.parent_ccode %]
+                                    <div style="font-size:11.5px; color:#64748b;">Thuộc: [% col.parent_lib || col.parent_ccode | html %]</div>
+                                [% ELSIF col.children_count > 0 %]
+                                    <div style="font-size:11.5px; color:#1d4ed8;">[% col.children_count | html %] BST con</div>
                                 [% END %]
                             </td>
                             <td>
                                 [% IF col.description %]
-                                    [% col.description | html %]
+                                    <div style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:12.5px; color:#475569;" title="[% col.description | html %]">[% col.description | html %]</div>
                                 [% ELSE %]
-                                    <em class="text-muted">(No summary description)</em>
+                                    <span class="text-muted">&mdash;</span>
                                 [% END %]
                             </td>
                             <td style="text-align: center;" data-order="[% col.items_count %]" data-filter="[% IF col.items_count > 0 %]has_items[% ELSE %]no_items[% END %]">
                                 [% IF col.items_count > 0 %]
-                                    <a href="/cgi-bin/koha/catalogue/search.pl?idx=mc-ccode&amp;q=[% col.ccode | uri %]" class="badge bg-primary text-decoration-none" title="Search items in staff catalogue">
-                                        <i class="fa fa-book"></i> [% col.items_count | html %] items
+                                    <a href="/cgi-bin/koha/catalogue/search.pl?idx=mc-ccode&amp;q=[% col.ccode | uri %]" class="badge bg-primary text-decoration-none">
+                                        [% col.items_count | html %]
                                     </a>
                                 [% ELSE %]
-                                    <span class="badge bg-secondary">0 items</span>
+                                    <span class="badge bg-secondary">0</span>
                                 [% END %]
                             </td>
                             <td style="text-align: center;" data-order="[% IF col.is_featured %]1[% ELSE %]0[% END %]" data-filter="[% IF col.is_featured %]featured[% ELSE %]normal[% END %]">
@@ -519,11 +570,11 @@
                                     [% INCLUDE 'csrf-token.inc' %]
                                     <input type="hidden" name="op" value="cud-toggle_featured" />
                                     <input type="hidden" name="ccode" value="[% col.ccode | html %]" />
-                                    <button type="submit" class="btn-toggle-featured" title="Click to toggle featured status">
+                                    <button type="submit" class="btn-toggle-featured" title="Đổi trạng thái nổi bật">
                                         [% IF col.is_featured %]
-                                            <span class="badge-featured"><i class="fa fa-star"></i> Featured</span>
+                                            <span class="badge-featured">Nổi bật</span>
                                         [% ELSE %]
-                                            <span class="badge-normal">Standard</span>
+                                            <span class="badge-normal">Thường</span>
                                         [% END %]
                                     </button>
                                 </form>
@@ -532,23 +583,23 @@
                                 [% col.sort_order | html %]
                             </td>
                             <td style="text-align: center; white-space: nowrap;">
-                                <a href="/cgi-bin/koha/admin/collections.pl?op=edit_form&amp;ccode=[% col.ccode | uri %]" class="btn btn-default btn-xs" title="Edit collection">
-                                    <i class="fa-solid fa-pencil"></i> Edit
+                                <a href="/cgi-bin/koha/admin/collections.pl?op=edit_form&amp;ccode=[% col.ccode | uri %]" class="btn btn-default btn-xs">
+                                    Sửa
                                 </a>
-                                <a href="/cgi-bin/ftu/opac-search.pl?limit=mc-ccode:[% col.ccode | uri %]" target="_blank" class="btn btn-default btn-xs" title="View on OPAC">
-                                    <i class="fa fa-external-link"></i> OPAC
+                                <a href="/cgi-bin/ftu/opac-search.pl?limit=mc-ccode:[% col.ccode | uri %]" target="_blank" class="btn btn-default btn-xs">
+                                    OPAC
                                 </a>
-                                <form action="/cgi-bin/koha/admin/collections.pl" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete collection [% col.lib | html %] ([% col.ccode | html %])?');">
+                                <form action="/cgi-bin/koha/admin/collections.pl" method="post" style="display:inline;" onsubmit="return confirm('Xóa bộ sưu tập [% col.lib | html %] ([% col.ccode | html %])?');">
                                     [% INCLUDE 'csrf-token.inc' %]
                                     <input type="hidden" name="op" value="cud-delete" />
                                     <input type="hidden" name="ccode" value="[% col.ccode | html %]" />
                                     [% IF col.items_count > 0 %]
-                                        <button type="button" class="btn btn-default btn-xs disabled" title="Cannot delete when [% col.items_count | html %] items are assigned" onclick="alert('Cannot delete: [% col.items_count | html %] items are currently assigned to this collection.');">
-                                            <i class="fa fa-trash-can text-muted"></i>
+                                        <button type="button" class="btn btn-default btn-xs disabled" onclick="alert('Không thể xóa khi đang có [% col.items_count | html %] tài liệu thuộc BST này.');">
+                                            Xóa
                                         </button>
                                     [% ELSE %]
-                                        <button type="submit" class="btn btn-default btn-xs text-danger" title="Delete collection">
-                                            <i class="fa fa-trash-can"></i>
+                                        <button type="submit" class="btn btn-default btn-xs text-danger">
+                                            Xóa
                                         </button>
                                     [% END %]
                                 </form>
@@ -585,6 +636,15 @@ $(document).ready(function() {
             if (statusFilter && statusFilter !== 'all') {
                 var rowStatus = $row.find('td:eq(5)').attr('data-filter');
                 if (rowStatus !== statusFilter) {
+                    return false;
+                }
+            }
+
+            // Hierarchy filter
+            var hierFilter = $('#filter_hierarchy').val();
+            if (hierFilter && hierFilter !== 'all') {
+                var rowHier = $row.attr('data-hierarchy');
+                if (rowHier !== hierFilter) {
                     return false;
                 }
             }
@@ -666,7 +726,7 @@ $(document).ready(function() {
         });
 
         // Dropdown filters
-        $('#filter_status, #filter_items').on('change', function() {
+        $('#filter_status, #filter_hierarchy, #filter_items').on('change', function() {
             colTable.draw();
         });
 
@@ -707,6 +767,7 @@ $(document).ready(function() {
         $('#btn_reset_filters').on('click', function() {
             $('#filter_search').val('');
             $('#filter_status').val('all');
+            $('#filter_hierarchy').val('all');
             $('#filter_items').val('all');
             $('#sort_by').val('order_asc');
             colTable.search('').order([[6, 'asc']]).draw();
@@ -725,7 +786,7 @@ function handleImageFile(input) {
             var status = document.getElementById('upload-status');
             if (status) {
                 status.style.display = 'block';
-                status.innerHTML = '<i class="fa fa-check-circle"></i> Selected file: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+                status.innerHTML = '<i class="fa fa-check-circle"></i> Đã chọn ảnh tải lên: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
             }
         };
         reader.readAsDataURL(file);

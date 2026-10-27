@@ -41,7 +41,11 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
         query           => $cgi,
         type            => "intranet",
         authnotrequired => 0,
-        flagsrequired   => { tools => "view_system_logs" },
+        flagsrequired   => [
+            { tools => "audit_logs" },
+            { tools => "audit_export" },
+            { tools => "view_system_logs" },
+        ],
     }
 );
 

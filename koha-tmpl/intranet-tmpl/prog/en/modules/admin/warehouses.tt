@@ -14,17 +14,17 @@
 <title>
     [% FILTER collapse %]
         [% IF op == 'add_warehouse_form' %]
-            New shelving location &rsaquo; Warehouses &amp; Circulation rules
+            Thêm mới kho lưu trữ &rsaquo; Quản lý Kho &amp; Quy tắc mượn
         [% ELSIF op == 'edit_warehouse_form' %]
-            Modify shelving location: [% warehouse.lib | html %] &rsaquo; Warehouses &amp; Circulation rules
+            Chỉnh sửa kho: [% warehouse.lib | html %] &rsaquo; Quản lý Kho &amp; Quy tắc mượn
         [% ELSIF op == 'add_rule_form' %]
-            New circulation rule &rsaquo; Warehouses &amp; Circulation rules
+            Thêm mới quy tắc mượn trả &rsaquo; Quản lý Kho &amp; Quy tắc mượn
         [% ELSIF op == 'edit_rule_form' %]
-            Modify circulation rule &rsaquo; Warehouses &amp; Circulation rules
+            Chỉnh sửa quy tắc mượn trả &rsaquo; Quản lý Kho &amp; Quy tắc mượn
         [% ELSE %]
-            Warehouses &amp; Circulation rules
+            Quản lý Kho lưu trữ &amp; Quy tắc mượn trả
         [% END %]
-        &rsaquo; [% t("Administration") | html %] &rsaquo; Koha
+        &rsaquo; Quản trị hệ thống &rsaquo; Koha
     [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -68,40 +68,40 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/koha/admin/admin-home.pl">[% t("Administration") | html %]</a>
+            <a href="/cgi-bin/koha/admin/admin-home.pl">Quản trị hệ thống</a>
         [% END %]
 
         [% IF op == 'add_warehouse_form' %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/admin/warehouses.pl">Warehouses &amp; Circulation rules</a>
+                <a href="/cgi-bin/koha/admin/warehouses.pl">Quản lý Kho &amp; Quy tắc mượn</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>New shelving location</span>
+                <span>Thêm mới kho lưu trữ</span>
             [% END %]
         [% ELSIF op == 'edit_warehouse_form' %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/admin/warehouses.pl">Warehouses &amp; Circulation rules</a>
+                <a href="/cgi-bin/koha/admin/warehouses.pl">Quản lý Kho &amp; Quy tắc mượn</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>Modify shelving location: [% warehouse.lib | html %]</span>
+                <span>Chỉnh sửa kho: [% warehouse.lib | html %]</span>
             [% END %]
         [% ELSIF op == 'add_rule_form' %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Warehouses &amp; Circulation rules</a>
+                <a href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Quản lý Kho &amp; Quy tắc mượn</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>New circulation rule</span>
+                <span>Thêm mới quy tắc mượn trả</span>
             [% END %]
         [% ELSIF op == 'edit_rule_form' %]
             [% WRAPPER breadcrumb_item %]
-                <a href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Warehouses &amp; Circulation rules</a>
+                <a href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Quản lý Kho &amp; Quy tắc mượn</a>
             [% END %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>Modify circulation rule</span>
+                <span>Chỉnh sửa quy tắc mượn trả</span>
             [% END %]
         [% ELSE %]
             [% WRAPPER breadcrumb_item bc_active = 1 %]
-                <span>Warehouses &amp; Circulation rules</span>
+                <span>Quản lý Kho &amp; Quy tắc mượn</span>
             [% END %]
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
@@ -109,7 +109,7 @@
 
 [% WRAPPER 'main-container.inc' aside='admin-menu' %]
 
-    <!-- Messages Alerts -->
+    <!-- Thông báo hệ thống (Koha Alerts) -->
     [% FOR m IN messages %]
         <div class="alert alert-[% m.type | html %] alert-dismissible fade show" role="alert">
             [% IF m.type == 'success' %]
@@ -123,14 +123,14 @@
     [% END %]
 
     <!-- ================================================================= -->
-    <!-- FORM 1: ADD / EDIT SHELVING LOCATION (Koha::AuthorisedValues - LOC) -->
+    <!-- FORM 1: THÊM / SỬA KHO LƯU TRỮ (Koha::AuthorisedValues - LOC)   -->
     <!-- ================================================================= -->
     [% IF op == 'add_warehouse_form' || op == 'edit_warehouse_form' %]
         <h1>
             [% IF is_add %]
-                <span>New shelving location (LOC)</span>
+                <span>Thêm kho lưu trữ (LOC)</span>
             [% ELSE %]
-                <span>Modify shelving location: [% warehouse.lib | html %]</span>
+                <span>Chỉnh sửa kho: [% warehouse.lib | html %]</span>
             [% END %]
         </h1>
 
@@ -143,31 +143,28 @@
 
             <div class="page-section">
                 <fieldset class="rows">
-                    <legend>Shelving location details</legend>
+                    <legend>Thông tin kho</legend>
                     <ol>
                         <li>
-                            <label for="authorised_value" class="required">Location code (LOC): </label>
+                            <label for="authorised_value" class="required">Mã kho (LOC): </label>
                             [% IF is_add %]
-                                <input type="text" name="authorised_value" id="authorised_value" value="[% warehouse.authorised_value | html %]" maxlength="80" required="required" placeholder="e.g. KHO_MUON" style="text-transform: uppercase;" />
-                                <span class="required">Required</span>
-                                <div class="hint">Alphanumeric code, corresponds to MARC 952$c and items.location.</div>
+                                <input type="text" name="authorised_value" id="authorised_value" value="[% warehouse.authorised_value | html %]" maxlength="80" required="required" placeholder="VD: KHO_MUON (In hoa, không dấu)" style="text-transform: uppercase;" />
+                                <span class="required">Bắt buộc</span>
                             [% ELSE %]
                                 <input type="text" name="authorised_value" id="authorised_value" value="[% warehouse.authorised_value | html %]" readonly="readonly" class="readonly" />
-                                <span class="hint">Location code cannot be changed after creation.</span>
                             [% END %]
                         </li>
                         <li>
-                            <label for="lib" class="required">Description (Staff): </label>
-                            <input type="text" name="lib" id="lib" value="[% warehouse.lib | html %]" maxlength="200" required="required" placeholder="e.g. Main Lending Stacks" style="width: 50%;" />
-                            <span class="required">Required</span>
+                            <label for="lib" class="required">Tên kho (Nội bộ): </label>
+                            <input type="text" name="lib" id="lib" value="[% warehouse.lib | html %]" maxlength="200" required="required" placeholder="VD: Kho mượn về nhà" style="width: 50%;" />
+                            <span class="required">Bắt buộc</span>
                         </li>
                         <li>
-                            <label for="lib_opac">OPAC description: </label>
-                            <input type="text" name="lib_opac" id="lib_opac" value="[% warehouse.lib_opac | html %]" maxlength="200" placeholder="e.g. Lending Stacks - 2nd Floor" style="width: 50%;" />
-                            <div class="hint">Description shown on OPAC. Leave empty to use staff description.</div>
+                            <label for="lib_opac">Tên hiển thị OPAC: </label>
+                            <input type="text" name="lib_opac" id="lib_opac" value="[% warehouse.lib_opac | html %]" maxlength="200" placeholder="Để trống nếu dùng giống tên nội bộ" style="width: 50%;" />
                         </li>
                         <li>
-                            <label for="branches">Library limitation: </label>
+                            <label for="branches">Chi nhánh áp dụng: </label>
                             <select name="branches" id="branches" multiple="multiple" size="5" style="width: 50%;">
                                 [% FOREACH b IN Branches.all( unfiltered => 1 ) %]
                                     [% SET selected = 0 %]
@@ -177,27 +174,23 @@
                                     <option value="[% b.branchcode | html %]" [% IF selected %]selected="selected"[% END %]>[% b.branchname | html %]</option>
                                 [% END %]
                             </select>
-                            <div class="hint">Select libraries that can use this location. Leave empty for all libraries.</div>
                         </li>
                     </ol>
                 </fieldset>
 
                 <fieldset class="action">
-                    <input type="submit" value="Save location" class="btn btn-primary" />
-                    <a class="cancel" href="/cgi-bin/koha/admin/warehouses.pl">Cancel</a>
+                    <input type="submit" value="Lưu kho" class="btn btn-primary" />
+                    <a class="cancel" href="/cgi-bin/koha/admin/warehouses.pl">Hủy</a>
                 </fieldset>
             </div>
         </form>
 
-    <!-- ================================================================= -->
-    <!-- FORM 2: ADD / EDIT CIRCULATION RULE (Koha::CirculationRules)    -->
-    <!-- ================================================================= -->
     [% ELSIF op == 'add_rule_form' || op == 'edit_rule_form' %]
         <h1>
             [% IF op == 'add_rule_form' %]
-                <span>New circulation rule</span>
+                <span>Thêm quy tắc mượn trả</span>
             [% ELSE %]
-                <span>Modify circulation rule</span>
+                <span>Chỉnh sửa quy tắc mượn trả</span>
             [% END %]
         </h1>
 
@@ -207,30 +200,30 @@
 
             <div class="page-section">
                 <fieldset class="rows">
-                    <legend>Rule scope</legend>
+                    <legend>Phạm vi áp dụng</legend>
                     <ol>
                         <li>
-                            <label for="branchcode">Library / Branch: </label>
+                            <label for="branchcode">Chi nhánh: </label>
                             <select name="branchcode" id="branchcode">
-                                <option value="*" [% IF branchcode == '*' %]selected="selected"[% END %]>* All libraries</option>
+                                <option value="*" [% IF branchcode == '*' %]selected="selected"[% END %]>* Tất cả thư viện</option>
                                 [% FOREACH b IN libraries %]
                                     <option value="[% b.branchcode | html %]" [% IF b.branchcode == branchcode %]selected="selected"[% END %]>[% b.branchname | html %]</option>
                                 [% END %]
                             </select>
                         </li>
                         <li>
-                            <label for="categorycode">Patron category: </label>
+                            <label for="categorycode">Nhóm bạn đọc: </label>
                             <select name="categorycode" id="categorycode">
-                                <option value="*" [% IF categorycode == '*' %]selected="selected"[% END %]>* All patron categories</option>
+                                <option value="*" [% IF categorycode == '*' %]selected="selected"[% END %]>* Tất cả bạn đọc</option>
                                 [% FOREACH c IN patron_categories %]
                                     <option value="[% c.categorycode | html %]" [% IF c.categorycode == categorycode %]selected="selected"[% END %]>[% c.description | html %] ([% c.categorycode | html %])</option>
                                 [% END %]
                             </select>
                         </li>
                         <li>
-                            <label for="itemtype">Item type: </label>
+                            <label for="itemtype">Loại tài liệu: </label>
                             <select name="itemtype" id="itemtype">
-                                <option value="*" [% IF itemtype == '*' %]selected="selected"[% END %]>* All item types</option>
+                                <option value="*" [% IF itemtype == '*' %]selected="selected"[% END %]>* Tất cả tài liệu</option>
                                 [% FOREACH it IN itemtypes %]
                                     <option value="[% it.itemtype | html %]" [% IF it.itemtype == itemtype %]selected="selected"[% END %]>[% it.description | html %] ([% it.itemtype | html %])</option>
                                 [% END %]
@@ -240,109 +233,98 @@
                 </fieldset>
 
                 <fieldset class="rows">
-                    <legend>Circulation &amp; fine policies</legend>
+                    <legend>Chính sách mượn trả &amp; Phí phạt</legend>
                     <ol>
                         <li>
-                            <label for="maxissueqty">Current checkouts allowed: </label>
+                            <label for="maxissueqty">Số cuốn mượn tối đa: </label>
                             <input type="number" min="0" max="100" name="maxissueqty" id="maxissueqty" value="[% rule.maxissueqty || 5 | html %]" />
-                            <span class="hint">Maximum books a patron can check out (0 = no checkouts allowed).</span>
                         </li>
                         <li>
-                            <label for="issuelength">Loan period: </label>
+                            <label for="issuelength">Thời hạn mượn: </label>
                             <input type="number" min="1" max="365" name="issuelength" id="issuelength" value="[% rule.issuelength || 14 | html %]" />
                             <select name="lengthunit" id="lengthunit">
-                                <option value="days" [% IF rule.lengthunit == 'days' || !rule.lengthunit %]selected="selected"[% END %]>Days</option>
-                                <option value="hours" [% IF rule.lengthunit == 'hours' %]selected="selected"[% END %]>Hours</option>
+                                <option value="days" [% IF rule.lengthunit == 'days' || !rule.lengthunit %]selected="selected"[% END %]>Ngày</option>
+                                <option value="hours" [% IF rule.lengthunit == 'hours' %]selected="selected"[% END %]>Giờ</option>
                             </select>
                         </li>
                         <li>
-                            <label for="renewalsallowed">Renewals allowed: </label>
+                            <label for="renewalsallowed">Số lần gia hạn: </label>
                             <input type="number" min="0" max="10" name="renewalsallowed" id="renewalsallowed" value="[% rule.renewalsallowed || 2 | html %]" />
-                            <span class="hint">Maximum number of times a loan can be renewed.</span>
                         </li>
                         <li>
-                            <label for="renewalperiod">Renewal period: </label>
+                            <label for="renewalperiod">Thời gian mỗi lần gia hạn: </label>
                             <input type="number" min="0" max="90" name="renewalperiod" id="renewalperiod" value="[% rule.renewalperiod || 7 | html %]" />
-                            <span class="hint">Number of days added per renewal.</span>
                         </li>
                         <li>
-                            <label for="maxonsiteissueqty">Current on-site checkouts allowed: </label>
+                            <label for="maxonsiteissueqty">Đọc tại chỗ tối đa: </label>
                             <input type="number" min="0" max="50" name="maxonsiteissueqty" id="maxonsiteissueqty" value="[% rule.maxonsiteissueqty || 5 | html %]" />
-                            <span class="hint">For reading room / in-library loans only.</span>
                         </li>
                         <li>
-                            <label for="fine">Overdue fine amount: </label>
+                            <label for="fine">Phạt quá hạn / ngày (VNĐ): </label>
                             <input type="number" min="0" step="500" name="fine" id="fine" value="[% rule.fine || 0 | html %]" />
-                            <span class="hint">Fine charged per day overdue.</span>
                         </li>
                         <li>
-                            <label for="reservesallowed">Holds allowed (total): </label>
+                            <label for="reservesallowed">Đặt giữ tối đa: </label>
                             <input type="number" min="0" max="10" name="reservesallowed" id="reservesallowed" value="[% rule.reservesallowed || 2 | html %]" />
-                            <span class="hint">Maximum active holds a patron can place.</span>
                         </li>
                         <li>
-                            <label for="note">Rule note: </label>
+                            <label for="note">Ghi chú: </label>
                             <textarea name="note" id="note" rows="2" style="width: 50%;">[% rule.note | html %]</textarea>
                         </li>
                     </ol>
                 </fieldset>
 
                 <fieldset class="action">
-                    <input type="submit" value="Save rule" class="btn btn-primary" />
-                    <a class="cancel" href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Cancel</a>
+                    <input type="submit" value="Lưu quy tắc" class="btn btn-primary" />
+                    <a class="cancel" href="/cgi-bin/koha/admin/warehouses.pl?tab=rules">Hủy</a>
                 </fieldset>
             </div>
         </form>
 
-    <!-- ================================================================= -->
-    <!-- DEFAULT: SHELVING LOCATIONS & CIRCULATION RULES LIST             -->
-    <!-- ================================================================= -->
     [% ELSE %]
-        <h1>Warehouses &amp; Circulation rules</h1>
+        <h1>Quản lý Kho &amp; Quy tắc mượn trả</h1>
 
-        <!-- Toolbar -->
         <div id="toolbar" class="btn-toolbar">
             <a class="btn btn-default" id="new_warehouse" href="/cgi-bin/koha/admin/warehouses.pl?op=add_warehouse_form">
-                <i class="fa fa-plus"></i> New shelving location
+                + Thêm kho mới
             </a>
             <a class="btn btn-default" id="new_rule" href="/cgi-bin/koha/admin/warehouses.pl?op=add_rule_form">
-                <i class="fa fa-plus"></i> New circulation rule
+                + Thêm quy tắc mượn
             </a>
             <a class="btn btn-default" href="/cgi-bin/koha/admin/smart-rules.pl">
-                <i class="fa fa-sliders"></i> Full circulation matrix (Koha Core)
+                Ma trận quy tắc chi tiết
             </a>
             <a class="btn btn-default" href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=LOC">
-                <i class="fa fa-list"></i> Authorized values for LOC
+                Danh mục LOC
             </a>
         </div>
 
-        <!-- Tabs -->
         <ul class="nav nav-tabs" id="warehouseTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link [% IF active_tab != 'rules' %]active[% END %]" id="warehouses-tab" data-bs-toggle="tab" data-bs-target="#warehouses-pane" type="button" role="tab">
-                    <i class="fa fa-boxes"></i> Shelving locations (LOC) <span class="badge bg-secondary">[% total_warehouses | html %]</span>
+                    Kho lưu trữ (LOC) <span class="badge bg-secondary">[% total_warehouses | html %]</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link [% IF active_tab == 'rules' %]active[% END %]" id="rules-tab" data-bs-toggle="tab" data-bs-target="#rules-pane" type="button" role="tab">
-                    <i class="fa fa-sliders"></i> Circulation &amp; fine rules <span class="badge bg-secondary">[% total_rules | html %]</span>
+                    Quy tắc mượn trả <span class="badge bg-secondary">[% total_rules | html %]</span>
                 </button>
             </li>
         </ul>
 
         <div class="tab-content" id="warehouseTabsContent">
-            <!-- TAB 1: SHELVING LOCATIONS -->
+            <!-- TAB 1: KHO LƯU TRỮ -->
             <div class="tab-pane fade [% IF active_tab != 'rules' %]show active[% END %]" id="warehouses-pane" role="tabpanel">
                 <div class="page-section">
                     <table id="table_warehouses" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Code (LOC)</th>
-                                <th>Description (Staff)</th>
-                                <th>OPAC description</th>
-                                <th>Library limitation</th>
-                                <th class="text-center">Items on shelf</th>
-                                <th class="no-export">Actions</th>
+                                <th>Mã kho</th>
+                                <th>Tên kho</th>
+                                <th>Tên OPAC</th>
+                                <th>Chi nhánh</th>
+                                <th class="text-center">Số bản</th>
+                                <th class="no-export">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -358,27 +340,27 @@
                                         [% IF w.lib_opac %]
                                             [% w.lib_opac | html %]
                                         [% ELSE %]
-                                            <span class="text-muted"><em>Same as staff</em></span>
+                                            <span class="text-muted">&mdash;</span>
                                         [% END %]
                                     </td>
                                     <td>
                                         [% w.branches_display | html %]
                                     </td>
                                     <td class="text-center">
-                                        <a href="/cgi-bin/koha/catalogue/search.pl?idx=loc&q=[% w.authorised_value | uri %]" title="Search items in this location">
-                                            <i class="fa fa-book"></i> [% w.items_count | html %] items
+                                        <a href="/cgi-bin/koha/catalogue/search.pl?idx=loc&q=[% w.authorised_value | uri %]">
+                                            [% w.items_count | html %]
                                         </a>
                                     </td>
                                     <td class="actions">
                                         <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/warehouses.pl?op=edit_warehouse_form&amp;id=[% w.id | uri %]">
-                                            <i class="fa fa-pencil"></i> Edit
+                                            Sửa
                                         </a>
-                                        <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete shelving location \'[% w.lib | html %]\' ([% w.authorised_value | html %])?');">
+                                        <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" style="display:inline;" onsubmit="return confirm('Xóa kho [% w.lib | html %] ([% w.authorised_value | html %])?');">
                                             [% INCLUDE 'csrf-token.inc' %]
                                             <input type="hidden" name="op" value="cud-delete_warehouse" />
                                             <input type="hidden" name="id" value="[% w.id | html %]" />
                                             <button type="submit" class="btn btn-default btn-xs text-danger">
-                                                <i class="fa fa-trash"></i> Delete
+                                                Xóa
                                             </button>
                                         </form>
                                     </td>
@@ -389,14 +371,14 @@
                 </div>
             </div>
 
-            <!-- TAB 2: CIRCULATION RULES -->
+            <!-- TAB 2: QUY TẮC MƯỢN TRẢ -->
             <div class="tab-pane fade [% IF active_tab == 'rules' %]show active[% END %]" id="rules-pane" role="tabpanel">
                 <div class="page-section">
                     <form method="get" action="/cgi-bin/koha/admin/warehouses.pl" class="mb-3" id="selectlibrary">
                         <input type="hidden" name="tab" value="rules" />
-                        <label for="branch"><strong>Filter by library:</strong> </label>
+                        <label for="branch"><strong>Chi nhánh:</strong> </label>
                         <select name="branch" id="branch" onchange="this.form.submit()">
-                            <option value="*" [% IF current_branch == '*' %]selected="selected"[% END %]>* All libraries</option>
+                            <option value="*" [% IF current_branch == '*' %]selected="selected"[% END %]>* Tất cả chi nhánh</option>
                             [% FOREACH b IN Branches.all( unfiltered => 1 ) %]
                                 <option value="[% b.branchcode | html %]" [% IF b.branchcode == current_branch %]selected="selected"[% END %]>[% b.branchname | html %]</option>
                             [% END %]
@@ -406,17 +388,17 @@
                     <table id="table_rules" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>Library</th>
-                                <th>Patron category</th>
-                                <th>Item type</th>
-                                <th class="text-center">Checkouts allowed</th>
-                                <th class="text-center">Loan period</th>
-                                <th class="text-center">Renewals</th>
-                                <th class="text-center">On-site</th>
-                                <th class="text-center">Fine</th>
-                                <th class="text-center">Holds</th>
-                                <th>Note</th>
-                                <th class="no-export">Actions</th>
+                                <th>Chi nhánh</th>
+                                <th>Nhóm bạn đọc</th>
+                                <th>Loại tài liệu</th>
+                                <th class="text-center">Số mượn</th>
+                                <th class="text-center">Thời hạn</th>
+                                <th class="text-center">Gia hạn</th>
+                                <th class="text-center">Tại chỗ</th>
+                                <th class="text-center">Phạt/ngày</th>
+                                <th class="text-center">Đặt giữ</th>
+                                <th>Ghi chú</th>
+                                <th class="no-export">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -426,47 +408,47 @@
                                         [% IF r.branchcode %]
                                             [% Branches.GetName(r.branchcode) | html %]
                                         [% ELSE %]
-                                            <span class="badge-all"><i class="fa fa-globe"></i> All libraries</span>
+                                            <span class="badge-all">Tất cả</span>
                                         [% END %]
                                     </td>
                                     <td>
                                         [% IF r.categorycode %]
                                             [% Categories.GetName(r.categorycode) | html %]
                                         [% ELSE %]
-                                            <span class="badge-all"><i class="fa fa-users"></i> All patrons</span>
+                                            <span class="badge-all">Tất cả</span>
                                         [% END %]
                                     </td>
                                     <td>
                                         [% IF r.itemtype %]
                                             [% ItemTypes.GetDescription(r.itemtype, 1) | html %]
                                         [% ELSE %]
-                                            <span class="badge-all"><i class="fa fa-layer-group"></i> All items</span>
+                                            <span class="badge-all">Tất cả</span>
                                         [% END %]
                                     </td>
                                     <td class="text-center">
                                         [% IF r.maxissueqty.defined %]
-                                            <strong>[% r.maxissueqty | html %]</strong>
+                                            <strong>[% r.maxissueqty | html %]</strong> cuốn
                                         [% ELSE %]
                                             <span class="text-muted">&mdash;</span>
                                         [% END %]
                                     </td>
                                     <td class="text-center">
                                         [% IF r.issuelength.defined %]
-                                            [% r.issuelength | html %] [% r.lengthunit == 'hours' ? 'hours' : 'days' %]
+                                            [% r.issuelength | html %] [% r.lengthunit == 'hours' ? 'giờ' : 'ngày' %]
                                         [% ELSE %]
                                             <span class="text-muted">&mdash;</span>
                                         [% END %]
                                     </td>
                                     <td class="text-center">
                                         [% IF r.renewalsallowed.defined %]
-                                            [% r.renewalsallowed | html %] ([% r.renewalperiod | html %] days)
+                                            [% r.renewalsallowed | html %] lần ([% r.renewalperiod | html %] ngày)
                                         [% ELSE %]
                                             <span class="text-muted">&mdash;</span>
                                         [% END %]
                                     </td>
                                     <td class="text-center">
                                         [% IF r.maxonsiteissueqty.defined %]
-                                            [% r.maxonsiteissueqty | html %]
+                                            [% r.maxonsiteissueqty | html %] cuốn
                                         [% ELSE %]
                                             <span class="text-muted">&mdash;</span>
                                         [% END %]
@@ -486,17 +468,17 @@
                                     </td>
                                     <td class="actions">
                                         <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/warehouses.pl?op=edit_rule_form&amp;branchcode=[% r.branchcode || '*' | uri %]&amp;categorycode=[% r.categorycode || '*' | uri %]&amp;itemtype=[% r.itemtype || '*' | uri %]">
-                                            <i class="fa fa-pencil"></i> Edit
+                                            <i class="fa fa-pencil"></i> Sửa
                                         </a>
                                         [% IF r.branchcode || r.categorycode || r.itemtype %]
-                                            <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this circulation rule?');">
+                                            <form action="/cgi-bin/koha/admin/warehouses.pl" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa quy tắc lưu thông này?');">
                                                 [% INCLUDE 'csrf-token.inc' %]
                                                 <input type="hidden" name="op" value="cud-delete_rule" />
                                                 <input type="hidden" name="branchcode" value="[% r.branchcode | html %]" />
                                                 <input type="hidden" name="categorycode" value="[% r.categorycode | html %]" />
                                                 <input type="hidden" name="itemtype" value="[% r.itemtype | html %]" />
                                                 <button type="submit" class="btn btn-default btn-xs text-danger">
-                                                    <i class="fa fa-trash"></i> Delete
+                                                    <i class="fa fa-trash"></i> Xóa
                                                 </button>
                                             </form>
                                         [% END %]
@@ -528,7 +510,7 @@ $(document).ready(function() {
             "paging": true
         });
 
-        // Tab state preservation
+        // Hỗ trợ lưu trữ trạng thái tab trên URL
         $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
             var target = $(e.target).attr("data-bs-target");
             var tabName = target === '#rules-pane' ? 'rules' : 'warehouses';

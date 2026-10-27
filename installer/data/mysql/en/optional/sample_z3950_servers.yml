@@ -95,3 +95,82 @@ tables:
           syntax: UNIMARC
           encoding: utf8
           servertype: zed
+
+        - host: "manchester.alma.exlibrisgroup.com"
+          port: 1921
+          db: "44MAN_INST"
+          userid: ""
+          password: ""
+          servername: "UNIVERSITY OF MANCHESTER (UK)"
+          checked: 1
+          rank: 1
+          syntax: USMARC
+          encoding: utf8
+          servertype: zed
+          recordtype: biblio
+
+        - host: "kcl.alma.exlibrisgroup.com"
+          port: 1921
+          db: "44KCL_INST"
+          userid: ""
+          password: ""
+          servername: "KINGS COLLEGE LONDON (UK)"
+          checked: 1
+          rank: 2
+          syntax: USMARC
+          encoding: utf8
+          servertype: zed
+          recordtype: biblio
+
+        - host: "ed.alma.exlibrisgroup.com"
+          port: 1921
+          db: "44UOE_INST"
+          userid: ""
+          password: ""
+          servername: "UNIVERSITY OF EDINBURGH (UK)"
+          checked: 1
+          rank: 3
+          syntax: USMARC
+          encoding: utf8
+          servertype: zed
+          recordtype: biblio
+
+        - host: "nls.alma.exlibrisgroup.com"
+          port: 1921
+          db: "44NLS_INST"
+          userid: ""
+          password: ""
+          servername: "NATIONAL LIBRARY OF SCOTLAND"
+          checked: 1
+          rank: 4
+          syntax: USMARC
+          encoding: utf8
+          servertype: zed
+          recordtype: biblio
+
+        - host: "aleph.nkp.cz"
+          port: 9991
+          db: "SKC"
+          userid: ""
+          password: ""
+          servername: "CZECH NATIONAL UNION (SKC)"
+          checked: 1
+          rank: 5
+          syntax: USMARC
+          encoding: utf8
+          servertype: zed
+          recordtype: biblio
+
+        - host: "z3950.nlv.gov.vn"
+          port: 9999
+          db: "biblios"
+          userid: ""
+          password: ""
+          servername: "THU VIEN QUOC GIA VIET NAM (NLV)"
+          checked: 0
+          rank: 10
+          syntax: USMARC
+          encoding: utf8
+          servertype: zed
+          recordtype: biblio
+

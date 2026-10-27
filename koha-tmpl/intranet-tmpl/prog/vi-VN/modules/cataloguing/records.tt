@@ -699,20 +699,20 @@
   <!-- Header & Primary Actions -->
   <div class="rec-header-row">
     <div class="rec-title-group">
-      <h1>Quản lý biểu ghi &amp; Đăng ký cá biệt</h1>
+      <h1>Biểu ghi &amp; Đăng ký cá biệt</h1>
     </div>
     <div class="rec-actions">
       <button type="button" class="rec-btn rec-btn-primary btn-open-quick-create">
-        <i class="fa fa-plus"></i> Thêm biểu ghi nhanh
+        + Thêm biểu ghi
       </button>
       <a href="/cgi-bin/koha/tools/stage-marc-import.pl" class="rec-btn">
-        <i class="fa fa-download"></i> Nhập file MARC
+        Nhập MARC
       </a>
       <a href="/cgi-bin/koha/tools/export.pl" class="rec-btn">
-        <i class="fa fa-upload"></i> Xuất dữ liệu
+        Xuất MARC
       </a>
       <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=batch" class="rec-btn">
-        <i class="fa fa-barcode"></i> In nhãn mã vạch
+        In mã vạch
       </a>
     </div>
   </div>
@@ -723,22 +723,22 @@
       <input type="hidden" name="limit" value="[% limit | html %]">
       <div class="rec-filter-grid">
         <div class="filter-group">
-          <label>Từ khóa tìm kiếm</label>
-          <input type="text" name="q" value="[% q | html %]" placeholder="Nhan đề, tác giả, ISBN, ĐKCB / Mã vạch...">
+          <label>Từ khóa</label>
+          <input type="text" name="q" value="[% q | html %]" placeholder="Nhan đề, tác giả, ISBN, mã ĐKCB...">
         </div>
         <div class="filter-group">
           <label>Loại tài liệu</label>
           <select name="itemtype">
-            <option value="">-- Tất cả loại --</option>
+            <option value="">Tất cả</option>
             [% FOREACH it IN itemtypes %]
               <option value="[% it.itemtype | html %]" [% IF selected_type == it.itemtype %]selected[% END %]>[% it.description | html %]</option>
             [% END %]
           </select>
         </div>
         <div class="filter-group">
-          <label>Chi nhánh / Kho</label>
+          <label>Chi nhánh</label>
           <select name="branch">
-            <option value="">-- Tất cả kho --</option>
+            <option value="">Tất cả</option>
             [% FOREACH br IN branches %]
               <option value="[% br.branchcode | html %]" [% IF selected_br == br.branchcode %]selected[% END %]>[% br.branchname | html %]</option>
             [% END %]
@@ -748,16 +748,16 @@
           <label>Ảnh bìa</label>
           <select name="has_cover">
             <option value="">Tất cả</option>
-            <option value="1" [% IF has_cover == '1' %]selected[% END %]>Đã có bìa</option>
-            <option value="0" [% IF has_cover == '0' %]selected[% END %]>Chưa có bìa</option>
+            <option value="1" [% IF has_cover == '1' %]selected[% END %]>Có bìa</option>
+            <option value="0" [% IF has_cover == '0' %]selected[% END %]>Chưa có</option>
           </select>
         </div>
         <div class="filter-group">
-          <label>Bản sách</label>
+          <label>ĐKCB</label>
           <select name="has_items">
             <option value="">Tất cả</option>
-            <option value="1" [% IF has_items == '1' %]selected[% END %]>Có bản sách</option>
-            <option value="0" [% IF has_items == '0' %]selected[% END %]>Chưa có bản</option>
+            <option value="1" [% IF has_items == '1' %]selected[% END %]>Có bản sao</option>
+            <option value="0" [% IF has_items == '0' %]selected[% END %]>Chưa có</option>
           </select>
         </div>
         <div class="filter-group">
@@ -770,11 +770,11 @@
         </div>
         <div class="filter-group" style="display: flex; flex-direction: row; gap: 6px;">
           <button type="submit" class="rec-btn rec-btn-primary" style="height: 36px;">
-            <i class="fa fa-search"></i> Tìm
+            Tìm
           </button>
           [% IF q || selected_type || selected_br || has_cover != '' || has_items != '' || sort != 'newest' %]
-            <a href="/cgi-bin/koha/cataloguing/records.pl" class="rec-btn" style="height: 36px;" title="Đặt lại bộ lọc">
-              <i class="fa fa-refresh"></i>
+            <a href="/cgi-bin/koha/cataloguing/records.pl" class="rec-btn" style="height: 36px;" title="Đặt lại">
+              Đặt lại
             </a>
           [% END %]
         </div>
@@ -786,15 +786,15 @@
   <div class="rec-table-card">
     <div class="rec-table-info-bar">
       <div>
-        Tìm thấy <strong>[% total_records | html %]</strong> biểu ghi tài liệu (Trang [% current_page | html %] / [% total_pages | html %])
+        Tổng <strong>[% total_records | html %]</strong> biểu ghi (Trang [% current_page | html %] / [% total_pages | html %])
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span>Hiển thị mỗi trang:</span>
+        <span>Số dòng:</span>
         <select onchange="changeLimit(this.value)" style="height: 28px; font-size: 12px; border-radius: 4px; border: 1px solid #cbd5e1;">
-          <option value="10" [% IF limit == 10 %]selected[% END %]>10 mục</option>
-          <option value="15" [% IF limit == 15 %]selected[% END %]>15 mục</option>
-          <option value="25" [% IF limit == 25 %]selected[% END %]>25 mục</option>
-          <option value="50" [% IF limit == 50 %]selected[% END %]>50 mục</option>
+          <option value="10" [% IF limit == 10 %]selected[% END %]>10</option>
+          <option value="15" [% IF limit == 15 %]selected[% END %]>15</option>
+          <option value="25" [% IF limit == 25 %]selected[% END %]>25</option>
+          <option value="50" [% IF limit == 50 %]selected[% END %]>50</option>
         </select>
       </div>
     </div>
@@ -802,42 +802,40 @@
     <table class="rec-table">
       <thead>
         <tr>
-          <th style="width: 70px; text-align: center;">Ảnh bìa</th>
-          <th>Nhan đề &amp; Thông tin xuất bản</th>
-          <th style="width: 140px;">Phân loại / Ký hiệu</th>
-          <th style="width: 200px;">ĐKCB &amp; Bản sách</th>
-          <th style="width: 110px;">Ngày tạo</th>
-          <th style="width: 150px; text-align: right;">Thao tác</th>
+          <th style="width: 65px; text-align: center;">Bìa</th>
+          <th>Nhan đề &amp; Tác giả</th>
+          <th style="width: 130px;">Ký hiệu xếp giá</th>
+          <th style="width: 190px;">Bản sao (ĐKCB)</th>
+          <th style="width: 100px;">Ngày tạo</th>
+          <th style="width: 140px; text-align: right;">Thao tác</th>
         </tr>
       </thead>
       <tbody>
         [% IF records.size %]
           [% FOREACH r IN records %]
             <tr id="rec-row-[% r.biblionumber | html %]">
-              <!-- Cover image box with drag-drop and click -->
               <td style="text-align: center;">
                 <div class="cover-box dropzone-cell btn-cover-trigger" 
                      id="cover-box-[% r.biblionumber | html %]" 
                      data-biblionumber="[% r.biblionumber | html %]"
-                     title="Bấm để tải hoặc đổi ảnh bìa">
+                     title="Đổi ảnh bìa">
                   [% IF r.cover_image_id %]
                     <img id="cover-img-[% r.biblionumber | html %]" src="/cgi-bin/koha/catalogue/image.pl?biblionumber=[% r.biblionumber | html %]&amp;thumbnail=1" alt="Bìa" />
                   [% ELSE %]
                     <div class="cover-placeholder" id="cover-placeholder-[% r.biblionumber | html %]">
-                      <i class="fa fa-camera" style="font-size: 16px;"></i>
                       <span>+ Bìa</span>
                     </div>
                   [% END %]
                   <div class="cover-overlay">
-                    <span class="cover-overlay-btn btn-cover-trigger" data-biblionumber="[% r.biblionumber | html %]"><i class="fa fa-upload"></i> Đổi</span>
+                    <span class="cover-overlay-btn btn-cover-trigger" data-biblionumber="[% r.biblionumber | html %]">Đổi</span>
                     [% IF r.cover_image_id %]
-                      <span class="cover-overlay-btn btn-delete-cover" data-biblionumber="[% r.biblionumber | html %]" title="Xóa ảnh bìa"><i class="fa fa-trash"></i></span>
+                      <span class="cover-overlay-btn btn-delete-cover" data-biblionumber="[% r.biblionumber | html %]" title="Xóa bìa">&times;</span>
                     [% END %]
                   </div>
                 </div>
               </td>
 
-              <!-- Biblio Title & Info -->
+              <!-- Biblio Title & Concise Info (No repetitive field prefixes) -->
               <td>
                 <div>
                   <a class="rec-meta-title" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% r.biblionumber | html %]" target="_blank">
@@ -851,16 +849,19 @@
                   <div style="font-size: 12px; color: #64748b; margin-bottom: 2px;">[% r.subtitle | html %]</div>
                 [% END %]
                 <div class="rec-meta-author">
-                  [% IF r.author %]<strong>Tác giả:</strong> [% r.author | html %][% ELSE %]<span style="color: #94a3b8;">(Chưa có tác giả)</span>[% END %]
+                  [% IF r.author %]<span class="rec-author-name">[% r.author | html %]</span>[% ELSE %]<span class="rec-author-name" style="color: #94a3b8;">&mdash;</span>[% END %]
+                  [% IF r.publicationyear || r.copyrightdate %]
+                    <span class="rec-meta-year" style="color: #475569; margin-left: 8px;">&bull; [% (r.publicationyear || r.copyrightdate) | html %]</span>
+                  [% END %]
                 </div>
                 <div class="rec-meta-details">
-                  [% IF r.publishercode || r.publicationyear %]
-                    <span><i class="fa fa-building-o"></i> [% r.publishercode | html %] [% IF r.publicationyear %]([% r.publicationyear | html %])[% END %]</span>
+                  [% IF r.publishercode %]
+                    <span>[% r.publishercode | html %]</span>
                   [% END %]
                   [% IF r.isbn %]
-                    <span><i class="fa fa-barcode"></i> ISBN: [% r.isbn | html %]</span>
+                    <span>ISBN: [% r.isbn | html %]</span>
                   [% END %]
-                  <span style="color: #94a3b8;">#Biểu ghi: [% r.biblionumber | html %]</span>
+                  <span style="color: #94a3b8;">#[% r.biblionumber | html %]</span>
                 </div>
               </td>
 
@@ -868,17 +869,17 @@
               <td>
                 <div id="display-callno-[% r.biblionumber | html %]">
                   [% IF r.callnumber %]
-                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.callnumber | html %]</span>
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace; font-size: 13px;">[% r.callnumber | html %]</span>
                   [% ELSIF r.classification && r.cutter %]
-                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.classification | html %]/[% r.cutter | html %]</span>
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace; font-size: 13px;">[% r.classification | html %]/[% r.cutter | html %]</span>
                   [% ELSIF r.classification %]
-                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.classification | html %]</span>
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace; font-size: 13px;">[% r.classification | html %]</span>
                   [% ELSIF r.cutter %]
-                    <span style="font-weight: 600; color: #0f172a; font-family: monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px;">[% r.cutter | html %]</span>
+                    <span style="font-weight: 600; color: #0f172a; font-family: monospace; font-size: 13px;">[% r.cutter | html %]</span>
                   [% ELSIF r.dewey %]
                     <span style="font-weight: 600; color: #0f172a;">[% r.dewey | html %]</span>
                   [% ELSE %]
-                    <span style="color: #94a3b8; font-weight: 400;">(Chưa gán)</span>
+                    <span style="color: #94a3b8;">&mdash;</span>
                   [% END %]
                 </div>
               </td>
@@ -893,7 +894,7 @@
                       data-title="[% r.title | html %]" 
                       data-total="[% r.total_items | html %]" 
                       data-quantity="[% r.book_quantity | html %]" 
-                      title="Bấm để cập nhật số lượng sách cho biểu ghi">
+                      title="Cập nhật số lượng bản sách">
                       <span id="badge-total-text-[% r.biblionumber | html %]">
                         [% IF r.book_quantity > r.total_items %]
                           [% r.total_items | html %]/[% r.book_quantity | html %] bản
@@ -901,7 +902,6 @@
                           [% r.total_items | html %] bản
                         [% END %]
                       </span>
-                      <i class="fa fa-pencil" style="font-size: 10px; margin-left: 3px; opacity: 0.7;"></i>
                     </button>
                     [% IF r.available_items > 0 %]
                       <span class="badge-items-count badge-avail" id="badge-avail-[% r.biblionumber | html %]">
@@ -915,7 +915,7 @@
                     [% END %]
                   </div>
                   <button type="button" class="btn-toggle-items" data-biblionumber="[% r.biblionumber | html %]">
-                    <i class="fa fa-list-ul"></i> <span id="toggle-label-[% r.biblionumber | html %]">Xem [% r.items.size || 0 %] ĐKCB</span> <i class="fa fa-angle-down"></i>
+                    <span id="toggle-label-[% r.biblionumber | html %]">ĐKCB ([% r.items.size || 0 %])</span> &#9662;
                   </button>
                 </div>
               </td>
@@ -928,14 +928,14 @@
               <!-- Actions -->
               <td style="text-align: right;">
                 <div style="display: inline-flex; gap: 4px;">
-                  <button type="button" class="rec-btn rec-btn-sm btn-quick-edit" data-biblionumber="[% r.biblionumber | html %]" title="Sửa nhanh biểu ghi">
-                    <i class="fa fa-pencil"></i> Sửa
+                  <button type="button" class="rec-btn rec-btn-sm btn-quick-edit" data-biblionumber="[% r.biblionumber | html %]">
+                    Sửa
                   </button>
-                  <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% r.biblionumber | html %]" target="_blank" class="rec-btn rec-btn-sm" title="Mở Trình biên mục MARC chuyên sâu">
-                    <i class="fa fa-external-link"></i> MARC
+                  <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% r.biblionumber | html %]" target="_blank" class="rec-btn rec-btn-sm">
+                    MARC
                   </a>
-                  <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-biblio" data-biblionumber="[% r.biblionumber | html %]" data-items="[% r.total_items | html %]" title="Xóa biểu ghi &amp; toàn bộ bản sách">
-                    <i class="fa fa-trash"></i>
+                  <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-biblio" data-biblionumber="[% r.biblionumber | html %]" data-items="[% r.total_items | html %]" title="Xóa biểu ghi">
+                    Xóa
                   </button>
                 </div>
               </td>
@@ -945,21 +945,20 @@
             <tr id="items-subrow-[% r.biblionumber | html %]" class="items-accordion-row" style="display: none;">
               <td colspan="6">
                 <div class="items-drawer-content">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div style="font-weight: 600; font-size: 13px; color: #0f172a;">
-                      <i class="fa fa-book text-muted"></i> Danh sách bản sách Đăng ký cá biệt (ĐKCB) của biểu ghi #[% r.biblionumber | html %]
+                      Danh sách ĐKCB (#[% r.biblionumber | html %])
                     </div>
-                    <span style="font-size: 11.5px; color: #64748b;">Quản lý kho lưu &bull; Tình trạng mượn trả &bull; Mã vạch</span>
                   </div>
 
                   <!-- Sub Items Table -->
                   <table class="sub-items-table" id="sub-table-[% r.biblionumber | html %]">
                     <thead>
                       <tr>
-                        <th style="width: 150px;">Mã ĐKCB (Barcode)</th>
+                        <th style="width: 150px;">Mã ĐKCB</th>
                         <th>Ký hiệu xếp giá</th>
-                        <th>Kho sở hữu &amp; Vị trí</th>
-                        <th>Trạng thái lưu thông</th>
+                        <th>Kho &amp; Vị trí</th>
+                        <th>Trạng thái</th>
                         <th>Ngày nhập</th>
                         <th style="width: 100px; text-align: right;">Thao tác</th>
                       </tr>
@@ -986,12 +985,11 @@
                                 data-barcode="[% it.barcode | html %]" 
                                 data-callno="[% it.itemcallnumber || r.callnumber | html %]" 
                                 data-branch="[% it.homebranch | html %]" 
-                                data-location="[% it.location | html %]" 
-                                title="Cập nhật mã ĐKCB / bản sách">
-                                <i class="fa fa-pencil"></i>
+                                data-location="[% it.location | html %]">
+                                Sửa
                               </button>
-                              <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-item" data-itemnumber="[% it.itemnumber | html %]" data-biblionumber="[% r.biblionumber | html %]" title="Xóa bản sách này">
-                                <i class="fa fa-times"></i>
+                              <button type="button" class="rec-btn rec-btn-sm rec-btn-danger btn-delete-item" data-itemnumber="[% it.itemnumber | html %]" data-biblionumber="[% r.biblionumber | html %]">
+                                Xóa
                               </button>
                             </td>
                           </tr>
@@ -999,7 +997,7 @@
                       [% ELSE %]
                         <tr id="no-items-row-[% r.biblionumber | html %]">
                           <td colspan="6" style="text-align: center; color: #94a3b8; padding: 12px;">
-                            Biểu ghi này chưa có bản sách ĐKCB nào. Vui lòng thêm bản sách ở bên dưới.
+                            Chưa có bản sách ĐKCB.
                           </td>
                         </tr>
                       [% END %]
@@ -1008,19 +1006,19 @@
 
                   <!-- Quick Add Item Form -->
                   <div class="add-item-subform">
-                    <span style="font-weight: 600; font-size: 12px; color: #334155;">+ Thêm ĐKCB mới:</span>
-                    <input type="text" id="add-barcode-[% r.biblionumber | html %]" name="barcode" placeholder="Mã vạch / ĐKCB" />
+                    <span style="font-weight: 600; font-size: 12px; color: #334155;">+ Thêm ĐKCB:</span>
+                    <input type="text" id="add-barcode-[% r.biblionumber | html %]" name="barcode" placeholder="Mã ĐKCB" />
                     <button type="button" class="rec-btn rec-btn-sm btn-auto-barcode" data-biblionumber="[% r.biblionumber | html %]">
-                      <i class="fa fa-magic"></i> Tự sinh mã
+                      Sinh mã
                     </button>
-                    <input type="text" id="add-callno-[% r.biblionumber | html %]" name="itemcallnumber" value="[% r.callnumber || r.classification | html %]" placeholder="Ký hiệu xếp giá (vd: [% r.callnumber || '338.5/N571t' | html %])" />
+                    <input type="text" id="add-callno-[% r.biblionumber | html %]" name="itemcallnumber" value="[% r.callnumber || r.classification | html %]" placeholder="Ký hiệu xếp giá" />
                     <select id="add-branch-[% r.biblionumber | html %]">
                       [% FOREACH br IN branches %]
                         <option value="[% br.branchcode | html %]" [% IF br.branchcode == 'CPL' %]selected[% END %]>[% br.branchname | html %]</option>
                       [% END %]
                     </select>
                     <button type="button" class="rec-btn rec-btn-primary rec-btn-sm btn-submit-item" data-biblionumber="[% r.biblionumber | html %]">
-                      <i class="fa fa-check"></i> Lưu bản sách
+                      Lưu
                     </button>
                   </div>
                 </div>
@@ -1029,9 +1027,8 @@
           [% END %]
         [% ELSE %]
           <tr>
-            <td colspan="6" style="text-align: center; padding: 48px; color: #94a3b8;">
-              <i class="fa fa-search" style="font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.4;"></i>
-              Không tìm thấy tài liệu nào phù hợp với bộ lọc hiện tại.
+            <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+              Không tìm thấy biểu ghi phù hợp.
             </td>
           </tr>
         [% END %]
@@ -1041,7 +1038,7 @@
     <!-- Pagination Bar -->
     <div class="rec-pagination-bar">
       <div style="font-size: 12.5px; color: #64748b;">
-        Hiển thị <strong>[% records.size || 0 %]</strong> / [% total_records | html %] biểu ghi
+        Hiển thị <strong>[% records.size || 0 %]</strong> / [% total_records | html %]
       </div>
       <div class="page-btn-group">
         [% IF prev_page %]
@@ -1063,11 +1060,11 @@
 
 </div>
 
-<!-- MODAL 1: SỬA NHANH BIỂU GHI (QUICK EDIT) -->
+<!-- MODAL 1: SỬA NHANH BIỂU GHI -->
 <div class="rec-modal-backdrop" id="modalQuickEdit">
   <div class="rec-modal">
     <div class="rec-modal-header">
-      <h3 id="editModalTitle">Chỉnh sửa biểu ghi</h3>
+      <h3 id="editModalTitle">Sửa biểu ghi</h3>
       <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
     </div>
     <form id="quickEditForm">
@@ -1077,15 +1074,15 @@
       <div class="rec-modal-body">
         <div class="form-grid">
           <div class="form-row full-col">
-            <label>Nhan đề chính (Title) *</label>
+            <label>Nhan đề chính *</label>
             <input type="text" name="title" id="edit_title" required />
           </div>
           <div class="form-row full-col">
-            <label>Phụ đề (Subtitle)</label>
+            <label>Phụ đề</label>
             <input type="text" name="subtitle" id="edit_subtitle" />
           </div>
           <div class="form-row">
-            <label>Tác giả (Author)</label>
+            <label>Tác giả</label>
             <input type="text" name="author" id="edit_author" />
           </div>
           <div class="form-row">
@@ -1097,53 +1094,53 @@
             </select>
           </div>
           <div class="form-row">
-            <label>Nhà xuất bản (Publisher)</label>
+            <label>Nhà xuất bản</label>
             <input type="text" name="publishercode" id="edit_publisher" />
           </div>
           <div class="form-row">
-            <label>Năm xuất bản (Year)</label>
+            <label>Năm xuất bản</label>
             <input type="text" name="publicationyear" id="edit_pubyear" />
           </div>
           <div class="form-row">
-            <label>Ký hiệu DDC / Phân loại (MARC 082$a / 942$h)</label>
-            <input type="text" name="classification" id="edit_classification" placeholder="Ví dụ: 005.133, 330.1" />
+            <label>Ký hiệu phân loại (DDC)</label>
+            <input type="text" name="classification" id="edit_classification" placeholder="VD: 330.1" />
           </div>
           <div class="form-row">
-            <label>Ký hiệu Cutter / Tác giả (MARC 082$b / 942$i)</label>
-            <input type="text" name="cutter" id="edit_cutter" placeholder="Ví dụ: P881, N571t" />
+            <label>Ký hiệu tác giả (Cutter)</label>
+            <input type="text" name="cutter" id="edit_cutter" placeholder="VD: N571t" />
           </div>
           <div class="form-row">
-            <label>Mã ISBN</label>
+            <label>ISBN</label>
             <input type="text" name="isbn" id="edit_isbn" />
           </div>
           <div class="form-row">
-            <label>Số trang (Pages)</label>
+            <label>Số trang</label>
             <input type="text" name="pages" id="edit_pages" />
           </div>
           <div class="form-row full-col">
-            <label>Tóm tắt / Nội dung (Abstract)</label>
+            <label>Tóm tắt nội dung</label>
             <textarea name="abstract" id="edit_abstract" rows="3"></textarea>
           </div>
         </div>
       </div>
       <div class="rec-modal-footer">
         <a id="btnFullMarcLink" href="#" target="_blank" class="rec-btn" style="margin-right: auto;">
-          <i class="fa fa-external-link"></i> Mở MARC Editor chuyên sâu
+          Biên mục MARC chi tiết
         </a>
         <button type="button" class="rec-btn btn-close-modal">Hủy</button>
         <button type="submit" class="rec-btn rec-btn-primary" id="btnSaveRecord">
-          <i class="fa fa-save"></i> Lưu thay đổi
+          Lưu
         </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- MODAL 2: TẠO BIỂU GHI NHANH (QUICK CREATE) -->
+<!-- MODAL 2: TẠO BIỂU GHI NHANH -->
 <div class="rec-modal-backdrop" id="modalQuickCreate">
   <div class="rec-modal">
     <div class="rec-modal-header">
-      <h3>Thêm biểu ghi mới &amp; ĐKCB siêu tốc</h3>
+      <h3>Thêm biểu ghi &amp; ĐKCB</h3>
       <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
     </div>
     <form id="quickCreateForm">
@@ -1153,11 +1150,11 @@
         <div class="form-grid">
           <div class="form-row full-col">
             <label>Nhan đề tài liệu *</label>
-            <input type="text" name="title" required placeholder="Nhập tên sách / tài liệu..." />
+            <input type="text" name="title" required placeholder="Nhập tên tài liệu..." />
           </div>
           <div class="form-row">
-            <label>Tác giả chính</label>
-            <input type="text" name="author" placeholder="Ví dụ: Nguyễn Văn A" />
+            <label>Tác giả</label>
+            <input type="text" name="author" placeholder="Nguyễn Văn A" />
           </div>
           <div class="form-row">
             <label>Loại tài liệu</label>
@@ -1169,40 +1166,40 @@
           </div>
           <div class="form-row">
             <label>Nhà xuất bản</label>
-            <input type="text" name="publishercode" placeholder="NXB Đại học Ngoại thương..." />
+            <input type="text" name="publishercode" placeholder="NXB..." />
           </div>
           <div class="form-row">
             <label>Năm xuất bản</label>
             <input type="text" name="publicationyear" placeholder="2026" />
           </div>
           <div class="form-row">
-            <label>Ký hiệu phân loại DDC (MARC 082$a)</label>
-            <input type="text" name="classification" placeholder="Ví dụ: 005.133, 330.1" />
+            <label>Ký hiệu phân loại (DDC)</label>
+            <input type="text" name="classification" placeholder="VD: 330.1" />
           </div>
           <div class="form-row">
-            <label>Ký hiệu Cutter / Tác giả (MARC 082$b)</label>
-            <input type="text" name="cutter" placeholder="Ví dụ: P881, N571t" />
+            <label>Ký hiệu tác giả (Cutter)</label>
+            <input type="text" name="cutter" placeholder="VD: N571t" />
           </div>
           <div class="form-row">
-            <label>Mã ISBN</label>
+            <label>ISBN</label>
             <input type="text" name="isbn" placeholder="978-..." />
           </div>
 
           <div class="form-row full-col" style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed #cbd5e1;">
-            <div style="font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 6px;">
-              Khởi tạo Bản sách Đăng ký cá biệt (ĐKCB):
+            <div style="font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 4px;">
+              Khởi tạo ĐKCB
             </div>
           </div>
           <div class="form-row">
-            <label>Số lượng bản sách nhập ban đầu</label>
+            <label>Số bản nhập</label>
             <input type="number" name="num_items" value="1" min="1" max="20" />
           </div>
           <div class="form-row">
-            <label>Tiền tố mã vạch (Barcode Prefix)</label>
+            <label>Tiền tố mã ĐKCB</label>
             <input type="text" name="barcode_prefix" value="FTU" />
           </div>
           <div class="form-row full-col">
-            <label>Kho nhập ban đầu</label>
+            <label>Chi nhánh</label>
             <select name="homebranch">
               [% FOREACH br IN branches %]
                 <option value="[% br.branchcode | html %]" [% IF br.branchcode == 'CPL' %]selected[% END %]>[% br.branchname | html %]</option>
@@ -1214,26 +1211,25 @@
       <div class="rec-modal-footer">
         <button type="button" class="rec-btn btn-close-modal">Hủy</button>
         <button type="submit" class="rec-btn rec-btn-primary" id="btnCreateRecord">
-          <i class="fa fa-plus"></i> Khởi tạo biểu ghi
+          Tạo biểu ghi
         </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- MODAL 3: UPLOAD ẢNH BÌA (UPLOAD COVER IMAGE) -->
+<!-- MODAL 3: UPLOAD ẢNH BÌA -->
 <div class="rec-modal-backdrop" id="modalUploadCover">
   <div class="rec-modal" style="max-width: 480px;">
     <div class="rec-modal-header">
-      <h3 id="coverModalTitle">Tải lên ảnh bìa</h3>
+      <h3 id="coverModalTitle">Tải ảnh bìa</h3>
       <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
     </div>
     <div class="rec-modal-body">
       <input type="hidden" id="upload_biblionumber" value="" />
       <div class="dropzone-box" id="modalDropzone">
-        <i class="fa fa-cloud-upload" style="font-size: 36px; color: #64748b; margin-bottom: 8px; display: block;"></i>
-        <div style="font-weight: 600; font-size: 14px; color: #0f172a; margin-bottom: 4px;">Kéo &amp; thả ảnh vào đây hoặc bấm để chọn</div>
-        <div style="font-size: 12px; color: #94a3b8;">Hỗ trợ định dạng JPG, PNG, WebP (Tối đa 10MB)</div>
+        <div style="font-weight: 600; font-size: 14px; color: #0f172a; margin-bottom: 4px;">Kéo thả ảnh hoặc bấm để chọn tệp</div>
+        <div style="font-size: 12px; color: #94a3b8;">JPG, PNG, WebP (Tối đa 10MB)</div>
       </div>
       <input type="file" id="coverFileInput" accept="image/*" style="display: none;" />
       <div id="coverPreviewContainer" style="display: none; margin-top: 14px; text-align: center;">
@@ -1243,7 +1239,7 @@
     <div class="rec-modal-footer">
       <button type="button" class="rec-btn btn-close-modal">Đóng</button>
       <button type="button" class="rec-btn rec-btn-primary" id="btnConfirmUploadCover" disabled>
-        <i class="fa fa-upload"></i> Cập nhật ảnh bìa
+        Lưu ảnh bìa
       </button>
     </div>
   </div>
@@ -1253,33 +1249,30 @@
 <div class="rec-modal-backdrop" id="modalConfirmDelete">
   <div class="rec-modal" style="max-width: 440px;">
     <div class="rec-modal-header">
-      <h3 style="color: #dc2626;"><i class="fa fa-exclamation-triangle"></i> Xác nhận xóa biểu ghi</h3>
+      <h3 style="color: #dc2626;">Xóa biểu ghi</h3>
       <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
     </div>
     <div class="rec-modal-body">
       <input type="hidden" id="del_biblionumber" value="" />
-      <p style="font-size: 13.5px; color: #334155; margin-bottom: 12px;">
-        Bạn có chắc chắn muốn xóa vĩnh viễn biểu ghi:
-      </p>
       <div id="del_record_title" style="font-weight: 700; color: #0f172a; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px;"></div>
       <div style="font-size: 12.5px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px;">
-        <i class="fa fa-warning"></i> Thao tác này sẽ xóa toàn bộ <strong id="del_items_count">0</strong> bản sách ĐKCB liên quan và không thể khôi phục lại!
+        Xóa biểu ghi cùng <strong id="del_items_count">0</strong> bản ĐKCB liên quan.
       </div>
     </div>
     <div class="rec-modal-footer">
-      <button type="button" class="rec-btn btn-close-modal">Hủy bỏ</button>
+      <button type="button" class="rec-btn btn-close-modal">Hủy</button>
       <button type="button" class="rec-btn rec-btn-danger" id="btnExecuteDelete">
-        <i class="fa fa-trash"></i> Đồng ý xóa vĩnh viễn
+        Xóa vĩnh viễn
       </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL 5: CHỈNH SỬA MÃ ĐKCB & BẢN SÁCH (EDIT ITEM / BARCODE) -->
+<!-- MODAL 5: CHỈNH SỬA MÃ ĐKCB & BẢN SÁCH -->
 <div class="rec-modal-backdrop" id="modalEditItem">
-  <div class="rec-modal" style="max-width: 580px;">
+  <div class="rec-modal" style="max-width: 560px;">
     <div class="rec-modal-header">
-      <h3 id="editItemModalTitle"><i class="fa fa-pencil"></i> Cập nhật bản sách ĐKCB</h3>
+      <h3 id="editItemModalTitle">Sửa bản sách ĐKCB</h3>
       <button type="button" class="rec-modal-close btn-close-modal">&times;</button>
     </div>
     <form id="editItemForm">
@@ -1288,35 +1281,35 @@
       <input type="hidden" name="itemnumber" id="edit_item_itemnumber" value="" />
       <input type="hidden" name="biblionumber" id="edit_item_biblionumber" value="" />
       <div class="rec-modal-body">
-        <div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px; line-height: 1.45;">
-          Biểu ghi: <strong id="edit_item_record_title" style="color: #0f172a;"></strong>
+        <div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 14px;">
+          <strong id="edit_item_record_title" style="color: #0f172a;"></strong>
         </div>
         <div class="form-grid">
           <div class="form-row full-col">
-            <label>Mã Đăng ký cá biệt (Barcode) *</label>
+            <label>Mã ĐKCB *</label>
             <div style="display: flex; gap: 8px; align-items: stretch;">
               <input type="text" name="barcode" id="edit_item_barcode" required style="flex: 1 1 0; min-width: 0; font-family: monospace; font-weight: 700; font-size: 14px; color: #0284c7; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 6px; padding: 8px 12px;" />
-              <button type="button" class="rec-btn" id="btnEditItemAutoBarcode" title="Tự sinh mã vạch tiếp theo" style="flex-shrink: 0; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; padding: 0 14px; color: #0284c7; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; cursor: pointer;">
-                <i class="fa fa-magic"></i> Sinh mã
+              <button type="button" class="rec-btn" id="btnEditItemAutoBarcode" style="flex-shrink: 0; font-weight: 600; padding: 0 14px; color: #0284c7; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px;">
+                Sinh mã
               </button>
             </div>
           </div>
           <div class="form-row full-col">
-            <label>Ký hiệu xếp giá (Item Call Number)</label>
-            <input type="text" name="itemcallnumber" id="edit_item_callnumber" placeholder="Ví dụ: 338.5/N571t" />
+            <label>Ký hiệu xếp giá</label>
+            <input type="text" name="itemcallnumber" id="edit_item_callnumber" placeholder="VD: 338.5/N571t" />
           </div>
           <div class="form-row">
-            <label>Kho sở hữu (Home Library)</label>
-            <select name="homebranch" id="edit_item_branch" style="text-overflow: ellipsis; overflow: hidden;">
+            <label>Chi nhánh</label>
+            <select name="homebranch" id="edit_item_branch">
               [% FOREACH br IN branches %]
                 <option value="[% br.branchcode | html %]">[% br.branchname | html %]</option>
               [% END %]
             </select>
           </div>
           <div class="form-row">
-            <label>Vị trí trong kho (Location)</label>
-            <select name="location" id="edit_item_location" style="text-overflow: ellipsis; overflow: hidden;">
-              <option value="">-- Mặc định (Không chọn) --</option>
+            <label>Kho lưu trữ (LOC)</label>
+            <select name="location" id="edit_item_location">
+              <option value="">-- Mặc định --</option>
               [% FOREACH loc IN locations %]
                 <option value="[% loc.authorised_value | html %]">[% loc.lib || loc.authorised_value | html %] ([% loc.authorised_value | html %])</option>
               [% END %]
@@ -1327,7 +1320,7 @@
       <div class="rec-modal-footer">
         <button type="button" class="rec-btn btn-close-modal">Hủy</button>
         <button type="submit" class="rec-btn rec-btn-primary" id="btnSaveEditItem">
-          <i class="fa fa-save"></i> Lưu cập nhật
+          Lưu
         </button>
       </div>
     </form>
@@ -1807,7 +1800,8 @@
   window.openQuickEditModal = function(biblionumber) {
     const $row = $('#rec-row-' + biblionumber);
     const rowTitle = $row.find('.rec-meta-title').text().trim();
-    const rawAuthor = $row.find('.rec-meta-author').text().trim();
+    const $authorEl = $row.find('.rec-author-name');
+    const rawAuthor = $authorEl.length ? $authorEl.text().trim() : $row.find('.rec-meta-author').text().trim();
     const rowAuthor = rawAuthor.replace(/^Tác giả:\s*/i, '').trim();
 
     // Reset & prepopulate with existing row data

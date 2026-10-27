@@ -3,10 +3,11 @@
 use Modern::Perl;
 use utf8;
 use CGI qw( -utf8 );
-use C4::Auth qw( get_template_and_user );
+use C4::Auth qw( get_template_and_user haspermission );
 use C4::Output qw( output_html_with_http_headers );
 use C4::Context;
 use C4::Log qw( logaction );
+use Koha::Patrons;
 
 my $cgi = CGI->new;
 my $dbh = C4::Context->dbh;
@@ -23,10 +24,31 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
             { tools => "portal_banner" },
             { tools => "portal_footer" },
             { tools => "edit_additional_contents" },
-            { tools => "*" }
+            { tools => "portal_review" },
         ],
     }
 );
+
+# ---- Phân quyền theo mục ----
+# portal_review: chỉ được thao tác Lời giới thiệu (intro_*). Các quyền portal_* còn lại: thao tác các mục khác.
+# Dùng sub ẩn danh (không dùng sub có tên) để tránh lỗi giữ biến cũ giữa các request khi chạy dưới Plack.
+my %INTRO_TYPES = ( intro_librarian => 1, intro_reader => 1 );
+my $ftu_userid  = C4::Context->userenv ? C4::Context->userenv->{id} : undef;
+my $can_review  = ( $ftu_userid && haspermission( $ftu_userid, { tools => 'portal_review' } ) ) ? 1 : 0;
+my $can_other   = 0;
+for my $perm (qw( portal_news portal_database portal_banner portal_footer edit_additional_contents )) {
+    if ( $ftu_userid && haspermission( $ftu_userid, { tools => $perm } ) ) { $can_other = 1; last; }
+}
+$template->param( can_portal_review => $can_review, can_portal_other => $can_other );
+my $ftu_can_touch = sub {
+    my ($pt) = @_;
+    return $INTRO_TYPES{ $pt // '' } ? $can_review : $can_other;
+};
+my $ftu_deny = sub {
+    my ($sec) = @_;
+    print $cgi->redirect( "/cgi-bin/koha/tools/portal-news.pl?op=list&msg=forbidden" . ( $sec ? "&section=$sec" : "" ) );
+    exit;
+};
 
 my $op = $cgi->param("op") || "list";
 my $msg = $cgi->param("msg") || "";
@@ -191,8 +213,10 @@ if (($op eq "delete" || $op eq "cud-delete")) {
         my $sth = $dbh->prepare("SELECT post_type FROM koha_portal_posts WHERE id = ?");
         $sth->execute($id);
         my ($pt) = $sth->fetchrow_array;
+        $ftu_deny->( $INTRO_TYPES{ $pt // '' } ? 'intro' : $section ) unless $ftu_can_touch->($pt);
         $section = "database" if ($pt && $pt eq "database");
         $section = "banner" if ($pt && $pt eq "banner");
+        $section = "intro" if ($pt && $INTRO_TYPES{$pt});
         $dbh->do("DELETE FROM koha_portal_posts WHERE id = ?", undef, $id);
         logaction( 'PORTAL_NEWS', 'DELETE', $id, "Xóa mục #" . $id . " (loại: " . ($pt || 'news') . ")" );
     }
@@ -207,8 +231,10 @@ if (($op eq "toggle_status" || $op eq "cud-toggle_status")) {
         my $sth = $dbh->prepare("SELECT status, post_type FROM koha_portal_posts WHERE id = ?");
         $sth->execute($id);
         my ($curr, $pt) = $sth->fetchrow_array;
+        $ftu_deny->( $INTRO_TYPES{ $pt // '' } ? 'intro' : $section ) unless $ftu_can_touch->($pt);
         $section = "database" if ($pt && $pt eq "database");
         $section = "banner" if ($pt && $pt eq "banner");
+        $section = "intro" if ($pt && $INTRO_TYPES{$pt});
         my $new_status = ($curr eq "published") ? "draft" : "published";
         $dbh->do("UPDATE koha_portal_posts SET status = ? WHERE id = ?", undef, $new_status, $id);
         logaction( 'PORTAL_NEWS', 'STATUS_CHANGE', $id, "Đổi trạng thái mục #$id sang $new_status (loại: " . ($pt || 'news') . ")" );
@@ -235,13 +261,21 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
     my $id                  = int($cgi->param("id") || 0);
     my $sort_order          = int($cgi->param("sort_order") || 1);
     my $post_type           = $cgi->param("post_type") || ($op =~ /_db/ ? "database" : ($op =~ /_banner/ ? "banner" : "news"));
+    if ($id > 0) {
+        my ($old_pt) = $dbh->selectrow_array("SELECT post_type FROM koha_portal_posts WHERE id = ?", undef, $id);
+        $ftu_deny->() if defined $old_pt && !$ftu_can_touch->($old_pt);
+    }
+    $ftu_deny->( $INTRO_TYPES{$post_type} ? 'intro' : '' ) unless $ftu_can_touch->($post_type);
     my $title               = $cgi->param("title");
     my $excerpt             = $cgi->param("excerpt") || "";
     my $classification      = $cgi->param("classification") || ($post_type eq 'database' ? "CSDL THƯƠNG MẠI" : ($post_type eq 'banner' ? "THƯ VIỆN FTU" : ""));
     my $access_instructions = $cgi->param("access_instructions") || "";
     my $db_user             = $cgi->param("db_user") || "";
     my $db_pass             = $cgi->param("db_pass") || "";
+    my $db_url              = $cgi->param("db_url") || "";
     my $support_link        = $cgi->param("support_link") || "";
+    $db_url ||= $support_link if ($post_type eq 'database' && !$db_url);
+    $support_link ||= $db_url if ($post_type eq 'database' && !$support_link);
     my $content             = "";
     my $is_featured         = 0;
 
@@ -255,7 +289,12 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
         }
     } else {
         $title = "Chưa đặt tiêu đề" unless defined $title && $title =~ /\S/;
-        $content = $cgi->param("content") || $excerpt || "";
+        my $raw_html = $cgi->param("content_raw");
+        if ( ( $cgi->param("content_mode") // '' ) eq 'text' && defined $raw_html && $raw_html =~ /\S/ ) {
+            $content = $raw_html;    # chế độ Mã nguồn HTML: giữ nguyên văn
+        } else {
+            $content = $cgi->param("content") || $excerpt || "";
+        }
         $is_featured = int($cgi->param("is_featured") || 0);
     }
 
@@ -275,17 +314,18 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
     my $event_tag      = $cgi->param("event_tag") || ($post_type eq 'database' ? "Nội bộ & Từ xa" : "Sắp diễn ra");
     my $views_count    = int($cgi->param("views_count") || 0);
 
+    my $saved_id = $id;
     if ($id > 0) {
         my $sql = "UPDATE koha_portal_posts SET 
             sort_order = ?, post_type = ?, title = ?, excerpt = ?, classification = ?,
-            access_instructions = ?, db_user = ?, db_pass = ?, support_link = ?,
+            access_instructions = ?, db_user = ?, db_pass = ?, db_url = ?, support_link = ?,
             content = ?, featured_image = ?, author_name = ?, status = ?, is_featured = ?,
             event_start = ?, event_end = ?, event_location = ?, event_reg_link = ?,
             event_tag = ?, views_count = ?
             WHERE id = ?";
         $dbh->do($sql, undef, 
             $sort_order, $post_type, $title, $excerpt, $classification,
-            $access_instructions, $db_user, $db_pass, $support_link,
+            $access_instructions, $db_user, $db_pass, $db_url, $support_link,
             $content, $featured_image, $author_name, $status, $is_featured,
             $event_start, $event_end, $event_location, $event_reg_link,
             $event_tag, $views_count, $id
@@ -293,29 +333,45 @@ if (($op eq "save" || $op eq "cud-save" || $op eq "save_db" || $op eq "cud-save_
         logaction( 'PORTAL_NEWS', 'MODIFY', $id, "$post_type: $title" );
     } else {
         my $sql = "INSERT INTO koha_portal_posts 
-            (sort_order, post_type, title, excerpt, classification, access_instructions, db_user, db_pass, support_link, content, featured_image, author_name, status, is_featured, event_start, event_end, event_location, event_reg_link, event_tag, views_count)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (sort_order, post_type, title, excerpt, classification, access_instructions, db_user, db_pass, db_url, support_link, content, featured_image, author_name, status, is_featured, event_start, event_end, event_location, event_reg_link, event_tag, views_count)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $dbh->do($sql, undef,
             $sort_order, $post_type, $title, $excerpt, $classification,
-            $access_instructions, $db_user, $db_pass, $support_link,
+            $access_instructions, $db_user, $db_pass, $db_url, $support_link,
             $content, $featured_image, $author_name, $status, $is_featured,
             $event_start, $event_end, $event_location, $event_reg_link,
             $event_tag, $views_count
         );
         my $new_id = $dbh->{mysql_insertid} || $dbh->last_insert_id(undef, undef, 'koha_portal_posts', 'id');
+        $saved_id = $new_id;
         logaction( 'PORTAL_NEWS', 'ADD', $new_id, "$post_type: $title" );
     }
+
+    # Gắn Lời giới thiệu với các biểu ghi (biblio) được giới thiệu
+    if ($saved_id) {
+        $dbh->do("DELETE FROM koha_portal_post_biblios WHERE post_id = ?", undef, $saved_id);
+        if ($INTRO_TYPES{$post_type}) {
+            my %seen;
+            my @bibs = grep { $_ > 0 && !$seen{$_}++ } map { int($_) } split /[^0-9]+/, ( $cgi->param("biblionumbers") // '' );
+            @bibs = @bibs[0 .. 0] if @bibs > 1;    # mỗi Lời giới thiệu gắn với đúng 1 cuốn sách
+            for my $bn (@bibs) {
+                $dbh->do("INSERT IGNORE INTO koha_portal_post_biblios (post_id, biblionumber) SELECT ?, biblionumber FROM biblio WHERE biblionumber = ?", undef, $saved_id, $bn);
+            }
+        }
+    }
+
     my $redirect_url = "/cgi-bin/koha/tools/portal-news.pl?op=list&msg=saved";
     $redirect_url .= "&section=database" if ($post_type eq "database");
     $redirect_url .= "&section=banner" if ($post_type eq "banner");
+    $redirect_url .= "&section=intro" if ($INTRO_TYPES{$post_type});
     print $cgi->redirect($redirect_url);
     exit;
 }
 
 if (($op eq "save_footer" || $op eq "cud-save_footer")) {
     my $p_library_name      = $cgi->param("library_name") || "Thư viện Phân hiệu Trường Đại học Ngoại thương";
-    my $p_campus_current    = $cgi->param("campus_current") || "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh";
-    my $p_campus_hcm_addr   = $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh";
+    my $p_campus_current    = $cgi->param("campus_current") || "Foreign Trade University - Ho Chi Minh City Branch";
+    my $p_campus_hcm_addr   = $cgi->param("campus_hcm_addr") || "Số 15, Đường D5, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh";
     my $p_hotline_hcmc      = $cgi->param("hotline_hcmc") || "(028) 3512 7254";
     my $p_email_contact     = $cgi->param("email_contact") || 'tv.hcmc@ftu.edu.vn';
     my $p_hours_summary     = $cgi->param("hours_summary") || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00";
@@ -456,12 +512,62 @@ if (($op eq "save_footer" || $op eq "cud-save_footer")) {
         Koha::Caches->get_instance()->flush_all();
     };
 
-    # Đồng bộ sang /usr/share/koha và xóa compiled template cache để thay đổi có hiệu lực tức thì
-    system("cp /kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/vi-VN/includes/ftu-brand-config.inc 2>/dev/null; cp /kohadevbox/koha/koha-tmpl/opac-tmpl/bootstrap/en/includes/ftu-brand-config.inc /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/includes/ftu-brand-config.inc 2>/dev/null; rm -rf /var/cache/koha/kohadev/templates/* 2>/dev/null");
+    # Xóa compiled template cache và khởi động lại Plack để thay đổi có hiệu lực tức thì
+    system("rm -rf /var/cache/koha/kohadev/templates/* 2>/dev/null; koha-plack --restart kohadev 2>/dev/null || true");
 
     logaction( 'PORTAL_NEWS', 'MODIFY', 0, "Cập nhật cấu hình thông tin chân trang (Footer)" );
 
     print $cgi->redirect("/cgi-bin/koha/tools/portal-news.pl?section=footer&msg=footer_saved");
+    exit;
+}
+
+if ($op eq "search_biblio") {
+    my $q = $cgi->param("q") // "";
+    my $field = $cgi->param("field") || "all";
+    $q =~ s/^\s+|\s+$//g;
+    my @rows;
+    if (length $q) {
+        my $like  = "%$q%";
+        my $isbnq = $q; $isbnq =~ s/[\s-]//g;
+        my $isbnl = "%$isbnq%";
+        my (@w, @bind);
+        my $bc_exists = "EXISTS (SELECT 1 FROM items ix WHERE ix.biblionumber = b.biblionumber AND ix.barcode %s ?)";
+        my $cn_exists = "EXISTS (SELECT 1 FROM items ix WHERE ix.biblionumber = b.biblionumber AND ix.itemcallnumber LIKE ?)";
+        if ($field eq "title") {
+            push @w, "(b.title LIKE ? OR b.subtitle LIKE ?)"; push @bind, $like, $like;
+        } elsif ($field eq "author") {
+            push @w, "b.author LIKE ?"; push @bind, $like;
+        } elsif ($field eq "isbn") {
+            push @w, "(REPLACE(bi.isbn, '-', '') LIKE ? OR REPLACE(bi.issn, '-', '') LIKE ?)"; push @bind, $isbnl, $isbnl;
+        } elsif ($field eq "barcode") {
+            push @w, sprintf($bc_exists, "LIKE"); push @bind, "$q%";
+        } elsif ($field eq "callnumber") {
+            push @w, $cn_exists; push @bind, "$q%";
+        } elsif ($field eq "biblionumber") {
+            push @w, "b.biblionumber = ?"; push @bind, ($q =~ /^\d+$/ ? $q : 0);
+        } else {
+            push @w, "b.biblionumber = ?";              push @bind, ($q =~ /^\d+$/ ? $q : 0);
+            push @w, sprintf($bc_exists, "=");          push @bind, $q;
+            push @w, "(b.title LIKE ? OR b.subtitle LIKE ?)"; push @bind, $like, $like;
+            push @w, "b.author LIKE ?";                 push @bind, $like;
+            push @w, "REPLACE(bi.isbn, '-', '') LIKE ?"; push @bind, $isbnl;
+        }
+        my $sql = "SELECT b.biblionumber, b.title, b.subtitle, b.author, bi.publicationyear, bi.publishercode, bi.isbn,
+                          (SELECT COUNT(*) FROM items i2 WHERE i2.biblionumber = b.biblionumber) AS items_count,
+                          (SELECT i3.itemcallnumber FROM items i3 WHERE i3.biblionumber = b.biblionumber AND i3.itemcallnumber <> '' LIMIT 1) AS callnumber,
+                          (SELECT i4.barcode FROM items i4 WHERE i4.biblionumber = b.biblionumber AND i4.barcode LIKE ? LIMIT 1) AS matched_barcode
+                   FROM biblio b LEFT JOIN biblioitems bi ON bi.biblionumber = b.biblionumber
+                   WHERE " . join(" OR ", @w) . "
+                   ORDER BY (b.biblionumber = ?) DESC, b.biblionumber DESC LIMIT 20";
+        my $sth = $dbh->prepare($sql);
+        $sth->execute( ($field eq 'barcode' ? "$q%" : $q), @bind, ($q =~ /^\d+$/ ? $q : 0) );
+        while (my $r = $sth->fetchrow_hashref) {
+            $r->{isbn} = (split /\s*\|\s*/, ($r->{isbn} // ''))[0];
+            push @rows, $r;
+        }
+    }
+    print $cgi->header( -type => "application/json", -charset => "utf-8" );
+    print JSON->new->utf8->encode(\@rows);
     exit;
 }
 
@@ -470,13 +576,21 @@ if ($op eq "add_form") {
     my $section = $cgi->param("section") || "";
     my $default_type = $cgi->param("default_type") || "";
     my $post = {};
+    my @linked_biblios;
+    # Người chỉ có quyền portal_review luôn được đưa về form Lời giới thiệu
+    if (!$can_other && !$id) { $section = "intro"; $default_type = "intro_librarian" unless $INTRO_TYPES{$default_type}; }
     if ($id > 0) {
         my $sth = $dbh->prepare("SELECT * FROM koha_portal_posts WHERE id = ?");
         $sth->execute($id);
         $post = $sth->fetchrow_hashref;
         if ($post) {
+            $ftu_deny->() unless $ftu_can_touch->($post->{post_type});
             $section = "database" if ($post->{post_type} && $post->{post_type} eq "database");
             $section = "banner" if ($post->{post_type} && $post->{post_type} eq "banner");
+            $section = "intro" if ($post->{post_type} && $INTRO_TYPES{ $post->{post_type} });
+            my $lb = $dbh->prepare("SELECT b.biblionumber, b.title, b.subtitle, b.author, bi.publicationyear, bi.publishercode, bi.isbn, (SELECT COUNT(*) FROM items i2 WHERE i2.biblionumber = b.biblionumber) AS items_count, (SELECT i3.itemcallnumber FROM items i3 WHERE i3.biblionumber = b.biblionumber AND i3.itemcallnumber <> '' LIMIT 1) AS callnumber FROM koha_portal_post_biblios pb JOIN biblio b ON b.biblionumber = pb.biblionumber LEFT JOIN biblioitems bi ON bi.biblionumber = b.biblionumber WHERE pb.post_id = ? ORDER BY b.title LIMIT 1");
+            $lb->execute($id);
+            while (my $r = $lb->fetchrow_hashref) { push @linked_biblios, $r; }
             if ($post->{event_start}) {
                 $post->{event_start} =~ s/\s+/T/; # Convert for datetime-local input
                 $post->{event_start} = substr($post->{event_start}, 0, 16);
@@ -488,7 +602,20 @@ if ($op eq "add_form") {
         }
     } else {
         $post->{status} = "published";
-        if ($default_type eq "database" || $section eq "database") {
+        if ($INTRO_TYPES{$default_type} || $section eq "intro") {
+            $ftu_deny->() unless $can_review;
+            $post->{post_type} = $INTRO_TYPES{$default_type} ? $default_type : "intro_librarian";
+            my $me = Koha::Patrons->find($borrowernumber);
+            my $me_name = $me ? join(' ', grep { defined && length } ($me->surname, $me->firstname)) : '';
+            $post->{author_name} = $post->{post_type} eq 'intro_reader' ? '' : ($me_name || "Thư viện Phân hiệu");
+            $post->{event_tag} = "";
+            $section = "intro";
+            # Cho phép mở form từ trang sách: ?biblionumber=123
+            if (my $pre = int($cgi->param("biblionumber") || 0)) {
+                my $r = $dbh->selectrow_hashref("SELECT b.biblionumber, b.title, b.subtitle, b.author, bi.publicationyear, bi.publishercode, bi.isbn, (SELECT COUNT(*) FROM items i2 WHERE i2.biblionumber = b.biblionumber) AS items_count, (SELECT i3.itemcallnumber FROM items i3 WHERE i3.biblionumber = b.biblionumber AND i3.itemcallnumber <> '' LIMIT 1) AS callnumber FROM biblio b LEFT JOIN biblioitems bi ON bi.biblionumber = b.biblionumber WHERE b.biblionumber = ?", undef, $pre);
+                push @linked_biblios, $r if $r;
+            }
+        } elsif ($default_type eq "database" || $section eq "database") {
             $post->{post_type} = "database";
             $post->{author_name} = "Thư viện Phân hiệu";
             $post->{event_tag} = "Nội bộ & Từ xa";
@@ -517,6 +644,7 @@ if ($op eq "add_form") {
         op      => "add_form",
         section => $section,
         post    => $post,
+        linked_biblios => \@linked_biblios,
         msg     => $msg,
     );
     output_html_with_http_headers $cgi, $cookie, $template->output;
@@ -536,9 +664,14 @@ if ($filter_type eq "database") {
     $section = "banner";
 } elsif ($filter_type eq "news" || $filter_type eq "event" || $filter_type eq "notice") {
     $section = "news";
+} elsif ($INTRO_TYPES{$filter_type}) {
+    $section = "intro";
 }
-$section = "news" unless ($section eq "database" || $section eq "banner" || $section eq "footer");
+$section = "news" unless ($section eq "database" || $section eq "banner" || $section eq "footer" || $section eq "intro");
+$section = "intro" if !$can_other && $can_review;
+$section = "news"  if $section eq "intro" && !$can_review;
 
+my $INTRO_SQL = "('intro_librarian', 'intro_reader')";
 my $query = "SELECT * FROM koha_portal_posts WHERE 1=1";
 my @params;
 
@@ -550,8 +683,14 @@ if ($section eq "database") {
     }
 } elsif ($section eq "banner") {
     $query .= " AND post_type = 'banner'";
+} elsif ($section eq "intro") {
+    $query .= " AND post_type IN $INTRO_SQL";
+    if ($INTRO_TYPES{$filter_type}) {
+        $query .= " AND post_type = ?";
+        push @params, $filter_type;
+    }
 } else {
-    $query .= " AND post_type NOT IN ('database', 'banner')";
+    $query .= " AND post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader')";
     if ($filter_type ne "all") {
         $query .= " AND post_type = ?";
         push @params, $filter_type;
@@ -563,8 +702,8 @@ if ($filter_status ne "all") {
     push @params, $filter_status;
 }
 if ($search_q ne "") {
-    $query .= " AND (title LIKE ? OR excerpt LIKE ? OR event_tag LIKE ? OR classification LIKE ? OR access_instructions LIKE ? OR db_user LIKE ?)";
-    push @params, "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%";
+    $query .= " AND (title LIKE ? OR excerpt LIKE ? OR event_tag LIKE ? OR classification LIKE ? OR access_instructions LIKE ? OR db_user LIKE ? OR author_name LIKE ?)";
+    push @params, "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%", "%$search_q%";
 }
 
 if ($section eq "database" || $section eq "banner") {
@@ -588,8 +727,13 @@ if ($section eq "database") {
     }
 } elsif ($section eq "banner") {
     $count_query .= " AND post_type = 'banner'";
+} elsif ($section eq "intro") {
+    $count_query .= " AND post_type IN $INTRO_SQL";
+    if ($INTRO_TYPES{$filter_type}) {
+        $count_query .= " AND post_type = ?";
+    }
 } else {
-    $count_query .= " AND post_type NOT IN ('database', 'banner')";
+    $count_query .= " AND post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader')";
     if ($filter_type ne "all") {
         $count_query .= " AND post_type = ?";
     }
@@ -598,7 +742,7 @@ if ($filter_status ne "all") {
     $count_query .= " AND status = ?";
 }
 if ($search_q ne "") {
-    $count_query .= " AND (title LIKE ? OR excerpt LIKE ? OR event_tag LIKE ? OR classification LIKE ? OR access_instructions LIKE ? OR db_user LIKE ?)";
+    $count_query .= " AND (title LIKE ? OR excerpt LIKE ? OR event_tag LIKE ? OR classification LIKE ? OR access_instructions LIKE ? OR db_user LIKE ? OR author_name LIKE ?)";
 }
 
 my $count_sth = $dbh->prepare($count_query);
@@ -626,6 +770,13 @@ while (my $row = $sth->fetchrow_hashref) {
         $row->{event_time} = "$4:$5";
         $row->{formatted_event} = "$3/$2 lúc $4:$5";
     }
+    if ($section eq "intro") {
+        my $bt = $dbh->prepare("SELECT b.biblionumber, b.title FROM koha_portal_post_biblios pb JOIN biblio b ON b.biblionumber = pb.biblionumber WHERE pb.post_id = ? ORDER BY b.title");
+        $bt->execute($row->{id});
+        my @books;
+        while (my $bk = $bt->fetchrow_hashref) { $bk->{title} =~ s/[\s\/:;,.]+$//; push @books, $bk; }
+        $row->{books} = \@books;
+    }
     push @posts, $row;
 }
 
@@ -646,10 +797,15 @@ for (my $p = 1; $p <= $total_pages; $p++) {
 }
 
 # Counts for quick tabs
-my $count_news_group = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type NOT IN ('database', 'banner')");
+my $count_news_group = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader')");
 my $count_news       = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'news'");
 my $count_event      = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'event'");
-my $count_news_draft = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type NOT IN ('database', 'banner') AND status = 'draft'");
+my $count_news_draft = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader') AND status = 'draft'");
+
+my $count_intro           = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type IN $INTRO_SQL");
+my $count_intro_librarian = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'intro_librarian'");
+my $count_intro_reader    = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'intro_reader'");
+my $count_intro_draft     = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type IN $INTRO_SQL AND status = 'draft'");
 
 my $count_database      = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'database'");
 my $count_db_active     = $dbh->selectrow_array("SELECT COUNT(*) FROM koha_portal_posts WHERE post_type = 'database' AND status = 'published'");
@@ -665,8 +821,8 @@ my ($next_banner_order) = $dbh->selectrow_array("SELECT COALESCE(MAX(sort_order)
 
 my $footer_cfg = {
     library_name           => C4::Context->preference('FTU_Footer_LibraryName') || "Thư viện Phân hiệu Trường Đại học Ngoại thương",
-    campus_current         => C4::Context->preference('FTU_Footer_CampusCurrent') || "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hcm_addr        => C4::Context->preference('FTU_Footer_Addr') || "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
+    campus_current         => C4::Context->preference('FTU_Footer_CampusCurrent') || "Foreign Trade University - Ho Chi Minh City Branch",
+    campus_hcm_addr        => C4::Context->preference('FTU_Footer_Addr') || "Số 15, Đường D5, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh",
     hotline_hcmc           => C4::Context->preference('FTU_Footer_Hotline') || "(028) 3512 7254",
     email_contact          => C4::Context->preference('FTU_Footer_Email') || 'tv.hcmc@ftu.edu.vn',
     hours_summary          => C4::Context->preference('FTU_Footer_Hours') || "Thứ 2 – Thứ 6: 07:30 – 19:30 | Thứ 7: 08:00 – 16:00",
@@ -734,6 +890,10 @@ $template->param(
     count_news          => $count_news,
     count_event         => $count_event,
     count_news_draft    => $count_news_draft,
+    count_intro           => $count_intro,
+    count_intro_librarian => $count_intro_librarian,
+    count_intro_reader    => $count_intro_reader,
+    count_intro_draft     => $count_intro_draft,
     count_database      => $count_database,
     count_db_active     => $count_db_active,
     count_db_draft      => $count_db_draft,

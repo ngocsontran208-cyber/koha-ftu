@@ -32,6 +32,9 @@
                                 <span class="view"><a id="Normalview" class="btn btn-link" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Normal<span class="d-none d-sm-inline"> view</span></a></span>
                                 <span class="view"><a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> MARC<span class="d-none d-sm-inline"> view</span></a></span>
                                 <span class="view current-view"><span id="ISBDview"><i class="fa fa-list-ul" aria-hidden="true"></i> ISBD<span class="d-none d-sm-inline"> view</span></span></span>
+                                [% IF ( ftu_intro_count ) %]
+                                    <span class="view"><a id="Introview" class="btn btn-link" href="/cgi-bin/koha/opac-intro.pl?biblionumber=[% biblio.biblionumber | html %]">Introductions ([% ftu_intro_count | html %])</a></span>
+                                [% END %]
                             </div>
                             <h1 class="title">[% INCLUDE 'biblio-title.inc' %]</h1>
                             <div id="isbdcontents">[% ISBD | $raw %]</div>

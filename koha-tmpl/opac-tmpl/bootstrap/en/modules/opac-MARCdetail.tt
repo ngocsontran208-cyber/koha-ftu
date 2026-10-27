@@ -34,6 +34,9 @@
                                 [% IF ( ISBD ) %]
                                     <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]"><i class="fa fa-list-ul" aria-hidden="true"></i> ISBD<span class="d-none d-sm-inline"> view</span></a></span>
                                 [% END %]
+                                [% IF ( ftu_intro_count ) %]
+                                    <span class="view"><a id="Introview" class="btn btn-link" href="/cgi-bin/koha/opac-intro.pl?biblionumber=[% biblio.biblionumber | html %]">Introductions ([% ftu_intro_count | html %])</a></span>
+                                [% END %]
                             </div>
                             <h1 class="title">[% bibliotitle | html %] (Record no. [% biblio.biblionumber | html %])</h1>
 

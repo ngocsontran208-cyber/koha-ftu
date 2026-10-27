@@ -37,10 +37,10 @@
                             onerror="this.onerror=null; this.src='[% FTU_BRAND.logo_url %]'" />
                         <div>
                             <div class="ftu-footer-title" style="font-weight: 800; color: #0F172A; font-size: 0.98rem; line-height: 1.3; text-transform: uppercase;">
-                                [% FTU_BRAND.library_name %]
+                                [% Koha.Preference('FTU_Footer_LibraryName') || FTU_BRAND.library_name %]
                             </div>
                             <div class="ftu-footer-sub" style="font-size: 0.78rem; color: #64748B; font-weight: 500; margin-top: 2px;">
-                                [% FTU_BRAND.campus_current %]
+                                [% Koha.Preference('FTU_Footer_CampusCurrent') || FTU_BRAND.campus_current || 'Foreign Trade University - Ho Chi Minh City Branch' %]
                             </div>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                             <i class="fa fa-location-dot" style="color: #b91c1c; font-size: 15px; margin-top: 3px; flex-shrink: 0;" aria-hidden="true"></i>
                             <div>
                                 <strong style="color: #1E293B;">Địa chỉ:</strong>
-                                <span> [% FTU_BRAND.campus_hcm_addr || 'Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh' %]</span>
+                                <span> [% Koha.Preference('FTU_Footer_Addr') || FTU_BRAND.campus_hcm_addr || 'Số 15, Đường D5, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh' %]</span>
                             </div>
                         </div>
 

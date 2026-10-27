@@ -30,7 +30,7 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 );
 
 # Điều kiện lọc bài viết công khai
-my $where = "status = 'published' AND post_type NOT IN ('database', 'banner')";
+my $where = "status = 'published' AND post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader')";
 my @bind;
 
 if ($filter_type ne "all") {

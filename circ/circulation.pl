@@ -816,11 +816,32 @@ my $relatives_issues_count =
 if ($patron) {
     my $av = Koha::AuthorisedValues->search( { category => 'ROADTYPE', authorised_value => $patron->streettype } );
     my $roadtype = $av->count ? $av->next->lib : '';
+    my $eff_branch = C4::Context->userenv ? C4::Context->userenv->{'branch'} : $patron->branchcode;
+    my $max_rule = Koha::CirculationRules->get_effective_rule(
+        {
+            categorycode => $patron->categorycode,
+            itemtype     => 'BK',
+            branchcode   => $eff_branch,
+            rule_name    => 'maxissueqty',
+        }
+    );
+    if ( !$max_rule || !defined $max_rule->rule_value || $max_rule->rule_value eq '' ) {
+        $max_rule = Koha::CirculationRules->get_effective_rule(
+            {
+                categorycode => $patron->categorycode,
+                itemtype     => undef,
+                branchcode   => $eff_branch,
+                rule_name    => 'maxissueqty',
+            }
+        );
+    }
+    my $patron_maxissueqty = ( $max_rule && defined $max_rule->rule_value && $max_rule->rule_value ne '' ) ? $max_rule->rule_value : 5;
     $template->param(
-        roadtype     => $roadtype,
-        patron       => $patron,
-        categoryname => $patron->category->description,
-        expiry       => $patron->dateexpiry,
+        roadtype           => $roadtype,
+        patron             => $patron,
+        categoryname       => $patron->category->description,
+        expiry             => $patron->dateexpiry,
+        patron_maxissueqty => $patron_maxissueqty,
     );
 }
 
@@ -837,6 +858,7 @@ if ( $restoreduedatespec || $stickyduedate ) {
 
 $template->param(
     borrowernumber            => $borrowernumber,
+    koha_session_id           => ( $session ? $session->id : $sessionID ),
     branch                    => $branch,
     was_renewed               => scalar $query->param('was_renewed') ? 1 : 0,
     barcodes                  => $barcodes,

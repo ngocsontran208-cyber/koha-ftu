@@ -3,13 +3,64 @@
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title
-    >[% FILTER collapse %]
-        [% t("Administration") | html %]
-        &rsaquo; [% t("Koha") | html %]
-    [% END %]</title
->
+<title>[% FILTER collapse %]
+    Quản trị hệ thống &rsaquo; Koha
+[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+body#admin_admin-home { background-color: #f8fafc; }
+body#admin_admin-home .main.container-fluid {
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 !important; padding: 20px 32px 48px 32px !important;
+    background-color: #f8fafc; box-sizing: border-box;
+}
+body#admin_admin-home .main.container-fluid > .row > div {
+    width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; padding: 0 !important;
+}
+.ftu-adm-header {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px 24px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-adm-header h1 { font-size: 20px; font-weight: 700; color: #0f172a; margin: 0; border: none !important; padding: 0 !important; }
+.ftu-adm-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ftu-adm-pref-form { display: flex; align-items: center; gap: 6px; margin: 0; }
+.ftu-adm-input {
+    width: 220px; padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+    font-size: 13px; color: #1e293b; background: #f8fafc;
+}
+.ftu-adm-input:focus { outline: none; border-color: #8B1E1E; background: #ffffff; }
+.ftu-adm-btn {
+    background: #8B1E1E; color: #ffffff; border: 1px solid #8B1E1E; border-radius: 8px;
+    padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none;
+}
+.ftu-adm-btn:hover { background: #731818; color: #ffffff; text-decoration: none; }
+.ftu-adm-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 20px; height: 100%; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-adm-card h3 {
+    font-size: 15px; font-weight: 700; color: #0f172a;
+    margin: 0 0 14px 0; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;
+}
+.ftu-adm-group {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748b; margin: 14px 0 6px 0;
+}
+.ftu-adm-group:first-of-type { margin-top: 0; }
+.ftu-adm-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ftu-adm-list li { margin: 0; padding: 0; }
+.ftu-adm-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: #334155; text-decoration: none;
+    transition: all 0.15s ease;
+}
+.ftu-adm-link:hover {
+    background: #fef2f2; border-color: #fecaca; color: #8B1E1E; text-decoration: none;
+}
+</style>
 </head>
 <body id="admin_admin-home" class="admin">
 [% WRAPPER 'header.inc' %]
@@ -21,307 +72,224 @@
         [% WRAPPER breadcrumb_item bc_active= 1 %]
             <span>Quản trị hệ thống</span>
         [% END %]
-    [% END #/ WRAPPER breadcrumbs %]
-[% END #/ WRAPPER sub-header.inc %]
+    [% END %]
+[% END %]
 
-[% WRAPPER 'main-container.inc' %]
-    <h1>Quản trị hệ thống</h1>
-    [% IF ( CAN_user_parameters_manage_mana ) %]
-        [% IF ( Koha.Preference('Mana') == 1) && !mana_url %]
-            <div class="alert alert-info">
-                <h4>Tính năng Mana Knowledge Base đã được bật nhưng chưa được cấu hình.</h4>
-                <p>Tính năng này cho phép bạn truy xuất và chia sẻ dữ liệu (mẫu đăng ký và báo cáo) với các thư viện Koha khác.</p>
-                <p> Yêu cầu quản trị viên cấu hình tính năng này, hoặc xoá thông báo này bằng cách <a href="/cgi-bin/koha/admin/share_content.pl">tắt tùy chọn hệ thống 'Mana'</a>. </p>
-            </div>
-        [% END %]
-        [% IF ( Koha.Preference('Mana') == 2 ) %]
-            <div class="alert alert-info">
-                <h4>Chia sẻ nội dung với Mana KB?</h4>
-                <p> Bạn chưa quyết định có muốn kích hoạt Mana Knowledge Base không. <a href="/cgi-bin/koha/admin/share_content.pl">Thay đổi cài đặt Mana KB</a>.</p>
-            </div>
-        [% END %]
-    [% END %]
-    [% IF ( CAN_user_parameters_manage_usage_stats ) %]
-        [% IF ( Koha.Preference('UsageStats') == 2 ) %]
-            <div class="alert alert-info">
-                <h4>Chia sẻ thống kê sử dụng ẩn danh với cộng đồng Koha?</h4>
-                <p> Bạn chưa quyết định có muốn kích hoạt chia sẻ thống kê sử dụng trong Koha không. <a href="/cgi-bin/koha/admin/usage_statistics.pl">Thay đổi cài đặt Hea</a>.</p>
-                <p>Tính năng này cung cấp thông tin hữu ích cho các nhà phát triển Koha về cách Koha được sử dụng và giúp định hướng các quyết định trong chu kỳ phát triển.</p>
-            </div>
-        [% END %]
-    [% END %]
-    <div class="row">
-        <div class="col-md-6 sysprefs">
+[% WRAPPER 'main-container.inc' wide_full => 1 %]
+    <div class="ftu-adm-header">
+        <h1>Quản trị hệ thống</h1>
+        <div class="ftu-adm-controls">
             [% IF ( CAN_user_parameters_manage_sysprefs ) %]
-                <form action="/cgi-bin/koha/admin/preferences.pl" method="get">
-                    <fieldset>
-                        <h4><a href="/cgi-bin/koha/admin/preferences.pl">Tùy chỉnh hệ thống</a></h4>
-                        <p>Quản lý các tùy chỉnh hệ thống như định dạng MARC, định dạng ngày, email quản trị và giao diện.</p>
-                        <input type="hidden" name="op" value="search" />
-                        <input type="text" name="searchfield" value="[% searchfield | html %]" />
-                        <input type="submit" name="ok" class="btn btn-primary" value="Tìm kiếm" />
-                    </fieldset>
-                </form>
+            <form action="/cgi-bin/koha/admin/preferences.pl" method="get" class="ftu-adm-pref-form">
+                <input type="hidden" name="op" value="search" />
+                <input type="text" name="searchfield" class="ftu-adm-input" value="[% searchfield | html %]" placeholder="Tìm tùy chọn hệ thống (SysPref)..." />
+                <input type="submit" name="ok" class="ftu-adm-btn" value="Tìm SysPref" />
+            </form>
             [% END %]
+            <input type="search" id="ftu-adm-filter" class="ftu-adm-input" placeholder="Lọc danh mục cấu hình..." autocomplete="off" />
+        </div>
+    </div>
 
-            [% IF ( CAN_user_parameters_manage_libraries || CAN_user_parameters_manage_itemtypes || CAN_user_parameters_manage_auth_values ) %]
-                <div class="hint"><h4>Gợi ý:</h4><p>Cấu hình các tham số theo thứ tự xuất hiện.</p></div>
-                <h3>Tham số cơ bản</h3>
-                <dl>
+    <div class="row g-4" id="ftu-adm-grid">
+        <!-- CỘT 1: THAM SỐ CƠ BẢN & LƯU THÔNG -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-adm-card">
+                <h3>Cơ bản &amp; Lưu thông</h3>
+
+                [% IF ( CAN_user_parameters_manage_libraries || CAN_user_parameters_manage_itemtypes || CAN_user_parameters_manage_auth_values || CAN_user_parameters_manage_sysprefs ) %]
+                <div class="ftu-adm-group">Tham số cơ bản</div>
+                <ul class="ftu-adm-list">
+                    [% IF ( CAN_user_parameters_manage_sysprefs ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/preferences.pl" title="Toàn bộ tùy chỉnh hệ thống Koha"><span>Tùy chỉnh hệ thống (SysPrefs)</span></a></li>
+                    [% END %]
                     [% IF ( CAN_user_parameters_manage_libraries ) %]
-                        <dt><a href="/cgi-bin/koha/admin/branches.pl">Thư viện</a></dt>
-                        <dd>Định nghĩa các thư viện</dd>
-                        <dt><a href="/cgi-bin/koha/admin/library_groups.pl">Nhóm thư viện</a></dt>
-                        <dd>Định nghĩa nhóm thư viện phân cấp</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/branches.pl" title="Khai báo thư viện và chi nhánh"><span>Thư viện &amp; Chi nhánh</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/library_groups.pl" title="Nhóm thư viện phân cấp"><span>Nhóm thư viện</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_itemtypes ) %]
-                        <dt><a href="/cgi-bin/koha/admin/itemtypes.pl">Loại tài liệu</a></dt>
-                        <dd>Định nghĩa loại tài liệu dùng trong quy tắc mượn trả</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/itemtypes.pl" title="Định nghĩa loại tài liệu"><span>Loại tài liệu</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_auth_values ) %]
-                        <dt><a href="/cgi-bin/koha/admin/authorised_values.pl">Giá trị được phép</a></dt>
-                        <dd>Định nghĩa danh mục và các giá trị được phép</dd>
-                        <dt><a href="/cgi-bin/koha/admin/collections.pl">Quản lý Bộ sưu tập</a></dt>
-                        <dd>Quản lý các bộ sưu tập chuyên đề (CCODE), ảnh bìa, tóm tắt mô tả và chuyên đề nổi bật trên OPAC</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/collections.pl" title="Quản lý bộ sưu tập chuyên đề CCODE"><span>Bộ sưu tập (CCODE)</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/warehouses.pl" title="Quản lý kho vật lý LOC và quy tắc mượn"><span>Kho lưu trữ (LOC)</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/authorised_values.pl" title="Danh mục giá trị chuẩn"><span>Giá trị được phép</span></a></li>
                     [% END %]
-                </dl>
-            [% END %]
+                </ul>
+                [% END %]
 
-            [% IF ( CAN_user_parameters_manage_patron_categories || CAN_user_parameters_manage_circ_rules || CAN_user_parameters_manage_patron_attributes || CAN_user_parameters_manage_transfers || CAN_user_parameters_manage_item_circ_alerts || CAN_user_parameters_manage_cities || CAN_user_parameters_manage_curbside_pickups ) %]
-                <h3>Bạn đọc và mượn trả</h3>
-                <dl>
+                [% IF ( CAN_user_parameters_manage_patron_categories || CAN_user_parameters_manage_circ_rules || CAN_user_parameters_manage_patron_attributes || CAN_user_parameters_manage_transfers || CAN_user_parameters_manage_item_circ_alerts || CAN_user_parameters_manage_cities || CAN_user_parameters_manage_curbside_pickups ) %]
+                <div class="ftu-adm-group">Bạn đọc &amp; Mượn trả</div>
+                <ul class="ftu-adm-list">
                     [% IF ( CAN_user_parameters_manage_patron_categories ) %]
-                        <dt><a href="/cgi-bin/koha/admin/categories.pl">Loại bạn đọc</a></dt>
-                        <dd>Định nghĩa các loại bạn đọc</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/categories.pl" title="Phân nhóm bạn đọc"><span>Nhóm bạn đọc</span></a></li>
                     [% END %]
                     [% IF CAN_user_parameters_manage_circ_rules %]
-                        <dt><a href="/cgi-bin/koha/admin/smart-rules.pl">Quy tắc mượn trả và phạt</a></dt>
-                        <dd>Định nghĩa quy tắc mượn trả và phạt theo tổ hợp thư viện, loại bạn đọc và loại tài liệu</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/smart-rules.pl" title="Quy tắc mượn trả và phí phạt"><span>Quy tắc lưu thông &amp; Phạt</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_patron_attributes ) %]
-                        <dt><a href="/cgi-bin/koha/admin/patron-attr-types.pl">Loại thuộc tính bạn đọc</a></dt>
-                        <dd>Định nghĩa thuộc tính mở rộng (định danh và danh mục thống kê) cho hồ sơ bạn đọc</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_transfers ) %]
-                        <dt><a href="/cgi-bin/koha/admin/branch_transfer_limits.pl">Giới hạn luân chuyển thư viện</a> (<a href="/cgi-bin/koha/admin/transfer_limits.pl">Trình soạn thảo nâng cao</a>)</dt>
-                        <dd>Giới hạn khả năng luân chuyển tài liệu giữa các thư viện dựa trên thư viện gửi, thư viện nhận và loại tài liệu. Các quy tắc này chỉ có hiệu lực khi tùy chọn UseBranchTransferLimits được bật.</dd>
-                        <dt><a href="/cgi-bin/koha/admin/transport-cost-matrix.pl">Ma trận chi phí vận chuyển</a></dt>
-                        <dd>Định nghĩa chi phí vận chuyển giữa các chi nhánh</dd>
-                        <dt><a href="/cgi-bin/koha/admin/float_limits.pl">Giới hạn lưu động thư viện</a></dt>
-                        <dd>Định nghĩa khi nào tài liệu cần được chuyển sang thư viện khác khi trả để cân bằng bộ sưu tập lưu động</dd>
-                    [% END %]
-                    [% IF ( CAN_user_sip2 ) %]
-                        <dt><a href="/cgi-bin/koha/sip2/sip2.pl">Mượn trả tự phục vụ (SIP2)</a></dt>
-                        <dd>Cấu hình SIP2, bao gồm tổ chức, tài khoản và ghi đè tùy chỉnh hệ thống</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_item_circ_alerts ) %]
-                        <dt><a href="/cgi-bin/koha/admin/item_circulation_alerts.pl">Cảnh báo mượn trả tài liệu</a></dt>
-                        <dd>Định nghĩa quy tắc thông báo trả/mượn theo tổ hợp thư viện, loại bạn đọc và loại tài liệu</dd>
-                    [% END %]
-                    [% IF ( Koha.Preference('UseCirculationDesks') && CAN_user_parameters_manage_libraries ) %]
-                        <dt><a href="/cgi-bin/koha/admin/desks.pl">Quầy phục vụ</a></dt>
-                        <dd>Định nghĩa các quầy phục vụ mượn trả</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_cities ) %]
-                        <dt><a href="/cgi-bin/koha/admin/cities.pl">Thành phố và địa phương</a></dt>
-                        <dd>Định nghĩa thành phố và địa phương nơi bạn đọc sinh sống</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_curbside_pickups ) %]
-                        <dt><a href="/cgi-bin/koha/admin/curbside_pickup.pl">Nhận tài liệu tại điểm hẹn</a></dt>
-                        <dd>Cấu hình dịch vụ nhận tài liệu tại điểm hẹn cho thư viện</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/patron-attr-types.pl" title="Thuộc tính mở rộng của bạn đọc (Khoa, Khóa...)"><span>Thuộc tính bạn đọc</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_patron_restrictions ) %]
-                        <dt><a href="/cgi-bin/koha/admin/restrictions.pl">Loại hạn chế bạn đọc</a></dt>
-                        <dd>Định nghĩa các loại hạn chế thủ công cho bạn đọc</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/restrictions.pl"><span>Loại hạn chế thẻ</span></a></li>
                     [% END %]
-                </dl>
-            [% END %]
-
-            [% IF ( CAN_user_parameters_manage_accounts || ( Koha.Preference('UseCashRegisters') && CAN_user_parameters_manage_cash_registers ) ) %]
-                <h3>Kế toán</h3>
-                <dl>
-                    [% IF ( CAN_user_parameters_manage_accounts ) %]
-                        <dt><a href="/cgi-bin/koha/admin/debit_types.pl">Loại ghi nợ</a></dt>
-                        <dd>Định nghĩa các loại ghi nợ</dd>
-                        <dt><a href="/cgi-bin/koha/admin/credit_types.pl">Loại tín dụng</a></dt>
-                        <dd>Định nghĩa các loại tín dụng</dd>
+                    [% IF ( CAN_user_parameters_manage_item_circ_alerts ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/item_circulation_alerts.pl"><span>Cảnh báo mượn trả</span></a></li>
                     [% END %]
-                    [% IF ( Koha.Preference('UseCashRegisters') && CAN_user_parameters_manage_cash_registers ) %]
-                        <dt><a href="/cgi-bin/koha/admin/cash_registers.pl">Máy tính tiền</a></dt>
-                        <dd>Định nghĩa các máy tính tiền</dd>
+                    [% IF ( CAN_user_parameters_manage_transfers ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/branch_transfer_limits.pl"><span>Giới hạn luân chuyển kho</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/transport-cost-matrix.pl"><span>Ma trận chi phí vận chuyển</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/float_limits.pl"><span>Giới hạn lưu động</span></a></li>
                     [% END %]
-                </dl>
-            [% END %]
-
-            [% IF plugins_enabled && ( CAN_user_plugins_manage || CAN_user_plugins_configure || ( CAN_user_plugins_admin && admin_plugins)) %]
-                <h3>Plugin</h3>
-                <dl>
-                    [% IF CAN_user_plugins_manage || CAN_user_plugins_configure %]
-                        <dt><a href="/cgi-bin/koha/plugins/plugins-home.pl">Quản lý plugin</a></dt>
-                        <dd>Xem, quản lý, cấu hình và chạy các plugin.</dd>
+                    [% IF ( Koha.Preference('UseCirculationDesks') && CAN_user_parameters_manage_libraries ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/desks.pl"><span>Quầy phục vụ</span></a></li>
                     [% END %]
-                    [% IF ( CAN_user_plugins_admin && admin_plugins ) %]
-                        [% FOREACH plugin IN admin_plugins %]
-                            <dt
-                                ><a href="/cgi-bin/koha/plugins/run.pl?class=[% plugin.class | uri %]&method=admin"><span class="plugin_name">[% plugin.metadata.name | html %]</span></a></dt
-                            >
-                            <dd>[% plugin.metadata.description | html %]</dd>
-                        [% END %]
+                    [% IF ( CAN_user_parameters_manage_cities ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/cities.pl"><span>Tỉnh / Thành phố</span></a></li>
                     [% END %]
-                </dl>
-            [% END %]
-
-            [% IF CAN_user_parameters_manage_background_jobs %]
-                <h3>Tác vụ nền</h3>
-                <dl>
-                    <dt><a href="/cgi-bin/koha/admin/background_jobs.pl">Quản lý tác vụ</a></dt>
-                    <dd>Xem, quản lý và huỷ các tác vụ nền.</dd>
-                </dl>
-            [% END %]
+                    [% IF ( CAN_user_parameters_manage_curbside_pickups ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/curbside_pickup.pl"><span>Nhận sách tại điểm hẹn</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_sip2 ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/sip2/sip2.pl"><span>Tự phục vụ (SIP2)</span></a></li>
+                    [% END %]
+                </ul>
+                [% END %]
+            </div>
         </div>
 
-        <div class="col-md-6 sysprefs">
-            [% IF ( CAN_user_parameters_manage_marc_frameworks || CAN_user_parameters_manage_classifications || CAN_user_parameters_manage_matching_rules || CAN_user_parameters_manage_oai_sets || CAN_user_parameters_manage_item_search_fields || CAN_user_parameters_manage_search_engine_config || CAN_user_parameters_manage_marc_overlay_rules || ( Koha.Preference('SavedSearchFilters') && ( CAN_user_parameters_manage_search_filters ) ) ) %]
-                <h3>Biên mục</h3>
-                <dl>
+        <!-- CỘT 2: BIÊN MỤC & TRA CỨU -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-adm-card">
+                <h3>Biên mục &amp; Tra cứu</h3>
+
+                [% IF ( CAN_user_parameters_manage_marc_frameworks || CAN_user_parameters_manage_classifications || CAN_user_parameters_manage_matching_rules || CAN_user_parameters_manage_oai_sets || CAN_user_parameters_manage_item_search_fields || CAN_user_parameters_manage_search_engine_config || CAN_user_parameters_manage_marc_overlay_rules || ( Koha.Preference('SavedSearchFilters') && ( CAN_user_parameters_manage_search_filters ) ) ) %]
+                <div class="ftu-adm-group">Cấu trúc MARC21</div>
+                <ul class="ftu-adm-list">
                     [% IF ( CAN_user_parameters_manage_marc_frameworks ) %]
-                        <dt><a href="/cgi-bin/koha/admin/biblio_framework.pl">Khung biên mục MARC</a></dt>
-                        <dd>Tạo và quản lý khung biên mục định nghĩa cấu trúc biểu ghi MARC (trường và trường con) cùng với các mẫu cho trình soạn thảo MARC</dd>
-                        <dt><a href="/cgi-bin/koha/admin/koha2marclinks.pl">Ánh xạ Koha sang MARC</a></dt>
-                        <dd>Định nghĩa ánh xạ giữa cơ sở dữ liệu giao dịch Koha (SQL) và biểu ghi MARC</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_marc_frameworks ) %]
-                        <dt><a href="/cgi-bin/koha/admin/checkmarc.pl">Kiểm tra khung biên mục MARC</a></dt>
-                        <dd>Kiểm tra cấu trúc MARC. Nên chạy công cụ này sau khi thay đổi khung biên mục để phát hiện lỗi.</dd>
-                        <dt><a href="/cgi-bin/koha/admin/authtypes.pl">Loại tham chiếu thẩm quyền</a></dt>
-                        <dd>Tạo và quản lý khung tham chiếu thẩm quyền định nghĩa cấu trúc biểu ghi MARC</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/biblio_framework.pl" title="Khung mẫu biên mục MARC21"><span>Khung biên mục MARC</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/koha2marclinks.pl" title="Ánh xạ cơ sở dữ liệu Koha sang MARC"><span>Ánh xạ Koha – MARC</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/checkmarc.pl" title="Kiểm tra lỗi cấu trúc khung MARC"><span>Kiểm tra khung MARC</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/authtypes.pl" title="Khung mẫu biểu ghi nhất quán (Authority)"><span>Khung từ chuẩn (Authority)</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_classifications ) %]
-                        <dt><a href="/cgi-bin/koha/admin/classsources.pl">Cấu hình phân loại</a></dt>
-                        <dd>Định nghĩa nguồn phân loại (ký hiệu xếp giá) cho bộ sưu tập, quy tắc sắp xếp và chia nhỏ ký hiệu</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/classsources.pl" title="Nguồn phân loại DDC/LCC và quy tắc xếp giá"><span>Khung phân loại &amp; Xếp giá</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_matching_rules ) %]
-                        <dt><a href="/cgi-bin/koha/admin/matching-rules.pl">Quy tắc đối sánh biểu ghi</a></dt>
-                        <dd>Quản lý quy tắc đối sánh biểu ghi MARC tự động khi nhập dữ liệu</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/matching-rules.pl" title="Quy tắc kiểm tra trùng biểu ghi khi nhập MARC"><span>Quy tắc đối sánh trùng</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_record_sources ) %]
-                        <dt><a href="/cgi-bin/koha/admin/record_sources">Nguồn biểu ghi</a></dt>
-                        <dd>Định nghĩa nguồn biểu ghi để nhập</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/record_sources"><span>Nguồn biểu ghi</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_marc_overlay_rules ) %]
-                        <dt><a href="/cgi-bin/koha/admin/marc-overlay-rules.pl">Quy tắc chồng lấp biểu ghi</a></dt>
-                        <dd>Quản lý quy tắc chồng lấp tự động trường MARC khi nhập và cập nhật biểu ghi</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/marc-overlay-rules.pl"><span>Quy tắc ghi đè trường MARC</span></a></li>
                     [% END %]
+                </ul>
+
+                <div class="ftu-adm-group">Tìm kiếm &amp; Liên thông</div>
+                <ul class="ftu-adm-list">
                     [% IF ( CAN_user_parameters_manage_oai_sets ) %]
-                        <dt><a href="/cgi-bin/koha/admin/oai_sets.pl">Cấu hình tập hợp OAI</a></dt>
-                        <dd>Quản lý các tập hợp OAI</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/oai_sets.pl"><span>Tập hợp OAI-PMH</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_item_search_fields ) %]
-                        <dt><a href="/cgi-bin/koha/admin/items_search_fields.pl">Trường tìm kiếm tài liệu</a></dt>
-                        <dd>Quản lý các trường tùy chỉnh cho tìm kiếm tài liệu</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/items_search_fields.pl"><span>Trường tìm kiếm ĐKCB</span></a></li>
                     [% END %]
                     [% IF Koha.Preference('SavedSearchFilters') && ( CAN_user_parameters_manage_search_filters ) %]
-                        <dt><a href="/cgi-bin/koha/admin/search_filters.pl">Bộ lọc tìm kiếm</a></dt>
-                        <dd>Quản lý các bộ lọc tìm kiếm tùy chỉnh</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/search_filters.pl"><span>Bộ lọc tìm kiếm lưu sẵn</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_search_engine_config ) %]
-                        <dt><a href="/cgi-bin/koha/admin/searchengine/elasticsearch/mappings.pl">Cấu hình máy tìm kiếm (Elasticsearch)</a></dt>
-                        <dd>Quản lý chỉ mục, facet và ánh xạ của chúng tới trường và trường con MARC</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/searchengine/elasticsearch/mappings.pl"><span>Cấu hình máy tìm kiếm</span></a></li>
                     [% END %]
-                </dl>
-            [% END %]
+                </ul>
+                [% END %]
+            </div>
+        </div>
 
-            [% IF ( CAN_user_acquisition_currencies_manage || CAN_user_acquisition_period_manage || CAN_user_acquisition_budget_manage || ( Koha.Preference('EDIFACT') && CAN_user_acquisition_edi_manage ) || ( Koha.Preference('MarcOrderingAutomation') && CAN_user_acquisition_marc_order_manage ) ) %]
-                <h3>Tham số bổ sung</h3>
-                <dl>
-                    [% IF ( CAN_user_acquisition_currencies_manage ) %]
-                        <dt><a href="/cgi-bin/koha/admin/currency.pl">Tiền tệ và tỷ giá hối đoái</a></dt>
-                        <dd>Định nghĩa đơn vị tiền tệ và tỷ giá dùng trong bổ sung tài liệu</dd>
-                    [% END %]
+        <!-- CỘT 3: BỔ SUNG, KẾ TOÁN & HỆ THỐNG -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-adm-card">
+                <h3>Bổ sung, Tài chính &amp; Hệ thống</h3>
+
+                [% IF ( CAN_user_acquisition_currencies_manage || CAN_user_acquisition_period_manage || CAN_user_acquisition_budget_manage || CAN_user_parameters_manage_accounts || ( Koha.Preference('UseCashRegisters') && CAN_user_parameters_manage_cash_registers ) ) %]
+                <div class="ftu-adm-group">Bổ sung &amp; Kế toán</div>
+                <ul class="ftu-adm-list">
                     [% IF ( CAN_user_acquisition_period_manage ) %]
-                        <dt><a href="/cgi-bin/koha/admin/aqbudgetperiods.pl">Ngân sách</a></dt>
-                        <dd>Định nghĩa ngân sách</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/aqbudgetperiods.pl"><span>Kỳ ngân sách</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_acquisition_budget_manage ) %]
-                        <dt><a href="/cgi-bin/koha/admin/aqbudgets.pl">Quỹ</a></dt>
-                        <dd>Định nghĩa các quỹ trong ngân sách</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/aqbudgets.pl"><span>Quỹ bổ sung</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_acquisition_currencies_manage ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/currency.pl"><span>Tiền tệ &amp; Tỷ giá</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_parameters_manage_accounts ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/debit_types.pl"><span>Loại phí thu (Ghi nợ)</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/credit_types.pl"><span>Loại hoàn trả (Tín dụng)</span></a></li>
+                    [% END %]
+                    [% IF ( Koha.Preference('UseCashRegisters') && CAN_user_parameters_manage_cash_registers ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/cash_registers.pl"><span>Quầy thu ngân</span></a></li>
                     [% END %]
                     [% IF ( Koha.Preference('EDIFACT') && CAN_user_acquisition_edi_manage ) %]
-                        <dt><a href="/cgi-bin/koha/admin/edi_accounts.pl">Tài khoản EDI</a></dt>
-                        <dd>Quản lý tài khoản EDI nhà cung cấp cho nhập/xuất</dd>
-                        <dt><a href="/cgi-bin/koha/admin/edi_ean_accounts.pl">EAN thư viện</a></dt>
-                        <dd>Quản lý mã EAN EDI thư viện</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/edi_accounts.pl"><span>Tài khoản EDI</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/edi_ean_accounts.pl"><span>Mã EAN thư viện</span></a></li>
                     [% END %]
                     [% IF ( Koha.Preference('MarcOrderingAutomation') && CAN_user_acquisition_marc_order_manage ) %]
-                        <dt><a href="/cgi-bin/koha/admin/marc_order_accounts.pl">Tài khoản đặt hàng MARC</a></dt>
-                        <dd>Quản lý tài khoản nhà cung cấp để tạo dòng đặt hàng tự động từ biểu ghi MARC</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/marc_order_accounts.pl"><span>Đặt hàng MARC tự động</span></a></li>
                     [% END %]
-                </dl>
-            [% END %]
+                </ul>
+                [% END %]
 
-            [% IF ( ( CAN_user_parameters_manage_identity_providers || CAN_user_parameters_manage_smtp_servers || CAN_user_parameters_manage_file_transports || CAN_user_parameters_manage_search_targets || CAN_user_parameters_manage_didyoumean || CAN_user_parameters_manage_column_config || CAN_user_parameters_manage_audio_alerts || CAN_user_parameters_manage_sms_providers && Koha.Preference('SMSSendDriver') == 'Email' ) || CAN_user_parameters_manage_usage_stats || CAN_user_parameters_manage_additional_fields || CAN_user_parameters_manage_mana || (Koha.Preference('EnableAdvancedCatalogingEditor') && CAN_user_parameters_manage_keyboard_shortcuts) ) %]
-                <h3>Tham số bổ trợ</h3>
-                <dl>
-                    <!-- <dt><a href="/cgi-bin/koha/admin/printers.pl">Network Printers</a></dt>
-                        <dd>Printers (UNIX paths).</dd> -->
-                    [% IF ( CAN_user_parameters_manage_identity_providers) %]
-                        <dt><a href="/cgi-bin/koha/admin/identity_providers.pl">Nhà cung cấp danh tính</a></dt>
-                        <dd>Định nghĩa các nhà cung cấp danh tính bên ngoài sẽ sử dụng</dd>
-                    [% END %]
+                <div class="ftu-adm-group">Kết nối &amp; Tiện ích hệ thống</div>
+                <ul class="ftu-adm-list">
                     [% IF ( CAN_user_parameters_manage_search_targets ) %]
-                        <dt><a href="/cgi-bin/koha/admin/z3950servers.pl">Máy chủ Z39.50/SRU</a></dt>
-                        <dd>Định nghĩa máy chủ bên ngoài để truy vấn dữ liệu MARC</dd>
-                        <dt><a href="/cgi-bin/koha/admin/oai_servers.pl">Kho OAI</a></dt>
-                        <dd>Định nghĩa các kho OAI để thu thập dữ liệu</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/z3950servers.pl"><span>Máy chủ Z39.50 / SRU</span></a></li>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/oai_servers.pl"><span>Kho thu hoạch OAI</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_smtp_servers ) %]
-                        <dt><a href="/cgi-bin/koha/admin/smtp_servers.pl">Máy chủ SMTP</a></dt>
-                        <dd>Định nghĩa máy chủ SMTP sẽ sử dụng</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/smtp_servers.pl"><span>Máy chủ gửi mail (SMTP)</span></a></li>
                     [% END %]
-                    [% IF ( CAN_user_parameters_manage_file_transports ) %]
-                        <dt><a href="/cgi-bin/koha/admin/file_transports.pl">Vận chuyển file</a></dt>
-                        <dd>Định nghĩa máy chủ vận chuyển file (FTP/SFTP)</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_didyoumean ) %]
-                        <dt><a href="/cgi-bin/koha/admin/didyoumean.pl">Bạn có muốn nói...?</a></dt>
-                        <dd>Chọn plugin gợi ý tìm kiếm cho bạn đọc và thủ thư</dd>
+                    [% IF ( CAN_user_parameters_manage_identity_providers) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/identity_providers.pl"><span>Nhà cung cấp định danh (SSO/IdP)</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_column_config ) %]
-                        <dt><a href="/cgi-bin/koha/admin/columns_settings.pl">Cài đặt bảng</a></dt>
-                        <dd>Cấu hình, ẩn hoặc hiển thị các cột trong bảng</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_audio_alerts ) %]
-                        <dt><a href="/cgi-bin/koha/admin/audio_alerts.pl">Cảnh báo âm thanh</a></dt>
-                        <dd>Định nghĩa sự kiện nào kích hoạt âm thanh nào</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_sms_providers && Koha.Preference('SMSSendDriver') == 'Email' ) %]
-                        <dt><a href="/cgi-bin/koha/admin/sms_providers.pl">Nhà mạng SMS</a></dt>
-                        <dd>Định nghĩa danh sách nhà mạng gửi SMS qua email</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_usage_stats ) %]
-                        <dt><a href="/cgi-bin/koha/admin/usage_statistics.pl">Chia sẻ thống kê sử dụng</a></dt>
-                        <dd>Chia sẻ thống kê sử dụng cài đặt Koha của bạn với cộng đồng Koha</dd>
-                    [% END %]
-                    [% IF ( CAN_user_parameters_manage_mana ) %]
-                        <dt><a href="/cgi-bin/koha/admin/share_content.pl">Chia sẻ nội dung với Mana KB</a></dt>
-                        <dd>Chia sẻ nội dung (đăng ký, báo cáo) với cộng đồng Koha</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/columns_settings.pl"><span>Cấu hình cột hiển thị bảng</span></a></li>
                     [% END %]
                     [% IF ( CAN_user_parameters_manage_additional_fields ) %]
-                        <dt><a href="/cgi-bin/koha/admin/additional-fields.pl">Trường bổ sung</a></dt>
-                        <dd>Thêm các trường bổ sung vào một số bảng</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/additional-fields.pl"><span>Trường dữ liệu bổ sung</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_parameters_manage_audio_alerts ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/audio_alerts.pl"><span>Âm báo lưu thông</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_parameters_manage_didyoumean ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/didyoumean.pl"><span>Gợi ý tìm kiếm</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_parameters_manage_file_transports ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/file_transports.pl"><span>Kết nối FTP / SFTP</span></a></li>
+                    [% END %]
+                    [% IF CAN_user_parameters_manage_background_jobs %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/background_jobs.pl"><span>Tiến trình nền (Background Jobs)</span></a></li>
+                    [% END %]
+                    [% IF plugins_enabled && ( CAN_user_plugins_manage || CAN_user_plugins_configure ) %]
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/plugins/plugins-home.pl"><span>Quản lý Plugin</span></a></li>
                     [% END %]
                     [% IF Koha.Preference('EnableAdvancedCatalogingEditor') && ( CAN_user_parameters_manage_keyboard_shortcuts ) %]
-                        <dt><a href="/cgi-bin/koha/admin/adveditorshortcuts.pl">Phím tắt bàn phím</a></dt>
-                        <dd>Định nghĩa các phím tắt cho trình biên mục nâng cao</dd>
+                    <li><a class="ftu-adm-link" href="/cgi-bin/koha/admin/adveditorshortcuts.pl"><span>Phím tắt biên mục</span></a></li>
                     [% END %]
-                    [% IF Koha.Preference('ILLModule') && CAN_user_ill %]
-                        <dt><a href="/cgi-bin/koha/admin/ill_batch_statuses.pl">Trạng thái lô mượn liên thư viện</a></dt>
-                        <dd>Quản lý các trạng thái có thể gán cho lô mượn liên thư viện</dd>
-                    [% END %]
-                </dl>
-            [% END %]
+                </ul>
+            </div>
         </div>
     </div>
 [% END %]
-
+<script nonce="[% Koha.CSPNonce | $raw %]">
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('ftu-adm-filter');
+    if (!input) return;
+    input.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        document.querySelectorAll('#ftu-adm-grid .ftu-adm-list li').forEach(function(li) {
+            var txt = li.textContent.toLowerCase();
+            li.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
+});
+</script>
 [% INCLUDE 'intranet-bottom.inc' %]

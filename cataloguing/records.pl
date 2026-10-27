@@ -134,6 +134,8 @@ if ( $op eq "get_record" ) {
     my $rec = $sth->fetchrow_hashref;
 
     if ($rec) {
+        $rec->{publicationyear} ||= $rec->{copyrightdate};
+        $rec->{copyrightdate}   ||= $rec->{publicationyear};
         my $biblio = Koha::Biblios->find($biblionumber);
         my $record = $biblio && $biblio->metadata ? $biblio->metadata->record : undef;
         
@@ -874,6 +876,7 @@ if ( $op eq "quick_create" ) {
             my $bi = $biblio->biblioitem;
             if ($bi) {
                 $bi->itemtype($itemtype);
+                $bi->publicationyear($pubyear) if length($pubyear);
                 $bi->cn_class($classif) if length($classif);
                 $bi->cn_item($cutter) if length($cutter);
                 $bi->cn_source('ddc');
@@ -1060,6 +1063,8 @@ my @records;
 my @page_biblionumbers;
 
 while (my $row = $sth_list->fetchrow_hashref) {
+    $row->{publicationyear} ||= $row->{copyrightdate};
+    $row->{copyrightdate}   ||= $row->{publicationyear};
     $row->{items} = [];
     $row->{total_items}     = int($row->{total_items} || 0);
     $row->{available_items} = int($row->{available_items} || 0);

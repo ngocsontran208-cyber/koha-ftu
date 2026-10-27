@@ -869,22 +869,19 @@
     <!-- MÀN HÌNH 1: QUẢN LÝ DANH SÁCH ĐỢT XÉT TỐT NGHIỆP (MẶC ĐỊNH KHI VÀO TRANG)   -->
     <!-- ========================================================================= -->
     <div id="view-batches-list" class="grad-view-section">
-        <!-- Hero Header Card (Hợp nhất tiêu đề duy nhất, loại bỏ trùng lặp) -->
+        <!-- Hero Header Card -->
         <div class="grad-batches-hero">
             <div class="grad-hero-content">
                 <div class="grad-hero-text">
-                    <h1>Quản lý Đợt Xét Tốt Nghiệp</h1>
+                    <h1>Xét tốt nghiệp</h1>
                 </div>
                 <div class="grad-hero-actions">
                     <button type="button" class="grad-btn grad-btn-crimson grad-btn-lg" onclick="openCreateBatchModal()">
-                        <i class="fa fa-plus-circle"></i> Tạo đợt xét tốt nghiệp mới
+                        + Tạo đợt mới
                     </button>
                     <button type="button" class="grad-btn grad-btn-outline" onclick="openAdhocCheckModal()">
-                        Tra cứu nhanh (không lưu đợt)
+                        Tra cứu nhanh
                     </button>
-                    <a href="/cgi-bin/koha/mainpage.pl" class="grad-btn grad-btn-outline" title="Quay về trang chủ quản trị Koha">
-                        <i class="fa fa-home"></i> Về Trang chủ
-                    </a>
                 </div>
             </div>
         </div>
@@ -893,13 +890,13 @@
         <div class="grad-card grad-batches-table-card">
             <div class="grad-card-header" style="padding: 14px 20px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span class="grad-card-title"><i class="fa fa-list-ul"></i> Danh sách các Đợt xét tốt nghiệp</span>
+                    <span class="grad-card-title">Danh sách đợt xét</span>
                     <span class="grad-counter-badge" id="batches-count-badge">[% saved_batches.size || 0 %] đợt</span>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="search-batch-input" class="grad-search-input" style="width: 260px;" placeholder="Tìm theo tên đợt, niên khóa..." oninput="filterBatchesList(this.value)">
+                    <input type="text" id="search-batch-input" class="grad-search-input" style="width: 240px;" placeholder="Tìm tên đợt, khóa..." oninput="filterBatchesList(this.value)">
                     <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="loadBatchesList()">
-                        <i class="fa fa-refresh"></i> Tải lại
+                        Tải lại
                     </button>
                 </div>
             </div>
@@ -908,12 +905,12 @@
                     <thead>
                         <tr>
                             <th style="width: 50px; text-align: center;">STT</th>
-                            <th>Tên đợt xét tốt nghiệp</th>
-                            <th style="width: 140px; text-align: center;">Khóa / Niên khóa</th>
-                            <th style="width: 110px; text-align: center;">Số lượng SV</th>
-                            <th style="width: 250px;">Tiến độ đối soát</th>
-                            <th style="width: 150px; text-align: center;">Ngày tạo</th>
-                            <th style="width: 220px; text-align: center;">Thao tác</th>
+                            <th>Tên đợt xét</th>
+                            <th style="width: 130px; text-align: center;">Khóa</th>
+                            <th style="width: 100px; text-align: center;">Số SV</th>
+                            <th style="width: 220px;">Kết quả đối soát</th>
+                            <th style="width: 140px; text-align: center;">Ngày tạo</th>
+                            <th style="width: 190px; text-align: center;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="batches-tbody">
@@ -923,7 +920,7 @@
                                 <td style="text-align: center; font-weight: 700; color: #64748b;">[% loop.count %]</td>
                                 <td>
                                     <a href="javascript:void(0)" onclick="openBatchDetail([% b.id %])" class="grad-batch-name-link">
-                                        <i class="fa fa-folder-open"></i> [% b.batch_name %]
+                                        [% b.batch_name %]
                                     </a>
                                     [% IF b.description %]
                                     <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">[% b.description %]</div>
@@ -933,15 +930,15 @@
                                     <span class="grad-batch-tag">[% b.cohort || b.academic_year || 'Đợt xét' %]</span>
                                 </td>
                                 <td style="text-align: center; font-weight: 700; font-size: 13.5px; color: #0f172a;">
-                                    [% b.total_patrons %] SV
+                                    [% b.total_patrons %]
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                                         <span class="grad-tab-pill pill-cleared" style="font-size: 11px;">
-                                            <i class="fa fa-check"></i> [% b.cleared_count || 0 %] Đủ ĐK
+                                            [% b.cleared_count || 0 %] Đủ ĐK
                                         </span>
                                         <span class="grad-tab-pill pill-debt" style="font-size: 11px;">
-                                            <i class="fa fa-exclamation-triangle"></i> [% b.debt_count || 0 %] Còn nợ
+                                            [% b.debt_count || 0 %] Còn nợ
                                         </span>
                                     </div>
                                 </td>
@@ -950,14 +947,14 @@
                                 </td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 6px;">
-                                        <button type="button" class="grad-btn grad-btn-primary grad-btn-sm" onclick="openBatchDetail([% b.id %])" title="Vào tra cứu và đối soát đợt này">
-                                            <i class="fa fa-search"></i> Vào tra cứu
+                                        <button type="button" class="grad-btn grad-btn-primary grad-btn-sm" onclick="openBatchDetail([% b.id %])">
+                                            Chi tiết
                                         </button>
-                                        <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="recheckBatchFromList([% b.id %])" title="Đối soát lại dữ liệu mượn trả">
-                                            <i class="fa fa-refresh"></i>
+                                        <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="recheckBatchFromList([% b.id %])" title="Đối soát lại">
+                                            Đối soát
                                         </button>
                                         <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" style="color: #dc2626; border-color: #fca5a5;" onclick="deleteBatchFromList([% b.id %], '[% b.batch_name %]')" title="Xóa đợt này">
-                                            <i class="fa fa-trash-can"></i>
+                                            Xóa
                                         </button>
                                     </div>
                                 </td>
@@ -966,12 +963,10 @@
                         [% ELSE %]
                             <tr>
                                 <td colspan="7">
-                                    <div id="batches-empty-msg" style="text-align: center; padding: 48px 20px;">
-                                        <i class="fa fa-folder-open" style="font-size: 48px; color: #cbd5e1; margin-bottom: 12px;"></i>
-                                        <h3 style="color: #475569; font-weight: 700; margin-bottom: 6px;">Chưa có đợt xét tốt nghiệp nào</h3>
-                                        <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Vui lòng tạo đợt xét mới và nạp danh sách sinh viên để bắt đầu quản lý.</p>
-                                        <button type="button" class="grad-btn grad-btn-crimson" onclick="openCreateBatchModal()">
-                                            <i class="fa fa-plus-circle"></i> Tạo đợt xét tốt nghiệp đầu tiên
+                                    <div id="batches-empty-msg" style="text-align: center; padding: 40px 20px;">
+                                        <h3 style="color: #475569; font-weight: 700; margin-bottom: 6px;">Chưa có đợt xét tốt nghiệp</h3>
+                                        <button type="button" class="grad-btn grad-btn-crimson" style="margin-top: 8px;" onclick="openCreateBatchModal()">
+                                            + Tạo đợt xét mới
                                         </button>
                                     </div>
                                 </td>
@@ -987,11 +982,11 @@
     <!-- MÀN HÌNH 2: GIAO DIỆN TRA CỨU & ĐỐI SOÁT CHI TIẾT CỦA ĐỢT (ẨN MẶC ĐỊNH)    -->
     <!-- ========================================================================= -->
     <div id="view-batch-detail" class="grad-view-section" style="display: none;">
-        <!-- Top Navigation Bar -->
+        <!-- Top Navigation Bar (Hợp nhất tiêu đề và tác vụ đợt) -->
         <div class="grad-detail-topbar">
             <div class="grad-topbar-left">
                 <button type="button" class="grad-btn grad-btn-outline grad-btn-back" onclick="backToBatchesList()">
-                    <i class="fa fa-arrow-left"></i> <span>Quay lại Danh sách các đợt</span>
+                    &larr; <span>Danh sách đợt</span>
                 </button>
                 <div class="grad-topbar-batch-info">
                     <span class="grad-batch-tag" id="detail-batch-tag">Đợt xét</span>
@@ -999,49 +994,43 @@
                 </div>
             </div>
             <div class="grad-topbar-right" style="display: flex; gap: 8px;">
-                <button type="button" id="btn-import-students" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="openImportStudentsModal()" title="Nạp file Excel hoặc dán thêm danh sách MSSV vào đợt này">
-                    <i class="fa fa-upload"></i> Nạp / Thêm sinh viên
+                <button type="button" id="btn-import-students" class="grad-btn grad-btn-crimson grad-btn-sm" onclick="openImportStudentsModal()">
+                    + Nạp sinh viên
                 </button>
-                <button type="button" id="btn-recheck-batch" class="grad-btn grad-btn-primary grad-btn-sm" onclick="recheckCurrentBatch()" title="Đối soát lại toàn bộ dữ liệu mượn trả từ Koha">
-                    <i class="fa fa-refresh"></i> Đối soát lại đợt này
+                <button type="button" id="btn-recheck-batch" class="grad-btn grad-btn-primary grad-btn-sm" onclick="recheckCurrentBatch()">
+                    Đối soát lại
                 </button>
-                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcelMode('DEBT_ONLY')" title="Xuất danh sách sinh viên còn nợ ra Excel">
-                    <i class="fa fa-file-excel-o"></i> Xuất DS nợ sách
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcelMode('DEBT_ONLY')">
+                    Xuất DS nợ
                 </button>
-                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcelMode('ALL')" title="Xuất toàn bộ danh sách đợt này ra Excel">
-                    <i class="fa fa-download"></i> Xuất tất cả
+                <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="exportExcelMode('ALL')">
+                    Xuất tất cả
                 </button>
-                <button type="button" id="btn-delete-batch" class="grad-btn grad-btn-outline grad-btn-sm" style="color: #dc2626; border-color: #fca5a5;" onclick="deleteCurrentBatch()" title="Xóa đợt này khỏi hệ thống">
-                    <i class="fa fa-trash-can"></i> Xóa đợt
+                <button type="button" id="btn-delete-batch" class="grad-btn grad-btn-outline grad-btn-sm" style="color: #dc2626; border-color: #fca5a5;" onclick="deleteCurrentBatch()">
+                    Xóa đợt
                 </button>
             </div>
         </div>
 
-        <!-- BANNER ĐỢT ĐANG HOẠT ĐỘNG -->
-        <div id="batch-active-banner" class="grad-batch-active-banner">
-            <div class="grad-batch-info-box">
-                <div class="grad-batch-active-title">
-                    <i class="fa fa-graduation-cap"></i> <strong id="active-batch-name">-</strong>
-                    <span class="grad-batch-tag" id="active-batch-tag">Đợt xét</span>
-                </div>
-                <div class="grad-batch-active-meta" id="active-batch-meta">
-                    Đang đối soát thời gian thực &bull; Nhấn "Đối soát lại đợt này" bất kỳ lúc nào để cập nhật dữ liệu trả sách mới nhất
-                </div>
-            </div>
+        <!-- Giữ DOM ẩn cho JS cập nhật mà không gây lặp banner trên giao diện -->
+        <div id="batch-active-banner" style="display: none !important;">
+            <strong id="active-batch-name">-</strong>
+            <span id="active-batch-tag"></span>
+            <div id="active-batch-meta"></div>
         </div>
 
-    <!-- FILTER & CONTROL SECTION (BỘ LỌC VÀ SẮP XẾP) -->
+    <!-- FILTER & CONTROL SECTION -->
     <div class="grad-filter-section">
-        <!-- ROW 1: STATUS TABS WITH INTEGRATED COUNTERS -->
+        <!-- ROW 1: STATUS TABS -->
         <div class="grad-status-tabs">
             <button type="button" class="grad-tab-btn active" onclick="setTabFilter('ALL', this)">
                 Tất cả <span class="grad-tab-pill" id="count-all">0</span>
             </button>
             <button type="button" class="grad-tab-btn" onclick="setTabFilter('CLEARED', this)">
-                Đủ điều kiện (Không nợ) <span class="grad-tab-pill pill-cleared" id="count-cleared">0</span>
+                Đủ điều kiện <span class="grad-tab-pill pill-cleared" id="count-cleared">0</span>
             </button>
             <button type="button" class="grad-tab-btn" onclick="setTabFilter('DEBT', this)">
-                Chưa đủ điều kiện (Còn nợ) <span class="grad-tab-pill pill-debt" id="count-debt">0</span>
+                Còn nợ <span class="grad-tab-pill pill-debt" id="count-debt">0</span>
             </button>
             <button type="button" class="grad-tab-btn" onclick="setTabFilter('DEBARRED', this)">
                 Đã khóa thẻ <span class="grad-tab-pill pill-locked" id="count-debarred">0</span>
@@ -1053,41 +1042,36 @@
 
         <!-- ROW 2: SEARCH, CLASS FILTER, DEBT FILTER, SORT SELECTOR -->
         <div class="grad-filter-row">
-            <!-- Search input -->
             <div class="grad-search-box">
-                <input type="text" id="filter-search" class="grad-search-input" placeholder="Tìm kiếm nhanh: Mã SV, Họ tên, Lớp..." oninput="handleSearchInput(this)">
+                <input type="text" id="filter-search" class="grad-search-input" placeholder="Tìm Mã SV, Họ tên, Lớp..." oninput="handleSearchInput(this)">
                 <span id="search-clear-btn" class="grad-search-clear" onclick="clearSearch()">&#10005;</span>
             </div>
 
-            <!-- Filter Class dropdown -->
             <select id="filter-class" class="grad-select" onchange="applyFilters()">
-                <option value="">Tất cả các Lớp / Khóa</option>
+                <option value="">Tất cả Lớp / Khóa</option>
             </select>
 
-            <!-- Filter Debt Type dropdown -->
             <select id="filter-debt-type" class="grad-select" onchange="applyFilters()">
-                <option value="">Tất cả tình trạng nợ</option>
-                <option value="OVERDUE">Có sách quá hạn trả</option>
-                <option value="FINE">Có tiền phạt tồn đọng</option>
-                <option value="BORROWING_OK">Đang mượn (trong hạn)</option>
-                <option value="NO_DEBT">Không mượn sách &amp; Không phạt</option>
+                <option value="">Tất cả tình trạng</option>
+                <option value="OVERDUE">Sách quá hạn</option>
+                <option value="FINE">Nợ tiền phạt</option>
+                <option value="BORROWING_OK">Đang mượn</option>
+                <option value="NO_DEBT">Không nợ</option>
             </select>
 
-            <!-- Sort selector dropdown -->
             <select id="sort-selector" class="grad-select" onchange="handleSortSelectorChange(this)">
-                <option value="index_asc">Sắp xếp: Mặc định (STT nạp)</option>
-                <option value="cardnumber_asc">Mã sinh viên: A &rarr; Z</option>
-                <option value="cardnumber_desc">Mã sinh viên: Z &rarr; A</option>
-                <option value="name_asc">Họ và tên: A &rarr; Z</option>
-                <option value="name_desc">Họ và tên: Z &rarr; A</option>
-                <option value="books_desc">Sách nợ: Nhiều nhất trước</option>
-                <option value="fine_desc">Tiền phạt: Cao nhất trước</option>
-                <option value="debt_first">Chưa đủ điều kiện (Còn nợ) lên trước</option>
+                <option value="index_asc">Sắp xếp: Mặc định</option>
+                <option value="cardnumber_asc">Mã SV: A &rarr; Z</option>
+                <option value="cardnumber_desc">Mã SV: Z &rarr; A</option>
+                <option value="name_asc">Họ tên: A &rarr; Z</option>
+                <option value="name_desc">Họ tên: Z &rarr; A</option>
+                <option value="books_desc">Sách nợ giảm dần</option>
+                <option value="fine_desc">Tiền phạt giảm dần</option>
+                <option value="debt_first">Còn nợ lên trước</option>
                 <option value="cleared_first">Đủ điều kiện lên trước</option>
             </select>
 
-            <!-- Reset filters button -->
-            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="resetAllFilters()" title="Đặt lại tất cả bộ lọc">
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="resetAllFilters()">
                 Đặt lại
             </button>
         </div>
@@ -1096,25 +1080,19 @@
     <!-- ACTION TOOLBAR -->
     <div class="grad-action-toolbar">
         <div class="grad-selection-summary">
-            Hiển thị <strong id="visible-count">0</strong> / <span id="total-count">0</span> sinh viên
-            &bull; Đã chọn <strong id="selected-count" style="color: var(--ftu-crimson);">0</strong> mục
+            Hiển thị <strong id="visible-count">0</strong> / <span id="total-count">0</span> SV
+            &bull; Đã chọn <strong id="selected-count" style="color: var(--ftu-crimson);">0</strong>
         </div>
 
         <div class="grad-actions-group">
-            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()" title="Gửi email nhắc nhở hoàn trả sách">
-                Gửi email nhắc nhở đã chọn
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="sendRemindersSelected()">
+                Gửi nhắc nhở
             </button>
-            <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()" title="Khóa thẻ sinh viên tốt nghiệp (Koha + SSO)">
-                Khóa thẻ hàng loạt
+            <button type="button" class="grad-btn grad-btn-danger grad-btn-sm" onclick="batchLockSelected()">
+                Khóa thẻ
             </button>
-            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected()" title="Mở khóa thẻ sinh viên đã chọn">
-                Mở khóa thẻ đã chọn
-            </button>
-            <button type="button" class="grad-btn grad-btn-success grad-btn-sm" onclick="exportExcelMode('ALL')" title="Xuất toàn bộ danh sách đối soát (Kèm sheet chi tiết sách nợ)">
-                Xuất tất cả danh sách (Excel)
-            </button>
-            <button type="button" class="grad-btn grad-btn-sm" style="background:#ea580c; color:#ffffff; border:1px solid #c2410c;" onclick="exportExcelMode('DEBT_ONLY')" title="Chỉ xuất danh sách những sinh viên đang nợ sách kèm chi tiết từng cuốn">
-                Chỉ xuất danh sách nợ sách (Excel)
+            <button type="button" class="grad-btn grad-btn-outline grad-btn-sm" onclick="batchUnlockSelected()">
+                Mở khóa thẻ
             </button>
         </div>
     </div>

@@ -72,5 +72,78 @@ tables:
       servertype: zed
       syntax: UNIMARC
       userid: Z3950
+    - checked: 1
+      db: 44MAN_INST
+      encoding: utf8
+      host: manchester.alma.exlibrisgroup.com
+      password: ''
+      port: 1921
+      rank: 1
+      recordtype: biblio
+      servername: UNIVERSITY OF MANCHESTER (UK)
+      servertype: zed
+      syntax: USMARC
+      userid: ''
+    - checked: 1
+      db: 44KCL_INST
+      encoding: utf8
+      host: kcl.alma.exlibrisgroup.com
+      password: ''
+      port: 1921
+      rank: 2
+      recordtype: biblio
+      servername: KINGS COLLEGE LONDON (UK)
+      servertype: zed
+      syntax: USMARC
+      userid: ''
+    - checked: 1
+      db: 44UOE_INST
+      encoding: utf8
+      host: ed.alma.exlibrisgroup.com
+      password: ''
+      port: 1921
+      rank: 3
+      recordtype: biblio
+      servername: UNIVERSITY OF EDINBURGH (UK)
+      servertype: zed
+      syntax: USMARC
+      userid: ''
+    - checked: 1
+      db: 44NLS_INST
+      encoding: utf8
+      host: nls.alma.exlibrisgroup.com
+      password: ''
+      port: 1921
+      rank: 4
+      recordtype: biblio
+      servername: NATIONAL LIBRARY OF SCOTLAND
+      servertype: zed
+      syntax: USMARC
+      userid: ''
+    - checked: 1
+      db: SKC
+      encoding: utf8
+      host: aleph.nkp.cz
+      password: ''
+      port: 9991
+      rank: 5
+      recordtype: biblio
+      servername: CZECH NATIONAL UNION (SKC)
+      servertype: zed
+      syntax: USMARC
+      userid: ''
+    - checked: 0
+      db: biblios
+      encoding: utf8
+      host: z3950.nlv.gov.vn
+      password: ''
+      port: 9999
+      rank: 10
+      recordtype: biblio
+      servername: THU VIEN QUOC GIA VIET NAM (NLV)
+      servertype: zed
+      syntax: USMARC
+      userid: ''
     translatable:
     - servername
+

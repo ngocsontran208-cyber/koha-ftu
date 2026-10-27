@@ -4,13 +4,61 @@
 [% USE Registers %]
 [% PROCESS 'i18n.inc' %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title
-    >[% FILTER collapse %]
-        [% t("Tools") | html %]
-        &rsaquo; [% t("Koha") | html %]
-    [% END %]</title
->
+<title>[% FILTER collapse %]
+    Công cụ &rsaquo; Koha
+[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+body#tools_tools-home { background-color: #f8fafc; }
+body#tools_tools-home .main.container-fluid {
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 !important; padding: 20px 32px 48px 32px !important;
+    background-color: #f8fafc; box-sizing: border-box;
+}
+body#tools_tools-home .main.container-fluid > .row > div {
+    width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; padding: 0 !important;
+}
+.ftu-hub-header {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px 24px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-hub-header h1 { font-size: 20px; font-weight: 700; color: #0f172a; margin: 0; border: none !important; padding: 0 !important; }
+.ftu-hub-filter {
+    width: 260px; max-width: 100%; padding: 7px 12px;
+    border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #1e293b; background: #f8fafc;
+}
+.ftu-hub-filter:focus { outline: none; border-color: #8B1E1E; background: #ffffff; }
+.ftu-hub-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 20px; height: 100%; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.ftu-hub-card h3 {
+    font-size: 15px; font-weight: 700; color: #0f172a;
+    margin: 0 0 14px 0; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;
+}
+.ftu-hub-group {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748b; margin: 14px 0 6px 0;
+}
+.ftu-hub-group:first-of-type { margin-top: 0; }
+.ftu-hub-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ftu-hub-list li { margin: 0; padding: 0; }
+.ftu-hub-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: #334155; text-decoration: none;
+    transition: all 0.15s ease;
+}
+.ftu-hub-link:hover {
+    background: #fef2f2; border-color: #fecaca; color: #8B1E1E; text-decoration: none;
+}
+.ftu-hub-badge {
+    background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+}
+</style>
 </head>
 <body id="tools_tools-home" class="tools">
 [% WRAPPER 'header.inc' %]
@@ -20,203 +68,182 @@
 [% WRAPPER 'sub-header.inc' %]
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Tools</span>
+            <span>Công cụ</span>
         [% END %]
-    [% END #/ WRAPPER breadcrumbs %]
-[% END #/ WRAPPER sub-header.inc %]
+    [% END %]
+[% END %]
 
-[% WRAPPER 'main-container.inc' %]
-    <h1>Tools</h1>
-    <div class="row">
-        <div class="col-sm-6">
-            [% IF ( CAN_user_tools_manage_patron_lists || CAN_user_clubs || CAN_user_tools_moderate_comments || CAN_user_tools_import_patrons  || CAN_user_tools_edit_notices || CAN_user_tools_edit_notice_status_triggers || CAN_user_tools_label_creator || CAN_user_tools_delete_anonymize_patrons  || CAN_user_tools_edit_patrons || CAN_user_tools_batch_extend_due_dates || ( CAN_user_tools_batch_modify_holds && CAN_user_reserveforothers_place_holds ) || CAN_user_tools_moderate_tags || CAN_user_tools_rotating_collections || ( CAN_user_tools_batch_upload_patron_images && Koha.Preference('patronimages') ) ) %]
-                <h3>Patrons and circulation</h3>
-            [% END %]
-            <dl>
-                [% IF (CAN_user_tools_manage_patron_lists) %]
-                    <dt><a href="/cgi-bin/koha/patron_lists/lists.pl">Patron lists</a></dt>
-                    <dd>Manage lists of patrons</dd>
-                [% END %]
+[% WRAPPER 'main-container.inc' wide_full => 1 %]
+    <div class="ftu-hub-header">
+        <h1>Công cụ vận hành</h1>
+        <input type="search" id="ftu-tools-filter" class="ftu-hub-filter" placeholder="Lọc nhanh công cụ..." autocomplete="off" />
+    </div>
 
-                [% IF (CAN_user_clubs) %]
-                    <dt><a href="/cgi-bin/koha/clubs/clubs.pl">Patron clubs</a></dt>
-                    <dd>Manage patron clubs</dd>
-                [% END %]
+    <div class="row g-4" id="ftu-tools-grid">
+        <!-- CỘT 1: BẠN ĐỌC & LƯU THÔNG -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-hub-card">
+                <h3>Bạn đọc &amp; Lưu thông</h3>
 
-                [% IF ( CAN_user_tools_moderate_comments ) %]
-                    <dt>
-                        <a href="/cgi-bin/koha/reviews/reviewswaiting.pl">Comments</a>
-                        [% IF ( pendingcomments ) %]
-                            <span class="badge bg-info-subtle"><a href="/cgi-bin/koha/reviews/reviewswaiting.pl">[% pendingcomments | html %]</a></span>
-                        [% END %]
-                    </dt>
-                    <dd>Moderate patron comments</dd>
-                [% END %]
+                <div class="ftu-hub-group">Hồ sơ &amp; Xử lý theo lô</div>
+                <ul class="ftu-hub-list">
+                    [% IF (CAN_user_tools_manage_patron_lists) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/patron_lists/lists.pl" title="Quản lý danh sách bạn đọc theo nhóm"><span>Danh sách bạn đọc</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_import_patrons ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/import_borrowers.pl" title="Nhập dữ liệu bạn đọc hàng loạt từ file"><span>Nhập bạn đọc theo lô</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_edit_patrons ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/modborrowers.pl" title="Chỉnh sửa thông tin nhiều bạn đọc cùng lúc"><span>Sửa bạn đọc theo lô</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_delete_anonymize_patrons ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/cleanborrowers.pl" title="Xóa bạn đọc và ẩn danh lịch sử mượn trả"><span>Xóa &amp; Ẩn danh bạn đọc</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_label_creator ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/patroncards/home.pl" title="Thiết kế và in thẻ bạn đọc"><span>In thẻ bạn đọc</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_batch_upload_patron_images && Koha.Preference('patronimages') ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/picture-upload.pl" title="Tải ảnh thẻ bạn đọc lên hệ thống"><span>Tải ảnh bạn đọc</span></a></li>
+                    [% END %]
+                    [% IF (CAN_user_clubs) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/clubs/clubs.pl" title="Quản lý câu lạc bộ bạn đọc"><span>Câu lạc bộ bạn đọc</span></a></li>
+                    [% END %]
+                </ul>
 
-                [% IF ( CAN_user_tools_import_patrons ) %]
-                    <dt><a href="/cgi-bin/koha/tools/import_borrowers.pl">Import patrons</a></dt>
-                    <dd>Import patron data</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_edit_notices ) %]
-                    <dt><a href="/cgi-bin/koha/tools/letter.pl">Notices and slips</a></dt>
-                    <dd>Define notices (print and email notification messages for overdues, etc.)</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_edit_notice_status_triggers ) %]
-                    <dt><a href="/cgi-bin/koha/tools/overduerules.pl">Overdue notice/status triggers</a></dt>
-                    <dd>Set notice/status triggers for overdue items</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_label_creator ) %]
-                    <dt><a href="/cgi-bin/koha/patroncards/home.pl">Patron card creator</a></dt>
-                    <dd>Create printable patron cards</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_delete_anonymize_patrons ) %]
-                    <dt><a href="/cgi-bin/koha/tools/cleanborrowers.pl">Batch patron deletion and anonymization</a></dt>
-                    <dd>Batch delete patrons and delete patron circulation history</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_edit_patrons ) %]
-                    <dt><a href="/cgi-bin/koha/tools/modborrowers.pl">Batch patron modification</a></dt>
-                    <dd>Modify patrons in batch</dd>
-                [% END %]
-                [% IF ( CAN_user_tools_graduation_view || CAN_user_tools_graduation_manage || CAN_user_tools_graduation_remind || CAN_user_tools_edit_patrons || CAN_user_tools ) %]
-                <dt><a href="/cgi-bin/koha/tools/graduation.pl">Xét tốt nghiệp</a></dt>
-                <dd>Đối soát nợ sách, gửi email nhắc nhở và khóa thẻ hàng loạt phục vụ thủ tục tốt nghiệp</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_batch_extend_due_dates ) %]
-                    <dt><a href="/cgi-bin/koha/tools/batch_extend_due_dates.pl">Batch extend due dates</a></dt>
-                    <dd>Modify the due date checkouts in batch</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_batch_modify_holds && CAN_user_reserveforothers_place_holds ) %]
-                    <dt><a href="/cgi-bin/koha/tools/batch_modify_holds.pl">Batch modify holds</a></dt>
-                    <dd>Modify holds in batch</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_moderate_tags ) %]
-                    <dt>
-                        <a href="/cgi-bin/koha/tags/review.pl">Tags</a>
-                        [% IF ( pendingtags ) %]
-                            <span class="badge bg-info-subtle"><a href="/cgi-bin/koha/tags/review.pl">[% pendingtags | html %]</a></span>
-                        [% END %]
-                    </dt>
-                    <dd>Moderate patron tags</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_batch_upload_patron_images && Koha.Preference('patronimages') ) %]
-                    <dt><a href="/cgi-bin/koha/tools/picture-upload.pl">Upload patron images</a></dt>
-                    <dd>Upload patron images in a batch or one at a time</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_rotating_collections ) %]
-                    <dt><a href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl">Rotating collections</a></dt>
-                    <dd>Manage rotating collections</dd>
-                [% END %]
-            </dl>
+                <div class="ftu-hub-group">Lưu thông &amp; Thông báo</div>
+                <ul class="ftu-hub-list">
+                    [% IF ( CAN_user_tools_edit_notices ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/letter.pl" title="Thiết lập mẫu email thông báo và phiếu in"><span>Mẫu thông báo &amp; Phiếu in</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_edit_notice_status_triggers ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/overduerules.pl" title="Cấu hình lịch gửi nhắc nhở quá hạn"><span>Quy tắc báo quá hạn</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_batch_extend_due_dates ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/batch_extend_due_dates.pl" title="Gia hạn ngày trả sách hàng loạt"><span>Gia hạn trả hàng loạt</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_batch_modify_holds && CAN_user_reserveforothers_place_holds ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/batch_modify_holds.pl" title="Chỉnh sửa yêu cầu đặt giữ hàng loạt"><span>Sửa đặt giữ theo lô</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_moderate_comments ) %]
+                    <li>
+                        <a class="ftu-hub-link" href="/cgi-bin/koha/reviews/reviewswaiting.pl" title="Kiểm duyệt bình luận của bạn đọc">
+                            <span>Duyệt bình luận</span>
+                            [% IF ( pendingcomments ) %]<span class="ftu-hub-badge">[% pendingcomments | html %]</span>[% END %]
+                        </a>
+                    </li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_moderate_tags ) %]
+                    <li>
+                        <a class="ftu-hub-link" href="/cgi-bin/koha/tags/review.pl" title="Kiểm duyệt từ khóa bạn đọc gắn">
+                            <span>Duyệt từ khóa (Tag)</span>
+                            [% IF ( pendingtags ) %]<span class="ftu-hub-badge">[% pendingtags | html %]</span>[% END %]
+                        </a>
+                    </li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_rotating_collections ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl"><span>Bộ sưu tập luân phiên</span></a></li>
+                    [% END %]
+                </ul>
+            </div>
         </div>
-        <!-- /.col-sm-6 -->
 
-        <div class="col-sm-6">
-            [% IF ( CAN_user_tools_edit_calendar || CAN_user_tools_manage_csv_profiles || CAN_user_tools_view_system_logs || CAN_user_tools_edit_additional_contents  || CAN_user_tools_schedule_tasks || CAN_user_tools_edit_quotes || ( plugins_enabled && CAN_user_plugins_tool )  || CAN_user_tools_upload_general_files || CAN_user_tools_access_files ) %]
-                <h3>Additional tools</h3>
-            [% END %]
-            <dl>
-                [% IF ( CAN_user_tools_edit_calendar ) %]
-                    <dt><a href="/cgi-bin/koha/tools/holidays.pl">Calendar</a></dt>
-                    <dd>Define days when the library is closed</dd>
-                [% END %]
+        <!-- CỘT 2: NGHIỆP VỤ ĐẶC THÙ FTU & CỔNG OPAC -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-hub-card">
+                <h3>Nghiệp vụ FTU &amp; Cổng OPAC</h3>
 
-                [% IF ( CAN_user_tools_manage_csv_profiles ) %]
-                    <dt><a href="/cgi-bin/koha/tools/csv-profiles.pl">CSV profiles</a></dt>
-                    <dd>Manage CSV export profiles</dd>
-                [% END %]
+                <div class="ftu-hub-group">Chuyên biệt FTU</div>
+                <ul class="ftu-hub-list">
+                    [% IF ( CAN_user_tools_graduation_view || CAN_user_tools_graduation_manage || CAN_user_tools_graduation_remind || CAN_user_tools_edit_patrons ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/graduation.pl" title="Đối soát công nợ sách/phạt và khóa thẻ sinh viên tốt nghiệp"><span>Xét tốt nghiệp</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/portal-news.pl?section=news" title="Đăng bài viết, tin tức và sự kiện lên OPAC"><span>Quản lý Tin tức &amp; Sự kiện</span></a></li>
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/portal-news.pl?section=database" title="Quản lý danh mục CSDL trực tuyến"><span>Quản lý Cơ sở dữ liệu (CSDL)</span></a></li>
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/portal-news.pl?section=banner" title="Quản lý banner trình chiếu trang chủ OPAC"><span>Quản lý Banner OPAC</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_view_system_logs || CAN_user_tools_audit_logs || CAN_user_tools_audit_export ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/audit-logs.pl" title="Giám sát lịch sử thao tác và an ninh hệ thống"><span>Nhật ký &amp; Giám sát an ninh</span></a></li>
+                    [% END %]
+                </ul>
 
-                [% IF ( CAN_user_tools_view_system_logs ) %]
-                    <dt><a href="/cgi-bin/koha/tools/audit-logs.pl">System audit &amp; action logs</a></dt>
-                    <dd>Enterprise audit console: monitor who did what, when, across which interface and examine modifications across FTULIB</dd>
-                    <dt><a href="/cgi-bin/koha/tools/viewlog.pl">Log viewer (Legacy)</a></dt>
-                    <dd>Browse the system logs in basic format</dd>
-                [% END %]
+                <div class="ftu-hub-group">Nội dung mở rộng OPAC</div>
+                <ul class="ftu-hub-list">
+                    [% IF ( CAN_user_tools_edit_additional_contents ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/additional-contents.pl?category=news"><span>Bản tin nội bộ Koha</span></a></li>
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/additional-contents.pl?category=html_customizations"><span>Tùy chỉnh vùng HTML</span></a></li>
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/additional-contents.pl?category=pages"><span>Trang tĩnh tùy chỉnh</span></a></li>
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/additional-contents.pl?category=record_display"><span>Tùy chỉnh hiển thị biểu ghi</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_edit_quotes ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/quotes.pl"><span>Trích dẫn mỗi ngày</span></a></li>
+                    [% END %]
+                    [% IF ( Koha.Preference('OPACReportProblem') && CAN_user_problem_reports ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/problem-reports.pl"><span>Phản hồi lỗi từ OPAC</span></a></li>
+                    [% END %]
+                </ul>
+            </div>
+        </div>
 
-                [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools ) %]
-                    <dt><a href="/cgi-bin/koha/tools/portal-news.pl?section=news">Quản lý tin tức &amp; sự kiện</a></dt>
-                    <dd>Publish news, events, and announcements on OPAC portal</dd>
+        <!-- CỘT 3: HỆ THỐNG, LỊCH & TỆP TIN -->
+        <div class="col-12 col-lg-4 col-md-6">
+            <div class="ftu-hub-card">
+                <h3>Hệ thống &amp; Tiện ích</h3>
 
-                    <dt><a href="/cgi-bin/koha/tools/portal-news.pl?section=database">Quản lý cơ sở dữ liệu (CSDL)</a></dt>
-                    <dd>Manage electronic databases: IEEE Xplore, ACM, credentials, links, and access notes</dd>
-
-                    <dt><a href="/cgi-bin/koha/tools/additional-contents.pl?category=news">News</a></dt>
-                    <dd>Write news for the OPAC and staff interfaces</dd>
-
-                    <dt><a href="/cgi-bin/koha/tools/additional-contents.pl?category=html_customizations">HTML customizations</a></dt>
-                    <dd>Write HTML customizations</dd>
-
-                    <dt><a href="/cgi-bin/koha/tools/additional-contents.pl?category=pages">Pages</a></dt>
-                    <dd>Write custom pages</dd>
-
-                    <dt><a href="/cgi-bin/koha/tools/additional-contents.pl?category=record_display">Record display customizations</a></dt>
-                    <dd>Write record display customizations</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_schedule_tasks ) %]
-                    <dt><a href="/cgi-bin/koha/tools/scheduler.pl">Task scheduler</a></dt>
-                    <dd>Schedule tasks to run</dd>
-                [% END %]
-
-                [% IF ( CAN_user_tools_edit_quotes ) %]
-                    <dt><a href="/cgi-bin/koha/tools/quotes.pl">Quote editor</a></dt>
-                    <dd>Manage 'Quote of the day' quotes</dd>
-                [% END %]
+                <div class="ftu-hub-group">Vận hành hệ thống</div>
+                <ul class="ftu-hub-list">
+                    [% IF ( CAN_user_tools_edit_calendar ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/holidays.pl" title="Thiết lập ngày nghỉ lễ và lịch mở cửa thư viện"><span>Lịch làm việc &amp; Ngày nghỉ</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_manage_csv_profiles ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/csv-profiles.pl"><span>Mẫu xuất CSV</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_schedule_tasks ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/scheduler.pl"><span>Lập lịch chạy báo cáo</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_view_system_logs ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/viewlog.pl"><span>Nhật ký hệ thống (Cơ bản)</span></a></li>
+                    [% END %]
+                    [% IF ( CAN_user_tools_upload_general_files ) %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/upload.pl"><span>Quản lý tệp tải lên</span></a></li>
+                    [% END %]
+                    [% IF CAN_user_tools_access_files %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/tools/access_files.pl"><span>Truy cập tệp máy chủ</span></a></li>
+                    [% END %]
+                </ul>
 
                 [% IF ( plugins_enabled && CAN_user_plugins_tool && tool_plugins ) %]
-                    <dt><a href="/cgi-bin/koha/plugins/plugins-home.pl?method=tool">Tool plugins</a></dt>
-                    <dd>
-                        Use tool plugins
-                        <ul>
-                            [% FOREACH plugin IN tool_plugins %]
-                                <li class="plugin_link">
-                                    <a href="/cgi-bin/koha/plugins/run.pl?class=[% plugin.class | uri %]&method=tool">
-                                        <span class="plugin_name">[% plugin.metadata.name | html %]</span>
-                                    </a>
-                                </li>
-                            [% END %]
-                        </ul>
-                    </dd>
+                <div class="ftu-hub-group">Plugin công cụ</div>
+                <ul class="ftu-hub-list">
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/plugins/plugins-home.pl?method=tool"><span>Danh sách Plugin</span></a></li>
+                    [% FOREACH plugin IN tool_plugins %]
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/plugins/run.pl?class=[% plugin.class | uri %]&method=tool"><span>[% plugin.metadata.name | html %]</span></a></li>
+                    [% END %]
+                </ul>
                 [% END %]
 
-                [% IF ( CAN_user_tools_upload_general_files ) %]
-                    <dt><a href="/cgi-bin/koha/tools/upload.pl">Uploads</a></dt>
-                    <dd>Upload any type of file, manage uploads</dd>
+                [% IF ( Koha.Preference('UseCashRegisters') && ( CAN_user_cash_management_cashup || CAN_user_cash_management_anonymous_refund ) ) %]
+                <div class="ftu-hub-group">Quản lý quỹ</div>
+                <ul class="ftu-hub-list">
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/pos/registers.pl"><span>Tổng hợp quỹ ([% Branches.GetLoggedInBranchname | html %])</span></a></li>
+                    <li><a class="ftu-hub-link" href="/cgi-bin/koha/pos/register.pl"><span>Lịch sử giao dịch ([% Registers.session_register_name | html %])</span></a></li>
+                </ul>
                 [% END %]
-
-                [% IF CAN_user_tools_access_files %]
-                    <dt><a href="/cgi-bin/koha/tools/access_files.pl">Access files</a></dt>
-                    <dd>Access files stored on the server, like log files or reports</dd>
-                [% END %]
-
-                [% IF ( Koha.Preference('OPACReportProblem') && CAN_user_problem_reports ) %]
-                    <dt><a href="/cgi-bin/koha/tools/problem-reports.pl">OPAC problem reports</a></dt>
-                    <dd>Manage OPAC problem reports submitted by patrons</dd>
-                [% END %]
-            </dl>
-
-            [% IF ( Koha.Preference('UseCashRegisters') && ( CAN_user_cash_management_cashup || CAN_user_cash_management_anonymous_refund ) ) %]
-                <h3>Cash management</h3>
-                <dl>
-                    <dt><a href="/cgi-bin/koha/pos/registers.pl">Cash summary for [% Branches.GetLoggedInBranchname | html %]</a></dt>
-                    <dd>View cash takings for the current library</dd>
-
-                    <dt><a href="/cgi-bin/koha/pos/register.pl">Transaction history for [% Registers.session_register_name | html %]</a></dt>
-                    <dd>View transaction history for the current cash register</dd>
-                </dl>
-            [% END %]
+            </div>
         </div>
-        <!-- /.col-sm-6 -->
     </div>
-    <!-- /.row -->
 [% END %]
+<script nonce="[% Koha.CSPNonce | $raw %]">
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('ftu-tools-filter');
+    if (!input) return;
+    input.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        document.querySelectorAll('#ftu-tools-grid .ftu-hub-list li').forEach(function(li) {
+            var txt = li.textContent.toLowerCase();
+            li.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
+});
+</script>
 [% INCLUDE 'intranet-bottom.inc' %]

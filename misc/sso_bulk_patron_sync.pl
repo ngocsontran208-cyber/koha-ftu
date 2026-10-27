@@ -45,7 +45,7 @@ INSERT INTO borrowers (
     dateexpiry=IF(categorycode='S' OR VALUES(categorycode)='S', '2099-12-31', VALUES(dateexpiry)),
     debarred=IF(categorycode='S' OR VALUES(categorycode)='S', NULL, VALUES(debarred)),
     debarredcomment=IF(categorycode='S' OR VALUES(categorycode)='S', NULL, VALUES(debarredcomment)),
-    flags=IF(categorycode='S' OR VALUES(categorycode)='S', 1, flags),
+    flags=COALESCE(flags, VALUES(flags), 0),
     phone=VALUES(phone),
     email=VALUES(email),
     address=VALUES(address),
@@ -131,7 +131,8 @@ for my $u (@$users) {
         }
     }
 
-    my $flags = $is_staff ? 1 : undef;
+    my $is_default_super = ($uid eq 'admin' || $uid eq 'adminn');
+    my $flags = $is_staff ? ($is_default_super ? 1 : 0) : undef;
 
     my $cohort_class = '';
     if ($u->{cohort} || $u->{studentClass}) {

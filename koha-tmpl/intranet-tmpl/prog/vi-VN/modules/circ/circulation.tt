@@ -610,37 +610,162 @@
 
     <!-- KHỐI XÁC NHẬN NẾU CÓ TRỞ NGẠI LƯU THÔNG -->
     [% IF ( NEEDSCONFIRMATION ) %]
-        <div id="circ_needsconfirmation" class="alert alert-warning" style="border-radius:8px; padding:12px 16px; margin:0 0 12px 0;">
-            <strong style="display:block; margin-bottom:6px;"><i class="fa fa-exclamation-triangle"></i> Yêu cầu xác nhận cho mượn:</strong>
-            <ul style="margin:0 0 10px 18px; padding:0; font-size:13px;">
-                [% IF ( RENEW_ISSUE ) %]<li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được mượn bởi bạn đọc này. Xác nhận gia hạn?</li>[% END %]
-                [% IF ( ISSUED_TO_ANOTHER ) %]<li>Tài liệu đang được mượn bởi [% issued_firstname | html %] [% issued_surname | html %] ([% issued_cardnumber | html %]). Tự động ghi trả và cho mượn lại?</li>[% END %]
-                [% IF ( RESERVE_WAITING ) %]<li>Tài liệu đang chờ bạn đọc khác đặt trước.</li>[% END %]
-                [% IF ( DEBT ) %]<li>Bạn đọc đang có tiền phạt chưa thanh toán: [% DEBT | $Price %].</li>[% END %]
+        <div id="circ_needsconfirmation" class="alert alert-warning" style="border-radius:8px; border:1px solid #f59e0b; border-left:4px solid #d97706; background:#fffbeb; color:#92400e; padding:14px 18px; margin:0 0 14px 0; box-shadow:0 2px 6px rgba(217,119,6,0.08);">
+            <strong style="display:block; font-size:14px; color:#78350f; margin-bottom:6px;">
+                Cảnh báo quy tắc lưu thông — Yêu cầu xác nhận cho mượn[% IF getTitleMessageIteminfo %]: <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo || barcode | html %])[% ELSIF barcode %] (Mã ĐKCB: [% barcode | html %])[% END %]
+            </strong>
+            <ul style="margin:0 0 12px 18px; padding:0; font-size:13px; line-height:1.6;">
+                [% IF ( TOO_MANY ) %]
+                    [% IF TOO_MANY == 'TOO_MANY_CHECKOUTS' %]
+                        <li><strong>Vượt quá số lượng mượn tối đa theo quy tắc lưu thông:</strong> Bạn đọc hiện đang mượn <strong>[% current_loan_count | html %]</strong> tài liệu, hạn mức tối đa cho phép là <strong>[% max_loans_allowed | html %]</strong> tài liệu.</li>
+                    [% ELSIF TOO_MANY == 'TOO_MANY_ONSITE_CHECKOUTS' %]
+                        <li><strong>Vượt quá số lượng đọc tại chỗ tối đa:</strong> Hiện tại <strong>[% current_loan_count | html %]</strong> / Tối đa cho phép <strong>[% max_loans_allowed | html %]</strong> tài liệu.</li>
+                    [% ELSIF TOO_MANY == 'NO_RULE_DEFINED' %]
+                        <li><strong>Chưa có quy tắc lưu thông:</strong> Chưa cấu hình quy tắc cho kiểu bạn đọc và loại tài liệu này (tối đa = 0).</li>
+                    [% ELSE %]
+                        <li><strong>Vượt quá hạn mức mượn theo quy tắc lưu thông:</strong> Đang mượn <strong>[% current_loan_count | html %]</strong> / Tối đa <strong>[% max_loans_allowed | html %]</strong> tài liệu.</li>
+                    [% END %]
+                [% END %]
+                [% IF ( PATRON_CANT ) %]
+                    <li><strong>Quy tắc lưu thông không cho phép mượn:</strong> Kiểu bạn đọc này không được phép mượn loại tài liệu này (hạn mức tối đa = 0).</li>
+                [% END %]
+                [% IF ( NOT_FOR_LOAN_FORCING ) %]
+                    <li><strong>Tài liệu hạn chế cho mượn:</strong> Tài liệu này được gắn trạng thái không cho mượn về nhà. Bạn có chắc chắn muốn ghi mượn ngoại lệ?</li>
+                [% END %]
+                [% IF ( RENEW_ISSUE ) %]
+                    <li>Tài liệu <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo | html %]) đang được mượn bởi bạn đọc này. Xác nhận gia hạn?</li>
+                [% END %]
+                [% IF ( ISSUED_TO_ANOTHER ) %]
+                    <li>Tài liệu đang được mượn bởi <strong>[% issued_firstname | html %] [% issued_surname | html %]</strong> ([% issued_cardnumber | html %]). Tự động ghi trả và cho bạn đọc này mượn?</li>
+                [% END %]
+                [% IF ( RESERVE_WAITING ) %]
+                    <li>Tài liệu đang chờ bạn đọc <strong>[% resfirstname | html %] [% ressurname | html %]</strong> ([% rescardnumber | html %]) đến nhận đặt trước.</li>
+                [% END %]
+                [% IF ( RESERVED ) %]
+                    <li>Tài liệu đã được bạn đọc <strong>[% resfirstname | html %] [% ressurname | html %]</strong> ([% rescardnumber | html %]) đặt trước.</li>
+                [% END %]
+                [% IF ( TRANSFERRED ) %]
+                    <li>Tài liệu đang trong quá trình chuyển kho cho đặt trước của <strong>[% resfirstname | html %] [% ressurname | html %]</strong>.</li>
+                [% END %]
+                [% IF ( PROCESSING ) %]
+                    <li>Tài liệu đang được xử lý cho đặt trước của <strong>[% resfirstname | html %] [% ressurname | html %]</strong>.</li>
+                [% END %]
+                [% IF ( USERBLOCKEDOVERDUE ) %]
+                    <li>Bạn đọc đang có <strong>[% USERBLOCKEDOVERDUE | html %]</strong> tài liệu quá hạn chưa trả.</li>
+                [% END %]
+                [% IF ( DEBT ) %]
+                    <li>Bạn đọc đang có tiền phạt chưa thanh toán vượt ngưỡng: <strong>[% DEBT | $Price %] đ</strong>.</li>
+                [% END %]
+                [% IF ( DEBT_GUARANTEES ) %]
+                    <li>Người được bảo lãnh của bạn đọc này đang nợ phí phạt: <strong>[% DEBT_GUARANTEES | $Price %] đ</strong>.</li>
+                [% END %]
+                [% IF ( DEBT_GUARANTORS ) %]
+                    <li>Người bảo lãnh của bạn đọc này đang nợ phí phạt: <strong>[% DEBT_GUARANTORS | $Price %] đ</strong>.</li>
+                [% END %]
+                [% IF ( HIGHHOLDS ) %]
+                    <li>Tài liệu có nhiều lượt đặt trước (<strong>[% HIGHHOLDS.num_holds | html %]</strong> lượt), thời hạn mượn được rút ngắn còn <strong>[% HIGHHOLDS.duration | html %]</strong> ngày.</li>
+                [% END %]
+                [% IF ( PREVISSUE ) %]
+                    <li>Bạn đọc này đã từng mượn tài liệu này trước đây.</li>
+                [% END %]
+                [% IF ( CURRENTISSUE ) %]
+                    <li>Bạn đọc này hiện đang mượn một bản sao khác của tài liệu này.</li>
+                [% END %]
+                [% IF ( BIBLIO_ALREADY_ISSUED ) %]
+                    <li>Bạn đọc đã mượn một bản sao khác thuộc cùng biểu ghi nhan đề này.</li>
+                [% END %]
+                [% IF ( AGE_RESTRICTION ) %]
+                    <li>Tài liệu có giới hạn độ tuổi: <strong>[% AGE_RESTRICTION | html %]</strong>.</li>
+                [% END %]
+                [% IF ( ITEM_LOST ) %]
+                    <li>Tài liệu này đang có trạng thái báo mất (<strong>[% ITEM_LOST | html %]</strong>).</li>
+                [% END %]
+                [% IF ( BORRNOTSAMEBRANCH ) %]
+                    <li>Bạn đọc thuộc thư viện khác (<strong>[% BORRNOTSAMEBRANCH | html %]</strong>).</li>
+                [% END %]
+                [% IF ( RENTALCHARGE && RENTALCHARGE > 0 ) %]
+                    <li>Phí thuê tài liệu phát sinh: <strong>[% RENTALCHARGE | $Price %] đ</strong>.</li>
+                [% END %]
+                [% IF ( ADDITIONAL_MATERIALS ) %]
+                    <li>Kiểm tra tài liệu/phụ lục đi kèm: <strong>[% ADDITIONAL_MATERIALS | html %]</strong>.</li>
+                [% END %]
+                [% IF ( INVALID_DATE ) %]
+                    <li>Ngày hẹn trả không hợp lệ hoặc nằm trong quá khứ.</li>
+                [% END %]
+                [% IF ( RECALLED ) %]
+                    <li>Tài liệu này đã bị triệu hồi bởi một bạn đọc khác.</li>
+                [% END %]
+                [% IF ( BOOKED_TO_ANOTHER ) %]
+                    <li>Tài liệu đã được đặt lịch mượn trước bởi bạn đọc khác.</li>
+                [% END %]
+                [% IF ( BOOKED_EARLY ) %]
+                    <li>Bạn đọc nhận tài liệu sớm hơn thời gian đặt lịch mượn.</li>
+                [% END %]
             </ul>
-            <form method="post" action="/cgi-bin/koha/circ/circulation.pl" style="display:flex; gap:8px;">
+            <form method="post" action="/cgi-bin/koha/circ/circulation.pl" style="display:flex; gap:8px; align-items:center;">
                 [% INCLUDE 'csrf-token.inc' %]
                 <input type="hidden" name="op" value="cud-checkout" />
                 <input type="hidden" name="borrowernumber" value="[% patron.borrowernumber | html %]" />
                 <input type="hidden" name="barcode" value="[% barcode | html %]" />
                 <input type="hidden" name="issueconfirmed" value="1" />
                 <input type="hidden" name="debt_confirmed" value="1" />
-                <button type="submit" class="btn btn-warning btn-sm fw-semibold">Xác nhận cho mượn</button>
-                <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="btn btn-outline-secondary btn-sm">Hủy bỏ</a>
+                [% IF ( RESERVED || RESERVE_WAITING || TRANSFERRED || PROCESSING ) %]
+                    <input type="hidden" name="cancelreserve" value="1" />
+                [% END %]
+                [% IF ( RECALLED ) %]
+                    <input type="hidden" name=" recall_id" value="[% RECALLED.id | html %]" />
+                    <input type="hidden" name="cancel_recall" value="1" />
+                [% END %]
+                <button type="submit" id="btn-confirm-checkout-override" class="btn btn-warning btn-sm fw-semibold" style="background:#d97706; border-color:#b45309; color:#fff; padding:6px 14px;">Xác nhận vẫn cho mượn</button>
+                <a href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% patron.borrowernumber | uri %]" class="btn btn-outline-secondary btn-sm" style="padding:6px 14px;">Hủy bỏ</a>
             </form>
         </div>
     [% END %]
 
     [% IF ( IMPOSSIBLE ) %]
-        <div class="alert alert-danger" style="border-radius:8px; padding:12px 16px; margin:0 0 12px 0;">
-            <strong style="display:block; margin-bottom:6px;"><i class="fa fa-times-circle"></i> Không thể cho mượn tài liệu:</strong>
-            <ul style="margin:0 0 10px 18px; padding:0; font-size:13px;">
-                [% IF ( UNKNOWN_BARCODE ) %]<li>Không tìm thấy mã vạch: <strong>[% barcode | html %]</strong></li>[% END %]
-                [% IF ( NOT_FOR_LOAN ) %]<li>Tài liệu này không thuộc diện cho mượn về nhà.</li>[% END %]
-                [% IF ( WTHDRAWN ) %]<li>Tài liệu đã được rút khỏi lưu thông.</li>[% END %]
-                [% IF ( RESTRICTED ) %]<li>Tài liệu bị giới hạn lưu thông.</li>[% END %]
+        <div id="circ_impossible" class="alert alert-danger" style="border-radius:8px; border:1px solid #f87171; border-left:4px solid #dc2626; background:#fef2f2; color:#991b1b; padding:14px 18px; margin:0 0 14px 0; box-shadow:0 2px 6px rgba(220,38,38,0.08);">
+            <strong style="display:block; font-size:14px; color:#7f1d1d; margin-bottom:6px;">
+                Không thể cho mượn tài liệu — Vi phạm quy tắc lưu thông[% IF getTitleMessageIteminfo %]: <em>[% getTitleMessageIteminfo | html %]</em> ([% getBarcodeMessageIteminfo || barcode | html %])[% ELSIF barcode %] (Mã ĐKCB: [% barcode | html %])[% END %]
+            </strong>
+            <ul style="margin:0 0 12px 18px; padding:0; font-size:13px; line-height:1.6;">
+                [% IF ( TOO_MANY ) %]
+                    [% IF TOO_MANY == 'TOO_MANY_CHECKOUTS' %]
+                        <li><strong>Vượt quá số lượng mượn tối đa theo quy tắc lưu thông:</strong> Bạn đọc đang mượn <strong>[% current_loan_count | html %]</strong> tài liệu, hạn mức tối đa cho phép là <strong>[% max_loans_allowed | html %]</strong> tài liệu (Không cho phép ghi đè).</li>
+                    [% ELSIF TOO_MANY == 'TOO_MANY_ONSITE_CHECKOUTS' %]
+                        <li><strong>Vượt quá số lượng đọc tại chỗ tối đa:</strong> Hiện tại <strong>[% current_loan_count | html %]</strong> / Tối đa <strong>[% max_loans_allowed | html %]</strong> tài liệu.</li>
+                    [% ELSIF TOO_MANY == 'NO_RULE_DEFINED' %]
+                        <li><strong>Chưa định nghĩa quy tắc lưu thông:</strong> Không tìm thấy hạn mức cho phép mượn đối với bạn đọc và loại tài liệu này.</li>
+                    [% ELSE %]
+                        <li><strong>Vượt quá hạn mức mượn theo quy tắc lưu thông:</strong> Đang mượn <strong>[% current_loan_count | html %]</strong> / Tối đa <strong>[% max_loans_allowed | html %]</strong> tài liệu.</li>
+                    [% END %]
+                [% END %]
+                [% IF ( PATRON_CANT ) %]
+                    <li><strong>Quy tắc lưu thông chặn mượn:</strong> Bạn đọc thuộc nhóm này không được phép mượn loại tài liệu này.</li>
+                [% END %]
+                [% IF ( UNKNOWN_BARCODE ) %]<li>Không tìm thấy mã vạch tài liệu: <strong>[% barcode | html %]</strong> trong cơ sở dữ liệu.</li>[% END %]
+                [% IF ( NOT_FOR_LOAN ) %]<li><strong>Tài liệu không cho mượn:</strong> Tài liệu này chỉ phục vụ đọc tại chỗ hoặc không thuộc diện lưu thông.</li>[% END %]
+                [% IF ( WTHDRAWN ) %]<li><strong>Tài liệu đã thanh lý/rút khỏi kho:</strong> Không thể thực hiện giao dịch mượn.</li>[% END %]
+                [% IF ( RESTRICTED ) %]<li><strong>Tài liệu bị giới hạn lưu thông:</strong> Chỉ phục vụ đối tượng đặc biệt.</li>[% END %]
+                [% IF ( EXPIRED ) %]<li><strong>Thẻ bạn đọc đã hết hạn sử dụng.</strong> Vui lòng gia hạn thẻ trước khi mượn.</li>[% END %]
+                [% IF ( DEBARRED || USERBLOCKEDNOENDDATE || USERBLOCKEDWITHENDDATE ) %]<li><strong>Tài khoản bạn đọc đang bị khóa quyền mượn</strong>[% IF USERBLOCKEDWITHENDDATE %] (đến ngày [% USERBLOCKEDWITHENDDATE | $KohaDates %])[% END %].</li>[% END %]
+                [% IF ( USERBLOCKEDOVERDUE ) %]<li><strong>Bạn đọc đang có [% USERBLOCKEDOVERDUE | html %] tài liệu quá hạn:</strong> Hệ thống chặn mượn mới cho đến khi trả sách quá hạn.</li>[% END %]
+                [% IF ( CARD_LOST ) %]<li><strong>Thẻ bạn đọc đang được báo mất.</strong></li>[% END %]
+                [% IF ( GNA ) %]<li><strong>Thông tin địa chỉ liên hệ của bạn đọc không xác thực.</strong></li>[% END %]
+                [% IF ( DEBT ) %]<li><strong>Nợ phí phạt vượt mức cho phép:</strong> Bạn đọc đang nợ <strong>[% DEBT | $Price %] đ</strong>.</li>[% END %]
+                [% IF ( DEBT_GUARANTEES ) %]<li><strong>Người được bảo lãnh nợ phí phạt vượt mức:</strong> [% DEBT_GUARANTEES | $Price %] đ.</li>[% END %]
+                [% IF ( DEBT_GUARANTORS ) %]<li><strong>Người bảo lãnh nợ phí phạt vượt mức:</strong> [% DEBT_GUARANTORS | $Price %] đ.</li>[% END %]
+                [% IF ( NO_MORE_RENEWALS ) %]<li><strong>Đã hết số lần gia hạn cho phép</strong> theo quy tắc lưu thông.</li>[% END %]
+                [% IF ( NO_RENEWAL_FOR_ONSITE_CHECKOUTS ) %]<li><strong>Tài liệu mượn đọc tại chỗ không được phép gia hạn.</strong></li>[% END %]
+                [% IF ( ITEMNOTSAMEBRANCH ) %]<li><strong>Tài liệu thuộc chi nhánh thư viện khác</strong> ([% itemhomebranch | html %]) và không cho phép mượn liên thư viện.</li>[% END %]
+                [% IF ( RETURN_IMPOSSIBLE ) %]<li><strong>Không thể tự động ghi trả tài liệu:</strong> Phải trả tại chi nhánh [% branch_to_return | html %].</li>[% END %]
+                [% IF ( AGE_RESTRICTION ) %]<li><strong>Vi phạm giới hạn độ tuổi:</strong> Yêu cầu [% AGE_RESTRICTION | html %].</li>[% END %]
+                [% IF ( INVALID_DATE ) %]<li><strong>Ngày hẹn trả không hợp lệ.</strong></li>[% END %]
+                [% IF ( NO_OPEN_DAYS ) %]<li><strong>Không tìm thấy ngày mở cửa hợp lệ</strong> trong lịch thư viện để tính hạn trả.</li>[% END %]
+                [% IF ( RESERVED || RESERVE_WAITING || TRANSFERRED || PROCESSING ) %]<li><strong>Tài liệu đang được đặt trước</strong> bởi bạn đọc [% resfirstname | html %] [% ressurname | html %] ([% rescardnumber | html %]).</li>[% END %]
+                [% IF ( BOOKED_TO_ANOTHER ) %]<li><strong>Tài liệu đã được đặt lịch mượn</strong> bởi một bạn đọc khác.</li>[% END %]
+                [% IF ( RECALLED_INTRANSIT ) %]<li><strong>Tài liệu bị triệu hồi</strong> và đang vận chuyển.</li>[% END %]
             </ul>
-            <a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% patron.cardnumber | uri %]" class="btn btn-secondary btn-sm">Quay lại</a>
+            <a href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% patron.borrowernumber | uri %]" class="btn btn-secondary btn-sm">Đóng thông báo</a>
         </div>
     [% END %]
 
@@ -681,8 +806,9 @@
             </div>
 
             <!-- Thống kê nhanh: Sách đang mượn & Tiền phạt -->
+            [% SET eff_max_loans = patron_maxissueqty.defined ? patron_maxissueqty : (max_loans_allowed.defined ? max_loans_allowed : 5) %]
             <div class="ftu-patron-stats-row">
-                <span>Sách đang mượn: <strong>[% chk_count %] / 5 cuốn</strong></span>
+                <span>Sách đang mượn: <strong [% IF eff_max_loans > 0 && chk_count >= eff_max_loans %]style="color:#dc2626;" title="Đã đạt/vượt hạn mức quy tắc lưu thông"[% END %]>[% chk_count %] / [% eff_max_loans %] cuốn</strong></span>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <span>Tiền phạt: <strong>[% IF balance > 0 %][% balance | $Price %] đ[% ELSE %]0 đ[% END %]</strong></span>
             </div>
@@ -870,7 +996,7 @@
                         <tbody>
                             [% SET row_idx = 1 %]
                             [% FOREACH issue IN patron.checkouts %]
-                            <tr data-issue-id="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]">
+                            <tr data-issue-id="[% issue.issue_id | html %]" data-itemnumber="[% issue.itemnumber | html %]" data-borrowernumber="[% patron.borrowernumber | html %]" data-barcode="[% issue.item.barcode | html %]" data-title="[% issue.item.biblio.title | html %]">
                                 <td style="text-align: center;"><input type="checkbox" class="ftu-chk-item" value="[% issue.issue_id | html %]" data-barcode="[% issue.item.barcode | html %]" /></td>
                                 <td style="color:#64748b; font-size:12px;">[% row_idx %]</td>
                                 <td style="font-weight:600; font-family:ui-monospace, monospace;">[% issue.item.barcode | html %]</td>
@@ -884,8 +1010,13 @@
                                 </td>
                                 <td>[% issue.item.itemcallnumber || '—' | html %]</td>
                                 <td>[% issue.issuedate | $KohaDates dateformat => 'metric' %]</td>
-                                <td class="ftu-duedate-cell" style="font-weight:600;">[% issue.date_due | $KohaDates dateformat => 'metric' %]</td>
-                                <td style="text-align: center;">
+                                <td class="ftu-duedate-cell" style="font-weight:600;">
+                                    <div>[% issue.date_due | $KohaDates dateformat => 'metric' %]</div>
+                                    [% IF issue.renewals_count %]
+                                        <div class="ftu-renew-badge" style="font-size:11px; color:#64748b; font-weight:500;">Đã GH: [% issue.renewals_count | html %] lần</div>
+                                    [% END %]
+                                </td>
+                                <td class="ftu-status-cell" style="text-align: center;">
                                     [% IF issue.is_overdue %]
                                         <span class="ftu-status-tag-overdue">Quá hạn</span>
                                     [% ELSE %]
@@ -894,7 +1025,7 @@
                                 </td>
                                 <td style="text-align: center;">
                                     <div class="ftu-row-actions-group">
-                                        <button type="button" class="ftu-row-btn-renew ftu-btn-renew-one" data-issue-id="[% issue.issue_id | html %]" title="Gia hạn">
+                                        <button type="button" class="ftu-row-btn-renew ftu-btn-renew-one" data-issue-id="[% issue.issue_id | html %]" data-itemnumber="[% issue.itemnumber | html %]" data-borrowernumber="[% patron.borrowernumber | html %]" data-title="[% issue.item.biblio.title | html %]" title="Gia hạn">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -947,6 +1078,11 @@
     [% INCLUDE 'js-date-format.inc' %]
     <script nonce="[% Koha.CSPNonce | $raw %]">
         $(document).ready(function() {
+            var kohaSessionId = '[% koha_session_id | html %]';
+            var patronBorrowernumber = '[% patron.borrowernumber | html %]';
+            var patronMaxIssueQty = '[% patron_maxissueqty || 5 | html %]';
+            var defaultRenewSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+
             // 1. Autofocus barcode
             setTimeout(function() {
                 var bc = $('#barcode');
@@ -970,14 +1106,14 @@
                 }
                 var colors = { success:'#16a34a', error:'#dc2626', info:'#0284c7' };
                 var toast = document.createElement('div');
-                toast.style.cssText = 'pointer-events:auto;background:#ffffff;border-left:3px solid '+(colors[type]||'#0284c7')+';padding:8px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:12.5px;max-width:320px;border-radius:4px;';
+                toast.style.cssText = 'pointer-events:auto;background:#ffffff;border-left:3px solid '+(colors[type]||'#0284c7')+';padding:8px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:12.5px;max-width:360px;border-radius:4px;';
                 toast.innerHTML = '<span>'+msg+'</span>';
                 container.appendChild(toast);
                 setTimeout(function(){
                     toast.style.opacity='0';
                     toast.style.transition='opacity 0.25s';
                     setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 250);
-                }, 3000);
+                }, 3500);
             }
 
             // 4. Update Table Counts
@@ -988,45 +1124,121 @@
                     location.reload();
                 } else {
                     $('#ftu-footer-info').text('Hiển thị 1 đến ' + count + ' trong ' + count + ' bản ghi');
+                    $('.ftu-tbl-title').html(
+                        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> ' +
+                        'Tài liệu đang mượn (' + count + ')'
+                    );
+                }
+            }
+
+            function formatRenewError(errCode, rCount) {
+                var map = {
+                    'too_many': 'Đã hết lượt gia hạn theo quy định (đã gia hạn ' + (rCount || 0) + ' lần)',
+                    'too_soon': 'Chưa đến thời điểm được phép gia hạn',
+                    'auto_too_soon': 'Chưa đến thời điểm được phép gia hạn',
+                    'on_reserve': 'Tài liệu đang có bạn đọc khác đặt mượn (Hold)',
+                    'overdue': 'Bạn đọc đang có tài liệu quá hạn',
+                    'too_much_owing': 'Bạn đọc đang nợ phí phạt vượt mức quy định',
+                    'auto_too_much_owing': 'Bạn đọc đang nợ phí phạt vượt mức quy định',
+                    'restriction': 'Tài khoản bạn đọc đang bị khóa/hạn chế',
+                    'item_denied_renewal': 'Loại tài liệu này không được phép gia hạn',
+                    'onsite_checkout': 'Tài liệu mượn đọc tại chỗ không được gia hạn',
+                    'no_checkout': 'Tài liệu không còn trong danh sách đang mượn',
+                    'auth_failed': 'Phiên làm việc hết hạn, vui lòng tải lại trang'
+                };
+                return map[errCode] || ('Lỗi gia hạn (' + (errCode || 'không xác định') + ')');
+            }
+
+            function isOverridableRenewError(errCode) {
+                return ['too_many', 'too_soon', 'auto_too_soon', 'on_reserve', 'overdue', 'too_much_owing', 'auto_too_much_owing', 'restriction'].indexOf(errCode) !== -1;
+            }
+
+            async function renewSingleRow(row, opts) {
+                opts = opts || {};
+                var btn = row.find('.ftu-btn-renew-one');
+                var dueCell = row.find('.ftu-duedate-cell');
+                var statusCell = row.find('.ftu-status-cell');
+                var issueId = row.attr('data-issue-id') || btn.data('issue-id');
+                var itemnumber = row.attr('data-itemnumber') || btn.data('itemnumber');
+                var borrowernumber = row.attr('data-borrowernumber') || btn.data('borrowernumber') || patronBorrowernumber;
+                var title = row.attr('data-title') || btn.data('title') || row.attr('data-barcode') || ('#' + issueId);
+
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+                try {
+                    var bodyParams = new URLSearchParams();
+                    if (issueId) bodyParams.append('issue_id', issueId);
+                    if (itemnumber) bodyParams.append('itemnumber', itemnumber);
+                    if (borrowernumber) bodyParams.append('borrowernumber', borrowernumber);
+                    bodyParams.append('seen', '1');
+                    bodyParams.append('override_debt', '1');
+                    if (opts.overrideLimit) {
+                        bodyParams.append('override_limit', '1');
+                    }
+                    if (kohaSessionId) {
+                        bodyParams.append('koha_session_id', kohaSessionId);
+                    }
+
+                    var resp = await fetch('/cgi-bin/koha/svc/renew', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                        body: bodyParams.toString(),
+                        credentials: 'same-origin'
+                    });
+
+                    var data = await resp.json().catch(function() { return {}; });
+
+                    if (data && data.renew_okay) {
+                        var displayDue = data.date_due_iso || (data.date_due ? String(data.date_due).split(' ')[0] : '');
+                        var rCount = data.renewals_count || 1;
+                        dueCell.html(
+                            '<div style="color:#16a34a; font-weight:700;">' + displayDue + '</div>' +
+                            '<div class="ftu-renew-badge" style="font-size:11px; color:#15803d; font-weight:600;">Đã GH: ' + rCount + ' lần</div>'
+                        );
+                        if (statusCell.length) {
+                            statusCell.html('<span class="ftu-status-tag-active">Đang mượn</span>');
+                        }
+                        btn.prop('disabled', false).html('<i class="fa fa-check" style="color:#16a34a;"></i>');
+                        if (!opts.silent) {
+                            showToast('Đã gia hạn "' + title + '" đến ' + displayDue, 'success');
+                        }
+                        return { ok: true, date_due: displayDue, renewals_count: rCount, title: title, row: row };
+                    }
+
+                    var errCode = (data && data.error) ? data.error : ('http_' + resp.status);
+                    var errText = formatRenewError(errCode, data ? data.renewals_count : 0);
+
+                    if (!opts.overrideLimit && opts.promptOverride !== false && isOverridableRenewError(errCode)) {
+                        if (confirm('Tài liệu "' + title + '": ' + errText + '.\n\nBạn có muốn GHI ĐÈ quy tắc lưu thông để tiếp tục gia hạn không?')) {
+                            return await renewSingleRow(row, { overrideLimit: true, silent: opts.silent, promptOverride: false });
+                        }
+                    }
+
+                    btn.prop('disabled', false).html(defaultRenewSvg);
+                    if (!opts.silent) {
+                        showToast('Không thể gia hạn "' + title + '": ' + errText, 'error');
+                    }
+                    return {
+                        ok: false,
+                        error: errCode,
+                        errorText: errText,
+                        overridable: isOverridableRenewError(errCode),
+                        title: title,
+                        row: row
+                    };
+                } catch (ex) {
+                    btn.prop('disabled', false).html(defaultRenewSvg);
+                    if (!opts.silent) {
+                        showToast('Lỗi kết nối khi gia hạn "' + title + '"', 'error');
+                    }
+                    return { ok: false, error: 'network_error', errorText: 'Lỗi kết nối máy chủ', overridable: false, title: title, row: row };
                 }
             }
 
             // 5. Single Item Renew
             $(document).on('click', '.ftu-btn-renew-one', async function(e) {
                 e.preventDefault();
-                var btn = $(this);
-                var issueId = btn.data('issue-id');
-                var row = btn.closest('tr');
-                var dueCell = row.find('.ftu-duedate-cell');
-
-                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-                try {
-                    var resp = await fetch('/api/v1/checkouts/' + issueId + '/renewals', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-koha-override': 'debt_limit' },
-                        body: '{}',
-                        credentials: 'same-origin'
-                    });
-                    if (resp.ok) {
-                        var data = await resp.json();
-                        if (data.due_date) {
-                            var dt = new Date(data.due_date);
-                            var day = String(dt.getDate()).padStart(2, '0');
-                            var month = String(dt.getMonth() + 1).padStart(2, '0');
-                            var year = dt.getFullYear();
-                            dueCell.html('<span style="color:#16a34a; font-weight:700;">' + day + '/' + month + '/' + year + '</span>');
-                        }
-                        showToast('Đã gia hạn thành công', 'success');
-                        btn.html('<i class="fa fa-check" style="color:#16a34a;"></i>');
-                    } else {
-                        var err = await resp.json().catch(function(){ return {}; });
-                        showToast('Không thể gia hạn: ' + (err.error || resp.status), 'error');
-                        btn.prop('disabled', false).html('<i class="fa fa-pencil-square-o"></i>');
-                    }
-                } catch(ex) {
-                    showToast('Lỗi kết nối khi gia hạn', 'error');
-                    btn.prop('disabled', false).html('<i class="fa fa-pencil-square-o"></i>');
-                }
+                var row = $(this).closest('tr');
+                await renewSingleRow(row, { silent: false, promptOverride: true });
             });
 
             // 6. Single Item Return
@@ -1064,33 +1276,93 @@
                 }
             });
 
-            // 7. Renew All
+            // 7. Renew All (hoặc gia hạn các mục đã tích chọn)
             $('#ftu-btn-renew-all').on('click', async function(e) {
                 e.preventDefault();
-                var btns = $('.ftu-btn-renew-one');
-                if (!btns.length) {
+                var linkBtn = $(this);
+                if (linkBtn.data('busy')) return;
+
+                var checkedBoxes = $('#ftu-checkouts-table tbody .ftu-chk-item:checked');
+                var targetRows = [];
+                if (checkedBoxes.length > 0) {
+                    checkedBoxes.each(function() {
+                        var r = $(this).closest('tr');
+                        if (r.length) targetRows.push(r);
+                    });
+                } else {
+                    $('#ftu-checkouts-table tbody tr[data-issue-id]').each(function() {
+                        targetRows.push($(this));
+                    });
+                }
+
+                if (!targetRows.length) {
                     showToast('Không có tài liệu nào để gia hạn', 'info');
                     return;
                 }
-                if (!confirm('Xác nhận gia hạn tất cả ' + btns.length + ' tài liệu?')) return;
-                $(this).css('opacity', 0.5);
-                for (var i = 0; i < btns.length; i++) {
-                    $(btns[i]).click();
-                    await new Promise(r => setTimeout(r, 200));
+
+                var scopeText = checkedBoxes.length > 0
+                    ? (checkedBoxes.length + ' tài liệu đã chọn')
+                    : ('tất cả ' + targetRows.length + ' tài liệu đang mượn');
+                if (!confirm('Xác nhận gia hạn ' + scopeText + '?')) return;
+
+                linkBtn.data('busy', true).css({ opacity: 0.5, pointerEvents: 'none' });
+
+                var okCount = 0;
+                var failedList = [];
+                for (var i = 0; i < targetRows.length; i++) {
+                    var res = await renewSingleRow(targetRows[i], { silent: true, promptOverride: false });
+                    if (res.ok) {
+                        okCount++;
+                    } else {
+                        failedList.push(res);
+                    }
                 }
-                $(this).css('opacity', 1);
-                showToast('Đã gửi yêu cầu gia hạn tất cả', 'success');
+
+                var overridableList = failedList.filter(function(item) { return item.overridable; });
+                if (overridableList.length > 0) {
+                    var detailLines = overridableList.map(function(item) {
+                        return '• ' + item.title + ': ' + item.errorText;
+                    }).join('\n');
+                    if (confirm('Có ' + overridableList.length + ' tài liệu vượt giới hạn quy tắc lưu thông:\n\n' + detailLines + '\n\nBạn có muốn GHI ĐÈ quy tắc để gia hạn các tài liệu này không?')) {
+                        var stillFailed = failedList.filter(function(item) { return !item.overridable; });
+                        for (var j = 0; j < overridableList.length; j++) {
+                            var retryRes = await renewSingleRow(overridableList[j].row, { silent: true, overrideLimit: true, promptOverride: false });
+                            if (retryRes.ok) {
+                                okCount++;
+                            } else {
+                                stillFailed.push(retryRes);
+                            }
+                        }
+                        failedList = stillFailed;
+                    }
+                }
+
+                linkBtn.data('busy', false).css({ opacity: 1, pointerEvents: 'auto' });
+                $('#ftu-chk-all, .ftu-chk-item').prop('checked', false);
+
+                if (okCount === targetRows.length) {
+                    showToast('Đã gia hạn thành công ' + okCount + '/' + targetRows.length + ' tài liệu!', 'success');
+                } else if (okCount > 0) {
+                    showToast('Đã gia hạn ' + okCount + '/' + targetRows.length + ' tài liệu (' + failedList.length + ' tài liệu không gia hạn).', 'info');
+                } else {
+                    var reason = failedList.length ? failedList[0].errorText : 'Không thể gia hạn';
+                    showToast('Gia hạn thất bại: ' + reason, 'error');
+                }
             });
 
             // 8. Return All
             $('#ftu-btn-return-all').on('click', async function(e) {
                 e.preventDefault();
-                var rows = $('#ftu-checkouts-table tbody tr[data-barcode]');
+                var checkedBoxes = $('#ftu-checkouts-table tbody .ftu-chk-item:checked');
+                var rows = checkedBoxes.length > 0
+                    ? checkedBoxes.closest('tr')
+                    : $('#ftu-checkouts-table tbody tr[data-barcode]');
                 if (!rows.length) {
                     showToast('Không có tài liệu nào đang mượn', 'info');
                     return;
                 }
-                if (!confirm('Xác nhận trả tất cả ' + rows.length + ' tài liệu?')) return;
+                var label = checkedBoxes.length > 0 ? (rows.length + ' tài liệu đã chọn') : ('tất cả ' + rows.length + ' tài liệu');
+                if (!confirm('Xác nhận trả ' + label + '?')) return;
                 $(this).css('opacity', 0.5);
                 var csrf = $('input[name="csrf_token"]').val() || '';
                 for (var i = 0; i < rows.length; i++) {
@@ -1108,7 +1380,7 @@
                 }
                 $(this).css('opacity', 1);
                 updateCounts();
-                showToast('Đã trả tất cả tài liệu', 'success');
+                showToast('Đã trả tài liệu thành công', 'success');
             });
 
             // 9. Instant Table Search

@@ -49,7 +49,7 @@ while ( my $r = $sth_counts->fetchrow_hashref ) {
 
 # Fetch databases
 my $sql = "SELECT id, title, slug, excerpt, content, classification,
-                  access_instructions, db_user, db_pass, support_link,
+                  access_instructions, db_user, db_pass, db_url, support_link,
                   sort_order, views_count, created_at
            FROM koha_portal_posts
            WHERE post_type = 'database' AND status = 'published'";
@@ -78,6 +78,7 @@ while ( my $row = $sth->fetchrow_hashref ) {
 my $is_logged_in = $borrowernumber ? 1 : 0;
 
 foreach my $row (@databases) {
+    $row->{db_url} ||= $row->{support_link} || '';
     my $has_pass = ( defined $row->{db_pass} && length($row->{db_pass}) > 0 ) ? 1 : 0;
     $row->{has_pass} = $has_pass;
     if ( !$is_logged_in ) {

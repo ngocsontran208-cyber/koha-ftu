@@ -41,7 +41,6 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
             { tools => "graduation_manage" },
             { tools => "graduation_remind" },
             { tools => "edit_patrons" },
-            { tools => "*" }
         ],
     }
 );
@@ -49,8 +48,8 @@ my ($template, $borrowernumber, $cookie) = get_template_and_user(
 my $userenv = C4::Context->userenv;
 my $user_id = $userenv ? $userenv->{id} : $borrowernumber;
 my $is_super = ($userenv && ($userenv->{flags} & 1)) ? 1 : 0;
-my $can_manage = ($is_super || haspermission($user_id, { tools => "graduation_manage" }) || haspermission($user_id, { tools => "*" })) ? 1 : 0;
-my $can_remind = ($is_super || $can_manage || haspermission($user_id, { tools => "graduation_remind" }) || haspermission($user_id, { tools => "*" })) ? 1 : 0;
+my $can_manage = ($is_super || haspermission($user_id, { tools => "graduation_manage" }) || haspermission($user_id, { tools => "edit_patrons" })) ? 1 : 0;
+my $can_remind = ($is_super || $can_manage || haspermission($user_id, { tools => "graduation_remind" })) ? 1 : 0;
 
 $template->param(
     can_graduation_manage => $can_manage,

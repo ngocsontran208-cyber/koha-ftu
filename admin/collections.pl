@@ -20,7 +20,10 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         template_name => "admin/collections.tt",
         query         => $input,
         type          => "intranet",
-        flagsrequired => { parameters => 'manage_auth_values' },
+        flagsrequired => [
+            { parameters    => 'manage_auth_values' },
+            { editcatalogue => 'edit_catalogue' },
+        ],
     }
 );
 
@@ -35,10 +38,13 @@ eval {
             image_url VARCHAR(500) NULL,
             is_featured TINYINT(1) DEFAULT 1,
             sort_order INT(11) DEFAULT 99,
+            parent_ccode VARCHAR(80) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_parent_ccode (parent_ccode)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
+    $dbh->do("ALTER TABLE koha_collection_meta ADD COLUMN IF NOT EXISTS parent_ccode VARCHAR(80) DEFAULT NULL AFTER sort_order");
 };
 
 my @messages;
@@ -68,19 +74,23 @@ my @preset_images = (
 );
 
 if ( $op eq 'cud-save' ) {
-    my $is_new      = $input->param('is_new') // 0;
-    my $ccode       = $input->param('ccode') // '';
-    my $lib         = $input->param('lib') // '';
-    my $description = $input->param('description') // '';
-    my $image_url   = $input->param('image_url') // '';
-    my $is_featured = $input->param('is_featured') ? 1 : 0;
-    my $sort_order  = $input->param('sort_order') // 1;
+    my $is_new       = $input->param('is_new') // 0;
+    my $ccode        = $input->param('ccode') // '';
+    my $lib          = $input->param('lib') // '';
+    my $description  = $input->param('description') // '';
+    my $image_url    = $input->param('image_url') // '';
+    my $is_featured  = $input->param('is_featured') ? 1 : 0;
+    my $sort_order   = $input->param('sort_order') // 1;
+    my $parent_ccode = $input->param('parent_ccode') // '';
 
     $ccode =~ s/^\s+|\s+$//g;
     $ccode = uc($ccode);
     $lib =~ s/^\s+|\s+$//g;
     $image_url =~ s/^\s+|\s+$//g;
     $sort_order = int($sort_order) || 1;
+    $parent_ccode =~ s/^\s+|\s+$//g;
+    $parent_ccode = uc($parent_ccode);
+    $parent_ccode = undef if ($parent_ccode eq '' || $parent_ccode eq $ccode);
 
     # Handle image upload from computer if provided
     my $upload_fh   = $input->upload('upload_image');
@@ -135,8 +145,8 @@ if ( $op eq 'cud-save' ) {
                     my $sth_av = $dbh->prepare("INSERT INTO authorised_values (category, authorised_value, lib, lib_opac) VALUES ('CCODE', ?, ?, ?)");
                     $sth_av->execute($ccode, $lib, $lib);
 
-                    my $sth_meta = $dbh->prepare("INSERT INTO koha_collection_meta (ccode, description, image_url, is_featured, sort_order) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE description=VALUES(description), image_url=VALUES(image_url), is_featured=VALUES(is_featured), sort_order=VALUES(sort_order)");
-                    $sth_meta->execute($ccode, $description, $image_url, $is_featured, $sort_order);
+                    my $sth_meta = $dbh->prepare("INSERT INTO koha_collection_meta (ccode, description, image_url, is_featured, sort_order, parent_ccode) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE description=VALUES(description), image_url=VALUES(image_url), is_featured=VALUES(is_featured), sort_order=VALUES(sort_order), parent_ccode=VALUES(parent_ccode)");
+                    $sth_meta->execute($ccode, $description, $image_url, $is_featured, $sort_order, $parent_ccode);
 
                     push @messages, { type => 'success', code => 'success_add', ccode => $ccode, lib => $lib };
                     $op = 'list';
@@ -146,8 +156,8 @@ if ( $op eq 'cud-save' ) {
                 my $sth_av = $dbh->prepare("UPDATE authorised_values SET lib = ?, lib_opac = ? WHERE category = 'CCODE' AND authorised_value = ?");
                 $sth_av->execute($lib, $lib, $ccode);
 
-                my $sth_meta = $dbh->prepare("INSERT INTO koha_collection_meta (ccode, description, image_url, is_featured, sort_order) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE description=VALUES(description), image_url=VALUES(image_url), is_featured=VALUES(is_featured), sort_order=VALUES(sort_order)");
-                $sth_meta->execute($ccode, $description, $image_url, $is_featured, $sort_order);
+                my $sth_meta = $dbh->prepare("INSERT INTO koha_collection_meta (ccode, description, image_url, is_featured, sort_order, parent_ccode) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE description=VALUES(description), image_url=VALUES(image_url), is_featured=VALUES(is_featured), sort_order=VALUES(sort_order), parent_ccode=VALUES(parent_ccode)");
+                $sth_meta->execute($ccode, $description, $image_url, $is_featured, $sort_order, $parent_ccode);
 
                 push @messages, { type => 'success', code => 'success_update', ccode => $ccode, lib => $lib };
                 $op = 'list';
@@ -179,6 +189,7 @@ if ( $op eq 'cud-save' ) {
             push @messages, { type => 'danger', code => 'error_has_items', ccode => $ccode, items_count => $cnt };
         } else {
             try {
+                $dbh->do("UPDATE koha_collection_meta SET parent_ccode = NULL WHERE parent_ccode = ?", undef, $ccode);
                 $dbh->do("DELETE FROM koha_collection_meta WHERE ccode = ?", undef, $ccode);
                 $dbh->do("DELETE FROM authorised_values WHERE category = 'CCODE' AND authorised_value = ?", undef, $ccode);
                 push @messages, { type => 'success', code => 'success_delete', ccode => $ccode };
@@ -192,8 +203,9 @@ if ( $op eq 'cud-save' ) {
 
 if ( $op eq 'add_form' || $op eq 'edit_form' ) {
     my $col = {};
+    my $current_ccode = '';
     if ( $op eq 'edit_form' ) {
-        my $ccode = $input->param('ccode');
+        $current_ccode = $input->param('ccode') // '';
         my $sth = $dbh->prepare("
             SELECT 
                 av.authorised_value as ccode,
@@ -203,6 +215,7 @@ if ( $op eq 'add_form' || $op eq 'edit_form' ) {
                 COALESCE(m.image_url, '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg') as image_url,
                 COALESCE(m.is_featured, 0) as is_featured,
                 COALESCE(m.sort_order, 1) as sort_order,
+                COALESCE(m.parent_ccode, '') as parent_ccode,
                 COALESCE(ic.items_count, 0) as items_count
             FROM authorised_values av
             LEFT JOIN koha_collection_meta m ON av.authorised_value = m.ccode
@@ -214,24 +227,42 @@ if ( $op eq 'add_form' || $op eq 'edit_form' ) {
             ) ic ON av.authorised_value = ic.ccode
             WHERE av.category = 'CCODE' AND av.authorised_value = ?
         ");
-        $sth->execute($ccode);
+        $sth->execute($current_ccode);
         $col = $sth->fetchrow_hashref();
     } else {
         $col = {
-            ccode       => '',
-            lib         => '',
-            description => '',
-            image_url   => '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg',
-            is_featured => 1,
-            sort_order  => 1,
-            items_count => 0,
+            ccode        => '',
+            lib          => '',
+            description  => '',
+            image_url    => '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg',
+            is_featured  => 1,
+            sort_order   => 1,
+            parent_ccode => '',
+            items_count  => 0,
         };
     }
 
+    # Fetch candidate parent collections (exclude self, and exclude collections that already have a parent)
+    my $sth_parents = $dbh->prepare("
+        SELECT av.authorised_value as ccode, av.lib 
+        FROM authorised_values av
+        LEFT JOIN koha_collection_meta m ON av.authorised_value = m.ccode
+        WHERE av.category = 'CCODE' 
+          AND (? = '' OR av.authorised_value != ?)
+          AND (m.parent_ccode IS NULL OR m.parent_ccode = '')
+        ORDER BY av.lib ASC
+    ");
+    $sth_parents->execute($current_ccode, $current_ccode);
+    my @parent_candidates;
+    while ( my $prow = $sth_parents->fetchrow_hashref() ) {
+        push @parent_candidates, $prow;
+    }
+
     $template->param(
-        collection    => $col,
-        is_add        => ( $op eq 'add_form' ? 1 : 0 ),
-        preset_images => \@preset_images,
+        collection        => $col,
+        parent_candidates => \@parent_candidates,
+        is_add            => ( $op eq 'add_form' ? 1 : 0 ),
+        preset_images     => \@preset_images,
     );
 } else {
     # List collections
@@ -245,26 +276,47 @@ if ( $op eq 'add_form' || $op eq 'edit_form' ) {
             COALESCE(m.image_url, '/opac-tmpl/bootstrap/images/collections/bst_lap_trinh.jpg') as image_url,
             COALESCE(m.is_featured, 0) as is_featured,
             COALESCE(m.sort_order, 99) as sort_order,
-            COALESCE(ic.items_count, 0) as items_count
+            COALESCE(m.parent_ccode, '') as parent_ccode,
+            COALESCE(parent_av.lib, m.parent_ccode, '') as parent_lib,
+            COALESCE(ic.items_count, 0) as items_count,
+            COALESCE(cc.children_count, 0) as children_count
         FROM authorised_values av
         LEFT JOIN koha_collection_meta m ON av.authorised_value = m.ccode
+        LEFT JOIN authorised_values parent_av ON m.parent_ccode = parent_av.authorised_value AND parent_av.category = 'CCODE'
         LEFT JOIN (
             SELECT ccode, COUNT(*) as items_count 
             FROM items 
             WHERE ccode IS NOT NULL AND ccode != '' 
             GROUP BY ccode
         ) ic ON av.authorised_value = ic.ccode
+        LEFT JOIN (
+            SELECT parent_ccode, COUNT(*) as children_count
+            FROM koha_collection_meta
+            WHERE parent_ccode IS NOT NULL AND parent_ccode != ''
+            GROUP BY parent_ccode
+        ) cc ON av.authorised_value = cc.parent_ccode
         WHERE av.category = 'CCODE'
-        ORDER BY m.is_featured DESC, m.sort_order ASC, av.lib ASC
+        ORDER BY 
+            CASE WHEN m.parent_ccode IS NULL OR m.parent_ccode = '' THEN 0 ELSE 1 END ASC,
+            m.is_featured DESC, 
+            m.sort_order ASC, 
+            av.lib ASC
     ");
     $sth->execute();
     my @collections;
     my $total_items = 0;
     my $featured_count = 0;
+    my $parent_count = 0;
+    my $child_count = 0;
 
     while ( my $row = $sth->fetchrow_hashref() ) {
         $total_items += $row->{items_count} || 0;
         $featured_count++ if $row->{is_featured};
+        if ( $row->{parent_ccode} ) {
+            $child_count++;
+        } elsif ( $row->{children_count} > 0 ) {
+            $parent_count++;
+        }
         push @collections, $row;
     }
 
@@ -273,6 +325,8 @@ if ( $op eq 'add_form' || $op eq 'edit_form' ) {
         total_count    => scalar(@collections),
         total_items    => $total_items,
         featured_count => $featured_count,
+        parent_count   => $parent_count,
+        child_count    => $child_count,
     );
 }
 

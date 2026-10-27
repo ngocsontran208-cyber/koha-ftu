@@ -54,9 +54,27 @@ if ($id > 0) {
     }
 }
 
+# Lời giới thiệu sách (intro_*) có luồng riêng: gắn với biểu ghi, không trộn vào Bảng tin
+my $is_intro = ($post && $post->{post_type} && $post->{post_type} =~ /^intro_(librarian|reader)$/) ? 1 : 0;
+my @intro_books;
+my $type_filter = "post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader')";
+my @type_bind;
+if ($is_intro) {
+    my $bs = $dbh->prepare("SELECT b.biblionumber, b.title, b.author FROM koha_portal_post_biblios pb JOIN biblio b ON b.biblionumber = pb.biblionumber WHERE pb.post_id = ? ORDER BY b.title");
+    $bs->execute($id);
+    while (my $bk = $bs->fetchrow_hashref) { $bk->{title} =~ s/[\s\/:;,.]+$//; push @intro_books, $bk; }
+    if (@intro_books) {
+        my $ph = join(',', ('?') x @intro_books);
+        $type_filter = "id IN (SELECT post_id FROM koha_portal_post_biblios WHERE biblionumber IN ($ph)) AND post_type IN ('intro_librarian', 'intro_reader')";
+        @type_bind = map { $_->{biblionumber} } @intro_books;
+    } else {
+        $type_filter = "post_type IN ('intro_librarian', 'intro_reader')";
+    }
+}
+
 # Fetch related recent posts (chỉ lấy bài viết/tin tức/sự kiện, loại trừ CSDL và Banner)
-my $recent_sth = $dbh->prepare("SELECT id, title, post_type, created_at, featured_image, views_count FROM koha_portal_posts WHERE status = ? AND id != ? AND post_type NOT IN ('database', 'banner') ORDER BY created_at DESC LIMIT 5");
-$recent_sth->execute("published", $id);
+my $recent_sth = $dbh->prepare("SELECT id, title, post_type, created_at, featured_image, views_count FROM koha_portal_posts WHERE status = ? AND id != ? AND $type_filter ORDER BY created_at DESC LIMIT 5");
+$recent_sth->execute("published", $id, @type_bind);
 my @recent_posts;
 while (my $row = $recent_sth->fetchrow_hashref) {
     if ($row->{created_at} =~ /^(\d{4})-(\d{2})-(\d{2})/) {
@@ -66,8 +84,8 @@ while (my $row = $recent_sth->fetchrow_hashref) {
 }
 
 # Fetch previous and next posts for bottom navigation (loại trừ CSDL và Banner)
-my $all_posts_sth = $dbh->prepare("SELECT id, title FROM koha_portal_posts WHERE status = ? AND post_type NOT IN ('database', 'banner') ORDER BY sort_order ASC, created_at DESC, id DESC");
-$all_posts_sth->execute("published");
+my $all_posts_sth = $dbh->prepare("SELECT id, title FROM koha_portal_posts WHERE status = ? AND $type_filter ORDER BY sort_order ASC, created_at DESC, id DESC");
+$all_posts_sth->execute("published", @type_bind);
 my @ordered_posts;
 my ($prev_post, $next_post);
 my $current_index = -1;
@@ -91,6 +109,8 @@ $template->param(
     recent_posts => \@recent_posts,
     prev_post    => $prev_post,
     next_post    => $next_post,
+    is_intro     => $is_intro,
+    intro_books  => \@intro_books,
 );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;

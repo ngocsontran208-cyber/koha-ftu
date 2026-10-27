@@ -1254,4 +1254,11 @@ if ( C4::Context->preference('OPACAuthorIdentifiersAndInformation') ) {
 # Cites
 $template->param( cites => C4::Record::marc2cites($record) );
 
+# FTU: so Loi gioi thieu da xuat ban cho bieu ghi (tab "Loi gioi thieu")
+eval {
+    my ($ftu_ic) = C4::Context->dbh->selectrow_array(
+        "SELECT COUNT(*) FROM koha_portal_post_biblios pb JOIN koha_portal_posts p ON p.id = pb.post_id WHERE pb.biblionumber = ? AND p.status = 'published' AND p.post_type IN ('intro_librarian','intro_reader')",
+        undef, int($biblionumber || 0) );
+    $template->param( ftu_intro_count => $ftu_ic ) if $ftu_ic;
+};
 output_html_with_http_headers $query, $cookie, $template->output;

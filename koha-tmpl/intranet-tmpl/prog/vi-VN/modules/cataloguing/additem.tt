@@ -596,9 +596,10 @@
  </label>
  <div class="ftu-qty-control">
  <button type="button" class="ftu-qty-btn" id="ftu_qty_minus" title="Giảm 1" onclick="ftuChangeQty(-1)">&minus;</button>
- <input type="number" id="ftu_qty_input" class="ftu-qty-input" value="5" min="1" max="1000" oninput="ftuOnQtyInput(this.value)" />
+ <input type="number" id="ftu_qty_input" class="ftu-qty-input" value="5" min="0" max="1000" oninput="ftuOnQtyInput(this.value)" />
  <button type="button" class="ftu-qty-btn" id="ftu_qty_plus" title="Tăng 1" onclick="ftuChangeQty(1)">+</button>
  <div class="ftu-quick-pills">
+ <span class="ftu-pill" data-qty="0" onclick="ftuSetQty(0)" style="font-weight:600; color:#0284c7; background:#e0f2fe; border-color:#7dd3fc;" title="Dành cho tài liệu số / điện tử đọc trực tuyến">0 (Tài liệu số)</span>
  <span class="ftu-pill" data-qty="1" onclick="ftuSetQty(1)">1</span>
  <span class="ftu-pill" data-qty="3" onclick="ftuSetQty(3)">3</span>
  <span class="ftu-pill active" data-qty="5" onclick="ftuSetQty(5)">5</span>
@@ -607,7 +608,7 @@
  <span class="ftu-pill" data-qty="50" onclick="ftuSetQty(50)">50</span>
  </div>
  </div>
- <div class="ftu-hint">Số lượng cuốn sách thực tế bạn muốn cấp mã nhập vào kho thư viện.</div>
+ <div class="ftu-hint">Số lượng cuốn sách thực tế bạn muốn cấp mã nhập vào kho (Chọn 0 nếu là tài liệu số đọc trực tuyến).</div>
  </div>
 
  <div class="ftu-form-group">
@@ -712,6 +713,9 @@
  <button type="button" id="ftu_btn_create_items" class="btn btn-primary ftu-btn-large" onclick="ftuSubmitItem()">
  Tạo ngay 5 bản tài liệu vào kho
  </button>
+ <a href="/staff/cgi-bin/ftu/catalogue/detail.pl?biblionumber=[% biblio.biblionumber | html %]" id="ftu_btn_finish_no_item" class="btn btn-default" style="margin-left: 10px; font-weight: 500; padding: 10px 18px; border-radius: 6px; border: 1px solid #cbd5e1; color: #475569; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+ <i class="fa fa-arrow-left"></i> Bỏ qua / Xem biểu ghi
+ </a>
  [% ELSE %]
  <button type="button" id="ftu_btn_create_items" class="btn btn-primary ftu-btn-large" onclick="ftuSubmitItem()">
  Lưu thay đổi bản tài liệu
@@ -943,6 +947,16 @@
                 }
             }
         }
+        if (itypeEl) {
+            itypeEl.addEventListener('change', function() {
+                if (this.value === 'CF') {
+                    setQty(0);
+                }
+            });
+            if (defaultItype === 'CF' || itypeEl.value === 'CF') {
+                setQty(0);
+            }
+        }
 
         var defaultCcode = "[% suggested_ccode | html %]";
         var ccodeEl = document.getElementById('ftu_ccode');
@@ -971,22 +985,58 @@
     // 3. Live Barcode Preview Renderer
     function renderBarcodePreview() {
         var qtyInput = document.getElementById('ftu_qty_input');
-        var qty = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
-        if (qty < 1) qty = 1;
-        if (qty > 1000) qty = 1000;
+        var parsedVal = qtyInput ? parseInt(qtyInput.value, 10) : 1;
+        var qty = isNaN(parsedVal) ? 1 : Math.max(0, Math.min(1000, parsedVal));
+
+        var titleEl = document.getElementById('ftu_preview_title');
+        var chipsWrapper = document.getElementById('ftu_barcode_preview_chips');
+        var tabBatch = document.getElementById('ftu_tab_batch');
+        var submitBtn = document.getElementById('ftu_btn_create_items');
+        var finishBtn = document.getElementById('ftu_btn_finish_no_item');
+
+        if (qty === 0) {
+            if (titleEl) {
+                titleEl.innerHTML = '<span style="color:#0284c7; font-weight:600;"><i class="fa fa-info-circle"></i> Số lượng 0 bản: Không tạo bản sách ĐKCB (Chuẩn cho Tài liệu số / Điện tử)</span>';
+            }
+            if (chipsWrapper) {
+                chipsWrapper.innerHTML = '<div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:12px 16px; color:#0369a1; font-size:0.88rem; line-height:1.5;">' +
+                    '<strong>💡 Tài liệu số / điện tử không cần cấp mã vạch nhập kho vật lý:</strong><br/>' +
+                    'Biểu ghi thư mục MARC đã được lưu độc lập và an toàn tại Koha. Bạn đọc có thể tra cứu và đọc trực tuyến tài liệu số ngay lập tức qua DSpace / DRM reader. ' +
+                    'Nhấn nút <strong>[Hoàn tất biên mục (Xem biểu ghi)]</strong> bên dưới để hoàn tất.' +
+                    '</div>';
+            }
+            if (submitBtn) {
+                submitBtn.style.display = 'none';
+            }
+            if (finishBtn) {
+                finishBtn.className = 'btn btn-success ftu-btn-large';
+                finishBtn.style.color = '#fff';
+                finishBtn.style.backgroundColor = '#16a34a';
+                finishBtn.style.borderColor = '#16a34a';
+                finishBtn.innerHTML = '<i class="fa fa-check"></i> Hoàn tất biên mục (Không tạo bản sách)';
+            }
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.style.display = '';
+            if (tabBatch && tabBatch.classList.contains('active')) {
+                submitBtn.textContent = 'Tạo ngay ' + qty + ' bản tài liệu vào kho';
+            }
+        }
+        if (finishBtn) {
+            finishBtn.className = 'btn btn-default';
+            finishBtn.style.color = '#475569';
+            finishBtn.style.backgroundColor = '';
+            finishBtn.style.borderColor = '#cbd5e1';
+            finishBtn.innerHTML = '<i class="fa fa-arrow-left"></i> Bỏ qua / Xem biểu ghi';
+        }
 
         var startBcInput = document.getElementById('ftu_start_barcode');
         var startBc = (startBcInput && startBcInput.value.trim()) ? startBcInput.value.trim() : 'FTU-BK-0001';
 
-        var titleEl = document.getElementById('ftu_preview_title');
         if (titleEl) {
             titleEl.textContent = 'Danh sách mã vạch dự kiến sinh ra (' + qty + ' bản):';
-        }
-
-        var tabBatch = document.getElementById('ftu_tab_batch');
-        var submitBtn = document.getElementById('ftu_btn_create_items');
-        if (tabBatch && tabBatch.classList.contains('active') && submitBtn) {
-            submitBtn.textContent = 'Tạo ngay ' + qty + ' bản tài liệu vào kho';
         }
 
         var chipsWrapper = document.getElementById('ftu_barcode_preview_chips');
@@ -1020,10 +1070,9 @@
     function changeQty(delta) {
         var input = document.getElementById('ftu_qty_input');
         if (!input) return;
-        var current = parseInt(input.value, 10) || 1;
-        var next = current + delta;
-        if (next < 1) next = 1;
-        if (next > 1000) next = 1000;
+        var current = parseInt(input.value, 10);
+        if (isNaN(current)) current = 1;
+        var next = Math.max(0, Math.min(1000, current + delta));
         input.value = next;
         updatePills(next);
         renderBarcodePreview();
@@ -1032,16 +1081,16 @@
     function setQty(val) {
         var input = document.getElementById('ftu_qty_input');
         if (!input) return;
-        var next = parseInt(val, 10) || 1;
-        if (next < 1) next = 1;
-        if (next > 1000) next = 1000;
+        var parsed = parseInt(val, 10);
+        var next = isNaN(parsed) ? 1 : Math.max(0, Math.min(1000, parsed));
         input.value = next;
         updatePills(next);
         renderBarcodePreview();
     }
 
     function onQtyInput(val) {
-        var next = parseInt(val, 10) || 1;
+        var parsed = parseInt(val, 10);
+        var next = isNaN(parsed) ? 0 : Math.max(0, Math.min(1000, parsed));
         updatePills(next);
         renderBarcodePreview();
     }
@@ -1101,7 +1150,12 @@
         if (isEdit) {
             barcode = (document.getElementById('ftu_edit_barcode')?.value || '').trim();
         } else if (isBatch) {
-            qty = parseInt(document.getElementById('ftu_qty_input')?.value, 10) || 1;
+            var rawQty = parseInt(document.getElementById('ftu_qty_input')?.value, 10);
+            qty = isNaN(rawQty) ? 1 : Math.max(0, rawQty);
+            if (qty === 0) {
+                window.location.href = '/staff/cgi-bin/ftu/catalogue/detail.pl?biblionumber=[% biblio.biblionumber | html %]';
+                return false;
+            }
             barcode = (document.getElementById('ftu_start_barcode')?.value || '').trim();
             if (!barcode) {
                 alert('Vui lòng nhập mã vạch bắt đầu!');

@@ -59,6 +59,18 @@
 
 <!-- Stylesheet & Script điều phối toàn cục -->
 <style>
+[% UNLESS ( logged_in_user.userid || loggedinusername ) %]
+/* Hide online resources and digital document links when not logged in */
+.results_summary.online_resources,
+.online_resources,
+.ftu-opac-digital-badge,
+.ftu-digital-direct-btn,
+.ftu-digital-read-btn,
+.ftu-dspace-link {
+    display: none !important;
+}
+[% END %]
+
 .ftu-quota-badge {
     display: inline-flex;
     align-items: center;
@@ -163,6 +175,31 @@
         return null;
     }
 
+    // Hide online resources when unauthenticated (Only display after login)
+    function syncOnlineResourcesVisibility() {
+        var patron = getLoggedInPatron();
+        var isAuth = !!(patron && patron.patronId);
+        var onlineEls = document.querySelectorAll(
+            '.results_summary.online_resources, ' +
+            '.online_resources, ' +
+            '.ftu-opac-digital-badge, ' +
+            '.ftu-digital-direct-btn, ' +
+            '.ftu-digital-read-btn, ' +
+            '.ftu-dspace-link'
+        );
+        onlineEls.forEach(function(el) {
+            if (!isAuth) {
+                el.style.setProperty('display', 'none', 'important');
+            } else {
+                el.style.removeProperty('display');
+            }
+        });
+    }
+    syncOnlineResourcesVisibility();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncOnlineResourcesVisibility);
+    }
+
     var activeCheckDoc = null;
     var returnTargetDoc = null;
 
@@ -177,16 +214,9 @@
 
         bsModal.show();
 
-        // Kiểm tra nếu chưa đăng nhập: Cung cấp tùy chọn Đọc thử trực tuyến (Guest) hoặc Đăng nhập để mượn toàn văn
+        // Check if not logged in: Library login required to borrow and read digital documents
         if (!patron || !patron.patronId) {
-            var ssoHost = window.location.protocol + '//' + window.location.hostname + (window.location.port === '80' || !window.location.port ? '/sso' : ':8090');
-            var ssoBase = ssoHost.endsWith('/sso') ? ssoHost : (ssoHost + '/sso');
-            var guestTarget = (params.bitstreamUuid && !params.bitstreamUuid.startsWith('00000000-'))
-                ? ('/bitstreams/' + encodeURIComponent(params.bitstreamUuid))
-                : (params.itemUuid ? ('/elib/items/' + encodeURIComponent(params.itemUuid)) : (params.fallbackUrl || ''));
-            var guestPreviewUrl = ssoBase + '/koha-to-dspace?user=guest&target=' + encodeURIComponent(guestTarget);
-
-            // Tạo đường dẫn trả về tương đối chuẩn xác kèm cờ auto_read=1 để tự động mở sau khi đăng nhập
+            // Create return path with auto_read=1 to automatically open after login
             var retPath = window.location.pathname + window.location.search;
             if (retPath.indexOf('auto_read=1') === -1) {
                 retPath += (retPath.indexOf('?') > -1 ? '&' : '?') + 'auto_read=1';
@@ -195,19 +225,16 @@
 
             bodyEl.innerHTML = `
                 <div class="text-center py-4">
-                    <div style="width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 50%; background: #FEF3C7; display: flex; align-items: center; justify-content: center; color: #D97706; font-size: 1.75rem;">
-                        <i class="fa fa-book-reader"></i>
+                    <div style="width: 68px; height: 68px; margin: 0 auto 1.25rem; border-radius: 50%; background: #FEF2F2; display: flex; align-items: center; justify-content: center; color: #DC2626; font-size: 1.85rem; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.15);">
+                        <i class="fa fa-lock"></i>
                     </div>
-                    <h5 class="fw-bold text-dark mb-2">Đọc trực tuyến &amp; Bản quyền tài liệu số</h5>
-                    <p class="text-muted" style="max-width: 520px; margin: 0 auto 1.5rem;">
-                        Tài liệu này được quản lý bản quyền số FTU DRM. Bạn đọc có thể xem trước nội dung trực tuyến hoặc đăng nhập tài khoản Thư viện FTU để mượn đọc toàn văn.
+                    <h5 class="fw-bold text-dark mb-2" style="font-size: 1.2rem;">Library Login Required</h5>
+                    <p class="text-muted" style="max-width: 480px; margin: 0 auto 1.5rem; font-size: 0.95rem; line-height: 1.6;">
+                        This document is protected by FTU DRM. You <strong>must log in</strong> with your FTU Library account to borrow and read the full text.
                     </p>
-                    <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
-                        <a href="${guestPreviewUrl}" target="_blank" class="btn btn-outline-danger px-3 py-2 fw-semibold" id="ftuBtnGuestPreview">
-                            <i class="fa fa-book-open me-1"></i> Xem trước trực tuyến
-                        </a>
-                        <button type="button" class="btn btn-danger px-4 py-2 fw-bold" id="ftuBtnLoginToRead" style="background: #A31A24; border-color: #A31A24;">
-                            <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập mượn toàn văn
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button type="button" class="btn btn-danger px-4 py-2 fw-bold" id="ftuBtnLoginToRead" style="background: #A31A24; border-color: #A31A24; font-size: 0.95rem; border-radius: 8px; box-shadow: 0 3px 10px rgba(163, 26, 36, 0.25);">
+                            <i class="fa fa-sign-in-alt me-2"></i> Log in to borrow and read
                         </button>
                     </div>
                 </div>
@@ -217,7 +244,7 @@
             if (btnLogin) {
                 btnLogin.onclick = function(e) {
                     if (e) e.preventDefault();
-                    // Lưu lại chính xác thông tin tài liệu người đọc muốn xem vào sessionStorage
+                    // Store pending document info into sessionStorage
                     sessionStorage.setItem('ftu_pending_digital_doc', JSON.stringify({
                         itemUuid: params.itemUuid,
                         bitstreamUuid: params.bitstreamUuid,
@@ -229,7 +256,7 @@
                         timestamp: Date.now()
                     }));
 
-                    // Ưu tiên mở modal đăng nhập ngay trên trang hiện tại nếu có
+                    // Prefer opening inline login modal if available
                     var loginModalEl = document.getElementById('loginModal');
                     var modalAuth = document.getElementById('modalAuth');
                     if (loginModalEl && modalAuth && typeof bootstrap !== 'undefined') {
@@ -254,8 +281,9 @@
                         return;
                     }
 
-                    // Điều hướng sang trang đăng nhập với URL đích chuẩn xác
-                    window.location.href = '/opac/login?return=' + loginReturnUrl;
+                    // Redirect to login page
+                    var loginUrl = (window.location.pathname.startsWith('/cgi-bin') ? '/cgi-bin/koha/opac-user.pl' : '/opac/login') + '?return=' + loginReturnUrl;
+                    window.location.href = loginUrl;
                 };
             }
             return;
@@ -457,6 +485,7 @@
                     ? ('/bitstreams/' + encodeURIComponent(bUuid))
                     : (doc.itemUuid ? ('/elib/items/' + encodeURIComponent(doc.itemUuid)) : (originalParams && originalParams.fallbackUrl ? originalParams.fallbackUrl : ''));
                 var targetUrl = borrowRes.readerUrl || (ssoBase + '/koha-to-dspace?user=' + encodeURIComponent(quota.patronId) + '&target=' + encodeURIComponent(readerTarget));
+                targetUrl = targetUrl.replace(/^https?:\/\/10\.2\.0\.227:8090(\/sso)?/i, ssoBase).replace(/^https?:\/\/10\.2\.0\.226:8090(\/sso)?/i, ssoBase);
 
                 var winNavigated = false;
                 if (readerWin && !readerWin.closed) {
@@ -550,37 +579,59 @@
             return;
         }
 
-        var href = rawHref;
-        try { href = decodeURIComponent(rawHref); } catch(_) {}
+        // Giải bọc nếu link đã được gắn cầu nối /koha-to-dspace?user=...&target=...
+        var effectiveHref = rawHref;
+        try {
+            if (effectiveHref.indexOf('koha-to-dspace') !== -1 && effectiveHref.indexOf('target=') !== -1) {
+                var uObj = new URL(effectiveHref, window.location.origin);
+                var innerTarget = uObj.searchParams.get('target');
+                if (innerTarget) effectiveHref = innerTarget;
+            }
+        } catch(_) {}
+
+        var href = effectiveHref;
+        try { href = decodeURIComponent(effectiveHref); } catch(_) {}
         var text = (a.textContent || '').trim().toLowerCase();
+
+        // Không chặn các liên kết điều hướng chung tới trang chủ Kho số DSpace (/elib, /elib/home) ở Header/Footer
+        var isGeneralPortalNav = (
+            a.closest('.ftu-footer-master') ||
+            a.closest('#header-region') ||
+            a.closest('#moresearches')
+        ) && !href.includes('/items/') && !href.includes('/handle/') && !href.includes('/bitstreams/');
+        if (isGeneralPortalNav) {
+            return;
+        }
 
         var isFullTextLink = false;
         if (
             a.getAttribute('property') === 'url' ||
             a.closest('.online_resources') ||
             a.closest('.ftu-opac-digital-badge') ||
+            a.classList.contains('ftu-digital-direct-btn') ||
+            a.classList.contains('ftu-digital-read-btn') ||
             a.classList.contains('ftu-dspace-link')
-        ) {
-            isFullTextLink = true;
-        } else if (
-            text.includes('truy cập toàn văn') ||
-            text.includes('toàn văn số') ||
-            text.includes('đọc trực tuyến') ||
-            text.includes('xem toàn văn') ||
-            text.includes('tài liệu số') ||
-            text.includes('full text') ||
-            text.includes('read online')
         ) {
             isFullTextLink = true;
         } else if (
             href.includes('/handle/') ||
             href.includes('/items/') ||
             href.includes('/bitstreams/') ||
-            href.includes('/koha-to-dspace') ||
-            href.includes('/elib/') ||
-            rawHref.includes('/koha-to-dspace') ||
             rawHref.includes('handle%2F') ||
             rawHref.includes('items%2F')
+        ) {
+            isFullTextLink = true;
+        } else if (
+            (text.includes('truy cập toàn văn') ||
+             text.includes('toàn văn số') ||
+             text.includes('đọc trực tuyến') ||
+             text.includes('xem toàn văn') ||
+             text.includes('xem tài liệu số') ||
+             text.includes('tài liệu số') ||
+             text.includes('full text') ||
+             text.includes('read online')) &&
+            !href.includes('opac-collections.pl') &&
+            !href.includes('opac-search.pl')
         ) {
             isFullTextLink = true;
         }
@@ -602,7 +653,7 @@
             var bsMatch = href.match(/\/bitstreams\/([a-f0-9\-]{36})/i);
             if (bsMatch) bitstreamUuid = bsMatch[1];
 
-            var handleMatch = href.match(/handle\/([0-9]+\/[0-9]+)/i) || rawHref.match(/handle(?:%2F|\/)([0-9]+(?:%2F|\/)[0-9]+)/i);
+            var handleMatch = href.match(/handle\/([0-9]+\/[0-9]+)/i) || effectiveHref.match(/handle(?:%2F|\/)([0-9]+(?:%2F|\/)[0-9]+)/i);
             if (handleMatch) {
                 handle = decodeURIComponent(handleMatch[1]).replace(/%2F/i, '/');
             }
@@ -633,7 +684,7 @@
                 if (respStmt) respStmt.remove();
                 title = clone.textContent.trim().replace(/\s+/g, ' ');
             }
-            var author = authorEl ? authorEl.textContent.trim().replace(/^Liệt kê theo:\s*/i, '').replace(/^Contributor\(s\):\s*/i, '').replace(/\s+/g, ' ') : '';
+            var author = authorEl ? authorEl.textContent.trim().replace(/^(?:Tác giả|Liệt kê theo|Author|By):\s*/i, '').replace(/^(?:Contributor\(s\)|Người đóng góp|Đồng tác giả):\s*/i, '').replace(/\s+/g, ' ') : '';
 
             window.ftuOpenDigitalLendingModal({
                 itemUuid: itemUuid,
@@ -768,6 +819,7 @@
                 var badgeClass = daysLeft > 3 ? 'bg-success' : (daysLeft > 0 ? 'bg-warning text-dark' : 'bg-danger');
                 var badgeText = daysLeft > 0 ? ('Còn ' + daysLeft + ' ngày') : 'Đã hết hạn';
 
+                var safeItemReaderUrl = String(item.readerUrl || '').replace(/^https?:\/\/10\.2\.0\.22[67]:8090(\/sso)?/i, '/sso');
                 html += `
                     <tr data-lending-id="${item.lendingId}" data-bitstream-uuid="${item.bitstreamUuid}">
                         <td class="text-center fw-bold text-muted">${idx + 1}</td>
@@ -782,7 +834,7 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
-                                <a href="${item.readerUrl}" target="_blank" class="btn btn-outline-primary fw-semibold" title="Đọc trực tuyến">
+                                <a href="${safeItemReaderUrl}" target="_blank" class="btn btn-outline-primary fw-semibold" title="Đọc trực tuyến">
                                     <i class="fa fa-book-reader me-1"></i> Đọc
                                 </a>
                                 <button type="button" class="btn btn-outline-danger fw-semibold btn-return-digital" data-title="${encodeURIComponent(item.title)}" data-lending-id="${item.lendingId}" data-bitstream-uuid="${item.bitstreamUuid}" title="Trả tài liệu số">

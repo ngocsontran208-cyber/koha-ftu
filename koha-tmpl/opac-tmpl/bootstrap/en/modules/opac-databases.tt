@@ -8,13 +8,13 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title
     >[% FILTER collapse %]
-        Databases &rsaquo; [% PROCESS 'library_name_title' %]
+        Cơ sở dữ liệu (CSDL) &rsaquo; [% PROCESS 'library_name_title' %]
     [% END %]</title
 >
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %]
 <style nonce="[% Koha.CSPNonce | $raw %]">
-    /* Clean, neutral aesthetic - Reduced colors, no logos */
+    /* Clean, neutral aesthetic - Hạn chế nhiều màu, không logo */
     .db-portal-wrapper {
         padding: 1.5rem 1.75rem 3.5rem 1.75rem;
         font-family: inherit;
@@ -228,21 +228,50 @@
         line-height: 1.35;
         margin-bottom: 0.35rem;
     }
+    .db-title-link {
+        color: #0f172a;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .db-title-link:hover {
+        color: #0284c7;
+        text-decoration: underline;
+    }
+    .db-title-link i {
+        font-size: 0.78rem;
+        color: #64748b;
+        transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .db-title-link:hover i {
+        color: #0284c7;
+        transform: translate(1px, -1px);
+    }
     .db-excerpt {
         color: #475569;
-        font-size: 0.88rem;
-        line-height: 1.45;
-        margin-bottom: 0.4rem;
+        font-size: 0.86rem;
+        line-height: 1.4;
+        margin-bottom: 0.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     .db-instruction {
-        color: #334155;
-        font-size: 0.85rem;
+        color: #64748b;
+        font-size: 0.8rem;
         background: #f8fafc;
-        border-left: 3px solid #94a3b8;
-        padding: 0.35rem 0.65rem;
+        border-left: 2px solid #cbd5e1;
+        padding: 0.2rem 0.55rem;
         border-radius: 0 4px 4px 0;
-        margin-top: 0.4rem;
-        line-height: 1.4;
+        margin-top: 0.25rem;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     /* Subdued Classification Badges */
@@ -474,7 +503,7 @@
     }
 
     /* ========================================================
-       MOBILE RESPONSIVE CARDS (ENG)
+       CHUYÊN BIỆT GIAO DIỆN DI ĐỘNG (MOBILE RESPONSIVE CARDS)
        ======================================================== */
     @media (max-width: 768px) {
         .db-portal-wrapper {
@@ -494,7 +523,7 @@
             color: #0284c7 !important;
         }
 
-        /* Toolbar compact on mobile */
+        /* Thanh công cụ tìm kiếm và lọc dạng vuốt ngang mượt mà */
         .db-toolbar {
             padding: 0.65rem 0.75rem !important;
             border-radius: 12px !important;
@@ -536,7 +565,7 @@
             border-radius: 8px !important;
         }
 
-        /* Transform table into Modern Touch Cards */
+        /* Chuyển đổi bảng dữ liệu rộng thành dạng thẻ (Modern Touch Cards) */
         .db-table-card {
             background: transparent !important;
             border: none !important;
@@ -562,7 +591,7 @@
             width: 100% !important;
         }
 
-        /* Each Row is a Card */
+        /* Từng hàng CSDL trở thành một Card độc lập */
         .db-row {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -574,7 +603,7 @@
             width: 100% !important;
         }
 
-        /* Card Header: STT & Classification Badge */
+        /* Phần đầu thẻ: Thứ tự STT & Nhãn phân loại */
         .col-stt {
             display: inline-flex !important;
             align-items: center !important;
@@ -590,7 +619,7 @@
             vertical-align: middle !important;
         }
         .col-stt::before {
-            content: "DB #";
+            content: "CSDL #";
         }
 
         .col-class {
@@ -609,7 +638,7 @@
             border-radius: 6px !important;
         }
 
-        /* Card Title & Content */
+        /* Tiêu đề & nội dung mô tả */
         .col-title {
             display: block !important;
             width: 100% !important;
@@ -639,7 +668,7 @@
             line-height: 1.4 !important;
         }
 
-        /* Credentials Section */
+        /* Khối thông tin đăng nhập Touch-Friendly */
         .col-user,
         .col-pass {
             display: flex !important;
@@ -655,7 +684,7 @@
             text-align: left !important;
         }
         .col-user::before {
-            content: "Username:";
+            content: "Tài khoản:";
             font-size: 0.8rem !important;
             font-weight: 600 !important;
             color: #64748b !important;
@@ -663,7 +692,7 @@
             margin-right: 0.5rem !important;
         }
         .col-pass::before {
-            content: "Password:";
+            content: "Mật khẩu:";
             font-size: 0.8rem !important;
             font-weight: 600 !important;
             color: #64748b !important;
@@ -691,7 +720,7 @@
             justify-content: center !important;
         }
 
-        /* Action Link Button */
+        /* Nút hành động mở link CSDL lớn, dễ bấm */
         .col-link {
             display: block !important;
             width: 100% !important;
@@ -716,7 +745,7 @@
             box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2) !important;
         }
 
-        /* Empty state */
+        /* Trạng thái danh sách rỗng */
         #server-empty-row td,
         #client-empty-row td {
             display: block !important;
@@ -731,7 +760,7 @@
             border-radius: 12px !important;
         }
 
-        /* Pagination on Mobile */
+        /* Phân trang trên di động */
         .db-pagination-container {
             flex-direction: column !important;
             align-items: center !important;
@@ -759,7 +788,7 @@
             border-radius: 6px !important;
         }
 
-        /* Toast safe from dock */
+        /* Thông báo Toast nằm nổi an toàn trên thanh Dock */
         #db-toast {
             bottom: 5.25rem !important;
             right: 50% !important;
@@ -784,10 +813,10 @@
 <main class="main">
     [% WRAPPER breadcrumbs %]
         [% WRAPPER breadcrumb_item %]
-            <a href="/cgi-bin/ftu/opac-main.pl">Home</a>
+            <a href="/cgi-bin/ftu/opac-main.pl">Trang chủ</a>
         [% END %]
         [% WRAPPER breadcrumb_item bc_active= 1 %]
-            <span>Databases (CSDL)</span>
+            <span>Cơ sở dữ liệu (CSDL)</span>
         [% END %]
     [% END #/ WRAPPER breadcrumbs %]
 
@@ -797,7 +826,7 @@
                 <!-- Header Section -->
             <div class="db-page-header">
                 <h1 class="db-page-title">
-                    Electronic Databases
+                    Cơ sở dữ liệu điện tử
                 </h1>
             </div>
 
@@ -805,7 +834,7 @@
             <div class="db-toolbar">
                 <div class="db-filter-pills" id="classificationFilter">
                     <button type="button" class="db-pill active" data-class="all">
-                        All <span class="badge-count" id="count-all">[% total_count %]</span>
+                        Tất cả <span class="badge-count" id="count-all">[% total_count %]</span>
                     </button>
                     [% FOREACH c IN class_counts %]
                         [% SET clean_class = c.classification %]
@@ -817,8 +846,8 @@
 
                 <div class="db-search-box">
                     <i class="fa fa-search db-search-icon" aria-hidden="true"></i>
-                    <input type="text" id="db-search-input" class="db-search-input" placeholder="Search by database name, keyword..." value="[% search_query | html %]" autocomplete="off" />
-                    <button type="button" id="db-search-clear" class="db-search-clear" title="Clear search">
+                    <input type="text" id="db-search-input" class="db-search-input" placeholder="Tìm tên CSDL, từ khóa..." value="[% search_query | html %]" autocomplete="off" />
+                    <button type="button" id="db-search-clear" class="db-search-clear" title="Xóa tìm kiếm">
                         <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -829,12 +858,12 @@
                 <table class="db-table" id="dbTable">
                     <thead>
                         <tr>
-                            <th class="col-stt">No.</th>
-                            <th class="col-title">Database / Source</th>
-                            <th class="col-class">Category</th>
-                            <th class="col-user">Username</th>
-                            <th class="col-pass">Password</th>
-                            <th class="col-link">Access Link</th>
+                            <th class="col-stt">TT</th>
+                            <th class="col-title">Tên CSDL &amp; Mô tả</th>
+                            <th class="col-class">Phân loại</th>
+                            <th class="col-user">Tài khoản</th>
+                            <th class="col-pass">Mật khẩu</th>
+                            <th class="col-link">Truy cập</th>
                         </tr>
                     </thead>
                     <tbody id="dbTableBody">
@@ -845,12 +874,20 @@
                                         [% db.sort_order || loop.count %]
                                     </td>
                                     <td class="col-title">
-                                        <div class="db-name">[% db.title | html %]</div>
+                                        <div class="db-name">
+                                            [% IF db.db_url || db.support_link %]
+                                                <a href="[% db.db_url || db.support_link | url %]" target="_blank" rel="noopener noreferrer" class="db-title-link" title="Truy cập [% db.title | html %]">
+                                                    <span>[% db.title | html %]</span>
+                                                </a>
+                                            [% ELSE %]
+                                                [% db.title | html %]
+                                            [% END %]
+                                        </div>
                                         [% IF db.excerpt %]
-                                            <div class="db-excerpt">[% db.excerpt | html %]</div>
+                                            <div class="db-excerpt" title="[% db.excerpt | html %]">[% db.excerpt | html %]</div>
                                         [% END %]
                                         [% IF db.access_instructions %]
-                                            <div class="db-instruction">
+                                            <div class="db-instruction" title="[% db.access_instructions | html %]">
                                                 [% db.access_instructions | html %]
                                             </div>
                                         [% END %]
@@ -870,12 +907,12 @@
                                         [% IF db.db_user %]
                                             <div class="cred-container">
                                                 <span class="cred-val" id="u-[% db.id %]">[% db.db_user | html %]</span>
-                                                <button type="button" class="btn-cred-action" title="Copy username" onclick="copyCred('u-[% db.id %]', this)">
+                                                <button type="button" class="btn-cred-action" title="Sao chép" onclick="copyCred('u-[% db.id %]', this)">
                                                     <i class="fa fa-copy" aria-hidden="true"></i>
                                                 </button>
                                             </div>
                                         [% ELSE %]
-                                            <span class="text-empty-val">IP Authentication</span>
+                                            <span class="text-empty-val">Theo IP</span>
                                         [% END %]
                                     </td>
                                     <td class="col-pass">
@@ -884,16 +921,16 @@
                                                 <div class="cred-container">
                                                     <span class="cred-pass-masked" id="pass-mask-[% db.id %]">••••••••</span>
                                                     <span class="cred-val d-none" id="pass-val-[% db.id %]">[% db.db_pass | html %]</span>
-                                                    <button type="button" class="btn-cred-action" title="Show / hide password" onclick="togglePass('[% db.id %]', this)">
+                                                    <button type="button" class="btn-cred-action" title="Hiện / ẩn" onclick="togglePass('[% db.id %]', this)">
                                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                                     </button>
-                                                    <button type="button" class="btn-cred-action" title="Copy password" onclick="copyCred('pass-val-[% db.id %]', this)">
+                                                    <button type="button" class="btn-cred-action" title="Sao chép" onclick="copyCred('pass-val-[% db.id %]', this)">
                                                         <i class="fa fa-copy" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
                                             [% ELSE %]
-                                                <a href="/cgi-bin/koha/opac-user.pl" class="btn-login-to-view" title="Log in to view and copy password">
-                                                    <i class="fa fa-lock" aria-hidden="true"></i> Log in to view
+                                                <a href="/opac/login" class="btn-login-to-view" title="Đăng nhập để xem mật khẩu">
+                                                    Đăng nhập
                                                 </a>
                                             [% END %]
                                         [% ELSE %]
@@ -901,9 +938,9 @@
                                         [% END %]
                                     </td>
                                     <td class="col-link">
-                                        [% IF db.support_link %]
-                                            <a href="[% db.support_link | url %]" target="_blank" rel="noopener noreferrer" class="btn-open-db" title="Open database">
-                                                [Open link] <i class="fa fa-external-link" aria-hidden="true"></i>
+                                        [% IF db.support_link || db.db_url %]
+                                            <a href="[% db.support_link || db.db_url | url %]" target="_blank" rel="noopener noreferrer" class="btn-open-db" title="Mở CSDL">
+                                                Truy cập
                                             </a>
                                         [% ELSE %]
                                             <span class="text-empty-val">—</span>
@@ -915,9 +952,7 @@
                             <tr id="server-empty-row">
                                 <td colspan="6">
                                     <div class="db-empty-state">
-                                        <i class="fa fa-database" aria-hidden="true"></i>
-                                        <div class="db-empty-title">No databases found</div>
-                                        <p class="mb-0">The electronic database directory is being updated.</p>
+                                        <div class="db-empty-title">Chưa có cơ sở dữ liệu nào</div>
                                     </div>
                                 </td>
                             </tr>
@@ -926,9 +961,7 @@
                         <tr id="client-empty-row" style="display: none;">
                             <td colspan="6">
                                 <div class="db-empty-state">
-                                    <i class="fa fa-search" aria-hidden="true"></i>
-                                    <div class="db-empty-title">No matching databases found</div>
-                                    <p class="mb-0">Please try another keyword or clear your filter.</p>
+                                    <div class="db-empty-title">Không tìm thấy CSDL phù hợp</div>
                                 </div>
                             </td>
                         </tr>
@@ -945,7 +978,7 @@
     </div>
 </main>
 
-<div id="db-toast"><i class="fa fa-check me-1"></i> <span id="db-toast-msg">Copied to clipboard!</span></div>
+<div id="db-toast"><span id="db-toast-msg">Đã sao chép</span></div>
 
 [% INCLUDE 'opac-bottom.inc' %]
 
@@ -1014,12 +1047,12 @@
             val.classList.remove('d-none');
             mask.classList.add('d-none');
             icon.className = 'fa fa-eye-slash';
-            btn.setAttribute('title', 'Hide password');
+            btn.setAttribute('title', 'Ẩn mật khẩu');
         } else {
             val.classList.add('d-none');
             mask.classList.remove('d-none');
             icon.className = 'fa fa-eye';
-            btn.setAttribute('title', 'Show password');
+            btn.setAttribute('title', 'Hiện mật khẩu');
         }
     }
 
@@ -1085,15 +1118,15 @@
 
                 if (totalMatched > 0) {
                     paginationContainer.show();
-                    paginationInfo.html('Showing <strong>' + (startIndex + 1) + '</strong> - <strong>' + endIndex + '</strong> of <strong>' + totalMatched + '</strong> databases');
+                    paginationInfo.html('<strong>' + (startIndex + 1) + '–' + endIndex + '</strong> / <strong>' + totalMatched + '</strong> CSDL');
 
                     if (totalPages > 1) {
                         var navHtml = '';
-                        navHtml += '<button type="button" class="db-page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' data-page="' + (currentPage - 1) + '">« Prev</button>';
+                        navHtml += '<button type="button" class="db-page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' data-page="' + (currentPage - 1) + '">« Trước</button>';
                         for (var p = 1; p <= totalPages; p++) {
                             navHtml += '<button type="button" class="db-page-btn ' + (p === currentPage ? 'active' : '') + '" data-page="' + p + '">' + p + '</button>';
                         }
-                        navHtml += '<button type="button" class="db-page-btn ' + (currentPage === totalPages ? 'disabled' : '') + ' data-page="' + (currentPage + 1) + '">Next »</button>';
+                        navHtml += '<button type="button" class="db-page-btn ' + (currentPage === totalPages ? 'disabled' : '') + ' data-page="' + (currentPage + 1) + '">Sau »</button>';
                         paginationNav.html(navHtml).show();
                     } else {
                         paginationNav.hide();

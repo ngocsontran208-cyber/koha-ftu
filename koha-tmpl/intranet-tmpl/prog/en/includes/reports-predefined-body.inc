@@ -234,37 +234,37 @@
     <div class="col-md-3 col-lg-3 mb-3">
         <div class="ftu-report-tree-card">
             <div class="ftu-tree-root">
-                Báo cáo
+                Danh mục báo cáo
             </div>
             <ul class="ftu-tree-list">
                 <li class="ftu-tree-item active">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('digital_access')">
-                        Báo cáo thống kê truy cập tài liệu số
+                        Truy cập tài liệu số
                     </a>
                 </li>
                 <li class="ftu-tree-item">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('circ')">
-                        Báo cáo lưu thông
+                        Lưu thông mượn trả
                     </a>
                 </li>
                 <li class="ftu-tree-item">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('digital_docs')">
-                        Báo cáo tài liệu số
+                        Kho tài liệu số
                     </a>
                 </li>
                 <li class="ftu-tree-item">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('inventory')">
-                        Báo cáo kho
+                        Kho tài liệu in &amp; ĐKCB
                     </a>
                 </li>
                 <li class="ftu-tree-item">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('public_pages')">
-                        Báo cáo các trang công khai
+                        Cổng thông tin OPAC
                     </a>
                 </li>
                 <li class="ftu-tree-item">
                     <a href="javascript:void(0)" class="ftu-tree-link" onclick="switchCategory('serials')">
-                        Báo cáo báo tạp chí
+                        Báo &amp; Tạp chí
                     </a>
                 </li>
             </ul>
@@ -277,50 +277,50 @@
             
             <!-- TIÊU ĐỀ KHU VỰC BÁO CÁO -->
             <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-                <h4 id="category_title" class="mb-0" style="color: #0d6efd; font-weight: 700; font-size: 17px; text-transform: uppercase;">
-                    Báo cáo thống kê truy cập tài liệu số
+                <h4 id="category_title" class="mb-0" style="color: #0d6efd; font-weight: 700; font-size: 16px;">
+                    Truy cập tài liệu số
                 </h4>
                 <span class="badge bg-light text-dark border">
-                    Ngày: [% today | html %]
+                    [% today | html %]
                 </span>
             </div>
 
             <!-- DROPDOWN CHỌN BÁO CÁO (THEO CHUẨN HÌNH 2) -->
             <div class="ftu-dropdown-container no-print">
                 <div class="ftu-custom-select-trigger" id="select_trigger" onclick="toggleDropdown()">
-                    <span id="selected_label">--- Chọn ---</span>
+                    <span id="selected_label">--- Chọn mẫu báo cáo ---</span>
                     <i class="fa fa-caret-down text-primary"></i>
                 </div>
                 
                 <div class="ftu-dropdown-menu" id="dropdown_menu">
                     <div class="ftu-dropdown-search-wrap">
-                        <input type="text" id="report_search_input" class="ftu-dropdown-search-input" placeholder="" onkeyup="filterReports(this.value)" />
+                        <input type="text" id="report_search_input" class="ftu-dropdown-search-input" placeholder="Tìm nhanh mẫu báo cáo..." onkeyup="filterReports(this.value)" />
                         <i class="fa fa-search ftu-search-icon"></i>
                     </div>
                     <ul class="ftu-dropdown-options-list" id="options_list">
-                        <li class="ftu-dropdown-option" data-id="" onclick="selectReport('', '--- Chọn ---')">
-                            --- Chọn ---
+                        <li class="ftu-dropdown-option" data-id="" onclick="selectReport('', '--- Chọn mẫu báo cáo ---')">
+                            --- Chọn mẫu báo cáo ---
                         </li>
-                        <li class="ftu-dropdown-option" data-id="online_users" onclick="selectReport('online_users', 'Thống kê truy cập chi tiết các user đang đăng nhập')">
-                            Thống kê truy cập chi tiết các user đang đăng nhập
+                        <li class="ftu-dropdown-option" data-id="online_users" onclick="selectReport('online_users', 'Bạn đọc đang trực tuyến')">
+                            Bạn đọc đang trực tuyến
                         </li>
-                        <li class="ftu-dropdown-option" data-id="access_over_time" onclick="selectReport('access_over_time', 'Báo cáo tổng lượt truy cập tài liệu số theo thời gian')">
-                            Báo cáo tổng lượt truy cập tài liệu số theo thời gian
+                        <li class="ftu-dropdown-option" data-id="access_over_time" onclick="selectReport('access_over_time', 'Lượt truy cập tài liệu số theo thời gian')">
+                            Lượt truy cập tài liệu số theo thời gian
                         </li>
-                        <li class="ftu-dropdown-option" data-id="top_used_docs" onclick="selectReport('top_used_docs', 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT')">
-                            THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT
+                        <li class="ftu-dropdown-option" data-id="top_used_docs" onclick="selectReport('top_used_docs', 'Tài liệu số sử dụng nhiều nhất')">
+                            Tài liệu số sử dụng nhiều nhất
                         </li>
-                        <li class="ftu-dropdown-option" data-id="top_interactive_docs" onclick="selectReport('top_interactive_docs', 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT')">
-                            THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT
+                        <li class="ftu-dropdown-option" data-id="top_interactive_docs" onclick="selectReport('top_interactive_docs', 'Tài liệu số tương tác cao nhất')">
+                            Tài liệu số tương tác cao nhất
                         </li>
-                        <li class="ftu-dropdown-option selected" data-id="opac_visits_ftu2" onclick="selectReport('opac_visits_ftu2', 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU')">
-                            TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU
+                        <li class="ftu-dropdown-option selected" data-id="opac_visits_ftu2" onclick="selectReport('opac_visits_ftu2', 'Tổng lượt truy cập OPAC theo kỳ')">
+                            Tổng lượt truy cập OPAC theo kỳ
                         </li>
-                        <li class="ftu-dropdown-option" data-id="top_patrons" onclick="selectReport('top_patrons', 'THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT')">
-                            THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT
+                        <li class="ftu-dropdown-option" data-id="top_patrons" onclick="selectReport('top_patrons', 'Bạn đọc dùng tài liệu số nhiều nhất')">
+                            Bạn đọc dùng tài liệu số nhiều nhất
                         </li>
-                        <li class="ftu-dropdown-option" data-id="collection_usage" onclick="selectReport('collection_usage', 'THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP')">
-                            THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP
+                        <li class="ftu-dropdown-option" data-id="collection_usage" onclick="selectReport('collection_usage', 'Lượt sử dụng theo bộ sưu tập')">
+                            Lượt sử dụng theo bộ sưu tập
                         </li>
                     </ul>
                 </div>
@@ -371,7 +371,7 @@
                 <div class="table-responsive">
                     <div id="loading_indicator" class="text-center py-4 d-none">
                         <i class="fa fa-spinner fa-spin fa-2x text-primary mb-2"></i>
-                        <div class="text-muted" style="font-size: 13.5px;">Đang tổng hợp dữ liệu báo cáo từ DRM Service & FTU - HCM LIB...</div>
+                        <div class="text-muted" style="font-size: 13.5px;">Đang tải số liệu...</div>
                     </div>
                     <table class="table table-bordered table-hover table-ftu-report" id="report_table">
                         <thead id="report_table_head">
@@ -411,92 +411,92 @@
 <script nonce="[% Koha.CSPNonce | $raw %]">
 var reportCategories = {
     digital_access: {
-        title: 'BÁO CÁO THỐNG KÊ TRUY CẬP TÀI LIỆU SỐ',
+        title: 'Truy cập tài liệu số',
         defaultReport: 'opac_visits_ftu2',
-        defaultTitle: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU',
+        defaultTitle: 'Tổng lượt truy cập OPAC theo kỳ',
         reports: [
-            { id: 'online_users', title: 'Thống kê truy cập chi tiết các user đang đăng nhập' },
-            { id: 'access_over_time', title: 'Báo cáo tổng lượt truy cập tài liệu số theo thời gian' },
-            { id: 'top_used_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ ĐƯỢC SỬ DỤNG NHIỀU NHẤT' },
-            { id: 'top_interactive_docs', title: 'THỐNG KÊ TÀI LIỆU SỐ CÓ LƯỢT TƯƠNG TÁC CAO NHẤT' },
-            { id: 'opac_visits_ftu2', title: 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU' },
-            { id: 'top_patrons', title: 'THỐNG KÊ BẠN ĐỌC SỬ DỤNG TÀI LIỆU SỐ NHIỀU NHẤT' },
-            { id: 'collection_usage', title: 'THỐNG KÊ LƯỢT SỬ DỤNG CÁC BỘ SƯU TẬP' }
+            { id: 'online_users', title: 'Bạn đọc đang trực tuyến' },
+            { id: 'access_over_time', title: 'Lượt truy cập tài liệu số theo thời gian' },
+            { id: 'top_used_docs', title: 'Tài liệu số sử dụng nhiều nhất' },
+            { id: 'top_interactive_docs', title: 'Tài liệu số tương tác cao nhất' },
+            { id: 'opac_visits_ftu2', title: 'Tổng lượt truy cập OPAC theo kỳ' },
+            { id: 'top_patrons', title: 'Bạn đọc dùng tài liệu số nhiều nhất' },
+            { id: 'collection_usage', title: 'Lượt sử dụng theo bộ sưu tập' }
         ]
     },
     circ: {
-        title: 'BÁO CÁO LƯU THÔNG',
+        title: 'Lưu thông mượn trả',
         defaultReport: 'circ_by_class',
-        defaultTitle: 'Thống kê tài liệu đang mượn theo môn loại',
+        defaultTitle: 'Tài liệu đang mượn theo môn loại',
         reports: [
-            { id: 'circ_by_class', title: 'Thống kê tài liệu đang mượn theo môn loại' },
-            { id: 'circ_flow_by_class', title: 'Thống kê tài liệu mượn trả theo môn loại' },
-            { id: 'circ_unused_docs', title: 'Thống kê tài liệu không có người mượn' },
-            { id: 'circ_total_docs', title: 'Thống kê tổng số tài liệu' },
-            { id: 'circ_overdue_docs', title: 'Thống kê tài liệu đang mượn quá hạn' },
-            { id: 'circ_popular_docs', title: 'Thống kê tài liệu được yêu thích' },
-            { id: 'circ_popular_authors', title: 'Thống kê tác giả được yêu thích' },
-            { id: 'circ_shelving_cart', title: 'Thống kê tài liệu mượn, trả vào kho' },
-            { id: 'circ_patron_loans', title: 'Thống kê mượn tài liệu của bạn đọc' },
-            { id: 'circ_doc_history', title: 'Thống kê lịch sử mượn - trả của tài liệu' }
+            { id: 'circ_by_class', title: 'Tài liệu đang mượn theo môn loại' },
+            { id: 'circ_flow_by_class', title: 'Lưu thông mượn trả theo môn loại' },
+            { id: 'circ_unused_docs', title: 'Tài liệu chưa có lượt mượn' },
+            { id: 'circ_total_docs', title: 'Tổng hợp tài liệu lưu thông' },
+            { id: 'circ_overdue_docs', title: 'Tài liệu đang quá hạn' },
+            { id: 'circ_popular_docs', title: 'Tài liệu mượn nhiều nhất' },
+            { id: 'circ_popular_authors', title: 'Tác giả được mượn nhiều nhất' },
+            { id: 'circ_shelving_cart', title: 'Tài liệu mượn trả theo kho' },
+            { id: 'circ_patron_loans', title: 'Lượt mượn theo bạn đọc' },
+            { id: 'circ_doc_history', title: 'Lịch sử mượn trả của tài liệu' }
         ]
     },
     digital_docs: {
-        title: 'BÁO CÁO TÀI LIỆU SỐ',
+        title: 'Kho tài liệu số',
         defaultReport: 'digital_page_count',
-        defaultTitle: 'Thống kê số trang tài liệu',
+        defaultTitle: 'Số trang tài liệu số',
         reports: [
-            { id: 'digital_page_count', title: 'Thống kê số trang tài liệu' },
-            { id: 'digital_docs_by_collection', title: 'Danh mục tài liệu theo bộ sưu tập' },
-            { id: 'digital_cataloging_stats', title: 'Thống kê biên mục tài liệu số' }
+            { id: 'digital_page_count', title: 'Số trang tài liệu số' },
+            { id: 'digital_docs_by_collection', title: 'Tài liệu số theo bộ sưu tập' },
+            { id: 'digital_cataloging_stats', title: 'Biên mục tài liệu số' }
         ]
     },
     inventory: {
-        title: 'BÁO CÁO KHO',
+        title: 'Kho tài liệu in & ĐKCB',
         defaultReport: 'inv_dkcb',
-        defaultTitle: 'Sổ ĐKCB',
+        defaultTitle: 'Sổ đăng ký cá biệt (ĐKCB)',
         reports: [
-            { id: 'inv_dkcb', title: 'Sổ ĐKCB' },
-            { id: 'inv_by_location', title: 'Báo cáo thống kê tài liệu theo kho' },
-            { id: 'inv_detail_items', title: 'Danh mục chi tiết tài liệu' },
-            { id: 'inv_by_language', title: 'Danh mục tài liệu theo nhóm ngôn ngữ' },
-            { id: 'inv_by_itemtype', title: 'Danh mục tài liệu theo nhóm loại tài liệu' },
-            { id: 'inv_by_status_group', title: 'Danh mục tài liệu theo nhóm trạng thái' },
-            { id: 'inv_status_list', title: 'Danh mục trạng thái tài liệu' },
-            { id: 'inv_withdrawn', title: 'Danh mục tài liệu thanh lý' },
-            { id: 'inv_lost', title: 'Danh mục tài liệu mất' }
+            { id: 'inv_dkcb', title: 'Sổ đăng ký cá biệt (ĐKCB)' },
+            { id: 'inv_by_location', title: 'Số lượng tài liệu theo kho' },
+            { id: 'inv_detail_items', title: 'Danh mục chi tiết bản sao' },
+            { id: 'inv_by_language', title: 'Tài liệu theo ngôn ngữ' },
+            { id: 'inv_by_itemtype', title: 'Tài liệu theo loại hình' },
+            { id: 'inv_by_status_group', title: 'Tài liệu theo nhóm trạng thái' },
+            { id: 'inv_status_list', title: 'Chi tiết trạng thái bản sao' },
+            { id: 'inv_withdrawn', title: 'Tài liệu thanh lý' },
+            { id: 'inv_lost', title: 'Tài liệu báo mất' }
         ]
     },
     public_pages: {
-        title: 'BÁO CÁO CÁC TRANG CÔNG KHAI',
+        title: 'Cổng thông tin OPAC',
         defaultReport: 'pub_article_views',
-        defaultTitle: 'Thống kê lượt xem bài viết & tin tức',
+        defaultTitle: 'Lượt xem tin tức & sự kiện',
         reports: [
-            { id: 'pub_article_views', title: 'Thống kê lượt xem bài viết & tin tức' },
-            { id: 'pub_page_traffic', title: 'Thống kê lưu lượng truy cập theo từng trang công khai' },
-            { id: 'pub_top_searches', title: 'Thống kê từ khóa tìm kiếm phổ biến' },
-            { id: 'pub_zero_hit_searches', title: 'Báo cáo tìm kiếm không có kết quả (Nhu cầu bổ sung)' },
-            { id: 'pub_interactions', title: 'Báo cáo tương tác & dịch vụ trực tuyến công khai' },
-            { id: 'pub_device_stats', title: 'Thống kê thiết bị & nền tảng truy cập' },
-            { id: 'pub_hourly_traffic', title: 'Thống kê lưu lượng truy cập theo khung giờ & ngày trong tuần' },
-            { id: 'pub_open_resources', title: 'Thống kê khám phá tài nguyên số công khai & bộ sưu tập mở' }
+            { id: 'pub_article_views', title: 'Lượt xem tin tức & sự kiện' },
+            { id: 'pub_page_traffic', title: 'Lưu lượng theo trang OPAC' },
+            { id: 'pub_top_searches', title: 'Từ khóa tìm kiếm phổ biến' },
+            { id: 'pub_zero_hit_searches', title: 'Tìm kiếm không có kết quả' },
+            { id: 'pub_interactions', title: 'Tương tác dịch vụ trực tuyến' },
+            { id: 'pub_device_stats', title: 'Thiết bị & Nền tảng truy cập' },
+            { id: 'pub_hourly_traffic', title: 'Lưu lượng theo khung giờ' },
+            { id: 'pub_open_resources', title: 'Khai thác bộ sưu tập mở' }
         ]
     },
     serials: {
-        title: 'BÁO CÁO BÁO - TẠP CHÍ',
+        title: 'Báo & Tạp chí',
         defaultReport: 'serials_summary',
-        defaultTitle: 'Thống kê tổng hợp báo - tạp chí',
+        defaultTitle: 'Tổng hợp báo – tạp chí',
         reports: [
-            { id: 'serials_summary', title: 'Thống kê tổng hợp báo - tạp chí' },
-            { id: 'serials_issues', title: 'Thống kê các số báo - tạp chí đã nhận' },
-            { id: 'serials_by_vendor', title: 'Thống kê báo tạp chí theo nhà cung cấp' }
+            { id: 'serials_summary', title: 'Tổng hợp báo – tạp chí' },
+            { id: 'serials_issues', title: 'Các số báo – tạp chí đã nhận' },
+            { id: 'serials_by_vendor', title: 'Báo – tạp chí theo nhà cung cấp' }
         ]
     }
 };
 
 var currentCategory = 'digital_access';
 var currentReportId = 'opac_visits_ftu2';
-var currentReportTitle = 'TỔNG LƯỢT TRUY CẬP TRANG OPAC TỪ NGÀY ĐẾN NGÀY TẠI PHÂN HIỆU';
+var currentReportTitle = 'Tổng lượt truy cập OPAC theo kỳ';
 
 document.addEventListener('DOMContentLoaded', function() {
     var urlParams = new URLSearchParams(window.location.search);
@@ -1507,7 +1507,7 @@ function renderTable(res) {
             + '<td class="text-end text-primary font-weight-bold"><strong>' + sumItems.toLocaleString('vi-VN') + ' bản</strong></td>'
             + '<td class="text-end text-success font-weight-bold"><strong>' + (summary.total_value_formatted || '0 đ') + '</strong></td>'
             + '<td class="text-end text-warning font-weight-bold"><strong>' + sumLoaned.toLocaleString('vi-VN') + '</strong></td>'
-            + '<td class="text-end text-info font-weight-bold">' + sumAvail.toLocaleString('vi-VN') + '</td>'
+            + '<td class="text-end text-info font-weight-bold"><strong>' + sumAvail.toLocaleString('vi-VN') + '</strong></td>'
             + '<td class="text-end"><strong>100%</strong></td>'
             + '</tr>';
     }

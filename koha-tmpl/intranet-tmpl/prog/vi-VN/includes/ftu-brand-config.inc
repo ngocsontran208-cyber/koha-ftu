@@ -12,23 +12,23 @@
     university_name        => "Trường Đại học Ngoại thương",
     university_name_en     => "Foreign Trade University",
     university_short       => "FTU",
-    campus_current         => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_current_short   => "Phân hiệu tại TP. Hồ Chí Minh",
-    campus_current_en      => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    campus_current         => Koha.Preference('FTU_Footer_CampusCurrent') || "Foreign Trade University - Ho Chi Minh City Branch",
+    campus_current_short   => "Ho Chi Minh City Branch",
+    campus_current_en      => Koha.Preference('FTU_Footer_CampusCurrent') || "Foreign Trade University - Ho Chi Minh City Branch",
 
     # ── 2. TÊN THƯ VIỆN & KHẨU HIỆU ─────────────────────────────────────────
     library_name           => "Thư viện Phân hiệu Trường Đại học Ngoại thương",
     library_name_short     => "Thư viện FTU",
     library_name_full      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    library_name_en        => "Thư viện Phân hiệu Trường Đại học Ngoại thương",
-    library_sub_title      => "Thư viện Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
+    library_name_en        => "Foreign Trade University - Ho Chi Minh City Campus Library",
+    library_sub_title      => "Foreign Trade University - Ho Chi Minh City Campus Library",
     library_slogan         => "Không gian học tập & nghiên cứu hiện đại, kết nối cộng đồng giảng viên và sinh viên với kho tri thức toàn diện",
     library_description    => "Trung tâm Thông tin – Tri thức hiện đại, kết nối cộng đồng giảng viên và sinh viên FTU với nguồn học liệu số phong phú, sách in chuyên ngành chất lượng cao và dịch vụ hỗ trợ nghiên cứu chuẩn quốc tế.",
     library_description_en => "A modern center for information and knowledge, connecting FTU faculty, researchers, and students with high-impact digital databases, comprehensive print collections, and world-class academic support.",
 
     # ── 3. LOGO & BIỂU TRƯNG NHẬN DIỆN ──────────────────────────────────────
     logo_url               => "/opac-tmpl/bootstrap/images/ftu-logo.png",
-    logo_alt               => "FTU Logo - Thư viện Phân hiệu Trường Đại học Ngoại thương",
+    logo_alt               => "FTU Library Logo - Foreign Trade University",
     favicon_svg            => "/opac-tmpl/bootstrap/images/favicon.svg?v=ftu",
     favicon_ico            => "/opac-tmpl/bootstrap/images/favicon.ico?v=ftu",
 
@@ -52,9 +52,9 @@
 
     # ── 6. ĐỊA CHỈ & LIÊN HỆ PHÂN HIỆU TP.HCM ───────────────────────────────
     campus_hcm_title       => "Phân hiệu Trường ĐH Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hcm_title_en    => "Phân hiệu Trường Đại học Ngoại thương tại TP. Hồ Chí Minh",
-    campus_hcm_addr        => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
-    campus_hcm_addr_en     => "Số 15, Đường D5, Phường 25, Quận Bình Thạnh, TP. Hồ Chí Minh",
+    campus_hcm_title_en    => "Foreign Trade University - Ho Chi Minh City Branch",
+    campus_hcm_addr        => Koha.Preference('FTU_Footer_Addr') || "Số 15, Đường D5, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh",
+    campus_hcm_addr_en     => Koha.Preference('FTU_Footer_Addr') || "Số 15, Đường D5, Phường Thạnh Mỹ Tây, TP. Hồ Chí Minh",
     campus_hcm_phone       => "(028) 3512 7254 - 3512 7258",
 
     campus_hn_title        => "Trụ sở chính Hà Nội",

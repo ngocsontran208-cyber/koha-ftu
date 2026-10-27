@@ -57,7 +57,7 @@
         </ul>
     [% END # /IF ( CAN_user_tools_items_batchdel... %]
 
-    [% IF ( CAN_user_tools_edit_calendar || CAN_user_tools_manage_csv_profiles || CAN_user_tools_view_system_logs || CAN_user_tools_audit_logs || CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools_schedule_tasks || CAN_user_tools_edit_quotes || ( Koha.ArePluginsEnabled() && CAN_user_plugins_tool )  || CAN_user_tools_upload_general_files || CAN_user_tools_access_files ) %]
+    [% IF ( CAN_user_tools_edit_calendar || CAN_user_tools_manage_csv_profiles || CAN_user_tools_view_system_logs || CAN_user_tools_audit_logs || CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools_portal_review || CAN_user_tools_schedule_tasks || CAN_user_tools_edit_quotes || ( Koha.ArePluginsEnabled() && CAN_user_plugins_tool )  || CAN_user_tools_upload_general_files || CAN_user_tools_access_files ) %]
         <h5>Additional tools</h5>
         <ul>
             [% IF ( CAN_user_tools_edit_calendar ) %]
@@ -70,7 +70,7 @@
                 <li><a href="/cgi-bin/koha/tools/audit-logs.pl">System audit &amp; action logs</a></li>
                 <li><a href="/cgi-bin/koha/tools/viewlog.pl">Log viewer (Legacy)</a></li>
             [% END %]
-            [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer ) %]
+            [% IF ( CAN_user_tools_edit_additional_contents || CAN_user_tools_portal_news || CAN_user_tools_portal_database || CAN_user_tools_portal_banner || CAN_user_tools_portal_footer || CAN_user_tools_portal_review ) %]
                 <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=news">Quản lý tin tức &amp; sự kiện</a></li>
                 <li><a href="/cgi-bin/koha/tools/portal-news.pl?section=database">Quản lý cơ sở dữ liệu (CSDL)</a></li>
                 <li><a href="/cgi-bin/koha/tools/additional-contents.pl?category=news">News</a></li>

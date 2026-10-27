@@ -1,0 +1,132 @@
+[% USE raw %]
+[% USE Koha %]
+[% PROCESS 'i18n.inc' %]
+[% PROCESS 'html_helpers.inc' %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title
+    >[% FILTER collapse %]
+ Introductions: [% biblio.title | html %]
+ &rsaquo; [% PROCESS 'library_name_title' %]
+ [% END %]</title
+>
+<meta name="description" content="Librarian and reader introductions to [% biblio.title | html %]" />
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %]
+<style>
+    .ftu-intro-head { margin: 0.25rem 0 1.5rem; }
+    .ftu-intro-head .title { margin-bottom: 0.25rem; }
+    .ftu-intro-sub { color: #64748b; font-size: 0.95rem; }
+    .ftu-intro-list { display: flex; flex-direction: column; gap: 1rem; }
+    .ftu-intro-card {
+        display: flex; gap: 1.1rem; padding: 1.1rem 1.25rem;
+        background: #fff; border: 1px solid #ece6da; border-left: 4px solid #A31A24;
+        border-radius: 10px; color: inherit; text-decoration: none;
+        transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+    }
+    .ftu-intro-card.is-reader { border-left-color: #C9A227; }
+    .ftu-intro-card:hover {
+        text-decoration: none; color: inherit; transform: translateY(-2px);
+        box-shadow: 0 10px 24px -14px rgba(127, 16, 25, .45);
+    }
+    .ftu-intro-thumb {
+        flex: 0 0 120px; height: 120px; border-radius: 8px; object-fit: cover; background: #f6f1e7;
+    }
+    .ftu-intro-body { flex: 1; min-width: 0; }
+    .ftu-intro-kind {
+        display: inline-block; font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+        text-transform: uppercase; color: #A31A24; margin-bottom: .35rem;
+    }
+    .ftu-intro-card.is-reader .ftu-intro-kind { color: #8a6d12; }
+    .ftu-intro-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0 0 .3rem; line-height: 1.35; }
+    .ftu-intro-card:hover .ftu-intro-title { color: #7F1019; }
+    .ftu-intro-meta { font-size: .85rem; color: #64748b; margin-bottom: .5rem; }
+    .ftu-intro-excerpt { color: #334155; font-size: .95rem; line-height: 1.6; margin: 0; }
+    .ftu-intro-more { display: inline-block; margin-top: .5rem; font-size: .85rem; font-weight: 600; color: #A31A24; }
+    .ftu-intro-empty {
+        padding: 2.5rem 1.5rem; text-align: center; color: #64748b;
+        border: 1px dashed #e5d9bf; border-radius: 10px; background: #fbf7ef;
+    }
+    @media (max-width: 576px) {
+        .ftu-intro-card { flex-direction: column; }
+        .ftu-intro-thumb { flex-basis: auto; width: 100%; height: 160px; }
+    }
+</style>
+[% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-intro' bodyclass='scrollto' %]
+[% INCLUDE 'masthead.inc' %]
+<main class="main">
+ [% WRAPPER breadcrumbs %]
+ [% WRAPPER breadcrumb_item %]
+ <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | uri %]">[% biblio.title | html %]</a>
+ [% END %]
+ [% WRAPPER breadcrumb_item bc_active= 1 %]
+ <span>Introductions</span>
+ [% END %]
+ [% END #/ WRAPPER breadcrumbs %]
+
+ <div class="container-fluid">
+ <div class="row">
+ <div class="col-lg-9">
+ <div id="opac-detail" class="maincontent">
+ <div id="catalogue_detail_biblio">
+ <div id="views">
+ <span class="view"><a id="Normalview" class="btn btn-link" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblio.biblionumber | html %]">Normal</a></span>
+ <span class="view"><a id="MARCview" class="btn btn-link" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblio.biblionumber | html %]">MARC</a></span>
+ [% IF Koha.Preference('viewISBD') %]
+ <span class="view"><a id="ISBDview" class="btn btn-link" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblio.biblionumber | html %]">ISBD</a></span>
+ [% END %]
+ <span class="view current-view"><span id="Introview">Introductions[% IF ftu_intro_count %] ([% ftu_intro_count | html %])[% END %]</span></span>
+ </div>
+
+ <div class="ftu-intro-head">
+ <h1 class="title">[% INCLUDE 'biblio-title.inc' %]</h1>
+ <div class="ftu-intro-sub">What librarians and readers say about this book</div>
+ </div>
+
+ [% IF intro_posts.size %]
+ <div class="ftu-intro-list">
+ [% FOREACH p IN intro_posts %]
+ <a class="ftu-intro-card[% IF p.post_type == 'intro_reader' %] is-reader[% END %]" href="/cgi-bin/koha/opac-news-detail.pl?id=[% p.id | uri %]">
+ [% IF p.featured_image %]
+ <img class="ftu-intro-thumb" src="[% p.featured_image | html %]" alt="[% p.title | html %]" loading="lazy" />
+ [% END %]
+ <div class="ftu-intro-body">
+ <span class="ftu-intro-kind">[% IF p.post_type == 'intro_librarian' %]Librarian's pick[% ELSE %]Reader's pick[% END %]</span>
+ <h2 class="ftu-intro-title">[% p.title | html %]</h2>
+ <div class="ftu-intro-meta">
+ [% p.author_name | html %][% IF p.post_type == 'intro_reader' && p.classification %] &middot; [% p.classification | html %][% END %][% IF p.formatted_date %] &middot; [% p.formatted_date | html %][% END %]
+ </div>
+ [% IF p.excerpt_text %]<p class="ftu-intro-excerpt">[% p.excerpt_text | html %]</p>[% END %]
+ <span class="ftu-intro-more">Read more &rsaquo;</span>
+ </div>
+ </a>
+ [% END %]
+ </div>
+ [% ELSE %]
+ <div class="ftu-intro-empty">No introductions for this book yet.</div>
+ [% END %]
+ </div>
+ <!-- / #catalogue_detail_biblio -->
+ </div>
+ <!-- / #opac-detail -->
+ </div>
+ <!-- / .col-lg-9 -->
+ <div class="col-lg-3"> [% INCLUDE 'opac-detail-sidebar.inc' %] </div>
+ </div>
+ <!-- / .row -->
+ </div>
+ <!-- / .container-fluid -->
+</main>
+<!-- / .main -->
+
+[% IF Koha.Preference('OpacCatalogConcerns') %]
+ [% INCLUDE 'modals/catalog_concern.inc' %]
+[% END %]
+
+[% INCLUDE 'opac-bottom.inc' %]
+[% BLOCK jsinclude %]
+ [% IF Koha.Preference('OpacCatalogConcerns') %]
+ [% Asset.js("js/modals/catalog_concern.js") | $raw %]
+ [% END %]
+[% END %]

@@ -65,8 +65,10 @@ my $query = "SELECT * FROM koha_portal_posts WHERE status = ?";
 my @params = ("published");
 
 if ($type eq "all") {
-    $query .= " AND post_type NOT IN ('database', 'banner')";
-} elsif ($type ne "all_with_db") {
+    $query .= " AND post_type NOT IN ('database', 'banner', 'intro_librarian', 'intro_reader')";
+} elsif ($type eq "all_with_db") {
+    $query .= " AND post_type NOT IN ('intro_librarian', 'intro_reader')";
+} else {
     $query .= " AND post_type = ?";
     push @params, $type;
 }
